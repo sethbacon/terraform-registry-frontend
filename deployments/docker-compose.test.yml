@@ -26,24 +26,6 @@ services:
     depends_on:
       - postgres
 
-  # cert-init generates a self-signed TLS certificate into a shared volume so
-  # that the nginx-based frontend can serve HTTPS without pre-baked secrets.
-  cert-init:
-    image: alpine:3.19
-    volumes:
-      - certs:/certs
-    entrypoint: /bin/sh
-    command:
-      - -c
-      - |
-        apk add --no-cache openssl 2>/dev/null
-        openssl req -x509 -newkey rsa:2048 \
-          -keyout /certs/server.key \
-          -out /certs/server.crt \
-          -days 365 -nodes \
-          -subj '/CN=localhost'
-        echo 'certs generated'
-
   frontend:
     build:
       context: ../frontend
@@ -51,19 +33,14 @@ services:
       args:
         # Enable the Dev Login button so Playwright can log in without real credentials
         VITE_MODE: development
-    volumes:
-      - certs:/etc/nginx/certs:ro
     ports:
       # Playwright expects https://localhost:3000; nginx serves HTTPS on 443
+      # The self-signed cert is baked into the image at build time.
       - "3000:443"
     depends_on:
-      cert-init:
-        condition: service_completed_successfully
       backend:
         condition: service_started
 
 volumes:
   postgres-data-test:
-    driver: local
-  certs:
     driver: local

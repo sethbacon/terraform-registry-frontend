@@ -34,11 +34,23 @@ COPY --from=builder /app/dist /usr/share/nginx/html
 # Copy nginx configuration
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
-# Expose port
-EXPOSE 80
+# Generate a self-signed TLS certificate so nginx can serve HTTPS on port 443
+# right out of the box (no external volume required).  Real deployments should
+# override these by mounting a certs volume at /etc/nginx/certs.
+RUN apk add --no-cache openssl && \
+    mkdir -p /etc/nginx/certs && \
+    openssl req -x509 -newkey rsa:2048 \
+      -keyout /etc/nginx/certs/server.key \
+      -out /etc/nginx/certs/server.crt \
+      -days 365 -nodes \
+      -subj '/CN=localhost' && \
+    chmod 600 /etc/nginx/certs/server.key
 
-# Health check
+# Expose ports
+EXPOSE 80 443
+
+# Health check (HTTPS, ignoring self-signed cert)
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-    CMD wget --no-verbose --tries=1 --spider http://127.0.0.1:80/ || exit 1
+    CMD wget --no-verbose --tries=1 --spider --no-check-certificate https://127.0.0.1:443/ || exit 1
 
 CMD ["nginx", "-g", "daemon off;"]
