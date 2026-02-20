@@ -29,6 +29,9 @@ export default defineConfig({
   /* No retries — failures should be visible immediately */
   retries: 0,
 
+  /* Stop after the first failure so CI feedback is fast */
+  maxFailures: 1,
+
   /* One worker on CI to avoid port conflicts */
   workers: process.env.CI ? 1 : undefined,
 
