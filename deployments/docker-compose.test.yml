@@ -44,6 +44,26 @@ services:
       retries: 10
       start_period: 5s
 
+  # seed-db runs after the backend has applied migrations, inserting the dev
+  # admin user so the Dev Login button works in Playwright tests.
+  seed-db:
+    image: postgres:14
+    volumes:
+      - ./create-dev-admin-user.sql:/create-dev-admin-user.sql:ro
+    environment:
+      PGPASSWORD: registry
+    entrypoint: [
+      "psql",
+      "--host=postgres",
+      "--port=5432",
+      "--username=registry",
+      "--dbname=terraform_registry",
+      "--file=/create-dev-admin-user.sql"
+    ]
+    depends_on:
+      backend:
+        condition: service_healthy
+
   frontend:
     build:
       context: ../frontend
@@ -58,6 +78,8 @@ services:
     depends_on:
       backend:
         condition: service_healthy
+      seed-db:
+        condition: service_completed_successfully
 
 volumes:
   postgres-data-test:

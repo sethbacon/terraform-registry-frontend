@@ -26,8 +26,8 @@ export default defineConfig({
   timeout: 60_000,
   expect: { timeout: 5_000 },
 
-  /* Retry on CI only */
-  retries: process.env.CI ? 2 : 0,
+  /* No retries — failures should be visible immediately */
+  retries: 0,
 
   /* One worker on CI to avoid port conflicts */
   workers: process.env.CI ? 1 : undefined,
