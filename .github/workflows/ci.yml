@@ -103,6 +103,16 @@ jobs:
           name: playwright-report
           path: e2e/playwright-report
 
+      - name: Dump container logs
+        if: always()
+        run: |
+          echo "===== backend =====" 
+          docker compose -f deployments/docker-compose.test.yml logs backend || true
+          echo "===== frontend ====="
+          docker compose -f deployments/docker-compose.test.yml logs frontend || true
+          echo "===== postgres ====="
+          docker compose -f deployments/docker-compose.test.yml logs postgres || true
+
       - name: Tear down test compose
         if: always()
         run: docker compose -f deployments/docker-compose.test.yml down --volumes
