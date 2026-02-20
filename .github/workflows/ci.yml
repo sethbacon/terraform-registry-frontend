@@ -69,10 +69,18 @@ jobs:
         # Pulls backend from ghcr.io; builds frontend locally
         run: docker compose -f deployments/docker-compose.test.yml up -d
 
-      - name: Wait for backend
+      - name: Wait for backend and frontend
         run: |
+          echo "Waiting for backend health..."
           for i in {1..30}; do
-            if curl -skS http://localhost:8080/health; then break; fi; sleep 2
+            if curl -skS http://localhost:8080/health; then echo "Backend ready"; break; fi
+            sleep 2
+          done
+          echo "Waiting for frontend HTTPS on port 3000..."
+          for i in {1..30}; do
+            code=$(curl -sk https://localhost:3000/ -o /dev/null -w "%{http_code}" 2>/dev/null || true)
+            if echo "$code" | grep -qE "^[23]"; then echo "Frontend ready (HTTP $code)"; break; fi
+            sleep 2
           done
 
       - name: Install e2e deps & Playwright

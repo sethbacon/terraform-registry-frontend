@@ -1,4 +1,3 @@
-version: '3.8'
 services:
   postgres:
     image: postgres:14
@@ -6,8 +5,6 @@ services:
       POSTGRES_DB: terraform_registry
       POSTGRES_USER: registry
       POSTGRES_PASSWORD: registry
-    ports:
-      - "5433:5432"
     volumes:
       - postgres-data-test:/var/lib/postgresql/data
 
@@ -29,17 +26,37 @@ services:
     depends_on:
       - postgres
 
+  # cert-init generates a self-signed TLS certificate into a shared volume so
+  # that the nginx-based frontend can serve HTTPS without pre-baked secrets.
+  cert-init:
+    image: alpine/openssl:latest
+    volumes:
+      - certs:/certs
+    command: >
+      sh -c "openssl req -x509 -newkey rsa:2048 -keyout /certs/server.key
+      -out /certs/server.crt -days 365 -nodes
+      -subj '/CN=localhost' 2>/dev/null && echo 'certs generated'"
+
   frontend:
     build:
       context: ../frontend
       dockerfile: Dockerfile
-    environment:
-      - VITE_API_URL=http://backend:8080
+      args:
+        # Enable the Dev Login button so Playwright can log in without real credentials
+        VITE_MODE: development
+    volumes:
+      - certs:/etc/nginx/certs:ro
     ports:
-      - "3000:80"
+      # Playwright expects https://localhost:3000; nginx serves HTTPS on 443
+      - "3000:443"
     depends_on:
-      - backend
+      cert-init:
+        condition: service_completed_successfully
+      backend:
+        condition: service_started
 
 volumes:
   postgres-data-test:
+    driver: local
+  certs:
     driver: local
