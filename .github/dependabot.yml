@@ -1,0 +1,79 @@
+version: 2
+
+updates:
+  # ---------------------------------------------------------------------------
+  # npm (frontend/)
+  # ---------------------------------------------------------------------------
+  - package-ecosystem: npm
+    directory: /frontend
+    schedule:
+      interval: biweekly
+      day: monday
+      time: "09:00"
+      timezone: UTC
+    reviewers:
+      - maintainers
+    labels:
+      - dependencies
+      - javascript
+    commit-message:
+      prefix: "chore(deps)"
+    groups:
+      npm-frontend-dependencies:
+        patterns:
+          - "*"
+    ignore:
+      # Major React/MUI bumps require manual migration work.
+      - dependency-name: "react"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "react-dom"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "@mui/material"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "@mui/icons-material"
+        update-types: ["version-update:semver-major"]
+
+  # ---------------------------------------------------------------------------
+  # npm (e2e/)
+  # ---------------------------------------------------------------------------
+  - package-ecosystem: npm
+    directory: /e2e
+    schedule:
+      interval: biweekly
+      day: monday
+      time: "09:00"
+      timezone: UTC
+    reviewers:
+      - maintainers
+    labels:
+      - dependencies
+      - javascript
+      - e2e
+    commit-message:
+      prefix: "chore(deps)"
+    groups:
+      npm-e2e-dependencies:
+        patterns:
+          - "*"
+
+  # ---------------------------------------------------------------------------
+  # GitHub Actions
+  # ---------------------------------------------------------------------------
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: biweekly
+      day: monday
+      time: "09:00"
+      timezone: UTC
+    reviewers:
+      - maintainers
+    labels:
+      - dependencies
+      - github-actions
+    commit-message:
+      prefix: "chore(ci)"
+    groups:
+      github-actions-dependencies:
+        patterns:
+          - "*"
