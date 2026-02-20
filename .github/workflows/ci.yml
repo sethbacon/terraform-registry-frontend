@@ -102,6 +102,8 @@ jobs:
         run: |
           echo "===== backend =====" 
           docker compose -f deployments/docker-compose.test.yml logs backend || true
+          echo "===== seed-db ====="
+          docker compose -f deployments/docker-compose.test.yml logs seed-db || true
           echo "===== frontend ====="
           docker compose -f deployments/docker-compose.test.yml logs frontend || true
           echo "===== postgres ====="
