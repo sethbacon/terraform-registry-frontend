@@ -31,7 +31,6 @@ const LoginPage: React.FC = () => {
     localStorage.removeItem('allowed_scopes');
 
     // login() will call fetchCurrentUser() which validates the JWT via /auth/me
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     await login({} as any);
     navigate('/');
   };
