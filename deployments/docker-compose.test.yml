@@ -29,13 +29,20 @@ services:
   # cert-init generates a self-signed TLS certificate into a shared volume so
   # that the nginx-based frontend can serve HTTPS without pre-baked secrets.
   cert-init:
-    image: alpine/openssl:latest
+    image: alpine:3.19
     volumes:
       - certs:/certs
-    command: >
-      sh -c "openssl req -x509 -newkey rsa:2048 -keyout /certs/server.key
-      -out /certs/server.crt -days 365 -nodes
-      -subj '/CN=localhost' 2>/dev/null && echo 'certs generated'"
+    entrypoint: /bin/sh
+    command:
+      - -c
+      - |
+        apk add --no-cache openssl 2>/dev/null
+        openssl req -x509 -newkey rsa:2048 \
+          -keyout /certs/server.key \
+          -out /certs/server.crt \
+          -days 365 -nodes \
+          -subj '/CN=localhost'
+        echo 'certs generated'
 
   frontend:
     build:
