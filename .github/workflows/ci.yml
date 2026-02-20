@@ -69,21 +69,15 @@ jobs:
         # Pulls backend from ghcr.io; builds frontend locally
         run: docker compose -f deployments/docker-compose.test.yml up -d
 
-      - name: Wait for backend and frontend
+      - name: Wait for frontend
         run: |
-          echo "Waiting for backend health..."
-          backend_up=0
-          for i in {1..30}; do
-            if curl -skS http://localhost:8080/health; then echo "Backend ready"; backend_up=1; break; fi
-            sleep 2
-          done
-          if [ "$backend_up" -eq 0 ]; then echo "ERROR: backend never became ready"; exit 1; fi
           echo "Waiting for frontend HTTPS on port 3000..."
+          echo "(backend/postgres readiness is enforced by Docker healthchecks in compose)"
           frontend_up=0
-          for i in {1..30}; do
+          for i in {1..60}; do
             code=$(curl -sk https://localhost:3000/ -o /dev/null -w "%{http_code}" 2>/dev/null || true)
             if echo "$code" | grep -qE "^[23]"; then echo "Frontend ready (HTTP $code)"; frontend_up=1; break; fi
-            sleep 2
+            sleep 3
           done
           if [ "$frontend_up" -eq 0 ]; then echo "ERROR: frontend never became ready"; exit 1; fi
 
