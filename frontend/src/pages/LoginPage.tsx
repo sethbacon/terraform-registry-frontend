@@ -17,7 +17,10 @@ import { apiClient } from '../services/api';
 const LoginPage: React.FC = () => {
   const { login } = useAuth();
   const navigate = useNavigate();
-  const isDev = import.meta.env.DEV;
+  // import.meta.env.DEV is tied to NODE_ENV, which Vite forces to 'production'
+  // during any `vite build` regardless of --mode. Check MODE instead, which
+  // correctly reflects the --mode argument (e.g. 'development').
+  const isDev = import.meta.env.MODE === 'development';
 
   const handleDevLogin = async () => {
     // Call the dev login endpoint to get a JWT (no hardcoded keys)
