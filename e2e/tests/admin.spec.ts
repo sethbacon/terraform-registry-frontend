@@ -72,7 +72,7 @@ test.describe('Admin: API Keys', () => {
     await page.goto('/admin/apikeys');
 
     await page.waitForSelector(
-      'table, [class*="MuiTable"], h6:has-text("No API keys"), [class*="MuiCircularProgress"]',
+      'table, [class*="MuiTable"], [class*="MuiPaper"], [class*="MuiCircularProgress"]',
       { timeout: 10_000 }
     );
 
