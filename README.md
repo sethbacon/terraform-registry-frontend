@@ -26,7 +26,7 @@ The backend API, database, and deployment infrastructure live in [terraform-regi
 
 ## Prerequisites
 
-- Node.js 18+ and npm
+- Node.js 20+ and npm
 - A running backend API — see [terraform-registry-backend](https://github.com/sethbacon/terraform-registry-backend) for setup
 - Docker & Docker Compose (for the full stack via compose)
 
