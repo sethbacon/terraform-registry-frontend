@@ -289,4 +289,60 @@ export interface SetupStatus {
   storage_configured: boolean;
   setup_required: boolean;
   storage_configured_at?: string;
+  // Enhanced fields from setup wizard
+  setup_completed?: boolean;
+  oidc_configured?: boolean;
+  admin_configured?: boolean;
+}
+
+// Setup Wizard Types
+export interface OIDCConfigInput {
+  name?: string;
+  provider_type: 'generic_oidc' | 'azuread';
+  issuer_url: string;
+  client_id: string;
+  client_secret: string;
+  redirect_url: string;
+  scopes?: string[];
+  extra_config?: Record<string, string>;
+}
+
+export interface OIDCConfigResponse {
+  id: string;
+  name: string;
+  provider_type: string;
+  issuer_url: string;
+  client_id: string;
+  redirect_url: string;
+  scopes: string[];
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface SetupValidateTokenResponse {
+  valid: boolean;
+  message: string;
+}
+
+export interface SetupTestResult {
+  success: boolean;
+  message: string;
+  issuer?: string; // For OIDC test
+}
+
+export interface ConfigureAdminInput {
+  email: string;
+}
+
+export interface ConfigureAdminResponse {
+  message: string;
+  email: string;
+  organization: string;
+  role: string;
+}
+
+export interface CompleteSetupResponse {
+  message: string;
+  setup_completed: boolean;
 }

@@ -8,6 +8,7 @@ import Layout from './components/Layout';
 import HomePage from './pages/HomePage';
 import LoginPage from './pages/LoginPage';
 import CallbackPage from './pages/CallbackPage';
+import SetupWizardPage from './pages/SetupWizardPage';
 import ModulesPage from './pages/ModulesPage';
 const ModuleDetailPage = lazy(() => import('./pages/ModuleDetailPage'));
 import ProvidersPage from './pages/ProvidersPage';
@@ -36,6 +37,7 @@ function App() {
             {/* Public routes */}
             <Route path="/login" element={<LoginPage />} />
             <Route path="/auth/callback" element={<CallbackPage />} />
+            <Route path="/setup" element={<SetupWizardPage />} />
 
             {/* Layout routes */}
             <Route element={<Layout />}>

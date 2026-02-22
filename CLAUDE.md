@@ -109,6 +109,14 @@ docker-compose -f docker-compose.test.yml up -d
 - **MUI `TextField` inputs** for non-obvious fields must include a `helperText` prop explaining the expected value.
 - **New pages** must be added to the router in `App.tsx` and, if admin-only, wrapped in `ProtectedRoute` with the appropriate required scope.
 
+### Setup Wizard
+
+- `pages/SetupWizardPage.tsx` — 5-step first-run wizard for OIDC, storage, and admin configuration.
+- Route: `/setup` (public, no auth layout — uses `SetupToken` header instead of JWT).
+- API methods in `services/api.ts` use a dedicated `setupRequest(token)` helper that sends `Authorization: SetupToken <token>`.
+- The wizard checks `/api/v1/setup/status` on mount and redirects to `/` if setup is already completed.
+- Types: `OIDCConfigInput`, `OIDCConfigResponse`, `SetupTestResult`, `ConfigureAdminInput`, `CompleteSetupResponse` in `types/index.ts`.
+
 ---
 
 ## Development Notes

@@ -11,6 +11,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.2.0] - 2026-02-22
+
+### Added
+
+- **Setup Wizard page** (`frontend/src/pages/SetupWizardPage.tsx`) — multi-step first-run wizard
+  at `/setup`; guides the operator through OIDC provider configuration, storage backend
+  configuration, and initial admin user creation; uses the one-time setup token for
+  authorisation and redirects to login on completion.
+
+- **Setup wizard API client** (`frontend/src/services/api.ts`) — eight new `ApiClient` methods:
+  `validateSetupToken`, `testOIDCConfig`, `saveOIDCConfig`, `testStorageConfig`,
+  `saveStorageConfig`, `configureAdmin`, `completeSetup`, and `getSetupStatus`; all setup
+  requests use a `SetupToken <token>` Authorization header instead of the normal JWT bearer token.
+
+- **Setup wizard TypeScript types** (`frontend/src/types/index.ts`) — `OIDCConfigInput`,
+  `StorageConfigInput`, `SetupValidateTokenResponse`, `SetupTestResult`,
+  `SetupOIDCConfigResponse`, `SetupStorageConfigResponse`, `SetupAdminResponse`, and
+  `SetupCompleteResponse`; `SetupStatus` extended with `setup_completed`, `oidc_configured`,
+  and `admin_configured` fields.
+
+### Changed
+
+- **`App.tsx`** — `/setup` route added as a public (unauthenticated) route rendering
+  `SetupWizardPage`.
+
+---
+
 ## [1.1.2] - 2026-02-21
 
 > First tagged release of the standalone `terraform-registry-frontend` repository,

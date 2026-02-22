@@ -847,6 +847,102 @@ class ApiClient {
   }
 
   // ============================================================================
+  // Setup Wizard
+  // ============================================================================
+
+  /**
+   * Creates an Axios instance that uses a setup token for authentication
+   * instead of the normal JWT bearer token.
+   */
+  private setupRequest(setupToken: string) {
+    return {
+      headers: { Authorization: `SetupToken ${setupToken}` },
+    };
+  }
+
+  async validateSetupToken(
+    setupToken: string
+  ): Promise<import('../types').SetupValidateTokenResponse> {
+    const response = await this.client.post(
+      '/api/v1/setup/validate-token',
+      {},
+      this.setupRequest(setupToken)
+    );
+    return response.data;
+  }
+
+  async testOIDCConfig(
+    setupToken: string,
+    data: import('../types').OIDCConfigInput
+  ): Promise<import('../types').SetupTestResult> {
+    const response = await this.client.post(
+      '/api/v1/setup/oidc/test',
+      data,
+      this.setupRequest(setupToken)
+    );
+    return response.data;
+  }
+
+  async saveOIDCConfig(
+    setupToken: string,
+    data: import('../types').OIDCConfigInput
+  ): Promise<import('../types').OIDCConfigResponse> {
+    const response = await this.client.post(
+      '/api/v1/setup/oidc',
+      data,
+      this.setupRequest(setupToken)
+    );
+    return response.data;
+  }
+
+  async testSetupStorageConfig(
+    setupToken: string,
+    data: import('../types').StorageConfigInput
+  ): Promise<import('../types').SetupTestResult> {
+    const response = await this.client.post(
+      '/api/v1/setup/storage/test',
+      data,
+      this.setupRequest(setupToken)
+    );
+    return response.data;
+  }
+
+  async saveSetupStorageConfig(
+    setupToken: string,
+    data: import('../types').StorageConfigInput
+  ): Promise<{ message: string; config: import('../types').StorageConfigResponse }> {
+    const response = await this.client.post(
+      '/api/v1/setup/storage',
+      data,
+      this.setupRequest(setupToken)
+    );
+    return response.data;
+  }
+
+  async configureAdmin(
+    setupToken: string,
+    data: import('../types').ConfigureAdminInput
+  ): Promise<import('../types').ConfigureAdminResponse> {
+    const response = await this.client.post(
+      '/api/v1/setup/admin',
+      data,
+      this.setupRequest(setupToken)
+    );
+    return response.data;
+  }
+
+  async completeSetup(
+    setupToken: string
+  ): Promise<import('../types').CompleteSetupResponse> {
+    const response = await this.client.post(
+      '/api/v1/setup/complete',
+      {},
+      this.setupRequest(setupToken)
+    );
+    return response.data;
+  }
+
+  // ============================================================================
   // Storage Configuration
   // ============================================================================
 
