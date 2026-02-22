@@ -11,7 +11,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [1.1.2] - 2026-02-20
+## [1.1.2] - 2026-02-21
+
+> First tagged release of the standalone `terraform-registry-frontend` repository,
+> split from the `sethbacon/terraform-registry` monorepo.
+> Includes all frontend changes through v1.1.2 of the monorepo.
 
 ### Added
 
