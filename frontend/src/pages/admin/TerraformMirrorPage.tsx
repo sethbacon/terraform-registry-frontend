@@ -320,7 +320,7 @@ const ConfigCard: React.FC<{
 
 const TOOL_DEFAULT_URLS: Record<string, string> = {
   terraform: 'https://releases.hashicorp.com',
-  opentofu: 'https://releases.opentofu.org',
+  opentofu: 'https://github.com/opentofu/opentofu',
 };
 
 /** Returns the canonical upstream URL for a known tool, or '' for custom. */
