@@ -1,0 +1,116 @@
+# Docker Compose OIDC overlay — Keycloak identity provider for local testing
+#
+# Usage:
+#   docker compose -f docker-compose.yml -f docker-compose.oidc.yml up -d
+#
+# This overlay:
+#   1. Adds a Keycloak service pre-configured with a "terraform-registry" realm,
+#      an OIDC client, and 7 test users (all password: TestPass123!)
+#   2. Reconfigures the backend to use Keycloak for OIDC authentication
+#   3. Disables DEV_MODE so the real OIDC flow is exercised
+#
+# Keycloak admin console: http://keycloak:8180/admin  (admin / admin)
+# Realm OIDC discovery:   http://keycloak:8180/realms/terraform-registry/.well-known/openid-configuration
+#
+# HOSTS FILE REQUIRED: Add this line to C:\Windows\System32\drivers\etc\hosts
+#   127.0.0.1  registry.local keycloak
+#
+# Test users (password for all: TestPass123!):
+#   admin.user   alice.dev   bob.ops   carol.qa
+#   dave.readonly   eve.viewer   frank.test
+
+services:
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.5.4
+    container_name: terraform-registry-keycloak
+    # start-dev: embedded H2 DB, no HTTPS required — development only
+    # --import-realm: auto-imports any JSON files in /opt/keycloak/data/import/
+    command: start-dev --import-realm
+    environment:
+      KC_BOOTSTRAP_ADMIN_USERNAME: admin
+      KC_BOOTSTRAP_ADMIN_PASSWORD: admin
+      # Use embedded H2 database — no separate DB needed for local testing.
+      # Realm is always re-imported from the JSON file on startup so no data loss concerns.
+      KC_DB: dev-file
+      KC_HTTP_PORT: "8180"
+      KC_HTTP_ENABLED: "true"
+      KC_HOSTNAME_STRICT: "false"
+      KC_HOSTNAME_STRICT_HTTPS: "false"
+      # Expose the health endpoint so Docker can use it for the healthcheck
+      KC_HEALTH_ENABLED: "true"
+      # Set hostname to "keycloak" — the Docker service name reachable by both:
+      #   - the backend container (via Docker internal DNS)
+      #   - the host browser (via 127.0.0.1 keycloak in the hosts file)
+      # This ensures the OIDC issuer URL in tokens matches the URL the backend uses for discovery.
+      KC_HOSTNAME: keycloak
+      KC_HOSTNAME_PORT: "8180"
+    volumes:
+      - ./keycloak/realm-export.json:/opt/keycloak/data/import/realm-export.json:ro
+    ports:
+      - "8180:8180"
+      - "9000:9000"
+    healthcheck:
+      # Keycloak 26+ uses a minimal UBI image with no curl or wget.
+      # Use bash /dev/tcp to hit the management port (9000) health endpoint.
+      test:
+        [
+          "CMD-SHELL",
+          "exec 3<>/dev/tcp/localhost/9000 && echo -e 'GET /health/ready HTTP/1.0\\r\\nHost: localhost\\r\\n\\r\\n' >&3 && grep -q UP <&3",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 15
+      start_period: 90s
+    networks:
+      - registry-network
+    restart: unless-stopped
+
+  backend:
+    # Wait for Keycloak to be healthy before starting the backend
+    depends_on:
+      keycloak:
+        condition: service_healthy
+    environment:
+      # Disable DEV_MODE — removes the /api/v1/dev/login shortcut so the real OIDC flow is tested
+      DEV_MODE: "false"
+
+      # Enable OIDC authentication
+      TFR_AUTH_OIDC_ENABLED: "true"
+
+      # Issuer URL uses the "keycloak" hostname — matches KC_HOSTNAME above.
+      # The backend resolves "keycloak" via Docker internal DNS.
+      # The browser resolves "keycloak" via the hosts file (127.0.0.1 keycloak).
+      # Both see the same issuer URL, satisfying the go-oidc issuer validation.
+      TFR_AUTH_OIDC_ISSUER_URL: "http://keycloak:8180/realms/terraform-registry"
+
+      TFR_AUTH_OIDC_CLIENT_ID: "terraform-registry"
+      TFR_AUTH_OIDC_CLIENT_SECRET: "terraform-registry-secret"
+
+      # Callback URL — must match what's in the Keycloak client's Valid Redirect URIs.
+      # This is the public (browser-facing) URL that Keycloak redirects to after login.
+      TFR_AUTH_OIDC_REDIRECT_URL: "https://registry.local:3000/api/v1/auth/callback"
+
+      TFR_AUTH_OIDC_SCOPES: "openid,email,profile"
+
+  # One-shot service that seeds the database after the backend has applied its migrations.
+  # Marks setup as complete (no wizard needed — OIDC configured via env vars) and
+  # pre-provisions admin@example.com (Keycloak's admin.user) as a registry admin.
+  # Runs every time the stack starts but the SQL is idempotent (ON CONFLICT DO NOTHING/UPDATE).
+  db-seed:
+    image: postgres:16-alpine
+    container_name: terraform-registry-db-seed
+    depends_on:
+      backend:
+        condition: service_healthy
+    environment:
+      PGHOST: postgres
+      PGPORT: 5432
+      PGDATABASE: terraform_registry
+      PGUSER: registry
+      PGPASSWORD: ${POSTGRES_PASSWORD:-registry}
+    volumes:
+      - ./keycloak/seed-oidc-dev.sql:/seed.sql:ro
+    command: psql -f /seed.sql
+    networks:
+      - registry-network
+    restart: "no"

@@ -1,0 +1,261 @@
+{
+  "realm": "terraform-registry",
+  "enabled": true,
+  "displayName": "Terraform Registry",
+  "sslRequired": "none",
+  "registrationAllowed": false,
+  "loginWithEmailAllowed": true,
+  "duplicateEmailsAllowed": false,
+  "resetPasswordAllowed": true,
+  "editUsernameAllowed": false,
+  "bruteForceProtected": false,
+  "groups": [
+    {
+      "name": "azr_ent_app9999_admins_cg",
+      "path": "/azr_ent_app9999_admins_cg"
+    },
+    {
+      "name": "azr_ent_app9999_publishers_cg",
+      "path": "/azr_ent_app9999_publishers_cg"
+    },
+    {
+      "name": "azr_ent_app9999_devops_cg",
+      "path": "/azr_ent_app9999_devops_cg"
+    },
+    {
+      "name": "azr_ent_app9999_auditors_cg",
+      "path": "/azr_ent_app9999_auditors_cg"
+    },
+    {
+      "name": "azr_ent_app9999_usermgr_cg",
+      "path": "/azr_ent_app9999_usermgr_cg"
+    },
+    {
+      "name": "azr_ent_app9999_viewers_cg",
+      "path": "/azr_ent_app9999_viewers_cg"
+    }
+  ],
+  "clients": [
+    {
+      "clientId": "terraform-registry",
+      "name": "Terraform Registry",
+      "description": "Terraform Registry OIDC client",
+      "enabled": true,
+      "clientAuthenticatorType": "client-secret",
+      "secret": "terraform-registry-secret",
+      "redirectUris": [
+        "https://registry.local:3000/*",
+        "http://localhost:8080/*",
+        "http://localhost:3000/*"
+      ],
+      "webOrigins": [
+        "https://registry.local:3000",
+        "http://localhost:8080",
+        "http://localhost:3000"
+      ],
+      "protocol": "openid-connect",
+      "publicClient": false,
+      "standardFlowEnabled": true,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": true,
+      "serviceAccountsEnabled": false,
+      "authorizationServicesEnabled": false,
+      "fullScopeAllowed": true,
+      "attributes": {
+        "post.logout.redirect.uris": "https://registry.local:3000/*##http://localhost:3000/*"
+      },
+      "protocolMappers": [
+        {
+          "name": "email",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-attribute-mapper",
+          "consentRequired": false,
+          "config": {
+            "userinfo.token.claim": "true",
+            "user.attribute": "email",
+            "id.token.claim": "true",
+            "access.token.claim": "true",
+            "claim.name": "email",
+            "jsonType.label": "String"
+          }
+        },
+        {
+          "name": "full name",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-full-name-mapper",
+          "consentRequired": false,
+          "config": {
+            "id.token.claim": "true",
+            "access.token.claim": "true",
+            "userinfo.token.claim": "true"
+          }
+        },
+        {
+          "name": "given name",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-attribute-mapper",
+          "consentRequired": false,
+          "config": {
+            "userinfo.token.claim": "true",
+            "user.attribute": "firstName",
+            "id.token.claim": "true",
+            "access.token.claim": "true",
+            "claim.name": "given_name",
+            "jsonType.label": "String"
+          }
+        },
+        {
+          "name": "family name",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-attribute-mapper",
+          "consentRequired": false,
+          "config": {
+            "userinfo.token.claim": "true",
+            "user.attribute": "lastName",
+            "id.token.claim": "true",
+            "access.token.claim": "true",
+            "claim.name": "family_name",
+            "jsonType.label": "String"
+          }
+        },
+        {
+          "name": "username",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-attribute-mapper",
+          "consentRequired": false,
+          "config": {
+            "userinfo.token.claim": "true",
+            "user.attribute": "username",
+            "id.token.claim": "true",
+            "access.token.claim": "true",
+            "claim.name": "preferred_username",
+            "jsonType.label": "String"
+          }
+        },
+        {
+          "name": "groups",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-group-membership-mapper",
+          "consentRequired": false,
+          "config": {
+            "full.path": "false",
+            "id.token.claim": "true",
+            "access.token.claim": "true",
+            "claim.name": "groups",
+            "userinfo.token.claim": "true"
+          }
+        }
+      ]
+    }
+  ],
+  "users": [
+    {
+      "username": "admin.user",
+      "email": "admin@example.com",
+      "firstName": "Admin",
+      "lastName": "User",
+      "enabled": true,
+      "emailVerified": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "TestPass123!",
+          "temporary": false
+        }
+      ],
+      "groups": [
+        "/azr_ent_app9999_admins_cg"
+      ]
+    },
+    {
+      "username": "alice.dev",
+      "email": "alice@example.com",
+      "firstName": "Alice",
+      "lastName": "Dev",
+      "enabled": true,
+      "emailVerified": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "TestPass123!",
+          "temporary": false
+        }
+      ],
+      "groups": [
+        "/azr_ent_app9999_publishers_cg"
+      ]
+    },
+    {
+      "username": "bob.ops",
+      "email": "bob@example.com",
+      "firstName": "Bob",
+      "lastName": "Ops",
+      "enabled": true,
+      "emailVerified": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "TestPass123!",
+          "temporary": false
+        }
+      ],
+      "groups": [
+        "/azr_ent_app9999_devops_cg"
+      ]
+    },
+    {
+      "username": "carol.auditor",
+      "email": "carol@example.com",
+      "firstName": "Carol",
+      "lastName": "Auditor",
+      "enabled": true,
+      "emailVerified": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "TestPass123!",
+          "temporary": false
+        }
+      ],
+      "groups": [
+        "/azr_ent_app9999_auditors_cg"
+      ]
+    },
+    {
+      "username": "dave.manager",
+      "email": "dave@example.com",
+      "firstName": "Dave",
+      "lastName": "Manager",
+      "enabled": true,
+      "emailVerified": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "TestPass123!",
+          "temporary": false
+        }
+      ],
+      "groups": [
+        "/azr_ent_app9999_usermgr_cg"
+      ]
+    },
+    {
+      "username": "eve.viewer",
+      "email": "eve@example.com",
+      "firstName": "Eve",
+      "lastName": "Viewer",
+      "enabled": true,
+      "emailVerified": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "TestPass123!",
+          "temporary": false
+        }
+      ],
+      "groups": [
+        "/azr_ent_app9999_viewers_cg"
+      ]
+    }
+  ]
+}

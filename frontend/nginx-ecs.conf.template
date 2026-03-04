@@ -1,0 +1,87 @@
+# ECS-specific nginx configuration — processed via envsubst at container startup.
+#
+# Key differences from nginx.conf (local Docker Compose):
+#
+#   1. Plain HTTP only (port 80). TLS is terminated at the ALB; the container
+#      never sees HTTPS traffic.
+#
+#   2. No /api/ proxy block. In ECS the ALB routes /api/* requests directly to
+#      the backend target group before they reach this container. Adding an /api/
+#      block here would cause a 502 because Fargate tasks have no shared internal
+#      DNS — there is no hostname "backend" that nginx can resolve.
+#
+#   3. BACKEND_URL is substituted by nginx's 20-envsubst-on-templates.sh at
+#      startup. Set it to the ALB's public URL (e.g. https://registry.example.com)
+#      in the ECS task definition environment. The proxy blocks below forward
+#      Terraform protocol paths that arrive at the frontend target group via the
+#      ALB default rule; in practice those paths should be intercepted by the
+#      higher-priority ALB listener rules and never reach nginx.
+
+server {
+    listen 80;
+    server_name _;
+    root /usr/share/nginx/html;
+    index index.html;
+
+    # Security headers
+    add_header X-Frame-Options "DENY" always;
+    add_header X-Content-Type-Options "nosniff" always;
+    add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+    add_header Content-Security-Policy "default-src 'self'; script-src 'self' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self'; frame-ancestors 'none';" always;
+
+    # Upload size limit (matches backend: 100MB modules, 500MB providers)
+    client_max_body_size 500m;
+
+    # SPA fallback - serve index.html for all non-file requests
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+
+    location /swagger.json {
+        proxy_pass ${BACKEND_URL}/swagger.json;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    location /v1/ {
+        proxy_pass ${BACKEND_URL};
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    location /.well-known/ {
+        proxy_pass ${BACKEND_URL};
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    location /webhooks/ {
+        proxy_pass ${BACKEND_URL};
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    location /terraform/ {
+        proxy_pass ${BACKEND_URL};
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    location /health {
+        proxy_pass ${BACKEND_URL}/health;
+    }
+
+    location /ready {
+        proxy_pass ${BACKEND_URL}/ready;
+    }
+}

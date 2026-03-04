@@ -1,0 +1,18 @@
+# Production overrides for Docker Compose
+# Usage: docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+#
+# Prerequisites:
+#   1. Copy .env.production.example to .env.production and fill in secrets
+#   2. Pull or build production images
+#   3. Place a reverse proxy (Traefik, Caddy, nginx) in front for TLS termination
+
+services:
+  frontend:
+    image: ${FRONTEND_IMAGE:-ghcr.io/sethbacon/terraform-registry-frontend}:${REGISTRY_TAG:-latest}
+    ports:
+      - "80:80"
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 256M

@@ -1,0 +1,92 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: terraform_registry
+      POSTGRES_USER: registry
+      POSTGRES_PASSWORD: registry
+    volumes:
+      - postgres-data-test:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U registry -d terraform_registry"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 5s
+
+  backend:
+    # Pull the published backend image from ghcr.io instead of building from source.
+    # Run `gh workflow run release.yml` in terraform-registry-backend to publish a new image.
+    #
+    # To test against a locally built backend image (e.g. unpublished migrations):
+    #   cd ../../terraform-registry-backend/deployments && docker compose build backend
+    #   BACKEND_IMAGE=deployments-backend docker compose -f docker-compose.test.yml up -d
+    image: ${BACKEND_IMAGE:-ghcr.io/sethbacon/terraform-registry-backend:latest}
+    environment:
+      - TFR_DATABASE_HOST=postgres
+      - TFR_DATABASE_PORT=5432
+      - TFR_DATABASE_NAME=terraform_registry
+      - TFR_DATABASE_USER=registry
+      - TFR_DATABASE_PASSWORD=registry
+      - TFR_DATABASE_SSL_MODE=disable
+      # DEV_MODE enables /api/v1/dev/login for Playwright fixtures — test/CI only, never production
+      - DEV_MODE=true
+      - TFR_SERVER_HOST=0.0.0.0
+      - TFR_SERVER_PORT=8080
+      # JWT secret required by backend — fixed value for test environment only
+      - TFR_JWT_SECRET=test-jwt-secret-for-e2e-only-not-for-production
+      # ENCRYPTION_KEY required for SCM integration — fixed 32-byte value for test only
+      - ENCRYPTION_KEY=00000000000000000000000000000000
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/health"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 5s
+
+  # seed-db runs after the backend has applied migrations, inserting the dev
+  # admin user so the Dev Login button works in Playwright tests.
+  seed-db:
+    image: postgres:16-alpine
+    volumes:
+      - ./create-dev-admin-user.sql:/create-dev-admin-user.sql:ro
+    environment:
+      PGPASSWORD: registry
+    entrypoint: [
+      "psql",
+      "--host=postgres",
+      "--port=5432",
+      "--username=registry",
+      "--dbname=terraform_registry",
+      "--file=/create-dev-admin-user.sql"
+    ]
+    depends_on:
+      backend:
+        condition: service_healthy
+
+  frontend:
+    build:
+      context: ../frontend
+      dockerfile: Dockerfile
+      args:
+        # development enables the Dev Login button so Playwright can log in without real credentials
+        # Must match DEV_MODE=true on the backend. Never use in production.
+        VITE_MODE: development
+    ports:
+      # Playwright expects https://localhost:3000; nginx serves HTTPS on port 443
+      # The self-signed cert is baked into the image at build time.
+      - "3000:443"
+    depends_on:
+      backend:
+        condition: service_healthy
+      seed-db:
+        condition: service_completed_successfully
+
+volumes:
+  postgres-data-test:
+    driver: local
