@@ -4,20 +4,31 @@
 #   docker compose -f docker-compose.yml -f docker-compose.oidc.yml up -d
 #
 # This overlay:
-#   1. Adds a Keycloak service pre-configured with a "terraform-registry" realm,
-#      an OIDC client, and 7 test users (all password: TestPass123!)
+#   1. Adds a Keycloak service pre-configured with two realms:
+#        - "terraform-registry"      (registry users)
+#        - "terraform-state-manager" (state manager users, for shared local dev)
+#      All test users have password: TestPass123!
 #   2. Reconfigures the backend to use Keycloak for OIDC authentication
 #   3. Disables DEV_MODE so the real OIDC flow is exercised
+#   4. Attaches Keycloak to the "shared-keycloak" external network so the
+#      state manager stack can reach it without spinning up its own Keycloak.
 #
 # Keycloak admin console: http://keycloak:8180/admin  (admin / admin)
-# Realm OIDC discovery:   http://keycloak:8180/realms/terraform-registry/.well-known/openid-configuration
+# Registry realm discovery:      http://keycloak:8180/realms/terraform-registry/.well-known/openid-configuration
+# State manager realm discovery: http://keycloak:8180/realms/terraform-state-manager/.well-known/openid-configuration
 #
 # HOSTS FILE REQUIRED: Add this line to C:\Windows\System32\drivers\etc\hosts
 #   127.0.0.1  registry.local keycloak
 #
-# Test users (password for all: TestPass123!):
+# NETWORK SETUP REQUIRED (once):
+#   docker network create shared-keycloak
+#
+# Registry test users (password for all: TestPass123!):
 #   admin.user   alice.dev   bob.ops   carol.qa
 #   dave.readonly   eve.viewer   frank.test
+#
+# State manager test users (password for all: TestPass123!):
+#   admin.user   alice.analyst   bob.operator   carol.viewer
 
 services:
   keycloak:
@@ -46,6 +57,7 @@ services:
       KC_HOSTNAME_PORT: "8180"
     volumes:
       - ./keycloak/realm-export.json:/opt/keycloak/data/import/realm-export.json:ro
+      - ./keycloak/tsm-realm-export.json:/opt/keycloak/data/import/tsm-realm-export.json:ro
     ports:
       - "8180:8180"
       - "9000:9000"
@@ -63,6 +75,7 @@ services:
       start_period: 90s
     networks:
       - registry-network
+      - shared-keycloak
     restart: unless-stopped
 
   backend:
@@ -114,3 +127,10 @@ services:
     networks:
       - registry-network
     restart: "no"
+
+networks:
+  # External network shared with the state manager stack so its backend
+  # can reach this Keycloak container via the "keycloak" hostname.
+  # Create once with: docker network create shared-keycloak
+  shared-keycloak:
+    external: true

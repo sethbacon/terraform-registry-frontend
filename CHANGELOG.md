@@ -11,6 +11,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.2.0] - 2026-03-05
+
+### Fixed
+
+- admin/terraform-mirror: corrected OpenTofu default upstream URL from `https://releases.opentofu.org` to `https://github.com/opentofu/opentofu` (#1)
+- nginx: add `Permissions-Policy` security header to `nginx.conf` and `nginx-ecs.conf.template` (#3)
+- nginx: add extended proxy timeouts (600s) for long-running mirror sync operations (#3)
+
+### Changed
+
+- docker-compose: add `name: terraform-registry` project name for deterministic container naming (#3)
+- docker-compose.oidc: add `terraform-state-manager` Keycloak realm and `shared-keycloak` external network for shared local development (#3)
+
+---
+
 ## [0.1.0] - 2026-03-04
 
 - Initial commit
