@@ -11,6 +11,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.2.1] - 2026-03-05
+
+### Fixed
+
+- fix: add explicit `Content-Type: application/json` header to nginx API proxy responses in `nginx.conf` and `nginx-ecs.conf.template` (#7)
+
+### Changed
+
+- docs: expand CONTRIBUTING.md table of contents, update Node.js prerequisite from 18+ to 20+, fix table alignment (#6)
+- docs: fix markdown heading structure in e2e/README.md (#6)
+
+---
+
 ## [0.2.0] - 2026-03-05
 
 ### Fixed
