@@ -4,14 +4,23 @@ Thank you for your interest in contributing to the frontend UI and E2E test suit
 
 ## Table of Contents
 
-- [Code of Conduct](#code-of-conduct)
-- [Getting Started](#getting-started)
-- [Development Workflow](#development-workflow)
-- [Frontend (TypeScript) Standards](#frontend-typescript-standards)
-- [Testing Requirements](#testing-requirements)
-- [Pull Request Process](#pull-request-process)
-- [Reporting Security Vulnerabilities](#reporting-security-vulnerabilities)
-- [Documentation](#documentation)
+- [Contributing to Terraform Registry — Frontend](#contributing-to-terraform-registry-%E2%80%94-frontend)
+  - [Table of Contents](#table-of-contents)
+  - [Code of Conduct](#code-of-conduct)
+  - [Getting Started](#getting-started)
+    - [Prerequisites](#prerequisites)
+    - [Fork and Clone](#fork-and-clone)
+    - [Local Setup](#local-setup)
+  - [Development Workflow](#development-workflow)
+    - [Branch Naming](#branch-naming)
+    - [Commit Messages](#commit-messages)
+  - [Frontend (TypeScript) Standards](#frontend-(typescript)-standards)
+    - [Linting](#linting)
+    - [Conventions](#conventions)
+  - [Testing Requirements](#testing-requirements)
+  - [Pull Request Process](#pull-request-process)
+  - [Reporting Security Vulnerabilities](#reporting-security-vulnerabilities)
+  - [Documentation](#documentation)
 
 ---
 
@@ -25,7 +34,7 @@ This project expects all participants to interact with each other professionally
 
 ### Prerequisites
 
-- Node.js 18+ and npm
+- Node.js 20+ and npm
 - Docker and Docker Compose (for running the backend during development)
 
 ### Fork and Clone
@@ -64,7 +73,7 @@ Alternatively, set up the backend manually — see [terraform-registry-backend](
 ### Branch Naming
 
 | Type | Pattern | Example |
-|------|---------|---------|
+| ---- | ------- | ------- |
 | Feature | `feat/short-description` | `feat/mirror-status-page` |
 | Bug fix | `fix/issue-description` | `fix/api-key-expiry-display` |
 | Documentation | `docs/topic` | `docs/e2e-setup` |
