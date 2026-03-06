@@ -9,6 +9,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- fix: mirrored provider usage example now shows upstream source (e.g. `hashicorp/aws`) with `>=major.minor` version constraint instead of registry hostname (#14)
+- fix: module usage example now shows `>=major.minor` version constraint and removes placeholder comment (#14)
+
 ---
 
 ## [0.2.2] - 2026-03-05
