@@ -1,8 +1,9 @@
 // Configuration for the Terraform Registry frontend
 
-// The hostname where the registry backend is accessible for Terraform CLI
-// This is used in usage examples shown to users
-export const REGISTRY_HOST = 'registry.local';
+// The hostname (including port when non-standard) where the registry is
+// accessible for Terraform CLI. Derived from the browser URL so usage
+// examples always match the actual deployment.
+export const REGISTRY_HOST = window.location.host;
 
-// Full URL for the registry backend (HTTPS on port 443)
-export const REGISTRY_URL = `https://${REGISTRY_HOST}`;
+// Full base URL for the registry backend, matching the current protocol.
+export const REGISTRY_URL = window.location.origin;
