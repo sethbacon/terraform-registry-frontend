@@ -323,11 +323,12 @@ const ModuleDetailPage: React.FC = () => {
   const getTerraformExample = () => {
     if (!module || !selectedVersion) return '';
 
+    const v = selectedVersion.version;
+    const majorMinor = v.split('.').slice(0, 2).join('.');
+
     return `module "${name}" {
   source  = "${REGISTRY_HOST}/${namespace}/${name}/${system}"
-  version = "${selectedVersion.version}"
-
-  # Add your module variables here
+  version = ">=${majorMinor}"
 }`;
   };
 

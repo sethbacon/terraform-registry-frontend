@@ -217,6 +217,24 @@ const ProviderDetailPage: React.FC = () => {
   const getTerraformExample = () => {
     if (!provider || !selectedVersion) return '';
 
+    const v = selectedVersion.version;
+    const majorMinor = v.split('.').slice(0, 2).join('.');
+
+    // Mirrored providers use the upstream source (e.g. hashicorp/aws) because
+    // Terraform resolves the mirror transparently via CLI network mirror config.
+    if (provider.source) {
+      return `terraform {
+  required_version = ">= 1.0.0"
+
+  required_providers {
+    ${name} = {
+      source  = "${namespace}/${name}"
+      version = ">=${majorMinor}"
+    }
+  }
+}`;
+    }
+
     return `terraform {
   required_providers {
     ${name} = {
