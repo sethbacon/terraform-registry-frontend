@@ -11,6 +11,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.2.4] - 2026-03-05
+
+### Fixed
+
+- fix: derive `REGISTRY_HOST` from `window.location.host` so module and provider usage examples include the port when non-standard (#17)
+
+---
+
 ## [0.2.3] - 2026-03-05
 
 ### Fixed
