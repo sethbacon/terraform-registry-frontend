@@ -34,6 +34,8 @@ const RESOURCE_TYPES = [
   { value: '', label: 'All Resource Types' },
   { value: 'module', label: 'Module' },
   { value: 'provider', label: 'Provider' },
+  { value: 'terraform_binary', label: 'Terraform Binary' },
+  { value: 'file', label: 'File' },
   { value: 'user', label: 'User' },
   { value: 'mirror', label: 'Mirror' },
   { value: 'api_key', label: 'API Key' },
