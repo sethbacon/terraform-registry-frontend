@@ -11,6 +11,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.2.2] - 2026-03-05
+
+### Fixed
+
+- fix: lower Dockerfile npm audit gate from `high` to `critical` to unblock builds blocked by unfixable swagger-ui-react transitive vulnerabilities (immutable@3.x, dompurify@3.2.x) (#11)
+
+---
+
 ## [0.2.1] - 2026-03-05
 
 ### Fixed
