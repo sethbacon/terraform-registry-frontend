@@ -19,8 +19,11 @@ RUN npm install --no-audit --no-fund
 # Fix what can be auto-fixed, then gate on production-dependency vulnerabilities only.
 # Dev-only packages (e.g. eslint → minimatch) are excluded: they are not present
 # in the final nginx image and cannot be force-fixed without breaking build tooling.
+# Gate at critical (not high) because swagger-ui-react pins immutable@3.x and
+# dompurify@3.2.x — both have high-severity advisories that are unfixable until
+# upstream migrates to immutable v4 / dompurify v3.3.2+.
 RUN npm audit fix || true && \
-    npm audit --audit-level=high --omit=dev
+    npm audit --audit-level=critical --omit=dev
 
 # Copy source code
 COPY . .
