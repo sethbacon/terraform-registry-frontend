@@ -11,6 +11,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.2.8] - 2026-03-17
+
+### Fixed
+
+- fix: auto-save storage configuration after successful connection test so test + save are one action (#29)
+- fix: hide Azure AD login button when provider is not configured, eliminating the confusing error on click (#30)
+- fix: rename "Sign in with OIDC" button to "Sign in with SSO" for environment-agnostic labelling (#30)
+
+---
+
 ## [0.2.7] - 2026-03-17
 
 ### Fixed

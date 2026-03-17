@@ -22,6 +22,17 @@ const LoginPage: React.FC = () => {
   // during any `vite build` regardless of --mode. Check MODE instead, which
   // correctly reflects the --mode argument (e.g. 'development').
   const isDev = import.meta.env.MODE === 'development';
+  const [azureADAvailable, setAzureADAvailable] = React.useState<boolean>(false);
+
+  React.useEffect(() => {
+    fetch('/api/v1/auth/login?provider=azuread', { method: 'GET', redirect: 'manual' })
+      .then(res => {
+        setAzureADAvailable(res.type === 'opaqueredirect' || res.status === 0);
+      })
+      .catch(() => {
+        setAzureADAvailable(false);
+      });
+  }, []);
 
   const handleDevLogin = async () => {
     // Call the dev login endpoint to get a JWT (no hardcoded keys)
@@ -134,30 +145,34 @@ const LoginPage: React.FC = () => {
               onClick={handleOIDCLogin}
               sx={{ py: 1.5 }}
             >
-              Sign in with OIDC
+              Sign in with SSO
             </Button>
 
-            <Divider>
-              <Typography variant="body2" color="text.secondary">
-                OR
-              </Typography>
-            </Divider>
+            {azureADAvailable && (
+              <>
+                <Divider>
+                  <Typography variant="body2" color="text.secondary">
+                    OR
+                  </Typography>
+                </Divider>
 
-            <Button
-              variant="contained"
-              size="large"
-              fullWidth
-              onClick={handleAzureADLogin}
-              sx={{ 
-                py: 1.5,
-                backgroundColor: '#0078d4',
-                '&:hover': {
-                  backgroundColor: '#106ebe',
-                },
-              }}
-            >
-              Sign in with Azure AD
-            </Button>
+                <Button
+                  variant="contained"
+                  size="large"
+                  fullWidth
+                  onClick={handleAzureADLogin}
+                  sx={{
+                    py: 1.5,
+                    backgroundColor: '#0078d4',
+                    '&:hover': {
+                      backgroundColor: '#106ebe',
+                    },
+                  }}
+                >
+                  Sign in with Azure AD
+                </Button>
+              </>
+            )}
           </Stack>
 
           <Box sx={{ mt: 3, textAlign: 'center' }}>
