@@ -11,6 +11,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.2.9] - 2026-03-17
+
+### Fixed
+
+- fix: set TFR_SERVER_PUBLIC_URL in E2E test compose so logout redirects to the nginx-fronted SPA instead of the raw backend port
+
+---
+
 ## [0.2.8] - 2026-03-17
 
 ### Fixed
