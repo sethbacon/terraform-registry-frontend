@@ -11,6 +11,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.2.5] - 2026-03-17
+
+### Fixed
+
+- fix: add `terraform_binary` and `file` to audit log resource type filter (#23)
+
+### Docs
+
+- docs: add UAT local build validation step to release workflow (#21)
+
+---
+
 ## [0.2.4] - 2026-03-05
 
 ### Fixed

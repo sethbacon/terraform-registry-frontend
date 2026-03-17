@@ -50,7 +50,7 @@ const ProviderDetailPage: React.FC = () => {
   const navigate = useNavigate();
   const { isAuthenticated, allowedScopes } = useAuth();
   const canManage = isAuthenticated && (allowedScopes.includes('admin') || allowedScopes.includes('providers:write'));
-  
+
   // Use 'type' as the name for display
   const name = type;
 
@@ -97,11 +97,11 @@ const ProviderDetailPage: React.FC = () => {
       }
 
       setProvider(matchingProvider);
-      
+
       // Backend returns { versions: [...] } directly
       const versions = versionsData.versions || [];
       setVersions(versions);
-      
+
       if (versions.length > 0) {
         setSelectedVersion(versions[0]);
       }
@@ -115,7 +115,7 @@ const ProviderDetailPage: React.FC = () => {
 
   const handleCopySource = () => {
     if (!provider || !selectedVersion) return;
-    
+
     const source = `${namespace}/${name}`;
     navigator.clipboard.writeText(source);
     setCopiedSource(true);
@@ -293,25 +293,25 @@ provider "${name}" {
 
       {/* Header */}
       <Box sx={{ mb: 4 }}>
-          <Stack direction="row" alignItems="center" justifyContent="space-between" spacing={2} sx={{ mb: 2 }}>
-            <Stack direction="row" alignItems="center" spacing={2}>
-              <IconButton onClick={() => navigate('/providers')}>
-                <ArrowBack />
-              </IconButton>
-              <Typography variant="h4" component="h1">
-                {name}
-              </Typography>
-            </Stack>
-            {canManage && !provider.source && (
-              <Button
-                variant="contained"
-                startIcon={<Add />}
-                onClick={handlePublishNewVersion}
-              >
-                Publish New Version
-              </Button>
-            )}
+        <Stack direction="row" alignItems="center" justifyContent="space-between" spacing={2} sx={{ mb: 2 }}>
+          <Stack direction="row" alignItems="center" spacing={2}>
+            <IconButton onClick={() => navigate('/providers')}>
+              <ArrowBack />
+            </IconButton>
+            <Typography variant="h4" component="h1">
+              {name}
+            </Typography>
           </Stack>
+          {canManage && !provider.source && (
+            <Button
+              variant="contained"
+              startIcon={<Add />}
+              onClick={handlePublishNewVersion}
+            >
+              Publish New Version
+            </Button>
+          )}
+        </Stack>
         <Typography variant="body1" color="text.secondary" gutterBottom>
           {provider.description || 'No description available'}
         </Typography>

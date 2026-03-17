@@ -78,9 +78,22 @@ When a release is called for:
    git push origin development
    ```
 
-3. Merge `development` → `main` via PR (step 7 above).
+3. **UAT — local build validation** before merging to `main`:
 
-4. **After the PR is merged**, tag the commit that landed on `main` and push the tag:
+   ```bash
+   cd deployments
+   docker compose -f docker-compose.yml -f docker-compose.oidc.yml build --no-cache frontend
+   docker compose -f docker-compose.yml -f docker-compose.oidc.yml up -d
+   ```
+
+   Open the frontend in a browser and verify it loads, pages render, and usage examples
+   display correctly. If the full stack is running, run a quick `terraform init` against a
+   mirrored provider and a module to confirm downloads work end-to-end. **Do not merge to
+   `main` until the local build passes.**
+
+4. Merge `development` → `main` via PR (step 7 above).
+
+5. **After the PR is merged**, tag the commit that landed on `main` and push the tag:
 
    ```bash
    git fetch origin
