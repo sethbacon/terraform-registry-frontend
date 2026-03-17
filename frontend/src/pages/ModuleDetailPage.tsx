@@ -383,8 +383,8 @@ const ModuleDetailPage: React.FC = () => {
               <ArrowBack />
             </IconButton>
             <Typography variant="h4" component="h1">
-            {name}
-          </Typography>
+              {name}
+            </Typography>
           </Stack>
           {canManage && (
             <Button
@@ -683,10 +683,10 @@ const ModuleDetailPage: React.FC = () => {
                                   event.state === 'succeeded'
                                     ? 'success'
                                     : event.state === 'failed'
-                                    ? 'error'
-                                    : event.state === 'processing'
-                                    ? 'info'
-                                    : 'default'
+                                      ? 'error'
+                                      : event.state === 'processing'
+                                        ? 'info'
+                                        : 'default'
                                 }
                               />
                               <Typography variant="body2">
