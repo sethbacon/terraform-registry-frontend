@@ -11,6 +11,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.2.7] - 2026-03-17
+
+### Fixed
+
+- fix: redirect nginx pid file to /tmp so container starts in AKS without root access to /var/run (#27)
+
+---
+
 ## [0.2.6] - 2026-03-17
 
 ### Fixed
