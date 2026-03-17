@@ -11,6 +11,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.2.6] - 2026-03-17
+
+### Fixed
+
+- fix: pre-create nginx temp dirs so container starts without CHOWN capability on AKS (#25)
+
+---
+
 ## [0.2.5] - 2026-03-17
 
 ### Fixed
