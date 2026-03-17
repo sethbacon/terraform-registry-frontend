@@ -64,6 +64,18 @@ RUN apk add --no-cache openssl && \
     -addext 'subjectAltName=DNS:localhost,DNS:registry.local,IP:127.0.0.1' && \
     chmod 600 /etc/nginx/certs/server.key
 
+# Pre-create nginx temp dirs owned by the nginx user (uid 101) so the
+# container can run without the CHOWN capability (dropped by the Helm chart
+# security context for AKS hardened namespaces).
+RUN mkdir -p /var/cache/nginx/client_temp \
+             /var/cache/nginx/proxy_temp \
+             /var/cache/nginx/fastcgi_temp \
+             /var/cache/nginx/uwsgi_temp \
+             /var/cache/nginx/scgi_temp && \
+    chown -R 101:101 /var/cache/nginx && \
+    chown -R 101:101 /var/log/nginx && \
+    touch /var/run/nginx.pid && chown 101:101 /var/run/nginx.pid
+
 # Expose ports
 EXPOSE 80 443
 
