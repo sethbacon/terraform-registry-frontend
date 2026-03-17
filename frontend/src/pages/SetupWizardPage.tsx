@@ -177,7 +177,7 @@ const SetupWizardPage: React.FC = () => {
     }
   };
 
-  // Step 2: Test Storage
+  // Step 2: Test Storage (auto-saves on success so test + save are one action)
   const handleTestStorage = async () => {
     try {
       setStorageTesting(true);
@@ -187,6 +187,8 @@ const SetupWizardPage: React.FC = () => {
       setStorageTestResult(result);
       if (!result.success) {
         setError(result.message);
+      } else {
+        await handleSaveStorage();
       }
     } catch (err: any) {
       setError(err.response?.data?.error || 'Storage test failed');
