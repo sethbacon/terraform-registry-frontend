@@ -37,6 +37,11 @@ services:
       - TFR_JWT_SECRET=test-jwt-secret-for-e2e-only-not-for-production
       # ENCRYPTION_KEY required for SCM integration — fixed 32-byte value for test only
       - ENCRYPTION_KEY=00000000000000000000000000000000
+      # PUBLIC_URL tells the backend the browser-facing address for OAuth callbacks and
+      # post-logout redirects.  Without this, deriveFrontendURL falls back to the internal
+      # base_url (http://localhost:8080) so logout would redirect to the raw backend instead
+      # of the nginx-fronted SPA that Playwright is testing against.
+      - TFR_SERVER_PUBLIC_URL=https://localhost:3000
     ports:
       - "8080:8080"
     depends_on:
