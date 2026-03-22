@@ -189,6 +189,27 @@ export interface ProviderPlatform {
   download_count: number;
 }
 
+export interface ProviderDocEntry {
+  id: string;
+  title: string;
+  slug: string;
+  category: string;
+  subcategory?: string;
+  language: string;
+}
+
+export interface ProviderDocsResponse {
+  docs: ProviderDocEntry[];
+  categories: string[];
+}
+
+export interface ProviderDocContent {
+  content: string;
+  title: string;
+  category: string;
+  slug: string;
+}
+
 export interface PaginationMeta {
   page: number;
   per_page: number;
