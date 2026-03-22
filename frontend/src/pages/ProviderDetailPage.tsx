@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import {
   Container,
   Typography,
@@ -30,6 +30,8 @@ import {
   DialogContentText,
   DialogActions,
   TextField,
+  Tabs,
+  Tab,
 } from '@mui/material';
 import ArrowBack from '@mui/icons-material/ArrowBack';
 import ContentCopy from '@mui/icons-material/ContentCopy';
@@ -37,10 +39,13 @@ import Delete from '@mui/icons-material/Delete';
 import Warning from '@mui/icons-material/Warning';
 import Restore from '@mui/icons-material/Restore';
 import Add from '@mui/icons-material/Add';
+import GitHub from '@mui/icons-material/GitHub';
 import api from '../services/api';
-import { Provider, ProviderVersion } from '../types';
+import { Provider, ProviderVersion, ProviderDocEntry } from '../types';
 import { useAuth } from '../contexts/AuthContext';
 import { REGISTRY_HOST } from '../config';
+import ProviderDocsSidebar from '../components/ProviderDocsSidebar';
+import ProviderDocContent from '../components/ProviderDocContent';
 
 const ProviderDetailPage: React.FC = () => {
   const { namespace, type } = useParams<{
@@ -48,8 +53,15 @@ const ProviderDetailPage: React.FC = () => {
     type: string;
   }>();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const { isAuthenticated, allowedScopes } = useAuth();
   const canManage = isAuthenticated && (allowedScopes.includes('admin') || allowedScopes.includes('providers:write'));
+
+  const activeTab = searchParams.get('tab') === 'docs' ? 1 : 0;
+  const docParam = searchParams.get('doc');
+  const docParts = docParam ? docParam.split('/') : [];
+  const selectedDocCategory = docParts[0] ?? null;
+  const selectedDocSlug = docParts[1] ?? null;
 
   // Use 'type' as the name for display
   const name = type;
@@ -69,9 +81,38 @@ const ProviderDetailPage: React.FC = () => {
   const [deprecationMessage, setDeprecationMessage] = useState('');
   const [deprecating, setDeprecating] = useState(false);
 
+  const [docs, setDocs] = useState<ProviderDocEntry[]>([]);
+  const [docsLoading, setDocsLoading] = useState(false);
+
   useEffect(() => {
     loadProviderDetails();
   }, [namespace, type]);
+
+  // Fetch doc index for mirrored providers when version is selected
+  useEffect(() => {
+    if (!provider?.source || !selectedVersion || !namespace || !type) return;
+    setDocsLoading(true);
+    api
+      .getProviderDocs(namespace, type, selectedVersion.version, undefined, 'hcl')
+      .then((data) => setDocs(data.docs))
+      .catch(() => { /* non-fatal */ })
+      .finally(() => setDocsLoading(false));
+  }, [provider?.source, selectedVersion?.version, namespace, type]);
+
+  // Auto-select first doc when Documentation tab is opened with no selection
+  useEffect(() => {
+    if (activeTab !== 1 || docParam || docs.length === 0) return;
+    const overview = docs.find((d) => d.category === 'overview');
+    const first = overview ?? docs[0];
+    setSearchParams(
+      (prev) => {
+        const next = new URLSearchParams(prev);
+        next.set('doc', `${first.category}/${first.slug}`);
+        return next;
+      },
+      { replace: true }
+    );
+  }, [activeTab, docParam, docs]);
 
   const loadProviderDetails = async () => {
     if (!namespace || !type) return;
@@ -214,6 +255,34 @@ const ProviderDetailPage: React.FC = () => {
     }
   };
 
+  const handleTabChange = (_: React.SyntheticEvent, newValue: number) => {
+    setSearchParams(
+      (prev) => {
+        const next = new URLSearchParams(prev);
+        if (newValue === 1) {
+          next.set('tab', 'docs');
+        } else {
+          next.delete('tab');
+          next.delete('doc');
+        }
+        return next;
+      },
+      { replace: true }
+    );
+  };
+
+  const handleDocSelect = (category: string, slug: string) => {
+    setSearchParams(
+      (prev) => {
+        const next = new URLSearchParams(prev);
+        next.set('tab', 'docs');
+        next.set('doc', `${category}/${slug}`);
+        return next;
+      },
+      { replace: true }
+    );
+  };
+
   const getTerraformExample = () => {
     if (!provider || !selectedVersion) return '';
 
@@ -259,7 +328,7 @@ provider "${name}" {
 
   if (error || !provider) {
     return (
-      <Container maxWidth="lg" sx={{ py: 4 }}>
+      <Container maxWidth="xl" sx={{ py: 4 }}>
         <Alert severity="error">{error || 'Provider not found'}</Alert>
         <Button
           startIcon={<ArrowBack />}
@@ -272,8 +341,18 @@ provider "${name}" {
     );
   }
 
+  const hasDocs = provider.source && selectedVersion;
+
+  // Derive GitHub repo URL from namespace/type convention for mirrored providers
+  const githubUrl = provider.source
+    ? `https://github.com/${namespace}/terraform-provider-${type}`
+    : null;
+  const changelogUrl = githubUrl && selectedVersion
+    ? `${githubUrl}/releases/tag/v${selectedVersion.version}`
+    : null;
+
   return (
-    <Container maxWidth="lg" sx={{ py: 4 }}>
+    <Container maxWidth="xl" sx={{ py: 4 }}>
       {/* Breadcrumbs */}
       <Breadcrumbs sx={{ mb: 3 }}>
         <Link
@@ -292,7 +371,7 @@ provider "${name}" {
       </Breadcrumbs>
 
       {/* Header */}
-      <Box sx={{ mb: 4 }}>
+      <Box sx={{ mb: 3 }}>
         <Stack direction="row" alignItems="center" justifyContent="space-between" spacing={2} sx={{ mb: 2 }}>
           <Stack direction="row" alignItems="center" spacing={2}>
             <IconButton onClick={() => navigate('/providers')}>
@@ -370,200 +449,358 @@ provider "${name}" {
         </Stack>
       </Box>
 
-      <Box sx={{ display: 'flex', gap: 3, flexDirection: { xs: 'column', md: 'row' } }}>
-        {/* Main Content */}
-        <Box sx={{ flex: 1 }}>
-          {/* Usage Example */}
-          <Paper sx={{ p: 3, mb: 3 }}>
-            <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
-              <Typography variant="h6">Usage Example</Typography>
-              <Tooltip title={copiedSource ? 'Copied!' : 'Copy source'}>
-                <IconButton onClick={handleCopySource} size="small">
-                  <ContentCopy />
-                </IconButton>
-              </Tooltip>
-            </Stack>
+      {/* Tabs */}
+      {hasDocs && (
+        <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 3 }}>
+          <Tabs value={activeTab} onChange={handleTabChange}>
+            <Tab label="Overview" />
+            <Tab label="Documentation" />
+          </Tabs>
+        </Box>
+      )}
+
+      {/* Overview Tab */}
+      {activeTab === 0 && (
+        <Box sx={{ display: 'flex', gap: 3, flexDirection: { xs: 'column', md: 'row' } }}>
+          {/* Main Content */}
+          <Box sx={{ flex: 1 }}>
+            {/* Usage Example */}
+            <Paper sx={{ p: 3, mb: 3 }}>
+              <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
+                <Typography variant="h6">Usage Example</Typography>
+                <Tooltip title={copiedSource ? 'Copied!' : 'Copy source'}>
+                  <IconButton onClick={handleCopySource} size="small">
+                    <ContentCopy />
+                  </IconButton>
+                </Tooltip>
+              </Stack>
+              <Box
+                component="pre"
+                sx={{
+                  p: 2,
+                  backgroundColor: (theme) => theme.palette.mode === 'dark' ? '#2d2d2d' : '#f5f5f5',
+                  color: (theme) => theme.palette.mode === 'dark' ? '#e6e6e6' : '#1e1e1e',
+                  borderRadius: 1,
+                  overflow: 'auto',
+                  fontSize: '0.875rem',
+                }}
+              >
+                <code>{getTerraformExample()}</code>
+              </Box>
+            </Paper>
+
+            {/* Platforms Table */}
+            {selectedVersion && selectedVersion.platforms && selectedVersion.platforms.length > 0 && (
+              <Paper sx={{ p: 3 }}>
+                <Typography variant="h6" gutterBottom>
+                  Available Platforms
+                </Typography>
+                <Divider sx={{ mb: 2 }} />
+                <TableContainer>
+                  <Table size="small">
+                    <TableHead>
+                      <TableRow>
+                        <TableCell>OS</TableCell>
+                        <TableCell>Architecture</TableCell>
+                        <TableCell>SHA256 Sum</TableCell>
+                        <TableCell width="50px"></TableCell>
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      {selectedVersion.platforms.map((platform) => (
+                        <TableRow key={platform.id}>
+                          <TableCell>{platform.os}</TableCell>
+                          <TableCell>{platform.arch}</TableCell>
+                          <TableCell sx={{ fontFamily: 'monospace', fontSize: '0.75rem', wordBreak: 'break-all' }}>
+                            {platform.shasum || 'N/A'}
+                          </TableCell>
+                          <TableCell>
+                            {platform.shasum && (
+                              <Tooltip title={copiedChecksum === platform.shasum ? "Copied!" : "Copy checksum"}>
+                                <IconButton
+                                  size="small"
+                                  onClick={() => handleCopyChecksum(platform.shasum)}
+                                >
+                                  <ContentCopy fontSize="small" />
+                                </IconButton>
+                              </Tooltip>
+                            )}
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </TableContainer>
+              </Paper>
+            )}
+          </Box>
+
+          {/* Sidebar - Provider Information and Version Details */}
+          <Box sx={{ width: { xs: '100%', md: 320 }, flexShrink: 0 }}>
+            {/* Provider Information */}
+            <Paper sx={{ p: 3, mb: 3 }}>
+              <Typography variant="h6" gutterBottom>
+                Provider Information
+              </Typography>
+              <Divider sx={{ mb: 2 }} />
+              <Box sx={{ '& > *': { mb: 1 } }}>
+                <Typography variant="body2">
+                  <strong>Namespace:</strong> {namespace}
+                </Typography>
+                <Typography variant="body2">
+                  <strong>Name:</strong> {name}
+                </Typography>
+                <Typography variant="body2">
+                  <strong>Latest Version:</strong> {versions.length > 0 ? (versions.find(v => !v.deprecated) ?? versions[0]).version : 'N/A'}
+                </Typography>
+                <Typography variant="body2">
+                  <strong>Total Downloads:</strong> {provider.download_count ?? 0}
+                </Typography>
+                {githubUrl && (
+                  <Box sx={{ mt: 1 }}>
+                    <Button
+                      variant="outlined"
+                      size="small"
+                      startIcon={<GitHub fontSize="small" />}
+                      href={githubUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      fullWidth
+                    >
+                      GitHub Repository
+                    </Button>
+                  </Box>
+                )}
+                {changelogUrl && (
+                  <Box sx={{ mt: 1 }}>
+                    <Button
+                      variant="outlined"
+                      size="small"
+                      href={changelogUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      fullWidth
+                    >
+                      Changelog v{selectedVersion?.version}
+                    </Button>
+                  </Box>
+                )}
+                {provider.created_by_name && (
+                  <Typography variant="body2" sx={{ mt: 1 }}>
+                    <strong>Created By:</strong> {provider.created_by_name}
+                  </Typography>
+                )}
+              </Box>
+            </Paper>
+
+            {/* Selected Version Details */}
+            {selectedVersion && (
+              <Paper sx={{ p: 3 }}>
+                <Typography variant="h6" gutterBottom>
+                  Version {selectedVersion.version} Details
+                </Typography>
+                <Divider sx={{ mb: 2 }} />
+                <Typography variant="body2" sx={{ mb: 2 }}>
+                  <strong>Published:</strong>{' '}
+                  {new Date(selectedVersion.published_at).toISOString().split('T')[0]}
+                </Typography>
+                <Typography variant="body2" sx={{ mb: 2 }}>
+                  <strong>Downloads:</strong> {selectedVersion.download_count ?? 0}
+                </Typography>
+                {selectedVersion.published_by_name && (
+                  <Typography variant="body2" sx={{ mb: 2 }}>
+                    <strong>Published By:</strong> {selectedVersion.published_by_name}
+                  </Typography>
+                )}
+
+                {/* Deprecation Status */}
+                {selectedVersion.deprecated && (
+                  <Alert severity="warning" sx={{ mb: 2 }}>
+                    <Typography variant="body2">
+                      <strong>Deprecated</strong>
+                      {selectedVersion.deprecated_at && (
+                        <> on {new Date(selectedVersion.deprecated_at).toISOString().split('T')[0]}</>
+                      )}
+                    </Typography>
+                    {selectedVersion.deprecation_message && (
+                      <Typography variant="body2" sx={{ mt: 1 }}>
+                        {selectedVersion.deprecation_message}
+                      </Typography>
+                    )}
+                  </Alert>
+                )}
+
+                {canManage && (
+                  <Stack spacing={1}>
+                    {selectedVersion.deprecated ? (
+                      <Button
+                        variant="outlined"
+                        color="success"
+                        size="small"
+                        startIcon={<Restore />}
+                        onClick={handleUndeprecateVersion}
+                        disabled={deprecating}
+                        fullWidth
+                      >
+                        {deprecating ? 'Removing Deprecation...' : 'Remove Deprecation'}
+                      </Button>
+                    ) : (
+                      <Button
+                        variant="outlined"
+                        color="warning"
+                        size="small"
+                        startIcon={<Warning />}
+                        onClick={() => setDeprecateDialogOpen(true)}
+                        fullWidth
+                      >
+                        Deprecate Version
+                      </Button>
+                    )}
+                    <Button
+                      variant="outlined"
+                      color="error"
+                      size="small"
+                      startIcon={<Delete />}
+                      onClick={() => openDeleteVersionDialog(selectedVersion.version)}
+                      fullWidth
+                    >
+                      Delete This Version
+                    </Button>
+                  </Stack>
+                )}
+              </Paper>
+            )}
+          </Box>
+        </Box>
+      )}
+
+      {/* Documentation Tab */}
+      {activeTab === 1 && hasDocs && (
+        <Box sx={{ display: 'flex', gap: 3, alignItems: 'flex-start' }}>
+          {/* Doc panel */}
+          <Paper sx={{ display: 'flex', flex: 1, height: '75vh', overflow: 'hidden', minWidth: 0 }}>
             <Box
-              component="pre"
               sx={{
-                p: 2,
-                backgroundColor: (theme) => theme.palette.mode === 'dark' ? '#2d2d2d' : '#f5f5f5',
-                color: (theme) => theme.palette.mode === 'dark' ? '#e6e6e6' : '#1e1e1e',
-                borderRadius: 1,
-                overflow: 'auto',
-                fontSize: '0.875rem',
+                width: 300,
+                flexShrink: 0,
+                borderRight: 1,
+                borderColor: 'divider',
+                display: 'flex',
+                flexDirection: 'column',
               }}
             >
-              <code>{getTerraformExample()}</code>
+              <ProviderDocsSidebar
+                providerName={name ?? ''}
+                docs={docs}
+                selectedCategory={selectedDocCategory ?? undefined}
+                selectedSlug={selectedDocSlug ?? undefined}
+                onSelect={handleDocSelect}
+                loading={docsLoading}
+              />
+            </Box>
+            <Box sx={{ flex: 1, overflowY: 'auto' }}>
+              {selectedDocCategory && selectedDocSlug && selectedVersion ? (
+                <ProviderDocContent
+                  namespace={namespace!}
+                  type={type!}
+                  version={selectedVersion.version}
+                  category={selectedDocCategory}
+                  slug={selectedDocSlug}
+                />
+              ) : (
+                <Box sx={{ p: 4, textAlign: 'center' }}>
+                  <Typography color="text.secondary">Select a document from the sidebar.</Typography>
+                </Box>
+              )}
             </Box>
           </Paper>
 
-          {/* Platforms Table */}
-          {selectedVersion && selectedVersion.platforms && selectedVersion.platforms.length > 0 && (
-            <Paper sx={{ p: 3 }}>
-              <Typography variant="h6" gutterBottom>
-                Available Platforms
-              </Typography>
+          {/* Info cards — same as overview tab */}
+          <Box sx={{ width: 320, flexShrink: 0 }}>
+            <Paper sx={{ p: 3, mb: 3 }}>
+              <Typography variant="h6" gutterBottom>Provider Information</Typography>
               <Divider sx={{ mb: 2 }} />
-              <TableContainer>
-                <Table size="small">
-                  <TableHead>
-                    <TableRow>
-                      <TableCell>OS</TableCell>
-                      <TableCell>Architecture</TableCell>
-                      <TableCell>SHA256 Sum</TableCell>
-                      <TableCell width="50px"></TableCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {selectedVersion.platforms.map((platform) => (
-                      <TableRow key={platform.id}>
-                        <TableCell>{platform.os}</TableCell>
-                        <TableCell>{platform.arch}</TableCell>
-                        <TableCell sx={{ fontFamily: 'monospace', fontSize: '0.75rem', wordBreak: 'break-all' }}>
-                          {platform.shasum || 'N/A'}
-                        </TableCell>
-                        <TableCell>
-                          {platform.shasum && (
-                            <Tooltip title={copiedChecksum === platform.shasum ? "Copied!" : "Copy checksum"}>
-                              <IconButton
-                                size="small"
-                                onClick={() => handleCopyChecksum(platform.shasum)}
-                              >
-                                <ContentCopy fontSize="small" />
-                              </IconButton>
-                            </Tooltip>
-                          )}
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </TableContainer>
+              <Box sx={{ '& > *': { mb: 1 } }}>
+                <Typography variant="body2"><strong>Namespace:</strong> {namespace}</Typography>
+                <Typography variant="body2"><strong>Name:</strong> {name}</Typography>
+                <Typography variant="body2">
+                  <strong>Latest Version:</strong> {versions.length > 0 ? (versions.find(v => !v.deprecated) ?? versions[0]).version : 'N/A'}
+                </Typography>
+                <Typography variant="body2"><strong>Total Downloads:</strong> {provider.download_count ?? 0}</Typography>
+                {githubUrl && (
+                  <Box sx={{ mt: 1 }}>
+                    <Button variant="outlined" size="small" startIcon={<GitHub fontSize="small" />}
+                      href={githubUrl} target="_blank" rel="noopener noreferrer" fullWidth>
+                      GitHub Repository
+                    </Button>
+                  </Box>
+                )}
+                {changelogUrl && (
+                  <Box sx={{ mt: 1 }}>
+                    <Button variant="outlined" size="small"
+                      href={changelogUrl} target="_blank" rel="noopener noreferrer" fullWidth>
+                      Changelog v{selectedVersion?.version}
+                    </Button>
+                  </Box>
+                )}
+                {provider.created_by_name && (
+                  <Typography variant="body2" sx={{ mt: 1 }}><strong>Created By:</strong> {provider.created_by_name}</Typography>
+                )}
+              </Box>
             </Paper>
-          )}
-        </Box>
 
-        {/* Sidebar - Provider Information and Version Details */}
-        <Box sx={{ width: { xs: '100%', md: 350 } }}>
-          {/* Provider Information */}
-          <Paper sx={{ p: 3, mb: 3 }}>
-            <Typography variant="h6" gutterBottom>
-              Provider Information
-            </Typography>
-            <Divider sx={{ mb: 2 }} />
-            <Box sx={{ '& > *': { mb: 1 } }}>
-              <Typography variant="body2">
-                <strong>Namespace:</strong> {namespace}
-              </Typography>
-              <Typography variant="body2">
-                <strong>Name:</strong> {name}
-              </Typography>
-              <Typography variant="body2">
-                <strong>Latest Version:</strong> {versions.length > 0 ? (versions.find(v => !v.deprecated) ?? versions[0]).version : 'N/A'}
-              </Typography>
-              <Typography variant="body2">
-                <strong>Total Downloads:</strong> {provider.download_count ?? 0}
-              </Typography>
-              {provider.source && selectedVersion && (
-                <Typography variant="body2">
-                  <strong>Documentation:</strong>{' '}
-                  <Link
-                    href={`https://registry.terraform.io/providers/${namespace}/${type}/${selectedVersion.version}/docs`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    registry.terraform.io ↗
-                  </Link>
+            {selectedVersion && (
+              <Paper sx={{ p: 3 }}>
+                <Typography variant="h6" gutterBottom>Version {selectedVersion.version} Details</Typography>
+                <Divider sx={{ mb: 2 }} />
+                <Typography variant="body2" sx={{ mb: 1 }}>
+                  <strong>Published:</strong> {new Date(selectedVersion.published_at).toISOString().split('T')[0]}
                 </Typography>
-              )}
-              {provider.created_by_name && (
-                <Typography variant="body2">
-                  <strong>Created By:</strong> {provider.created_by_name}
+                <Typography variant="body2" sx={{ mb: 1 }}>
+                  <strong>Downloads:</strong> {selectedVersion.download_count ?? 0}
                 </Typography>
-              )}
-            </Box>
-          </Paper>
-
-          {/* Selected Version Details */}
-          {selectedVersion && (
-            <Paper sx={{ p: 3 }}>
-              <Typography variant="h6" gutterBottom>
-                Version {selectedVersion.version} Details
-              </Typography>
-              <Divider sx={{ mb: 2 }} />
-              <Typography variant="body2" sx={{ mb: 2 }}>
-                <strong>Published:</strong>{' '}
-                {new Date(selectedVersion.published_at).toISOString().split('T')[0]}
-              </Typography>
-              <Typography variant="body2" sx={{ mb: 2 }}>
-                <strong>Downloads:</strong> {selectedVersion.download_count ?? 0}
-              </Typography>
-              {selectedVersion.published_by_name && (
-                <Typography variant="body2" sx={{ mb: 2 }}>
-                  <strong>Published By:</strong> {selectedVersion.published_by_name}
-                </Typography>
-              )}
-
-              {/* Deprecation Status */}
-              {selectedVersion.deprecated && (
-                <Alert severity="warning" sx={{ mb: 2 }}>
-                  <Typography variant="body2">
-                    <strong>Deprecated</strong>
-                    {selectedVersion.deprecated_at && (
-                      <> on {new Date(selectedVersion.deprecated_at).toISOString().split('T')[0]}</>
-                    )}
+                {selectedVersion.published_by_name && (
+                  <Typography variant="body2" sx={{ mb: 2 }}>
+                    <strong>Published By:</strong> {selectedVersion.published_by_name}
                   </Typography>
-                  {selectedVersion.deprecation_message && (
-                    <Typography variant="body2" sx={{ mt: 1 }}>
-                      {selectedVersion.deprecation_message}
+                )}
+                {selectedVersion.deprecated && (
+                  <Alert severity="warning" sx={{ mb: 2 }}>
+                    <Typography variant="body2">
+                      <strong>Deprecated</strong>
+                      {selectedVersion.deprecated_at && (
+                        <> on {new Date(selectedVersion.deprecated_at).toISOString().split('T')[0]}</>
+                      )}
                     </Typography>
-                  )}
-                </Alert>
-              )}
-
-              {canManage && (
-                <Stack spacing={1}>
-                  {selectedVersion.deprecated ? (
-                    <Button
-                      variant="outlined"
-                      color="success"
-                      size="small"
-                      startIcon={<Restore />}
-                      onClick={handleUndeprecateVersion}
-                      disabled={deprecating}
-                      fullWidth
-                    >
-                      {deprecating ? 'Removing Deprecation...' : 'Remove Deprecation'}
+                    {selectedVersion.deprecation_message && (
+                      <Typography variant="body2" sx={{ mt: 1 }}>{selectedVersion.deprecation_message}</Typography>
+                    )}
+                  </Alert>
+                )}
+                {canManage && (
+                  <Stack spacing={1}>
+                    {selectedVersion.deprecated ? (
+                      <Button variant="outlined" color="success" size="small" startIcon={<Restore />}
+                        onClick={handleUndeprecateVersion} disabled={deprecating} fullWidth>
+                        {deprecating ? 'Removing...' : 'Remove Deprecation'}
+                      </Button>
+                    ) : (
+                      <Button variant="outlined" color="warning" size="small" startIcon={<Warning />}
+                        onClick={() => setDeprecateDialogOpen(true)} fullWidth>
+                        Deprecate Version
+                      </Button>
+                    )}
+                    <Button variant="outlined" color="error" size="small" startIcon={<Delete />}
+                      onClick={() => openDeleteVersionDialog(selectedVersion.version)} fullWidth>
+                      Delete This Version
                     </Button>
-                  ) : (
-                    <Button
-                      variant="outlined"
-                      color="warning"
-                      size="small"
-                      startIcon={<Warning />}
-                      onClick={() => setDeprecateDialogOpen(true)}
-                      fullWidth
-                    >
-                      Deprecate Version
-                    </Button>
-                  )}
-                  <Button
-                    variant="outlined"
-                    color="error"
-                    size="small"
-                    startIcon={<Delete />}
-                    onClick={() => openDeleteVersionDialog(selectedVersion.version)}
-                    fullWidth
-                  >
-                    Delete This Version
-                  </Button>
-                </Stack>
-              )}
-            </Paper>
-          )}
+                  </Stack>
+                )}
+              </Paper>
+            )}
+          </Box>
         </Box>
-      </Box>
+      )}
 
       {/* Delete Provider Confirmation Dialog */}
       <Dialog

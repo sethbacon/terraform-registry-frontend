@@ -258,6 +258,24 @@ class ApiClient {
     return response.data;
   }
 
+  async getProviderDocs(namespace: string, type: string, version: string, category?: string, language?: string) {
+    const params: Record<string, string> = {};
+    if (category) params.category = category;
+    if (language) params.language = language;
+    const response = await this.client.get(
+      `/api/v1/providers/${namespace}/${type}/versions/${version}/docs`,
+      { params }
+    );
+    return response.data;
+  }
+
+  async getProviderDocContent(namespace: string, type: string, version: string, category: string, slug: string) {
+    const response = await this.client.get(
+      `/api/v1/providers/${namespace}/${type}/versions/${version}/docs/${category}/${slug}`
+    );
+    return response.data;
+  }
+
   // Helper to transform user from API format to frontend format
   private transformUser(user: any) {
     return {

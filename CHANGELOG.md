@@ -11,6 +11,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.2.10] - 2026-03-22
+
+### Added
+
+- feat: provider documentation tab — ProviderDetailPage gains a Documentation tab with a collapsible sidebar (grouped by subcategory → resource type) and inline markdown rendering; docs are fetched from the backend proxy and displayed without leaving the app
+- feat: shared MarkdownRenderer component — extracted from ModuleDetailPage for reuse across provider docs and module readme rendering
+- feat: Overview tab enhancements — GitHub Repository and Changelog buttons replace the external documentation link; info cards sidebar carried through to the Documentation tab
+
+---
+
 ## [0.2.9] - 2026-03-17
 
 ### Fixed
