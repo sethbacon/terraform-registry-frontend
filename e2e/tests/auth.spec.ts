@@ -90,7 +90,8 @@ test.describe('Logout', () => {
     // Logout redirects to the backend /auth/logout endpoint which terminates any
     // OIDC SSO session and then redirects back to the frontend home page ('/').
     // In dev mode (no OIDC) the backend falls back directly to the home page.
-    await page.waitForURL((url) => url.pathname === '/', { timeout: 10_000 });
+    // 30 s — covers the backend redirect latency + full SPA page load on slow CI runners.
+    await page.waitForURL((url) => url.pathname === '/', { timeout: 30_000 });
     expect(page.url()).not.toContain('/login');
 
     // Security check: swagger-ui-react persists Authorize dialog entries under
