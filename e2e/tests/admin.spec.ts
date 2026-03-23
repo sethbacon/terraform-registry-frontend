@@ -72,15 +72,14 @@ test.describe('Admin: API Keys', () => {
   test('api keys page loads', async ({ loggedInPage: page }) => {
     await page.goto('/admin/apikeys');
 
+    // Wait directly for settled content — either a table (keys exist) or the
+    // empty-state text (no keys yet).  This avoids a race where MuiPaper
+    // appears immediately (while the API call is in-flight) and the optional
+    // spinner-check dance misses the loading window on fast backends.
     await page.waitForSelector(
-      'table, [class*="MuiTable"], [class*="MuiPaper"], [class*="MuiCircularProgress"]',
-      { timeout: 10_000 }
+      'table, [class*="MuiTable"], text="No API keys found"',
+      { timeout: 15_000 }
     );
-
-    const loadingSpinner = page.locator('[class*="MuiCircularProgress"]').first();
-    if (await loadingSpinner.isVisible()) {
-      await expect(loadingSpinner).toBeHidden({ timeout: 15_000 });
-    }
 
     const hasTable = await page.locator('table, [class*="MuiTable"]').count() > 0;
     const hasEmptyState = await page
