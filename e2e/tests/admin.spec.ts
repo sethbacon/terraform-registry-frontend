@@ -401,15 +401,10 @@ test.describe('Admin: Storage', () => {
   test('storage page loads', async ({ loggedInPage: page }) => {
     await page.goto('/admin/storage');
 
-    await page.waitForSelector(
-      '[class*="MuiCard"], [class*="MuiCircularProgress"], [class*="MuiStepper"]',
-      { timeout: 10_000 }
-    );
-
-    const loadingSpinner = page.locator('[class*="MuiCircularProgress"]').first();
-    if (await loadingSpinner.isVisible()) {
-      await expect(loadingSpinner).toBeHidden({ timeout: 15_000 });
-    }
+    const stepper = page.locator('[class*="MuiStepper"]');
+    const card = page.locator('[class*="MuiCard"]');
+    const alert = page.locator('[class*="MuiAlert"]');
+    await expect(stepper.or(card).or(alert).first()).toBeVisible({ timeout: 15_000 });
 
     const content = await page.locator('main, [class*="MuiContainer"]').first().textContent();
     expect(content).toBeTruthy();
@@ -419,23 +414,18 @@ test.describe('Admin: Storage', () => {
   test('storage page shows setup wizard, configuration, or configured alert', async ({ loggedInPage: page }) => {
     await page.goto('/admin/storage');
 
-    const loadingSpinner = page.locator('[class*="MuiCircularProgress"]').first();
-    if (await loadingSpinner.isVisible()) {
-      await expect(loadingSpinner).toBeHidden({ timeout: 15_000 });
-    }
-
-    await page.waitForSelector(
-      '[class*="MuiStepper"], [class*="MuiCard"], [class*="MuiSelect"], [class*="MuiAlert"]',
-      { timeout: 10_000 }
-    );
-
-    // Three possible states:
+    // Three possible settled states:
     // 1. First-time setup wizard (MuiStepper)
     // 2. Storage configured and showing config cards (MuiCard)
     // 3. Storage already configured — shows warning alert only (MuiAlert, no Card/Stepper)
-    const hasStepper = (await page.locator('[class*="MuiStepper"]').count()) > 0;
-    const hasCards = (await page.locator('[class*="MuiCard"]').count()) > 0;
-    const hasAlert = (await page.locator('[class*="MuiAlert"]').count()) > 0;
+    const stepper = page.locator('[class*="MuiStepper"]');
+    const cards = page.locator('[class*="MuiCard"]');
+    const alert = page.locator('[class*="MuiAlert"]');
+    await expect(stepper.or(cards).or(alert).first()).toBeVisible({ timeout: 15_000 });
+
+    const hasStepper = (await stepper.count()) > 0;
+    const hasCards = (await cards.count()) > 0;
+    const hasAlert = (await alert.count()) > 0;
 
     expect(hasStepper || hasCards || hasAlert).toBe(true);
   });
