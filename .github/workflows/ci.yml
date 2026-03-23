@@ -2,11 +2,11 @@ name: CI
 
 on:
   push:
-    branches: [ main, development ]
+    branches: [main, development]
   pull_request:
-    branches: [ main, development ]
+    branches: [main, development]
   workflow_dispatch: {}
-  workflow_call: {}   # allows release.yml to call this as a prerequisite
+  workflow_call: {} # allows release.yml to call this as a prerequisite
 
 permissions:
   packages: read
@@ -22,8 +22,8 @@ jobs:
       - name: Set up Node
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'npm'
+          node-version: "22"
+          cache: "npm"
           cache-dependency-path: frontend/package-lock.json
 
       - name: Install frontend deps
@@ -64,7 +64,7 @@ jobs:
       - name: Set up Node
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: "22"
 
       - name: Start test compose
         # Pulls backend from ghcr.io; builds frontend locally

@@ -73,19 +73,15 @@ test.describe('Admin: API Keys', () => {
     await page.goto('/admin/apikeys');
 
     // Wait directly for settled content — either a table (keys exist) or the
-    // empty-state text (no keys yet).  This avoids a race where MuiPaper
-    // appears immediately (while the API call is in-flight) and the optional
-    // spinner-check dance misses the loading window on fast backends.
-    await page.waitForSelector(
-      'table, [class*="MuiTable"], text="No API keys found"',
-      { timeout: 15_000 }
-    );
+    // empty-state text (no keys yet).  Using .or() avoids the race where
+    // MuiPaper appears immediately (while the API call is still in-flight)
+    // and the old spinner-check dance misses the loading window on fast backends.
+    const table = page.locator('table, [class*="MuiTable"]');
+    const emptyState = page.getByText('No API keys found');
+    await expect(table.or(emptyState).first()).toBeVisible({ timeout: 15_000 });
 
-    const hasTable = await page.locator('table, [class*="MuiTable"]').count() > 0;
-    const hasEmptyState = await page
-      .getByText(/no api keys/i)
-      .isVisible()
-      .catch(() => false);
+    const hasTable = await table.count() > 0;
+    const hasEmptyState = await emptyState.isVisible().catch(() => false);
 
     expect(hasTable || hasEmptyState).toBe(true);
   });
