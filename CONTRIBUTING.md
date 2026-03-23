@@ -34,7 +34,7 @@ This project expects all participants to interact with each other professionally
 
 ### Prerequisites
 
-- Node.js 20+ and npm
+- Node.js 22+ (LTS) and npm
 - Docker and Docker Compose (for running the backend during development)
 
 ### Fork and Clone
@@ -72,12 +72,12 @@ Alternatively, set up the backend manually — see [terraform-registry-backend](
 
 ### Branch Naming
 
-| Type | Pattern | Example |
-| ---- | ------- | ------- |
-| Feature | `feat/short-description` | `feat/mirror-status-page` |
-| Bug fix | `fix/issue-description` | `fix/api-key-expiry-display` |
-| Documentation | `docs/topic` | `docs/e2e-setup` |
-| Refactor | `refactor/area` | `refactor/auth-context` |
+| Type          | Pattern                  | Example                      |
+| ------------- | ------------------------ | ---------------------------- |
+| Feature       | `feat/short-description` | `feat/mirror-status-page`    |
+| Bug fix       | `fix/issue-description`  | `fix/api-key-expiry-display` |
+| Documentation | `docs/topic`             | `docs/e2e-setup`             |
+| Refactor      | `refactor/area`          | `refactor/auth-context`      |
 
 ### Commit Messages
 

@@ -136,7 +136,7 @@ const ProvidersPage: React.FC = () => {
           {/* Provider Grid */}
           <Grid container spacing={3}>
             {providers.map((provider) => (
-              <Grid item xs={12} sm={6} md={4} key={provider.id}>
+              <Grid size={{ xs: 12, sm: 6, md: 4 }} key={provider.id}>
                 <RegistryItemCard
                   title={provider.type}
                   subtitle={provider.namespace}

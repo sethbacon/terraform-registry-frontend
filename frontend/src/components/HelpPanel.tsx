@@ -262,6 +262,20 @@ const MIRROR_POLICIES_HELP: HelpContent = {
   ],
 };
 
+const AUDIT_LOGS_HELP: HelpContent = {
+  title: 'Audit Logs',
+  overview:
+    'A tamper-evident record of every significant action taken in the registry — uploads, deletes, configuration changes, login events, and mirror syncs. Use it for compliance reviews, incident investigation, or general activity monitoring.',
+  actions: [
+    { heading: 'Filter by Resource Type', text: 'Use the Resource Type dropdown to narrow results to a specific entity class (e.g. module, provider, user, mirror).' },
+    { heading: 'Filter by Action', text: 'Type an action name (e.g. "create", "delete", "login") in the Action field to show only matching events.' },
+    { heading: 'Filter by User', text: 'Enter a user email to see all actions performed by that account.' },
+    { heading: 'Date Range', text: 'Set Start and End date pickers to restrict results to a specific time window.' },
+    { heading: 'View Detail', text: 'Click any row to open a detail panel showing the full log entry, including resource ID, actor, and metadata.' },
+    { heading: 'Export', text: 'Use the Export button to download the current filtered result set as CSV or JSON.' },
+  ],
+};
+
 const DEFAULT_HELP: HelpContent = {
   title: 'Help',
   overview: 'Navigate to a page using the sidebar to see context-sensitive help for that section.',
@@ -278,25 +292,26 @@ function getHelpContent(pathname: string): HelpContent {
   if (segments[0] === 'terraform-binaries' && segments.length >= 2) return TERRAFORM_BINARY_DETAIL_HELP;
 
   switch (pathname) {
-    case '/':               return HOME_HELP;
-    case '/modules':        return MODULES_HELP;
-    case '/providers':      return PROVIDERS_HELP;
+    case '/': return HOME_HELP;
+    case '/modules': return MODULES_HELP;
+    case '/providers': return PROVIDERS_HELP;
     case '/terraform-binaries': return TERRAFORM_BINARIES_HELP;
-    case '/api-docs':       return API_DOCS_HELP;
-    case '/admin':          return DASHBOARD_HELP;
-    case '/admin/users':    return USERS_HELP;
+    case '/api-docs': return API_DOCS_HELP;
+    case '/admin': return DASHBOARD_HELP;
+    case '/admin/users': return USERS_HELP;
     case '/admin/organizations': return ORGANIZATIONS_HELP;
-    case '/admin/roles':    return ROLES_HELP;
-    case '/admin/oidc':     return OIDC_GROUPS_HELP;
-    case '/admin/apikeys':  return APIKEYS_HELP;
-    case '/admin/upload':   return UPLOAD_HELP;
+    case '/admin/roles': return ROLES_HELP;
+    case '/admin/oidc': return OIDC_GROUPS_HELP;
+    case '/admin/apikeys': return APIKEYS_HELP;
+    case '/admin/upload': return UPLOAD_HELP;
     case '/admin/scm-providers': return SCM_PROVIDERS_HELP;
-    case '/admin/mirrors':  return MIRRORS_HELP;
-    case '/admin/storage':  return STORAGE_HELP;
+    case '/admin/mirrors': return MIRRORS_HELP;
+    case '/admin/storage': return STORAGE_HELP;
+    case '/admin/audit-logs': return AUDIT_LOGS_HELP;
     case '/admin/terraform-mirror': return TERRAFORM_MIRROR_HELP;
     case '/admin/approvals': return APPROVALS_HELP;
     case '/admin/policies': return MIRROR_POLICIES_HELP;
-    default:                return DEFAULT_HELP;
+    default: return DEFAULT_HELP;
   }
 }
 

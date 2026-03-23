@@ -11,6 +11,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.3.0] - 2026-03-22
+
+### Changed
+
+- chore: upgrade React 18 → 19 and Material-UI v5 → v7; migrate all Grid v1 `item` props to Grid v2 `size` API across 11 pages
+- chore: upgrade Dockerfile base image from `node:20-alpine` to `node:22-alpine`
+- chore: raise npm audit gate from `--audit-level=critical` to `--audit-level=high` now that swagger-ui-react transitive vulnerabilities are resolved
+- chore: update README and CLAUDE.md prerequisite notes to Node.js 22+ (LTS)
+
+### Fixed
+
+- fix: correct Vite dev server proxy target from hardcoded `https://localhost:443` to `http://localhost:8080` (Docker host port); add `VITE_PROXY_TARGET` env var override for TLS setups
+
+### Added
+
+- feat: add context help drawer content for Audit Logs page
+
+---
+
 ## [0.2.10] - 2026-03-22
 
 ### Added
