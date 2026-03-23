@@ -655,7 +655,7 @@ const TerraformMirrorPage: React.FC = () => {
           {configs.map((cfg) => {
             const status = statusMap[cfg.id];
             return (
-              <Grid item xs={12} md={6} key={cfg.id}>
+              <Grid size={{ xs: 12, md: 6 }} key={cfg.id}>
                 <ConfigCard
                   config={cfg}
                   status={status}

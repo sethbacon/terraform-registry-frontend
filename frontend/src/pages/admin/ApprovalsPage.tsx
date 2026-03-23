@@ -214,7 +214,7 @@ const ApprovalsPage: React.FC = () => {
 
       <Grid container spacing={3}>
         {approvals.map((approval) => (
-          <Grid item xs={12} md={6} key={approval.id}>
+          <Grid size={{ xs: 12, md: 6 }} key={approval.id}>
             <Card>
               <CardContent>
                 <Box display="flex" justifyContent="space-between" alignItems="flex-start" mb={1}>
@@ -279,7 +279,7 @@ const ApprovalsPage: React.FC = () => {
         ))}
 
         {approvals.length === 0 && !loading && (
-          <Grid item xs={12}>
+          <Grid size={12}>
             <Card>
               <CardContent>
                 <Typography variant="body1" color="textSecondary" align="center">

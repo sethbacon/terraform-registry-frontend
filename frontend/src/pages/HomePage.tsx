@@ -67,11 +67,11 @@ const HomePage: React.FC = () => {
       setStats({
         loading: false,
         setupRequired: setup.status === 'fulfilled' ? (setup.value.setup_required ?? false) : false,
-        moduleCount:   mods.status === 'fulfilled' ? (mods.value.meta?.total ?? null) : null,
-        moduleNames:   mods.status === 'fulfilled' ? (mods.value.modules ?? []).slice(0, 3) : [],
+        moduleCount: mods.status === 'fulfilled' ? (mods.value.meta?.total ?? null) : null,
+        moduleNames: mods.status === 'fulfilled' ? (mods.value.modules ?? []).slice(0, 3) : [],
         providerCount: provs.status === 'fulfilled' ? (provs.value.meta?.total ?? null) : null,
         providerNames: provs.status === 'fulfilled' ? (provs.value.providers ?? []).slice(0, 3) : [],
-        binaryTools:   bins.status === 'fulfilled'
+        binaryTools: bins.status === 'fulfilled'
           ? [...new Set((bins.value as { tool: string }[]).map((b) => b.tool))]
           : [],
       });
@@ -245,7 +245,7 @@ const HomePage: React.FC = () => {
         <Grid container spacing={3}>
 
           {/* Modules */}
-          <Grid item xs={12} md={4}>
+          <Grid size={{ xs: 12, md: 4 }}>
             <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column', transition: 'transform 0.2s', '&:hover': { transform: 'translateY(-4px)' } }}>
               <CardContent sx={{ flexGrow: 1 }}>
                 <Box sx={{ color: '#5C4EE5', mb: 2 }}>
@@ -288,7 +288,7 @@ const HomePage: React.FC = () => {
           </Grid>
 
           {/* Providers */}
-          <Grid item xs={12} md={4}>
+          <Grid size={{ xs: 12, md: 4 }}>
             <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column', transition: 'transform 0.2s', '&:hover': { transform: 'translateY(-4px)' } }}>
               <CardContent sx={{ flexGrow: 1 }}>
                 <Box sx={{ color: '#00D9C0', mb: 2 }}>
@@ -331,7 +331,7 @@ const HomePage: React.FC = () => {
           </Grid>
 
           {/* Terraform Binaries */}
-          <Grid item xs={12} md={4}>
+          <Grid size={{ xs: 12, md: 4 }}>
             <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column', transition: 'transform 0.2s', '&:hover': { transform: 'translateY(-4px)' } }}>
               <CardContent sx={{ flexGrow: 1 }}>
                 <Box sx={{ color: '#FF6B6B', mb: 2 }}>
@@ -381,7 +381,7 @@ const HomePage: React.FC = () => {
             Getting Started
           </Typography>
           <Grid container spacing={3}>
-            <Grid item xs={12} md={4}>
+            <Grid size={{ xs: 12, md: 4 }}>
               <Card sx={{ height: '100%' }}>
                 <CardContent>
                   <Typography variant="h6" gutterBottom color="primary">
@@ -394,7 +394,7 @@ const HomePage: React.FC = () => {
                 </CardContent>
               </Card>
             </Grid>
-            <Grid item xs={12} md={4}>
+            <Grid size={{ xs: 12, md: 4 }}>
               <Card sx={{ height: '100%' }}>
                 <CardContent>
                   <Typography variant="h6" gutterBottom color="primary">
@@ -438,7 +438,7 @@ const HomePage: React.FC = () => {
                 </CardContent>
               </Card>
             </Grid>
-            <Grid item xs={12} md={4}>
+            <Grid size={{ xs: 12, md: 4 }}>
               <Card sx={{ height: '100%' }}>
                 <CardContent>
                   <Typography variant="h6" gutterBottom color="primary">

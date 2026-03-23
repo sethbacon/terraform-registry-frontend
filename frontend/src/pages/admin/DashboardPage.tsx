@@ -546,7 +546,7 @@ const DashboardPage: React.FC = () => {
       {/* Zone 2 — Stat cards */}
       <Grid container spacing={2.5} sx={{ mb: 4 }}>
         {statCards.map((card) => (
-          <Grid item xs={12} sm={6} md={card.gridMd} key={card.title}>
+          <Grid size={{ xs: 12, sm: 6, md: card.gridMd }} key={card.title}>
             <StatCard {...card} />
           </Grid>
         ))}
@@ -558,7 +558,7 @@ const DashboardPage: React.FC = () => {
       <Grid container spacing={3}>
 
         {/* Recent sync activity */}
-        <Grid item xs={12} md={8}>
+        <Grid size={{ xs: 12, md: 8 }}>
           <Typography variant="h6" fontWeight={600} gutterBottom>
             Recent Sync Activity
           </Typography>
@@ -622,7 +622,7 @@ const DashboardPage: React.FC = () => {
         </Grid>
 
         {/* Quick links */}
-        <Grid item xs={12} md={4}>
+        <Grid size={{ xs: 12, md: 4 }}>
           <Typography variant="h6" fontWeight={600} gutterBottom>
             Quick Links
           </Typography>

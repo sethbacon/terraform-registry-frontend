@@ -1,9 +1,9 @@
 # Terraform Registry — Frontend
 
-React 18 TypeScript SPA for the [Enterprise Terraform Registry](https://github.com/sethbacon/terraform-registry-backend).
+React 19 TypeScript SPA for the [Enterprise Terraform Registry](https://github.com/sethbacon/terraform-registry-backend).
 
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
-[![React](https://img.shields.io/badge/React-18+-61DAFB?logo=react)](https://react.dev/)
+[![React](https://img.shields.io/badge/React-19+-61DAFB?logo=react)](https://react.dev/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5+-3178C6?logo=typescript)](https://www.typescriptlang.org/)
 
 ## Overview
@@ -31,7 +31,7 @@ The backend API, database, and deployment infrastructure live in [terraform-regi
 
 ## Prerequisites
 
-- Node.js 20+ and npm
+- Node.js 22+ (LTS) and npm
 - A running backend API — see [terraform-registry-backend](https://github.com/sethbacon/terraform-registry-backend) for setup
 - Docker & Docker Compose (for the full stack via compose)
 
@@ -53,11 +53,11 @@ See [terraform-registry-backend](https://github.com/sethbacon/terraform-registry
 
 ### Docker Compose environments
 
-| Compose file | Purpose | Frontend mode | Backend DEV_MODE |
-| --- | --- | --- | --- |
-| `docker-compose.yml` | Local development | `development` (Dev Login enabled) | `true` |
-| `docker-compose.test.yml` | E2E testing / CI | `development` (Dev Login enabled) | `true` |
-| `docker-compose.yml` + `docker-compose.prod.yml` | Production | `production` (published image) | `false` |
+| Compose file                                     | Purpose           | Frontend mode                     | Backend DEV_MODE |
+| ------------------------------------------------ | ----------------- | --------------------------------- | ---------------- |
+| `docker-compose.yml`                             | Local development | `development` (Dev Login enabled) | `true`           |
+| `docker-compose.test.yml`                        | E2E testing / CI  | `development` (Dev Login enabled) | `true`           |
+| `docker-compose.yml` + `docker-compose.prod.yml` | Production        | `production` (published image)    | `false`          |
 
 **Local development** — backend + frontend via Docker, frontend also accessible via `npm run dev`:
 
@@ -92,8 +92,8 @@ BACKEND_IMAGE=deployments-backend docker compose -f docker-compose.test.yml up -
 
 The frontend reads the backend API base URL from the `VITE_API_URL` environment variable at build time.
 
-| Variable | Default | Description |
-| --- | --- | --- |
+| Variable       | Default                  | Description                                |
+| -------------- | ------------------------ | ------------------------------------------ |
 | `VITE_API_URL` | (proxied by Vite in dev) | Backend API base URL for production builds |
 
 In development the Vite proxy handles `/api/*` routing, so no env var is needed locally.
@@ -101,17 +101,17 @@ For Docker / production builds, set `VITE_API_URL=http://your-backend-host:8080`
 
 ## Tech Stack
 
-| Concern | Technology |
-| --- | --- |
-| Language | TypeScript 5.7.2 (strict mode) |
-| Framework | React 18.2.0 |
-| Build Tool | Vite 6.1.11 |
-| UI | Material-UI v5 + Emotion |
-| HTTP Client | Axios 1.6.7 |
-| Router | React Router v6 |
-| Markdown | react-markdown + remark-gfm |
-| Linting | ESLint 9 with TypeScript ESLint |
-| E2E Tests | Playwright |
+| Concern     | Technology                      |
+| ----------- | ------------------------------- |
+| Language    | TypeScript 5.7.2 (strict mode)  |
+| Framework   | React 19                        |
+| Build Tool  | Vite 6.1.11                     |
+| UI          | Material-UI v7 + Emotion        |
+| HTTP Client | Axios 1.6.7                     |
+| Router      | React Router v6                 |
+| Markdown    | react-markdown + remark-gfm     |
+| Linting     | ESLint 9 with TypeScript ESLint |
+| E2E Tests   | Playwright                      |
 
 ## Development
 

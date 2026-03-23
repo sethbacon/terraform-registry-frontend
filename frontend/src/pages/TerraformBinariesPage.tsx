@@ -112,7 +112,7 @@ const TerraformBinariesPage: React.FC = () => {
           {configs.map((cfg) => {
             const stats = statsMap[cfg.name];
             return (
-              <Grid item xs={12} sm={6} md={4} key={cfg.name}>
+              <Grid size={{ xs: 12, sm: 6, md: 4 }} key={cfg.name}>
                 <RegistryItemCard
                   title={cfg.name}
                   description={cfg.description ?? undefined}

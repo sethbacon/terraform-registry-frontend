@@ -109,7 +109,7 @@ When a release is called for:
 
 ## Project Overview
 
-React 18 TypeScript SPA (single-page application) for the Enterprise Terraform Registry.
+React 19 TypeScript SPA (single-page application) for the Enterprise Terraform Registry.
 
 Backend API lives in a separate repository: [terraform-registry-backend](https://github.com/sethbacon/terraform-registry-backend)
 
@@ -119,7 +119,7 @@ Backend API lives in a separate repository: [terraform-registry-backend](https:/
 
 ```txt
 terraform-registry-frontend/
-├── frontend/                 # React 18 TypeScript SPA (Vite + Material-UI)
+├── frontend/                 # React 19 TypeScript SPA (Vite + Material-UI v7)
 │   ├── src/
 │   │   ├── pages/            # Admin dashboard, modules, providers, login, etc.
 │   │   ├── components/       # Layout, ProtectedRoute, PublishWizard, etc.
@@ -147,9 +147,9 @@ terraform-registry-frontend/
 | Concern    | Technology                      |
 | ---------- | ------------------------------- |
 | Language   | TypeScript 5.7.2 (strict mode)  |
-| Framework  | React 18.2.0                    |
+| Framework  | React 19                        |
 | Build Tool | Vite 6.1.11                     |
-| UI         | Material-UI v5 + Emotion        |
+| UI         | Material-UI v7 + Emotion        |
 | HTTP       | Axios 1.6.7                     |
 | Router     | React Router v6                 |
 | Markdown   | react-markdown + remark-gfm     |

@@ -163,7 +163,7 @@ const StoragePage: React.FC = () => {
   const renderBackendSelection = () => (
     <Grid container spacing={3}>
       {(['local', 'azure', 's3', 'gcs'] as StorageBackendType[]).map((type) => (
-        <Grid item xs={12} sm={6} key={type}>
+        <Grid size={{ xs: 12, sm: 6 }} key={type}>
           <Card
             sx={{
               cursor: 'pointer',
@@ -445,19 +445,19 @@ const StoragePage: React.FC = () => {
       </Typography>
       <Paper variant="outlined" sx={{ p: 2, mb: 2 }}>
         <Grid container spacing={2}>
-          <Grid item xs={4}>
+          <Grid size={4}>
             <Typography variant="body2" color="textSecondary">Backend Type</Typography>
           </Grid>
-          <Grid item xs={8}>
+          <Grid size={8}>
             <Typography variant="body1">{getBackendLabel(formData.backend_type)}</Typography>
           </Grid>
 
           {formData.backend_type === 'local' && (
             <>
-              <Grid item xs={4}>
+              <Grid size={4}>
                 <Typography variant="body2" color="textSecondary">Base Path</Typography>
               </Grid>
-              <Grid item xs={8}>
+              <Grid size={8}>
                 <Typography variant="body1">{formData.local_base_path}</Typography>
               </Grid>
             </>
@@ -465,16 +465,16 @@ const StoragePage: React.FC = () => {
 
           {formData.backend_type === 'azure' && (
             <>
-              <Grid item xs={4}>
+              <Grid size={4}>
                 <Typography variant="body2" color="textSecondary">Account Name</Typography>
               </Grid>
-              <Grid item xs={8}>
+              <Grid size={8}>
                 <Typography variant="body1">{formData.azure_account_name}</Typography>
               </Grid>
-              <Grid item xs={4}>
+              <Grid size={4}>
                 <Typography variant="body2" color="textSecondary">Container</Typography>
               </Grid>
-              <Grid item xs={8}>
+              <Grid size={8}>
                 <Typography variant="body1">{formData.azure_container_name}</Typography>
               </Grid>
             </>
@@ -482,22 +482,22 @@ const StoragePage: React.FC = () => {
 
           {formData.backend_type === 's3' && (
             <>
-              <Grid item xs={4}>
+              <Grid size={4}>
                 <Typography variant="body2" color="textSecondary">Bucket</Typography>
               </Grid>
-              <Grid item xs={8}>
+              <Grid size={8}>
                 <Typography variant="body1">{formData.s3_bucket}</Typography>
               </Grid>
-              <Grid item xs={4}>
+              <Grid size={4}>
                 <Typography variant="body2" color="textSecondary">Region</Typography>
               </Grid>
-              <Grid item xs={8}>
+              <Grid size={8}>
                 <Typography variant="body1">{formData.s3_region}</Typography>
               </Grid>
-              <Grid item xs={4}>
+              <Grid size={4}>
                 <Typography variant="body2" color="textSecondary">Auth Method</Typography>
               </Grid>
-              <Grid item xs={8}>
+              <Grid size={8}>
                 <Typography variant="body1">{formData.s3_auth_method || 'default'}</Typography>
               </Grid>
             </>
@@ -505,16 +505,16 @@ const StoragePage: React.FC = () => {
 
           {formData.backend_type === 'gcs' && (
             <>
-              <Grid item xs={4}>
+              <Grid size={4}>
                 <Typography variant="body2" color="textSecondary">Bucket</Typography>
               </Grid>
-              <Grid item xs={8}>
+              <Grid size={8}>
                 <Typography variant="body1">{formData.gcs_bucket}</Typography>
               </Grid>
-              <Grid item xs={4}>
+              <Grid size={4}>
                 <Typography variant="body2" color="textSecondary">Auth Method</Typography>
               </Grid>
-              <Grid item xs={8}>
+              <Grid size={8}>
                 <Typography variant="body1">{formData.gcs_auth_method || 'default'}</Typography>
               </Grid>
             </>
@@ -639,7 +639,7 @@ const StoragePage: React.FC = () => {
 
       <Grid container spacing={3}>
         {configs.map((config) => (
-          <Grid item xs={12} md={6} key={config.id}>
+          <Grid size={{ xs: 12, md: 6 }} key={config.id}>
             <Card>
               <CardContent>
                 <Box display="flex" alignItems="center" mb={2}>

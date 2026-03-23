@@ -108,7 +108,7 @@ const ModulesPage: React.FC = () => {
 
   /** Renders a single module card (shared between both view modes). */
   const renderModuleCard = (module: Module) => (
-    <Grid item xs={12} sm={6} md={4} key={module.id}>
+    <Grid size={{ xs: 12, sm: 6, md: 4 }} key={module.id}>
       <RegistryItemCard
         title={module.name}
         subtitle={`${module.namespace}/${module.system}`}

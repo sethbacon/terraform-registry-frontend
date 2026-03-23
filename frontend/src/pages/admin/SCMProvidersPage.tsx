@@ -347,7 +347,7 @@ const SCMProvidersPage: React.FC = () => {
 
       <Grid container spacing={3}>
         {providers.map((provider) => (
-          <Grid item xs={12} md={6} lg={4} key={provider.id}>
+          <Grid size={{ xs: 12, md: 6, lg: 4 }} key={provider.id}>
             <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
               <CardContent sx={{ flexGrow: 1 }}>
                 <Box display="flex" alignItems="center" mb={2}>
@@ -528,7 +528,7 @@ const SCMProvidersPage: React.FC = () => {
         ))}
 
         {providers.length === 0 && !loading && (
-          <Grid item xs={12}>
+          <Grid size={12}>
             <Card>
               <CardContent>
                 <Typography variant="body1" color="textSecondary" align="center">

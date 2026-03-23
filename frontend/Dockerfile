@@ -1,7 +1,7 @@
 # Multi-stage Dockerfile for Terraform Registry Frontend
 
 # Stage 1: Build the React application
-FROM node:20-alpine AS builder
+FROM node:22-alpine AS builder
 
 # VITE_MODE controls the Vite build mode.
 # Use "development" to enable the Dev Login button for E2E/staging environments.
@@ -17,13 +17,10 @@ COPY package.json package-lock.json ./
 RUN npm install --no-audit --no-fund
 
 # Fix what can be auto-fixed, then gate on production-dependency vulnerabilities only.
-# Dev-only packages (e.g. eslint → minimatch) are excluded: they are not present
+# Dev-only packages (e.g. eslint tooling) are excluded: they are not present
 # in the final nginx image and cannot be force-fixed without breaking build tooling.
-# Gate at critical (not high) because swagger-ui-react pins immutable@3.x and
-# dompurify@3.2.x — both have high-severity advisories that are unfixable until
-# upstream migrates to immutable v4 / dompurify v3.3.2+.
 RUN npm audit fix || true && \
-    npm audit --audit-level=critical --omit=dev
+    npm audit --audit-level=high --omit=dev
 
 # Copy source code
 COPY . .
@@ -68,10 +65,10 @@ RUN apk add --no-cache openssl && \
 # container can run without the CHOWN capability (dropped by the Helm chart
 # security context for AKS hardened namespaces).
 RUN mkdir -p /var/cache/nginx/client_temp \
-             /var/cache/nginx/proxy_temp \
-             /var/cache/nginx/fastcgi_temp \
-             /var/cache/nginx/uwsgi_temp \
-             /var/cache/nginx/scgi_temp && \
+    /var/cache/nginx/proxy_temp \
+    /var/cache/nginx/fastcgi_temp \
+    /var/cache/nginx/uwsgi_temp \
+    /var/cache/nginx/scgi_temp && \
     chown -R 101:101 /var/cache/nginx && \
     chown -R 101:101 /var/log/nginx && \
     sed -i 's|pid\s*/var/run/nginx.pid;|pid /tmp/nginx.pid;|' /etc/nginx/nginx.conf

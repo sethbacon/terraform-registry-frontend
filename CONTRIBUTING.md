@@ -34,7 +34,7 @@ This project expects all participants to interact with each other professionally
 
 ### Prerequisites
 
-- Node.js 20+ and npm
+- Node.js 22+ (LTS) and npm
 - Docker and Docker Compose (for running the backend during development)
 
 ### Fork and Clone

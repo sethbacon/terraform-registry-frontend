@@ -460,7 +460,7 @@ const MirrorsPage: React.FC = () => {
         {mirrors.map((mirror) => {
           const parsed = parseMirrorConfig(mirror);
           return (
-            <Grid item xs={12} md={6} key={mirror.id}>
+            <Grid size={{ xs: 12, md: 6 }} key={mirror.id}>
               <Card>
                 <CardContent>
                   <Box display="flex" alignItems="center" mb={2}>
@@ -594,7 +594,7 @@ const MirrorsPage: React.FC = () => {
         })}
 
         {mirrors.length === 0 && !loading && (
-          <Grid item xs={12}>
+          <Grid size={12}>
             <Card>
               <CardContent>
                 <Typography variant="body1" color="textSecondary" align="center">

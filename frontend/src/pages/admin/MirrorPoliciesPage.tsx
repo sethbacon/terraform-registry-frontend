@@ -271,7 +271,7 @@ const MirrorPoliciesPage: React.FC = () => {
 
       <Grid container spacing={3}>
         {policies.map((policy) => (
-          <Grid item xs={12} md={6} key={policy.id}>
+          <Grid size={{ xs: 12, md: 6 }} key={policy.id}>
             <Card sx={{ opacity: policy.is_active ? 1 : 0.6 }}>
               <CardContent>
                 <Box display="flex" justifyContent="space-between" alignItems="flex-start" mb={1}>
@@ -357,7 +357,7 @@ const MirrorPoliciesPage: React.FC = () => {
         ))}
 
         {policies.length === 0 && !loading && (
-          <Grid item xs={12}>
+          <Grid size={12}>
             <Card>
               <CardContent>
                 <Typography variant="body1" color="textSecondary" align="center">
