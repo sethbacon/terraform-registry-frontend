@@ -23,7 +23,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
           cache: 'npm'
           cache-dependency-path: frontend/package-lock.json
 
@@ -80,7 +80,7 @@ jobs:
               '- A transitive npm dependency published a breaking change',
               '- A high-severity npm audit finding was introduced',
               '- A lint rule started flagging new code patterns',
-              '- The Node.js 20 base image changed in a breaking way',
+              '- The Node.js 22 base image changed in a breaking way',
             ].join('\n');
 
             await github.rest.issues.create({
