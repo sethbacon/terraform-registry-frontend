@@ -35,6 +35,7 @@ import GetApp from '@mui/icons-material/GetApp';
 import Brightness4 from '@mui/icons-material/Brightness4';
 import Brightness7 from '@mui/icons-material/Brightness7';
 import HelpOutline from '@mui/icons-material/HelpOutline';
+import InfoOutlined from '@mui/icons-material/InfoOutlined';
 import Shield from '@mui/icons-material/Shield';
 import Storage from '@mui/icons-material/Storage';
 import HourglassEmpty from '@mui/icons-material/HourglassEmpty';
@@ -50,6 +51,7 @@ import { useThemeMode } from '../contexts/ThemeContext';
 import { useHelp } from '../contexts/HelpContext';
 import DevUserSwitcher from './DevUserSwitcher';
 import HelpPanel, { HELP_PANEL_WIDTH } from './HelpPanel';
+import AboutModal from './AboutModal';
 
 const drawerWidth = 240;
 
@@ -63,6 +65,7 @@ const Layout = () => {
 
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [aboutOpen, setAboutOpen] = useState(false);
 
   // Helper to check if user has a specific scope (or admin which grants all)
   const hasScope = (scope: string) => {
@@ -344,6 +347,16 @@ const Layout = () => {
               <HelpOutline />
             </IconButton>
           </Tooltip>
+          <Tooltip title="About">
+            <IconButton
+              color="inherit"
+              onClick={() => setAboutOpen(true)}
+              aria-label="About"
+              sx={{ mr: 1 }}
+            >
+              <InfoOutlined />
+            </IconButton>
+          </Tooltip>
           {isAuthenticated ? (
             <div>
               <IconButton
@@ -454,6 +467,7 @@ const Layout = () => {
       {/* HelpPanel is position:fixed — keep it outside the flex row so
           its root element doesn't consume flex space when closed. */}
       <HelpPanel />
+      <AboutModal open={aboutOpen} onClose={() => setAboutOpen(false)} />
     </Box>
   );
 };

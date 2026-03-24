@@ -2,6 +2,7 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import path from 'path'
 import fs from 'fs'
+import pkg from './package.json'
 
 // Only read certs when they exist (skipped during Docker build)
 const certPath = path.resolve(__dirname, '../backend/certs/server.crt')
@@ -14,6 +15,9 @@ const proxyTarget = process.env.VITE_PROXY_TARGET ?? 'http://localhost:8080'
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react()],
+  define: {
+    __APP_VERSION__: JSON.stringify(pkg.version),
+  },
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),

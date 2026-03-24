@@ -401,3 +401,14 @@ export interface AuditLogListResponse {
   logs: AuditLog[];
   pagination: PaginationMeta;
 }
+
+export interface VersionInfo {
+  version: string;
+  build_date: string;
+  api_version: string;
+  protocols: {
+    modules: string;
+    providers: string;
+    mirror: string;
+  };
+}
