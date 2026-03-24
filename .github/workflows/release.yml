@@ -27,7 +27,7 @@ jobs:
     name: Verify tag is on main
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0 # need full history to walk ancestry
 
@@ -56,7 +56,7 @@ jobs:
       packages: write # required to push to ghcr.io
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Log in to GitHub Container Registry
         uses: docker/login-action@v3
