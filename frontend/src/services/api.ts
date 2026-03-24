@@ -1260,6 +1260,15 @@ class ApiClient {
     a.click();
     URL.revokeObjectURL(url);
   }
+
+  // ============================================================================
+  // Version
+  // ============================================================================
+
+  async getVersionInfo(): Promise<import('../types').VersionInfo> {
+    const response = await this.client.get('/version');
+    return response.data;
+  }
 }
 
 export const apiClient = new ApiClient();
