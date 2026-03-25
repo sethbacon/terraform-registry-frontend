@@ -38,6 +38,37 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.3.4] - 2026-03-24
+
+### Maintenance
+- chore: add PR template, CI changelog enforcement, and collection script — `.github/PULL_REQUEST_TEMPLATE.md` pre-fills the changelog section; `pr-checks.yml` fails PRs without a valid entry; `collect-changelog.sh` automates release-time changelog collection
+
+---
+
+## [0.3.3] - 2026-03-24
+
+### Fixed
+- fix: bump `package.json` version to `0.3.3` so `__APP_VERSION__` bakes correctly at Vite build time — prior builds always emitted `v0.3.0` because `package.json` was never updated after the initial version
+- fix: proxy `/version` endpoint through nginx to the backend so the About modal can fetch the live backend version in production deployments
+
+---
+
+## [0.3.2] - 2026-03-24
+
+### Added
+- feat: About modal with frontend and backend version info — accessible from the toolbar via an info icon; displays frontend version (baked at Vite build time from `package.json`) and backend version (fetched live from `GET /version`)
+
+---
+
+## [0.3.1] - 2026-03-24
+
+### Maintenance
+- fix: upgrade GitHub Actions to Node 24 compatible versions (checkout@v4, setup-node@v4, actions/cache@v4)
+- fix: upgrade Playwright to 1.58.2 for Node.js 24 runtime compatibility
+- chore: opt GitHub Actions runners into Node.js 24 runtime; suppress deprecation warnings
+
+---
+
 ## [0.3.0] - 2026-03-22
 
 ### Changed
