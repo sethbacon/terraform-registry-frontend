@@ -73,14 +73,21 @@ When a release is called for:
    ## [X.Y.Z] - YYYY-MM-DD
    ```
 
-2. Commit directly on `development` and push (**no tag yet**):
+2. **CRITICAL — version sync:** Update `frontend/package.json` `"version"` to match the
+   release version (e.g., `"0.3.5"` for release `v0.3.5`). This value is baked into the
+   Vite bundle as `__APP_VERSION__` at build time and is what the About modal displays as
+   the frontend version chip. **The release workflow fails if `package.json` does not
+   match the tag** — but catching it only at tag-push time means the fix must go into
+   another PR. Bump it now, in the same commit as the CHANGELOG promotion.
+
+3. Commit directly on `development` and push (**no tag yet**):
 
    ```bash
    git commit -m "chore: release vX.Y.Z"
    git push origin development
    ```
 
-3. **UAT — local build validation** before merging to `main`:
+4. **UAT — local build validation** before merging to `main`:
 
    ```bash
    cd deployments
@@ -93,9 +100,9 @@ When a release is called for:
    mirrored provider and a module to confirm downloads work end-to-end. **Do not merge to
    `main` until the local build passes.**
 
-4. Merge `development` → `main` via PR (step 7 above).
+5. Merge `development` → `main` via PR (step 7 above).
 
-5. **After the PR is merged**, tag the commit that landed on `main` and push the tag:
+6. **After the PR is merged**, tag the commit that landed on `main` and push the tag:
 
    ```bash
    git fetch origin
