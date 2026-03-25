@@ -11,6 +11,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.3.5] - 2026-03-25
+
+### Fixed
+- fix: bump `package.json` version to `0.3.5` so `__APP_VERSION__` bakes the correct version string into the Vite bundle at build time — prior releases emitted the wrong version in the About modal because `package.json` was not bumped before tagging
+- fix: enforce `package.json` version sync in release workflow — `release.yml` guard job now fails fast if `frontend/package.json` `"version"` does not match the pushed tag, preventing future mismatches at release time
+
+### Maintenance
+- chore: document `package.json` version-sync requirement in `CLAUDE.md` — new CRITICAL step 2 in the Releasing section calls out the mandatory bump before committing the release
+
+---
+
 ## [0.3.4] - 2026-03-24
 
 ### Maintenance

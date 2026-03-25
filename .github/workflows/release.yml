@@ -31,6 +31,21 @@ jobs:
         with:
           fetch-depth: 0 # need full history to walk ancestry
 
+      - name: Verify package.json version matches release tag
+        working-directory: frontend
+        run: |
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            TAG="${{ github.event.inputs.tag }}"
+          else
+            TAG="${{ github.ref_name }}"
+          fi
+          PKG_VERSION="v$(node -p "require('./package.json').version")"
+          if [ "${PKG_VERSION}" != "${TAG}" ]; then
+            echo "::error::package.json version (${PKG_VERSION}) does not match release tag (${TAG}). Bump frontend/package.json 'version' before pushing the tag."
+            exit 1
+          fi
+          echo "Version check passed: ${TAG}"
+
       - name: Check tagged commit is reachable from main
         run: |
           git fetch origin main
