@@ -9,6 +9,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- feat: configure Vitest testing framework with happy-dom, @testing-library/react, and @testing-library/jest-dom
+- feat: add foundational unit tests for useDebounce, ProtectedRoute, AuthContext, and api service (18 tests across 4 files)
+
 ---
 
 ## [0.3.6] - 2026-04-10
