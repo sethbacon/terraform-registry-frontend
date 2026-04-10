@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- feat: add Firefox to E2E cross-browser testing — conditionally included in CI only to keep local test runs fast
+
 ## [0.3.7] - 2026-04-10
 
 ### Added

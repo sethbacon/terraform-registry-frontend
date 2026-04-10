@@ -55,5 +55,14 @@ export default defineConfig({
       name: 'chromium',
       use: { ...devices['Desktop Chrome'] },
     },
+    // Firefox is included only in CI to keep local test runs fast.
+    ...(process.env.CI
+      ? [
+          {
+            name: 'firefox',
+            use: { ...devices['Desktop Firefox'] },
+          },
+        ]
+      : []),
   ],
 });
