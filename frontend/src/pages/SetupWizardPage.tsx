@@ -106,13 +106,14 @@ const SetupWizardPage: React.FC = () => {
       }
 
       // Pre-fill redirect URL
-      if (!oidcForm.redirect_url) {
+      setOidcForm(prev => {
+        if (prev.redirect_url) return prev;
         const baseUrl = window.location.origin;
-        setOidcForm(prev => ({
+        return {
           ...prev,
           redirect_url: `${baseUrl}/api/v1/auth/callback`,
-        }));
-      }
+        };
+      });
     } catch {
       setError('Failed to check setup status');
     } finally {

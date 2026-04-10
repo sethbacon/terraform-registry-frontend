@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useDebounce } from '../hooks/useDebounce';
 import {
@@ -55,11 +55,7 @@ const ModulesPage: React.FC = () => {
   const [viewMode, setViewMode] = useState<ViewMode>('grid');
   const limit = 12;
 
-  useEffect(() => {
-    loadModules();
-  }, [page, debouncedSearch, viewMode]);
-
-  const loadModules = async () => {
+  const loadModules = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
@@ -87,7 +83,11 @@ const ModulesPage: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [page, debouncedSearch, viewMode]);
+
+  useEffect(() => {
+    loadModules();
+  }, [loadModules]);
 
   const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(event.target.value);

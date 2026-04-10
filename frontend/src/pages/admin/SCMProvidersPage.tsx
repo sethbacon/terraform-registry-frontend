@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   Box,
   Button,
@@ -72,28 +72,31 @@ const SCMProvidersPage: React.FC = () => {
     webhook_secret: '',
   });
 
-  useEffect(() => {
-    loadProviders();
-    loadMemberships();
-  }, []);
-
-  const loadMemberships = async () => {
+  const loadMemberships = useCallback(async () => {
     try {
       if (user?.id) {
         const data = await api.getCurrentUserMemberships();
         setMemberships(data || []);
         // Set first organization as default if available
-        if (data && data.length > 0 && !formData.organization_id) {
-          setFormData(prev => ({
-            ...prev,
-            organization_id: data[0].organization_id,
-          }));
+        if (data && data.length > 0) {
+          setFormData(prev => {
+            if (prev.organization_id) return prev;
+            return {
+              ...prev,
+              organization_id: data[0].organization_id,
+            };
+          });
         }
       }
     } catch (err: any) {
       console.error('Error loading memberships:', err);
     }
-  };
+  }, [user?.id]);
+
+  useEffect(() => {
+    loadProviders();
+    loadMemberships();
+  }, [loadMemberships]);
 
   const loadProviders = async () => {
     try {

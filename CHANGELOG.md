@@ -20,6 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- chore: enable `react-hooks/exhaustive-deps` ESLint rule and fix all violations across the codebase
 - refactor: normalize all API imports to use default `api` import instead of mixed `api`/`apiClient` named exports
 - refactor: extract shared `formatDate`, `getScopeInfo`, and `getScopeColor` utilities to `utils/` directory, removing duplicate definitions from 4 admin pages
 - refactor: consolidate local `ApprovalRequest` and `MirrorPolicy` type definitions into shared `types/rbac.ts`

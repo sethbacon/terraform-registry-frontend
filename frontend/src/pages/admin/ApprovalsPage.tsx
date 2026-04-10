@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   Box,
   Button,
@@ -57,11 +57,7 @@ const ApprovalsPage: React.FC = () => {
   // Status filter
   const [statusFilter, setStatusFilter] = useState<string>('');
 
-  useEffect(() => {
-    loadApprovals();
-  }, [statusFilter]);
-
-  const loadApprovals = async () => {
+  const loadApprovals = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
@@ -75,7 +71,11 @@ const ApprovalsPage: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [statusFilter]);
+
+  useEffect(() => {
+    loadApprovals();
+  }, [loadApprovals]);
 
   const handleCreate = async () => {
     try {
