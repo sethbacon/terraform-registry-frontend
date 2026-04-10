@@ -32,7 +32,7 @@ import RefreshIcon from '@mui/icons-material/Refresh';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import BlockIcon from '@mui/icons-material/Block';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
-import { apiClient } from '../../services/api';
+import api from '../../services/api';
 
 interface MirrorPolicy {
   id: string;
@@ -104,7 +104,7 @@ const MirrorPoliciesPage: React.FC = () => {
     try {
       setLoading(true);
       setError(null);
-      const data = await apiClient.listMirrorPolicies();
+      const data = await api.listMirrorPolicies();
       setPolicies(Array.isArray(data) ? data : []);
     } catch (err: any) {
       setError(err.response?.data?.error || 'Failed to load mirror policies');
@@ -131,10 +131,10 @@ const MirrorPoliciesPage: React.FC = () => {
       };
 
       if (editingPolicy) {
-        await apiClient.updateMirrorPolicy(editingPolicy.id, payload);
+        await api.updateMirrorPolicy(editingPolicy.id, payload);
         setSuccess('Policy updated successfully');
       } else {
-        await apiClient.createMirrorPolicy(payload);
+        await api.createMirrorPolicy(payload);
         setSuccess('Policy created successfully');
       }
 
@@ -153,7 +153,7 @@ const MirrorPoliciesPage: React.FC = () => {
     if (!policyToDelete) return;
     try {
       setError(null);
-      await apiClient.deleteMirrorPolicy(policyToDelete.id);
+      await api.deleteMirrorPolicy(policyToDelete.id);
       setDeleteDialogOpen(false);
       setPolicyToDelete(null);
       setSuccess('Policy deleted successfully');
@@ -167,7 +167,7 @@ const MirrorPoliciesPage: React.FC = () => {
     try {
       setEvaluating(true);
       setEvaluateResult(null);
-      const result = await apiClient.evaluateMirrorPolicy({
+      const result = await api.evaluateMirrorPolicy({
         registry: evaluateForm.registry,
         namespace: evaluateForm.namespace,
         provider: evaluateForm.provider,

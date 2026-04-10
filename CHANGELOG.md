@@ -15,6 +15,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - feat: add foundational unit tests for useDebounce, ProtectedRoute, AuthContext, and api service (18 tests across 4 files)
 - feat: add React error boundaries wrapping all routes — prevents white screen crashes by showing a user-friendly fallback UI with reload options
 
+### Changed
+
+- refactor: normalize all API imports to use default `api` import instead of mixed `api`/`apiClient` named exports
+
 ### Fixed
 
 - fix: remove duplicate `ProviderPlatform` interface — keep complete 10-field definition, delete narrower duplicate that was missing `storage_path` and `storage_backend`

@@ -26,7 +26,7 @@ import RefreshIcon from '@mui/icons-material/Refresh';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import CancelIcon from '@mui/icons-material/Cancel';
 import HourglassEmptyIcon from '@mui/icons-material/HourglassEmpty';
-import { apiClient } from '../../services/api';
+import api from '../../services/api';
 
 interface ApprovalRequest {
   id: string;
@@ -78,7 +78,7 @@ const ApprovalsPage: React.FC = () => {
     try {
       setLoading(true);
       setError(null);
-      const data = await apiClient.listApprovalRequests(
+      const data = await api.listApprovalRequests(
         statusFilter ? { status: statusFilter } : undefined
       );
       setApprovals(Array.isArray(data) ? data : []);
@@ -93,7 +93,7 @@ const ApprovalsPage: React.FC = () => {
   const handleCreate = async () => {
     try {
       setError(null);
-      await apiClient.createApprovalRequest({
+      await api.createApprovalRequest({
         mirror_config_id: createForm.mirror_config_id,
         provider_namespace: createForm.provider_namespace,
         provider_name: createForm.provider_name || undefined,
@@ -113,7 +113,7 @@ const ApprovalsPage: React.FC = () => {
     try {
       setReviewing(true);
       setError(null);
-      await apiClient.reviewApproval(reviewingApproval.id, {
+      await api.reviewApproval(reviewingApproval.id, {
         status: reviewForm.status,
         notes: reviewForm.notes || undefined,
       });

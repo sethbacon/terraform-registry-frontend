@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { User, AuthContextType, RoleTemplateInfo } from '../types';
-import { apiClient } from '../services/api';
+import api from '../services/api';
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
@@ -60,7 +60,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const fetchCurrentUser = async () => {
     try {
-      const response = await apiClient.getCurrentUserWithRole();
+      const response = await api.getCurrentUserWithRole();
       setUser(response.user);
       setRoleTemplate(response.role_template || null);
       setAllowedScopes(response.allowed_scopes || []);
@@ -76,7 +76,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const login = async (userOrProvider: User | 'oidc' | 'azuread'): Promise<void> => {
     if (typeof userOrProvider === 'string') {
       // OAuth login - redirects to OAuth provider
-      apiClient.login(userOrProvider);
+      api.login(userOrProvider);
     } else {
       // Direct user object (dev mode) - SECURITY: Always fetch actual user data from API
       // Never trust client-provided user data for authorization decisions
@@ -105,12 +105,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     // Redirect to the backend logout endpoint, which terminates the OIDC SSO session
     // at the identity provider level. Without this, the IdP session remains active and
     // clicking "Login with OIDC" again would silently re-authenticate the user.
-    apiClient.logout();
+    api.logout();
   };
 
   const refreshToken = async () => {
     try {
-      const response = await apiClient.refreshToken();
+      const response = await api.refreshToken();
       localStorage.setItem('auth_token', response.token);
     } catch (error) {
       console.error('Failed to refresh token:', error);

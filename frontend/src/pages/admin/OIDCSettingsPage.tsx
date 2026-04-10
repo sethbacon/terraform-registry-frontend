@@ -34,7 +34,7 @@ import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import ManageAccountsIcon from '@mui/icons-material/ManageAccounts';
 import SaveIcon from '@mui/icons-material/Save';
-import { apiClient } from '../../services/api';
+import api from '../../services/api';
 import type { OIDCConfigResponse, OIDCGroupMapping, OIDCGroupMappingInput, Organization } from '../../types';
 
 // Available roles that can be assigned to mapped groups — must match system role template names
@@ -77,7 +77,7 @@ const OIDCSettingsPage: React.FC = () => {
     setLoading(true);
     setError(null);
     try {
-      const data = await apiClient.getAdminOIDCConfig();
+      const data = await api.getAdminOIDCConfig();
       setConfig(data);
       setGroupClaimName(data.group_claim_name ?? '');
       setDefaultRole(data.default_role ?? '');
@@ -100,7 +100,7 @@ const OIDCSettingsPage: React.FC = () => {
         group_mappings: mappings,
         default_role: defaultRole,
       };
-      const updated = await apiClient.updateOIDCGroupMapping(input);
+      const updated = await api.updateOIDCGroupMapping(input);
       setConfig(updated);
       setGroupClaimName(updated.group_claim_name ?? '');
       setDefaultRole(updated.default_role ?? '');
@@ -118,7 +118,7 @@ const OIDCSettingsPage: React.FC = () => {
   const loadOrgs = async () => {
     setOrgLoading(true);
     try {
-      const orgs: Organization[] = await apiClient.listOrganizations(1, 200);
+      const orgs: Organization[] = await api.listOrganizations(1, 200);
       setOrgOptions(orgs.map(o => o.name));
     } catch {
       setOrgOptions([]);

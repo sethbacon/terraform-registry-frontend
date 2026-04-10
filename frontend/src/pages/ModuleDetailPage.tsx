@@ -49,7 +49,7 @@ import WebhookIcon from '@mui/icons-material/Webhook';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import SecurityIcon from '@mui/icons-material/Security';
-import api, { apiClient } from '../services/api';
+import api from '../services/api';
 import { Module, ModuleVersion, ModuleScan, ModuleDoc } from '../types';
 import type { ModuleSCMLink, SCMWebhookEvent } from '../types/scm';
 import { useAuth } from '../contexts/AuthContext';
@@ -182,7 +182,7 @@ const ModuleDetailPage: React.FC = () => {
 
   const loadSCMLink = async (moduleId: string) => {
     try {
-      const link = await apiClient.getModuleSCMInfo(moduleId);
+      const link = await api.getModuleSCMInfo(moduleId);
       setScmLink(link);
     } catch {
       setScmLink(null); // 404 = not linked, which is fine
@@ -194,7 +194,7 @@ const ModuleDetailPage: React.FC = () => {
   const loadWebhookEvents = async (moduleId: string) => {
     try {
       setWebhookEventsLoading(true);
-      const events = await apiClient.getWebhookEvents(moduleId);
+      const events = await api.getWebhookEvents(moduleId);
       setWebhookEvents(Array.isArray(events) ? events : []);
     } catch {
       setWebhookEvents([]);
@@ -210,7 +210,7 @@ const ModuleDetailPage: React.FC = () => {
     setScanNotFound(false);
     setModuleScan(null);
     try {
-      const scan = await apiClient.getModuleScan(namespace, name, system, version);
+      const scan = await api.getModuleScan(namespace, name, system, version);
       setModuleScan(scan);
     } catch (err: any) {
       if (err?.response?.status === 404) {
@@ -226,7 +226,7 @@ const ModuleDetailPage: React.FC = () => {
     setDocsLoading(true);
     setModuleDocs(null);
     try {
-      const docs = await apiClient.getModuleDocs(namespace, name, system, version);
+      const docs = await api.getModuleDocs(namespace, name, system, version);
       setModuleDocs(docs);
     } catch {
       setModuleDocs(null);
@@ -239,7 +239,7 @@ const ModuleDetailPage: React.FC = () => {
     if (!module?.id) return;
     try {
       setScmUnlinking(true);
-      await apiClient.unlinkModuleFromSCM(module.id);
+      await api.unlinkModuleFromSCM(module.id);
       setScmLink(null);
     } catch (err: any) {
       setError(err?.response?.data?.error || 'Failed to unlink repository');
@@ -264,7 +264,7 @@ const ModuleDetailPage: React.FC = () => {
     console.log('Triggering manual sync for module:', module.id);
     try {
       setScmSyncing(true);
-      await apiClient.triggerManualSync(module.id);
+      await api.triggerManualSync(module.id);
       setError(null);
       // Start polling so newly imported versions appear without manual refresh.
       pollForVersions();

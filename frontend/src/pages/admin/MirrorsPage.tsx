@@ -42,7 +42,7 @@ import ErrorIcon from '@mui/icons-material/Error';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ScheduleIcon from '@mui/icons-material/Schedule';
-import { apiClient } from '../../services/api';
+import api from '../../services/api';
 import {
   type MirrorConfiguration,
   type MirrorSyncHistory,
@@ -244,7 +244,7 @@ const MirrorsPage: React.FC = () => {
     try {
       setLoading(true);
       setError(null);
-      const data = await apiClient.listMirrors();
+      const data = await api.listMirrors();
       setMirrors(Array.isArray(data) ? data : []);
     } catch (err: any) {
       setError(err.response?.data?.error || 'Failed to load mirrors');
@@ -264,7 +264,7 @@ const MirrorsPage: React.FC = () => {
         version_filter: versionFilterInput.trim() || undefined,
         platform_filter: platformFilterInput.split(',').map(s => s.trim()).filter(Boolean),
       };
-      await apiClient.createMirror(data as CreateMirrorConfigRequest);
+      await api.createMirror(data as CreateMirrorConfigRequest);
       setCreateDialogOpen(false);
       resetForm();
       setSuccess('Mirror configuration created successfully');
@@ -289,7 +289,7 @@ const MirrorsPage: React.FC = () => {
         enabled: formData.enabled,
         sync_interval_hours: formData.sync_interval_hours,
       };
-      await apiClient.updateMirror(editingMirror.id, data);
+      await api.updateMirror(editingMirror.id, data);
       setEditingMirror(null);
       resetForm();
       setSuccess('Mirror configuration updated successfully');
@@ -303,7 +303,7 @@ const MirrorsPage: React.FC = () => {
     if (!mirrorToDelete) return;
     try {
       setError(null);
-      await apiClient.deleteMirror(mirrorToDelete.id);
+      await api.deleteMirror(mirrorToDelete.id);
       setDeleteConfirmOpen(false);
       setMirrorToDelete(null);
       setSuccess('Mirror configuration deleted successfully');
@@ -316,7 +316,7 @@ const MirrorsPage: React.FC = () => {
   const handleTriggerSync = async (mirror: MirrorConfiguration) => {
     try {
       setError(null);
-      await apiClient.triggerMirrorSync(mirror.id);
+      await api.triggerMirrorSync(mirror.id);
       setSuccess(`Sync triggered for "${mirror.name}"`);
       await loadMirrors();
     } catch (err: any) {
@@ -329,7 +329,7 @@ const MirrorsPage: React.FC = () => {
     setProvidersDialogOpen(true);
     setProvidersLoading(true);
     try {
-      const providers = await apiClient.getMirrorProviders(mirror.id);
+      const providers = await api.getMirrorProviders(mirror.id);
       setMirrorProviders(Array.isArray(providers) ? providers : []);
     } catch {
       setMirrorProviders([]);
@@ -343,7 +343,7 @@ const MirrorsPage: React.FC = () => {
     setHistoryDialogOpen(true);
     setHistoryLoading(true);
     try {
-      const status = await apiClient.getMirrorStatus(mirror.id);
+      const status = await api.getMirrorStatus(mirror.id);
       setMirrorHistory(status.recent_syncs ?? []);
     } catch {
       setMirrorHistory([]);

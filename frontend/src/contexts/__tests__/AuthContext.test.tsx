@@ -4,7 +4,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 
 // Mock the api module
 vi.mock('../../services/api', () => ({
-  apiClient: {
+  default: {
     getCurrentUserWithRole: vi.fn(),
     login: vi.fn(),
     logout: vi.fn(),
