@@ -1,0 +1,14 @@
+# Default owner for all files
+* @sethbacon
+
+# CI/CD workflows require explicit review
+.github/ @sethbacon
+
+# Frontend source
+frontend/ @sethbacon
+
+# Deployment configurations
+deployments/ @sethbacon
+
+# E2E tests
+e2e/ @sethbacon

@@ -412,3 +412,58 @@ export interface VersionInfo {
     mirror: string;
   };
 }
+
+// ---- Module Security Scan ----
+
+export type ModuleScanStatus = 'pending' | 'scanning' | 'clean' | 'findings' | 'error';
+
+export interface ModuleScan {
+  id: string;
+  module_version_id: string;
+  scanner: string;
+  scanner_version: string | null;
+  expected_version: string | null;
+  status: ModuleScanStatus;
+  scanned_at: string | null;
+  critical_count: number;
+  high_count: number;
+  medium_count: number;
+  low_count: number;
+  raw_results: Record<string, unknown> | null;
+  error_message: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+// ---- Module terraform-docs ----
+
+export interface ModuleInputVar {
+  name: string;
+  type: string;
+  description: string;
+  default: unknown;
+  required: boolean;
+}
+
+export interface ModuleOutputVal {
+  name: string;
+  description: string;
+  sensitive: boolean;
+}
+
+export interface ModuleProviderReq {
+  name: string;
+  source: string;
+  version_constraints: string;
+}
+
+export interface ModuleRequirements {
+  required_version: string;
+}
+
+export interface ModuleDoc {
+  inputs: ModuleInputVar[];
+  outputs: ModuleOutputVal[];
+  providers: ModuleProviderReq[];
+  requirements: ModuleRequirements | null;
+}

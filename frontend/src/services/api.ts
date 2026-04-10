@@ -643,6 +643,20 @@ class ApiClient {
     return response.data;
   }
 
+  async getModuleScan(namespace: string, name: string, system: string, version: string): Promise<import('../types').ModuleScan> {
+    const response = await this.client.get(
+      `/api/v1/admin/modules/${namespace}/${name}/${system}/versions/${version}/scan`
+    );
+    return response.data;
+  }
+
+  async getModuleDocs(namespace: string, name: string, system: string, version: string): Promise<import('../types').ModuleDoc> {
+    const response = await this.client.get(
+      `/api/v1/modules/${namespace}/${name}/${system}/versions/${version}/docs`
+    );
+    return response.data;
+  }
+
   // Dashboard Stats
   async getDashboardStats() {
     const response = await this.client.get('/api/v1/admin/stats/dashboard');
