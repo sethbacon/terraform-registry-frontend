@@ -33,22 +33,7 @@ import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import BlockIcon from '@mui/icons-material/Block';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import { apiClient } from '../../services/api';
-
-interface MirrorPolicy {
-  id: string;
-  organization_id?: string;
-  name: string;
-  description?: string;
-  policy_type: 'allow' | 'deny';
-  upstream_registry?: string;
-  namespace_pattern?: string;
-  provider_pattern?: string;
-  priority?: number;
-  is_active: boolean;
-  requires_approval: boolean;
-  created_at: string;
-  updated_at: string;
-}
+import { MirrorPolicy } from '../../types/rbac';
 
 interface PolicyFormData {
   name: string;
