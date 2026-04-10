@@ -27,24 +27,11 @@ import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import CancelIcon from '@mui/icons-material/Cancel';
 import HourglassEmptyIcon from '@mui/icons-material/HourglassEmpty';
 import api from '../../services/api';
-
-interface ApprovalRequest {
-  id: string;
-  mirror_config_id: string;
-  organization_id?: string;
-  provider_namespace: string;
-  provider_name?: string;
-  reason?: string;
-  status: 'pending' | 'approved' | 'rejected';
-  reviewer_notes?: string;
-  reviewed_by?: string;
-  reviewed_at?: string;
-  created_at: string;
-  updated_at: string;
-}
+import { formatDate } from '../../utils';
+import { MirrorApprovalRequest } from '../../types/rbac';
 
 const ApprovalsPage: React.FC = () => {
-  const [approvals, setApprovals] = useState<ApprovalRequest[]>([]);
+  const [approvals, setApprovals] = useState<MirrorApprovalRequest[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
@@ -60,7 +47,7 @@ const ApprovalsPage: React.FC = () => {
 
   // Review dialog state
   const [reviewDialogOpen, setReviewDialogOpen] = useState(false);
-  const [reviewingApproval, setReviewingApproval] = useState<ApprovalRequest | null>(null);
+  const [reviewingApproval, setReviewingApproval] = useState<MirrorApprovalRequest | null>(null);
   const [reviewForm, setReviewForm] = useState<{
     status: 'approved' | 'rejected';
     notes: string;
@@ -129,7 +116,7 @@ const ApprovalsPage: React.FC = () => {
     }
   };
 
-  const openReviewDialog = (approval: ApprovalRequest, defaultStatus: 'approved' | 'rejected') => {
+  const openReviewDialog = (approval: MirrorApprovalRequest, defaultStatus: 'approved' | 'rejected') => {
     setReviewingApproval(approval);
     setReviewForm({ status: defaultStatus, notes: '' });
     setReviewDialogOpen(true);
@@ -145,11 +132,6 @@ const ApprovalsPage: React.FC = () => {
       default:
         return <Chip label="Pending" size="small" color="warning" icon={<HourglassEmptyIcon />} />;
     }
-  };
-
-  const formatDate = (dateStr?: string) => {
-    if (!dateStr) return 'N/A';
-    return new Date(dateStr).toLocaleString();
   };
 
   if (loading) {
@@ -243,9 +225,9 @@ const ApprovalsPage: React.FC = () => {
                     <Typography variant="caption" color="textSecondary" display="block">
                       <strong>Reviewed:</strong> {formatDate(approval.reviewed_at)}
                     </Typography>
-                    {approval.reviewer_notes && (
+                    {approval.review_notes && (
                       <Typography variant="caption" color="textSecondary" display="block">
-                        <strong>Notes:</strong> {approval.reviewer_notes}
+                        <strong>Notes:</strong> {approval.review_notes}
                       </Typography>
                     )}
                   </>

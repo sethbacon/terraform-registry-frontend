@@ -24,11 +24,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - fix: remove duplicate `ProviderPlatform` interface — keep complete 10-field definition, delete narrower duplicate that was missing `storage_path` and `storage_backend`
 - fix: consolidate duplicate `RoleTemplate` interface — canonical definition in `types/rbac.ts`, re-exported from `types/index.ts`
 
-### Changed
-
-- refactor: extract shared `formatDate`, `getScopeInfo`, and `getScopeColor` utilities to `utils/` directory, removing duplicate definitions from 4 admin pages
-- refactor: consolidate local `ApprovalRequest` and `MirrorPolicy` type definitions into shared `types/rbac.ts`
-
 ---
 
 ## [0.3.6] - 2026-04-10
