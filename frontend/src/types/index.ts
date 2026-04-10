@@ -10,14 +10,7 @@ export interface User {
   updated_at: string;
 }
 
-export interface RoleTemplate {
-  id: string;
-  name: string;
-  display_name: string;
-  description?: string;
-  scopes: string[];
-  is_system?: boolean;
-}
+export type { RoleTemplate } from './rbac';
 
 export interface RoleTemplateInfo {
   id?: string;
@@ -176,17 +169,6 @@ export interface ProviderVersion {
   deprecated_at?: string;
   deprecation_message?: string;
   created_at: string;
-}
-
-export interface ProviderPlatform {
-  id: string;
-  provider_version_id: string;
-  os: string;
-  arch: string;
-  filename: string;
-  size_bytes: number;
-  shasum: string;
-  download_count: number;
 }
 
 export interface ProviderDocEntry {
