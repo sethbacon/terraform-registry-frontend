@@ -13,6 +13,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - feat: add React error boundaries wrapping all routes — prevents white screen crashes by showing a user-friendly fallback UI with reload options
 
+### Fixed
+
+- fix: remove duplicate `ProviderPlatform` interface — keep complete 10-field definition, delete narrower duplicate that was missing `storage_path` and `storage_backend`
+- fix: consolidate duplicate `RoleTemplate` interface — canonical definition in `types/rbac.ts`, re-exported from `types/index.ts`
+
 ---
 
 ## [0.3.6] - 2026-04-10
