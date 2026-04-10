@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+---
+
+## [0.3.6] - 2026-04-10
+
 ### Added
 
 - feat: surface module security scan results in module detail page — Security Scan sidebar panel shows scan status (clean/findings/pending/scanning/error), severity counts (Critical/High/Medium/Low), scanner name and version, and scan timestamp; visible to admin and modules:write users
@@ -171,7 +175,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- fix: lower Dockerfile npm audit gate from `high` to `critical` to unblock builds blocked by unfixable swagger-ui-react transitive vulnerabilities (immutable@3.x, dompurify@3.2.x) (#11)
+- fix: lower Dockerfile npm audit gate from `high` to `critical` to unblock builds blocked by unfixable swagger-ui-react transitive vulnerabilities (`immutable@3.x`, `dompurify@3.2.x`) (#11)
 
 ---
 
