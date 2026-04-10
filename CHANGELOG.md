@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.7] - 2026-04-10
+
 ### Added
 
 - feat: configure Vitest testing framework with happy-dom, @testing-library/react, and @testing-library/jest-dom
@@ -25,6 +27,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - refactor: extract shared `formatDate`, `getScopeInfo`, and `getScopeColor` utilities to `utils/` directory, removing duplicate definitions from 4 admin pages
 - refactor: consolidate local `ApprovalRequest` and `MirrorPolicy` type definitions into shared `types/rbac.ts`
 - chore: enable `@typescript-eslint/no-unused-vars` ESLint rule and fix all violations
+- chore: enable `@typescript-eslint/no-explicit-any` ESLint rule — replace all 88 `any` types across 19 files with type-safe alternatives; add shared `utils/errors.ts` with `getErrorMessage()` and `getErrorStatus()` helpers
 
 ### Fixed
 
