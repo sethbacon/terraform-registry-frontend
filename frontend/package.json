@@ -17,7 +17,7 @@
     "@fortawesome/react-fontawesome": "^3.2.0",
     "@mui/icons-material": "^7.0.0",
     "@mui/material": "^7.0.0",
-    "axios": "^1.6.7",
+    "axios": "^1.15.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-markdown": "^9.1.0",
