@@ -28,7 +28,7 @@ export default [
     rules: {
       // TypeScript rules — disabled for pre-existing codebase (address in follow-up)
       '@typescript-eslint/no-explicit-any': 'off',
-      '@typescript-eslint/no-unused-vars': 'off',
+      '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_', varsIgnorePattern: '^_' }],
       // React hooks — enforce both rules to prevent stale closures and rule violations
       'react-hooks/rules-of-hooks': 'error',
       'react-hooks/exhaustive-deps': 'error',
