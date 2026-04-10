@@ -254,3 +254,63 @@ docker compose -f docker-compose.test.yml up -d --build
 - E2E tests require the backend image `ghcr.io/sethbacon/terraform-registry-backend:latest` to be available.
 - The `docker-compose.test.yml` pulls the backend from GHCR rather than building it from source.
 - For backend configuration, API documentation, and architecture details, see [terraform-registry-backend](https://github.com/sethbacon/terraform-registry-backend).
+
+---
+
+## Repository Security Hardening (applied 2026-04-09)
+
+### Branch Protection
+
+**`main` branch:**
+- Required status checks (strict — branch must be up-to-date): `Frontend Lint & Build`
+- Required pull request reviews: 1 approving review, dismiss stale reviews, require code owner review
+- Enforce admins: no (admin/owner can bypass review requirements as sole maintainer)
+- Required linear history: yes (squash/rebase only, no merge commits)
+- Required conversation resolution: yes
+- Force pushes: blocked
+- Branch deletion: blocked
+
+**`development` branch:**
+- Required status checks (non-strict): `Frontend Lint & Build`
+- Required linear history: yes
+- Required conversation resolution: yes
+- Force pushes: blocked
+- Branch deletion: blocked
+- Admin bypass: allowed (owner can push directly for admin tasks)
+
+### Merge Strategy
+
+- **Squash merge only** — merge commits and rebase merges are disabled
+- **Delete branch on merge** — enabled; feature/fix branches are cleaned up automatically
+- **Allow update branch** — enabled; PRs can pull in base branch changes via GitHub UI
+- **Web commit signoff required** — enabled; all web-based commits require DCO signoff
+
+### Dependency Management
+
+- **Dependabot vulnerability alerts** — enabled
+- **Dependabot automated security fixes** — enabled
+- **Dependabot version updates** — configured via `.github/dependabot.yml` for npm (frontend + e2e) and GitHub Actions (biweekly)
+
+### Code Ownership
+
+- **CODEOWNERS** file at `.github/CODEOWNERS` — `@sethbacon` owns all files; `frontend/`, `.github/`, `deployments/`, and `e2e/` require explicit owner review
+
+### Security Features (GitHub)
+
+- Secret scanning: enabled
+- Secret scanning push protection: enabled
+- `npm audit --audit-level=high` in Dockerfile and scheduled workflow
+- rehype-sanitize for Markdown rendering (XSS mitigation)
+- All GitHub Actions pinned to full commit SHAs
+- Scheduled weekly builds with auto-issue on failure
+
+### Repository Topics
+
+`terraform`, `terraform-registry`, `react`, `typescript`, `material-ui`, `vite`, `private-registry`
+
+### Remaining Recommendations (not yet applied)
+
+- **Add SECURITY.md** for private vulnerability reporting
+- **Tighten ESLint rules** — `@typescript-eslint/no-explicit-any`, `@typescript-eslint/no-unused-vars`, and `react-hooks/exhaustive-deps` are currently disabled; re-enabling would improve code quality
+- **Enable secret scanning non-provider patterns and validity checks** for broader secret detection
+- **Add a tag protection rule** to prevent deletion of release tags (`v*.*.*`)
