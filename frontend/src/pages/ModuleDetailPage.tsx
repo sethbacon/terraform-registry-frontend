@@ -238,37 +238,6 @@ const ModuleDetailPage: React.FC = () => {
     }
   };
 
-  const loadModuleScan = async (version: string) => {
-    if (!namespace || !name || !system) return;
-    setScanLoading(true);
-    setScanNotFound(false);
-    setModuleScan(null);
-    try {
-      const scan = await apiClient.getModuleScan(namespace, name, system, version);
-      setModuleScan(scan);
-    } catch (err: any) {
-      if (err?.response?.status === 404) {
-        setScanNotFound(true);
-      }
-    } finally {
-      setScanLoading(false);
-    }
-  };
-
-  const loadModuleDocs = async (version: string) => {
-    if (!namespace || !name || !system) return;
-    setDocsLoading(true);
-    setModuleDocs(null);
-    try {
-      const docs = await apiClient.getModuleDocs(namespace, name, system, version);
-      setModuleDocs(docs);
-    } catch {
-      setModuleDocs(null);
-    } finally {
-      setDocsLoading(false);
-    }
-  };
-
   const handleSCMUnlink = async () => {
     if (!module?.id) return;
     try {
