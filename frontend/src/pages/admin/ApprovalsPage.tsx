@@ -27,6 +27,7 @@ import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import CancelIcon from '@mui/icons-material/Cancel';
 import HourglassEmptyIcon from '@mui/icons-material/HourglassEmpty';
 import { apiClient } from '../../services/api';
+import { formatDate } from '../../utils';
 
 interface ApprovalRequest {
   id: string;
@@ -145,11 +146,6 @@ const ApprovalsPage: React.FC = () => {
       default:
         return <Chip label="Pending" size="small" color="warning" icon={<HourglassEmptyIcon />} />;
     }
-  };
-
-  const formatDate = (dateStr?: string) => {
-    if (!dateStr) return 'N/A';
-    return new Date(dateStr).toLocaleString();
   };
 
   if (loading) {
