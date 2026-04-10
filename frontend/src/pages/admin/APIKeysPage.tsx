@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   Container,
   Typography,
@@ -118,12 +118,7 @@ const APIKeysPage: React.FC = () => {
     ? AVAILABLE_SCOPES.map((s) => s.value)
     : allowedScopes;
 
-  useEffect(() => {
-    loadAPIKeys();
-    loadMemberships();
-  }, [user?.id]);
-
-  const loadMemberships = async () => {
+  const loadMemberships = useCallback(async () => {
     if (!user?.id) return;
     try {
       setMembershipsLoading(true);
@@ -136,7 +131,12 @@ const APIKeysPage: React.FC = () => {
     } finally {
       setMembershipsLoading(false);
     }
-  };
+  }, [user?.id]);
+
+  useEffect(() => {
+    loadAPIKeys();
+    loadMemberships();
+  }, [user?.id, loadMemberships]);
 
   const loadAPIKeys = async () => {
     try {

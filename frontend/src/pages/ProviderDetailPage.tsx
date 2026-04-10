@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import {
   Container,
@@ -84,37 +84,7 @@ const ProviderDetailPage: React.FC = () => {
   const [docs, setDocs] = useState<ProviderDocEntry[]>([]);
   const [docsLoading, setDocsLoading] = useState(false);
 
-  useEffect(() => {
-    loadProviderDetails();
-  }, [namespace, type]);
-
-  // Fetch doc index for mirrored providers when version is selected
-  useEffect(() => {
-    if (!provider?.source || !selectedVersion || !namespace || !type) return;
-    setDocsLoading(true);
-    api
-      .getProviderDocs(namespace, type, selectedVersion.version, undefined, 'hcl')
-      .then((data) => setDocs(data.docs))
-      .catch(() => { /* non-fatal */ })
-      .finally(() => setDocsLoading(false));
-  }, [provider?.source, selectedVersion?.version, namespace, type]);
-
-  // Auto-select first doc when Documentation tab is opened with no selection
-  useEffect(() => {
-    if (activeTab !== 1 || docParam || docs.length === 0) return;
-    const overview = docs.find((d) => d.category === 'overview');
-    const first = overview ?? docs[0];
-    setSearchParams(
-      (prev) => {
-        const next = new URLSearchParams(prev);
-        next.set('doc', `${first.category}/${first.slug}`);
-        return next;
-      },
-      { replace: true }
-    );
-  }, [activeTab, docParam, docs]);
-
-  const loadProviderDetails = async () => {
+  const loadProviderDetails = useCallback(async () => {
     if (!namespace || !type) return;
 
     try {
@@ -152,7 +122,37 @@ const ProviderDetailPage: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [namespace, type]);
+
+  useEffect(() => {
+    loadProviderDetails();
+  }, [loadProviderDetails]);
+
+  // Fetch doc index for mirrored providers when version is selected
+  useEffect(() => {
+    if (!provider?.source || !selectedVersion || !namespace || !type) return;
+    setDocsLoading(true);
+    api
+      .getProviderDocs(namespace, type, selectedVersion.version, undefined, 'hcl')
+      .then((data) => setDocs(data.docs))
+      .catch(() => { /* non-fatal */ })
+      .finally(() => setDocsLoading(false));
+  }, [provider?.source, selectedVersion, namespace, type]);
+
+  // Auto-select first doc when Documentation tab is opened with no selection
+  useEffect(() => {
+    if (activeTab !== 1 || docParam || docs.length === 0) return;
+    const overview = docs.find((d) => d.category === 'overview');
+    const first = overview ?? docs[0];
+    setSearchParams(
+      (prev) => {
+        const next = new URLSearchParams(prev);
+        next.set('doc', `${first.category}/${first.slug}`);
+        return next;
+      },
+      { replace: true }
+    );
+  }, [activeTab, docParam, docs, setSearchParams]);
 
   const handleCopySource = () => {
     if (!provider || !selectedVersion) return;

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import MarkdownRenderer from '../components/MarkdownRenderer';
 import {
@@ -102,20 +102,49 @@ const ModuleDetailPage: React.FC = () => {
   const [moduleDocs, setModuleDocs] = useState<ModuleDoc | null>(null);
   const [docsLoading, setDocsLoading] = useState(false);
 
-  useEffect(() => {
-    loadModuleDetails();
+  const loadSCMLink = useCallback(async (moduleId: string) => {
+    try {
+      const link = await api.getModuleSCMInfo(moduleId);
+      setScmLink(link);
+    } catch {
+      setScmLink(null); // 404 = not linked, which is fine
+    } finally {
+      setScmLinkLoaded(true);
+    }
+  }, []);
+
+  const loadModuleScan = useCallback(async (version: string) => {
+    if (!namespace || !name || !system) return;
+    setScanLoading(true);
+    setScanNotFound(false);
+    setModuleScan(null);
+    try {
+      const scan = await api.getModuleScan(namespace, name, system, version);
+      setModuleScan(scan);
+    } catch (err: any) {
+      if (err?.response?.status === 404) {
+        setScanNotFound(true);
+      }
+    } finally {
+      setScanLoading(false);
+    }
   }, [namespace, name, system]);
 
-  useEffect(() => {
-    if (!selectedVersion?.version || !namespace || !name || !system) return;
-    setModuleScan(null);
-    setScanNotFound(false);
+  const loadModuleDocs = useCallback(async (version: string) => {
+    if (!namespace || !name || !system) return;
+    setDocsLoading(true);
     setModuleDocs(null);
-    if (canManage) loadModuleScan(selectedVersion.version);
-    loadModuleDocs(selectedVersion.version);
-  }, [selectedVersion?.version, canManage]);
+    try {
+      const docs = await api.getModuleDocs(namespace, name, system, version);
+      setModuleDocs(docs);
+    } catch {
+      setModuleDocs(null);
+    } finally {
+      setDocsLoading(false);
+    }
+  }, [namespace, name, system]);
 
-  const loadModuleDetails = async () => {
+  const loadModuleDetails = useCallback(async () => {
     if (!namespace || !name || !system) return;
 
     try {
@@ -162,11 +191,13 @@ const ModuleDetailPage: React.FC = () => {
 
       // Select latest version by default (preserve current selection if reloading)
       if (mergedVersions.length > 0) {
-        const currentVersion = selectedVersion?.version;
-        const matchingVersion = currentVersion
-          ? mergedVersions.find((v: ModuleVersion) => v.version === currentVersion)
-          : null;
-        setSelectedVersion(matchingVersion || mergedVersions[0]);
+        setSelectedVersion(prev => {
+          const currentVersion = prev?.version;
+          const matchingVersion = currentVersion
+            ? mergedVersions.find((v: ModuleVersion) => v.version === currentVersion)
+            : null;
+          return matchingVersion || mergedVersions[0];
+        });
       }
     } catch (err: any) {
       console.error('Failed to load module details:', err);
@@ -178,18 +209,20 @@ const ModuleDetailPage: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [namespace, name, system, isAuthenticated, loadSCMLink]);
 
-  const loadSCMLink = async (moduleId: string) => {
-    try {
-      const link = await api.getModuleSCMInfo(moduleId);
-      setScmLink(link);
-    } catch {
-      setScmLink(null); // 404 = not linked, which is fine
-    } finally {
-      setScmLinkLoaded(true);
-    }
-  };
+  useEffect(() => {
+    loadModuleDetails();
+  }, [loadModuleDetails]);
+
+  useEffect(() => {
+    if (!selectedVersion?.version || !namespace || !name || !system) return;
+    setModuleScan(null);
+    setScanNotFound(false);
+    setModuleDocs(null);
+    if (canManage) loadModuleScan(selectedVersion.version);
+    loadModuleDocs(selectedVersion.version);
+  }, [selectedVersion?.version, canManage, loadModuleScan, loadModuleDocs, namespace, name, system]);
 
   const loadWebhookEvents = async (moduleId: string) => {
     try {
@@ -201,37 +234,6 @@ const ModuleDetailPage: React.FC = () => {
     } finally {
       setWebhookEventsLoading(false);
       setWebhookEventsLoaded(true);
-    }
-  };
-
-  const loadModuleScan = async (version: string) => {
-    if (!namespace || !name || !system) return;
-    setScanLoading(true);
-    setScanNotFound(false);
-    setModuleScan(null);
-    try {
-      const scan = await api.getModuleScan(namespace, name, system, version);
-      setModuleScan(scan);
-    } catch (err: any) {
-      if (err?.response?.status === 404) {
-        setScanNotFound(true);
-      }
-    } finally {
-      setScanLoading(false);
-    }
-  };
-
-  const loadModuleDocs = async (version: string) => {
-    if (!namespace || !name || !system) return;
-    setDocsLoading(true);
-    setModuleDocs(null);
-    try {
-      const docs = await api.getModuleDocs(namespace, name, system, version);
-      setModuleDocs(docs);
-    } catch {
-      setModuleDocs(null);
-    } finally {
-      setDocsLoading(false);
     }
   };
 

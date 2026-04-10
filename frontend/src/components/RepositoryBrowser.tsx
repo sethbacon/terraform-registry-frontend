@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   Box,
   Typography,
@@ -57,19 +57,7 @@ const RepositoryBrowser: React.FC<RepositoryBrowserProps> = ({
   const [searchQuery, setSearchQuery] = useState('');
   const [expandedRepo, setExpandedRepo] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (providerId) {
-      loadRepositories();
-    }
-  }, [providerId]);
-
-  useEffect(() => {
-    if (selectedRepository && expandedRepo === selectedRepository.full_name) {
-      loadTagsAndBranches(selectedRepository);
-    }
-  }, [selectedRepository, expandedRepo]);
-
-  const loadRepositories = async () => {
+  const loadRepositories = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
@@ -95,9 +83,9 @@ const RepositoryBrowser: React.FC<RepositoryBrowserProps> = ({
     } finally {
       setLoading(false);
     }
-  };
+  }, [providerId]);
 
-  const loadTagsAndBranches = async (_repository: SCMRepository) => {
+  const loadTagsAndBranches = useCallback(async (_repository: SCMRepository) => {
     try {
       setLoadingTags(true);
       setError(null);
@@ -126,7 +114,19 @@ const RepositoryBrowser: React.FC<RepositoryBrowserProps> = ({
     } finally {
       setLoadingTags(false);
     }
-  };
+  }, [providerId]);
+
+  useEffect(() => {
+    if (providerId) {
+      loadRepositories();
+    }
+  }, [providerId, loadRepositories]);
+
+  useEffect(() => {
+    if (selectedRepository && expandedRepo === selectedRepository.full_name) {
+      loadTagsAndBranches(selectedRepository);
+    }
+  }, [selectedRepository, expandedRepo, loadTagsAndBranches]);
 
   const handleRepositoryClick = (repository: SCMRepository) => {
     if (expandedRepo === repository.full_name) {

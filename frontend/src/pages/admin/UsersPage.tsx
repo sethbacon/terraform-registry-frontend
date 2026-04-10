@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   Container,
   Typography,
@@ -79,11 +79,7 @@ const UsersPage: React.FC = () => {
   // User memberships being edited
   const [editMemberships, setEditMemberships] = useState<UserMembership[]>([]);
 
-  useEffect(() => {
-    loadUsers();
-  }, [page, rowsPerPage, searchQuery]);
-
-  const loadUsers = async () => {
+  const loadUsers = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
@@ -109,7 +105,11 @@ const UsersPage: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [page, rowsPerPage, searchQuery]);
+
+  useEffect(() => {
+    loadUsers();
+  }, [loadUsers]);
 
   const loadUserMemberships = async (userId: string) => {
     try {

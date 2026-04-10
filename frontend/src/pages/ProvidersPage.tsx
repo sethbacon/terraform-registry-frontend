@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useDebounce } from '../hooks/useDebounce';
 import {
@@ -34,11 +34,7 @@ const ProvidersPage: React.FC = () => {
   const [totalPages, setTotalPages] = useState(1);
   const limit = 12;
 
-  useEffect(() => {
-    loadProviders();
-  }, [page, debouncedSearch]);
-
-  const loadProviders = async () => {
+  const loadProviders = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
@@ -55,7 +51,11 @@ const ProvidersPage: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [page, debouncedSearch]);
+
+  useEffect(() => {
+    loadProviders();
+  }, [loadProviders]);
 
   const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(event.target.value);
