@@ -22,7 +22,8 @@ import {
   RadioGroup,
   FormLabel,
 } from '@mui/material';
-import { apiClient } from '../services/api';
+import api from '../services/api';
+import { getErrorMessage } from '../utils/errors';
 import RepositoryBrowser from './RepositoryBrowser';
 import type { SCMProvider, SCMRepository, SCMTag } from '../types/scm';
 
@@ -66,9 +67,9 @@ const PublishFromSCMWizard: React.FC<PublishFromSCMWizardProps> = ({
   const loadProviders = async () => {
     try {
       setLoading(true);
-      const data = await apiClient.listSCMProviders();
+      const data = await api.listSCMProviders();
       setProviders(Array.isArray(data) ? data.filter((p: SCMProvider) => p.is_active) : []);
-    } catch (err: any) {
+    } catch (err: unknown) {
       setError('Failed to load SCM providers');
       console.error('Error loading providers:', err);
     } finally {
@@ -106,7 +107,7 @@ const PublishFromSCMWizard: React.FC<PublishFromSCMWizardProps> = ({
         }
         // Link with the exact tag as the pattern and auto-publish disabled.
         // Then trigger an immediate sync so that single version is imported.
-        await apiClient.linkModuleToSCM(moduleId, {
+        await api.linkModuleToSCM(moduleId, {
           provider_id: selectedProvider.id,
           repository_owner: selectedRepository.owner,
           repository_name: selectedRepository.name,
@@ -116,12 +117,12 @@ const PublishFromSCMWizard: React.FC<PublishFromSCMWizardProps> = ({
           tag_pattern: selectedTag.tag_name,
         });
         try {
-          await apiClient.triggerManualSync(moduleId);
+          await api.triggerManualSync(moduleId);
         } catch {
           // non-fatal — user can trigger sync manually from the module page
         }
       } else {
-        await apiClient.linkModuleToSCM(moduleId, {
+        await api.linkModuleToSCM(moduleId, {
           provider_id: selectedProvider.id,
           repository_owner: selectedRepository.owner,
           repository_name: selectedRepository.name,
@@ -135,8 +136,8 @@ const PublishFromSCMWizard: React.FC<PublishFromSCMWizardProps> = ({
       if (onComplete) {
         onComplete();
       }
-    } catch (err: any) {
-      setError(err.response?.data?.error || 'Failed to link module to SCM');
+    } catch (err: unknown) {
+      setError(getErrorMessage(err, 'Failed to link module to SCM'));
     } finally {
       setLoading(false);
     }

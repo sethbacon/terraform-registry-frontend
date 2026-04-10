@@ -9,6 +9,51 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.7] - 2026-04-10
+
+### Added
+
+- feat: configure Vitest testing framework with happy-dom, @testing-library/react, and @testing-library/jest-dom
+- feat: add foundational unit tests for useDebounce, ProtectedRoute, AuthContext, and api service (18 tests across 4 files)
+- feat: add React error boundaries wrapping all routes — prevents white screen crashes by showing a user-friendly fallback UI with reload options
+- docs: add `SECURITY.md` with vulnerability reporting instructions, supported versions, and disclosure policy
+- docs: add `frontend/.env.example` documenting all four `VITE_*` environment variables
+- docs: add `.env` and `.env.local` to `.gitignore`
+
+### Changed
+
+- chore: enable `react-hooks/exhaustive-deps` ESLint rule and fix all violations across the codebase
+- refactor: normalize all API imports to use default `api` import instead of mixed `api`/`apiClient` named exports
+- refactor: extract shared `formatDate`, `getScopeInfo`, and `getScopeColor` utilities to `utils/` directory, removing duplicate definitions from 4 admin pages
+- refactor: consolidate local `ApprovalRequest` and `MirrorPolicy` type definitions into shared `types/rbac.ts`
+- chore: enable `@typescript-eslint/no-unused-vars` ESLint rule and fix all violations
+- chore: enable `@typescript-eslint/no-explicit-any` ESLint rule — replace all 88 `any` types across 19 files with type-safe alternatives; add shared `utils/errors.ts` with `getErrorMessage()` and `getErrorStatus()` helpers
+
+### Fixed
+
+- fix: remove duplicate `ProviderPlatform` interface — keep complete 10-field definition, delete narrower duplicate that was missing `storage_path` and `storage_backend`
+- fix: consolidate duplicate `RoleTemplate` interface — canonical definition in `types/rbac.ts`, re-exported from `types/index.ts`
+
+---
+
+## [0.3.6] - 2026-04-10
+
+### Added
+
+- feat: surface module security scan results in module detail page — Security Scan sidebar panel shows scan status (clean/findings/pending/scanning/error), severity counts (Critical/High/Medium/Low), scanner name and version, and scan timestamp; visible to admin and modules:write users
+- feat: surface module documentation in module detail page — Module Documentation section below README shows inputs (name, type, description, default, required), outputs (name, description, sensitive), provider requirements, and Terraform version constraints; visible to all users
+- feat: add `ModuleScan`, `ModuleDoc`, and related TypeScript types to support backend v0.3.0 scanning and terraform-docs extraction features
+
+### Fixed
+
+- fix: remove deprecated `baseUrl` from `tsconfig.json` — `baseUrl` is no longer required as a prerequisite for `paths` in TypeScript 5.x bundler mode and is deprecated as of TS 6.0
+- fix: install MUI v7.3.9 which was declared in `package.json` but absent from `node_modules`, resolving pre-existing TypeScript errors across 11 files
+
+### Maintenance
+
+- chore: document repository security hardening settings in `CLAUDE.md` — branch protection rules, merge strategy, dependency management, code ownership, and remaining recommendations
+- chore: pin GitHub Actions workflow steps to full commit SHAs and harden CI/CD pipeline
+
 ---
 
 ## [0.3.6] - 2026-04-10

@@ -35,6 +35,7 @@ import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import ErrorIcon from '@mui/icons-material/Error';
 import api from '../services/api';
+import { getErrorMessage } from '../utils/errors';
 import {
   type TerraformVersion,
   type TerraformVersionPlatform,
@@ -356,8 +357,8 @@ const TerraformBinaryDetailPage: React.FC = () => {
       setDeprecateTarget(null);
       setDeprecateMessage('');
       loadData();
-    } catch (err: any) {
-      setActionError(err?.response?.data?.error ?? 'Failed to deprecate version');
+    } catch (err: unknown) {
+      setActionError(getErrorMessage(err, 'Failed to deprecate version'));
     } finally {
       setDeprecating(false);
     }
@@ -370,8 +371,8 @@ const TerraformBinaryDetailPage: React.FC = () => {
       await api.undeprecateTerraformVersion(configId, version.version);
       setActionSuccess(`Deprecation removed from version ${version.version}.`);
       loadData();
-    } catch (err: any) {
-      setActionError(err?.response?.data?.error ?? 'Failed to remove deprecation');
+    } catch (err: unknown) {
+      setActionError(getErrorMessage(err, 'Failed to remove deprecation'));
     } finally {
       setUndeprecating(false);
     }
@@ -389,8 +390,8 @@ const TerraformBinaryDetailPage: React.FC = () => {
       setActionSuccess(`Version ${deleteTarget.version} deleted.`);
       setDeleteTarget(null);
       loadData();
-    } catch (err: any) {
-      setActionError(err?.response?.data?.error ?? 'Failed to delete version');
+    } catch (err: unknown) {
+      setActionError(getErrorMessage(err, 'Failed to delete version'));
     } finally {
       setDeleting(false);
     }
@@ -453,7 +454,7 @@ const TerraformBinaryDetailPage: React.FC = () => {
         <Typography variant="h4" fontFamily="monospace">
           {name}
         </Typography>
-        <Chip label={toolLabel} color={toolColor as any} size="small" variant="outlined" />
+        <Chip label={toolLabel} color={toolColor as 'primary' | 'secondary' | 'default'} size="small" variant="outlined" />
         {/* Public endpoint only returns enabled configs; no disabled chip needed */}
       </Box>
 

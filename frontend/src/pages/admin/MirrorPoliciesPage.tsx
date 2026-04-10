@@ -32,23 +32,9 @@ import RefreshIcon from '@mui/icons-material/Refresh';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import BlockIcon from '@mui/icons-material/Block';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
-import { apiClient } from '../../services/api';
-
-interface MirrorPolicy {
-  id: string;
-  organization_id?: string;
-  name: string;
-  description?: string;
-  policy_type: 'allow' | 'deny';
-  upstream_registry?: string;
-  namespace_pattern?: string;
-  provider_pattern?: string;
-  priority?: number;
-  is_active: boolean;
-  requires_approval: boolean;
-  created_at: string;
-  updated_at: string;
-}
+import api from '../../services/api';
+import { MirrorPolicy } from '../../types/rbac';
+import { getErrorMessage } from '../../utils/errors';
 
 interface PolicyFormData {
   name: string;
@@ -93,7 +79,7 @@ const MirrorPoliciesPage: React.FC = () => {
   // Evaluate dialog
   const [evaluateDialogOpen, setEvaluateDialogOpen] = useState(false);
   const [evaluateForm, setEvaluateForm] = useState({ registry: '', namespace: '', provider: '' });
-  const [evaluateResult, setEvaluateResult] = useState<any>(null);
+  const [evaluateResult, setEvaluateResult] = useState<{ allowed: boolean; matched_policy?: string; reason?: string } | null>(null);
   const [evaluating, setEvaluating] = useState(false);
 
   useEffect(() => {
@@ -104,10 +90,10 @@ const MirrorPoliciesPage: React.FC = () => {
     try {
       setLoading(true);
       setError(null);
-      const data = await apiClient.listMirrorPolicies();
+      const data = await api.listMirrorPolicies();
       setPolicies(Array.isArray(data) ? data : []);
-    } catch (err: any) {
-      setError(err.response?.data?.error || 'Failed to load mirror policies');
+    } catch (err: unknown) {
+      setError(getErrorMessage(err, 'Failed to load mirror policies'));
       console.error('Error loading policies:', err);
     } finally {
       setLoading(false);
@@ -131,10 +117,10 @@ const MirrorPoliciesPage: React.FC = () => {
       };
 
       if (editingPolicy) {
-        await apiClient.updateMirrorPolicy(editingPolicy.id, payload);
+        await api.updateMirrorPolicy(editingPolicy.id, payload);
         setSuccess('Policy updated successfully');
       } else {
-        await apiClient.createMirrorPolicy(payload);
+        await api.createMirrorPolicy(payload);
         setSuccess('Policy created successfully');
       }
 
@@ -142,8 +128,8 @@ const MirrorPoliciesPage: React.FC = () => {
       setEditingPolicy(null);
       setFormData(defaultFormData);
       await loadPolicies();
-    } catch (err: any) {
-      setError(err.response?.data?.error || 'Failed to save policy');
+    } catch (err: unknown) {
+      setError(getErrorMessage(err, 'Failed to save policy'));
     } finally {
       setSaving(false);
     }
@@ -153,13 +139,13 @@ const MirrorPoliciesPage: React.FC = () => {
     if (!policyToDelete) return;
     try {
       setError(null);
-      await apiClient.deleteMirrorPolicy(policyToDelete.id);
+      await api.deleteMirrorPolicy(policyToDelete.id);
       setDeleteDialogOpen(false);
       setPolicyToDelete(null);
       setSuccess('Policy deleted successfully');
       await loadPolicies();
-    } catch (err: any) {
-      setError(err.response?.data?.error || 'Failed to delete policy');
+    } catch (err: unknown) {
+      setError(getErrorMessage(err, 'Failed to delete policy'));
     }
   };
 
@@ -167,14 +153,14 @@ const MirrorPoliciesPage: React.FC = () => {
     try {
       setEvaluating(true);
       setEvaluateResult(null);
-      const result = await apiClient.evaluateMirrorPolicy({
+      const result = await api.evaluateMirrorPolicy({
         registry: evaluateForm.registry,
         namespace: evaluateForm.namespace,
         provider: evaluateForm.provider,
       });
       setEvaluateResult(result);
-    } catch (err: any) {
-      setError(err.response?.data?.error || 'Failed to evaluate policy');
+    } catch (err: unknown) {
+      setError(getErrorMessage(err, 'Failed to evaluate policy'));
     } finally {
       setEvaluating(false);
     }

@@ -1,6 +1,6 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
 import { User, AuthContextType, RoleTemplateInfo } from '../types';
-import { apiClient } from '../services/api';
+import api from '../services/api';
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
@@ -22,6 +22,41 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [allowedScopes, setAllowedScopes] = useState<string[]>([]);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+
+  const logout = useCallback(() => {
+    // Clear local session state and storage first
+    setUser(null);
+    setRoleTemplate(null);
+    setAllowedScopes([]);
+    setIsAuthenticated(false);
+    localStorage.removeItem('auth_token');
+    localStorage.removeItem('user');
+    localStorage.removeItem('role_template');
+    localStorage.removeItem('allowed_scopes');
+    // Clear any API key authorised in the Swagger UI "Authorize" dialog.
+    // swagger-ui-react persists this under the key "authorized" when persistAuthorization
+    // is enabled; leaving it in localStorage would expose the key across sessions.
+    localStorage.removeItem('authorized');
+    // Redirect to the backend logout endpoint, which terminates the OIDC SSO session
+    // at the identity provider level. Without this, the IdP session remains active and
+    // clicking "Login with OIDC" again would silently re-authenticate the user.
+    api.logout();
+  }, []);
+
+  const fetchCurrentUser = useCallback(async () => {
+    try {
+      const response = await api.getCurrentUserWithRole();
+      setUser(response.user);
+      setRoleTemplate(response.role_template || null);
+      setAllowedScopes(response.allowed_scopes || []);
+      localStorage.setItem('user', JSON.stringify(response.user));
+      localStorage.setItem('role_template', JSON.stringify(response.role_template));
+      localStorage.setItem('allowed_scopes', JSON.stringify(response.allowed_scopes));
+    } catch (error) {
+      console.error('Failed to fetch current user:', error);
+      logout();
+    }
+  }, [logout]);
 
   useEffect(() => {
     // Check if user is already logged in
@@ -56,27 +91,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       fetchCurrentUser();
     }
     setIsLoading(false);
-  }, []);
-
-  const fetchCurrentUser = async () => {
-    try {
-      const response = await apiClient.getCurrentUserWithRole();
-      setUser(response.user);
-      setRoleTemplate(response.role_template || null);
-      setAllowedScopes(response.allowed_scopes || []);
-      localStorage.setItem('user', JSON.stringify(response.user));
-      localStorage.setItem('role_template', JSON.stringify(response.role_template));
-      localStorage.setItem('allowed_scopes', JSON.stringify(response.allowed_scopes));
-    } catch (error) {
-      console.error('Failed to fetch current user:', error);
-      logout();
-    }
-  };
+  }, [fetchCurrentUser]);
 
   const login = async (userOrProvider: User | 'oidc' | 'azuread'): Promise<void> => {
     if (typeof userOrProvider === 'string') {
       // OAuth login - redirects to OAuth provider
-      apiClient.login(userOrProvider);
+      api.login(userOrProvider);
     } else {
       // Direct user object (dev mode) - SECURITY: Always fetch actual user data from API
       // Never trust client-provided user data for authorization decisions
@@ -88,29 +108,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
-  const logout = () => {
-    // Clear local session state and storage first
-    setUser(null);
-    setRoleTemplate(null);
-    setAllowedScopes([]);
-    setIsAuthenticated(false);
-    localStorage.removeItem('auth_token');
-    localStorage.removeItem('user');
-    localStorage.removeItem('role_template');
-    localStorage.removeItem('allowed_scopes');
-    // Clear any API key authorised in the Swagger UI "Authorize" dialog.
-    // swagger-ui-react persists this under the key "authorized" when persistAuthorization
-    // is enabled; leaving it in localStorage would expose the key across sessions.
-    localStorage.removeItem('authorized');
-    // Redirect to the backend logout endpoint, which terminates the OIDC SSO session
-    // at the identity provider level. Without this, the IdP session remains active and
-    // clicking "Login with OIDC" again would silently re-authenticate the user.
-    apiClient.logout();
-  };
-
   const refreshToken = async () => {
     try {
-      const response = await apiClient.refreshToken();
+      const response = await api.refreshToken();
       localStorage.setItem('auth_token', response.token);
     } catch (error) {
       console.error('Failed to refresh token:', error);

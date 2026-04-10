@@ -30,7 +30,8 @@ import FolderIcon from '@mui/icons-material/Folder';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import InfoIcon from '@mui/icons-material/Info';
-import { apiClient } from '../../services/api';
+import api from '../../services/api';
+import { getErrorMessage } from '../../utils/errors';
 import type { StorageConfigResponse, StorageConfigInput, StorageBackendType, SetupStatus } from '../../types';
 
 const StoragePage: React.FC = () => {
@@ -61,15 +62,15 @@ const StoragePage: React.FC = () => {
       setLoading(true);
       setError(null);
 
-      const status = await apiClient.getSetupStatus();
+      const status = await api.getSetupStatus();
       setSetupStatus(status);
 
       if (!status.setup_required) {
-        const configList = await apiClient.listStorageConfigs();
+        const configList = await api.listStorageConfigs();
         setConfigs(Array.isArray(configList) ? configList : []);
       }
-    } catch (err: any) {
-      setError(err.response?.data?.error || 'Failed to load storage configuration');
+    } catch (err: unknown) {
+      setError(getErrorMessage(err, 'Failed to load storage configuration'));
     } finally {
       setLoading(false);
     }
@@ -106,12 +107,12 @@ const StoragePage: React.FC = () => {
     try {
       setTesting(true);
       setError(null);
-      const result = await apiClient.testStorageConfig(formData);
+      const result = await api.testStorageConfig(formData);
       if (result.success) {
         setSuccess('Storage configuration is valid!');
       }
-    } catch (err: any) {
-      setError(err.response?.data?.error || 'Configuration test failed');
+    } catch (err: unknown) {
+      setError(getErrorMessage(err, 'Configuration test failed'));
     } finally {
       setTesting(false);
     }
@@ -121,12 +122,12 @@ const StoragePage: React.FC = () => {
     try {
       setSaving(true);
       setError(null);
-      await apiClient.createStorageConfig(formData);
+      await api.createStorageConfig(formData);
       setSuccess('Storage configuration saved successfully!');
       await loadData();
       setActiveStep(0);
-    } catch (err: any) {
-      setError(err.response?.data?.error || 'Failed to save configuration');
+    } catch (err: unknown) {
+      setError(getErrorMessage(err, 'Failed to save configuration'));
     } finally {
       setSaving(false);
     }

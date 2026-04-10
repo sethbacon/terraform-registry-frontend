@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   Container,
   Typography,
@@ -45,6 +45,8 @@ import { APIKey, UserMembership } from '../../types';
 import { REGISTRY_HOST } from '../../config';
 import { useAuth } from '../../contexts/AuthContext';
 import { AVAILABLE_SCOPES } from '../../types/rbac';
+import { getScopeInfo } from '../../utils';
+import { getErrorMessage } from '../../utils/errors';
 
 function getExpirationStatus(expiresAt?: string | null): 'expired' | 'expiring-soon' | 'active' | 'never' {
   if (!expiresAt) return 'never';
@@ -117,12 +119,7 @@ const APIKeysPage: React.FC = () => {
     ? AVAILABLE_SCOPES.map((s) => s.value)
     : allowedScopes;
 
-  useEffect(() => {
-    loadAPIKeys();
-    loadMemberships();
-  }, [user?.id]);
-
-  const loadMemberships = async () => {
+  const loadMemberships = useCallback(async () => {
     if (!user?.id) return;
     try {
       setMembershipsLoading(true);
@@ -135,7 +132,12 @@ const APIKeysPage: React.FC = () => {
     } finally {
       setMembershipsLoading(false);
     }
-  };
+  }, [user?.id]);
+
+  useEffect(() => {
+    loadAPIKeys();
+    loadMemberships();
+  }, [user?.id, loadMemberships]);
 
   const loadAPIKeys = async () => {
     try {
@@ -193,9 +195,9 @@ const APIKeysPage: React.FC = () => {
       });
       setNewKeyValue(response.key);
       await loadAPIKeys();
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Failed to create API key:', err);
-      setError(err.response?.data?.error || 'Failed to create API key. Please try again.');
+      setError(getErrorMessage(err, 'Failed to create API key. Please try again.'));
     }
   };
 
@@ -233,9 +235,9 @@ const APIKeysPage: React.FC = () => {
       setEditDialogOpen(false);
       setKeyToEdit(null);
       await loadAPIKeys();
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Failed to update API key:', err);
-      setError(err.response?.data?.error || 'Failed to update API key. Please try again.');
+      setError(getErrorMessage(err, 'Failed to update API key. Please try again.'));
     }
   };
 
@@ -264,9 +266,9 @@ const APIKeysPage: React.FC = () => {
         oldExpiresAt: response.old_expires_at,
       });
       await loadAPIKeys();
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Failed to rotate API key:', err);
-      setError(err.response?.data?.error || 'Failed to rotate API key. Please try again.');
+      setError(getErrorMessage(err, 'Failed to rotate API key. Please try again.'));
     }
   };
 
@@ -292,9 +294,9 @@ const APIKeysPage: React.FC = () => {
       setDeleteDialogOpen(false);
       setKeyToDelete(null);
       loadAPIKeys();
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Failed to delete API key:', err);
-      setError(err.response?.data?.error || 'Failed to delete API key. Please try again.');
+      setError(getErrorMessage(err, 'Failed to delete API key. Please try again.'));
     }
   };
 
@@ -317,14 +319,6 @@ const APIKeysPage: React.FC = () => {
         : [...prev.scopes, scope];
       return { ...prev, scopes: newScopes };
     });
-  };
-
-  const getScopeInfo = (scopeValue: string) => {
-    return AVAILABLE_SCOPES.find((s) => s.value === scopeValue) || {
-      value: scopeValue,
-      label: scopeValue,
-      description: '',
-    };
   };
 
   const renderExpirationChip = (expiresAt?: string | null) => {

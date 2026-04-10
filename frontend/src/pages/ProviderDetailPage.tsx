@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import {
   Container,
@@ -41,6 +41,7 @@ import Restore from '@mui/icons-material/Restore';
 import Add from '@mui/icons-material/Add';
 import GitHub from '@mui/icons-material/GitHub';
 import api from '../services/api';
+import { getErrorMessage } from '../utils/errors';
 import { Provider, ProviderVersion, ProviderDocEntry } from '../types';
 import { useAuth } from '../contexts/AuthContext';
 import { REGISTRY_HOST } from '../config';
@@ -84,37 +85,7 @@ const ProviderDetailPage: React.FC = () => {
   const [docs, setDocs] = useState<ProviderDocEntry[]>([]);
   const [docsLoading, setDocsLoading] = useState(false);
 
-  useEffect(() => {
-    loadProviderDetails();
-  }, [namespace, type]);
-
-  // Fetch doc index for mirrored providers when version is selected
-  useEffect(() => {
-    if (!provider?.source || !selectedVersion || !namespace || !type) return;
-    setDocsLoading(true);
-    api
-      .getProviderDocs(namespace, type, selectedVersion.version, undefined, 'hcl')
-      .then((data) => setDocs(data.docs))
-      .catch(() => { /* non-fatal */ })
-      .finally(() => setDocsLoading(false));
-  }, [provider?.source, selectedVersion?.version, namespace, type]);
-
-  // Auto-select first doc when Documentation tab is opened with no selection
-  useEffect(() => {
-    if (activeTab !== 1 || docParam || docs.length === 0) return;
-    const overview = docs.find((d) => d.category === 'overview');
-    const first = overview ?? docs[0];
-    setSearchParams(
-      (prev) => {
-        const next = new URLSearchParams(prev);
-        next.set('doc', `${first.category}/${first.slug}`);
-        return next;
-      },
-      { replace: true }
-    );
-  }, [activeTab, docParam, docs]);
-
-  const loadProviderDetails = async () => {
+  const loadProviderDetails = useCallback(async () => {
     if (!namespace || !type) return;
 
     try {
@@ -152,7 +123,37 @@ const ProviderDetailPage: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [namespace, type]);
+
+  useEffect(() => {
+    loadProviderDetails();
+  }, [loadProviderDetails]);
+
+  // Fetch doc index for mirrored providers when version is selected
+  useEffect(() => {
+    if (!provider?.source || !selectedVersion || !namespace || !type) return;
+    setDocsLoading(true);
+    api
+      .getProviderDocs(namespace, type, selectedVersion.version, undefined, 'hcl')
+      .then((data) => setDocs(data.docs))
+      .catch(() => { /* non-fatal */ })
+      .finally(() => setDocsLoading(false));
+  }, [provider?.source, selectedVersion, namespace, type]);
+
+  // Auto-select first doc when Documentation tab is opened with no selection
+  useEffect(() => {
+    if (activeTab !== 1 || docParam || docs.length === 0) return;
+    const overview = docs.find((d) => d.category === 'overview');
+    const first = overview ?? docs[0];
+    setSearchParams(
+      (prev) => {
+        const next = new URLSearchParams(prev);
+        next.set('doc', `${first.category}/${first.slug}`);
+        return next;
+      },
+      { replace: true }
+    );
+  }, [activeTab, docParam, docs, setSearchParams]);
 
   const handleCopySource = () => {
     if (!provider || !selectedVersion) return;
@@ -176,10 +177,9 @@ const ProviderDetailPage: React.FC = () => {
       setDeleting(true);
       await api.deleteProvider(namespace, type);
       navigate('/providers');
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Failed to delete provider:', err);
-      const message = err?.response?.data?.error || err?.message || 'Failed to delete provider. Please try again.';
-      setError(message);
+      setError(getErrorMessage(err, 'Failed to delete provider. Please try again.'));
     } finally {
       setDeleting(false);
       setDeleteProviderDialogOpen(false);
@@ -195,10 +195,9 @@ const ProviderDetailPage: React.FC = () => {
       // Reload the provider details
       await loadProviderDetails();
       setVersionToDelete(null);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Failed to delete version:', err);
-      const message = err?.response?.data?.error || err?.message || 'Failed to delete version. Please try again.';
-      setError(message);
+      setError(getErrorMessage(err, 'Failed to delete version. Please try again.'));
     } finally {
       setDeleting(false);
       setDeleteVersionDialogOpen(false);
@@ -219,10 +218,9 @@ const ProviderDetailPage: React.FC = () => {
       // Reload the provider details
       await loadProviderDetails();
       setDeprecationMessage('');
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Failed to deprecate version:', err);
-      const message = err?.response?.data?.error || err?.message || 'Failed to deprecate version. Please try again.';
-      setError(message);
+      setError(getErrorMessage(err, 'Failed to deprecate version. Please try again.'));
     } finally {
       setDeprecating(false);
       setDeprecateDialogOpen(false);
@@ -246,10 +244,9 @@ const ProviderDetailPage: React.FC = () => {
       await api.undeprecateProviderVersion(namespace, type, selectedVersion.version);
       // Reload the provider details
       await loadProviderDetails();
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Failed to remove deprecation:', err);
-      const message = err?.response?.data?.error || err?.message || 'Failed to remove deprecation. Please try again.';
-      setError(message);
+      setError(getErrorMessage(err, 'Failed to remove deprecation. Please try again.'));
     } finally {
       setDeprecating(false);
     }

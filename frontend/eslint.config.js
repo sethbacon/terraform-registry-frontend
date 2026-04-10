@@ -26,12 +26,12 @@ export default [
       'react-refresh': reactRefresh,
     },
     rules: {
-      // TypeScript rules — disabled for pre-existing codebase (address in follow-up)
-      '@typescript-eslint/no-explicit-any': 'off',
-      '@typescript-eslint/no-unused-vars': 'off',
-      // React hooks — only enforce the non-negotiable rule; exhaustive-deps is advisory
+      // TypeScript rules
+      '@typescript-eslint/no-explicit-any': 'error',
+      '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_', varsIgnorePattern: '^_' }],
+      // React hooks — enforce both rules to prevent stale closures and rule violations
       'react-hooks/rules-of-hooks': 'error',
-      'react-hooks/exhaustive-deps': 'off',
+      'react-hooks/exhaustive-deps': 'error',
       // React refresh — off to avoid warnings on context/hook files
       'react-refresh/only-export-components': 'off',
       // Disable rules that fire false positives in TSX files

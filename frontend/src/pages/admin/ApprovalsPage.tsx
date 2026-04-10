@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   Box,
   Button,
@@ -26,25 +26,13 @@ import RefreshIcon from '@mui/icons-material/Refresh';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import CancelIcon from '@mui/icons-material/Cancel';
 import HourglassEmptyIcon from '@mui/icons-material/HourglassEmpty';
-import { apiClient } from '../../services/api';
-
-interface ApprovalRequest {
-  id: string;
-  mirror_config_id: string;
-  organization_id?: string;
-  provider_namespace: string;
-  provider_name?: string;
-  reason?: string;
-  status: 'pending' | 'approved' | 'rejected';
-  reviewer_notes?: string;
-  reviewed_by?: string;
-  reviewed_at?: string;
-  created_at: string;
-  updated_at: string;
-}
+import api from '../../services/api';
+import { formatDate } from '../../utils';
+import { MirrorApprovalRequest } from '../../types/rbac';
+import { getErrorMessage } from '../../utils/errors';
 
 const ApprovalsPage: React.FC = () => {
-  const [approvals, setApprovals] = useState<ApprovalRequest[]>([]);
+  const [approvals, setApprovals] = useState<MirrorApprovalRequest[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
@@ -60,7 +48,7 @@ const ApprovalsPage: React.FC = () => {
 
   // Review dialog state
   const [reviewDialogOpen, setReviewDialogOpen] = useState(false);
-  const [reviewingApproval, setReviewingApproval] = useState<ApprovalRequest | null>(null);
+  const [reviewingApproval, setReviewingApproval] = useState<MirrorApprovalRequest | null>(null);
   const [reviewForm, setReviewForm] = useState<{
     status: 'approved' | 'rejected';
     notes: string;
@@ -70,30 +58,30 @@ const ApprovalsPage: React.FC = () => {
   // Status filter
   const [statusFilter, setStatusFilter] = useState<string>('');
 
-  useEffect(() => {
-    loadApprovals();
-  }, [statusFilter]);
-
-  const loadApprovals = async () => {
+  const loadApprovals = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
-      const data = await apiClient.listApprovalRequests(
+      const data = await api.listApprovalRequests(
         statusFilter ? { status: statusFilter } : undefined
       );
       setApprovals(Array.isArray(data) ? data : []);
-    } catch (err: any) {
-      setError(err.response?.data?.error || 'Failed to load approval requests');
+    } catch (err: unknown) {
+      setError(getErrorMessage(err, 'Failed to load approval requests'));
       console.error('Error loading approvals:', err);
     } finally {
       setLoading(false);
     }
-  };
+  }, [statusFilter]);
+
+  useEffect(() => {
+    loadApprovals();
+  }, [loadApprovals]);
 
   const handleCreate = async () => {
     try {
       setError(null);
-      await apiClient.createApprovalRequest({
+      await api.createApprovalRequest({
         mirror_config_id: createForm.mirror_config_id,
         provider_namespace: createForm.provider_namespace,
         provider_name: createForm.provider_name || undefined,
@@ -103,8 +91,8 @@ const ApprovalsPage: React.FC = () => {
       setCreateForm({ mirror_config_id: '', provider_namespace: '', provider_name: '', reason: '' });
       setSuccess('Approval request created successfully');
       await loadApprovals();
-    } catch (err: any) {
-      setError(err.response?.data?.error || 'Failed to create approval request');
+    } catch (err: unknown) {
+      setError(getErrorMessage(err, 'Failed to create approval request'));
     }
   };
 
@@ -113,7 +101,7 @@ const ApprovalsPage: React.FC = () => {
     try {
       setReviewing(true);
       setError(null);
-      await apiClient.reviewApproval(reviewingApproval.id, {
+      await api.reviewApproval(reviewingApproval.id, {
         status: reviewForm.status,
         notes: reviewForm.notes || undefined,
       });
@@ -122,14 +110,14 @@ const ApprovalsPage: React.FC = () => {
       setReviewForm({ status: 'approved', notes: '' });
       setSuccess(`Approval request ${reviewForm.status}`);
       await loadApprovals();
-    } catch (err: any) {
-      setError(err.response?.data?.error || 'Failed to review approval request');
+    } catch (err: unknown) {
+      setError(getErrorMessage(err, 'Failed to review approval request'));
     } finally {
       setReviewing(false);
     }
   };
 
-  const openReviewDialog = (approval: ApprovalRequest, defaultStatus: 'approved' | 'rejected') => {
+  const openReviewDialog = (approval: MirrorApprovalRequest, defaultStatus: 'approved' | 'rejected') => {
     setReviewingApproval(approval);
     setReviewForm({ status: defaultStatus, notes: '' });
     setReviewDialogOpen(true);
@@ -145,11 +133,6 @@ const ApprovalsPage: React.FC = () => {
       default:
         return <Chip label="Pending" size="small" color="warning" icon={<HourglassEmptyIcon />} />;
     }
-  };
-
-  const formatDate = (dateStr?: string) => {
-    if (!dateStr) return 'N/A';
-    return new Date(dateStr).toLocaleString();
   };
 
   if (loading) {
@@ -243,9 +226,9 @@ const ApprovalsPage: React.FC = () => {
                     <Typography variant="caption" color="textSecondary" display="block">
                       <strong>Reviewed:</strong> {formatDate(approval.reviewed_at)}
                     </Typography>
-                    {approval.reviewer_notes && (
+                    {approval.review_notes && (
                       <Typography variant="caption" color="textSecondary" display="block">
-                        <strong>Notes:</strong> {approval.reviewer_notes}
+                        <strong>Notes:</strong> {approval.review_notes}
                       </Typography>
                     )}
                   </>

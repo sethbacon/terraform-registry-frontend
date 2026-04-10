@@ -310,7 +310,5 @@ docker compose -f docker-compose.test.yml up -d --build
 
 ### Remaining Recommendations (not yet applied)
 
-- **Add SECURITY.md** for private vulnerability reporting
-- **Tighten ESLint rules** — `@typescript-eslint/no-explicit-any`, `@typescript-eslint/no-unused-vars`, and `react-hooks/exhaustive-deps` are currently disabled; re-enabling would improve code quality
 - **Enable secret scanning non-provider patterns and validity checks** for broader secret detection
 - **Add a tag protection rule** to prevent deletion of release tags (`v*.*.*`)

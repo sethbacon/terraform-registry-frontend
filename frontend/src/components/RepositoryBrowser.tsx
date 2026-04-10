@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   Box,
   Typography,
@@ -30,6 +30,7 @@ import RefreshIcon from '@mui/icons-material/Refresh';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import type { SCMRepository, SCMTag, SCMBranch } from '../types/scm';
 import apiClient from '../services/api';
+import { getErrorMessage, getErrorStatus } from '../utils/errors';
 
 interface RepositoryBrowserProps {
   providerId: string;
@@ -57,19 +58,7 @@ const RepositoryBrowser: React.FC<RepositoryBrowserProps> = ({
   const [searchQuery, setSearchQuery] = useState('');
   const [expandedRepo, setExpandedRepo] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (providerId) {
-      loadRepositories();
-    }
-  }, [providerId]);
-
-  useEffect(() => {
-    if (selectedRepository && expandedRepo === selectedRepository.full_name) {
-      loadTagsAndBranches(selectedRepository);
-    }
-  }, [selectedRepository, expandedRepo]);
-
-  const loadRepositories = async () => {
+  const loadRepositories = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
@@ -77,16 +66,10 @@ const RepositoryBrowser: React.FC<RepositoryBrowserProps> = ({
       const response = await apiClient.listSCMRepositories(providerId);
       const repos = response.repositories || [];
       setRepositories(repos);
-    } catch (err: any) {
-      const status: number | undefined = err.response?.status;
-      const serverMessage: string | undefined = err.response?.data?.error;
-      console.error('[RepositoryBrowser] loadRepositories failed', {
-        status,
-        serverMessage,
-        responseData: err.response?.data,
-        message: err.message,
-        url: err.config?.url,
-      });
+    } catch (err: unknown) {
+      const status = getErrorStatus(err);
+      const serverMessage = getErrorMessage(err, '');
+      console.error('[RepositoryBrowser] loadRepositories failed', err);
       if (status === 401 || status === 403) {
         setError(serverMessage || 'OAuth token is invalid or has been revoked; please reconnect to this SCM provider in Admin → SCM Providers.');
       } else {
@@ -95,9 +78,9 @@ const RepositoryBrowser: React.FC<RepositoryBrowserProps> = ({
     } finally {
       setLoading(false);
     }
-  };
+  }, [providerId]);
 
-  const loadTagsAndBranches = async (_repository: SCMRepository) => {
+  const loadTagsAndBranches = useCallback(async (_repository: SCMRepository) => {
     try {
       setLoadingTags(true);
       setError(null);
@@ -110,23 +93,29 @@ const RepositoryBrowser: React.FC<RepositoryBrowserProps> = ({
 
       setTags(tagsResponse.tags || []);
       setBranches(branchesResponse.branches || []);
-    } catch (err: any) {
-      const status: number | undefined = err.response?.status;
-      const serverMessage: string | undefined = err.response?.data?.error;
-      console.error('[RepositoryBrowser] loadTagsAndBranches failed', {
-        status,
-        serverMessage,
-        responseData: err.response?.data,
-        message: err.message,
-        url: err.config?.url,
-      });
+    } catch (err: unknown) {
+      const status = getErrorStatus(err);
+      const serverMessage = getErrorMessage(err, '');
+      console.error('[RepositoryBrowser] loadTagsAndBranches failed', err);
       setError(serverMessage ? `Error ${status}: ${serverMessage}` : `Failed to load tags and branches (HTTP ${status ?? 'unknown'})`);
       setTags([]);
       setBranches([]);
     } finally {
       setLoadingTags(false);
     }
-  };
+  }, [providerId]);
+
+  useEffect(() => {
+    if (providerId) {
+      loadRepositories();
+    }
+  }, [providerId, loadRepositories]);
+
+  useEffect(() => {
+    if (selectedRepository && expandedRepo === selectedRepository.full_name) {
+      loadTagsAndBranches(selectedRepository);
+    }
+  }, [selectedRepository, expandedRepo, loadTagsAndBranches]);
 
   const handleRepositoryClick = (repository: SCMRepository) => {
     if (expandedRepo === repository.full_name) {

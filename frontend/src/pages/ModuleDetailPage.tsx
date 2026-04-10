@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import MarkdownRenderer from '../components/MarkdownRenderer';
 import {
@@ -49,11 +49,12 @@ import WebhookIcon from '@mui/icons-material/Webhook';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import SecurityIcon from '@mui/icons-material/Security';
-import api, { apiClient } from '../services/api';
+import api from '../services/api';
 import { Module, ModuleVersion, ModuleScan, ModuleDoc } from '../types';
 import type { ModuleSCMLink, SCMWebhookEvent } from '../types/scm';
 import { useAuth } from '../contexts/AuthContext';
 import { REGISTRY_HOST } from '../config';
+import { getErrorMessage, getErrorStatus } from '../utils/errors';
 import PublishFromSCMWizard from '../components/PublishFromSCMWizard';
 
 const ModuleDetailPage: React.FC = () => {
@@ -102,20 +103,49 @@ const ModuleDetailPage: React.FC = () => {
   const [moduleDocs, setModuleDocs] = useState<ModuleDoc | null>(null);
   const [docsLoading, setDocsLoading] = useState(false);
 
-  useEffect(() => {
-    loadModuleDetails();
+  const loadSCMLink = useCallback(async (moduleId: string) => {
+    try {
+      const link = await api.getModuleSCMInfo(moduleId);
+      setScmLink(link);
+    } catch {
+      setScmLink(null); // 404 = not linked, which is fine
+    } finally {
+      setScmLinkLoaded(true);
+    }
+  }, []);
+
+  const loadModuleScan = useCallback(async (version: string) => {
+    if (!namespace || !name || !system) return;
+    setScanLoading(true);
+    setScanNotFound(false);
+    setModuleScan(null);
+    try {
+      const scan = await api.getModuleScan(namespace, name, system, version);
+      setModuleScan(scan);
+    } catch (err: unknown) {
+      if (getErrorStatus(err) === 404) {
+        setScanNotFound(true);
+      }
+    } finally {
+      setScanLoading(false);
+    }
   }, [namespace, name, system]);
 
-  useEffect(() => {
-    if (!selectedVersion?.version || !namespace || !name || !system) return;
-    setModuleScan(null);
-    setScanNotFound(false);
+  const loadModuleDocs = useCallback(async (version: string) => {
+    if (!namespace || !name || !system) return;
+    setDocsLoading(true);
     setModuleDocs(null);
-    if (canManage) loadModuleScan(selectedVersion.version);
-    loadModuleDocs(selectedVersion.version);
-  }, [selectedVersion?.version, canManage]);
+    try {
+      const docs = await api.getModuleDocs(namespace, name, system, version);
+      setModuleDocs(docs);
+    } catch {
+      setModuleDocs(null);
+    } finally {
+      setDocsLoading(false);
+    }
+  }, [namespace, name, system]);
 
-  const loadModuleDetails = async () => {
+  const loadModuleDetails = useCallback(async () => {
     if (!namespace || !name || !system) return;
 
     try {
@@ -162,39 +192,43 @@ const ModuleDetailPage: React.FC = () => {
 
       // Select latest version by default (preserve current selection if reloading)
       if (mergedVersions.length > 0) {
-        const currentVersion = selectedVersion?.version;
-        const matchingVersion = currentVersion
-          ? mergedVersions.find((v: ModuleVersion) => v.version === currentVersion)
-          : null;
-        setSelectedVersion(matchingVersion || mergedVersions[0]);
+        setSelectedVersion(prev => {
+          const currentVersion = prev?.version;
+          const matchingVersion = currentVersion
+            ? mergedVersions.find((v: ModuleVersion) => v.version === currentVersion)
+            : null;
+          return matchingVersion || mergedVersions[0];
+        });
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Failed to load module details:', err);
-      if (err?.response?.status === 404) {
+      if (getErrorStatus(err) === 404) {
         setError('Module not found');
       } else {
-        setError('Failed to load module details. Please try again.');
+        setError(getErrorMessage(err, 'Failed to load module details'));
       }
     } finally {
       setLoading(false);
     }
-  };
+  }, [namespace, name, system, isAuthenticated, loadSCMLink]);
 
-  const loadSCMLink = async (moduleId: string) => {
-    try {
-      const link = await apiClient.getModuleSCMInfo(moduleId);
-      setScmLink(link);
-    } catch {
-      setScmLink(null); // 404 = not linked, which is fine
-    } finally {
-      setScmLinkLoaded(true);
-    }
-  };
+  useEffect(() => {
+    loadModuleDetails();
+  }, [loadModuleDetails]);
+
+  useEffect(() => {
+    if (!selectedVersion?.version || !namespace || !name || !system) return;
+    setModuleScan(null);
+    setScanNotFound(false);
+    setModuleDocs(null);
+    if (canManage) loadModuleScan(selectedVersion.version);
+    loadModuleDocs(selectedVersion.version);
+  }, [selectedVersion?.version, canManage, loadModuleScan, loadModuleDocs, namespace, name, system]);
 
   const loadWebhookEvents = async (moduleId: string) => {
     try {
       setWebhookEventsLoading(true);
-      const events = await apiClient.getWebhookEvents(moduleId);
+      const events = await api.getWebhookEvents(moduleId);
       setWebhookEvents(Array.isArray(events) ? events : []);
     } catch {
       setWebhookEvents([]);
@@ -204,45 +238,14 @@ const ModuleDetailPage: React.FC = () => {
     }
   };
 
-  const loadModuleScan = async (version: string) => {
-    if (!namespace || !name || !system) return;
-    setScanLoading(true);
-    setScanNotFound(false);
-    setModuleScan(null);
-    try {
-      const scan = await apiClient.getModuleScan(namespace, name, system, version);
-      setModuleScan(scan);
-    } catch (err: any) {
-      if (err?.response?.status === 404) {
-        setScanNotFound(true);
-      }
-    } finally {
-      setScanLoading(false);
-    }
-  };
-
-  const loadModuleDocs = async (version: string) => {
-    if (!namespace || !name || !system) return;
-    setDocsLoading(true);
-    setModuleDocs(null);
-    try {
-      const docs = await apiClient.getModuleDocs(namespace, name, system, version);
-      setModuleDocs(docs);
-    } catch {
-      setModuleDocs(null);
-    } finally {
-      setDocsLoading(false);
-    }
-  };
-
   const handleSCMUnlink = async () => {
     if (!module?.id) return;
     try {
       setScmUnlinking(true);
-      await apiClient.unlinkModuleFromSCM(module.id);
+      await api.unlinkModuleFromSCM(module.id);
       setScmLink(null);
-    } catch (err: any) {
-      setError(err?.response?.data?.error || 'Failed to unlink repository');
+    } catch (err: unknown) {
+      setError(getErrorMessage(err, 'Failed to unlink repository'));
     } finally {
       setScmUnlinking(false);
     }
@@ -264,13 +267,13 @@ const ModuleDetailPage: React.FC = () => {
     console.log('Triggering manual sync for module:', module.id);
     try {
       setScmSyncing(true);
-      await apiClient.triggerManualSync(module.id);
+      await api.triggerManualSync(module.id);
       setError(null);
       // Start polling so newly imported versions appear without manual refresh.
       pollForVersions();
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Sync failed:', err);
-      setError(err?.response?.data?.error || 'Failed to trigger sync');
+      setError(getErrorMessage(err, 'Failed to trigger sync'));
     } finally {
       setScmSyncing(false);
     }
@@ -304,9 +307,9 @@ const ModuleDetailPage: React.FC = () => {
       setDeleting(true);
       await api.deleteModule(namespace, name, system);
       navigate('/modules');
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Failed to delete module:', err);
-      const message = err?.response?.data?.error || err?.message || 'Failed to delete module. Please try again.';
+      const message = getErrorMessage(err, 'Failed to delete module. Please try again.');
       setError(message);
     } finally {
       setDeleting(false);
@@ -323,9 +326,9 @@ const ModuleDetailPage: React.FC = () => {
       // Reload the module details
       await loadModuleDetails();
       setVersionToDelete(null);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Failed to delete version:', err);
-      const message = err?.response?.data?.error || err?.message || 'Failed to delete version. Please try again.';
+      const message = getErrorMessage(err, 'Failed to delete version. Please try again.');
       setError(message);
     } finally {
       setDeleting(false);
@@ -347,9 +350,9 @@ const ModuleDetailPage: React.FC = () => {
       // Reload the module details
       await loadModuleDetails();
       setDeprecationMessage('');
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Failed to deprecate version:', err);
-      const message = err?.response?.data?.error || err?.message || 'Failed to deprecate version. Please try again.';
+      const message = getErrorMessage(err, 'Failed to deprecate version. Please try again.');
       setError(message);
     } finally {
       setDeprecating(false);
@@ -365,9 +368,9 @@ const ModuleDetailPage: React.FC = () => {
       await api.undeprecateModuleVersion(namespace, name, system, selectedVersion.version);
       // Reload the module details
       await loadModuleDetails();
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Failed to remove deprecation:', err);
-      const message = err?.response?.data?.error || err?.message || 'Failed to remove deprecation. Please try again.';
+      const message = getErrorMessage(err, 'Failed to remove deprecation. Please try again.');
       setError(message);
     } finally {
       setDeprecating(false);

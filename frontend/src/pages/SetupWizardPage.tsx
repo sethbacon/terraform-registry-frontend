@@ -34,7 +34,8 @@ import ErrorIcon from '@mui/icons-material/Error';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import { useNavigate } from 'react-router-dom';
-import { apiClient } from '../services/api';
+import api from '../services/api';
+import { getErrorMessage } from '../utils/errors';
 import type {
   SetupStatus,
   OIDCConfigInput,
@@ -97,7 +98,7 @@ const SetupWizardPage: React.FC = () => {
   const checkSetupStatus = useCallback(async () => {
     try {
       setLoading(true);
-      const status = await apiClient.getSetupStatus();
+      const status = await api.getSetupStatus();
       setSetupStatus(status);
 
       if (status.setup_completed) {
@@ -106,13 +107,14 @@ const SetupWizardPage: React.FC = () => {
       }
 
       // Pre-fill redirect URL
-      if (!oidcForm.redirect_url) {
+      setOidcForm(prev => {
+        if (prev.redirect_url) return prev;
         const baseUrl = window.location.origin;
-        setOidcForm(prev => ({
+        return {
           ...prev,
           redirect_url: `${baseUrl}/api/v1/auth/callback`,
-        }));
-      }
+        };
+      });
     } catch {
       setError('Failed to check setup status');
     } finally {
@@ -129,15 +131,14 @@ const SetupWizardPage: React.FC = () => {
     try {
       setTokenValidating(true);
       setError(null);
-      const result = await apiClient.validateSetupToken(setupToken.trim());
+      const result = await api.validateSetupToken(setupToken.trim());
       if (result.valid) {
         setTokenValid(true);
         setSuccess('Setup token verified successfully');
         setActiveStep(1);
       }
-    } catch (err: any) {
-      const msg = err.response?.data?.error || 'Invalid setup token';
-      setError(msg);
+    } catch (err: unknown) {
+      setError(getErrorMessage(err, 'Invalid setup token'));
       setTokenValid(false);
     } finally {
       setTokenValidating(false);
@@ -150,13 +151,13 @@ const SetupWizardPage: React.FC = () => {
       setOidcTesting(true);
       setError(null);
       setOidcTestResult(null);
-      const result = await apiClient.testOIDCConfig(setupToken, oidcForm);
+      const result = await api.testOIDCConfig(setupToken, oidcForm);
       setOidcTestResult(result);
       if (!result.success) {
         setError(result.message);
       }
-    } catch (err: any) {
-      setError(err.response?.data?.error || 'OIDC test failed');
+    } catch (err: unknown) {
+      setError(getErrorMessage(err, 'OIDC test failed'));
     } finally {
       setOidcTesting(false);
     }
@@ -167,11 +168,11 @@ const SetupWizardPage: React.FC = () => {
     try {
       setOidcSaving(true);
       setError(null);
-      await apiClient.saveOIDCConfig(setupToken, oidcForm);
+      await api.saveOIDCConfig(setupToken, oidcForm);
       setOidcSaved(true);
       setSuccess('OIDC provider configured successfully');
-    } catch (err: any) {
-      setError(err.response?.data?.error || 'Failed to save OIDC configuration');
+    } catch (err: unknown) {
+      setError(getErrorMessage(err, 'Failed to save OIDC configuration'));
     } finally {
       setOidcSaving(false);
     }
@@ -183,15 +184,15 @@ const SetupWizardPage: React.FC = () => {
       setStorageTesting(true);
       setError(null);
       setStorageTestResult(null);
-      const result = await apiClient.testSetupStorageConfig(setupToken, storageForm);
+      const result = await api.testSetupStorageConfig(setupToken, storageForm);
       setStorageTestResult(result);
       if (!result.success) {
         setError(result.message);
       } else {
         await handleSaveStorage();
       }
-    } catch (err: any) {
-      setError(err.response?.data?.error || 'Storage test failed');
+    } catch (err: unknown) {
+      setError(getErrorMessage(err, 'Storage test failed'));
     } finally {
       setStorageTesting(false);
     }
@@ -202,11 +203,11 @@ const SetupWizardPage: React.FC = () => {
     try {
       setStorageSaving(true);
       setError(null);
-      await apiClient.saveSetupStorageConfig(setupToken, storageForm);
+      await api.saveSetupStorageConfig(setupToken, storageForm);
       setStorageSaved(true);
       setSuccess('Storage backend configured successfully');
-    } catch (err: any) {
-      setError(err.response?.data?.error || 'Failed to save storage configuration');
+    } catch (err: unknown) {
+      setError(getErrorMessage(err, 'Failed to save storage configuration'));
     } finally {
       setStorageSaving(false);
     }
@@ -217,11 +218,11 @@ const SetupWizardPage: React.FC = () => {
     try {
       setAdminSaving(true);
       setError(null);
-      await apiClient.configureAdmin(setupToken, { email: adminEmail.trim().toLowerCase() });
+      await api.configureAdmin(setupToken, { email: adminEmail.trim().toLowerCase() });
       setAdminSaved(true);
       setSuccess('Admin user configured successfully');
-    } catch (err: any) {
-      setError(err.response?.data?.error || 'Failed to configure admin user');
+    } catch (err: unknown) {
+      setError(getErrorMessage(err, 'Failed to configure admin user'));
     } finally {
       setAdminSaving(false);
     }
@@ -232,13 +233,12 @@ const SetupWizardPage: React.FC = () => {
     try {
       setCompleting(true);
       setError(null);
-      const result = await apiClient.completeSetup(setupToken);
+      const result = await api.completeSetup(setupToken);
       setSuccess(result.message);
       // Redirect to login after 3 seconds
       setTimeout(() => navigate('/login', { replace: true }), 3000);
-    } catch (err: any) {
-      const data = err.response?.data;
-      setError(data?.error || 'Failed to complete setup');
+    } catch (err: unknown) {
+      setError(getErrorMessage(err, 'Failed to complete setup'));
     } finally {
       setCompleting(false);
     }

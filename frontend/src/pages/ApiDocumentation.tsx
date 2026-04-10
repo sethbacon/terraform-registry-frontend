@@ -227,14 +227,18 @@ interface NavTag {
   label: string;
 }
 
-function buildNavTags(spec: any): NavTag[] {
+interface OpenAPISpec {
+  paths?: Record<string, Record<string, { tags?: string[] }>>;
+}
+
+function buildNavTags(spec: OpenAPISpec): NavTag[] {
   if (!spec?.paths) return [];
   const seen = new Set<string>();
   const tags: NavTag[] = [];
-  for (const methods of Object.values(spec.paths as Record<string, any>)) {
-    for (const op of Object.values(methods as Record<string, any>)) {
+  for (const methods of Object.values(spec.paths)) {
+    for (const op of Object.values(methods)) {
       if (!op?.tags) continue;
-      for (const tag of op.tags as string[]) {
+      for (const tag of op.tags) {
         if (!seen.has(tag)) {
           seen.add(tag);
           // Swagger UI uses this id pattern for tag sections
@@ -254,11 +258,12 @@ const ApiDocumentation: React.FC = () => {
 
   const [navTags, setNavTags] = useState<NavTag[]>([]);
   const [activeTag, setActiveTag] = useState<string>('');
-  const specRef = useRef<any>(null);
+  const specRef = useRef<OpenAPISpec | null>(null);
   const observerRef = useRef<IntersectionObserver | null>(null);
   const contentRef = useRef<HTMLDivElement>(null);
 
   // Forward the user's bearer token so "Try it out" works on auth'd endpoints.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- swagger-ui-react's Request type lacks headers
   const requestInterceptor = useCallback((req: any) => {
     const token = localStorage.getItem('auth_token');
     if (token) req.headers['Authorization'] = `Bearer ${token}`;
@@ -267,7 +272,7 @@ const ApiDocumentation: React.FC = () => {
 
   // onComplete fires when SwaggerUI finishes rendering.
   // We extract tags from the loaded spec at that point.
-  const onComplete = useCallback((system: any) => {
+  const onComplete = useCallback((system: { getState: () => { toJS: () => { spec?: { json?: OpenAPISpec } } } }) => {
     try {
       const spec = system.getState().toJS().spec?.json;
       if (spec) {
