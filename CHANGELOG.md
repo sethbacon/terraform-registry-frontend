@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- feat: add React error boundaries wrapping all routes — prevents white screen crashes by showing a user-friendly fallback UI with reload options
+
 ---
 
 ## [0.3.6] - 2026-04-10
