@@ -54,6 +54,7 @@ import { Module, ModuleVersion, ModuleScan, ModuleDoc } from '../types';
 import type { ModuleSCMLink, SCMWebhookEvent } from '../types/scm';
 import { useAuth } from '../contexts/AuthContext';
 import { REGISTRY_HOST } from '../config';
+import { getErrorMessage, getErrorStatus } from '../utils/errors';
 import PublishFromSCMWizard from '../components/PublishFromSCMWizard';
 
 const ModuleDetailPage: React.FC = () => {
@@ -121,8 +122,8 @@ const ModuleDetailPage: React.FC = () => {
     try {
       const scan = await api.getModuleScan(namespace, name, system, version);
       setModuleScan(scan);
-    } catch (err: any) {
-      if (err?.response?.status === 404) {
+    } catch (err: unknown) {
+      if (getErrorStatus(err) === 404) {
         setScanNotFound(true);
       }
     } finally {
@@ -199,12 +200,12 @@ const ModuleDetailPage: React.FC = () => {
           return matchingVersion || mergedVersions[0];
         });
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Failed to load module details:', err);
-      if (err?.response?.status === 404) {
+      if (getErrorStatus(err) === 404) {
         setError('Module not found');
       } else {
-        setError('Failed to load module details. Please try again.');
+        setError(getErrorMessage(err, 'Failed to load module details'));
       }
     } finally {
       setLoading(false);
@@ -243,8 +244,8 @@ const ModuleDetailPage: React.FC = () => {
       setScmUnlinking(true);
       await api.unlinkModuleFromSCM(module.id);
       setScmLink(null);
-    } catch (err: any) {
-      setError(err?.response?.data?.error || 'Failed to unlink repository');
+    } catch (err: unknown) {
+      setError(getErrorMessage(err, 'Failed to unlink repository'));
     } finally {
       setScmUnlinking(false);
     }
@@ -270,9 +271,9 @@ const ModuleDetailPage: React.FC = () => {
       setError(null);
       // Start polling so newly imported versions appear without manual refresh.
       pollForVersions();
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Sync failed:', err);
-      setError(err?.response?.data?.error || 'Failed to trigger sync');
+      setError(getErrorMessage(err, 'Failed to trigger sync'));
     } finally {
       setScmSyncing(false);
     }
@@ -306,9 +307,9 @@ const ModuleDetailPage: React.FC = () => {
       setDeleting(true);
       await api.deleteModule(namespace, name, system);
       navigate('/modules');
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Failed to delete module:', err);
-      const message = err?.response?.data?.error || err?.message || 'Failed to delete module. Please try again.';
+      const message = getErrorMessage(err, 'Failed to delete module. Please try again.');
       setError(message);
     } finally {
       setDeleting(false);
@@ -325,9 +326,9 @@ const ModuleDetailPage: React.FC = () => {
       // Reload the module details
       await loadModuleDetails();
       setVersionToDelete(null);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Failed to delete version:', err);
-      const message = err?.response?.data?.error || err?.message || 'Failed to delete version. Please try again.';
+      const message = getErrorMessage(err, 'Failed to delete version. Please try again.');
       setError(message);
     } finally {
       setDeleting(false);
@@ -349,9 +350,9 @@ const ModuleDetailPage: React.FC = () => {
       // Reload the module details
       await loadModuleDetails();
       setDeprecationMessage('');
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Failed to deprecate version:', err);
-      const message = err?.response?.data?.error || err?.message || 'Failed to deprecate version. Please try again.';
+      const message = getErrorMessage(err, 'Failed to deprecate version. Please try again.');
       setError(message);
     } finally {
       setDeprecating(false);
@@ -367,9 +368,9 @@ const ModuleDetailPage: React.FC = () => {
       await api.undeprecateModuleVersion(namespace, name, system, selectedVersion.version);
       // Reload the module details
       await loadModuleDetails();
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Failed to remove deprecation:', err);
-      const message = err?.response?.data?.error || err?.message || 'Failed to remove deprecation. Please try again.';
+      const message = getErrorMessage(err, 'Failed to remove deprecation. Please try again.');
       setError(message);
     } finally {
       setDeprecating(false);

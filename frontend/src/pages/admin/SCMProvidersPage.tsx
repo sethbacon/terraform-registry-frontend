@@ -35,6 +35,7 @@ import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import LinkOffIcon from '@mui/icons-material/LinkOff';
 import api from '../../services/api';
+import { getErrorMessage } from '../../utils/errors';
 import { useAuth } from '../../contexts/AuthContext';
 import type { SCMProvider, SCMProviderType, CreateSCMProviderRequest } from '../../types/scm';
 import type { UserMembership } from '../../types';
@@ -88,7 +89,7 @@ const SCMProvidersPage: React.FC = () => {
           });
         }
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Error loading memberships:', err);
     }
   }, [user?.id]);
@@ -118,8 +119,8 @@ const SCMProvidersPage: React.FC = () => {
         }
       });
       setTokenStatuses(statuses);
-    } catch (err: any) {
-      setError(err.response?.data?.error || 'Failed to load SCM providers');
+    } catch (err: unknown) {
+      setError(getErrorMessage(err, 'Failed to load SCM providers'));
       console.error('Error loading providers:', err);
     } finally {
       setLoading(false);
@@ -133,8 +134,8 @@ const SCMProvidersPage: React.FC = () => {
       setCreateDialogOpen(false);
       resetForm();
       await loadProviders();
-    } catch (err: any) {
-      setError(err.response?.data?.error || 'Failed to create provider');
+    } catch (err: unknown) {
+      setError(getErrorMessage(err, 'Failed to create provider'));
     }
   };
 
@@ -153,8 +154,8 @@ const SCMProvidersPage: React.FC = () => {
       setEditingProvider(null);
       resetForm();
       await loadProviders();
-    } catch (err: any) {
-      setError(err.response?.data?.error || 'Failed to update provider');
+    } catch (err: unknown) {
+      setError(getErrorMessage(err, 'Failed to update provider'));
     }
   };
 
@@ -166,8 +167,8 @@ const SCMProvidersPage: React.FC = () => {
       setDeleteConfirmOpen(false);
       setProviderToDelete(null);
       await loadProviders();
-    } catch (err: any) {
-      setError(err.response?.data?.error || 'Failed to delete provider');
+    } catch (err: unknown) {
+      setError(getErrorMessage(err, 'Failed to delete provider'));
     }
   };
 
@@ -180,8 +181,8 @@ const SCMProvidersPage: React.FC = () => {
       try {
         const response = await api.initiateSCMOAuth(provider.id);
         window.location.href = response.authorization_url;
-      } catch (err: any) {
-        setError(err.response?.data?.error || 'Failed to initiate OAuth');
+      } catch (err: unknown) {
+        setError(getErrorMessage(err, 'Failed to initiate OAuth'));
       }
     }
   };
@@ -194,8 +195,8 @@ const SCMProvidersPage: React.FC = () => {
       setPatDialogOpen(false);
       setPatValue('');
       setPatProvider(null);
-    } catch (err: any) {
-      setError(err.response?.data?.error || 'Failed to save access token');
+    } catch (err: unknown) {
+      setError(getErrorMessage(err, 'Failed to save access token'));
     }
   };
 
@@ -496,8 +497,8 @@ const SCMProvidersPage: React.FC = () => {
                         try {
                           await api.revokeSCMToken(provider.id);
                           await loadProviders();
-                        } catch (err: any) {
-                          setError(err.response?.data?.error || 'Failed to disconnect');
+                        } catch (err: unknown) {
+                          setError(getErrorMessage(err, 'Failed to disconnect'));
                         }
                       }}
                     >

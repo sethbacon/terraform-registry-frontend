@@ -46,6 +46,7 @@ import { REGISTRY_HOST } from '../../config';
 import { useAuth } from '../../contexts/AuthContext';
 import { AVAILABLE_SCOPES } from '../../types/rbac';
 import { getScopeInfo } from '../../utils';
+import { getErrorMessage } from '../../utils/errors';
 
 function getExpirationStatus(expiresAt?: string | null): 'expired' | 'expiring-soon' | 'active' | 'never' {
   if (!expiresAt) return 'never';
@@ -194,9 +195,9 @@ const APIKeysPage: React.FC = () => {
       });
       setNewKeyValue(response.key);
       await loadAPIKeys();
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Failed to create API key:', err);
-      setError(err.response?.data?.error || 'Failed to create API key. Please try again.');
+      setError(getErrorMessage(err, 'Failed to create API key. Please try again.'));
     }
   };
 
@@ -234,9 +235,9 @@ const APIKeysPage: React.FC = () => {
       setEditDialogOpen(false);
       setKeyToEdit(null);
       await loadAPIKeys();
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Failed to update API key:', err);
-      setError(err.response?.data?.error || 'Failed to update API key. Please try again.');
+      setError(getErrorMessage(err, 'Failed to update API key. Please try again.'));
     }
   };
 
@@ -265,9 +266,9 @@ const APIKeysPage: React.FC = () => {
         oldExpiresAt: response.old_expires_at,
       });
       await loadAPIKeys();
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Failed to rotate API key:', err);
-      setError(err.response?.data?.error || 'Failed to rotate API key. Please try again.');
+      setError(getErrorMessage(err, 'Failed to rotate API key. Please try again.'));
     }
   };
 
@@ -293,9 +294,9 @@ const APIKeysPage: React.FC = () => {
       setDeleteDialogOpen(false);
       setKeyToDelete(null);
       loadAPIKeys();
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Failed to delete API key:', err);
-      setError(err.response?.data?.error || 'Failed to delete API key. Please try again.');
+      setError(getErrorMessage(err, 'Failed to delete API key. Please try again.'));
     }
   };
 

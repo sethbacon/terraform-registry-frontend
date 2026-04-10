@@ -18,6 +18,7 @@ import CloudUpload from '@mui/icons-material/CloudUpload';
 import SCMIcon from '@mui/icons-material/AccountTree';
 import ArrowBack from '@mui/icons-material/ArrowBack';
 import api from '../../services/api';
+import { getErrorMessage } from '../../utils/errors';
 import PublishFromSCMWizard from '../../components/PublishFromSCMWizard';
 
 type ModuleMethod = 'choose' | 'upload' | 'scm';
@@ -84,8 +85,8 @@ const ModuleUploadPage: React.FC = () => {
       await api.uploadModule(formData);
 
       navigate(`/modules/${moduleNamespace}/${moduleName}/${moduleProvider}`);
-    } catch (err: any) {
-      setError(err.response?.data?.error || 'Failed to upload module. Please try again.');
+    } catch (err: unknown) {
+      setError(getErrorMessage(err, 'Failed to upload module. Please try again.'));
       setUploading(false);
     }
   };
@@ -105,8 +106,8 @@ const ModuleUploadPage: React.FC = () => {
         description: scmDescription || undefined,
       });
       setScmModuleId(module.id);
-    } catch (err: any) {
-      setScmError(err.response?.data?.error || 'Failed to create module record');
+    } catch (err: unknown) {
+      setScmError(getErrorMessage(err, 'Failed to create module record'));
     } finally {
       setScmCreating(false);
     }

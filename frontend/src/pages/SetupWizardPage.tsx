@@ -35,6 +35,7 @@ import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
+import { getErrorMessage } from '../utils/errors';
 import type {
   SetupStatus,
   OIDCConfigInput,
@@ -136,9 +137,8 @@ const SetupWizardPage: React.FC = () => {
         setSuccess('Setup token verified successfully');
         setActiveStep(1);
       }
-    } catch (err: any) {
-      const msg = err.response?.data?.error || 'Invalid setup token';
-      setError(msg);
+    } catch (err: unknown) {
+      setError(getErrorMessage(err, 'Invalid setup token'));
       setTokenValid(false);
     } finally {
       setTokenValidating(false);
@@ -156,8 +156,8 @@ const SetupWizardPage: React.FC = () => {
       if (!result.success) {
         setError(result.message);
       }
-    } catch (err: any) {
-      setError(err.response?.data?.error || 'OIDC test failed');
+    } catch (err: unknown) {
+      setError(getErrorMessage(err, 'OIDC test failed'));
     } finally {
       setOidcTesting(false);
     }
@@ -171,8 +171,8 @@ const SetupWizardPage: React.FC = () => {
       await api.saveOIDCConfig(setupToken, oidcForm);
       setOidcSaved(true);
       setSuccess('OIDC provider configured successfully');
-    } catch (err: any) {
-      setError(err.response?.data?.error || 'Failed to save OIDC configuration');
+    } catch (err: unknown) {
+      setError(getErrorMessage(err, 'Failed to save OIDC configuration'));
     } finally {
       setOidcSaving(false);
     }
@@ -191,8 +191,8 @@ const SetupWizardPage: React.FC = () => {
       } else {
         await handleSaveStorage();
       }
-    } catch (err: any) {
-      setError(err.response?.data?.error || 'Storage test failed');
+    } catch (err: unknown) {
+      setError(getErrorMessage(err, 'Storage test failed'));
     } finally {
       setStorageTesting(false);
     }
@@ -206,8 +206,8 @@ const SetupWizardPage: React.FC = () => {
       await api.saveSetupStorageConfig(setupToken, storageForm);
       setStorageSaved(true);
       setSuccess('Storage backend configured successfully');
-    } catch (err: any) {
-      setError(err.response?.data?.error || 'Failed to save storage configuration');
+    } catch (err: unknown) {
+      setError(getErrorMessage(err, 'Failed to save storage configuration'));
     } finally {
       setStorageSaving(false);
     }
@@ -221,8 +221,8 @@ const SetupWizardPage: React.FC = () => {
       await api.configureAdmin(setupToken, { email: adminEmail.trim().toLowerCase() });
       setAdminSaved(true);
       setSuccess('Admin user configured successfully');
-    } catch (err: any) {
-      setError(err.response?.data?.error || 'Failed to configure admin user');
+    } catch (err: unknown) {
+      setError(getErrorMessage(err, 'Failed to configure admin user'));
     } finally {
       setAdminSaving(false);
     }
@@ -237,9 +237,8 @@ const SetupWizardPage: React.FC = () => {
       setSuccess(result.message);
       // Redirect to login after 3 seconds
       setTimeout(() => navigate('/login', { replace: true }), 3000);
-    } catch (err: any) {
-      const data = err.response?.data;
-      setError(data?.error || 'Failed to complete setup');
+    } catch (err: unknown) {
+      setError(getErrorMessage(err, 'Failed to complete setup'));
     } finally {
       setCompleting(false);
     }

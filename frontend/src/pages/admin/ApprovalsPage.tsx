@@ -29,6 +29,7 @@ import HourglassEmptyIcon from '@mui/icons-material/HourglassEmpty';
 import api from '../../services/api';
 import { formatDate } from '../../utils';
 import { MirrorApprovalRequest } from '../../types/rbac';
+import { getErrorMessage } from '../../utils/errors';
 
 const ApprovalsPage: React.FC = () => {
   const [approvals, setApprovals] = useState<MirrorApprovalRequest[]>([]);
@@ -65,8 +66,8 @@ const ApprovalsPage: React.FC = () => {
         statusFilter ? { status: statusFilter } : undefined
       );
       setApprovals(Array.isArray(data) ? data : []);
-    } catch (err: any) {
-      setError(err.response?.data?.error || 'Failed to load approval requests');
+    } catch (err: unknown) {
+      setError(getErrorMessage(err, 'Failed to load approval requests'));
       console.error('Error loading approvals:', err);
     } finally {
       setLoading(false);
@@ -90,8 +91,8 @@ const ApprovalsPage: React.FC = () => {
       setCreateForm({ mirror_config_id: '', provider_namespace: '', provider_name: '', reason: '' });
       setSuccess('Approval request created successfully');
       await loadApprovals();
-    } catch (err: any) {
-      setError(err.response?.data?.error || 'Failed to create approval request');
+    } catch (err: unknown) {
+      setError(getErrorMessage(err, 'Failed to create approval request'));
     }
   };
 
@@ -109,8 +110,8 @@ const ApprovalsPage: React.FC = () => {
       setReviewForm({ status: 'approved', notes: '' });
       setSuccess(`Approval request ${reviewForm.status}`);
       await loadApprovals();
-    } catch (err: any) {
-      setError(err.response?.data?.error || 'Failed to review approval request');
+    } catch (err: unknown) {
+      setError(getErrorMessage(err, 'Failed to review approval request'));
     } finally {
       setReviewing(false);
     }

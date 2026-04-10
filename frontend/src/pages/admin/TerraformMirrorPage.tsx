@@ -42,6 +42,7 @@ import RefreshIcon from '@mui/icons-material/Refresh';
 import SyncIcon from '@mui/icons-material/Sync';
 
 import api from '../../services/api';
+import { getErrorMessage } from '../../utils/errors';
 import {
   type TerraformMirrorConfig,
   type TerraformMirrorStatusResponse,
@@ -398,8 +399,8 @@ const TerraformMirrorPage: React.FC = () => {
     try {
       const data = await api.listTerraformMirrorConfigs();
       setConfigs(data.configs ?? []);
-    } catch (err: any) {
-      setError(err?.response?.data?.error ?? 'Failed to load Terraform mirror configurations');
+    } catch (err: unknown) {
+      setError(getErrorMessage(err, 'Failed to load Terraform mirror configurations'));
     } finally {
       setLoading(false);
     }
@@ -444,8 +445,8 @@ const TerraformMirrorPage: React.FC = () => {
       setCreateVersionFilter('');
       setCreatePlatformFilter('');
       loadConfigs();
-    } catch (err: any) {
-      setError(err?.response?.data?.error ?? 'Failed to create mirror config');
+    } catch (err: unknown) {
+      setError(getErrorMessage(err, 'Failed to create mirror config'));
     } finally {
       setCreating(false);
     }
@@ -486,8 +487,8 @@ const TerraformMirrorPage: React.FC = () => {
       setSuccess(`Mirror "${editConfig.name}" updated`);
       setEditConfig(null);
       loadConfigs();
-    } catch (err: any) {
-      setError(err?.response?.data?.error ?? 'Failed to update mirror config');
+    } catch (err: unknown) {
+      setError(getErrorMessage(err, 'Failed to update mirror config'));
     } finally {
       setEditing(false);
     }
@@ -504,8 +505,8 @@ const TerraformMirrorPage: React.FC = () => {
       setSuccess(`Mirror "${deleteConfig.name}" deleted`);
       setDeleteConfig(null);
       loadConfigs();
-    } catch (err: any) {
-      setError(err?.response?.data?.error ?? 'Failed to delete mirror config');
+    } catch (err: unknown) {
+      setError(getErrorMessage(err, 'Failed to delete mirror config'));
     } finally {
       setDeleting(false);
     }
@@ -519,8 +520,8 @@ const TerraformMirrorPage: React.FC = () => {
     try {
       await api.triggerTerraformMirrorSync(config.id);
       setSuccess(`Sync triggered for "${config.name}"`);
-    } catch (err: any) {
-      setError(err?.response?.data?.error ?? 'Failed to trigger sync');
+    } catch (err: unknown) {
+      setError(getErrorMessage(err, 'Failed to trigger sync'));
     } finally {
       setSyncingIds((prev) => {
         const next = new Set(prev);
@@ -561,8 +562,8 @@ const TerraformMirrorPage: React.FC = () => {
       setSuccess(`Version ${deleteVersion.version} deleted`);
       setDeleteVersion(null);
       openVersions(versionsConfig);
-    } catch (err: any) {
-      setError(err?.response?.data?.error ?? 'Failed to delete version');
+    } catch (err: unknown) {
+      setError(getErrorMessage(err, 'Failed to delete version'));
       setDeleteVersion(null);
     } finally {
       setDeletingVersion(false);

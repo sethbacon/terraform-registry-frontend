@@ -34,6 +34,7 @@ import BlockIcon from '@mui/icons-material/Block';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import api from '../../services/api';
 import { MirrorPolicy } from '../../types/rbac';
+import { getErrorMessage } from '../../utils/errors';
 
 interface PolicyFormData {
   name: string;
@@ -78,7 +79,7 @@ const MirrorPoliciesPage: React.FC = () => {
   // Evaluate dialog
   const [evaluateDialogOpen, setEvaluateDialogOpen] = useState(false);
   const [evaluateForm, setEvaluateForm] = useState({ registry: '', namespace: '', provider: '' });
-  const [evaluateResult, setEvaluateResult] = useState<any>(null);
+  const [evaluateResult, setEvaluateResult] = useState<{ allowed: boolean; matched_policy?: string; reason?: string } | null>(null);
   const [evaluating, setEvaluating] = useState(false);
 
   useEffect(() => {
@@ -91,8 +92,8 @@ const MirrorPoliciesPage: React.FC = () => {
       setError(null);
       const data = await api.listMirrorPolicies();
       setPolicies(Array.isArray(data) ? data : []);
-    } catch (err: any) {
-      setError(err.response?.data?.error || 'Failed to load mirror policies');
+    } catch (err: unknown) {
+      setError(getErrorMessage(err, 'Failed to load mirror policies'));
       console.error('Error loading policies:', err);
     } finally {
       setLoading(false);
@@ -127,8 +128,8 @@ const MirrorPoliciesPage: React.FC = () => {
       setEditingPolicy(null);
       setFormData(defaultFormData);
       await loadPolicies();
-    } catch (err: any) {
-      setError(err.response?.data?.error || 'Failed to save policy');
+    } catch (err: unknown) {
+      setError(getErrorMessage(err, 'Failed to save policy'));
     } finally {
       setSaving(false);
     }
@@ -143,8 +144,8 @@ const MirrorPoliciesPage: React.FC = () => {
       setPolicyToDelete(null);
       setSuccess('Policy deleted successfully');
       await loadPolicies();
-    } catch (err: any) {
-      setError(err.response?.data?.error || 'Failed to delete policy');
+    } catch (err: unknown) {
+      setError(getErrorMessage(err, 'Failed to delete policy'));
     }
   };
 
@@ -158,8 +159,8 @@ const MirrorPoliciesPage: React.FC = () => {
         provider: evaluateForm.provider,
       });
       setEvaluateResult(result);
-    } catch (err: any) {
-      setError(err.response?.data?.error || 'Failed to evaluate policy');
+    } catch (err: unknown) {
+      setError(getErrorMessage(err, 'Failed to evaluate policy'));
     } finally {
       setEvaluating(false);
     }

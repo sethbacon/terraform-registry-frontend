@@ -41,6 +41,7 @@ import Restore from '@mui/icons-material/Restore';
 import Add from '@mui/icons-material/Add';
 import GitHub from '@mui/icons-material/GitHub';
 import api from '../services/api';
+import { getErrorMessage } from '../utils/errors';
 import { Provider, ProviderVersion, ProviderDocEntry } from '../types';
 import { useAuth } from '../contexts/AuthContext';
 import { REGISTRY_HOST } from '../config';
@@ -176,10 +177,9 @@ const ProviderDetailPage: React.FC = () => {
       setDeleting(true);
       await api.deleteProvider(namespace, type);
       navigate('/providers');
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Failed to delete provider:', err);
-      const message = err?.response?.data?.error || err?.message || 'Failed to delete provider. Please try again.';
-      setError(message);
+      setError(getErrorMessage(err, 'Failed to delete provider. Please try again.'));
     } finally {
       setDeleting(false);
       setDeleteProviderDialogOpen(false);
@@ -195,10 +195,9 @@ const ProviderDetailPage: React.FC = () => {
       // Reload the provider details
       await loadProviderDetails();
       setVersionToDelete(null);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Failed to delete version:', err);
-      const message = err?.response?.data?.error || err?.message || 'Failed to delete version. Please try again.';
-      setError(message);
+      setError(getErrorMessage(err, 'Failed to delete version. Please try again.'));
     } finally {
       setDeleting(false);
       setDeleteVersionDialogOpen(false);
@@ -219,10 +218,9 @@ const ProviderDetailPage: React.FC = () => {
       // Reload the provider details
       await loadProviderDetails();
       setDeprecationMessage('');
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Failed to deprecate version:', err);
-      const message = err?.response?.data?.error || err?.message || 'Failed to deprecate version. Please try again.';
-      setError(message);
+      setError(getErrorMessage(err, 'Failed to deprecate version. Please try again.'));
     } finally {
       setDeprecating(false);
       setDeprecateDialogOpen(false);
@@ -246,10 +244,9 @@ const ProviderDetailPage: React.FC = () => {
       await api.undeprecateProviderVersion(namespace, type, selectedVersion.version);
       // Reload the provider details
       await loadProviderDetails();
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Failed to remove deprecation:', err);
-      const message = err?.response?.data?.error || err?.message || 'Failed to remove deprecation. Please try again.';
-      setError(message);
+      setError(getErrorMessage(err, 'Failed to remove deprecation. Please try again.'));
     } finally {
       setDeprecating(false);
     }

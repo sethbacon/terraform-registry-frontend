@@ -23,6 +23,7 @@ import CloudUpload from '@mui/icons-material/CloudUpload';
 import CloudDownload from '@mui/icons-material/CloudDownload';
 import ArrowBack from '@mui/icons-material/ArrowBack';
 import api from '../../services/api';
+import { getErrorMessage } from '../../utils/errors';
 
 type ProviderMethod = 'choose' | 'upload' | 'mirror';
 
@@ -81,8 +82,8 @@ const ProviderUploadPage: React.FC = () => {
       await api.uploadProvider(formData);
 
       navigate(`/providers/${providerNamespace}/${providerName}`);
-    } catch (err: any) {
-      setError(err.response?.data?.error || 'Failed to upload provider. Please try again.');
+    } catch (err: unknown) {
+      setError(getErrorMessage(err, 'Failed to upload provider. Please try again.'));
       setUploading(false);
     }
   };

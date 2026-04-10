@@ -30,6 +30,7 @@ import RefreshIcon from '@mui/icons-material/Refresh';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import type { SCMRepository, SCMTag, SCMBranch } from '../types/scm';
 import apiClient from '../services/api';
+import { getErrorMessage, getErrorStatus } from '../utils/errors';
 
 interface RepositoryBrowserProps {
   providerId: string;
@@ -65,16 +66,10 @@ const RepositoryBrowser: React.FC<RepositoryBrowserProps> = ({
       const response = await apiClient.listSCMRepositories(providerId);
       const repos = response.repositories || [];
       setRepositories(repos);
-    } catch (err: any) {
-      const status: number | undefined = err.response?.status;
-      const serverMessage: string | undefined = err.response?.data?.error;
-      console.error('[RepositoryBrowser] loadRepositories failed', {
-        status,
-        serverMessage,
-        responseData: err.response?.data,
-        message: err.message,
-        url: err.config?.url,
-      });
+    } catch (err: unknown) {
+      const status = getErrorStatus(err);
+      const serverMessage = getErrorMessage(err, '');
+      console.error('[RepositoryBrowser] loadRepositories failed', err);
       if (status === 401 || status === 403) {
         setError(serverMessage || 'OAuth token is invalid or has been revoked; please reconnect to this SCM provider in Admin → SCM Providers.');
       } else {
@@ -98,16 +93,10 @@ const RepositoryBrowser: React.FC<RepositoryBrowserProps> = ({
 
       setTags(tagsResponse.tags || []);
       setBranches(branchesResponse.branches || []);
-    } catch (err: any) {
-      const status: number | undefined = err.response?.status;
-      const serverMessage: string | undefined = err.response?.data?.error;
-      console.error('[RepositoryBrowser] loadTagsAndBranches failed', {
-        status,
-        serverMessage,
-        responseData: err.response?.data,
-        message: err.message,
-        url: err.config?.url,
-      });
+    } catch (err: unknown) {
+      const status = getErrorStatus(err);
+      const serverMessage = getErrorMessage(err, '');
+      console.error('[RepositoryBrowser] loadTagsAndBranches failed', err);
       setError(serverMessage ? `Error ${status}: ${serverMessage}` : `Failed to load tags and branches (HTTP ${status ?? 'unknown'})`);
       setTags([]);
       setBranches([]);

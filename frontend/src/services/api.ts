@@ -70,9 +70,9 @@ class ApiClient {
     );
   }
 
-  private getMockResponse(url: string): any {
+  private getMockResponse(url: string): { data: unknown; status: number } {
     // Mock responses for development when backend is not available
-    let mockData: any = { data: [] };
+    let mockData: { data: unknown } = { data: [] };
 
     if (url.includes('/modules') && !url.includes('/versions')) {
       mockData.data = { modules: [], meta: { total: 0, limit: 10, offset: 0 } };
@@ -134,7 +134,7 @@ class ApiClient {
 
   // Modules
   async searchModules(options?: { query?: string; limit?: number; offset?: number; page?: number; per_page?: number }) {
-    const params: any = {};
+    const params: Record<string, string | number> = {};
 
     if (options?.query) params.q = options.query;
     if (options?.limit) params.limit = options.limit;
@@ -202,7 +202,7 @@ class ApiClient {
 
   // Providers
   async searchProviders(options?: { query?: string; limit?: number; offset?: number; page?: number; per_page?: number }) {
-    const params: any = {};
+    const params: Record<string, string | number> = {};
 
     if (options?.query) params.q = options.query;
     if (options?.limit) params.limit = options.limit;
@@ -277,17 +277,17 @@ class ApiClient {
   }
 
   // Helper to transform user from API format to frontend format
-  private transformUser(user: any) {
+  private transformUser(user: Record<string, unknown>) {
     return {
-      id: user.ID || user.id,
-      email: user.Email || user.email,
-      name: user.Name || user.name,
-      oidc_sub: user.OidcSub || user.oidc_sub,
-      role_template_id: user.RoleTemplateID || user.role_template_id,
-      role_template_name: user.RoleTemplateName || user.role_template_name,
-      role_template_display_name: user.RoleTemplateDisplayName || user.role_template_display_name,
-      created_at: user.CreatedAt || user.created_at,
-      updated_at: user.UpdatedAt || user.updated_at,
+      id: (user.ID || user.id) as string,
+      email: (user.Email || user.email) as string,
+      name: (user.Name || user.name) as string,
+      oidc_sub: (user.OidcSub || user.oidc_sub) as string | undefined,
+      role_template_id: (user.RoleTemplateID || user.role_template_id) as string | undefined,
+      role_template_name: (user.RoleTemplateName || user.role_template_name) as string | undefined,
+      role_template_display_name: (user.RoleTemplateDisplayName || user.role_template_display_name) as string | undefined,
+      created_at: (user.CreatedAt || user.created_at) as string,
+      updated_at: (user.UpdatedAt || user.updated_at) as string,
     };
   }
 
@@ -298,7 +298,7 @@ class ApiClient {
     });
     const users = response.data.users || [];
     return {
-      users: users.map((user: any) => this.transformUser(user)),
+      users: users.map((user: Record<string, unknown>) => this.transformUser(user)),
       pagination: response.data.pagination,
     };
   }
@@ -309,7 +309,7 @@ class ApiClient {
     });
     const users = response.data.users || [];
     return {
-      users: users.map((user: any) => this.transformUser(user)),
+      users: users.map((user: Record<string, unknown>) => this.transformUser(user)),
       pagination: response.data.pagination,
     };
   }
@@ -335,16 +335,16 @@ class ApiClient {
   }
 
   // Helper to transform organization from API format to frontend format
-  private transformOrganization(org: any) {
+  private transformOrganization(org: Record<string, unknown>) {
     if (!org) {
       throw new Error('Cannot transform undefined organization');
     }
     return {
-      id: org.id,
-      name: org.name,
-      display_name: org.display_name,
-      created_at: org.created_at,
-      updated_at: org.updated_at,
+      id: org.id as string,
+      name: org.name as string,
+      display_name: org.display_name as string,
+      created_at: org.created_at as string,
+      updated_at: org.updated_at as string,
     };
   }
 
@@ -354,7 +354,7 @@ class ApiClient {
       params: { page, per_page: perPage },
     });
     const orgs = response.data.organizations || [];
-    return orgs.map((org: any) => this.transformOrganization(org));
+    return orgs.map((org: Record<string, unknown>) => this.transformOrganization(org));
   }
 
   async searchOrganizations(query: string, page = 1, perPage = 20) {
@@ -362,7 +362,7 @@ class ApiClient {
       params: { q: query, page, per_page: perPage },
     });
     const orgs = response.data.organizations || [];
-    return orgs.map((org: any) => this.transformOrganization(org));
+    return orgs.map((org: Record<string, unknown>) => this.transformOrganization(org));
   }
 
   async getOrganization(id: string) {
@@ -445,7 +445,7 @@ class ApiClient {
 
     // Normalize keys to frontend shape (support PascalCase from Go structs
     // or snake_case from explicit JSON mapping)
-    const keys = rawKeys.map((k: any) => ({
+    const keys = rawKeys.map((k: Record<string, unknown>) => ({
       id: k.id || k.ID,
       user_id: k.user_id || k.UserID,
       user_name: k.user_name || k.UserName || null,
@@ -873,7 +873,7 @@ class ApiClient {
     return response.data;
   }
 
-  async devLogin(): Promise<{ token: string; user: any; expires_in: number }> {
+  async devLogin(): Promise<{ token: string; user: Record<string, unknown>; expires_in: number }> {
     const response = await this.client.post('/api/v1/dev/login');
     return response.data;
   }

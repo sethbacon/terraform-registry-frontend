@@ -31,6 +31,7 @@ import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import InfoIcon from '@mui/icons-material/Info';
 import api from '../../services/api';
+import { getErrorMessage } from '../../utils/errors';
 import type { StorageConfigResponse, StorageConfigInput, StorageBackendType, SetupStatus } from '../../types';
 
 const StoragePage: React.FC = () => {
@@ -68,8 +69,8 @@ const StoragePage: React.FC = () => {
         const configList = await api.listStorageConfigs();
         setConfigs(Array.isArray(configList) ? configList : []);
       }
-    } catch (err: any) {
-      setError(err.response?.data?.error || 'Failed to load storage configuration');
+    } catch (err: unknown) {
+      setError(getErrorMessage(err, 'Failed to load storage configuration'));
     } finally {
       setLoading(false);
     }
@@ -110,8 +111,8 @@ const StoragePage: React.FC = () => {
       if (result.success) {
         setSuccess('Storage configuration is valid!');
       }
-    } catch (err: any) {
-      setError(err.response?.data?.error || 'Configuration test failed');
+    } catch (err: unknown) {
+      setError(getErrorMessage(err, 'Configuration test failed'));
     } finally {
       setTesting(false);
     }
@@ -125,8 +126,8 @@ const StoragePage: React.FC = () => {
       setSuccess('Storage configuration saved successfully!');
       await loadData();
       setActiveStep(0);
-    } catch (err: any) {
-      setError(err.response?.data?.error || 'Failed to save configuration');
+    } catch (err: unknown) {
+      setError(getErrorMessage(err, 'Failed to save configuration'));
     } finally {
       setSaving(false);
     }

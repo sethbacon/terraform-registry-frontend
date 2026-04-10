@@ -53,6 +53,7 @@ import {
   parseMirrorConfig,
 } from '../../types/mirror';
 import { formatDate } from '../../utils';
+import { getErrorMessage } from '../../utils/errors';
 
 // ---------------------------------------------------------------------------
 // Version sub-row with expandable platform list
@@ -247,8 +248,8 @@ const MirrorsPage: React.FC = () => {
       setError(null);
       const data = await api.listMirrors();
       setMirrors(Array.isArray(data) ? data : []);
-    } catch (err: any) {
-      setError(err.response?.data?.error || 'Failed to load mirrors');
+    } catch (err: unknown) {
+      setError(getErrorMessage(err, 'Failed to load mirrors'));
       console.error('Error loading mirrors:', err);
     } finally {
       setLoading(false);
@@ -270,8 +271,8 @@ const MirrorsPage: React.FC = () => {
       resetForm();
       setSuccess('Mirror configuration created successfully');
       await loadMirrors();
-    } catch (err: any) {
-      setError(err.response?.data?.error || 'Failed to create mirror');
+    } catch (err: unknown) {
+      setError(getErrorMessage(err, 'Failed to create mirror'));
     }
   };
 
@@ -295,8 +296,8 @@ const MirrorsPage: React.FC = () => {
       resetForm();
       setSuccess('Mirror configuration updated successfully');
       await loadMirrors();
-    } catch (err: any) {
-      setError(err.response?.data?.error || 'Failed to update mirror');
+    } catch (err: unknown) {
+      setError(getErrorMessage(err, 'Failed to update mirror'));
     }
   };
 
@@ -309,8 +310,8 @@ const MirrorsPage: React.FC = () => {
       setMirrorToDelete(null);
       setSuccess('Mirror configuration deleted successfully');
       await loadMirrors();
-    } catch (err: any) {
-      setError(err.response?.data?.error || 'Failed to delete mirror');
+    } catch (err: unknown) {
+      setError(getErrorMessage(err, 'Failed to delete mirror'));
     }
   };
 
@@ -320,8 +321,8 @@ const MirrorsPage: React.FC = () => {
       await api.triggerMirrorSync(mirror.id);
       setSuccess(`Sync triggered for "${mirror.name}"`);
       await loadMirrors();
-    } catch (err: any) {
-      setError(err.response?.data?.error || 'Failed to trigger sync');
+    } catch (err: unknown) {
+      setError(getErrorMessage(err, 'Failed to trigger sync'));
     }
   };
 

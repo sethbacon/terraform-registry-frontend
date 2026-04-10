@@ -26,8 +26,8 @@ export default [
       'react-refresh': reactRefresh,
     },
     rules: {
-      // TypeScript rules — disabled for pre-existing codebase (address in follow-up)
-      '@typescript-eslint/no-explicit-any': 'off',
+      // TypeScript rules
+      '@typescript-eslint/no-explicit-any': 'error',
       '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_', varsIgnorePattern: '^_' }],
       // React hooks — enforce both rules to prevent stale closures and rule violations
       'react-hooks/rules-of-hooks': 'error',

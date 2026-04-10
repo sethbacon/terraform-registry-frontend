@@ -39,6 +39,7 @@ import BusinessIcon from '@mui/icons-material/Business';
 import api from '../../services/api';
 import { User, UserMembership, Organization } from '../../types';
 import { RoleTemplate } from '../../types/rbac';
+import { getErrorMessage } from '../../utils/errors';
 
 interface UserWithMemberships extends User {
   memberships?: UserMembership[];
@@ -212,7 +213,7 @@ const UsersPage: React.FC = () => {
             user_id: userId,
             role_template_id: formData.roleTemplateId || undefined,
           });
-        } catch (err: any) {
+        } catch (err: unknown) {
           console.error('Failed to add user to organization:', err);
           // Don't fail the whole operation, user was created
         }
@@ -220,9 +221,9 @@ const UsersPage: React.FC = () => {
 
       handleCloseDialog();
       loadUsers();
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Failed to save user:', err);
-      setError(err.response?.data?.error || 'Failed to save user. Please try again.');
+      setError(getErrorMessage(err, 'Failed to save user. Please try again.'));
     }
   };
 
@@ -242,9 +243,9 @@ const UsersPage: React.FC = () => {
 
       // Reset selection
       setFormData(prev => ({ ...prev, organizationId: '', roleTemplateId: '' }));
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Failed to add membership:', err);
-      setError(err.response?.data?.error || 'Failed to add organization membership');
+      setError(getErrorMessage(err, 'Failed to add organization membership'));
     }
   };
 
@@ -260,9 +261,9 @@ const UsersPage: React.FC = () => {
       // Refresh memberships to get updated role template info
       const memberships = await api.getUserMemberships(editingUser.id);
       setEditMemberships(memberships);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Failed to update membership role:', err);
-      setError(err.response?.data?.error || 'Failed to update role');
+      setError(getErrorMessage(err, 'Failed to update role'));
     }
   };
 
@@ -275,9 +276,9 @@ const UsersPage: React.FC = () => {
 
       // Update local state
       setEditMemberships(prev => prev.filter(m => m.organization_id !== orgId));
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Failed to remove membership:', err);
-      setError(err.response?.data?.error || 'Failed to remove from organization');
+      setError(getErrorMessage(err, 'Failed to remove from organization'));
     }
   };
 
@@ -295,9 +296,9 @@ const UsersPage: React.FC = () => {
       setDeleteDialogOpen(false);
       setUserToDelete(null);
       loadUsers();
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Failed to delete user:', err);
-      setError(err.response?.data?.error || 'Failed to delete user. Please try again.');
+      setError(getErrorMessage(err, 'Failed to delete user. Please try again.'));
     }
   };
 

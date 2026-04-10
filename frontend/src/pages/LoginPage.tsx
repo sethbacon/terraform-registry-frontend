@@ -13,6 +13,7 @@ import LoginIcon from '@mui/icons-material/Login';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
+import type { User } from '../types';
 
 const LoginPage: React.FC = () => {
   const { login } = useAuth();
@@ -46,7 +47,7 @@ const LoginPage: React.FC = () => {
     localStorage.removeItem('allowed_scopes');
 
     // login() will call fetchCurrentUser() which validates the JWT via /auth/me
-    await login({} as any);
+    await login({} as User);
     navigate('/');
   };
 

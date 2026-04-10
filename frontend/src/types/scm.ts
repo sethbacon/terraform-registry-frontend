@@ -121,7 +121,7 @@ export interface SCMWebhookEvent {
   event_type: string;
   ref_name: string;
   commit_sha: string;
-  payload: Record<string, any>;
+  payload: Record<string, unknown>;
   state: 'pending' | 'processing' | 'succeeded' | 'failed';
   error_message?: string | null;
   version_id?: string | null;
