@@ -52,6 +52,7 @@ import {
   type CreateMirrorConfigRequest,
   parseMirrorConfig,
 } from '../../types/mirror';
+import { formatDate } from '../../utils';
 
 // ---------------------------------------------------------------------------
 // Version sub-row with expandable platform list
@@ -401,11 +402,6 @@ const MirrorsPage: React.FC = () => {
     }
   };
 
-  const formatDate = (dateStr?: string) => {
-    if (!dateStr) return 'Never';
-    return new Date(dateStr).toLocaleString();
-  };
-
   if (loading) {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '400px' }}>
@@ -533,7 +529,7 @@ const MirrorsPage: React.FC = () => {
                     Sync interval: {mirror.sync_interval_hours} hours
                   </Typography>
                   <Typography variant="caption" color="textSecondary" display="block">
-                    Last sync: {formatDate(mirror.last_sync_at)}
+                    Last sync: {formatDate(mirror.last_sync_at, 'Never')}
                   </Typography>
 
                   {mirror.last_sync_error && (

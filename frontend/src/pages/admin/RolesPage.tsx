@@ -25,6 +25,7 @@ import LockIcon from '@mui/icons-material/Lock';
 import AdminIcon from '@mui/icons-material/AdminPanelSettings';
 import api from '../../services/api';
 import { RoleTemplate, AVAILABLE_SCOPES } from '../../types/rbac';
+import { getScopeInfo, getScopeColor } from '../../utils';
 
 // Scope category groupings for better organization
 const SCOPE_CATEGORIES: Record<string, string[]> = {
@@ -32,23 +33,6 @@ const SCOPE_CATEGORIES: Record<string, string[]> = {
   'DevOps': ['mirrors:read', 'mirrors:manage', 'scm:read', 'scm:manage'],
   'User & Organization': ['users:read', 'users:write', 'organizations:read', 'organizations:write'],
   'System': ['api_keys:manage', 'audit:read', 'admin'],
-};
-
-// Get scope info from AVAILABLE_SCOPES
-const getScopeInfo = (scopeValue: string) => {
-  return AVAILABLE_SCOPES.find((s) => s.value === scopeValue) || {
-    value: scopeValue,
-    label: scopeValue,
-    description: 'Unknown scope',
-  };
-};
-
-// Get color for scope chip based on category
-const getScopeColor = (scope: string): 'default' | 'primary' | 'secondary' | 'success' | 'warning' | 'error' | 'info' => {
-  if (scope === 'admin') return 'error';
-  if (scope.includes(':write') || scope.includes(':manage')) return 'warning';
-  if (scope.includes(':read')) return 'success';
-  return 'default';
 };
 
 const RolesPage: React.FC = () => {

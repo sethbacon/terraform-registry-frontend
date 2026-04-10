@@ -45,6 +45,7 @@ import { APIKey, UserMembership } from '../../types';
 import { REGISTRY_HOST } from '../../config';
 import { useAuth } from '../../contexts/AuthContext';
 import { AVAILABLE_SCOPES } from '../../types/rbac';
+import { getScopeInfo } from '../../utils';
 
 function getExpirationStatus(expiresAt?: string | null): 'expired' | 'expiring-soon' | 'active' | 'never' {
   if (!expiresAt) return 'never';
@@ -317,14 +318,6 @@ const APIKeysPage: React.FC = () => {
         : [...prev.scopes, scope];
       return { ...prev, scopes: newScopes };
     });
-  };
-
-  const getScopeInfo = (scopeValue: string) => {
-    return AVAILABLE_SCOPES.find((s) => s.value === scopeValue) || {
-      value: scopeValue,
-      label: scopeValue,
-      description: '',
-    };
   };
 
   const renderExpirationChip = (expiresAt?: string | null) => {
