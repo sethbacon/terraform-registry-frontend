@@ -1,14 +1,14 @@
 import { describe, it, expect } from 'vitest'
 
 describe('api service', () => {
-  it('exports both default and named apiClient pointing to same instance', async () => {
+  it('exports a default api client instance', async () => {
     const mod = await import('../api')
-    expect(mod.default).toBe(mod.apiClient)
+    expect(mod.default).toBeDefined()
   })
 
-  it('apiClient is an object with expected public methods', async () => {
+  it('api client is an object with expected public methods', async () => {
     const mod = await import('../api')
-    const client = mod.apiClient
+    const client = mod.default
 
     expect(client).toBeDefined()
     expect(typeof client.validateSetupToken).toBe('function')
@@ -19,7 +19,7 @@ describe('api service', () => {
 
   it('exposes setup-related methods that use SetupToken header', async () => {
     const mod = await import('../api')
-    const client = mod.apiClient
+    const client = mod.default
 
     expect(typeof client.validateSetupToken).toBe('function')
     expect(typeof client.testOIDCConfig).toBe('function')

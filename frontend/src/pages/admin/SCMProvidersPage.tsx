@@ -34,7 +34,7 @@ import CloudIcon from '@mui/icons-material/Cloud';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import LinkOffIcon from '@mui/icons-material/LinkOff';
-import { apiClient } from '../../services/api';
+import api from '../../services/api';
 import { useAuth } from '../../contexts/AuthContext';
 import type { SCMProvider, SCMProviderType, CreateSCMProviderRequest } from '../../types/scm';
 import type { UserMembership } from '../../types';
@@ -80,7 +80,7 @@ const SCMProvidersPage: React.FC = () => {
   const loadMemberships = async () => {
     try {
       if (user?.id) {
-        const data = await apiClient.getCurrentUserMemberships();
+        const data = await api.getCurrentUserMemberships();
         setMemberships(data || []);
         // Set first organization as default if available
         if (data && data.length > 0 && !formData.organization_id) {
@@ -99,13 +99,13 @@ const SCMProvidersPage: React.FC = () => {
     try {
       setLoading(true);
       setError(null);
-      const data = await apiClient.listSCMProviders();
+      const data = await api.listSCMProviders();
       const providerList = Array.isArray(data) ? data : [];
       setProviders(providerList);
 
       // Fetch token status for each provider in parallel
       const statusEntries = await Promise.allSettled(
-        providerList.map((p) => apiClient.getSCMTokenStatus(p.id).then((s) => [p.id, s] as const))
+        providerList.map((p) => api.getSCMTokenStatus(p.id).then((s) => [p.id, s] as const))
       );
       const statuses: Record<string, TokenStatus> = {};
       statusEntries.forEach((result) => {
@@ -126,7 +126,7 @@ const SCMProvidersPage: React.FC = () => {
   const handleCreate = async () => {
     try {
       setError(null);
-      await apiClient.createSCMProvider(formData as CreateSCMProviderRequest);
+      await api.createSCMProvider(formData as CreateSCMProviderRequest);
       setCreateDialogOpen(false);
       resetForm();
       await loadProviders();
@@ -139,7 +139,7 @@ const SCMProvidersPage: React.FC = () => {
     if (!editingProvider) return;
     try {
       setError(null);
-      await apiClient.updateSCMProvider(editingProvider.id, {
+      await api.updateSCMProvider(editingProvider.id, {
         name: formData.name,
         base_url: formData.base_url,
         tenant_id: formData.tenant_id,
@@ -159,7 +159,7 @@ const SCMProvidersPage: React.FC = () => {
     if (!providerToDelete) return;
     try {
       setError(null);
-      await apiClient.deleteSCMProvider(providerToDelete.id);
+      await api.deleteSCMProvider(providerToDelete.id);
       setDeleteConfirmOpen(false);
       setProviderToDelete(null);
       await loadProviders();
@@ -175,7 +175,7 @@ const SCMProvidersPage: React.FC = () => {
       setPatDialogOpen(true);
     } else {
       try {
-        const response = await apiClient.initiateSCMOAuth(provider.id);
+        const response = await api.initiateSCMOAuth(provider.id);
         window.location.href = response.authorization_url;
       } catch (err: any) {
         setError(err.response?.data?.error || 'Failed to initiate OAuth');
@@ -187,7 +187,7 @@ const SCMProvidersPage: React.FC = () => {
     if (!patProvider || !patValue) return;
     try {
       setError(null);
-      await apiClient.saveSCMToken(patProvider.id, patValue);
+      await api.saveSCMToken(patProvider.id, patValue);
       setPatDialogOpen(false);
       setPatValue('');
       setPatProvider(null);
@@ -491,7 +491,7 @@ const SCMProvidersPage: React.FC = () => {
                       color="warning"
                       onClick={async () => {
                         try {
-                          await apiClient.revokeSCMToken(provider.id);
+                          await api.revokeSCMToken(provider.id);
                           await loadProviders();
                         } catch (err: any) {
                           setError(err.response?.data?.error || 'Failed to disconnect');

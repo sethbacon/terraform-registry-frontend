@@ -12,7 +12,7 @@ import {
 import LoginIcon from '@mui/icons-material/Login';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { apiClient } from '../services/api';
+import api from '../services/api';
 
 const LoginPage: React.FC = () => {
   const { login } = useAuth();
@@ -37,7 +37,7 @@ const LoginPage: React.FC = () => {
   const handleDevLogin = async () => {
     // Call the dev login endpoint to get a JWT (no hardcoded keys)
     // This endpoint is gated by DevModeMiddleware and returns 403 in production
-    const response = await apiClient.devLogin();
+    const response = await api.devLogin();
     localStorage.setItem('auth_token', response.token);
 
     // Clear any cached user data to force fresh fetch from API
@@ -66,7 +66,7 @@ const LoginPage: React.FC = () => {
       // returned an error (e.g. 400 provider not configured).
       if (res.type === 'opaqueredirect' || res.status === 0) {
         // Normal redirect — let the browser follow it
-        apiClient.login(provider);
+        api.login(provider);
         return;
       }
       // The backend returned a non-redirect response — extract the error message
@@ -80,7 +80,7 @@ const LoginPage: React.FC = () => {
       setLoginError(message);
     } catch {
       // Network error or CORS issue — fall back to direct redirect
-      apiClient.login(provider);
+      api.login(provider);
     }
   };
 
