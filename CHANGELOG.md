@@ -11,13 +11,35 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.3.6] - 2026-04-10
+
+### Added
+
+- feat: surface module security scan results in module detail page — Security Scan sidebar panel shows scan status (clean/findings/pending/scanning/error), severity counts (Critical/High/Medium/Low), scanner name and version, and scan timestamp; visible to admin and modules:write users
+- feat: surface module documentation in module detail page — Module Documentation section below README shows inputs (name, type, description, default, required), outputs (name, description, sensitive), provider requirements, and Terraform version constraints; visible to all users
+- feat: add `ModuleScan`, `ModuleDoc`, and related TypeScript types to support backend v0.3.0 scanning and terraform-docs extraction features
+
+### Fixed
+
+- fix: remove deprecated `baseUrl` from `tsconfig.json` — `baseUrl` is no longer required as a prerequisite for `paths` in TypeScript 5.x bundler mode and is deprecated as of TS 6.0
+- fix: install MUI v7.3.9 which was declared in `package.json` but absent from `node_modules`, resolving pre-existing TypeScript errors across 11 files
+
+### Maintenance
+
+- chore: document repository security hardening settings in `CLAUDE.md` — branch protection rules, merge strategy, dependency management, code ownership, and remaining recommendations
+- chore: pin GitHub Actions workflow steps to full commit SHAs and harden CI/CD pipeline
+
+---
+
 ## [0.3.5] - 2026-03-25
 
 ### Fixed
+
 - fix: bump `package.json` version to `0.3.5` so `__APP_VERSION__` bakes the correct version string into the Vite bundle at build time — prior releases emitted the wrong version in the About modal because `package.json` was not bumped before tagging
 - fix: enforce `package.json` version sync in release workflow — `release.yml` guard job now fails fast if `frontend/package.json` `"version"` does not match the pushed tag, preventing future mismatches at release time
 
 ### Maintenance
+
 - chore: document `package.json` version-sync requirement in `CLAUDE.md` — new CRITICAL step 2 in the Releasing section calls out the mandatory bump before committing the release
 
 ---
@@ -25,6 +47,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.3.4] - 2026-03-24
 
 ### Maintenance
+
 - chore: add PR template, CI changelog enforcement, and collection script — `.github/PULL_REQUEST_TEMPLATE.md` pre-fills the changelog section; `pr-checks.yml` fails PRs without a valid entry; `collect-changelog.sh` automates release-time changelog collection
 
 ---
@@ -32,6 +55,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.3.3] - 2026-03-24
 
 ### Fixed
+
 - fix: bump `package.json` version to `0.3.3` so `__APP_VERSION__` bakes correctly at Vite build time — prior builds always emitted `v0.3.0` because `package.json` was never updated after the initial version
 - fix: proxy `/version` endpoint through nginx to the backend so the About modal can fetch the live backend version in production deployments
 
@@ -40,6 +64,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.3.2] - 2026-03-24
 
 ### Added
+
 - feat: About modal with frontend and backend version info — accessible from the toolbar via an info icon; displays frontend version (baked at Vite build time from `package.json`) and backend version (fetched live from `GET /version`)
 
 ---
@@ -47,6 +72,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.3.1] - 2026-03-24
 
 ### Maintenance
+
 - fix: upgrade GitHub Actions to Node 24 compatible versions (checkout@v4, setup-node@v4, actions/cache@v4)
 - fix: upgrade Playwright to 1.58.2 for Node.js 24 runtime compatibility
 - chore: opt GitHub Actions runners into Node.js 24 runtime; suppress deprecation warnings
@@ -149,7 +175,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- fix: lower Dockerfile npm audit gate from `high` to `critical` to unblock builds blocked by unfixable swagger-ui-react transitive vulnerabilities (immutable@3.x, dompurify@3.2.x) (#11)
+- fix: lower Dockerfile npm audit gate from `high` to `critical` to unblock builds blocked by unfixable swagger-ui-react transitive vulnerabilities (`immutable@3.x`, `dompurify@3.2.x`) (#11)
 
 ---
 

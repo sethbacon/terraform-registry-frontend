@@ -29,6 +29,12 @@ import {
   List,
   ListItem,
   ListItemText,
+  Table,
+  TableHead,
+  TableBody,
+  TableRow,
+  TableCell,
+  TableContainer,
 } from '@mui/material';
 import ArrowBack from '@mui/icons-material/ArrowBack';
 import ContentCopy from '@mui/icons-material/ContentCopy';
@@ -42,8 +48,9 @@ import SyncIcon from '@mui/icons-material/Sync';
 import WebhookIcon from '@mui/icons-material/Webhook';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
+import SecurityIcon from '@mui/icons-material/Security';
 import api, { apiClient } from '../services/api';
-import { Module, ModuleVersion } from '../types';
+import { Module, ModuleVersion, ModuleScan, ModuleDoc } from '../types';
 import type { ModuleSCMLink, SCMWebhookEvent } from '../types/scm';
 import { useAuth } from '../contexts/AuthContext';
 import { REGISTRY_HOST } from '../config';
@@ -86,9 +93,27 @@ const ModuleDetailPage: React.FC = () => {
   const [webhookEventsLoading, setWebhookEventsLoading] = useState(false);
   const [webhookEventsExpanded, setWebhookEventsExpanded] = useState(false);
 
+  // Security scan state
+  const [moduleScan, setModuleScan] = useState<ModuleScan | null>(null);
+  const [scanLoading, setScanLoading] = useState(false);
+  const [scanNotFound, setScanNotFound] = useState(false);
+
+  // Module docs state
+  const [moduleDocs, setModuleDocs] = useState<ModuleDoc | null>(null);
+  const [docsLoading, setDocsLoading] = useState(false);
+
   useEffect(() => {
     loadModuleDetails();
   }, [namespace, name, system]);
+
+  useEffect(() => {
+    if (!selectedVersion?.version || !namespace || !name || !system) return;
+    setModuleScan(null);
+    setScanNotFound(false);
+    setModuleDocs(null);
+    if (canManage) loadModuleScan(selectedVersion.version);
+    loadModuleDocs(selectedVersion.version);
+  }, [selectedVersion?.version, canManage]);
 
   const loadModuleDetails = async () => {
     if (!namespace || !name || !system) return;
@@ -176,6 +201,37 @@ const ModuleDetailPage: React.FC = () => {
     } finally {
       setWebhookEventsLoading(false);
       setWebhookEventsLoaded(true);
+    }
+  };
+
+  const loadModuleScan = async (version: string) => {
+    if (!namespace || !name || !system) return;
+    setScanLoading(true);
+    setScanNotFound(false);
+    setModuleScan(null);
+    try {
+      const scan = await apiClient.getModuleScan(namespace, name, system, version);
+      setModuleScan(scan);
+    } catch (err: any) {
+      if (err?.response?.status === 404) {
+        setScanNotFound(true);
+      }
+    } finally {
+      setScanLoading(false);
+    }
+  };
+
+  const loadModuleDocs = async (version: string) => {
+    if (!namespace || !name || !system) return;
+    setDocsLoading(true);
+    setModuleDocs(null);
+    try {
+      const docs = await apiClient.getModuleDocs(namespace, name, system, version);
+      setModuleDocs(docs);
+    } catch {
+      setModuleDocs(null);
+    } finally {
+      setDocsLoading(false);
     }
   };
 
@@ -482,6 +538,121 @@ const ModuleDetailPage: React.FC = () => {
               <MarkdownRenderer>{selectedVersion.readme}</MarkdownRenderer>
             </Paper>
           )}
+
+          {/* Module Documentation */}
+          {!docsLoading && moduleDocs &&
+            (moduleDocs.inputs.length > 0 || moduleDocs.outputs.length > 0 ||
+             moduleDocs.providers.length > 0 || moduleDocs.requirements?.required_version) && (
+            <Paper sx={{ p: 3, mt: 3 }}>
+              <Typography variant="h6" gutterBottom>Module Documentation</Typography>
+              <Divider sx={{ mb: 2 }} />
+
+              {moduleDocs.requirements?.required_version && (
+                <Box mb={2}>
+                  <Typography variant="subtitle2" gutterBottom>Terraform Version Requirement</Typography>
+                  <Typography variant="body2" fontFamily="monospace">
+                    {moduleDocs.requirements.required_version}
+                  </Typography>
+                </Box>
+              )}
+
+              {moduleDocs.inputs.length > 0 && (
+                <Box mb={3}>
+                  <Typography variant="subtitle2" gutterBottom>Inputs</Typography>
+                  <TableContainer>
+                    <Table size="small">
+                      <TableHead>
+                        <TableRow>
+                          <TableCell><strong>Name</strong></TableCell>
+                          <TableCell><strong>Type</strong></TableCell>
+                          <TableCell><strong>Description</strong></TableCell>
+                          <TableCell><strong>Default</strong></TableCell>
+                          <TableCell><strong>Required</strong></TableCell>
+                        </TableRow>
+                      </TableHead>
+                      <TableBody>
+                        {moduleDocs.inputs.map((inp) => (
+                          <TableRow key={inp.name}>
+                            <TableCell sx={{ fontFamily: 'monospace', whiteSpace: 'nowrap' }}>{inp.name}</TableCell>
+                            <TableCell sx={{ fontFamily: 'monospace' }}>{inp.type}</TableCell>
+                            <TableCell>{inp.description}</TableCell>
+                            <TableCell sx={{ fontFamily: 'monospace' }}>
+                              {inp.required ? '—' : JSON.stringify(inp.default)}
+                            </TableCell>
+                            <TableCell>
+                              <Chip
+                                label={inp.required ? 'Yes' : 'No'}
+                                size="small"
+                                color={inp.required ? 'error' : 'default'}
+                                variant="outlined"
+                              />
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </TableContainer>
+                </Box>
+              )}
+
+              {moduleDocs.outputs.length > 0 && (
+                <Box mb={3}>
+                  <Typography variant="subtitle2" gutterBottom>Outputs</Typography>
+                  <TableContainer>
+                    <Table size="small">
+                      <TableHead>
+                        <TableRow>
+                          <TableCell><strong>Name</strong></TableCell>
+                          <TableCell><strong>Description</strong></TableCell>
+                          <TableCell><strong>Sensitive</strong></TableCell>
+                        </TableRow>
+                      </TableHead>
+                      <TableBody>
+                        {moduleDocs.outputs.map((out) => (
+                          <TableRow key={out.name}>
+                            <TableCell sx={{ fontFamily: 'monospace' }}>{out.name}</TableCell>
+                            <TableCell>{out.description}</TableCell>
+                            <TableCell>
+                              {out.sensitive
+                                ? <Chip label="Sensitive" size="small" color="warning" variant="outlined" />
+                                : <Typography variant="body2" color="text.secondary">—</Typography>
+                              }
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </TableContainer>
+                </Box>
+              )}
+
+              {moduleDocs.providers.length > 0 && (
+                <Box>
+                  <Typography variant="subtitle2" gutterBottom>Provider Requirements</Typography>
+                  <TableContainer>
+                    <Table size="small">
+                      <TableHead>
+                        <TableRow>
+                          <TableCell><strong>Name</strong></TableCell>
+                          <TableCell><strong>Source</strong></TableCell>
+                          <TableCell><strong>Version Constraints</strong></TableCell>
+                        </TableRow>
+                      </TableHead>
+                      <TableBody>
+                        {moduleDocs.providers.map((prov) => (
+                          <TableRow key={prov.name}>
+                            <TableCell sx={{ fontFamily: 'monospace' }}>{prov.name}</TableCell>
+                            <TableCell sx={{ fontFamily: 'monospace' }}>{prov.source}</TableCell>
+                            <TableCell sx={{ fontFamily: 'monospace' }}>{prov.version_constraints}</TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </TableContainer>
+                </Box>
+              )}
+            </Paper>
+          )}
         </Box>
 
         {/* Sidebar - Module Information and Version Details */}
@@ -770,6 +941,76 @@ const ModuleDetailPage: React.FC = () => {
                   </Button>
                 </Stack>
               )}
+            </Paper>
+          )}
+
+          {/* Security Scan */}
+          {canManage && selectedVersion && (
+            <Paper sx={{ p: 3, mb: 3 }}>
+              <Box display="flex" alignItems="center" gap={1} mb={1}>
+                <SecurityIcon fontSize="small" color="action" />
+                <Typography variant="h6">Security Scan</Typography>
+                {(moduleScan?.status === 'pending' || moduleScan?.status === 'scanning') && (
+                  <CircularProgress size={16} sx={{ ml: 'auto' }} />
+                )}
+              </Box>
+              <Divider sx={{ mb: 2 }} />
+              {scanLoading ? (
+                <Box display="flex" justifyContent="center" py={2}>
+                  <CircularProgress size={24} />
+                </Box>
+              ) : scanNotFound ? (
+                <Typography variant="body2" color="text.secondary">
+                  No scan available for this version.
+                </Typography>
+              ) : moduleScan ? (
+                <Box>
+                  <Box mb={1.5}>
+                    <Chip
+                      label={moduleScan.status}
+                      size="small"
+                      color={
+                        moduleScan.status === 'clean' ? 'success' :
+                        moduleScan.status === 'findings' ? 'warning' :
+                        moduleScan.status === 'error' ? 'error' : 'info'
+                      }
+                    />
+                  </Box>
+                  {moduleScan.status === 'error' && moduleScan.error_message && (
+                    <Alert severity="error" sx={{ mb: 1.5 }}>
+                      {moduleScan.error_message}
+                    </Alert>
+                  )}
+                  {(moduleScan.status === 'findings' || moduleScan.status === 'clean') && (
+                    <Stack direction="row" spacing={0.5} flexWrap="wrap" sx={{ mb: 1.5 }}>
+                      {moduleScan.critical_count > 0 && (
+                        <Chip label={`Critical: ${moduleScan.critical_count}`} size="small" color="error" />
+                      )}
+                      {moduleScan.high_count > 0 && (
+                        <Chip label={`High: ${moduleScan.high_count}`} size="small" color="warning" />
+                      )}
+                      {moduleScan.medium_count > 0 && (
+                        <Chip label={`Medium: ${moduleScan.medium_count}`} size="small" />
+                      )}
+                      {moduleScan.low_count > 0 && (
+                        <Chip label={`Low: ${moduleScan.low_count}`} size="small" />
+                      )}
+                      {moduleScan.critical_count === 0 && moduleScan.high_count === 0 &&
+                       moduleScan.medium_count === 0 && moduleScan.low_count === 0 && (
+                        <Typography variant="body2" color="success.main">No findings</Typography>
+                      )}
+                    </Stack>
+                  )}
+                  <Typography variant="caption" color="text.secondary" display="block">
+                    Scanner: {moduleScan.scanner}{moduleScan.scanner_version ? ` ${moduleScan.scanner_version}` : ''}
+                  </Typography>
+                  {moduleScan.scanned_at && (
+                    <Typography variant="caption" color="text.secondary" display="block">
+                      Scanned: {new Date(moduleScan.scanned_at).toLocaleString()}
+                    </Typography>
+                  )}
+                </Box>
+              ) : null}
             </Paper>
           )}
         </Box>
