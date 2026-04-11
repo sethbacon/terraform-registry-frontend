@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - feat: add Playwright E2E tests for SetupWizardPage — covers redirect-when-complete, page structure with stepper, token validation, OIDC step progression, storage backend chips, and public accessibility; uses route mocking for incomplete setup simulation
+- feat: add Firefox to E2E cross-browser testing — conditionally included in CI only to keep local test runs fast
 
 ## [0.3.7] - 2026-04-10
 
