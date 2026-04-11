@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import {
   Box,
@@ -236,18 +236,7 @@ const MirrorsPage: React.FC = () => {
 
   const [searchParams] = useSearchParams();
 
-  useEffect(() => {
-    loadMirrors();
-  }, []);
-
-  // Auto-open the Add Mirror dialog when navigated here with ?action=add
-  useEffect(() => {
-    if (searchParams.get('action') === 'add') {
-      setCreateDialogOpen(true);
-    }
-  }, [searchParams]);
-
-  const loadMirrors = async () => {
+  const loadMirrors = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
@@ -259,7 +248,18 @@ const MirrorsPage: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    loadMirrors();
+  }, [loadMirrors]);
+
+  // Auto-open the Add Mirror dialog when navigated here with ?action=add
+  useEffect(() => {
+    if (searchParams.get('action') === 'add') {
+      setCreateDialogOpen(true);
+    }
+  }, [searchParams]);
 
   const handleCreate = async () => {
     try {

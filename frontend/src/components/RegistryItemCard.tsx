@@ -96,4 +96,4 @@ const RegistryItemCard: React.FC<RegistryItemCardProps> = ({
   </Card>
 );
 
-export default RegistryItemCard;
+export default React.memo(RegistryItemCard);
