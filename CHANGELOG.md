@@ -20,6 +20,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - perf: reduce ModulesPage grouped view fetch limit from 500 to 100 modules per page with pagination controls
 - perf: add memoization to Layout sidebar navigation arrays (`useMemo`), wrap `RegistryItemCard` in `React.memo`, memoize search handlers and grouped computations in ModulesPage/ProvidersPage/MirrorsPage
 
+### Fixed
+
+- fix: remove `|| true` tautology from E2E admin test and strengthen weak assertions across 9 test files with descriptive comments and more specific checks
+
 ## [0.3.7] - 2026-04-10
 
 ### Added

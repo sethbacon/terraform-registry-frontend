@@ -39,6 +39,7 @@ test.describe('Admin: Terraform Binary Mirrors', () => {
       .isVisible()
       .catch(() => false);
 
+    // Page should show mirror config cards or an empty-state message
     expect(hasCards || hasEmptyState).toBe(true);
   });
 
