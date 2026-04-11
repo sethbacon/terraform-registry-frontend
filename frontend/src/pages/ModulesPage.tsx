@@ -60,14 +60,14 @@ const ModulesPage: React.FC = () => {
       setLoading(true);
       setError(null);
       if (viewMode === 'grouped') {
-        // Fetch a large batch so all providers are visible without pagination splitting groups.
+        // Fetch enough to populate grouped sections without excessive payload.
         const response = await api.searchModules({
           query: debouncedSearch || undefined,
-          limit: 500,
-          offset: 0,
+          limit: 100,
+          offset: (page - 1) * 100,
         });
         setModules(response.modules);
-        setTotalPages(1);
+        setTotalPages(Math.ceil(response.meta.total / 100));
       } else {
         const response = await api.searchModules({
           query: debouncedSearch || undefined,
@@ -233,6 +233,18 @@ const ModulesPage: React.FC = () => {
               </Grid>
             </Box>
           ))}
+
+          {totalPages > 1 && (
+            <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
+              <Pagination
+                count={totalPages}
+                page={page}
+                onChange={handlePageChange}
+                color="primary"
+                size="large"
+              />
+            </Box>
+          )}
         </>
       ) : (
         /* ---- Flat paginated grid ---- */

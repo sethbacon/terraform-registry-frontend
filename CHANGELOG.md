@@ -14,6 +14,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - feat: add Playwright E2E tests for SetupWizardPage — covers redirect-when-complete, page structure with stepper, token validation, OIDC step progression, storage backend chips, and public accessibility; uses route mocking for incomplete setup simulation
 - feat: add Firefox to E2E cross-browser testing — conditionally included in CI only to keep local test runs fast
 
+### Changed
+
+- perf: add client-side pagination to MirrorsPage (10/25/50 per page) to avoid rendering all mirrors at once
+- perf: reduce ModulesPage grouped view fetch limit from 500 to 100 modules per page with pagination controls
+
 ## [0.3.7] - 2026-04-10
 
 ### Added
