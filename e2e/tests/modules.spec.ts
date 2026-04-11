@@ -50,6 +50,7 @@ test.describe('Modules list', () => {
     const hasCards = await page.locator('[class*="MuiCard"]').count() > 0;
     const hasEmptyState = await page.getByText('No modules found').isVisible().catch(() => false);
 
+    // Page should show module cards or a "No modules found" empty state
     expect(hasCards || hasEmptyState).toBe(true);
   });
 
@@ -110,7 +111,7 @@ test.describe('Module detail page', () => {
       .filter({ hasText: /.+/ })
       .first()
       .textContent();
-    expect(pageContent).toBeTruthy();
+    expect(pageContent).not.toBeNull();
     expect(pageContent!.trim().length).toBeGreaterThan(10);
   });
 
@@ -183,6 +184,7 @@ test.describe('Module detail page', () => {
       .isVisible()
       .catch(() => false);
 
+    // Panel should show webhook event items or a "no webhook events" empty state
     expect(hasEvents || hasEmptyState).toBe(true);
   });
 });

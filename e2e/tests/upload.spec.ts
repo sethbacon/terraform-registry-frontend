@@ -21,7 +21,7 @@ test.describe('Module Upload page', () => {
 
     // Should have some content — heading or method cards
     const content = await page.locator('main, [class*="MuiContainer"]').first().textContent();
-    expect(content).toBeTruthy();
+    expect(content).not.toBeNull();
     expect(content!.length).toBeGreaterThan(5);
   });
 
@@ -109,7 +109,7 @@ test.describe('Provider Upload page', () => {
     });
 
     const content = await page.locator('main, [class*="MuiContainer"]').first().textContent();
-    expect(content).toBeTruthy();
+    expect(content).not.toBeNull();
     expect(content!.length).toBeGreaterThan(5);
   });
 

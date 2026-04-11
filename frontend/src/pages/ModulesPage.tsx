@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useDebounce } from '../hooks/useDebounce';
 import {
@@ -60,14 +60,14 @@ const ModulesPage: React.FC = () => {
       setLoading(true);
       setError(null);
       if (viewMode === 'grouped') {
-        // Fetch a large batch so all providers are visible without pagination splitting groups.
+        // Fetch enough to populate grouped sections without excessive payload.
         const response = await api.searchModules({
           query: debouncedSearch || undefined,
-          limit: 500,
-          offset: 0,
+          limit: 100,
+          offset: (page - 1) * 100,
         });
         setModules(response.modules);
-        setTotalPages(1);
+        setTotalPages(Math.ceil(response.meta.total / 100));
       } else {
         const response = await api.searchModules({
           query: debouncedSearch || undefined,
@@ -89,25 +89,25 @@ const ModulesPage: React.FC = () => {
     loadModules();
   }, [loadModules]);
 
-  const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleSearchChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(event.target.value);
     setPage(1);
-  };
+  }, []);
 
-  const handlePageChange = (_event: React.ChangeEvent<unknown>, value: number) => {
+  const handlePageChange = useCallback((_event: React.ChangeEvent<unknown>, value: number) => {
     setPage(value);
     window.scrollTo(0, 0);
-  };
+  }, []);
 
-  const handleViewModeChange = (_event: React.MouseEvent<HTMLElement>, newMode: ViewMode | null) => {
+  const handleViewModeChange = useCallback((_event: React.MouseEvent<HTMLElement>, newMode: ViewMode | null) => {
     if (newMode) {
       setViewMode(newMode);
       setPage(1);
     }
-  };
+  }, []);
 
   /** Renders a single module card (shared between both view modes). */
-  const renderModuleCard = (module: Module) => (
+  const renderModuleCard = useCallback((module: Module) => (
     <Grid size={{ xs: 12, sm: 6, md: 4 }} key={module.id}>
       <RegistryItemCard
         title={module.name}
@@ -131,7 +131,9 @@ const ModulesPage: React.FC = () => {
         onClick={() => navigate(`/modules/${module.namespace}/${module.name}/${module.system}`)}
       />
     </Grid>
-  );
+  ), [navigate]);
+
+  const groupedModules = useMemo(() => groupByProvider(modules), [modules]);
 
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
@@ -217,7 +219,7 @@ const ModulesPage: React.FC = () => {
       ) : viewMode === 'grouped' ? (
         /* ---- Grouped by provider ---- */
         <>
-          {groupByProvider(modules).map(([provider, providerModules]) => (
+          {groupedModules.map(([provider, providerModules]) => (
             <Box key={provider} sx={{ mb: 5 }}>
               {/* Provider section header */}
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 2 }}>
@@ -233,6 +235,18 @@ const ModulesPage: React.FC = () => {
               </Grid>
             </Box>
           ))}
+
+          {totalPages > 1 && (
+            <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
+              <Pagination
+                count={totalPages}
+                page={page}
+                onChange={handlePageChange}
+                color="primary"
+                size="large"
+              />
+            </Box>
+          )}
         </>
       ) : (
         /* ---- Flat paginated grid ---- */

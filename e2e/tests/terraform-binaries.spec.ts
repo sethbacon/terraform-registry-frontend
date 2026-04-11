@@ -39,6 +39,7 @@ test.describe('Terraform Binaries list', () => {
       .isVisible()
       .catch(() => false);
 
+    // Page should show binary mirror cards or a "no binary mirrors configured" empty state
     expect(hasCards || hasEmptyState).toBe(true);
   });
 
@@ -114,7 +115,7 @@ test.describe('Terraform Binary detail page', () => {
       .locator('[class*="MuiContainer"]')
       .first()
       .textContent();
-    expect(content).toBeTruthy();
+    expect(content).not.toBeNull();
     expect(content!.trim().length).toBeGreaterThan(5);
   });
 });

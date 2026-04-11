@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import {
   Box,
@@ -22,6 +22,7 @@ import {
   TableContainer,
   TableHead,
   TableRow,
+  TablePagination,
   TextField,
   Switch,
   FormControlLabel,
@@ -212,6 +213,10 @@ const MirrorsPage: React.FC = () => {
   const [historyLoading, setHistoryLoading] = useState(false);
   const [historyMirrorName, setHistoryMirrorName] = useState('');
 
+  // Client-side pagination
+  const [mirrorsPage, setMirrorsPage] = useState(0);
+  const [mirrorsRowsPerPage, setMirrorsRowsPerPage] = useState(10);
+
   const [formData, setFormData] = useState<Partial<CreateMirrorConfigRequest>>({
     name: '',
     description: '',
@@ -231,18 +236,7 @@ const MirrorsPage: React.FC = () => {
 
   const [searchParams] = useSearchParams();
 
-  useEffect(() => {
-    loadMirrors();
-  }, []);
-
-  // Auto-open the Add Mirror dialog when navigated here with ?action=add
-  useEffect(() => {
-    if (searchParams.get('action') === 'add') {
-      setCreateDialogOpen(true);
-    }
-  }, [searchParams]);
-
-  const loadMirrors = async () => {
+  const loadMirrors = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
@@ -254,7 +248,18 @@ const MirrorsPage: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    loadMirrors();
+  }, [loadMirrors]);
+
+  // Auto-open the Add Mirror dialog when navigated here with ?action=add
+  useEffect(() => {
+    if (searchParams.get('action') === 'add') {
+      setCreateDialogOpen(true);
+    }
+  }, [searchParams]);
 
   const handleCreate = async () => {
     try {
@@ -454,7 +459,9 @@ const MirrorsPage: React.FC = () => {
       )}
 
       <Grid container spacing={3}>
-        {mirrors.map((mirror) => {
+        {mirrors
+          .slice(mirrorsPage * mirrorsRowsPerPage, mirrorsPage * mirrorsRowsPerPage + mirrorsRowsPerPage)
+          .map((mirror) => {
           const parsed = parseMirrorConfig(mirror);
           return (
             <Grid size={{ xs: 12, md: 6 }} key={mirror.id}>
@@ -602,6 +609,22 @@ const MirrorsPage: React.FC = () => {
           </Grid>
         )}
       </Grid>
+
+      {mirrors.length > mirrorsRowsPerPage && (
+        <TablePagination
+          component="div"
+          count={mirrors.length}
+          page={mirrorsPage}
+          onPageChange={(_e, newPage) => setMirrorsPage(newPage)}
+          rowsPerPage={mirrorsRowsPerPage}
+          onRowsPerPageChange={(e) => {
+            setMirrorsRowsPerPage(parseInt(e.target.value, 10));
+            setMirrorsPage(0);
+          }}
+          rowsPerPageOptions={[10, 25, 50]}
+          sx={{ mt: 2 }}
+        />
+      )}
 
       {/* Create/Edit Dialog */}
       <Dialog
