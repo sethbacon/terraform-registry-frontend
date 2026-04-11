@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- fix: update module scan API path from `/admin/modules/` to `/modules/` to match backend route fix (sethbacon/terraform-registry-backend#147)
+
 ## [0.3.8] - 2026-04-10
 
 ### Added
