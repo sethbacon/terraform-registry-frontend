@@ -128,7 +128,7 @@ test.describe('API Documentation page', () => {
 
     // Page should render some meaningful content
     const pageContent = await page.locator('body').textContent();
-    expect(pageContent).toBeTruthy();
+    expect(pageContent).not.toBeNull();
     expect(pageContent!.length).toBeGreaterThan(50);
   });
 

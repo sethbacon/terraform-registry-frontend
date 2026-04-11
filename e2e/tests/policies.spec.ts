@@ -46,6 +46,7 @@ test.describe('Admin: Mirror Policies', () => {
       .isVisible()
       .catch(() => false);
 
+    // Page should show policy cards or a "no mirror policies" empty state
     expect(hasCards || hasEmptyText).toBe(true);
   });
 

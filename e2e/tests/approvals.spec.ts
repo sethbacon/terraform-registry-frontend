@@ -45,6 +45,7 @@ test.describe('Admin: Approval Requests', () => {
       .isVisible()
       .catch(() => false);
 
+    // Page should show approval request cards or a "no approval requests" empty state
     expect(hasCards || hasEmptyText).toBe(true);
   });
 

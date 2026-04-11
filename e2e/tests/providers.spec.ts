@@ -48,6 +48,7 @@ test.describe('Providers list', () => {
     const hasCards = (await page.locator('[class*="MuiCard"]').count()) > 0;
     const hasEmptyState = await page.getByText('No providers found').isVisible().catch(() => false);
 
+    // Page should show provider cards or a "No providers found" empty state
     expect(hasCards || hasEmptyState).toBe(true);
   });
 
@@ -123,7 +124,7 @@ test.describe('Provider detail page', () => {
       .filter({ hasText: /.+/ })
       .first()
       .textContent();
-    expect(pageContent).toBeTruthy();
+    expect(pageContent).not.toBeNull();
     expect(pageContent!.trim().length).toBeGreaterThan(10);
   });
 });

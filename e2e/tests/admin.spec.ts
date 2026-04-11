@@ -28,6 +28,7 @@ test.describe('Admin: Users', () => {
     const hasTable = await page.locator('table, [class*="MuiTable"]').count() > 0;
     const hasEmptyState = await page.getByText(/no users/i).isVisible().catch(() => false);
 
+    // Page should show either a users table or a "no users" empty state
     expect(hasTable || hasEmptyState).toBe(true);
   });
 
@@ -64,6 +65,7 @@ test.describe('Admin: Organizations', () => {
       .isVisible()
       .catch(() => false);
 
+    // Page should show either an organizations table or a "no organizations" empty state
     expect(hasTable || hasEmptyState).toBe(true);
   });
 });
@@ -83,6 +85,7 @@ test.describe('Admin: API Keys', () => {
     const hasTable = await table.count() > 0;
     const hasEmptyState = await emptyState.isVisible().catch(() => false);
 
+    // Page should show either an API keys table or a "No API keys found" empty state
     expect(hasTable || hasEmptyState).toBe(true);
   });
 
@@ -125,8 +128,8 @@ test.describe('Admin: Provider Mirrors', () => {
       .getByText(/no mirror|no configuration|add.*mirror/i)
       .isVisible()
       .catch(() => false);
-    // At minimum the heading is visible — content check passed above
-    expect(hasCards || hasEmptyText || true).toBe(true);
+    // Page may show mirror config cards or an empty-state message depending on test data
+    expect(hasCards || hasEmptyText).toBe(true);
   });
 
   test('page has labelled Refresh and Add Mirror buttons', async ({ loggedInPage: page }) => {
@@ -209,7 +212,7 @@ test.describe('Admin: Dashboard', () => {
 
     // Stat cards or content should be present
     const content = await page.locator('main, [class*="MuiContainer"]').first().textContent();
-    expect(content).toBeTruthy();
+    expect(content).not.toBeNull();
     expect(content!.length).toBeGreaterThan(5);
   });
 
@@ -260,7 +263,7 @@ test.describe('Admin: Roles', () => {
     }
 
     const content = await page.locator('main, [class*="MuiContainer"]').first().textContent();
-    expect(content).toBeTruthy();
+    expect(content).not.toBeNull();
     expect(content!.length).toBeGreaterThan(5);
   });
 
@@ -281,6 +284,7 @@ test.describe('Admin: Roles', () => {
     const hasTable = (await page.locator('table').count()) > 0;
     const hasEmptyState = await page.getByText(/no roles/i).isVisible().catch(() => false);
 
+    // Page should show role items (accordion or table) or a "no roles" empty state
     expect(hasAccordion || hasTable || hasEmptyState).toBe(true);
   });
 });
@@ -300,7 +304,7 @@ test.describe('Admin: SCM Providers', () => {
     }
 
     const content = await page.locator('main, [class*="MuiContainer"]').first().textContent();
-    expect(content).toBeTruthy();
+    expect(content).not.toBeNull();
     expect(content!.length).toBeGreaterThan(5);
   });
 
@@ -339,7 +343,7 @@ test.describe('Admin: SCM Providers', () => {
       .isVisible()
       .catch(() => false);
 
-    // Either cards exist or the empty state is shown
+    // Page should show SCM provider cards or an empty-state message
     expect(hasCards || hasEmptyState).toBe(true);
   });
 });
@@ -407,7 +411,7 @@ test.describe('Admin: Storage', () => {
     await expect(stepper.or(card).or(alert).first()).toBeVisible({ timeout: 15_000 });
 
     const content = await page.locator('main, [class*="MuiContainer"]').first().textContent();
-    expect(content).toBeTruthy();
+    expect(content).not.toBeNull();
     expect(content!.length).toBeGreaterThan(5);
   });
 
@@ -427,6 +431,7 @@ test.describe('Admin: Storage', () => {
     const hasCards = (await cards.count()) > 0;
     const hasAlert = (await alert.count()) > 0;
 
+    // Page should show setup wizard (stepper), config cards, or a configured alert
     expect(hasStepper || hasCards || hasAlert).toBe(true);
   });
 });
