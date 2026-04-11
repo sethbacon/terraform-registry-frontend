@@ -18,6 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - perf: add client-side pagination to MirrorsPage (10/25/50 per page) to avoid rendering all mirrors at once
 - perf: reduce ModulesPage grouped view fetch limit from 500 to 100 modules per page with pagination controls
+- perf: add memoization to Layout sidebar navigation arrays (`useMemo`), wrap `RegistryItemCard` in `React.memo`, memoize search handlers and grouped computations in ModulesPage/ProvidersPage/MirrorsPage
 
 ## [0.3.7] - 2026-04-10
 

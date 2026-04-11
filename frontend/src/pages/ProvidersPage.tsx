@@ -57,15 +57,15 @@ const ProvidersPage: React.FC = () => {
     loadProviders();
   }, [loadProviders]);
 
-  const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleSearchChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(event.target.value);
     setPage(1);
-  };
+  }, []);
 
-  const handlePageChange = (_event: React.ChangeEvent<unknown>, value: number) => {
+  const handlePageChange = useCallback((_event: React.ChangeEvent<unknown>, value: number) => {
     setPage(value);
     window.scrollTo(0, 0);
-  };
+  }, []);
 
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>

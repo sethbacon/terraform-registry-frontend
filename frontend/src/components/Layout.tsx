@@ -45,7 +45,7 @@ import Description from '@mui/icons-material/Description';
 import ExpandMore from '@mui/icons-material/ExpandMore';
 import History from '@mui/icons-material/History';
 import ExpandLess from '@mui/icons-material/ExpandLess';
-import { useState } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useThemeMode } from '../contexts/ThemeContext';
 import { useHelp } from '../contexts/HelpContext';
@@ -68,40 +68,40 @@ const Layout = () => {
   const [aboutOpen, setAboutOpen] = useState(false);
 
   // Helper to check if user has a specific scope (or admin which grants all)
-  const hasScope = (scope: string) => {
+  const hasScope = useCallback((scope: string) => {
     return allowedScopes.includes('admin') || allowedScopes.includes(scope);
-  };
+  }, [allowedScopes]);
 
-  const handleMenu = (event: React.MouseEvent<HTMLElement>) => {
+  const handleMenu = useCallback((event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
-  };
+  }, []);
 
-  const handleClose = () => {
+  const handleClose = useCallback(() => {
     setAnchorEl(null);
-  };
+  }, []);
 
-  const handleLogout = () => {
+  const handleLogout = useCallback(() => {
     handleClose();
     logout();
     // logout() redirects the browser to the backend logout endpoint, which forwards
     // to the OIDC provider's end_session_endpoint. Do not navigate() here — the
     // full-page redirect from logout() takes over immediately.
-  };
+  }, [handleClose, logout]);
 
-  const handleDrawerToggle = () => {
-    setMobileOpen(!mobileOpen);
-  };
+  const handleDrawerToggle = useCallback(() => {
+    setMobileOpen(prev => !prev);
+  }, []);
 
-  const navigationItems = [
+  const navigationItems = useMemo(() => [
     { text: 'Home', icon: <Home />, path: '/', tooltip: 'Home Page' },
     { text: 'Modules', icon: <ViewModule />, path: '/modules', tooltip: 'View Terraform Modules' },
     { text: 'Providers', icon: <Extension />, path: '/providers', tooltip: 'View Terraform Providers' },
     { text: 'Terraform Binaries', icon: <GetApp />, path: '/terraform-binaries', tooltip: 'View Terraform Binaries' },
     { text: 'API Docs', icon: <Description />, path: '/api-docs', tooltip: 'API Documentation' },
-  ];
+  ], []);
 
   // Admin nav groups — each group is collapsible. Items are filtered by scope.
-  const adminNavGroups = [
+  const adminNavGroups = useMemo(() => [
     {
       key: 'identity',
       label: 'Identity',
@@ -138,7 +138,7 @@ const Layout = () => {
         { text: 'Audit Logs', icon: <History />, path: '/admin/audit-logs', tooltip: 'View system audit logs', scope: 'audit:read' },
       ],
     },
-  ];
+  ], []);
 
   // Track which groups are open — persisted to localStorage so state survives navigation/refresh.
   const [openGroups, setOpenGroups] = useState<Record<string, boolean>>(() => {
@@ -155,22 +155,36 @@ const Layout = () => {
     return Object.fromEntries(adminNavGroups.map(g => [g.key, true]));
   });
 
-  const toggleGroup = (key: string) =>
+  const toggleGroup = useCallback((key: string) =>
     setOpenGroups(prev => {
       const next = { ...prev, [key]: !prev[key] };
       try { localStorage.setItem('adminNavGroups', JSON.stringify(next)); } catch { /* quota */ }
       return next;
-    });
+    }), []);
 
   // Filter each group's items by the user's scopes, then drop empty groups
-  const visibleAdminGroups = isAuthenticated
-    ? adminNavGroups
-      .map(group => ({
-        ...group,
-        items: group.items.filter(item => item.scope === null || hasScope(item.scope)),
-      }))
-      .filter(group => group.items.length > 0)
-    : [];
+  const visibleAdminGroups = useMemo(() =>
+    isAuthenticated
+      ? adminNavGroups
+        .map(group => ({
+          ...group,
+          items: group.items.filter(item => item.scope === null || hasScope(item.scope)),
+        }))
+        .filter(group => group.items.length > 0)
+      : [],
+    [isAuthenticated, adminNavGroups, hasScope]);
+
+  const handleCloseMobileDrawer = useCallback(() => {
+    setMobileOpen(false);
+  }, []);
+
+  const handleOpenAbout = useCallback(() => {
+    setAboutOpen(true);
+  }, []);
+
+  const handleCloseAbout = useCallback(() => {
+    setAboutOpen(false);
+  }, []);
 
   const drawer = (
     <Box>
@@ -191,7 +205,7 @@ const Layout = () => {
                 <ListItemButton
                   component={RouterLink}
                   to={item.path}
-                  onClick={() => setMobileOpen(false)}
+                  onClick={handleCloseMobileDrawer}
                   sx={{
                     borderLeft: isActive ? `3px solid ${theme.palette.primary.main}` : '3px solid transparent',
                     bgcolor: isActive ? `${theme.palette.primary.main}14` : 'transparent',
@@ -224,7 +238,7 @@ const Layout = () => {
                     <ListItemButton
                       component={RouterLink}
                       to="/admin"
-                      onClick={() => setMobileOpen(false)}
+                      onClick={handleCloseMobileDrawer}
                       sx={{
                         borderLeft: isActive ? `3px solid ${theme.palette.primary.main}` : '3px solid transparent',
                         bgcolor: isActive ? `${theme.palette.primary.main}14` : 'transparent',
@@ -274,7 +288,7 @@ const Layout = () => {
                             <ListItemButton
                               component={RouterLink}
                               to={item.path}
-                              onClick={() => setMobileOpen(false)}
+                              onClick={handleCloseMobileDrawer}
                               sx={{
                                 pl: isActive ? '21px' : '24px',
                                 borderLeft: isActive ? `3px solid ${theme.palette.primary.main}` : '3px solid transparent',
@@ -350,7 +364,7 @@ const Layout = () => {
           <Tooltip title="About">
             <IconButton
               color="inherit"
-              onClick={() => setAboutOpen(true)}
+              onClick={handleOpenAbout}
               aria-label="About"
               sx={{ mr: 1 }}
             >
@@ -467,7 +481,7 @@ const Layout = () => {
       {/* HelpPanel is position:fixed — keep it outside the flex row so
           its root element doesn't consume flex space when closed. */}
       <HelpPanel />
-      <AboutModal open={aboutOpen} onClose={() => setAboutOpen(false)} />
+      <AboutModal open={aboutOpen} onClose={handleCloseAbout} />
     </Box>
   );
 };
