@@ -645,7 +645,7 @@ class ApiClient {
 
   async getModuleScan(namespace: string, name: string, system: string, version: string): Promise<import('../types').ModuleScan> {
     const response = await this.client.get(
-      `/api/v1/admin/modules/${namespace}/${name}/${system}/versions/${version}/scan`
+      `/api/v1/modules/${namespace}/${name}/${system}/versions/${version}/scan`
     );
     return response.data;
   }
