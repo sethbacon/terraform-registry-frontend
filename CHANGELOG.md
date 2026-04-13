@@ -11,6 +11,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.5.1] - 2026-04-13
 
+### Fixed
+
+- fix: add null-safety for module detail page API responses to prevent TypeError crash
+
+### Chore
+
+- chore: remove stale ROADMAP.md
+
+## [0.5.0-rc.3] - 2026-04-13
+
+## [0.5.0-rc.2] - 2026-04-13
+
 ## [0.5.0-rc.1] - 2026-04-13
 
 ## [0.4.3] - 2026-04-13
