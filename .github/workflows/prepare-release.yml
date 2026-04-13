@@ -4,8 +4,7 @@ name: Prepare Release
 #   1. Collects changelog entries from merged PR bodies
 #   2. Updates CHANGELOG.md (promotes [Unreleased] to new version)
 #   3. Bumps frontend/package.json version
-#   4. Commits on development and pushes
-#   5. Opens a release PR from development → main
+#   4. Pushes to a release branch and opens a PR to main
 #
 # Usage: dispatch manually with the desired version (e.g., 0.5.0).
 on:
@@ -41,7 +40,7 @@ jobs:
         run: |
           VERSION="${{ inputs.version }}"
           if ! echo "$VERSION" | grep -qP '^\d+\.\d+\.\d+(-[a-zA-Z0-9.]+)?$'; then
-            echo "::error::Invalid version format: $VERSION (expected X.Y.Z)"
+            echo "::error::Invalid version format: $VERSION (expected X.Y.Z or X.Y.Z-pre.N)"
             exit 1
           fi
           if git rev-parse "v$VERSION" >/dev/null 2>&1; then
@@ -56,7 +55,6 @@ jobs:
         run: |
           chmod +x .github/scripts/collect-changelog.sh
           ENTRIES=$(.github/scripts/collect-changelog.sh "" "${{ inputs.version }}")
-          # Write to a temp file for the next step
           echo "$ENTRIES" > /tmp/changelog-block.md
           echo "Collected changelog:"
           cat /tmp/changelog-block.md
@@ -71,21 +69,15 @@ jobs:
             exit 1
           fi
 
-          # Replace [Unreleased] header with the new version, and add a fresh [Unreleased] above it
           if grep -q '## \[Unreleased\]' CHANGELOG.md; then
-            # Insert the collected entries under a new version header, replacing [Unreleased]
             sed -i "s/## \[Unreleased\]/## [Unreleased]\n\n## [$VERSION] - $TODAY/" CHANGELOG.md
           else
-            # No [Unreleased] section — prepend after the first line (title)
             sed -i "1a\\\\n## [Unreleased]\\n\\n## [$VERSION] - $TODAY" CHANGELOG.md
           fi
 
-          # If collect-changelog produced entries, insert them after the version header
           if [ -s /tmp/changelog-block.md ]; then
-            # Extract just the section content (skip the header line which collect-changelog already wrote)
             CONTENT=$(tail -n +2 /tmp/changelog-block.md)
             if [ -n "$CONTENT" ]; then
-              # Use a temp file approach to avoid sed escaping issues
               python3 -c "
           import re, sys
           version = '$VERSION'
@@ -93,7 +85,6 @@ jobs:
               content = f.read()
           with open('/tmp/changelog-block.md', 'r') as f:
               block = f.read().strip()
-          # Extract section content (after the ## [version] - date line in the block)
           lines = block.split('\n')
           section_content = '\n'.join(lines[1:]).strip()
           if section_content:
@@ -110,27 +101,31 @@ jobs:
         working-directory: frontend
         run: npm version "${{ inputs.version }}" --no-git-tag-version
 
-      - name: Commit and push
+      - name: Create release branch, commit, and push
         run: |
+          VERSION="${{ inputs.version }}"
+          BRANCH="release/v${VERSION}"
+          git checkout -b "$BRANCH"
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add CHANGELOG.md frontend/package.json frontend/package-lock.json
-          git commit -m "chore: release v${{ inputs.version }}"
-          git push origin development
+          git commit -m "chore: release v${VERSION}"
+          git push origin "$BRANCH"
 
       - name: Open release PR
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           VERSION="${{ inputs.version }}"
+          BRANCH="release/v${VERSION}"
           gh pr create \
             --base main \
-            --head development \
+            --head "$BRANCH" \
             --title "chore: release v${VERSION}" \
             --body "$(cat <<EOF
           ## Release v${VERSION}
 
-          This PR merges the \`development\` branch into \`main\` for release v${VERSION}.
+          This PR merges release preparation into \`main\` for release v${VERSION}.
 
           ### Checklist
           - [ ] CHANGELOG.md updated with collected entries
@@ -138,8 +133,8 @@ jobs:
           - [ ] CI passes
           - [ ] UAT: local Docker Compose build validated
 
-          > **Merge this PR using a merge commit** (not squash) to preserve commit ancestry
-          > between \`development\` and \`main\`. After merge, \`auto-tag.yml\` will
-          > automatically create and push the \`v${VERSION}\` tag, triggering the release workflow.
+          > **Merge this PR using a merge commit** (not squash). After merge, \`auto-tag.yml\`
+          > will automatically create and push the \`v${VERSION}\` tag, triggering the release
+          > workflow. Then merge \`main\` back into \`development\` to sync the version bump.
           EOF
           )"
