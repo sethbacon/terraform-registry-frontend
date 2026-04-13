@@ -120,8 +120,8 @@ export function useModuleDetail() {
       }
 
       // Merge version data - getModule has basic version info, getModuleVersions has readme/published_at
-      const protocolVersions = versionsData.modules?.[0]?.versions || [];
-      const moduleVersions = moduleData.versions || [];
+      const protocolVersions = Array.isArray(versionsData?.modules?.[0]?.versions) ? versionsData.modules[0].versions : [];
+      const moduleVersions = Array.isArray(moduleData?.versions) ? moduleData.versions : [];
 
       // Use protocol versions as they have more complete data (readme, published_at)
       // Fall back to module versions if protocol versions not available
