@@ -114,6 +114,22 @@ When a release is called for:
    > Tagging on `development` before the merge leaves the tag pointing at the wrong commit —
    > it will never appear in `main`'s history as a tagged release.
 
+7. **Update deployment configs in the backend repo** to reference the new frontend version.
+   The backend repository (`terraform-registry-backend`) hosts all Kubernetes, Helm, and
+   cloud deployment configs that include frontend image tags. After a frontend release,
+   update these files in the backend repo:
+
+   **Helm chart** (in `deployments/helm/`):
+   - `values.yaml` — update `frontend.image.tag`
+   - `values-aks.yaml`, `values-eks.yaml`, `values-gke.yaml` — update `frontend.image.tag`
+
+   **Kustomize overlays** (in `deployments/kubernetes/overlays/`):
+   - `eks/kustomization.yaml` — update frontend `newTag`
+   - `gke/kustomization.yaml` — update frontend `newTag`
+
+   > The frontend repo's own `deployments/` directory uses Docker Compose with
+   > `${REGISTRY_TAG:-latest}` — no hardcoded tags to update here.
+
 ---
 
 ## Project Overview
