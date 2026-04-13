@@ -74,15 +74,15 @@ Releases are largely automated via two workflows: `prepare-release.yml` and `aut
 1. **Dispatch `prepare-release.yml`** from the GitHub Actions UI or CLI:
 
    ```bash
-   gh workflow run prepare-release.yml -f version=X.Y.Z
+   gh workflow run prepare-release.yml -f version=X.Y.Z --ref development
    ```
 
    This will:
    - Collect `## Changelog` entries from merged PR bodies since the last tag
-   - Update `CHANGELOG.md` on `development`
+   - Update `CHANGELOG.md`
    - Bump `frontend/package.json` version to match
-   - Commit `chore: release vX.Y.Z` on `development` and push
-   - Open a release PR from `development` → `main`
+   - Create a `release/vX.Y.Z` branch, commit, and push
+   - Open a release PR (`release/vX.Y.Z` → `main`) titled `chore: release vX.Y.Z`
 
 2. **UAT — local build validation** before merging to `main`:
 
@@ -106,9 +106,21 @@ Releases are largely automated via two workflows: `prepare-release.yml` and `aut
 
 4. **`auto-tag.yml` fires automatically** after the release PR merges. It extracts the
    version from the PR title (`chore: release vX.Y.Z`) and creates + pushes the tag.
-   The tag push triggers `release.yml`, which builds and publishes all release artifacts.
 
-5. **Update deployment configs in the backend repo** to reference the new frontend version.
+5. **Manually dispatch `release.yml`** to build and publish release artifacts:
+
+   ```bash
+   gh workflow run release.yml -f tag=vX.Y.Z --ref vX.Y.Z
+   ```
+
+   > **Why manual?** Tags pushed by `GITHUB_TOKEN` (from `auto-tag.yml`) cannot trigger
+   > downstream workflows — this is a GitHub security limitation to prevent infinite loops.
+   > A GitHub App token or PAT with `workflow` scope would allow fully automatic triggering.
+
+   `release.yml` runs CI, builds the Docker image, pushes to ghcr.io, attests SLSA
+   provenance, signs with cosign, and creates the GitHub Release.
+
+6. **Update deployment configs in the backend repo** to reference the new frontend version.
    The backend repository (`terraform-registry-backend`) hosts all Kubernetes, Helm, and
    cloud deployment configs that include frontend image tags. After a frontend release,
    update these files in the backend repo:
@@ -131,23 +143,8 @@ If the automated workflow fails, you can perform the steps manually:
 1. Run `.github/scripts/collect-changelog.sh` to gather entries.
 2. Update `CHANGELOG.md` and `frontend/package.json` version on `development`.
 3. Commit `chore: release vX.Y.Z`, push, and open the release PR to `main`.
-4. After merge, tag manually: `git tag vX.Y.Z origin/main && git push origin vX.Y.Z`.
-
-7. **Update deployment configs in the backend repo** to reference the new frontend version.
-   The backend repository (`terraform-registry-backend`) hosts all Kubernetes, Helm, and
-   cloud deployment configs that include frontend image tags. After a frontend release,
-   update these files in the backend repo:
-
-   **Helm chart** (in `deployments/helm/`):
-   - `values.yaml` — update `frontend.image.tag`
-   - `values-aks.yaml`, `values-eks.yaml`, `values-gke.yaml` — update `frontend.image.tag`
-
-   **Kustomize overlays** (in `deployments/kubernetes/overlays/`):
-   - `eks/kustomization.yaml` — update frontend `newTag`
-   - `gke/kustomization.yaml` — update frontend `newTag`
-
-   > The frontend repo's own `deployments/` directory uses Docker Compose with
-   > `${REGISTRY_TAG:-latest}` — no hardcoded tags to update here.
+4. After merge, tag manually: `git tag -a vX.Y.Z origin/main -m "Release vX.Y.Z" && git push origin vX.Y.Z`.
+5. Dispatch release: `gh workflow run release.yml -f tag=vX.Y.Z --ref vX.Y.Z`.
 
 ---
 
