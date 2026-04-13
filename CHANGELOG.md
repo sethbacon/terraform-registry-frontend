@@ -7,6 +7,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.2] - 2026-04-13
+
+### Fixed
+
+- fix: seed `system_settings.setup_completed = true` in E2E test stack so setup-redirect test passes
+- fix: use correct env var `TFR_SECURITY_RATE_LIMITING_ENABLED` to disable rate limiting in test stack
+- fix: use `getByRole('button')` for MUI Chip selectors in setup-wizard E2E spec
+
 ## [0.4.1] - 2026-04-13
 
 ### Changed
