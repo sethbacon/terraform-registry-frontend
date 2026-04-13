@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import MarkdownRenderer from '../components/MarkdownRenderer';
 import {
   Container,
@@ -25,369 +25,76 @@ import {
   DialogContentText,
   DialogActions,
   TextField,
-  Collapse,
-  List,
-  ListItem,
-  ListItemText,
-  Table,
-  TableHead,
-  TableBody,
-  TableRow,
-  TableCell,
-  TableContainer,
 } from '@mui/material';
 import ArrowBack from '@mui/icons-material/ArrowBack';
 import ContentCopy from '@mui/icons-material/ContentCopy';
 import Add from '@mui/icons-material/Add';
 import Delete from '@mui/icons-material/Delete';
 import Warning from '@mui/icons-material/Warning';
-import Restore from '@mui/icons-material/Restore';
-import SCMIcon from '@mui/icons-material/AccountTree';
-import UnlinkIcon from '@mui/icons-material/LinkOff';
-import SyncIcon from '@mui/icons-material/Sync';
-import WebhookIcon from '@mui/icons-material/Webhook';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import ExpandLessIcon from '@mui/icons-material/ExpandLess';
-import SecurityIcon from '@mui/icons-material/Security';
-import api from '../services/api';
-import { Module, ModuleVersion, ModuleScan, ModuleDoc } from '../types';
-import type { ModuleSCMLink, SCMWebhookEvent } from '../types/scm';
-import { useAuth } from '../contexts/AuthContext';
-import { REGISTRY_HOST } from '../config';
-import { getErrorMessage, getErrorStatus } from '../utils/errors';
 import PublishFromSCMWizard from '../components/PublishFromSCMWizard';
+import ModuleDocumentation from '../components/ModuleDocumentation';
+import SecurityScanPanel from '../components/SecurityScanPanel';
+import SCMRepositoryPanel from '../components/SCMRepositoryPanel';
+import WebhookEventsPanel from '../components/WebhookEventsPanel';
+import VersionDetailsPanel from '../components/VersionDetailsPanel';
+import { useModuleDetail } from '../hooks/useModuleDetail';
 
 const ModuleDetailPage: React.FC = () => {
-  const { namespace, name, system } = useParams<{
-    namespace: string;
-    name: string;
-    system: string;
-  }>();
   const navigate = useNavigate();
-  const { isAuthenticated, allowedScopes } = useAuth();
-  const canManage = isAuthenticated && (allowedScopes.includes('admin') || allowedScopes.includes('modules:write'));
-
-  const [module, setModule] = useState<Module | null>(null);
-  const [versions, setVersions] = useState<ModuleVersion[]>([]);
-  const [selectedVersion, setSelectedVersion] = useState<ModuleVersion | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [copiedSource, setCopiedSource] = useState(false);
-  const [deleteModuleDialogOpen, setDeleteModuleDialogOpen] = useState(false);
-  const [deleteVersionDialogOpen, setDeleteVersionDialogOpen] = useState(false);
-  const [versionToDelete, setVersionToDelete] = useState<string | null>(null);
-  const [deleting, setDeleting] = useState(false);
-  const [deprecateDialogOpen, setDeprecateDialogOpen] = useState(false);
-  const [deprecationMessage, setDeprecationMessage] = useState('');
-  const [deprecating, setDeprecating] = useState(false);
-
-  // SCM linking state
-  const [scmLink, setScmLink] = useState<ModuleSCMLink | null>(null);
-  const [scmLinkLoaded, setScmLinkLoaded] = useState(false);
-  const [scmWizardOpen, setScmWizardOpen] = useState(false);
-  const [scmSyncing, setScmSyncing] = useState(false);
-  const [scmUnlinking, setScmUnlinking] = useState(false);
-
-  // Webhook events state
-  const [webhookEvents, setWebhookEvents] = useState<SCMWebhookEvent[]>([]);
-  const [webhookEventsLoaded, setWebhookEventsLoaded] = useState(false);
-  const [webhookEventsLoading, setWebhookEventsLoading] = useState(false);
-  const [webhookEventsExpanded, setWebhookEventsExpanded] = useState(false);
-
-  // Security scan state
-  const [moduleScan, setModuleScan] = useState<ModuleScan | null>(null);
-  const [scanLoading, setScanLoading] = useState(false);
-  const [scanNotFound, setScanNotFound] = useState(false);
-
-  // Module docs state
-  const [moduleDocs, setModuleDocs] = useState<ModuleDoc | null>(null);
-  const [docsLoading, setDocsLoading] = useState(false);
-
-  const loadSCMLink = useCallback(async (moduleId: string) => {
-    try {
-      const link = await api.getModuleSCMInfo(moduleId);
-      setScmLink(link);
-    } catch {
-      setScmLink(null); // 404 = not linked, which is fine
-    } finally {
-      setScmLinkLoaded(true);
-    }
-  }, []);
-
-  const loadModuleScan = useCallback(async (version: string) => {
-    if (!namespace || !name || !system) return;
-    setScanLoading(true);
-    setScanNotFound(false);
-    setModuleScan(null);
-    try {
-      const scan = await api.getModuleScan(namespace, name, system, version);
-      setModuleScan(scan);
-    } catch (err: unknown) {
-      if (getErrorStatus(err) === 404) {
-        setScanNotFound(true);
-      }
-    } finally {
-      setScanLoading(false);
-    }
-  }, [namespace, name, system]);
-
-  const loadModuleDocs = useCallback(async (version: string) => {
-    if (!namespace || !name || !system) return;
-    setDocsLoading(true);
-    setModuleDocs(null);
-    try {
-      const docs = await api.getModuleDocs(namespace, name, system, version);
-      setModuleDocs(docs);
-    } catch {
-      setModuleDocs(null);
-    } finally {
-      setDocsLoading(false);
-    }
-  }, [namespace, name, system]);
-
-  const loadModuleDetails = useCallback(async () => {
-    if (!namespace || !name || !system) return;
-
-    try {
-      setLoading(true);
-      setError(null);
-
-      // Use getModule API which returns module with embedded versions
-      // Also fetch versions from the Terraform protocol endpoint for readme/published_at
-      const [moduleData, versionsData] = await Promise.all([
-        api.getModule(namespace, name, system),
-        api.getModuleVersions(namespace, name, system),
-      ]);
-
-      if (!moduleData) {
-        setError('Module not found');
-        return;
-      }
-
-      setModule(moduleData);
-      if (moduleData?.id && isAuthenticated) {
-        loadSCMLink(moduleData.id);
-      }
-
-      // Merge version data - getModule has basic version info, getModuleVersions has readme/published_at
-      const protocolVersions = versionsData.modules?.[0]?.versions || [];
-      const moduleVersions = moduleData.versions || [];
-
-      // Use protocol versions as they have more complete data (readme, published_at)
-      // Fall back to module versions if protocol versions not available
-      const rawVersions: ModuleVersion[] = protocolVersions.length > 0 ? protocolVersions : moduleVersions;
-
-      // Sort by semver descending so latest is always first
-      const mergedVersions = [...rawVersions].sort((a, b) => {
-        const parseParts = (v: string): [number, number, number] => {
-          const clean = v.replace(/^v/, '').split('-')[0];
-          const [maj = 0, min = 0, pat = 0] = clean.split('.').map(Number);
-          return [maj, min, pat];
-        };
-        const [aMaj, aMin, aPat] = parseParts(a.version);
-        const [bMaj, bMin, bPat] = parseParts(b.version);
-        return bMaj !== aMaj ? bMaj - aMaj : bMin !== aMin ? bMin - aMin : bPat - aPat;
-      });
-      setVersions(mergedVersions);
-
-      // Select latest version by default (preserve current selection if reloading)
-      if (mergedVersions.length > 0) {
-        setSelectedVersion(prev => {
-          const currentVersion = prev?.version;
-          const matchingVersion = currentVersion
-            ? mergedVersions.find((v: ModuleVersion) => v.version === currentVersion)
-            : null;
-          return matchingVersion || mergedVersions[0];
-        });
-      }
-    } catch (err: unknown) {
-      console.error('Failed to load module details:', err);
-      if (getErrorStatus(err) === 404) {
-        setError('Module not found');
-      } else {
-        setError(getErrorMessage(err, 'Failed to load module details'));
-      }
-    } finally {
-      setLoading(false);
-    }
-  }, [namespace, name, system, isAuthenticated, loadSCMLink]);
-
-  useEffect(() => {
-    loadModuleDetails();
-  }, [loadModuleDetails]);
-
-  useEffect(() => {
-    if (!selectedVersion?.version || !namespace || !name || !system) return;
-    setModuleScan(null);
-    setScanNotFound(false);
-    setModuleDocs(null);
-    if (canManage) loadModuleScan(selectedVersion.version);
-    loadModuleDocs(selectedVersion.version);
-  }, [selectedVersion?.version, canManage, loadModuleScan, loadModuleDocs, namespace, name, system]);
-
-  const loadWebhookEvents = async (moduleId: string) => {
-    try {
-      setWebhookEventsLoading(true);
-      const events = await api.getWebhookEvents(moduleId);
-      setWebhookEvents(Array.isArray(events) ? events : []);
-    } catch {
-      setWebhookEvents([]);
-    } finally {
-      setWebhookEventsLoading(false);
-      setWebhookEventsLoaded(true);
-    }
-  };
-
-  const handleSCMUnlink = async () => {
-    if (!module?.id) return;
-    try {
-      setScmUnlinking(true);
-      await api.unlinkModuleFromSCM(module.id);
-      setScmLink(null);
-    } catch (err: unknown) {
-      setError(getErrorMessage(err, 'Failed to unlink repository'));
-    } finally {
-      setScmUnlinking(false);
-    }
-  };
-
-  // Poll for updated versions after an async sync by reloading at 2 s, 5 s, and 12 s.
-  // The sync runs in the background (202) so a single immediate reload is not enough.
-  const pollForVersions = () => {
-    [2000, 5000, 12000].forEach(delay => {
-      setTimeout(() => loadModuleDetails(), delay);
-    });
-  };
-
-  const handleSCMSync = async () => {
-    if (!module?.id) {
-      console.error('Cannot sync: module.id is not available');
-      return;
-    }
-    console.log('Triggering manual sync for module:', module.id);
-    try {
-      setScmSyncing(true);
-      await api.triggerManualSync(module.id);
-      setError(null);
-      // Start polling so newly imported versions appear without manual refresh.
-      pollForVersions();
-    } catch (err: unknown) {
-      console.error('Sync failed:', err);
-      setError(getErrorMessage(err, 'Failed to trigger sync'));
-    } finally {
-      setScmSyncing(false);
-    }
-  };
-
-  const handleCopySource = () => {
-    if (!module || !selectedVersion) return;
-
-    const source = `${namespace}/${name}/${system}`;
-    navigator.clipboard.writeText(source);
-    setCopiedSource(true);
-    setTimeout(() => setCopiedSource(false), 2000);
-  };
-
-  const handlePublishNewVersion = () => {
-    navigate('/admin/upload/module', {
-      state: {
-        moduleData: {
-          namespace,
-          name,
-          provider: system,
-        },
-      },
-    });
-  };
-
-  const handleDeleteModule = async () => {
-    if (!namespace || !name || !system) return;
-
-    try {
-      setDeleting(true);
-      await api.deleteModule(namespace, name, system);
-      navigate('/modules');
-    } catch (err: unknown) {
-      console.error('Failed to delete module:', err);
-      const message = getErrorMessage(err, 'Failed to delete module. Please try again.');
-      setError(message);
-    } finally {
-      setDeleting(false);
-      setDeleteModuleDialogOpen(false);
-    }
-  };
-
-  const handleDeleteVersion = async () => {
-    if (!namespace || !name || !system || !versionToDelete) return;
-
-    try {
-      setDeleting(true);
-      await api.deleteModuleVersion(namespace, name, system, versionToDelete);
-      // Reload the module details
-      await loadModuleDetails();
-      setVersionToDelete(null);
-    } catch (err: unknown) {
-      console.error('Failed to delete version:', err);
-      const message = getErrorMessage(err, 'Failed to delete version. Please try again.');
-      setError(message);
-    } finally {
-      setDeleting(false);
-      setDeleteVersionDialogOpen(false);
-    }
-  };
-
-  const openDeleteVersionDialog = (version: string) => {
-    setVersionToDelete(version);
-    setDeleteVersionDialogOpen(true);
-  };
-
-  const handleDeprecateVersion = async () => {
-    if (!namespace || !name || !system || !selectedVersion) return;
-
-    try {
-      setDeprecating(true);
-      await api.deprecateModuleVersion(namespace, name, system, selectedVersion.version, deprecationMessage || undefined);
-      // Reload the module details
-      await loadModuleDetails();
-      setDeprecationMessage('');
-    } catch (err: unknown) {
-      console.error('Failed to deprecate version:', err);
-      const message = getErrorMessage(err, 'Failed to deprecate version. Please try again.');
-      setError(message);
-    } finally {
-      setDeprecating(false);
-      setDeprecateDialogOpen(false);
-    }
-  };
-
-  const handleUndeprecateVersion = async () => {
-    if (!namespace || !name || !system || !selectedVersion) return;
-
-    try {
-      setDeprecating(true);
-      await api.undeprecateModuleVersion(namespace, name, system, selectedVersion.version);
-      // Reload the module details
-      await loadModuleDetails();
-    } catch (err: unknown) {
-      console.error('Failed to remove deprecation:', err);
-      const message = getErrorMessage(err, 'Failed to remove deprecation. Please try again.');
-      setError(message);
-    } finally {
-      setDeprecating(false);
-    }
-  };
-
-  const getTerraformExample = () => {
-    if (!module || !selectedVersion) return '';
-
-    const v = selectedVersion.version;
-    const majorMinor = v.split('.').slice(0, 2).join('.');
-
-    return `module "${name}" {
-  source  = "${REGISTRY_HOST}/${namespace}/${name}/${system}"
-  version = ">=${majorMinor}"
-}`;
-  };
+  const {
+    namespace,
+    name,
+    system,
+    isAuthenticated,
+    canManage,
+    module,
+    versions,
+    selectedVersion,
+    setSelectedVersion,
+    loading,
+    error,
+    copiedSource,
+    deleteModuleDialogOpen,
+    setDeleteModuleDialogOpen,
+    deleting,
+    deleteVersionDialogOpen,
+    setDeleteVersionDialogOpen,
+    versionToDelete,
+    deprecateDialogOpen,
+    setDeprecateDialogOpen,
+    deprecationMessage,
+    setDeprecationMessage,
+    deprecating,
+    scmLink,
+    scmLinkLoaded,
+    scmWizardOpen,
+    setScmWizardOpen,
+    scmSyncing,
+    scmUnlinking,
+    webhookEvents,
+    webhookEventsLoaded,
+    webhookEventsLoading,
+    webhookEventsExpanded,
+    setWebhookEventsExpanded,
+    moduleScan,
+    scanLoading,
+    scanNotFound,
+    moduleDocs,
+    docsLoading,
+    loadSCMLink,
+    loadWebhookEvents,
+    pollForVersions,
+    handleSCMSync,
+    handleSCMUnlink,
+    handleCopySource,
+    handlePublishNewVersion,
+    handleDeleteModule,
+    handleDeleteVersion,
+    openDeleteVersionDialog,
+    handleDeprecateVersion,
+    handleUndeprecateVersion,
+    getTerraformExample,
+  } = useModuleDetail();
 
   return (
     <Box aria-busy={loading} aria-live="polite">
@@ -537,119 +244,7 @@ const ModuleDetailPage: React.FC = () => {
           )}
 
           {/* Module Documentation */}
-          {!docsLoading && moduleDocs &&
-            (moduleDocs.inputs.length > 0 || moduleDocs.outputs.length > 0 ||
-             moduleDocs.providers.length > 0 || moduleDocs.requirements?.required_version) && (
-            <Paper sx={{ p: 3, mt: 3 }}>
-              <Typography variant="h6" gutterBottom>Module Documentation</Typography>
-              <Divider sx={{ mb: 2 }} />
-
-              {moduleDocs.requirements?.required_version && (
-                <Box mb={2}>
-                  <Typography variant="subtitle2" gutterBottom>Terraform Version Requirement</Typography>
-                  <Typography variant="body2" fontFamily="monospace">
-                    {moduleDocs.requirements.required_version}
-                  </Typography>
-                </Box>
-              )}
-
-              {moduleDocs.inputs.length > 0 && (
-                <Box mb={3}>
-                  <Typography variant="subtitle2" gutterBottom>Inputs</Typography>
-                  <TableContainer>
-                    <Table size="small">
-                      <TableHead>
-                        <TableRow>
-                          <TableCell><strong>Name</strong></TableCell>
-                          <TableCell><strong>Type</strong></TableCell>
-                          <TableCell><strong>Description</strong></TableCell>
-                          <TableCell><strong>Default</strong></TableCell>
-                          <TableCell><strong>Required</strong></TableCell>
-                        </TableRow>
-                      </TableHead>
-                      <TableBody>
-                        {moduleDocs.inputs.map((inp) => (
-                          <TableRow key={inp.name}>
-                            <TableCell sx={{ fontFamily: 'monospace', whiteSpace: 'nowrap' }}>{inp.name}</TableCell>
-                            <TableCell sx={{ fontFamily: 'monospace' }}>{inp.type}</TableCell>
-                            <TableCell>{inp.description}</TableCell>
-                            <TableCell sx={{ fontFamily: 'monospace' }}>
-                              {inp.required ? '—' : JSON.stringify(inp.default)}
-                            </TableCell>
-                            <TableCell>
-                              <Chip
-                                label={inp.required ? 'Yes' : 'No'}
-                                size="small"
-                                color={inp.required ? 'error' : 'default'}
-                                variant="outlined"
-                              />
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  </TableContainer>
-                </Box>
-              )}
-
-              {moduleDocs.outputs.length > 0 && (
-                <Box mb={3}>
-                  <Typography variant="subtitle2" gutterBottom>Outputs</Typography>
-                  <TableContainer>
-                    <Table size="small">
-                      <TableHead>
-                        <TableRow>
-                          <TableCell><strong>Name</strong></TableCell>
-                          <TableCell><strong>Description</strong></TableCell>
-                          <TableCell><strong>Sensitive</strong></TableCell>
-                        </TableRow>
-                      </TableHead>
-                      <TableBody>
-                        {moduleDocs.outputs.map((out) => (
-                          <TableRow key={out.name}>
-                            <TableCell sx={{ fontFamily: 'monospace' }}>{out.name}</TableCell>
-                            <TableCell>{out.description}</TableCell>
-                            <TableCell>
-                              {out.sensitive
-                                ? <Chip label="Sensitive" size="small" color="warning" variant="outlined" />
-                                : <Typography variant="body2" color="text.secondary">—</Typography>
-                              }
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  </TableContainer>
-                </Box>
-              )}
-
-              {moduleDocs.providers.length > 0 && (
-                <Box>
-                  <Typography variant="subtitle2" gutterBottom>Provider Requirements</Typography>
-                  <TableContainer>
-                    <Table size="small">
-                      <TableHead>
-                        <TableRow>
-                          <TableCell><strong>Name</strong></TableCell>
-                          <TableCell><strong>Source</strong></TableCell>
-                          <TableCell><strong>Version Constraints</strong></TableCell>
-                        </TableRow>
-                      </TableHead>
-                      <TableBody>
-                        {moduleDocs.providers.map((prov) => (
-                          <TableRow key={prov.name}>
-                            <TableCell sx={{ fontFamily: 'monospace' }}>{prov.name}</TableCell>
-                            <TableCell sx={{ fontFamily: 'monospace' }}>{prov.source}</TableCell>
-                            <TableCell sx={{ fontFamily: 'monospace' }}>{prov.version_constraints}</TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  </TableContainer>
-                </Box>
-              )}
-            </Paper>
-          )}
+          <ModuleDocumentation moduleDocs={moduleDocs} docsLoading={docsLoading} />
         </Box>
 
         {/* Sidebar - Module Information and Version Details */}
@@ -687,329 +282,45 @@ const ModuleDetailPage: React.FC = () => {
             </Box>
           </Paper>
 
-          {/* SCM Repository Panel */}
-          {isAuthenticated && scmLinkLoaded && (
-            <Paper sx={{ p: 3, mb: 3 }}>
-              <Box display="flex" alignItems="center" gap={1} mb={1}>
-                <SCMIcon fontSize="small" color="action" />
-                <Typography variant="h6">Source Repository</Typography>
-              </Box>
-              <Divider sx={{ mb: 2 }} />
-              {scmLink ? (
-                <Box>
-                  <Typography variant="body2" sx={{ mb: 0.5 }}>
-                    <strong>{scmLink.repository_owner}/{scmLink.repository_name}</strong>
-                  </Typography>
-                  <Typography variant="caption" color="text.secondary" display="block" sx={{ mb: 0.5 }}>
-                    Branch: {scmLink.default_branch}
-                  </Typography>
-                  <Typography variant="caption" color="text.secondary" display="block" sx={{ mb: 0.5 }}>
-                    Tag pattern: <code>{scmLink.tag_pattern || 'v*'}</code>
-                  </Typography>
-                  <Chip
-                    label={scmLink.auto_publish_enabled ? 'Auto-publish on' : 'Auto-publish off'}
-                    size="small"
-                    color={scmLink.auto_publish_enabled ? 'success' : 'default'}
-                    variant="outlined"
-                    sx={{ mb: 1.5, fontSize: '0.7rem' }}
-                  />
-                  {scmLink.last_sync_at && (
-                    <Typography variant="caption" color="text.secondary" display="block" sx={{ mb: 1.5 }}>
-                      Last synced: {new Date(scmLink.last_sync_at).toLocaleString()}
-                    </Typography>
-                  )}
-                  <Stack spacing={1}>
-                    <Button
-                      variant="outlined"
-                      size="small"
-                      startIcon={scmSyncing ? <CircularProgress size={14} /> : <SyncIcon />}
-                      onClick={handleSCMSync}
-                      disabled={scmSyncing}
-                      fullWidth
-                    >
-                      {scmSyncing ? 'Syncing...' : 'Sync Now'}
-                    </Button>
-                    <Button
-                      variant="outlined"
-                      color="error"
-                      size="small"
-                      startIcon={scmUnlinking ? <CircularProgress size={14} /> : <UnlinkIcon />}
-                      onClick={handleSCMUnlink}
-                      disabled={scmUnlinking}
-                      fullWidth
-                    >
-                      {scmUnlinking ? 'Unlinking...' : 'Unlink Repository'}
-                    </Button>
-                  </Stack>
-                </Box>
-              ) : (
-                <Box>
-                  <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                    Not linked to a repository. Link one to enable automatic version publishing.
-                  </Typography>
-                  <Button
-                    variant="outlined"
-                    size="small"
-                    startIcon={<SCMIcon />}
-                    onClick={() => setScmWizardOpen(true)}
-                    fullWidth
-                  >
-                    Link Repository
-                  </Button>
-                </Box>
-              )}
-            </Paper>
-          )}
+          <SCMRepositoryPanel
+            isAuthenticated={isAuthenticated}
+            scmLinkLoaded={scmLinkLoaded}
+            scmLink={scmLink}
+            scmSyncing={scmSyncing}
+            scmUnlinking={scmUnlinking}
+            onSync={handleSCMSync}
+            onUnlink={handleSCMUnlink}
+            onOpenWizard={() => setScmWizardOpen(true)}
+          />
 
-          {/* Webhook Events Panel */}
-          {isAuthenticated && scmLink && (
-            <Paper sx={{ p: 3, mb: 3 }}>
-              <Box
-                display="flex"
-                alignItems="center"
-                justifyContent="space-between"
-                sx={{ cursor: 'pointer' }}
-                onClick={() => {
-                  if (!webhookEventsExpanded && !webhookEventsLoaded && module?.id) {
-                    loadWebhookEvents(module.id);
-                  }
-                  setWebhookEventsExpanded(!webhookEventsExpanded);
-                }}
-              >
-                <Box display="flex" alignItems="center" gap={1}>
-                  <WebhookIcon fontSize="small" color="action" />
-                  <Typography variant="h6">Webhook Events</Typography>
-                </Box>
-                <IconButton size="small" aria-label="Toggle webhook events">
-                  {webhookEventsExpanded ? <ExpandLessIcon /> : <ExpandMoreIcon />}
-                </IconButton>
-              </Box>
+          <WebhookEventsPanel
+            isAuthenticated={isAuthenticated}
+            scmLink={scmLink}
+            moduleId={module?.id}
+            webhookEvents={webhookEvents}
+            webhookEventsLoaded={webhookEventsLoaded}
+            webhookEventsLoading={webhookEventsLoading}
+            webhookEventsExpanded={webhookEventsExpanded}
+            onToggleExpanded={() => setWebhookEventsExpanded(!webhookEventsExpanded)}
+            onLoadEvents={loadWebhookEvents}
+          />
 
-              <Collapse in={webhookEventsExpanded}>
-                <Divider sx={{ my: 2 }} />
-                {webhookEventsLoading ? (
-                  <Box display="flex" justifyContent="center" py={2}>
-                    <CircularProgress size={24} />
-                  </Box>
-                ) : webhookEvents.length === 0 ? (
-                  <Typography variant="body2" color="text.secondary">
-                    No webhook events recorded yet.
-                  </Typography>
-                ) : (
-                  <List dense disablePadding>
-                    {webhookEvents.slice(0, 10).map((event) => (
-                      <ListItem key={event.id} disableGutters sx={{ py: 0.5 }}>
-                        <ListItemText
-                          primary={
-                            <Box display="flex" alignItems="center" gap={1}>
-                              <Chip
-                                label={event.state}
-                                size="small"
-                                color={
-                                  event.state === 'succeeded'
-                                    ? 'success'
-                                    : event.state === 'failed'
-                                      ? 'error'
-                                      : event.state === 'processing'
-                                        ? 'info'
-                                        : 'default'
-                                }
-                              />
-                              <Typography variant="body2">
-                                {event.event_type} — {event.ref_name}
-                              </Typography>
-                            </Box>
-                          }
-                          secondary={
-                            <Box>
-                              <Typography variant="caption" color="text.secondary" display="block">
-                                {new Date(event.created_at).toLocaleString()}
-                              </Typography>
-                              {event.error_message && (
-                                <Typography variant="caption" color="error" display="block">
-                                  {event.error_message}
-                                </Typography>
-                              )}
-                            </Box>
-                          }
-                        />
-                      </ListItem>
-                    ))}
-                    {webhookEvents.length > 10 && (
-                      <Typography variant="caption" color="text.secondary" sx={{ pl: 0, mt: 1, display: 'block' }}>
-                        Showing 10 of {webhookEvents.length} events
-                      </Typography>
-                    )}
-                  </List>
-                )}
-                {webhookEventsLoaded && (
-                  <Box mt={1}>
-                    <Button
-                      size="small"
-                      startIcon={<SyncIcon />}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        if (module?.id) loadWebhookEvents(module.id);
-                      }}
-                      disabled={webhookEventsLoading}
-                    >
-                      Refresh
-                    </Button>
-                  </Box>
-                )}
-              </Collapse>
-            </Paper>
-          )}
+          <VersionDetailsPanel
+            selectedVersion={selectedVersion}
+            canManage={canManage}
+            deprecating={deprecating}
+            onUndeprecate={handleUndeprecateVersion}
+            onOpenDeprecateDialog={() => setDeprecateDialogOpen(true)}
+            onOpenDeleteVersionDialog={openDeleteVersionDialog}
+          />
 
-          {/* Selected Version Details */}
-          {selectedVersion && (
-            <Paper sx={{ p: 3 }}>
-              <Typography variant="h6" gutterBottom>
-                Version {selectedVersion.version} Details
-              </Typography>
-              <Divider sx={{ mb: 2 }} />
-              <Typography variant="body2" sx={{ mb: 2 }}>
-                <strong>Published:</strong>{' '}
-                {(selectedVersion.published_at || selectedVersion.created_at)
-                  ? new Date(selectedVersion.published_at || selectedVersion.created_at!).toLocaleDateString()
-                  : 'N/A'}
-              </Typography>
-              <Typography variant="body2" sx={{ mb: 2 }}>
-                <strong>Downloads:</strong> {selectedVersion.download_count ?? 0}
-              </Typography>
-              {selectedVersion.published_by_name && (
-                <Typography variant="body2" sx={{ mb: 2 }}>
-                  <strong>Published By:</strong> {selectedVersion.published_by_name}
-                </Typography>
-              )}
-
-              {/* Deprecation Status */}
-              {selectedVersion.deprecated && (
-                <Alert severity="warning" sx={{ mb: 2 }}>
-                  <Typography variant="body2">
-                    <strong>Deprecated</strong>
-                    {selectedVersion.deprecated_at && (
-                      <> on {new Date(selectedVersion.deprecated_at).toLocaleDateString()}</>
-                    )}
-                  </Typography>
-                  {selectedVersion.deprecation_message && (
-                    <Typography variant="body2" sx={{ mt: 1 }}>
-                      {selectedVersion.deprecation_message}
-                    </Typography>
-                  )}
-                </Alert>
-              )}
-
-              {canManage && (
-                <Stack spacing={1}>
-                  {selectedVersion.deprecated ? (
-                    <Button
-                      variant="outlined"
-                      color="success"
-                      size="small"
-                      startIcon={<Restore />}
-                      onClick={handleUndeprecateVersion}
-                      disabled={deprecating}
-                      fullWidth
-                    >
-                      {deprecating ? 'Removing Deprecation...' : 'Remove Deprecation'}
-                    </Button>
-                  ) : (
-                    <Button
-                      variant="outlined"
-                      color="warning"
-                      size="small"
-                      startIcon={<Warning />}
-                      onClick={() => setDeprecateDialogOpen(true)}
-                      fullWidth
-                    >
-                      Deprecate Version
-                    </Button>
-                  )}
-                  <Button
-                    variant="outlined"
-                    color="error"
-                    size="small"
-                    startIcon={<Delete />}
-                    onClick={() => openDeleteVersionDialog(selectedVersion.version)}
-                    fullWidth
-                  >
-                    Delete This Version
-                  </Button>
-                </Stack>
-              )}
-            </Paper>
-          )}
-
-          {/* Security Scan */}
-          {canManage && selectedVersion && (
-            <Paper sx={{ p: 3, mb: 3 }}>
-              <Box display="flex" alignItems="center" gap={1} mb={1}>
-                <SecurityIcon fontSize="small" color="action" />
-                <Typography variant="h6">Security Scan</Typography>
-                {(moduleScan?.status === 'pending' || moduleScan?.status === 'scanning') && (
-                  <CircularProgress size={16} sx={{ ml: 'auto' }} />
-                )}
-              </Box>
-              <Divider sx={{ mb: 2 }} />
-              {scanLoading ? (
-                <Box display="flex" justifyContent="center" py={2}>
-                  <CircularProgress size={24} />
-                </Box>
-              ) : scanNotFound ? (
-                <Typography variant="body2" color="text.secondary">
-                  No scan available for this version.
-                </Typography>
-              ) : moduleScan ? (
-                <Box>
-                  <Box mb={1.5}>
-                    <Chip
-                      label={moduleScan.status}
-                      size="small"
-                      color={
-                        moduleScan.status === 'clean' ? 'success' :
-                        moduleScan.status === 'findings' ? 'warning' :
-                        moduleScan.status === 'error' ? 'error' : 'info'
-                      }
-                    />
-                  </Box>
-                  {moduleScan.status === 'error' && moduleScan.error_message && (
-                    <Alert severity="error" sx={{ mb: 1.5 }}>
-                      {moduleScan.error_message}
-                    </Alert>
-                  )}
-                  {(moduleScan.status === 'findings' || moduleScan.status === 'clean') && (
-                    <Stack direction="row" spacing={0.5} flexWrap="wrap" sx={{ mb: 1.5 }}>
-                      {moduleScan.critical_count > 0 && (
-                        <Chip label={`Critical: ${moduleScan.critical_count}`} size="small" color="error" />
-                      )}
-                      {moduleScan.high_count > 0 && (
-                        <Chip label={`High: ${moduleScan.high_count}`} size="small" color="warning" />
-                      )}
-                      {moduleScan.medium_count > 0 && (
-                        <Chip label={`Medium: ${moduleScan.medium_count}`} size="small" />
-                      )}
-                      {moduleScan.low_count > 0 && (
-                        <Chip label={`Low: ${moduleScan.low_count}`} size="small" />
-                      )}
-                      {moduleScan.critical_count === 0 && moduleScan.high_count === 0 &&
-                       moduleScan.medium_count === 0 && moduleScan.low_count === 0 && (
-                        <Typography variant="body2" color="success.main">No findings</Typography>
-                      )}
-                    </Stack>
-                  )}
-                  <Typography variant="caption" color="text.secondary" display="block">
-                    Scanner: {moduleScan.scanner}{moduleScan.scanner_version ? ` ${moduleScan.scanner_version}` : ''}
-                  </Typography>
-                  {moduleScan.scanned_at && (
-                    <Typography variant="caption" color="text.secondary" display="block">
-                      Scanned: {new Date(moduleScan.scanned_at).toLocaleString()}
-                    </Typography>
-                  )}
-                </Box>
-              ) : null}
-            </Paper>
-          )}
+          <SecurityScanPanel
+            canManage={canManage}
+            selectedVersion={selectedVersion}
+            moduleScan={moduleScan}
+            scanLoading={scanLoading}
+            scanNotFound={scanNotFound}
+          />
         </Box>
       </Box>
 
