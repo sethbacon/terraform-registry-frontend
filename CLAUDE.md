@@ -29,7 +29,9 @@ git remote prune origin                          # prune stale remote-tracking r
    # or: feature/short-description
    ```
 
-3. **Implement the change**, updating `CHANGELOG.md` under `[Unreleased]` as you go.
+3. **Implement the change.**
+
+   Include a `## Changelog` section in the PR body (step 6) with entries for this change. **Do not edit `CHANGELOG.md` directly** — entries are collected automatically at release time.
 
 4. **Commit — no co-author attribution**:
 
@@ -54,7 +56,7 @@ git remote prune origin                          # prune stale remote-tracking r
    gh pr create --base development --title "fix: short description" --body "Closes #<issue>"
    ```
 
-   - Update `CHANGELOG.md` and any affected docs in this PR if not already done.
+   - Include a `## Changelog` section in the PR body with the entry for this change (format: `- type: description`). **Do not edit `CHANGELOG.md` in the branch** — changelog entries are collected from merged PR bodies at release time by the `prepare-release.yml` workflow.
    - Squash-merge into `development` when approved.
 
 7. **Open a PR from `development` → `main`** when the integration branch is ready to ship:
@@ -65,29 +67,24 @@ git remote prune origin                          # prune stale remote-tracking r
 
 ### Releasing a version
 
-When a release is called for:
+Releases are largely automated via two workflows: `prepare-release.yml` and `auto-tag.yml`.
 
-1. Promote `[Unreleased]` in `CHANGELOG.md` to the new version with today's date:
+#### Automated flow (preferred)
 
-   ```markdown
-   ## [X.Y.Z] - YYYY-MM-DD
-   ```
-
-2. **CRITICAL — version sync:** Update `frontend/package.json` `"version"` to match the
-   release version (e.g., `"0.3.5"` for release `v0.3.5`). This value is baked into the
-   Vite bundle as `__APP_VERSION__` at build time and is what the About modal displays as
-   the frontend version chip. **The release workflow fails if `package.json` does not
-   match the tag** — but catching it only at tag-push time means the fix must go into
-   another PR. Bump it now, in the same commit as the CHANGELOG promotion.
-
-3. Commit directly on `development` and push (**no tag yet**):
+1. **Dispatch `prepare-release.yml`** from the GitHub Actions UI or CLI:
 
    ```bash
-   git commit -m "chore: release vX.Y.Z"
-   git push origin development
+   gh workflow run prepare-release.yml -f version=X.Y.Z
    ```
 
-4. **UAT — local build validation** before merging to `main`:
+   This will:
+   - Collect `## Changelog` entries from merged PR bodies since the last tag
+   - Update `CHANGELOG.md` on `development`
+   - Bump `frontend/package.json` version to match
+   - Commit `chore: release vX.Y.Z` on `development` and push
+   - Open a release PR from `development` → `main`
+
+2. **UAT — local build validation** before merging to `main`:
 
    ```bash
    cd deployments
@@ -100,19 +97,41 @@ When a release is called for:
    mirrored provider and a module to confirm downloads work end-to-end. **Do not merge to
    `main` until the local build passes.**
 
-5. Merge `development` → `main` via PR (step 7 above).
+3. **Merge the release PR using a merge commit** (not squash). This preserves shared commit
+   ancestry between `development` and `main`, preventing CHANGELOG merge conflicts.
 
-6. **After the PR is merged**, tag the commit that landed on `main` and push the tag:
+   > **Important:** Release PRs (`development` → `main`) must use merge commits. Feature PRs
+   > (`feature/*` → `development`) continue to use squash merges. GitHub allows both when
+   > "Allow merge commits" and "Allow squash merging" are both enabled.
 
-   ```bash
-   git fetch origin
-   git tag vX.Y.Z origin/main
-   git push origin vX.Y.Z
-   ```
+4. **`auto-tag.yml` fires automatically** after the release PR merges. It extracts the
+   version from the PR title (`chore: release vX.Y.Z`) and creates + pushes the tag.
+   The tag push triggers `release.yml`, which builds and publishes all release artifacts.
 
-   > **Why tag after the merge?** The release PR produces a new merge commit SHA on `main`.
-   > Tagging on `development` before the merge leaves the tag pointing at the wrong commit —
-   > it will never appear in `main`'s history as a tagged release.
+5. **Update deployment configs in the backend repo** to reference the new frontend version.
+   The backend repository (`terraform-registry-backend`) hosts all Kubernetes, Helm, and
+   cloud deployment configs that include frontend image tags. After a frontend release,
+   update these files in the backend repo:
+
+   **Helm chart** (in `deployments/helm/`):
+   - `values.yaml` — update `frontend.image.tag`
+   - `values-aks.yaml`, `values-eks.yaml`, `values-gke.yaml` — update `frontend.image.tag`
+
+   **Kustomize overlays** (in `deployments/kubernetes/overlays/`):
+   - `eks/kustomization.yaml` — update frontend `newTag`
+   - `gke/kustomization.yaml` — update frontend `newTag`
+
+   > The frontend repo's own `deployments/` directory uses Docker Compose with
+   > `${REGISTRY_TAG:-latest}` — no hardcoded tags to update here.
+
+#### Manual fallback
+
+If the automated workflow fails, you can perform the steps manually:
+
+1. Run `.github/scripts/collect-changelog.sh` to gather entries.
+2. Update `CHANGELOG.md` and `frontend/package.json` version on `development`.
+3. Commit `chore: release vX.Y.Z`, push, and open the release PR to `main`.
+4. After merge, tag manually: `git tag vX.Y.Z origin/main && git push origin vX.Y.Z`.
 
 7. **Update deployment configs in the backend repo** to reference the new frontend version.
    The backend repository (`terraform-registry-backend`) hosts all Kubernetes, Helm, and
@@ -281,7 +300,6 @@ docker compose -f docker-compose.test.yml up -d --build
 - Required status checks (strict — branch must be up-to-date): `Frontend Lint & Build`
 - Required pull request reviews: 1 approving review, dismiss stale reviews, require code owner review
 - Enforce admins: no (admin/owner can bypass review requirements as sole maintainer)
-- Required linear history: yes (squash/rebase only, no merge commits)
 - Required conversation resolution: yes
 - Force pushes: blocked
 - Branch deletion: blocked
@@ -296,10 +314,15 @@ docker compose -f docker-compose.test.yml up -d --build
 
 ### Merge Strategy
 
-- **Squash merge only** — merge commits and rebase merges are disabled
+- **Squash merge** — default for feature/fix branches → `development`
+- **Merge commits** — used for release PRs (`development` → `main`) to preserve commit ancestry and prevent CHANGELOG conflicts
+- **Rebase merges** — disabled
 - **Delete branch on merge** — enabled; feature/fix branches are cleaned up automatically
 - **Allow update branch** — enabled; PRs can pull in base branch changes via GitHub UI
 - **Web commit signoff required** — enabled; all web-based commits require DCO signoff
+
+> **GitHub repo settings required:** Both "Allow merge commits" and "Allow squash merging"
+> must be enabled. "Allow rebase merging" remains disabled.
 
 ### Dependency Management
 
@@ -319,6 +342,8 @@ docker compose -f docker-compose.test.yml up -d --build
 - rehype-sanitize for Markdown rendering (XSS mitigation)
 - All GitHub Actions pinned to full commit SHAs
 - Scheduled weekly builds with auto-issue on failure
+- **SLSA provenance attestation** on Docker images via `actions/attest-build-provenance`
+- **Cosign keyless signing** on Docker images via Sigstore (verify with `cosign verify`)
 
 ### Repository Topics
 
