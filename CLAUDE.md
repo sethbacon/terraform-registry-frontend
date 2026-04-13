@@ -133,6 +133,22 @@ If the automated workflow fails, you can perform the steps manually:
 3. Commit `chore: release vX.Y.Z`, push, and open the release PR to `main`.
 4. After merge, tag manually: `git tag vX.Y.Z origin/main && git push origin vX.Y.Z`.
 
+7. **Update deployment configs in the backend repo** to reference the new frontend version.
+   The backend repository (`terraform-registry-backend`) hosts all Kubernetes, Helm, and
+   cloud deployment configs that include frontend image tags. After a frontend release,
+   update these files in the backend repo:
+
+   **Helm chart** (in `deployments/helm/`):
+   - `values.yaml` — update `frontend.image.tag`
+   - `values-aks.yaml`, `values-eks.yaml`, `values-gke.yaml` — update `frontend.image.tag`
+
+   **Kustomize overlays** (in `deployments/kubernetes/overlays/`):
+   - `eks/kustomization.yaml` — update frontend `newTag`
+   - `gke/kustomization.yaml` — update frontend `newTag`
+
+   > The frontend repo's own `deployments/` directory uses Docker Compose with
+   > `${REGISTRY_TAG:-latest}` — no hardcoded tags to update here.
+
 ---
 
 ## Project Overview
