@@ -21,10 +21,15 @@ interface ModuleDocumentationProps {
 
 const ModuleDocumentation: React.FC<ModuleDocumentationProps> = ({ moduleDocs, docsLoading }) => {
   if (docsLoading || !moduleDocs) return null;
+
+  const inputs = moduleDocs.inputs ?? [];
+  const outputs = moduleDocs.outputs ?? [];
+  const providers = moduleDocs.providers ?? [];
+
   if (
-    moduleDocs.inputs.length === 0 &&
-    moduleDocs.outputs.length === 0 &&
-    moduleDocs.providers.length === 0 &&
+    inputs.length === 0 &&
+    outputs.length === 0 &&
+    providers.length === 0 &&
     !moduleDocs.requirements?.required_version
   ) {
     return null;
@@ -44,7 +49,7 @@ const ModuleDocumentation: React.FC<ModuleDocumentationProps> = ({ moduleDocs, d
         </Box>
       )}
 
-      {moduleDocs.inputs.length > 0 && (
+      {inputs.length > 0 && (
         <Box mb={3}>
           <Typography variant="subtitle2" gutterBottom>Inputs</Typography>
           <TableContainer>
@@ -59,7 +64,7 @@ const ModuleDocumentation: React.FC<ModuleDocumentationProps> = ({ moduleDocs, d
                 </TableRow>
               </TableHead>
               <TableBody>
-                {moduleDocs.inputs.map((inp) => (
+                {inputs.map((inp) => (
                   <TableRow key={inp.name}>
                     <TableCell sx={{ fontFamily: 'monospace', whiteSpace: 'nowrap' }}>{inp.name}</TableCell>
                     <TableCell sx={{ fontFamily: 'monospace' }}>{inp.type}</TableCell>
@@ -83,7 +88,7 @@ const ModuleDocumentation: React.FC<ModuleDocumentationProps> = ({ moduleDocs, d
         </Box>
       )}
 
-      {moduleDocs.outputs.length > 0 && (
+      {outputs.length > 0 && (
         <Box mb={3}>
           <Typography variant="subtitle2" gutterBottom>Outputs</Typography>
           <TableContainer>
@@ -96,7 +101,7 @@ const ModuleDocumentation: React.FC<ModuleDocumentationProps> = ({ moduleDocs, d
                 </TableRow>
               </TableHead>
               <TableBody>
-                {moduleDocs.outputs.map((out) => (
+                {outputs.map((out) => (
                   <TableRow key={out.name}>
                     <TableCell sx={{ fontFamily: 'monospace' }}>{out.name}</TableCell>
                     <TableCell>{out.description}</TableCell>
@@ -114,7 +119,7 @@ const ModuleDocumentation: React.FC<ModuleDocumentationProps> = ({ moduleDocs, d
         </Box>
       )}
 
-      {moduleDocs.providers.length > 0 && (
+      {providers.length > 0 && (
         <Box>
           <Typography variant="subtitle2" gutterBottom>Provider Requirements</Typography>
           <TableContainer>
@@ -127,7 +132,7 @@ const ModuleDocumentation: React.FC<ModuleDocumentationProps> = ({ moduleDocs, d
                 </TableRow>
               </TableHead>
               <TableBody>
-                {moduleDocs.providers.map((prov) => (
+                {providers.map((prov) => (
                   <TableRow key={prov.name}>
                     <TableCell sx={{ fontFamily: 'monospace' }}>{prov.name}</TableCell>
                     <TableCell sx={{ fontFamily: 'monospace' }}>{prov.source}</TableCell>
