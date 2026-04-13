@@ -389,31 +389,25 @@ const ModuleDetailPage: React.FC = () => {
 }`;
   };
 
-  if (loading) {
-    return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
-        <CircularProgress />
-      </Box>
-    );
-  }
-
-  if (error || !module) {
-    return (
-      <Container maxWidth="lg" sx={{ py: 4 }}>
-        <Alert severity="error">{error || 'Module not found'}</Alert>
-        <Button
-          startIcon={<ArrowBack />}
-          onClick={() => navigate('/modules')}
-          sx={{ mt: 2 }}
-        >
-          Back to Modules
-        </Button>
-      </Container>
-    );
-  }
-
   return (
-    <Container maxWidth="lg" sx={{ py: 4 }}>
+    <Box aria-busy={loading} aria-live="polite">
+      {loading ? (
+        <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
+          <CircularProgress />
+        </Box>
+      ) : error || !module ? (
+        <Container maxWidth="lg" sx={{ py: 4 }}>
+          <Alert severity="error">{error || 'Module not found'}</Alert>
+          <Button
+            startIcon={<ArrowBack />}
+            onClick={() => navigate('/modules')}
+            sx={{ mt: 2 }}
+          >
+            Back to Modules
+          </Button>
+        </Container>
+      ) : (
+        <Container maxWidth="lg" sx={{ py: 4 }}>
       {/* Breadcrumbs */}
       <Breadcrumbs sx={{ mb: 3 }}>
         <Link
@@ -436,7 +430,7 @@ const ModuleDetailPage: React.FC = () => {
       <Box sx={{ mb: 4 }}>
         <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 2 }}>
           <Stack direction="row" alignItems="center" spacing={2}>
-            <IconButton onClick={() => navigate('/modules')}>
+            <IconButton aria-label="Back to modules" onClick={() => navigate('/modules')}>
               <ArrowBack />
             </IconButton>
             <Typography variant="h4" component="h1">
@@ -511,7 +505,7 @@ const ModuleDetailPage: React.FC = () => {
             <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
               <Typography variant="h6">Usage Example</Typography>
               <Tooltip title={copiedSource ? 'Copied!' : 'Copy source'}>
-                <IconButton onClick={handleCopySource} size="small">
+                <IconButton aria-label="Copy source URL" onClick={handleCopySource} size="small">
                   <ContentCopy />
                 </IconButton>
               </Tooltip>
@@ -786,7 +780,7 @@ const ModuleDetailPage: React.FC = () => {
                   <WebhookIcon fontSize="small" color="action" />
                   <Typography variant="h6">Webhook Events</Typography>
                 </Box>
-                <IconButton size="small">
+                <IconButton size="small" aria-label="Toggle webhook events">
                   {webhookEventsExpanded ? <ExpandLessIcon /> : <ExpandMoreIcon />}
                 </IconButton>
               </Box>
@@ -1131,6 +1125,8 @@ const ModuleDetailPage: React.FC = () => {
         </DialogActions>
       </Dialog>
     </Container>
+      )}
+    </Box>
   );
 };
 

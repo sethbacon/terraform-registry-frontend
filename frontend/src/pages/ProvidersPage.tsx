@@ -1,5 +1,6 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
 import { useDebounce } from '../hooks/useDebounce';
 import {
   Container,
@@ -17,6 +18,7 @@ import {
 import SearchIcon from '@mui/icons-material/Search';
 import CloudUpload from '@mui/icons-material/CloudUpload';
 import api from '../services/api';
+import { queryKeys } from '../services/queryKeys';
 import { Provider } from '../types';
 import { useAuth } from '../contexts/AuthContext';
 import RegistryItemCard from '../components/RegistryItemCard';
@@ -25,37 +27,27 @@ const ProvidersPage: React.FC = () => {
   const navigate = useNavigate();
   const { isAuthenticated } = useAuth();
   const [searchParams] = useSearchParams();
-  const [providers, setProviders] = useState<Provider[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState(searchParams.get('q') ?? '');
   const debouncedSearch = useDebounce(searchQuery, 300);
   const [page, setPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
   const limit = 12;
 
-  const loadProviders = useCallback(async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      const response = await api.searchProviders({
-        query: debouncedSearch || undefined,
-        limit,
-        offset: (page - 1) * limit,
-      });
-      setProviders(response.providers);
-      setTotalPages(Math.ceil(response.meta.total / limit));
-    } catch (err) {
-      console.error('Failed to load providers:', err);
-      setError('Failed to load providers. Please try again.');
-    } finally {
-      setLoading(false);
-    }
-  }, [page, debouncedSearch]);
+  const { data: queryData, isLoading: loading, error: queryError } = useQuery({
+    queryKey: queryKeys.providers.search({
+      query: debouncedSearch || undefined,
+      limit,
+      offset: (page - 1) * limit,
+    }),
+    queryFn: () => api.searchProviders({
+      query: debouncedSearch || undefined,
+      limit,
+      offset: (page - 1) * limit,
+    }),
+  });
 
-  useEffect(() => {
-    loadProviders();
-  }, [loadProviders]);
+  const providers: Provider[] = queryData?.providers ?? [];
+  const totalPages = queryData ? Math.ceil(queryData.meta.total / limit) : 1;
+  const error = queryError ? 'Failed to load providers. Please try again.' : null;
 
   const handleSearchChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(event.target.value);
@@ -68,7 +60,7 @@ const ProvidersPage: React.FC = () => {
   }, []);
 
   return (
-    <Container maxWidth="lg" sx={{ py: 4 }}>
+    <Container maxWidth="lg" sx={{ py: 4 }} aria-busy={loading} aria-live="polite">
       {/* Header */}
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
         <Box>

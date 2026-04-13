@@ -46,7 +46,7 @@ const CallbackPage: React.FC = () => {
   }, [searchParams, setToken, navigate]);
 
   return (
-    <Container maxWidth="sm" sx={{ mx: 'auto' }}>
+    <Container maxWidth="sm" sx={{ mx: 'auto' }} aria-busy={!error} aria-live="polite">
       <Box
         sx={{
           minHeight: '100vh',

@@ -308,16 +308,14 @@ const SCMProvidersPage: React.FC = () => {
     }
   };
 
-  if (loading) {
-    return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '400px' }}>
-        <CircularProgress />
-      </Box>
-    );
-  }
-
   return (
-    <Container maxWidth="lg" sx={{ py: 4 }}>
+    <Container maxWidth="lg" sx={{ py: 4 }} aria-busy={loading} aria-live="polite">
+      {loading ? (
+        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '400px' }}>
+          <CircularProgress />
+        </Box>
+      ) : (
+        <>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
         <Box>
           <Typography variant="h4">SCM Providers</Typography>
@@ -419,6 +417,7 @@ const SCMProvidersPage: React.FC = () => {
                       <Tooltip title="Copy to clipboard">
                         <IconButton
                           size="small"
+                          aria-label="Copy callback URL"
                           onClick={() => copyToClipboard(getCallbackUrl(provider.id))}
                           sx={{ flexShrink: 0 }}
                         >
@@ -482,6 +481,7 @@ const SCMProvidersPage: React.FC = () => {
                 }>
                   <IconButton
                     size="small"
+                    aria-label="Connect SCM provider"
                     color="primary"
                     onClick={() => handleConnect(provider)}
                   >
@@ -492,6 +492,7 @@ const SCMProvidersPage: React.FC = () => {
                   <Tooltip title="Disconnect">
                     <IconButton
                       size="small"
+                      aria-label="Disconnect SCM provider"
                       color="warning"
                       onClick={async () => {
                         try {
@@ -509,6 +510,7 @@ const SCMProvidersPage: React.FC = () => {
                 <Tooltip title="Edit">
                   <IconButton
                     size="small"
+                    aria-label="Edit SCM provider"
                     onClick={() => openEditDialog(provider)}
                   >
                     <EditIcon />
@@ -517,6 +519,7 @@ const SCMProvidersPage: React.FC = () => {
                 <Tooltip title="Delete">
                   <IconButton
                     size="small"
+                    aria-label="Delete SCM provider"
                     color="error"
                     onClick={() => {
                       setProviderToDelete(provider);
@@ -745,6 +748,8 @@ const SCMProvidersPage: React.FC = () => {
           </Button>
         </DialogActions>
       </Dialog>
+        </>
+      )}
     </Container>
   );
 };

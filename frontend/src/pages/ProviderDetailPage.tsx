@@ -315,33 +315,10 @@ provider "${name}" {
 }`;
   };
 
-  if (loading) {
-    return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
-        <CircularProgress />
-      </Box>
-    );
-  }
-
-  if (error || !provider) {
-    return (
-      <Container maxWidth="xl" sx={{ py: 4 }}>
-        <Alert severity="error">{error || 'Provider not found'}</Alert>
-        <Button
-          startIcon={<ArrowBack />}
-          onClick={() => navigate('/providers')}
-          sx={{ mt: 2 }}
-        >
-          Back to Providers
-        </Button>
-      </Container>
-    );
-  }
-
-  const hasDocs = provider.source && selectedVersion;
+  const hasDocs = provider?.source && selectedVersion;
 
   // Derive GitHub repo URL from namespace/type convention for mirrored providers
-  const githubUrl = provider.source
+  const githubUrl = provider?.source
     ? `https://github.com/${namespace}/terraform-provider-${type}`
     : null;
   const changelogUrl = githubUrl && selectedVersion
@@ -349,7 +326,24 @@ provider "${name}" {
     : null;
 
   return (
-    <Container maxWidth="xl" sx={{ py: 4 }}>
+    <Box aria-busy={loading} aria-live="polite">
+      {loading ? (
+        <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
+          <CircularProgress />
+        </Box>
+      ) : error || !provider ? (
+        <Container maxWidth="xl" sx={{ py: 4 }}>
+          <Alert severity="error">{error || 'Provider not found'}</Alert>
+          <Button
+            startIcon={<ArrowBack />}
+            onClick={() => navigate('/providers')}
+            sx={{ mt: 2 }}
+          >
+            Back to Providers
+          </Button>
+        </Container>
+      ) : (
+        <Container maxWidth="xl" sx={{ py: 4 }}>
       {/* Breadcrumbs */}
       <Breadcrumbs sx={{ mb: 3 }}>
         <Link
@@ -371,7 +365,7 @@ provider "${name}" {
       <Box sx={{ mb: 3 }}>
         <Stack direction="row" alignItems="center" justifyContent="space-between" spacing={2} sx={{ mb: 2 }}>
           <Stack direction="row" alignItems="center" spacing={2}>
-            <IconButton onClick={() => navigate('/providers')}>
+            <IconButton aria-label="Back to providers" onClick={() => navigate('/providers')}>
               <ArrowBack />
             </IconButton>
             <Typography variant="h4" component="h1">
@@ -466,7 +460,7 @@ provider "${name}" {
               <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
                 <Typography variant="h6">Usage Example</Typography>
                 <Tooltip title={copiedSource ? 'Copied!' : 'Copy source'}>
-                  <IconButton onClick={handleCopySource} size="small">
+                  <IconButton aria-label="Copy source URL" onClick={handleCopySource} size="small">
                     <ContentCopy />
                   </IconButton>
                 </Tooltip>
@@ -516,6 +510,7 @@ provider "${name}" {
                               <Tooltip title={copiedChecksum === platform.shasum ? "Copied!" : "Copy checksum"}>
                                 <IconButton
                                   size="small"
+                                  aria-label="Copy checksum"
                                   onClick={() => handleCopyChecksum(platform.shasum)}
                                 >
                                   <ContentCopy fontSize="small" />
@@ -885,6 +880,8 @@ provider "${name}" {
         </DialogActions>
       </Dialog>
     </Container>
+      )}
+    </Box>
   );
 };
 

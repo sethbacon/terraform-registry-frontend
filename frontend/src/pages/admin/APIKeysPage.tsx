@@ -445,7 +445,7 @@ const APIKeysPage: React.FC = () => {
   );
 
   return (
-    <Container maxWidth="lg" sx={{ py: 4 }}>
+    <Container maxWidth="lg" sx={{ py: 4 }} aria-busy={loading} aria-live="polite">
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
         <Box>
           <Typography variant="h4" gutterBottom>
@@ -549,6 +549,7 @@ const APIKeysPage: React.FC = () => {
                           <Tooltip title="Edit">
                             <IconButton
                               size="small"
+                              aria-label="Edit API key"
                               onClick={() => handleEditClick(apiKey)}
                             >
                               <EditIcon fontSize="small" />
@@ -557,6 +558,7 @@ const APIKeysPage: React.FC = () => {
                           <Tooltip title="Rotate">
                             <IconButton
                               size="small"
+                              aria-label="Rotate API key"
                               onClick={() => handleRotateClick(apiKey)}
                             >
                               <AutorenewIcon fontSize="small" />
@@ -565,6 +567,7 @@ const APIKeysPage: React.FC = () => {
                           <Tooltip title="Delete">
                             <IconButton
                               size="small"
+                              aria-label="Delete API key"
                               onClick={() => handleDeleteClick(apiKey)}
                               color="error"
                             >
@@ -606,7 +609,7 @@ const APIKeysPage: React.FC = () => {
                   readOnly: true,
                   endAdornment: (
                     <InputAdornment position="end">
-                      <IconButton onClick={() => handleCopyKey(newKeyValue)}>
+                      <IconButton aria-label="Copy API key" onClick={() => handleCopyKey(newKeyValue)}>
                         <CopyIcon />
                       </IconButton>
                     </InputAdornment>
@@ -773,7 +776,7 @@ const APIKeysPage: React.FC = () => {
                   readOnly: true,
                   endAdornment: (
                     <InputAdornment position="end">
-                      <IconButton onClick={() => handleCopyKey(rotatedKeyValue)}>
+                      <IconButton aria-label="Copy rotated key" onClick={() => handleCopyKey(rotatedKeyValue)}>
                         <CopyIcon />
                       </IconButton>
                     </InputAdornment>

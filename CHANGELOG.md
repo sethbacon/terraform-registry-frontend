@@ -7,7 +7,37 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.4.0] - 2026-04-13
+
+### Added
+
+- feat: add skip-to-content keyboard navigation link for accessibility
+- feat: add `aria-label` to all 45 icon-only buttons across 14 files for screen reader accessibility
+- feat: add `aria-busy` and `aria-live` attributes to all page-level loading containers (23 files) for screen reader state announcements
+- feat: add TanStack Query data-fetching abstraction with proof-of-concept migration of ModulesPage, ProvidersPage, and DashboardPage — replaces manual `useState`/`useEffect`/`try-catch` boilerplate with `useQuery`, adds request caching and deduplication
+- feat: add error reporting service placeholder (`services/errorReporting.ts`) with Sentry-compatible `init`/`captureError`/`setUser` interface — hooks into ErrorBoundary and global `unhandledrejection` handler, gated behind `VITE_ERROR_REPORTING_DSN` env var
+- docs: document tag protection rule command in CLAUDE.md
+
+### Fixed
+
+- fix: update module scan API path from `/admin/modules/` to `/modules/` to match backend route fix (sethbacon/terraform-registry-backend#147)
+
+## [0.3.8] - 2026-04-10
+
+### Added
+
+- feat: add Playwright E2E tests for SetupWizardPage — covers redirect-when-complete, page structure with stepper, token validation, OIDC step progression, storage backend chips, and public accessibility; uses route mocking for incomplete setup simulation
+- feat: add Firefox to E2E cross-browser testing — conditionally included in CI only to keep local test runs fast
+
+### Changed
+
+- perf: add client-side pagination to MirrorsPage (10/25/50 per page) to avoid rendering all mirrors at once
+- perf: reduce ModulesPage grouped view fetch limit from 500 to 100 modules per page with pagination controls
+- perf: add memoization to Layout sidebar navigation arrays (`useMemo`), wrap `RegistryItemCard` in `React.memo`, memoize search handlers and grouped computations in ModulesPage/ProvidersPage/MirrorsPage
+
+### Fixed
+
+- fix: remove `|| true` tautology from E2E admin test and strengthen weak assertions across 9 test files with descriptive comments and more specific checks
 
 ## [0.3.8] - 2026-04-10
 

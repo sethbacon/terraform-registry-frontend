@@ -1,6 +1,7 @@
 import { Component } from 'react';
 import type { ErrorInfo, ReactNode } from 'react';
 import { Alert, AlertTitle, Box, Button, Container, Stack, Typography } from '@mui/material';
+import { captureError } from '../services/errorReporting';
 
 interface ErrorBoundaryProps {
   children: ReactNode;
@@ -23,7 +24,7 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
   }
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo): void {
-    console.error('ErrorBoundary caught an error:', error, errorInfo);
+    captureError(error, { componentStack: errorInfo?.componentStack ?? undefined });
   }
 
   handleReset = (): void => {

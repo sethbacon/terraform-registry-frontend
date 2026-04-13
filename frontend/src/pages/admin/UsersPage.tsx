@@ -440,6 +440,7 @@ const UsersPage: React.FC = () => {
                     <TableCell align="right">
                       <IconButton
                         size="small"
+                        aria-label="Edit user"
                         onClick={() => handleOpenDialog(user)}
                         color="primary"
                       >
@@ -447,6 +448,7 @@ const UsersPage: React.FC = () => {
                       </IconButton>
                       <IconButton
                         size="small"
+                        aria-label="Delete user"
                         onClick={() => handleDeleteClick(user)}
                         color="error"
                       >
@@ -543,6 +545,7 @@ const UsersPage: React.FC = () => {
                       </FormControl>
                       <IconButton
                         size="small"
+                        aria-label="Remove from organization"
                         onClick={() => handleRemoveMembership(m.organization_id)}
                         color="error"
                       >

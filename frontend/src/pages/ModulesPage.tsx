@@ -1,5 +1,6 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
 import { useDebounce } from '../hooks/useDebounce';
 import {
   Container,
@@ -22,6 +23,7 @@ import CloudUpload from '@mui/icons-material/CloudUpload';
 import ViewModuleIcon from '@mui/icons-material/ViewModule';
 import CategoryIcon from '@mui/icons-material/Category';
 import api from '../services/api';
+import { queryKeys } from '../services/queryKeys';
 import { Module } from '../types';
 import { useAuth } from '../contexts/AuthContext';
 import { ProviderIcon, providerDisplayName } from '../components/ProviderIcon';
@@ -45,49 +47,29 @@ const ModulesPage: React.FC = () => {
   const navigate = useNavigate();
   const { isAuthenticated } = useAuth();
   const [searchParams] = useSearchParams();
-  const [modules, setModules] = useState<Module[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState(searchParams.get('q') ?? '');
   const debouncedSearch = useDebounce(searchQuery, 300);
   const [page, setPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
   const [viewMode, setViewMode] = useState<ViewMode>('grid');
-  const limit = 12;
+  const limit = viewMode === 'grouped' ? 100 : 12;
 
-  const loadModules = useCallback(async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      if (viewMode === 'grouped') {
-        // Fetch enough to populate grouped sections without excessive payload.
-        const response = await api.searchModules({
-          query: debouncedSearch || undefined,
-          limit: 100,
-          offset: (page - 1) * 100,
-        });
-        setModules(response.modules);
-        setTotalPages(Math.ceil(response.meta.total / 100));
-      } else {
-        const response = await api.searchModules({
-          query: debouncedSearch || undefined,
-          limit,
-          offset: (page - 1) * limit,
-        });
-        setModules(response.modules);
-        setTotalPages(Math.ceil(response.meta.total / limit));
-      }
-    } catch (err) {
-      console.error('Failed to load modules:', err);
-      setError('Failed to load modules. Please try again.');
-    } finally {
-      setLoading(false);
-    }
-  }, [page, debouncedSearch, viewMode]);
+  const { data: queryData, isLoading: loading, error: queryError } = useQuery({
+    queryKey: queryKeys.modules.search({
+      query: debouncedSearch || undefined,
+      limit,
+      offset: (page - 1) * limit,
+      viewMode,
+    }),
+    queryFn: () => api.searchModules({
+      query: debouncedSearch || undefined,
+      limit,
+      offset: (page - 1) * limit,
+    }),
+  });
 
-  useEffect(() => {
-    loadModules();
-  }, [loadModules]);
+  const modules = useMemo(() => queryData?.modules ?? [], [queryData]);
+  const totalPages = queryData ? Math.ceil(queryData.meta.total / limit) : 1;
+  const error = queryError ? 'Failed to load modules. Please try again.' : null;
 
   const handleSearchChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(event.target.value);
@@ -136,7 +118,7 @@ const ModulesPage: React.FC = () => {
   const groupedModules = useMemo(() => groupByProvider(modules), [modules]);
 
   return (
-    <Container maxWidth="lg" sx={{ py: 4 }}>
+    <Container maxWidth="lg" sx={{ py: 4 }} aria-busy={loading} aria-live="polite">
       {/* Header */}
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
         <Box>

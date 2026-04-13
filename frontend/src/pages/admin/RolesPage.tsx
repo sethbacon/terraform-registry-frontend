@@ -73,18 +73,14 @@ const RolesPage: React.FC = () => {
     setExpandedRole(isExpanded ? roleId : false);
   };
 
-  if (loading) {
-    return (
-      <Container maxWidth="lg">
+  return (
+    <Container maxWidth="lg" aria-busy={loading} aria-live="polite">
+      {loading ? (
         <Box display="flex" justifyContent="center" alignItems="center" minHeight="400px">
           <CircularProgress />
         </Box>
-      </Container>
-    );
-  }
-
-  return (
-    <Container maxWidth="lg">
+      ) : (
+        <>
       <Box sx={{ mb: 4 }}>
         <Stack direction="row" alignItems="center" spacing={2} sx={{ mb: 2 }}>
           <ShieldIcon sx={{ fontSize: 32, color: 'primary.main' }} />
@@ -292,6 +288,8 @@ const RolesPage: React.FC = () => {
           </Box>
         )}
       </Paper>
+        </>
+      )}
     </Container>
   );
 };

@@ -8,6 +8,7 @@ interface ImportMetaEnv {
   readonly MODE: string;
   readonly VITE_API_URL?: string;
   readonly VITE_USE_MOCK_DATA?: string;
+  readonly VITE_ERROR_REPORTING_DSN?: string;
 }
 
 interface ImportMeta {
