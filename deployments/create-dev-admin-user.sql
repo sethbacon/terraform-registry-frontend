@@ -28,6 +28,15 @@ BEGIN
     VALUES (v_org_id, v_user_id, v_admin_role_template_id)
     ON CONFLICT (organization_id, user_id) DO UPDATE SET role_template_id = EXCLUDED.role_template_id;
 
+    -- Mark setup as completed so the frontend does not show the Setup Wizard
+    -- and the E2E test for setup-redirect-when-complete passes.
+    UPDATE system_settings
+       SET setup_completed = true,
+           oidc_configured = true,
+           storage_configured = true,
+           updated_at = NOW()
+     WHERE id = 1;
+
     -- Dev login now uses JWT via POST /api/v1/dev/login (no hardcoded API key needed)
-    RAISE NOTICE 'Dev admin user and org membership with admin role assigned.';
+    RAISE NOTICE 'Dev admin user and org membership with admin role assigned (setup marked completed).';
 END $$;

@@ -213,10 +213,10 @@ test.describe('Setup Wizard — OIDC & Storage steps (mocked API)', () => {
     ).toBeVisible({ timeout: 10_000 });
 
     // Backend type chips should be present
-    await expect(page.getByText('Local')).toBeVisible();
-    await expect(page.getByText('Azure Blob')).toBeVisible();
-    await expect(page.getByText('AWS S3')).toBeVisible();
-    await expect(page.getByText('Google Cloud')).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Local' })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Azure Blob' })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'AWS S3' })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Google Cloud' })).toBeVisible();
   });
 });
 
