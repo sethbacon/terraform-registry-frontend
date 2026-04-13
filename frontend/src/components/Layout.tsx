@@ -319,6 +319,7 @@ const Layout = () => {
 
   return (
     <Box sx={{ display: 'flex' }}>
+      <a href="#main-content" className="skip-link">Skip to main content</a>
       <AppBar
         position="fixed"
         sx={{
@@ -450,6 +451,8 @@ const Layout = () => {
 
       <Box
         component="main"
+        id="main-content"
+        tabIndex={-1}
         sx={{
           flexGrow: 1,
           // minWidth:0 lets the flex child shrink correctly on narrow viewports.

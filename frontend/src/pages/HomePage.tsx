@@ -428,6 +428,7 @@ const HomePage: React.FC = () => {
                     <Tooltip title={copied ? 'Copied!' : 'Copy to clipboard'} placement="top">
                       <IconButton
                         size="small"
+                        aria-label="Copy usage example"
                         onClick={handleCopyCredentials}
                         sx={{ position: 'absolute', top: 4, right: 4, opacity: 0.6, '&:hover': { opacity: 1 } }}
                       >

@@ -114,7 +114,7 @@ const VersionRow: React.FC<{
     <>
       <TableRow hover sx={{ '& > *': { borderBottom: 'unset' } }}>
         <TableCell>
-          <IconButton size="small" onClick={handleExpand}>
+          <IconButton size="small" aria-label="Toggle version details" onClick={handleExpand}>
             {open ? <ExpandLessIcon /> : <ExpandMoreIcon />}
           </IconButton>
         </TableCell>
@@ -138,6 +138,7 @@ const VersionRow: React.FC<{
             <span>
               <IconButton
                 size="small"
+                aria-label="Delete version"
                 color="error"
                 onClick={() => onDelete(version)}
                 disabled={version.sync_status === 'syncing'}
@@ -287,7 +288,7 @@ const ConfigCard: React.FC<{
           </Button>
         </Tooltip>
         <Tooltip title="View sync history">
-          <IconButton size="small" onClick={() => onViewHistory(config)}>
+          <IconButton size="small" aria-label="View sync history" onClick={() => onViewHistory(config)}>
             <HistoryIcon fontSize="small" />
           </IconButton>
         </Tooltip>
@@ -295,18 +296,18 @@ const ConfigCard: React.FC<{
       <Box>
         <Tooltip title="Trigger sync">
           <span>
-            <IconButton size="small" onClick={() => onSync(config)} disabled={syncing || !config.enabled}>
+            <IconButton size="small" aria-label="Sync mirror" onClick={() => onSync(config)} disabled={syncing || !config.enabled}>
               <SyncIcon fontSize="small" />
             </IconButton>
           </span>
         </Tooltip>
         <Tooltip title="Edit configuration">
-          <IconButton size="small" onClick={() => onEdit(config)}>
+          <IconButton size="small" aria-label="Edit mirror" onClick={() => onEdit(config)}>
             <EditIcon fontSize="small" />
           </IconButton>
         </Tooltip>
         <Tooltip title="Delete mirror">
-          <IconButton size="small" color="error" onClick={() => onDelete(config)}>
+          <IconButton size="small" aria-label="Delete mirror" color="error" onClick={() => onDelete(config)}>
             <DeleteIcon fontSize="small" />
           </IconButton>
         </Tooltip>
@@ -590,16 +591,14 @@ const TerraformMirrorPage: React.FC = () => {
   // ---------------------------------------------------------------------------
   // Render
   // ---------------------------------------------------------------------------
-  if (loading) {
-    return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '400px' }}>
-        <CircularProgress />
-      </Box>
-    );
-  }
-
   return (
-    <Container maxWidth="lg" sx={{ py: 4 }}>
+    <Box aria-busy={loading} aria-live="polite">
+      {loading ? (
+        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '400px' }}>
+          <CircularProgress />
+        </Box>
+      ) : (
+        <Container maxWidth="lg" sx={{ py: 4 }}>
       {/* Header */}
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
         <Box>
@@ -1089,6 +1088,8 @@ const TerraformMirrorPage: React.FC = () => {
         </DialogActions>
       </Dialog>
     </Container>
+      )}
+    </Box>
   );
 };
 

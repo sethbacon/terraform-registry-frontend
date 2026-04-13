@@ -174,7 +174,7 @@ const VersionRow: React.FC<VersionRowProps> = ({
         }}
       >
         <TableCell width={48}>
-          <IconButton size="small" onClick={() => setOpen((p) => !p)}>
+          <IconButton size="small" aria-label="Toggle version details" onClick={() => setOpen((p) => !p)}>
             {open ? <ExpandLessIcon /> : <ExpandMoreIcon />}
           </IconButton>
         </TableCell>
@@ -204,7 +204,7 @@ const VersionRow: React.FC<VersionRowProps> = ({
             <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 0.5 }}>
               {version.is_deprecated ? (
                 <Tooltip title="Remove deprecation (re-enable syncing)">
-                  <IconButton size="small" onClick={() => onUndeprecate(version)}>
+                  <IconButton size="small" aria-label="Undeprecate version" onClick={() => onUndeprecate(version)}>
                     <RestoreIcon fontSize="small" />
                   </IconButton>
                 </Tooltip>
@@ -212,6 +212,7 @@ const VersionRow: React.FC<VersionRowProps> = ({
                 <Tooltip title="Mark as deprecated (prevents re-sync)">
                   <IconButton
                     size="small"
+                    aria-label="Deprecate version"
                     color="warning"
                     onClick={() => onDeprecate(version)}
                     disabled={version.sync_status === 'syncing'}
@@ -224,6 +225,7 @@ const VersionRow: React.FC<VersionRowProps> = ({
                 <span>
                   <IconButton
                     size="small"
+                    aria-label="Delete version"
                     color="error"
                     onClick={() => onDelete(version)}
                     disabled={version.sync_status === 'syncing'}
@@ -401,27 +403,6 @@ const TerraformBinaryDetailPage: React.FC = () => {
   // Render
   // ---------------------------------------------------------------------------
 
-  if (loading) {
-    return (
-      <Container>
-        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 8 }}>
-          <CircularProgress />
-        </Box>
-      </Container>
-    );
-  }
-
-  if (error) {
-    return (
-      <Container sx={{ py: 4 }}>
-        <Alert severity="error">{error}</Alert>
-        <Button sx={{ mt: 2 }} startIcon={<ArrowBack />} onClick={() => navigate('/terraform-binaries')}>
-          Back to Mirrors
-        </Button>
-      </Container>
-    );
-  }
-
   const toolLabel =
     config?.tool === 'terraform'
       ? 'Terraform (HashiCorp)'
@@ -433,7 +414,22 @@ const TerraformBinaryDetailPage: React.FC = () => {
     config?.tool === 'terraform' ? 'primary' : config?.tool === 'opentofu' ? 'secondary' : 'default';
 
   return (
-    <Container maxWidth="lg" sx={{ py: 4 }}>
+    <Box aria-busy={loading} aria-live="polite">
+      {loading ? (
+        <Container>
+          <Box sx={{ display: 'flex', justifyContent: 'center', mt: 8 }}>
+            <CircularProgress />
+          </Box>
+        </Container>
+      ) : error ? (
+        <Container sx={{ py: 4 }}>
+          <Alert severity="error">{error}</Alert>
+          <Button sx={{ mt: 2 }} startIcon={<ArrowBack />} onClick={() => navigate('/terraform-binaries')}>
+            Back to Mirrors
+          </Button>
+        </Container>
+      ) : (
+        <Container maxWidth="lg" sx={{ py: 4 }}>
       {/* Breadcrumbs */}
       <Breadcrumbs sx={{ mb: 2 }}>
         <Link component={RouterLink} to="/terraform-binaries" underline="hover" color="inherit">
@@ -447,7 +443,7 @@ const TerraformBinaryDetailPage: React.FC = () => {
       {/* Back button + title */}
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
         <Tooltip title="Back to mirrors">
-          <IconButton size="small" onClick={() => navigate('/terraform-binaries')}>
+          <IconButton size="small" aria-label="Back to binaries" onClick={() => navigate('/terraform-binaries')}>
             <ArrowBack />
           </IconButton>
         </Tooltip>
@@ -581,6 +577,8 @@ const TerraformBinaryDetailPage: React.FC = () => {
         </DialogActions>
       </Dialog>
     </Container>
+      )}
+    </Box>
   );
 };
 

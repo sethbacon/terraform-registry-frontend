@@ -428,7 +428,7 @@ const PublishFromSCMWizard: React.FC<PublishFromSCMWizardProps> = ({
   };
 
   return (
-    <Box>
+    <Box aria-busy={loading} aria-live="polite">
       <Stepper activeStep={activeStep} sx={{ mb: 4 }}>
         {steps.map((label) => (
           <Step key={label}>

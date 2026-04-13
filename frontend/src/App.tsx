@@ -1,5 +1,7 @@
 import { Suspense, lazy } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { CssBaseline } from '@mui/material';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { AuthProvider } from './contexts/AuthContext';
@@ -36,6 +38,16 @@ const MirrorPoliciesPage = lazy(() => import('./pages/admin/MirrorPoliciesPage')
 const OIDCSettingsPage = lazy(() => import('./pages/admin/OIDCSettingsPage'));
 const AuditLogPage = lazy(() => import('./pages/admin/AuditLogPage'));
 
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 30_000,
+      retry: 1,
+      refetchOnWindowFocus: false,
+    },
+  },
+});
+
 const loader = <div>Loading...</div>;
 
 function App() {
@@ -44,6 +56,7 @@ function App() {
       <CssBaseline />
       <AuthProvider>
         <HelpProvider>
+          <QueryClientProvider client={queryClient}>
           <Router>
             <ErrorBoundary>
               <Routes>
@@ -95,6 +108,8 @@ function App() {
               </Routes>
             </ErrorBoundary>
           </Router>
+          <ReactQueryDevtools initialIsOpen={false} />
+          </QueryClientProvider>
         </HelpProvider>
       </AuthProvider>
     </ThemeProvider>
