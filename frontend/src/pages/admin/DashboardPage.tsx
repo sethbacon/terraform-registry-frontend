@@ -1,5 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { queryKeys } from '../../services/queryKeys';
 import {
   Container,
   Typography,
@@ -368,64 +370,38 @@ const QuickLink: React.FC<QuickLinkProps> = ({ label, icon, route, color }) => {
 
 const DashboardPage: React.FC = () => {
   const { allowedScopes } = useAuth();
-  const [data, setData] = useState<DashboardData | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [refreshing, setRefreshing] = useState(false);
+  const queryClient = useQueryClient();
+
+  const { data: raw, isLoading: loading, isFetching: refreshing, error: queryError } = useQuery({
+    queryKey: queryKeys.dashboard.stats(),
+    queryFn: () => api.getDashboardStats(),
+  });
+
+  const error = queryError ? 'Failed to load dashboard statistics.' : null;
+
+  // Normalise: backend may not yet have mirror fields on older builds.
+  const data: DashboardData | null = raw ? {
+    modules: raw.modules ?? { total: 0, versions: 0, downloads: 0, by_system: [] },
+    providers: raw.providers ?? { total: 0, manual: 0, mirrored: 0, total_versions: 0, manual_versions: 0, mirrored_versions: 0, downloads: 0 },
+    users: raw.users ?? 0,
+    organizations: raw.organizations ?? 0,
+    downloads: raw.downloads ?? 0,
+    scm_providers: raw.scm_providers ?? 0,
+    binary_mirrors: raw.binary_mirrors ?? { total: 0, healthy: 0, failed: 0, syncing: 0, platforms: 0, downloads: 0, by_tool: [] },
+    provider_mirrors: raw.provider_mirrors ?? { total: 0, healthy: 0, failed: 0 },
+    recent_syncs: raw.recent_syncs ?? [],
+  } : null;
 
   const hasScope = (scope: string) =>
     allowedScopes.includes('admin') || allowedScopes.includes(scope);
 
-  const load = async (silent = false) => {
-    if (!silent) setLoading(true);
-    else setRefreshing(true);
-    setError(null);
-    try {
-      const raw = await api.getDashboardStats();
-      // Normalise: backend may not yet have mirror fields on older builds.
-      setData({
-        modules: raw.modules ?? { total: 0, versions: 0, downloads: 0, by_system: [] },
-        providers: raw.providers ?? { total: 0, manual: 0, mirrored: 0, total_versions: 0, manual_versions: 0, mirrored_versions: 0, downloads: 0 },
-        users: raw.users ?? 0,
-        organizations: raw.organizations ?? 0,
-        downloads: raw.downloads ?? 0,
-        scm_providers: raw.scm_providers ?? 0,
-        binary_mirrors: raw.binary_mirrors ?? { total: 0, healthy: 0, failed: 0, syncing: 0, platforms: 0, downloads: 0, by_tool: [] },
-        provider_mirrors: raw.provider_mirrors ?? { total: 0, healthy: 0, failed: 0 },
-        recent_syncs: raw.recent_syncs ?? [],
-      });
-    } catch {
-      setError('Failed to load dashboard statistics.');
-    } finally {
-      setLoading(false);
-      setRefreshing(false);
-    }
-  };
-
-  useEffect(() => { load(); }, []);
-
-  if (loading) {
-    return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', py: 10 }}>
-        <CircularProgress />
-      </Box>
-    );
-  }
-
-  if (error || !data) {
-    return (
-      <Container maxWidth="lg" sx={{ py: 4 }}>
-        <Alert severity="error">{error ?? 'Failed to load dashboard'}</Alert>
-      </Container>
-    );
-  }
-
   // ---- Zone 1: health pills ------------------------------------------------
-  const anyMirrorIssue =
-    data.binary_mirrors.failed > 0 || data.provider_mirrors.failed > 0;
+  const anyMirrorIssue = data
+    ? data.binary_mirrors.failed > 0 || data.provider_mirrors.failed > 0
+    : false;
 
   // ---- Zone 2: stat cards --------------------------------------------------
-  const statCards: (StatCardProps & { scope: string | null; gridMd: number })[] = [
+  const statCards: (StatCardProps & { scope: string | null; gridMd: number })[] = !data ? [] : [
     // Row 1 — content cards (each md=6)
     {
       title: 'Modules', value: data.modules.total,
@@ -470,7 +446,7 @@ const DashboardPage: React.FC = () => {
   ].filter(c => c.scope === null || hasScope(c.scope));
 
   // ---- Zone 3 left: recent syncs -------------------------------------------
-  const recentSyncs = data.recent_syncs.slice(0, 8);
+  const recentSyncs = data ? data.recent_syncs.slice(0, 8) : [];
 
   // ---- Zone 3 right: quick links -------------------------------------------
   const quickLinks: (QuickLinkProps & { scope: string | null })[] = [
@@ -485,8 +461,15 @@ const DashboardPage: React.FC = () => {
   ].filter(l => l.scope === null || hasScope(l.scope));
 
   return (
-    <Container maxWidth="lg" sx={{ py: 4 }}>
-
+    <Container maxWidth="lg" sx={{ py: 4 }} aria-busy={loading} aria-live="polite">
+      {loading ? (
+        <Box sx={{ display: 'flex', justifyContent: 'center', py: 10 }}>
+          <CircularProgress />
+        </Box>
+      ) : (error || !data) ? (
+        <Alert severity="error">{error ?? 'Failed to load dashboard'}</Alert>
+      ) : (
+      <>
       {/* Header */}
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
         <Box>
@@ -498,7 +481,7 @@ const DashboardPage: React.FC = () => {
         <Button
           variant="outlined"
           startIcon={<Refresh />}
-          onClick={() => load(true)}
+          onClick={() => queryClient.invalidateQueries({ queryKey: queryKeys.dashboard.stats() })}
           disabled={refreshing}
         >
           Refresh
@@ -634,6 +617,8 @@ const DashboardPage: React.FC = () => {
         </Grid>
 
       </Grid>
+      </>
+      )}
     </Container>
   );
 };

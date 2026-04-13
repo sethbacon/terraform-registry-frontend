@@ -710,18 +710,16 @@ const StoragePage: React.FC = () => {
     </Container>
   );
 
-  if (loading) {
-    return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '400px' }}>
-        <CircularProgress />
-      </Box>
-    );
-  }
-
   return (
-    <>
-      {setupStatus?.setup_required ? renderSetupWizard() : renderExistingConfigs()}
-    </>
+    <Box aria-busy={loading} aria-live="polite">
+      {loading ? (
+        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '400px' }}>
+          <CircularProgress />
+        </Box>
+      ) : (
+        setupStatus?.setup_required ? renderSetupWizard() : renderExistingConfigs()
+      )}
+    </Box>
   );
 };
 

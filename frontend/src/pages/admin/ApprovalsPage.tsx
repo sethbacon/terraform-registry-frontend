@@ -135,16 +135,14 @@ const ApprovalsPage: React.FC = () => {
     }
   };
 
-  if (loading) {
-    return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '400px' }}>
-        <CircularProgress />
-      </Box>
-    );
-  }
-
   return (
-    <Container maxWidth="lg" sx={{ py: 4 }}>
+    <Container maxWidth="lg" sx={{ py: 4 }} aria-busy={loading} aria-live="polite">
+      {loading ? (
+        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '400px' }}>
+          <CircularProgress />
+        </Box>
+      ) : (
+        <>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
         <Box>
           <Typography variant="h4">Approval Requests</Typography>
@@ -390,6 +388,8 @@ const ApprovalsPage: React.FC = () => {
           </Button>
         </DialogActions>
       </Dialog>
+        </>
+      )}
     </Container>
   );
 };

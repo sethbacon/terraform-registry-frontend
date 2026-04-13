@@ -195,16 +195,14 @@ const MirrorPoliciesPage: React.FC = () => {
     return <Chip label="Deny" size="small" color="error" icon={<BlockIcon />} />;
   };
 
-  if (loading) {
-    return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '400px' }}>
-        <CircularProgress />
-      </Box>
-    );
-  }
-
   return (
-    <Container maxWidth="lg" sx={{ py: 4 }}>
+    <Container maxWidth="lg" sx={{ py: 4 }} aria-busy={loading} aria-live="polite">
+      {loading ? (
+        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '400px' }}>
+          <CircularProgress />
+        </Box>
+      ) : (
+        <>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
         <Box>
           <Typography variant="h4">Mirror Policies</Typography>
@@ -321,13 +319,14 @@ const MirrorPoliciesPage: React.FC = () => {
 
               <CardActions>
                 <Tooltip title="Edit">
-                  <IconButton size="small" onClick={() => openEditDialog(policy)}>
+                  <IconButton size="small" aria-label="Edit policy" onClick={() => openEditDialog(policy)}>
                     <EditIcon />
                   </IconButton>
                 </Tooltip>
                 <Tooltip title="Delete">
                   <IconButton
                     size="small"
+                    aria-label="Delete policy"
                     color="error"
                     onClick={() => {
                       setPolicyToDelete(policy);
@@ -566,6 +565,8 @@ const MirrorPoliciesPage: React.FC = () => {
           </Button>
         </DialogActions>
       </Dialog>
+        </>
+      )}
     </Container>
   );
 };

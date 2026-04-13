@@ -160,18 +160,14 @@ const OIDCSettingsPage: React.FC = () => {
     setDeleteIndex(null);
   };
 
-  if (loading) {
-    return (
-      <Container maxWidth="lg">
+  return (
+    <Container maxWidth="lg" aria-busy={loading} aria-live="polite">
+      {loading ? (
         <Box sx={{ display: 'flex', justifyContent: 'center', mt: 8 }}>
           <CircularProgress />
         </Box>
-      </Container>
-    );
-  }
-
-  return (
-    <Container maxWidth="lg">
+      ) : (
+        <>
       {/* Header */}
       <Box sx={{ mb: 4 }}>
         <Stack direction="row" alignItems="center" spacing={2} sx={{ mb: 1 }}>
@@ -295,10 +291,10 @@ const OIDCSettingsPage: React.FC = () => {
                           <Chip label={m.role} size="small" color="primary" variant="outlined" />
                         </TableCell>
                         <TableCell align="right">
-                          <IconButton size="small" onClick={() => openEditDialog(i)}>
+                          <IconButton size="small" aria-label="Edit claim mapping" onClick={() => openEditDialog(i)}>
                             <EditIcon fontSize="small" />
                           </IconButton>
-                          <IconButton size="small" color="error" onClick={() => setDeleteIndex(i)}>
+                          <IconButton size="small" aria-label="Delete claim mapping" color="error" onClick={() => setDeleteIndex(i)}>
                             <DeleteIcon fontSize="small" />
                           </IconButton>
                         </TableCell>
@@ -418,6 +414,8 @@ const OIDCSettingsPage: React.FC = () => {
           </Button>
         </DialogActions>
       </Dialog>
+        </>
+      )}
     </Container>
   );
 };

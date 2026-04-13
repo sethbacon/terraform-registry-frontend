@@ -145,16 +145,14 @@ const RepositoryBrowser: React.FC<RepositoryBrowserProps> = ({
       repo.description?.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  if (loading) {
-    return (
-      <Box display="flex" justifyContent="center" alignItems="center" minHeight="200px">
-        <CircularProgress />
-      </Box>
-    );
-  }
-
   return (
-    <Box>
+    <Box aria-busy={loading} aria-live="polite">
+      {loading ? (
+        <Box display="flex" justifyContent="center" alignItems="center" minHeight="200px">
+          <CircularProgress />
+        </Box>
+      ) : (
+        <Box>
       <Box mb={2} display="flex" gap={1}>
         <TextField
           fullWidth
@@ -171,7 +169,7 @@ const RepositoryBrowser: React.FC<RepositoryBrowserProps> = ({
           }}
         />
         <Tooltip title="Refresh">
-          <IconButton onClick={loadRepositories} size="small">
+          <IconButton onClick={loadRepositories} size="small" aria-label="Refresh repositories">
             <RefreshIcon />
           </IconButton>
         </Tooltip>
@@ -317,6 +315,8 @@ const RepositoryBrowser: React.FC<RepositoryBrowserProps> = ({
             </Accordion>
           ))}
         </Box>
+      )}
+    </Box>
       )}
     </Box>
   );

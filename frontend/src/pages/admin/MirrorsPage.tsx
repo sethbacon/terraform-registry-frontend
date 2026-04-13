@@ -67,7 +67,7 @@ const VersionPlatformRow: React.FC<{ version: MirroredProviderVersion }> = ({ ve
     <>
       <TableRow sx={{ '& > *': { borderBottom: 'unset' } }}>
         <TableCell sx={{ pl: 1 }}>
-          <IconButton size="small" onClick={() => setOpen((p) => !p)} disabled={platforms.length === 0}>
+          <IconButton size="small" aria-label="Toggle platforms" onClick={() => setOpen((p) => !p)} disabled={platforms.length === 0}>
             {open ? <ExpandLessIcon fontSize="inherit" /> : <ExpandMoreIcon fontSize="inherit" />}
           </IconButton>
         </TableCell>
@@ -139,7 +139,7 @@ const ProviderRow: React.FC<{ provider: MirroredProvider }> = ({ provider }) => 
     <>
       <TableRow hover sx={{ '& > *': { borderBottom: 'unset' } }}>
         <TableCell>
-          <IconButton size="small" onClick={() => setOpen((p) => !p)} disabled={versions.length === 0}>
+          <IconButton size="small" aria-label="Toggle versions" onClick={() => setOpen((p) => !p)} disabled={versions.length === 0}>
             {open ? <ExpandLessIcon /> : <ExpandMoreIcon />}
           </IconButton>
         </TableCell>
@@ -408,16 +408,14 @@ const MirrorsPage: React.FC = () => {
     }
   };
 
-  if (loading) {
-    return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '400px' }}>
-        <CircularProgress />
-      </Box>
-    );
-  }
-
   return (
-    <Container maxWidth="lg" sx={{ py: 4 }}>
+    <Container maxWidth="lg" sx={{ py: 4 }} aria-busy={loading} aria-live="polite">
+      {loading ? (
+        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '400px' }}>
+          <CircularProgress />
+        </Box>
+      ) : (
+        <>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
         <Box>
           <Typography variant="h4">Mirroring — Provider Config</Typography>
@@ -555,7 +553,7 @@ const MirrorsPage: React.FC = () => {
                       </Button>
                     </Tooltip>
                     <Tooltip title="View sync history">
-                      <IconButton size="small" onClick={() => handleViewHistory(mirror)}>
+                      <IconButton size="small" aria-label="View sync history" onClick={() => handleViewHistory(mirror)}>
                         <HistoryIcon fontSize="small" />
                       </IconButton>
                     </Tooltip>
@@ -565,6 +563,7 @@ const MirrorsPage: React.FC = () => {
                       <span>
                         <IconButton
                           size="small"
+                          aria-label="Sync mirror"
                           color="primary"
                           onClick={() => handleTriggerSync(mirror)}
                           disabled={mirror.last_sync_status === 'in_progress'}
@@ -574,13 +573,14 @@ const MirrorsPage: React.FC = () => {
                       </span>
                     </Tooltip>
                     <Tooltip title="Edit">
-                      <IconButton size="small" onClick={() => openEditDialog(mirror)}>
+                      <IconButton size="small" aria-label="Edit mirror" onClick={() => openEditDialog(mirror)}>
                         <EditIcon fontSize="small" />
                       </IconButton>
                     </Tooltip>
                     <Tooltip title="Delete">
                       <IconButton
                         size="small"
+                        aria-label="Delete mirror"
                         color="error"
                         onClick={() => {
                           setMirrorToDelete(mirror);
@@ -878,6 +878,8 @@ const MirrorsPage: React.FC = () => {
           </Button>
         </DialogActions>
       </Dialog>
+        </>
+      )}
     </Container>
   );
 };

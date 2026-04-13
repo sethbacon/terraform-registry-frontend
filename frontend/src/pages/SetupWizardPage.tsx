@@ -274,20 +274,18 @@ const SetupWizardPage: React.FC = () => {
     setStorageSaved(false);
   };
 
-  if (loading) {
-    return (
-      <Container maxWidth="md" sx={{ display: 'flex', justifyContent: 'center', mt: 8 }}>
-        <CircularProgress />
-      </Container>
-    );
-  }
-
-  if (setupStatus?.setup_completed) {
+  if (!loading && setupStatus?.setup_completed) {
     return null; // Will redirect
   }
 
   return (
-    <Container maxWidth="md" sx={{ py: 4 }}>
+    <Box aria-busy={loading} aria-live="polite">
+      {loading ? (
+        <Container maxWidth="md" sx={{ display: 'flex', justifyContent: 'center', mt: 8 }}>
+          <CircularProgress />
+        </Container>
+      ) : (
+        <Container maxWidth="md" sx={{ py: 4 }}>
       <Paper elevation={3} sx={{ p: 4 }}>
         {/* Header */}
         <Box sx={{ textAlign: 'center', mb: 4 }}>
@@ -425,7 +423,7 @@ const SetupWizardPage: React.FC = () => {
                 InputProps={{
                   endAdornment: (
                     <InputAdornment position="end">
-                      <IconButton onClick={() => setShowClientSecret(!showClientSecret)} edge="end">
+                      <IconButton onClick={() => setShowClientSecret(!showClientSecret)} edge="end" aria-label="Toggle password visibility">
                         {showClientSecret ? <VisibilityOffIcon /> : <VisibilityIcon />}
                       </IconButton>
                     </InputAdornment>
@@ -909,6 +907,8 @@ const SetupWizardPage: React.FC = () => {
         </Typography>
       </Paper>
     </Container>
+      )}
+    </Box>
   );
 };
 

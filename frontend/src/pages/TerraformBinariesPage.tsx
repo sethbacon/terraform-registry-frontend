@@ -76,7 +76,7 @@ const TerraformBinariesPage: React.FC = () => {
   }, []);
 
   return (
-    <Container maxWidth="lg" sx={{ py: 4 }}>
+    <Container maxWidth="lg" sx={{ py: 4 }} aria-busy={loading} aria-live="polite">
       <Box sx={{ mb: 2 }}>
         <Typography variant="h4" gutterBottom>
           Terraform Binary Mirrors

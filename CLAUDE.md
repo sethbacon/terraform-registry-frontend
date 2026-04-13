@@ -308,7 +308,21 @@ docker compose -f docker-compose.test.yml up -d --build
 
 `terraform`, `terraform-registry`, `react`, `typescript`, `material-ui`, `vite`, `private-registry`
 
+### Tag Protection Rule (documented 2026-04-13)
+
+To protect release tags (`v*.*.*`) from deletion, apply a repository ruleset via the GitHub CLI or UI:
+
+```bash
+gh api repos/{owner}/{repo}/rulesets --method POST \
+  --field name="Protect release tags" \
+  --field target=tag \
+  --field enforcement=active \
+  --field 'conditions[ref_name][include][]=refs/tags/v*.*.*' \
+  --field 'rules[][type]=deletion'
+```
+
+Alternatively, in the GitHub UI: **Settings > Rules > Rulesets > New ruleset** targeting tags matching `v*.*.*` with a "Restrict deletions" rule.
+
 ### Remaining Recommendations (not yet applied)
 
 - **Enable secret scanning non-provider patterns and validity checks** for broader secret detection
-- **Add a tag protection rule** to prevent deletion of release tags (`v*.*.*`)

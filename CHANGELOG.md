@@ -9,6 +9,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- feat: add skip-to-content keyboard navigation link for accessibility
+- feat: add `aria-label` to all 45 icon-only buttons across 14 files for screen reader accessibility
+- feat: add `aria-busy` and `aria-live` attributes to all page-level loading containers (23 files) for screen reader state announcements
+- feat: add TanStack Query data-fetching abstraction with proof-of-concept migration of ModulesPage, ProvidersPage, and DashboardPage — replaces manual `useState`/`useEffect`/`try-catch` boilerplate with `useQuery`, adds request caching and deduplication
+- feat: add error reporting service placeholder (`services/errorReporting.ts`) with Sentry-compatible `init`/`captureError`/`setUser` interface — hooks into ErrorBoundary and global `unhandledrejection` handler, gated behind `VITE_ERROR_REPORTING_DSN` env var
+- docs: document tag protection rule command in CLAUDE.md
+
 ### Fixed
 
 - fix: update module scan API path from `/admin/modules/` to `/modules/` to match backend route fix (sethbacon/terraform-registry-backend#147)

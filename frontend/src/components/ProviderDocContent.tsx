@@ -55,25 +55,21 @@ const ProviderDocContent: React.FC<ProviderDocContentProps> = ({
     };
   }, [namespace, type, version, category, slug]);
 
-  if (loading) {
-    return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', pt: 4 }}>
-        <CircularProgress />
-      </Box>
-    );
-  }
-
-  if (error) {
-    return (
-      <Box sx={{ pt: 2, pb: 4, pl: 2, pr: 5 }}>
-        <Alert severity="error">{error}</Alert>
-      </Box>
-    );
-  }
-
   return (
-    <Box sx={{ p: 2 }}>
-      <MarkdownRenderer>{content ?? ''}</MarkdownRenderer>
+    <Box aria-busy={loading} aria-live="polite">
+      {loading ? (
+        <Box sx={{ display: 'flex', justifyContent: 'center', pt: 4 }}>
+          <CircularProgress />
+        </Box>
+      ) : error ? (
+        <Box sx={{ pt: 2, pb: 4, pl: 2, pr: 5 }}>
+          <Alert severity="error">{error}</Alert>
+        </Box>
+      ) : (
+        <Box sx={{ p: 2 }}>
+          <MarkdownRenderer>{content ?? ''}</MarkdownRenderer>
+        </Box>
+      )}
     </Box>
   );
 };
