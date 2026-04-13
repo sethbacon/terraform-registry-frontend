@@ -34,6 +34,7 @@ code {
   border-radius: 0 0 4px 4px;
   transition: top 0.2s ease;
 }
+
 .skip-link:focus {
   top: 0;
 }

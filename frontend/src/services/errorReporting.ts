@@ -27,7 +27,7 @@ export function captureError(error: Error, context?: Record<string, unknown>): v
         userAgent: navigator.userAgent,
         ...(currentUser ? { userId: currentUser } : {}),
       }),
-    }).catch(() => {});
+    }).catch(() => { });
   }
 }
 
