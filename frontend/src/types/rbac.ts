@@ -80,6 +80,7 @@ export const AVAILABLE_SCOPES = [
   { value: 'scm:manage', label: 'SCM Manage', description: 'Create and manage SCM provider integrations' },
   { value: 'api_keys:manage', label: 'API Keys Manage', description: 'Create and manage API keys' },
   { value: 'audit:read', label: 'Audit Read', description: 'View audit logs' },
+  { value: 'scanning:read', label: 'Scanning Read', description: 'View scan results and statistics' },
   { value: 'admin', label: 'Administrator', description: 'Full access to all features' },
 ] as const;
 
