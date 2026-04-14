@@ -13,8 +13,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- fix: repair API docs sidebar links for tags with spaces (underscore encoding mismatch)
+- fix: enable alphabetical tag sorting in SwaggerUI via wrapSelectors plugin
+
+## [0.5.4] - 2026-04-14
+
+### Added
+
+- feat: add tabbed README / Inputs-Outputs documentation view on module detail page
+- feat: add inline module description editing on module detail page
+- feat: add Security Scanning admin page with configuration and recent scans
+- feat: add scanning health status HealthPill to admin dashboard
+- feat: sort API documentation sections alphabetically
+
+## [0.5.3] - 2026-04-14
+
+### Fixed
+
 - fix: sort provider versions by semver descending instead of relying on backend `created_at` order
 - fix: fetch all provider documentation pages (paginate with limit=1000) so large providers show all categories and docs in the sidebar
+
+## [0.5.2] - 2026-04-14
+
+### Performance
+
+- perf: run Playwright E2E suite with 4 parallel workers (up from 1) — eliminates the "port conflicts" misconception; GH runners handle I/O-bound workers well
+- perf: amortise dev-login cost to once per worker via worker-scoped `storageState` override — reduces ~75 serial login round-trips to at most 4 per run
 
 ## [0.5.1] - 2026-04-13
 
