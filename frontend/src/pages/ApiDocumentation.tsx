@@ -247,6 +247,7 @@ function buildNavTags(spec: OpenAPISpec): NavTag[] {
       }
     }
   }
+  tags.sort((a, b) => a.label.localeCompare(b.label));
   return tags;
 }
 
@@ -434,6 +435,7 @@ const ApiDocumentation: React.FC = () => {
             requestInterceptor={requestInterceptor}
             persistAuthorization
             onComplete={onComplete}
+            {...{ tagsSorter: 'alpha' } as Record<string, unknown>}
           />
         </Box>
       </Box>

@@ -9,6 +9,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.4] - 2026-04-14
+
+### Added
+
+- feat: add tabbed README / Inputs-Outputs documentation view on module detail page
+- feat: add inline module description editing on module detail page
+- feat: add Security Scanning admin page with configuration and recent scans
+- feat: add scanning health status HealthPill to admin dashboard
+- feat: sort API documentation sections alphabetically
+
 ## [0.5.3] - 2026-04-14
 
 ### Fixed

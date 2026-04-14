@@ -37,6 +37,7 @@ const ApprovalsPage = lazy(() => import('./pages/admin/ApprovalsPage'));
 const MirrorPoliciesPage = lazy(() => import('./pages/admin/MirrorPoliciesPage'));
 const OIDCSettingsPage = lazy(() => import('./pages/admin/OIDCSettingsPage'));
 const AuditLogPage = lazy(() => import('./pages/admin/AuditLogPage'));
+const SecurityScanningPage = lazy(() => import('./pages/admin/SecurityScanningPage'));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -101,6 +102,7 @@ function App() {
                   <Route path="/admin/policies" element={<ProtectedRoute requiredScope="admin"><ErrorBoundary><Suspense fallback={loader}><MirrorPoliciesPage /></Suspense></ErrorBoundary></ProtectedRoute>} />
                   <Route path="/admin/oidc" element={<ProtectedRoute requiredScope="admin"><ErrorBoundary><Suspense fallback={loader}><OIDCSettingsPage /></Suspense></ErrorBoundary></ProtectedRoute>} />
                   <Route path="/admin/audit-logs" element={<ProtectedRoute requiredScope="audit:read"><ErrorBoundary><Suspense fallback={loader}><AuditLogPage /></Suspense></ErrorBoundary></ProtectedRoute>} />
+                  <Route path="/admin/security-scanning" element={<ProtectedRoute requiredScope="admin"><ErrorBoundary><Suspense fallback={loader}><SecurityScanningPage /></Suspense></ErrorBoundary></ProtectedRoute>} />
 
                   {/* Catch all */}
                   <Route path="*" element={<Navigate to="/" replace />} />
