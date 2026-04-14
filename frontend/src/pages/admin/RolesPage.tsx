@@ -32,7 +32,7 @@ const SCOPE_CATEGORIES: Record<string, string[]> = {
   'Registry Access': ['modules:read', 'modules:write', 'providers:read', 'providers:write'],
   'DevOps': ['mirrors:read', 'mirrors:manage', 'scm:read', 'scm:manage'],
   'User & Organization': ['users:read', 'users:write', 'organizations:read', 'organizations:write'],
-  'System': ['api_keys:manage', 'audit:read', 'admin'],
+  'System': ['api_keys:manage', 'audit:read', 'scanning:read', 'admin'],
 };
 
 const RolesPage: React.FC = () => {
