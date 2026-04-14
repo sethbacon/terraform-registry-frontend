@@ -16,6 +16,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - fix: sort provider versions by semver descending instead of relying on backend `created_at` order
 - fix: fetch all provider documentation pages (paginate with limit=1000) so large providers show all categories and docs in the sidebar
 
+## [0.5.2] - 2026-04-14
+
+### Performance
+
+- perf: run Playwright E2E suite with 4 parallel workers (up from 1) — eliminates the "port conflicts" misconception; GH runners handle I/O-bound workers well
+- perf: amortise dev-login cost to once per worker via worker-scoped `storageState` override — reduces ~75 serial login round-trips to at most 4 per run
+
 ## [0.5.1] - 2026-04-13
 
 ### Fixed
