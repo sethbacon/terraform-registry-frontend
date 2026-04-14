@@ -645,10 +645,25 @@ class ApiClient {
     return response.data;
   }
 
+  async updateModule(id: string, data: { description?: string; source?: string }) {
+    const response = await this.client.put(`/api/v1/admin/modules/${id}`, data);
+    return response.data;
+  }
+
   async getModuleScan(namespace: string, name: string, system: string, version: string): Promise<import('../types').ModuleScan> {
     const response = await this.client.get(
       `/api/v1/modules/${namespace}/${name}/${system}/versions/${version}/scan`
     );
+    return response.data;
+  }
+
+  async getScanningConfig(): Promise<import('../types').ScanningConfig> {
+    const response = await this.client.get('/api/v1/admin/scanning/config');
+    return response.data;
+  }
+
+  async getScanningStats(): Promise<import('../types').ScanningStats> {
+    const response = await this.client.get('/api/v1/admin/scanning/stats');
     return response.data;
   }
 
