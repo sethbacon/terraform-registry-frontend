@@ -1,7 +1,7 @@
 name: Scheduled Build
 
-# Run a full build, lint, and audit cycle every Monday at 08:00 UTC so that
-# broken dependencies (new npm package versions, security advisories, etc.)
+# Run a full build, lint, test, and audit cycle every Monday at 08:00 UTC so
+# that broken dependencies (new npm package versions, security advisories, etc.)
 # are caught before a developer tries to land a PR on a broken base.
 #
 # This workflow is intentionally separate from the per-PR CI workflow so that
@@ -38,6 +38,14 @@ jobs:
       - name: Frontend — lint
         working-directory: frontend
         run: npm run lint
+
+      - name: Frontend — typecheck
+        working-directory: frontend
+        run: npx tsc --noEmit
+
+      - name: Frontend — unit tests with coverage
+        working-directory: frontend
+        run: npm run test:coverage
 
       - name: Frontend — build
         working-directory: frontend
