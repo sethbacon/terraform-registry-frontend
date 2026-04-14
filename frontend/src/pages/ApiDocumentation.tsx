@@ -432,10 +432,10 @@ const ApiDocumentation: React.FC = () => {
             docExpansion="list"
             deepLinking
             tryItOutEnabled
-            tagsSorter="alpha"
             requestInterceptor={requestInterceptor}
             persistAuthorization
             onComplete={onComplete}
+            {...{ tagsSorter: 'alpha' } as Record<string, unknown>}
           />
         </Box>
       </Box>
