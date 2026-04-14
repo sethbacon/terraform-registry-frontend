@@ -32,8 +32,7 @@ export default defineConfig({
   /* Stop after the first failure so CI feedback is fast */
   maxFailures: 1,
 
-  /* One worker on CI to avoid port conflicts */
-  workers: process.env.CI ? 1 : undefined,
+  workers: process.env.CI ? 4 : undefined,
 
   reporter: [['html'], ['list']],
 
