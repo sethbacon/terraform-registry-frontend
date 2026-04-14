@@ -1,4 +1,5 @@
-import axios, { AxiosInstance, AxiosError } from 'axios';
+import axios, { AxiosInstance, AxiosError, InternalAxiosRequestConfig } from 'axios';
+import { addApiBreadcrumb } from './errorReporting';
 
 // In dev mode, use empty baseURL to use relative paths (goes through Vite proxy)
 // In production, use the configured URL or default to current origin
@@ -28,6 +29,8 @@ class ApiClient {
         if (token) {
           config.headers.Authorization = `Bearer ${token}`;
         }
+        // Stamp the request start time for breadcrumb duration tracking
+        (config as InternalAxiosRequestConfig & { _startTime?: number })._startTime = Date.now();
         return config;
       },
       (error) => Promise.reject(error)
@@ -65,6 +68,22 @@ class ApiClient {
             // If no token, allow the error to propagate (for public endpoints)
           }
         }
+        return Promise.reject(error);
+      }
+    );
+
+    // Breadcrumb interceptor — records API calls for error reporting context
+    this.client.interceptors.response.use(
+      (response) => {
+        const cfg = response.config as InternalAxiosRequestConfig & { _startTime?: number };
+        const duration = cfg._startTime ? Date.now() - cfg._startTime : undefined;
+        addApiBreadcrumb(cfg.method ?? 'GET', cfg.url ?? '', response.status, duration);
+        return response;
+      },
+      (error: AxiosError) => {
+        const cfg = (error.config ?? {}) as InternalAxiosRequestConfig & { _startTime?: number };
+        const duration = cfg._startTime ? Date.now() - cfg._startTime : undefined;
+        addApiBreadcrumb(cfg.method ?? 'GET', cfg.url ?? '', error.response?.status, duration);
         return Promise.reject(error);
       }
     );
