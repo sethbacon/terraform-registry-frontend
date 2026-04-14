@@ -1,4 +1,5 @@
-import axios, { AxiosInstance, AxiosError } from 'axios';
+import axios, { AxiosInstance, AxiosError, InternalAxiosRequestConfig } from 'axios';
+import { addApiBreadcrumb } from './errorReporting';
 
 // In dev mode, use empty baseURL to use relative paths (goes through Vite proxy)
 // In production, use the configured URL or default to current origin
@@ -28,6 +29,8 @@ class ApiClient {
         if (token) {
           config.headers.Authorization = `Bearer ${token}`;
         }
+        // Stamp the request start time for breadcrumb duration tracking
+        (config as InternalAxiosRequestConfig & { _startTime?: number })._startTime = Date.now();
         return config;
       },
       (error) => Promise.reject(error)
@@ -65,6 +68,22 @@ class ApiClient {
             // If no token, allow the error to propagate (for public endpoints)
           }
         }
+        return Promise.reject(error);
+      }
+    );
+
+    // Breadcrumb interceptor — records API calls for error reporting context
+    this.client.interceptors.response.use(
+      (response) => {
+        const cfg = response.config as InternalAxiosRequestConfig & { _startTime?: number };
+        const duration = cfg._startTime ? Date.now() - cfg._startTime : undefined;
+        addApiBreadcrumb(cfg.method ?? 'GET', cfg.url ?? '', response.status, duration);
+        return response;
+      },
+      (error: AxiosError) => {
+        const cfg = (error.config ?? {}) as InternalAxiosRequestConfig & { _startTime?: number };
+        const duration = cfg._startTime ? Date.now() - cfg._startTime : undefined;
+        addApiBreadcrumb(cfg.method ?? 'GET', cfg.url ?? '', error.response?.status, duration);
         return Promise.reject(error);
       }
     );
@@ -258,10 +277,12 @@ class ApiClient {
     return response.data;
   }
 
-  async getProviderDocs(namespace: string, type: string, version: string, category?: string, language?: string) {
-    const params: Record<string, string> = {};
+  async getProviderDocs(namespace: string, type: string, version: string, category?: string, language?: string, limit?: number, offset?: number) {
+    const params: Record<string, string | number> = {};
     if (category) params.category = category;
     if (language) params.language = language;
+    if (limit !== undefined) params.limit = limit;
+    if (offset !== undefined) params.offset = offset;
     const response = await this.client.get(
       `/api/v1/providers/${namespace}/${type}/versions/${version}/docs`,
       { params }
@@ -643,10 +664,25 @@ class ApiClient {
     return response.data;
   }
 
+  async updateModule(id: string, data: { description?: string; source?: string }) {
+    const response = await this.client.put(`/api/v1/admin/modules/${id}`, data);
+    return response.data;
+  }
+
   async getModuleScan(namespace: string, name: string, system: string, version: string): Promise<import('../types').ModuleScan> {
     const response = await this.client.get(
       `/api/v1/modules/${namespace}/${name}/${system}/versions/${version}/scan`
     );
+    return response.data;
+  }
+
+  async getScanningConfig(): Promise<import('../types').ScanningConfig> {
+    const response = await this.client.get('/api/v1/admin/scanning/config');
+    return response.data;
+  }
+
+  async getScanningStats(): Promise<import('../types').ScanningStats> {
+    const response = await this.client.get('/api/v1/admin/scanning/stats');
     return response.data;
   }
 

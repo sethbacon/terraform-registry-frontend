@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import {
   Container,
   Typography,
@@ -26,33 +27,29 @@ import AdminIcon from '@mui/icons-material/AdminPanelSettings';
 import api from '../../services/api';
 import { RoleTemplate, AVAILABLE_SCOPES } from '../../types/rbac';
 import { getScopeInfo, getScopeColor } from '../../utils';
+import { queryKeys } from '../../services/queryKeys';
 
 // Scope category groupings for better organization
 const SCOPE_CATEGORIES: Record<string, string[]> = {
   'Registry Access': ['modules:read', 'modules:write', 'providers:read', 'providers:write'],
   'DevOps': ['mirrors:read', 'mirrors:manage', 'scm:read', 'scm:manage'],
   'User & Organization': ['users:read', 'users:write', 'organizations:read', 'organizations:write'],
-  'System': ['api_keys:manage', 'audit:read', 'admin'],
+  'System': ['api_keys:manage', 'audit:read', 'scanning:read', 'admin'],
 };
 
 const RolesPage: React.FC = () => {
-  const [roles, setRoles] = useState<RoleTemplate[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [expandedRole, setExpandedRole] = useState<string | false>(false);
 
-  useEffect(() => {
-    loadRoles();
-  }, []);
-
-  const loadRoles = async () => {
-    try {
-      setLoading(true);
-      setError(null);
+  const {
+    data: roles = [],
+    isLoading: loading,
+    error: queryError,
+  } = useQuery<RoleTemplate[]>({
+    queryKey: queryKeys.roles.list(),
+    queryFn: async () => {
       const templates = await api.listRoleTemplates();
-      // Sort: system roles first (in logical order), then custom roles
       const roleOrder = ['viewer', 'publisher', 'devops', 'user_manager', 'auditor', 'admin'];
-      const sorted = [...templates].sort((a, b) => {
+      return [...templates].sort((a, b) => {
         if (a.is_system && !b.is_system) return -1;
         if (!a.is_system && b.is_system) return 1;
         if (a.is_system && b.is_system) {
@@ -60,14 +57,10 @@ const RolesPage: React.FC = () => {
         }
         return a.name.localeCompare(b.name);
       });
-      setRoles(sorted);
-    } catch (err) {
-      console.error('Failed to load roles:', err);
-      setError('Failed to load roles. Please try again.');
-    } finally {
-      setLoading(false);
-    }
-  };
+    },
+  });
+
+  const error = queryError ? 'Failed to load roles. Please try again.' : null;
 
   const handleAccordionChange = (roleId: string) => (_: React.SyntheticEvent, isExpanded: boolean) => {
     setExpandedRole(isExpanded ? roleId : false);

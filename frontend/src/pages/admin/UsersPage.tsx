@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   Container,
   Typography,
@@ -40,6 +41,7 @@ import api from '../../services/api';
 import { User, UserMembership, Organization } from '../../types';
 import { RoleTemplate } from '../../types/rbac';
 import { getErrorMessage } from '../../utils/errors';
+import { queryKeys } from '../../services/queryKeys';
 
 interface UserWithMemberships extends User {
   memberships?: UserMembership[];
@@ -47,13 +49,14 @@ interface UserWithMemberships extends User {
 }
 
 const UsersPage: React.FC = () => {
-  const [users, setUsers] = useState<UserWithMemberships[]>([]);
-  const [loading, setLoading] = useState(true);
+  const queryClient = useQueryClient();
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
-  const [totalUsers, setTotalUsers] = useState(0);
+
+  // Local memberships state (per-user enrichment)
+  const [userMemberships, setUserMemberships] = useState<Record<string, { memberships?: UserMembership[]; loading: boolean }>>({});
 
   // Dialog state
   const [openDialog, setOpenDialog] = useState(false);
@@ -80,59 +83,49 @@ const UsersPage: React.FC = () => {
   // User memberships being edited
   const [editMemberships, setEditMemberships] = useState<UserMembership[]>([]);
 
-  const loadUsers = useCallback(async () => {
-    try {
-      setLoading(true);
-      setError(null);
-
-      let response;
+  const {
+    data: usersData,
+    isLoading: loading,
+    error: queryError,
+  } = useQuery({
+    queryKey: queryKeys.users.list({ page: page + 1, perPage: rowsPerPage, search: searchQuery || undefined }),
+    queryFn: async () => {
       if (searchQuery) {
-        response = await api.searchUsers(searchQuery, page + 1, rowsPerPage);
-      } else {
-        response = await api.listUsers(page + 1, rowsPerPage);
+        return api.searchUsers(searchQuery, page + 1, rowsPerPage);
       }
+      return api.listUsers(page + 1, rowsPerPage);
+    },
+  });
 
-      const usersData = response.users || [];
-      setUsers(usersData.map((u: User) => ({ ...u, memberships: undefined, membershipsLoading: true })));
-      setTotalUsers(response.pagination?.total || 0);
+  const rawUsers = usersData?.users || [];
+  const totalUsers = usersData?.pagination?.total || 0;
 
-      // Load memberships for each user
-      for (const user of usersData) {
-        loadUserMemberships(user.id);
-      }
-    } catch (err) {
-      console.error('Failed to load users:', err);
-      setError('Failed to load users. Please try again.');
-    } finally {
-      setLoading(false);
-    }
-  }, [page, rowsPerPage, searchQuery]);
+  // Merge memberships into users
+  const users: UserWithMemberships[] = rawUsers.map((u: User) => ({
+    ...u,
+    memberships: userMemberships[u.id]?.memberships,
+    membershipsLoading: userMemberships[u.id]?.loading ?? true,
+  }));
 
+  if (queryError && !error) {
+    setError('Failed to load users. Please try again.');
+  }
+
+  // Load memberships whenever rawUsers changes
   useEffect(() => {
-    loadUsers();
-  }, [loadUsers]);
-
-  const loadUserMemberships = async (userId: string) => {
-    try {
-      const memberships = await api.getUserMemberships(userId);
-      setUsers((prev) =>
-        prev.map((u) =>
-          u.id === userId
-            ? { ...u, memberships, membershipsLoading: false }
-            : u
-        )
-      );
-    } catch (err) {
-      console.error(`Failed to load memberships for user ${userId}:`, err);
-      setUsers((prev) =>
-        prev.map((u) =>
-          u.id === userId
-            ? { ...u, memberships: [], membershipsLoading: false }
-            : u
-        )
-      );
+    for (const user of rawUsers) {
+      if (userMemberships[user.id] === undefined) {
+        setUserMemberships(prev => ({ ...prev, [user.id]: { loading: true } }));
+        api.getUserMemberships(user.id)
+          .then(memberships => {
+            setUserMemberships(prev => ({ ...prev, [user.id]: { memberships, loading: false } }));
+          })
+          .catch(() => {
+            setUserMemberships(prev => ({ ...prev, [user.id]: { memberships: [], loading: false } }));
+          });
+      }
     }
-  };
+  }, [rawUsers]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const loadOrganizations = async () => {
     try {
@@ -192,20 +185,15 @@ const UsersPage: React.FC = () => {
     setEditMemberships([]);
   };
 
-  const handleSaveUser = async () => {
-    try {
-      setError(null);
+  const saveUserMutation = useMutation({
+    mutationFn: async () => {
       let userId = editingUser?.id;
-
       if (editingUser) {
-        await api.updateUser(editingUser.id, {
-          name: formData.name,
-        });
+        await api.updateUser(editingUser.id, { name: formData.name });
       } else {
         const newUser = await api.createUser({ email: formData.email, name: formData.name });
         userId = newUser.id;
       }
-
       // Add to organization if selected (for new users)
       if (!editingUser && formData.organizationId && userId) {
         try {
@@ -213,18 +201,38 @@ const UsersPage: React.FC = () => {
             user_id: userId,
             role_template_id: formData.roleTemplateId || undefined,
           });
-        } catch (err: unknown) {
+        } catch (err) {
           console.error('Failed to add user to organization:', err);
-          // Don't fail the whole operation, user was created
         }
       }
-
+    },
+    onSuccess: () => {
       handleCloseDialog();
-      loadUsers();
-    } catch (err: unknown) {
-      console.error('Failed to save user:', err);
+      setUserMemberships({});
+      queryClient.invalidateQueries({ queryKey: queryKeys.users._def });
+    },
+    onError: (err: unknown) => {
       setError(getErrorMessage(err, 'Failed to save user. Please try again.'));
-    }
+    },
+  });
+
+  const deleteUserMutation = useMutation({
+    mutationFn: (id: string) => api.deleteUser(id),
+    onSuccess: () => {
+      setDeleteDialogOpen(false);
+      setUserToDelete(null);
+      setError(null);
+      setUserMemberships({});
+      queryClient.invalidateQueries({ queryKey: queryKeys.users._def });
+    },
+    onError: (err: unknown) => {
+      setError(getErrorMessage(err, 'Failed to delete user. Please try again.'));
+    },
+  });
+
+  const handleSaveUser = () => {
+    setError(null);
+    saveUserMutation.mutate();
   };
 
   const handleAddMembership = async () => {
@@ -287,19 +295,10 @@ const UsersPage: React.FC = () => {
     setDeleteDialogOpen(true);
   };
 
-  const handleDeleteConfirm = async () => {
+  const handleDeleteConfirm = () => {
     if (!userToDelete) return;
-
-    try {
-      setError(null);
-      await api.deleteUser(userToDelete.id);
-      setDeleteDialogOpen(false);
-      setUserToDelete(null);
-      loadUsers();
-    } catch (err: unknown) {
-      console.error('Failed to delete user:', err);
-      setError(getErrorMessage(err, 'Failed to delete user. Please try again.'));
-    }
+    setError(null);
+    deleteUserMutation.mutate(userToDelete.id);
   };
 
   const handleChangePage = (_event: unknown, newPage: number) => {

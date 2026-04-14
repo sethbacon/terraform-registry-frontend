@@ -183,6 +183,9 @@ export interface ProviderDocEntry {
 export interface ProviderDocsResponse {
   docs: ProviderDocEntry[];
   categories: string[];
+  total: number;
+  limit: number;
+  offset: number;
 }
 
 export interface ProviderDocContent {
@@ -415,6 +418,46 @@ export interface ModuleScan {
   error_message: string | null;
   created_at: string;
   updated_at: string;
+}
+
+// ---- Module terraform-docs ----
+
+// ---- Security Scanning Admin ----
+
+export interface ScanningConfig {
+  enabled: boolean;
+  tool: string;
+  expected_version?: string;
+  severity_threshold: string;
+  timeout: string;
+  worker_count: number;
+  scan_interval_mins: number;
+}
+
+export interface RecentScanEntry {
+  id: string;
+  module_version: string;
+  module_name: string;
+  namespace: string;
+  system: string;
+  scanner: string;
+  status: ModuleScanStatus;
+  critical_count: number;
+  high_count: number;
+  medium_count: number;
+  low_count: number;
+  scanned_at: string | null;
+  created_at: string;
+}
+
+export interface ScanningStats {
+  total: number;
+  pending: number;
+  scanning: number;
+  clean: number;
+  findings: number;
+  error: number;
+  recent_scans: RecentScanEntry[];
 }
 
 // ---- Module terraform-docs ----

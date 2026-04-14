@@ -36,6 +36,7 @@ import Error from '@mui/icons-material/Error';
 import Sync from '@mui/icons-material/Sync';
 import Refresh from '@mui/icons-material/Refresh';
 import ArrowForward from '@mui/icons-material/ArrowForward';
+import Security from '@mui/icons-material/Security';
 import api from '../../services/api';
 import { useAuth } from '../../contexts/AuthContext';
 
@@ -92,6 +93,14 @@ interface DashboardData {
     total: number;
     healthy: number;
     failed: number;
+  };
+  scanning: {
+    enabled: boolean;
+    total: number;
+    pending: number;
+    clean: number;
+    findings: number;
+    error: number;
   };
   recent_syncs: RecentSyncEntry[];
 }
@@ -389,6 +398,7 @@ const DashboardPage: React.FC = () => {
     scm_providers: raw.scm_providers ?? 0,
     binary_mirrors: raw.binary_mirrors ?? { total: 0, healthy: 0, failed: 0, syncing: 0, platforms: 0, downloads: 0, by_tool: [] },
     provider_mirrors: raw.provider_mirrors ?? { total: 0, healthy: 0, failed: 0 },
+    scanning: raw.scanning ?? { enabled: false, total: 0, pending: 0, clean: 0, findings: 0, error: 0 },
     recent_syncs: raw.recent_syncs ?? [],
   } : null;
 
@@ -522,6 +532,16 @@ const DashboardPage: React.FC = () => {
             failed={0}
             icon={<Storage fontSize="small" />}
             route="/admin/storage"
+          />
+        )}
+        {hasScope('admin') && data.scanning.enabled && (
+          <HealthPill
+            label="Security Scanning"
+            total={data.scanning.total}
+            failed={data.scanning.error}
+            syncing={data.scanning.pending}
+            icon={<Security fontSize="small" />}
+            route="/admin/security-scanning"
           />
         )}
       </Box>

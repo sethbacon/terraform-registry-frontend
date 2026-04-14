@@ -1,11 +1,29 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import api from '../services/api';
 import { Module, ModuleVersion, ModuleScan, ModuleDoc } from '../types';
 import type { ModuleSCMLink, SCMWebhookEvent } from '../types/scm';
 import { useAuth } from '../contexts/AuthContext';
 import { REGISTRY_HOST } from '../config';
 import { getErrorMessage, getErrorStatus } from '../utils/errors';
+import { queryKeys } from '../services/queryKeys';
+
+// ---------------------------------------------------------------------------
+// Semver sort helper (shared by query & version selection)
+// ---------------------------------------------------------------------------
+function sortVersionsDesc(raw: ModuleVersion[]): ModuleVersion[] {
+  return [...raw].sort((a, b) => {
+    const parseParts = (v: string): [number, number, number] => {
+      const clean = v.replace(/^v/, '').split('-')[0];
+      const [maj = 0, min = 0, pat = 0] = clean.split('.').map(Number);
+      return [maj, min, pat];
+    };
+    const [aMaj, aMin, aPat] = parseParts(a.version);
+    const [bMaj, bMin, bPat] = parseParts(b.version);
+    return bMaj !== aMaj ? bMaj - aMaj : bMin !== aMin ? bMin - aMin : bPat - aPat;
+  });
+}
 
 export function useModuleDetail() {
   const { namespace, name, system } = useParams<{
@@ -14,166 +32,150 @@ export function useModuleDetail() {
     system: string;
   }>();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const { isAuthenticated, allowedScopes } = useAuth();
   const canManage = isAuthenticated && (allowedScopes.includes('admin') || allowedScopes.includes('modules:write'));
 
-  const [module, setModule] = useState<Module | null>(null);
-  const [versions, setVersions] = useState<ModuleVersion[]>([]);
+  // UI-only state (not server data)
   const [selectedVersion, setSelectedVersion] = useState<ModuleVersion | null>(null);
-  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [copiedSource, setCopiedSource] = useState(false);
   const [deleteModuleDialogOpen, setDeleteModuleDialogOpen] = useState(false);
   const [deleteVersionDialogOpen, setDeleteVersionDialogOpen] = useState(false);
   const [versionToDelete, setVersionToDelete] = useState<string | null>(null);
-  const [deleting, setDeleting] = useState(false);
   const [deprecateDialogOpen, setDeprecateDialogOpen] = useState(false);
   const [deprecationMessage, setDeprecationMessage] = useState('');
-  const [deprecating, setDeprecating] = useState(false);
 
-  // SCM linking state
-  const [scmLink, setScmLink] = useState<ModuleSCMLink | null>(null);
-  const [scmLinkLoaded, setScmLinkLoaded] = useState(false);
+  // SCM linking UI state
   const [scmWizardOpen, setScmWizardOpen] = useState(false);
-  const [scmSyncing, setScmSyncing] = useState(false);
-  const [scmUnlinking, setScmUnlinking] = useState(false);
 
-  // Webhook events state
-  const [webhookEvents, setWebhookEvents] = useState<SCMWebhookEvent[]>([]);
-  const [webhookEventsLoaded, setWebhookEventsLoaded] = useState(false);
-  const [webhookEventsLoading, setWebhookEventsLoading] = useState(false);
+  // Webhook events UI state
   const [webhookEventsExpanded, setWebhookEventsExpanded] = useState(false);
 
-  // Security scan state
-  const [moduleScan, setModuleScan] = useState<ModuleScan | null>(null);
-  const [scanLoading, setScanLoading] = useState(false);
-  const [scanNotFound, setScanNotFound] = useState(false);
+  // =========================================================================
+  // 1. Module + versions query (primary)
+  // =========================================================================
+  const moduleQueryEnabled = !!(namespace && name && system);
 
-  // Module docs state
-  const [moduleDocs, setModuleDocs] = useState<ModuleDoc | null>(null);
-  const [docsLoading, setDocsLoading] = useState(false);
-
-  const loadSCMLink = useCallback(async (moduleId: string) => {
-    try {
-      const link = await api.getModuleSCMInfo(moduleId);
-      setScmLink(link);
-    } catch {
-      setScmLink(null); // 404 = not linked, which is fine
-    } finally {
-      setScmLinkLoaded(true);
-    }
-  }, []);
-
-  const loadModuleScan = useCallback(async (version: string) => {
-    if (!namespace || !name || !system) return;
-    setScanLoading(true);
-    setScanNotFound(false);
-    setModuleScan(null);
-    try {
-      const scan = await api.getModuleScan(namespace, name, system, version);
-      setModuleScan(scan);
-    } catch (err: unknown) {
-      if (getErrorStatus(err) === 404) {
-        setScanNotFound(true);
-      }
-    } finally {
-      setScanLoading(false);
-    }
-  }, [namespace, name, system]);
-
-  const loadModuleDocs = useCallback(async (version: string) => {
-    if (!namespace || !name || !system) return;
-    setDocsLoading(true);
-    setModuleDocs(null);
-    try {
-      const docs = await api.getModuleDocs(namespace, name, system, version);
-      setModuleDocs(docs);
-    } catch {
-      setModuleDocs(null);
-    } finally {
-      setDocsLoading(false);
-    }
-  }, [namespace, name, system]);
-
-  const loadModuleDetails = useCallback(async () => {
-    if (!namespace || !name || !system) return;
-
-    try {
-      setLoading(true);
-      setError(null);
-
-      // Use getModule API which returns module with embedded versions
-      // Also fetch versions from the Terraform protocol endpoint for readme/published_at
-      const [moduleData, versionsData] = await Promise.all([
-        api.getModule(namespace, name, system),
-        api.getModuleVersions(namespace, name, system),
+  const {
+    data: moduleData,
+    isLoading: loading,
+    error: moduleQueryError,
+  } = useQuery({
+    queryKey: queryKeys.modules.detail(namespace ?? '', name ?? '', system ?? ''),
+    queryFn: async () => {
+      const [mod, versionsData] = await Promise.all([
+        api.getModule(namespace!, name!, system!),
+        api.getModuleVersions(namespace!, name!, system!),
       ]);
+      if (!mod) throw new Error('Module not found');
 
-      if (!moduleData) {
-        setError('Module not found');
-        return;
-      }
+      const protocolVersions = Array.isArray(versionsData?.modules?.[0]?.versions)
+        ? versionsData.modules[0].versions
+        : [];
+      const moduleVersions = Array.isArray(mod?.versions) ? mod.versions : [];
+      const rawVersions: ModuleVersion[] =
+        protocolVersions.length > 0 ? protocolVersions : moduleVersions;
+      const mergedVersions = sortVersionsDesc(rawVersions);
 
-      setModule(moduleData);
-      if (moduleData?.id && isAuthenticated) {
-        loadSCMLink(moduleData.id);
-      }
+      return { module: mod, versions: mergedVersions };
+    },
+    enabled: moduleQueryEnabled,
+  });
 
-      // Merge version data - getModule has basic version info, getModuleVersions has readme/published_at
-      const protocolVersions = versionsData.modules?.[0]?.versions || [];
-      const moduleVersions = moduleData.versions || [];
+  const module = moduleData?.module ?? null;
+  const versions = moduleData?.versions ?? [];
 
-      // Use protocol versions as they have more complete data (readme, published_at)
-      // Fall back to module versions if protocol versions not available
-      const rawVersions: ModuleVersion[] = protocolVersions.length > 0 ? protocolVersions : moduleVersions;
-
-      // Sort by semver descending so latest is always first
-      const mergedVersions = [...rawVersions].sort((a, b) => {
-        const parseParts = (v: string): [number, number, number] => {
-          const clean = v.replace(/^v/, '').split('-')[0];
-          const [maj = 0, min = 0, pat = 0] = clean.split('.').map(Number);
-          return [maj, min, pat];
-        };
-        const [aMaj, aMin, aPat] = parseParts(a.version);
-        const [bMaj, bMin, bPat] = parseParts(b.version);
-        return bMaj !== aMaj ? bMaj - aMaj : bMin !== aMin ? bMin - aMin : bPat - aPat;
-      });
-      setVersions(mergedVersions);
-
-      // Select latest version by default (preserve current selection if reloading)
-      if (mergedVersions.length > 0) {
-        setSelectedVersion(prev => {
-          const currentVersion = prev?.version;
-          const matchingVersion = currentVersion
-            ? mergedVersions.find((v: ModuleVersion) => v.version === currentVersion)
-            : null;
-          return matchingVersion || mergedVersions[0];
-        });
-      }
-    } catch (err: unknown) {
-      console.error('Failed to load module details:', err);
-      if (getErrorStatus(err) === 404) {
+  // Derive error from query
+  useEffect(() => {
+    if (moduleQueryError) {
+      if (getErrorStatus(moduleQueryError) === 404) {
         setError('Module not found');
       } else {
-        setError(getErrorMessage(err, 'Failed to load module details'));
+        setError(getErrorMessage(moduleQueryError, 'Failed to load module details'));
       }
-    } finally {
-      setLoading(false);
     }
-  }, [namespace, name, system, isAuthenticated, loadSCMLink]);
+  }, [moduleQueryError]);
 
+  // Auto-select latest version (or preserve current selection on refetch)
   useEffect(() => {
-    loadModuleDetails();
-  }, [loadModuleDetails]);
+    if (versions.length === 0) return;
+    setSelectedVersion((prev) => {
+      const current = prev?.version;
+      const match = current ? versions.find((v) => v.version === current) : null;
+      return match || versions[0];
+    });
+  }, [versions]);
 
-  useEffect(() => {
-    if (!selectedVersion?.version || !namespace || !name || !system) return;
-    setModuleScan(null);
-    setScanNotFound(false);
-    setModuleDocs(null);
-    if (canManage) loadModuleScan(selectedVersion.version);
-    loadModuleDocs(selectedVersion.version);
-  }, [selectedVersion?.version, canManage, loadModuleScan, loadModuleDocs, namespace, name, system]);
+  // =========================================================================
+  // 2. SCM Link query (depends on module.id)
+  // =========================================================================
+  const {
+    data: scmLink = null,
+    isSuccess: scmLinkLoaded,
+  } = useQuery<ModuleSCMLink | null>({
+    queryKey: queryKeys.modules.scm(module?.id ?? ''),
+    queryFn: async () => {
+      try {
+        return await api.getModuleSCMInfo(module!.id);
+      } catch {
+        return null; // 404 = not linked, which is fine
+      }
+    },
+    enabled: !!module?.id && isAuthenticated,
+  });
+
+  // =========================================================================
+  // 3. Module scan query (depends on selectedVersion)
+  // =========================================================================
+  const scanVersion = selectedVersion?.version ?? '';
+
+  const {
+    data: scanData,
+    isLoading: scanLoading,
+  } = useQuery({
+    queryKey: queryKeys.modules.scan(namespace ?? '', name ?? '', system ?? '', scanVersion),
+    queryFn: async () => {
+      try {
+        const scan = await api.getModuleScan(namespace!, name!, system!, scanVersion);
+        return { scan, notFound: false };
+      } catch (err: unknown) {
+        if (getErrorStatus(err) === 404) {
+          return { scan: null, notFound: true };
+        }
+        throw err;
+      }
+    },
+    enabled: moduleQueryEnabled && !!scanVersion && canManage,
+  });
+
+  const moduleScan: ModuleScan | null = scanData?.scan ?? null;
+  const scanNotFound = scanData?.notFound ?? false;
+
+  // =========================================================================
+  // 4. Module docs query (depends on selectedVersion)
+  // =========================================================================
+  const {
+    data: moduleDocs = null,
+    isLoading: docsLoading,
+  } = useQuery<ModuleDoc | null>({
+    queryKey: queryKeys.modules.docs(namespace ?? '', name ?? '', system ?? '', scanVersion),
+    queryFn: async () => {
+      try {
+        return await api.getModuleDocs(namespace!, name!, system!, scanVersion);
+      } catch {
+        return null;
+      }
+    },
+    enabled: moduleQueryEnabled && !!scanVersion,
+  });
+
+  // =========================================================================
+  // 5. Webhook events (on-demand via loadWebhookEvents)
+  // =========================================================================
+  const [webhookEventsLoaded, setWebhookEventsLoaded] = useState(false);
+  const [webhookEventsLoading, setWebhookEventsLoading] = useState(false);
+  const [webhookEvents, setWebhookEvents] = useState<SCMWebhookEvent[]>([]);
 
   const loadWebhookEvents = async (moduleId: string) => {
     try {
@@ -188,50 +190,152 @@ export function useModuleDetail() {
     }
   };
 
-  const handleSCMUnlink = async () => {
-    if (!module?.id) return;
-    try {
-      setScmUnlinking(true);
-      await api.unlinkModuleFromSCM(module.id);
-      setScmLink(null);
-    } catch (err: unknown) {
+  // =========================================================================
+  // Mutations
+  // =========================================================================
+
+  const deleteModuleMutation = useMutation({
+    mutationFn: () => api.deleteModule(namespace!, name!, system!),
+    onSuccess: () => {
+      navigate('/modules');
+    },
+    onError: (err: unknown) => {
+      setError(getErrorMessage(err, 'Failed to delete module. Please try again.'));
+    },
+    onSettled: () => {
+      setDeleteModuleDialogOpen(false);
+    },
+  });
+
+  const deleteVersionMutation = useMutation({
+    mutationFn: (version: string) => api.deleteModuleVersion(namespace!, name!, system!, version),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.modules.detail(namespace ?? '', name ?? '', system ?? ''),
+      });
+      setVersionToDelete(null);
+    },
+    onError: (err: unknown) => {
+      setError(getErrorMessage(err, 'Failed to delete version. Please try again.'));
+    },
+    onSettled: () => {
+      setDeleteVersionDialogOpen(false);
+    },
+  });
+
+  const deprecateVersionMutation = useMutation({
+    mutationFn: (args: { version: string; message?: string }) =>
+      api.deprecateModuleVersion(namespace!, name!, system!, args.version, args.message),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.modules.detail(namespace ?? '', name ?? '', system ?? ''),
+      });
+      setDeprecationMessage('');
+    },
+    onError: (err: unknown) => {
+      setError(getErrorMessage(err, 'Failed to deprecate version. Please try again.'));
+    },
+    onSettled: () => {
+      setDeprecateDialogOpen(false);
+    },
+  });
+
+  const undeprecateVersionMutation = useMutation({
+    mutationFn: (version: string) =>
+      api.undeprecateModuleVersion(namespace!, name!, system!, version),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.modules.detail(namespace ?? '', name ?? '', system ?? ''),
+      });
+    },
+    onError: (err: unknown) => {
+      setError(getErrorMessage(err, 'Failed to remove deprecation. Please try again.'));
+    },
+  });
+
+  const updateDescriptionMutation = useMutation({
+    mutationFn: (newDescription: string) => api.updateModule(module!.id, { description: newDescription }),
+    onSuccess: (_data, newDescription) => {
+      // Optimistically update the cached module
+      queryClient.setQueryData(
+        queryKeys.modules.detail(namespace ?? '', name ?? '', system ?? ''),
+        (old: typeof moduleData) =>
+          old ? { ...old, module: { ...old.module, description: newDescription } } : old,
+      );
+    },
+    onError: (err: unknown) => {
+      setError(getErrorMessage(err, 'Failed to update description'));
+    },
+  });
+
+  const scmUnlinkMutation = useMutation({
+    mutationFn: () => api.unlinkModuleFromSCM(module!.id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.modules.scm(module?.id ?? ''),
+      });
+    },
+    onError: (err: unknown) => {
       setError(getErrorMessage(err, 'Failed to unlink repository'));
-    } finally {
-      setScmUnlinking(false);
-    }
-  };
+    },
+  });
 
-  // Poll for updated versions after an async sync by reloading at 2 s, 5 s, and 12 s.
-  // The sync runs in the background (202) so a single immediate reload is not enough.
-  const pollForVersions = () => {
-    [2000, 5000, 12000].forEach(delay => {
-      setTimeout(() => loadModuleDetails(), delay);
+  const scmSyncMutation = useMutation({
+    mutationFn: () => api.triggerManualSync(module!.id),
+    onSuccess: () => {
+      setError(null);
+      // Poll for updated versions after an async sync (202) at 2s, 5s, and 12s.
+      [2000, 5000, 12000].forEach((delay) => {
+        setTimeout(() => {
+          queryClient.invalidateQueries({
+            queryKey: queryKeys.modules.detail(namespace ?? '', name ?? '', system ?? ''),
+          });
+        }, delay);
+      });
+    },
+    onError: (err: unknown) => {
+      setError(getErrorMessage(err, 'Failed to trigger sync'));
+    },
+  });
+
+  // =========================================================================
+  // Handler wrappers (preserve existing call signatures for the page)
+  // =========================================================================
+
+  const loadSCMLink = useCallback(
+    (_moduleId: string) => {
+      // SCM link is now loaded via React Query; this is a no-op kept for
+      // backward compatibility with the page component.
+      queryClient.invalidateQueries({ queryKey: queryKeys.modules.scm(_moduleId) });
+    },
+    [queryClient],
+  );
+
+  const pollForVersions = useCallback(() => {
+    [2000, 5000, 12000].forEach((delay) => {
+      setTimeout(() => {
+        queryClient.invalidateQueries({
+          queryKey: queryKeys.modules.detail(namespace ?? '', name ?? '', system ?? ''),
+        });
+      }, delay);
     });
-  };
+  }, [queryClient, namespace, name, system]);
 
-  const handleSCMSync = async () => {
+  const handleSCMSync = () => {
     if (!module?.id) {
       console.error('Cannot sync: module.id is not available');
       return;
     }
-    console.log('Triggering manual sync for module:', module.id);
-    try {
-      setScmSyncing(true);
-      await api.triggerManualSync(module.id);
-      setError(null);
-      // Start polling so newly imported versions appear without manual refresh.
-      pollForVersions();
-    } catch (err: unknown) {
-      console.error('Sync failed:', err);
-      setError(getErrorMessage(err, 'Failed to trigger sync'));
-    } finally {
-      setScmSyncing(false);
-    }
+    scmSyncMutation.mutate();
+  };
+
+  const handleSCMUnlink = () => {
+    if (!module?.id) return;
+    scmUnlinkMutation.mutate();
   };
 
   const handleCopySource = () => {
     if (!module || !selectedVersion) return;
-
     const source = `${namespace}/${name}/${system}`;
     navigator.clipboard.writeText(source);
     setCopiedSource(true);
@@ -250,40 +354,14 @@ export function useModuleDetail() {
     });
   };
 
-  const handleDeleteModule = async () => {
+  const handleDeleteModule = () => {
     if (!namespace || !name || !system) return;
-
-    try {
-      setDeleting(true);
-      await api.deleteModule(namespace, name, system);
-      navigate('/modules');
-    } catch (err: unknown) {
-      console.error('Failed to delete module:', err);
-      const message = getErrorMessage(err, 'Failed to delete module. Please try again.');
-      setError(message);
-    } finally {
-      setDeleting(false);
-      setDeleteModuleDialogOpen(false);
-    }
+    deleteModuleMutation.mutate();
   };
 
-  const handleDeleteVersion = async () => {
+  const handleDeleteVersion = () => {
     if (!namespace || !name || !system || !versionToDelete) return;
-
-    try {
-      setDeleting(true);
-      await api.deleteModuleVersion(namespace, name, system, versionToDelete);
-      // Reload the module details
-      await loadModuleDetails();
-      setVersionToDelete(null);
-    } catch (err: unknown) {
-      console.error('Failed to delete version:', err);
-      const message = getErrorMessage(err, 'Failed to delete version. Please try again.');
-      setError(message);
-    } finally {
-      setDeleting(false);
-      setDeleteVersionDialogOpen(false);
-    }
+    deleteVersionMutation.mutate(versionToDelete);
   };
 
   const openDeleteVersionDialog = (version: string) => {
@@ -291,40 +369,22 @@ export function useModuleDetail() {
     setDeleteVersionDialogOpen(true);
   };
 
-  const handleDeprecateVersion = async () => {
+  const handleDeprecateVersion = () => {
     if (!namespace || !name || !system || !selectedVersion) return;
-
-    try {
-      setDeprecating(true);
-      await api.deprecateModuleVersion(namespace, name, system, selectedVersion.version, deprecationMessage || undefined);
-      // Reload the module details
-      await loadModuleDetails();
-      setDeprecationMessage('');
-    } catch (err: unknown) {
-      console.error('Failed to deprecate version:', err);
-      const message = getErrorMessage(err, 'Failed to deprecate version. Please try again.');
-      setError(message);
-    } finally {
-      setDeprecating(false);
-      setDeprecateDialogOpen(false);
-    }
+    deprecateVersionMutation.mutate({
+      version: selectedVersion.version,
+      message: deprecationMessage || undefined,
+    });
   };
 
-  const handleUndeprecateVersion = async () => {
+  const handleUndeprecateVersion = () => {
     if (!namespace || !name || !system || !selectedVersion) return;
+    undeprecateVersionMutation.mutate(selectedVersion.version);
+  };
 
-    try {
-      setDeprecating(true);
-      await api.undeprecateModuleVersion(namespace, name, system, selectedVersion.version);
-      // Reload the module details
-      await loadModuleDetails();
-    } catch (err: unknown) {
-      console.error('Failed to remove deprecation:', err);
-      const message = getErrorMessage(err, 'Failed to remove deprecation. Please try again.');
-      setError(message);
-    } finally {
-      setDeprecating(false);
-    }
+  const handleUpdateDescription = (newDescription: string) => {
+    if (!module?.id) return;
+    updateDescriptionMutation.mutate(newDescription);
   };
 
   const getTerraformExample = () => {
@@ -358,7 +418,7 @@ export function useModuleDetail() {
     // Delete module dialog
     deleteModuleDialogOpen,
     setDeleteModuleDialogOpen,
-    deleting,
+    deleting: deleteModuleMutation.isPending || deleteVersionMutation.isPending,
     // Delete version dialog
     deleteVersionDialogOpen,
     setDeleteVersionDialogOpen,
@@ -368,14 +428,14 @@ export function useModuleDetail() {
     setDeprecateDialogOpen,
     deprecationMessage,
     setDeprecationMessage,
-    deprecating,
+    deprecating: deprecateVersionMutation.isPending || undeprecateVersionMutation.isPending,
     // SCM linking
     scmLink,
     scmLinkLoaded,
     scmWizardOpen,
     setScmWizardOpen,
-    scmSyncing,
-    scmUnlinking,
+    scmSyncing: scmSyncMutation.isPending,
+    scmUnlinking: scmUnlinkMutation.isPending,
     // Webhook events
     webhookEvents,
     webhookEventsLoaded,
@@ -402,6 +462,7 @@ export function useModuleDetail() {
     openDeleteVersionDialog,
     handleDeprecateVersion,
     handleUndeprecateVersion,
+    handleUpdateDescription,
     getTerraformExample,
   };
 }

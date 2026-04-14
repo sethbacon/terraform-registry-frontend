@@ -4,6 +4,30 @@ import 'swagger-ui-react/swagger-ui.css';
 import { Box, Typography, List, ListItemButton, ListItemText, Paper } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 
+// swagger-ui-react's wrapper only forwards a fixed set of props to the
+// underlying SwaggerUIBundle.  tagsSorter is not one of them, so we inject
+// it via a plugin that wraps the taggedOperations selector to always sort.
+/* eslint-disable @typescript-eslint/no-explicit-any -- SwaggerUI plugin & Immutable.js types are untyped */
+const TagsSorterPlugin = (): any => ({
+  statePlugins: {
+    spec: {
+      wrapSelectors: {
+        taggedOperations: (origSelector: any) => (...args: any[]) => {
+          const taggedOps = origSelector(...args);
+          if (taggedOps && typeof taggedOps.sortBy === 'function') {
+            return taggedOps.sortBy(
+              (_val: any, key: string) => key,
+              (a: string, b: string) => a.localeCompare(b),
+            );
+          }
+          return taggedOps;
+        },
+      },
+    },
+  },
+});
+/* eslint-enable @typescript-eslint/no-explicit-any */
+
 // ---------------------------------------------------------------------------
 // Theme-aligned CSS overrides for Swagger UI
 //
@@ -241,12 +265,13 @@ function buildNavTags(spec: OpenAPISpec): NavTag[] {
       for (const tag of op.tags) {
         if (!seen.has(tag)) {
           seen.add(tag);
-          // Swagger UI uses this id pattern for tag sections
-          tags.push({ id: `operations-tag-${tag.replace(/\s+/g, '-')}`, label: tag });
+          // Swagger UI encodes spaces as underscores in tag section ids
+          tags.push({ id: `operations-tag-${tag.replace(/\s+/g, '_')}`, label: tag });
         }
       }
     }
   }
+  tags.sort((a, b) => a.label.localeCompare(b.label));
   return tags;
 }
 
@@ -272,7 +297,8 @@ const ApiDocumentation: React.FC = () => {
 
   // onComplete fires when SwaggerUI finishes rendering.
   // We extract tags from the loaded spec at that point.
-  const onComplete = useCallback((system: { getState: () => { toJS: () => { spec?: { json?: OpenAPISpec } } } }) => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- swagger-ui-react system type is not exported
+  const onComplete = useCallback((system: any) => {
     try {
       const spec = system.getState().toJS().spec?.json;
       if (spec) {
@@ -434,6 +460,7 @@ const ApiDocumentation: React.FC = () => {
             requestInterceptor={requestInterceptor}
             persistAuthorization
             onComplete={onComplete}
+            plugins={[TagsSorterPlugin]}
           />
         </Box>
       </Box>

@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   Box,
   Button,
@@ -30,10 +31,10 @@ import api from '../../services/api';
 import { formatDate } from '../../utils';
 import { MirrorApprovalRequest } from '../../types/rbac';
 import { getErrorMessage } from '../../utils/errors';
+import { queryKeys } from '../../services/queryKeys';
 
 const ApprovalsPage: React.FC = () => {
-  const [approvals, setApprovals] = useState<MirrorApprovalRequest[]>([]);
-  const [loading, setLoading] = useState(true);
+  const queryClient = useQueryClient();
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
@@ -53,69 +54,79 @@ const ApprovalsPage: React.FC = () => {
     status: 'approved' | 'rejected';
     notes: string;
   }>({ status: 'approved', notes: '' });
-  const [reviewing, setReviewing] = useState(false);
 
   // Status filter
   const [statusFilter, setStatusFilter] = useState<string>('');
 
-  const loadApprovals = useCallback(async () => {
-    try {
-      setLoading(true);
-      setError(null);
+  const {
+    data: approvals = [],
+    isLoading: loading,
+    error: queryError,
+    refetch: loadApprovals,
+  } = useQuery<MirrorApprovalRequest[]>({
+    queryKey: queryKeys.approvals.list(statusFilter ? { status: statusFilter } : undefined),
+    queryFn: async () => {
       const data = await api.listApprovalRequests(
         statusFilter ? { status: statusFilter } : undefined
       );
-      setApprovals(Array.isArray(data) ? data : []);
-    } catch (err: unknown) {
-      setError(getErrorMessage(err, 'Failed to load approval requests'));
-      console.error('Error loading approvals:', err);
-    } finally {
-      setLoading(false);
-    }
-  }, [statusFilter]);
+      return Array.isArray(data) ? data : [];
+    },
+  });
 
-  useEffect(() => {
-    loadApprovals();
-  }, [loadApprovals]);
+  if (queryError && !error) {
+    setError(getErrorMessage(queryError, 'Failed to load approval requests'));
+  }
 
-  const handleCreate = async () => {
-    try {
-      setError(null);
-      await api.createApprovalRequest({
+  const createMutation = useMutation({
+    mutationFn: () =>
+      api.createApprovalRequest({
         mirror_config_id: createForm.mirror_config_id,
         provider_namespace: createForm.provider_namespace,
         provider_name: createForm.provider_name || undefined,
         reason: createForm.reason || undefined,
-      });
+      }),
+    onSuccess: () => {
       setCreateDialogOpen(false);
       setCreateForm({ mirror_config_id: '', provider_namespace: '', provider_name: '', reason: '' });
       setSuccess('Approval request created successfully');
-      await loadApprovals();
-    } catch (err: unknown) {
-      setError(getErrorMessage(err, 'Failed to create approval request'));
-    }
-  };
-
-  const handleReview = async () => {
-    if (!reviewingApproval) return;
-    try {
-      setReviewing(true);
       setError(null);
-      await api.reviewApproval(reviewingApproval.id, {
-        status: reviewForm.status,
-        notes: reviewForm.notes || undefined,
-      });
+      queryClient.invalidateQueries({ queryKey: queryKeys.approvals._def });
+    },
+    onError: (err: unknown) => {
+      setError(getErrorMessage(err, 'Failed to create approval request'));
+    },
+  });
+
+  const reviewMutation = useMutation({
+    mutationFn: ({ id, status, notes }: { id: string; status: 'approved' | 'rejected'; notes?: string }) =>
+      api.reviewApproval(id, { status, notes }),
+    onSuccess: () => {
       setReviewDialogOpen(false);
+      setSuccess(`Approval request ${reviewForm.status}`);
+      setError(null);
       setReviewingApproval(null);
       setReviewForm({ status: 'approved', notes: '' });
-      setSuccess(`Approval request ${reviewForm.status}`);
-      await loadApprovals();
-    } catch (err: unknown) {
+      queryClient.invalidateQueries({ queryKey: queryKeys.approvals._def });
+    },
+    onError: (err: unknown) => {
       setError(getErrorMessage(err, 'Failed to review approval request'));
-    } finally {
-      setReviewing(false);
-    }
+    },
+  });
+
+  const handleCreate = () => {
+    createMutation.mutate();
   };
+
+  const handleReview = () => {
+    if (!reviewingApproval) return;
+    reviewMutation.mutate({
+      id: reviewingApproval.id,
+      status: reviewForm.status,
+      notes: reviewForm.notes || undefined,
+    });
+  };
+
+  const reviewing = reviewMutation.isPending;
 
   const openReviewDialog = (approval: MirrorApprovalRequest, defaultStatus: 'approved' | 'rejected') => {
     setReviewingApproval(approval);
@@ -143,251 +154,251 @@ const ApprovalsPage: React.FC = () => {
         </Box>
       ) : (
         <>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-        <Box>
-          <Typography variant="h4">Approval Requests</Typography>
-          <Typography variant="body2" color="text.secondary">
-            Review and manage mirror provider approval requests
-          </Typography>
-        </Box>
-        <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
-          <FormControl size="small" sx={{ minWidth: 140 }}>
-            <InputLabel>Status</InputLabel>
-            <Select
-              label="Status"
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-            >
-              <MenuItem value="">All</MenuItem>
-              <MenuItem value="pending">Pending</MenuItem>
-              <MenuItem value="approved">Approved</MenuItem>
-              <MenuItem value="rejected">Rejected</MenuItem>
-            </Select>
-          </FormControl>
-          <Button
-            variant="outlined"
-            startIcon={<RefreshIcon />}
-            onClick={loadApprovals}
-          >
-            Refresh
-          </Button>
-          <Button
-            variant="contained"
-            startIcon={<AddIcon />}
-            onClick={() => setCreateDialogOpen(true)}
-          >
-            Create Request
-          </Button>
-        </Box>
-      </Box>
-
-      {error && (
-        <Alert severity="error" sx={{ mb: 2 }} onClose={() => setError(null)}>
-          {error}
-        </Alert>
-      )}
-
-      {success && (
-        <Alert severity="success" sx={{ mb: 2 }} onClose={() => setSuccess(null)}>
-          {success}
-        </Alert>
-      )}
-
-      <Grid container spacing={3}>
-        {approvals.map((approval) => (
-          <Grid size={{ xs: 12, md: 6 }} key={approval.id}>
-            <Card>
-              <CardContent>
-                <Box display="flex" justifyContent="space-between" alignItems="flex-start" mb={1}>
-                  <Typography variant="h6" sx={{ wordBreak: 'break-word', flex: 1, mr: 1 }}>
-                    {approval.provider_namespace}
-                    {approval.provider_name ? `/${approval.provider_name}` : ''}
-                  </Typography>
-                  {getStatusChip(approval.status)}
-                </Box>
-
-                {approval.reason && (
-                  <Typography variant="body2" color="textSecondary" paragraph>
-                    {approval.reason}
-                  </Typography>
-                )}
-
-                <Typography variant="caption" color="textSecondary" display="block">
-                  <strong>Mirror Config ID:</strong> {approval.mirror_config_id}
-                </Typography>
-                <Typography variant="caption" color="textSecondary" display="block">
-                  <strong>Created:</strong> {formatDate(approval.created_at)}
-                </Typography>
-
-                {approval.reviewed_at && (
-                  <>
-                    <Typography variant="caption" color="textSecondary" display="block">
-                      <strong>Reviewed:</strong> {formatDate(approval.reviewed_at)}
-                    </Typography>
-                    {approval.review_notes && (
-                      <Typography variant="caption" color="textSecondary" display="block">
-                        <strong>Notes:</strong> {approval.review_notes}
-                      </Typography>
-                    )}
-                  </>
-                )}
-              </CardContent>
-
-              {approval.status === 'pending' && (
-                <CardActions>
-                  <Button
-                    size="small"
-                    color="success"
-                    variant="outlined"
-                    startIcon={<CheckCircleIcon />}
-                    onClick={() => openReviewDialog(approval, 'approved')}
-                  >
-                    Approve
-                  </Button>
-                  <Button
-                    size="small"
-                    color="error"
-                    variant="outlined"
-                    startIcon={<CancelIcon />}
-                    onClick={() => openReviewDialog(approval, 'rejected')}
-                  >
-                    Reject
-                  </Button>
-                </CardActions>
-              )}
-            </Card>
-          </Grid>
-        ))}
-
-        {approvals.length === 0 && !loading && (
-          <Grid size={12}>
-            <Card>
-              <CardContent>
-                <Typography variant="body1" color="textSecondary" align="center">
-                  No approval requests found.
-                  {statusFilter && ` Try clearing the "${statusFilter}" filter.`}
-                </Typography>
-              </CardContent>
-            </Card>
-          </Grid>
-        )}
-      </Grid>
-
-      {/* Create Dialog */}
-      <Dialog
-        open={createDialogOpen}
-        onClose={() => setCreateDialogOpen(false)}
-        maxWidth="sm"
-        fullWidth
-      >
-        <DialogTitle>Create Approval Request</DialogTitle>
-        <DialogContent>
-          <Box sx={{ pt: 2, display: 'flex', flexDirection: 'column', gap: 2 }}>
-            <TextField
-              label="Mirror Config ID"
-              fullWidth
-              required
-              value={createForm.mirror_config_id}
-              onChange={(e) => setCreateForm({ ...createForm, mirror_config_id: e.target.value })}
-              helperText="The ID of the mirror configuration to request access for"
-            />
-            <TextField
-              label="Provider Namespace"
-              fullWidth
-              required
-              value={createForm.provider_namespace}
-              onChange={(e) => setCreateForm({ ...createForm, provider_namespace: e.target.value })}
-              helperText="e.g., hashicorp"
-            />
-            <TextField
-              label="Provider Name"
-              fullWidth
-              value={createForm.provider_name}
-              onChange={(e) => setCreateForm({ ...createForm, provider_name: e.target.value })}
-              helperText="Optional — leave blank to request access to all providers in the namespace"
-            />
-            <TextField
-              label="Reason"
-              fullWidth
-              multiline
-              rows={3}
-              value={createForm.reason}
-              onChange={(e) => setCreateForm({ ...createForm, reason: e.target.value })}
-              helperText="Explain why access is needed"
-            />
-          </Box>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setCreateDialogOpen(false)}>Cancel</Button>
-          <Button
-            variant="contained"
-            onClick={handleCreate}
-            disabled={!createForm.mirror_config_id || !createForm.provider_namespace}
-          >
-            Submit Request
-          </Button>
-        </DialogActions>
-      </Dialog>
-
-      {/* Review Dialog */}
-      <Dialog
-        open={reviewDialogOpen}
-        onClose={() => setReviewDialogOpen(false)}
-        maxWidth="sm"
-        fullWidth
-      >
-        <DialogTitle>Review Approval Request</DialogTitle>
-        <DialogContent>
-          {reviewingApproval && (
-            <Box sx={{ pt: 2, display: 'flex', flexDirection: 'column', gap: 2 }}>
-              <Typography variant="body2">
-                <strong>Provider:</strong> {reviewingApproval.provider_namespace}
-                {reviewingApproval.provider_name ? `/${reviewingApproval.provider_name}` : ''}
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+            <Box>
+              <Typography variant="h4">Approval Requests</Typography>
+              <Typography variant="body2" color="text.secondary">
+                Review and manage mirror provider approval requests
               </Typography>
-              {reviewingApproval.reason && (
-                <Typography variant="body2">
-                  <strong>Reason:</strong> {reviewingApproval.reason}
-                </Typography>
-              )}
-              <FormControl fullWidth>
-                <InputLabel>Decision</InputLabel>
+            </Box>
+            <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+              <FormControl size="small" sx={{ minWidth: 140 }}>
+                <InputLabel>Status</InputLabel>
                 <Select
-                  label="Decision"
-                  value={reviewForm.status}
-                  onChange={(e) =>
-                    setReviewForm({ ...reviewForm, status: e.target.value as 'approved' | 'rejected' })
-                  }
+                  label="Status"
+                  value={statusFilter}
+                  onChange={(e) => setStatusFilter(e.target.value)}
                 >
-                  <MenuItem value="approved">Approve</MenuItem>
-                  <MenuItem value="rejected">Reject</MenuItem>
+                  <MenuItem value="">All</MenuItem>
+                  <MenuItem value="pending">Pending</MenuItem>
+                  <MenuItem value="approved">Approved</MenuItem>
+                  <MenuItem value="rejected">Rejected</MenuItem>
                 </Select>
               </FormControl>
-              <TextField
-                label="Notes"
-                fullWidth
-                multiline
-                rows={3}
-                value={reviewForm.notes}
-                onChange={(e) => setReviewForm({ ...reviewForm, notes: e.target.value })}
-                helperText="Optional notes for the requester"
-              />
+              <Button
+                variant="outlined"
+                startIcon={<RefreshIcon />}
+                onClick={loadApprovals}
+              >
+                Refresh
+              </Button>
+              <Button
+                variant="contained"
+                startIcon={<AddIcon />}
+                onClick={() => setCreateDialogOpen(true)}
+              >
+                Create Request
+              </Button>
             </Box>
+          </Box>
+
+          {error && (
+            <Alert severity="error" sx={{ mb: 2 }} onClose={() => setError(null)}>
+              {error}
+            </Alert>
           )}
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setReviewDialogOpen(false)} disabled={reviewing}>
-            Cancel
-          </Button>
-          <Button
-            variant="contained"
-            color={reviewForm.status === 'approved' ? 'success' : 'error'}
-            onClick={handleReview}
-            disabled={reviewing}
+
+          {success && (
+            <Alert severity="success" sx={{ mb: 2 }} onClose={() => setSuccess(null)}>
+              {success}
+            </Alert>
+          )}
+
+          <Grid container spacing={3}>
+            {approvals.map((approval) => (
+              <Grid size={{ xs: 12, md: 6 }} key={approval.id}>
+                <Card>
+                  <CardContent>
+                    <Box display="flex" justifyContent="space-between" alignItems="flex-start" mb={1}>
+                      <Typography variant="h6" sx={{ wordBreak: 'break-word', flex: 1, mr: 1 }}>
+                        {approval.provider_namespace}
+                        {approval.provider_name ? `/${approval.provider_name}` : ''}
+                      </Typography>
+                      {getStatusChip(approval.status)}
+                    </Box>
+
+                    {approval.reason && (
+                      <Typography variant="body2" color="textSecondary" paragraph>
+                        {approval.reason}
+                      </Typography>
+                    )}
+
+                    <Typography variant="caption" color="textSecondary" display="block">
+                      <strong>Mirror Config ID:</strong> {approval.mirror_config_id}
+                    </Typography>
+                    <Typography variant="caption" color="textSecondary" display="block">
+                      <strong>Created:</strong> {formatDate(approval.created_at)}
+                    </Typography>
+
+                    {approval.reviewed_at && (
+                      <>
+                        <Typography variant="caption" color="textSecondary" display="block">
+                          <strong>Reviewed:</strong> {formatDate(approval.reviewed_at)}
+                        </Typography>
+                        {approval.review_notes && (
+                          <Typography variant="caption" color="textSecondary" display="block">
+                            <strong>Notes:</strong> {approval.review_notes}
+                          </Typography>
+                        )}
+                      </>
+                    )}
+                  </CardContent>
+
+                  {approval.status === 'pending' && (
+                    <CardActions>
+                      <Button
+                        size="small"
+                        color="success"
+                        variant="outlined"
+                        startIcon={<CheckCircleIcon />}
+                        onClick={() => openReviewDialog(approval, 'approved')}
+                      >
+                        Approve
+                      </Button>
+                      <Button
+                        size="small"
+                        color="error"
+                        variant="outlined"
+                        startIcon={<CancelIcon />}
+                        onClick={() => openReviewDialog(approval, 'rejected')}
+                      >
+                        Reject
+                      </Button>
+                    </CardActions>
+                  )}
+                </Card>
+              </Grid>
+            ))}
+
+            {approvals.length === 0 && !loading && (
+              <Grid size={12}>
+                <Card>
+                  <CardContent>
+                    <Typography variant="body1" color="textSecondary" align="center">
+                      No approval requests found.
+                      {statusFilter && ` Try clearing the "${statusFilter}" filter.`}
+                    </Typography>
+                  </CardContent>
+                </Card>
+              </Grid>
+            )}
+          </Grid>
+
+          {/* Create Dialog */}
+          <Dialog
+            open={createDialogOpen}
+            onClose={() => setCreateDialogOpen(false)}
+            maxWidth="sm"
+            fullWidth
           >
-            {reviewing ? 'Submitting...' : reviewForm.status === 'approved' ? 'Approve' : 'Reject'}
-          </Button>
-        </DialogActions>
-      </Dialog>
+            <DialogTitle>Create Approval Request</DialogTitle>
+            <DialogContent>
+              <Box sx={{ pt: 2, display: 'flex', flexDirection: 'column', gap: 2 }}>
+                <TextField
+                  label="Mirror Config ID"
+                  fullWidth
+                  required
+                  value={createForm.mirror_config_id}
+                  onChange={(e) => setCreateForm({ ...createForm, mirror_config_id: e.target.value })}
+                  helperText="The ID of the mirror configuration to request access for"
+                />
+                <TextField
+                  label="Provider Namespace"
+                  fullWidth
+                  required
+                  value={createForm.provider_namespace}
+                  onChange={(e) => setCreateForm({ ...createForm, provider_namespace: e.target.value })}
+                  helperText="e.g., hashicorp"
+                />
+                <TextField
+                  label="Provider Name"
+                  fullWidth
+                  value={createForm.provider_name}
+                  onChange={(e) => setCreateForm({ ...createForm, provider_name: e.target.value })}
+                  helperText="Optional — leave blank to request access to all providers in the namespace"
+                />
+                <TextField
+                  label="Reason"
+                  fullWidth
+                  multiline
+                  rows={3}
+                  value={createForm.reason}
+                  onChange={(e) => setCreateForm({ ...createForm, reason: e.target.value })}
+                  helperText="Explain why access is needed"
+                />
+              </Box>
+            </DialogContent>
+            <DialogActions>
+              <Button onClick={() => setCreateDialogOpen(false)}>Cancel</Button>
+              <Button
+                variant="contained"
+                onClick={handleCreate}
+                disabled={!createForm.mirror_config_id || !createForm.provider_namespace}
+              >
+                Submit Request
+              </Button>
+            </DialogActions>
+          </Dialog>
+
+          {/* Review Dialog */}
+          <Dialog
+            open={reviewDialogOpen}
+            onClose={() => setReviewDialogOpen(false)}
+            maxWidth="sm"
+            fullWidth
+          >
+            <DialogTitle>Review Approval Request</DialogTitle>
+            <DialogContent>
+              {reviewingApproval && (
+                <Box sx={{ pt: 2, display: 'flex', flexDirection: 'column', gap: 2 }}>
+                  <Typography variant="body2">
+                    <strong>Provider:</strong> {reviewingApproval.provider_namespace}
+                    {reviewingApproval.provider_name ? `/${reviewingApproval.provider_name}` : ''}
+                  </Typography>
+                  {reviewingApproval.reason && (
+                    <Typography variant="body2">
+                      <strong>Reason:</strong> {reviewingApproval.reason}
+                    </Typography>
+                  )}
+                  <FormControl fullWidth>
+                    <InputLabel>Decision</InputLabel>
+                    <Select
+                      label="Decision"
+                      value={reviewForm.status}
+                      onChange={(e) =>
+                        setReviewForm({ ...reviewForm, status: e.target.value as 'approved' | 'rejected' })
+                      }
+                    >
+                      <MenuItem value="approved">Approve</MenuItem>
+                      <MenuItem value="rejected">Reject</MenuItem>
+                    </Select>
+                  </FormControl>
+                  <TextField
+                    label="Notes"
+                    fullWidth
+                    multiline
+                    rows={3}
+                    value={reviewForm.notes}
+                    onChange={(e) => setReviewForm({ ...reviewForm, notes: e.target.value })}
+                    helperText="Optional notes for the requester"
+                  />
+                </Box>
+              )}
+            </DialogContent>
+            <DialogActions>
+              <Button onClick={() => setReviewDialogOpen(false)} disabled={reviewing}>
+                Cancel
+              </Button>
+              <Button
+                variant="contained"
+                color={reviewForm.status === 'approved' ? 'success' : 'error'}
+                onClick={handleReview}
+                disabled={reviewing}
+              >
+                {reviewing ? 'Submitting...' : reviewForm.status === 'approved' ? 'Approve' : 'Reject'}
+              </Button>
+            </DialogActions>
+          </Dialog>
         </>
       )}
     </Container>
