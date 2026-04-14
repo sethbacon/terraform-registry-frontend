@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   Box,
   Button,
@@ -33,11 +34,10 @@ import InfoIcon from '@mui/icons-material/Info';
 import api from '../../services/api';
 import { getErrorMessage } from '../../utils/errors';
 import type { StorageConfigResponse, StorageConfigInput, StorageBackendType, SetupStatus } from '../../types';
+import { queryKeys } from '../../services/queryKeys';
 
 const StoragePage: React.FC = () => {
-  const [setupStatus, setSetupStatus] = useState<SetupStatus | null>(null);
-  const [configs, setConfigs] = useState<StorageConfigResponse[]>([]);
-  const [loading, setLoading] = useState(true);
+  const queryClient = useQueryClient();
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
@@ -53,28 +53,29 @@ const StoragePage: React.FC = () => {
 
   const steps = ['Select Backend', 'Configure Settings', 'Review & Save'];
 
-  useEffect(() => {
-    loadData();
-  }, []);
-
-  const loadData = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-
+  const {
+    data: storageData,
+    isLoading: loading,
+    error: queryError,
+  } = useQuery({
+    queryKey: [...queryKeys.storageConfigs.list(), 'withSetup'],
+    queryFn: async () => {
       const status = await api.getSetupStatus();
-      setSetupStatus(status);
-
+      let configs: StorageConfigResponse[] = [];
       if (!status.setup_required) {
         const configList = await api.listStorageConfigs();
-        setConfigs(Array.isArray(configList) ? configList : []);
+        configs = Array.isArray(configList) ? configList : [];
       }
-    } catch (err: unknown) {
-      setError(getErrorMessage(err, 'Failed to load storage configuration'));
-    } finally {
-      setLoading(false);
-    }
-  };
+      return { setupStatus: status, configs };
+    },
+  });
+
+  const setupStatus = storageData?.setupStatus ?? null;
+  const configs = storageData?.configs ?? [];
+
+  if (queryError && !error) {
+    setError(getErrorMessage(queryError, 'Failed to load storage configuration'));
+  }
 
   const handleBackendChange = (type: StorageBackendType) => {
     const newFormData: StorageConfigInput = { backend_type: type };
@@ -124,7 +125,7 @@ const StoragePage: React.FC = () => {
       setError(null);
       await api.createStorageConfig(formData);
       setSuccess('Storage configuration saved successfully!');
-      await loadData();
+      queryClient.invalidateQueries({ queryKey: queryKeys.storageConfigs._def });
       setActiveStep(0);
     } catch (err: unknown) {
       setError(getErrorMessage(err, 'Failed to save configuration'));

@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   Container,
   Typography,
@@ -37,12 +38,12 @@ import { Organization, OrganizationMemberWithUser, User } from '../../types';
 import { RoleTemplate } from '../../types/rbac';
 import { useAuth } from '../../contexts/AuthContext';
 import { getErrorMessage } from '../../utils/errors';
+import { queryKeys } from '../../services/queryKeys';
 
 const OrganizationsPage: React.FC = () => {
+  const queryClient = useQueryClient();
   const { allowedScopes } = useAuth();
   const canManage = allowedScopes.includes('admin') || allowedScopes.includes('organizations:manage');
-  const [organizations, setOrganizations] = useState<Organization[]>([]);
-  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   // Dialog state
@@ -68,27 +69,21 @@ const OrganizationsPage: React.FC = () => {
     display_name: '',
   });
 
-  useEffect(() => {
-    loadOrganizations();
-  }, []);
-
-  const loadOrganizations = async () => {
-    try {
-      setLoading(true);
-      setError(null);
+  const {
+    data: organizations = [],
+    isLoading: loading,
+    error: queryError,
+  } = useQuery<Organization[]>({
+    queryKey: queryKeys.organizations.list(),
+    queryFn: async () => {
       const orgs = await api.listOrganizations();
-      setOrganizations(orgs || []);
-    } catch (err) {
-      console.error('Failed to load organizations:', err);
-      // In dev mode, just show empty list instead of error
-      setOrganizations([]);
-      if (!import.meta.env.DEV) {
-        setError('Failed to load organizations. Please try again.');
-      }
-    } finally {
-      setLoading(false);
-    }
-  };
+      return orgs || [];
+    },
+  });
+
+  if (queryError && !error && !import.meta.env.DEV) {
+    setError('Failed to load organizations. Please try again.');
+  }
 
   const handleOpenDialog = (org?: Organization) => {
     if (org) {
@@ -113,25 +108,39 @@ const OrganizationsPage: React.FC = () => {
     setError(null);
   };
 
-  const handleSaveOrganization = async () => {
-    try {
-      setError(null);
+  const saveOrgMutation = useMutation({
+    mutationFn: async () => {
       if (editingOrg) {
-        await api.updateOrganization(editingOrg.id, {
-          display_name: formData.display_name,
-        });
+        await api.updateOrganization(editingOrg.id, { display_name: formData.display_name });
       } else {
-        await api.createOrganization({
-          name: formData.name,
-          display_name: formData.display_name,
-        });
+        await api.createOrganization({ name: formData.name, display_name: formData.display_name });
       }
+    },
+    onSuccess: () => {
       handleCloseDialog();
-      loadOrganizations();
-    } catch (err: unknown) {
-      console.error('Failed to save organization:', err);
+      queryClient.invalidateQueries({ queryKey: queryKeys.organizations._def });
+    },
+    onError: (err: unknown) => {
       setError(getErrorMessage(err, 'Failed to save organization. Please try again.'));
-    }
+    },
+  });
+
+  const deleteOrgMutation = useMutation({
+    mutationFn: (id: string) => api.deleteOrganization(id),
+    onSuccess: () => {
+      setDeleteDialogOpen(false);
+      setOrgToDelete(null);
+      setError(null);
+      queryClient.invalidateQueries({ queryKey: queryKeys.organizations._def });
+    },
+    onError: (err: unknown) => {
+      setError(getErrorMessage(err, 'Failed to delete organization. Please try again.'));
+    },
+  });
+
+  const handleSaveOrganization = () => {
+    setError(null);
+    saveOrgMutation.mutate();
   };
 
   const handleDeleteClick = (org: Organization) => {
@@ -139,19 +148,10 @@ const OrganizationsPage: React.FC = () => {
     setDeleteDialogOpen(true);
   };
 
-  const handleDeleteConfirm = async () => {
+  const handleDeleteConfirm = () => {
     if (!orgToDelete) return;
-
-    try {
-      setError(null);
-      await api.deleteOrganization(orgToDelete.id);
-      setDeleteDialogOpen(false);
-      setOrgToDelete(null);
-      loadOrganizations();
-    } catch (err: unknown) {
-      console.error('Failed to delete organization:', err);
-      setError(getErrorMessage(err, 'Failed to delete organization. Please try again.'));
-    }
+    setError(null);
+    deleteOrgMutation.mutate(orgToDelete.id);
   };
 
   const handleViewMembers = async (org: Organization) => {
@@ -371,8 +371,8 @@ const OrganizationsPage: React.FC = () => {
         </DialogContent>
         <DialogActions>
           <Button onClick={handleCloseDialog}>Cancel</Button>
-          <Button 
-            onClick={handleSaveOrganization} 
+          <Button
+            onClick={handleSaveOrganization}
             variant="contained"
             disabled={!formData.name.trim() || !formData.display_name.trim()}
           >

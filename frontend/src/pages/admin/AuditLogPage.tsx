@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useRef } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import {
   Container,
   Typography,
@@ -29,6 +30,7 @@ import {
 import DownloadIcon from '@mui/icons-material/Download';
 import api from '../../services/api';
 import { AuditLog } from '../../types';
+import { queryKeys } from '../../services/queryKeys';
 
 const RESOURCE_TYPES = [
   { value: '', label: 'All Resource Types' },
@@ -43,10 +45,7 @@ const RESOURCE_TYPES = [
 ];
 
 const AuditLogPage: React.FC = () => {
-  const [logs, setLogs] = useState<AuditLog[]>([]);
-  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [total, setTotal] = useState(0);
 
   // Pagination (MUI TablePagination uses 0-based page)
   const [page, setPage] = useState(0);
@@ -71,33 +70,31 @@ const AuditLogPage: React.FC = () => {
   // Export menu
   const [exportAnchor, setExportAnchor] = useState<null | HTMLElement>(null);
 
-  const fetchLogs = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const opts: Record<string, string | number> = {
-        page: page + 1, // API is 1-based
-        per_page: rowsPerPage,
-      };
-      if (resourceType) opts.resource_type = resourceType;
-      if (debouncedAction) opts.action = debouncedAction;
-      if (debouncedUserEmail) opts.user_email = debouncedUserEmail;
-      if (startDate) opts.start_date = new Date(startDate).toISOString();
-      if (endDate) opts.end_date = new Date(endDate).toISOString();
+  const queryParams = {
+    page: page + 1,
+    per_page: rowsPerPage,
+    ...(resourceType ? { resource_type: resourceType } : {}),
+    ...(debouncedAction ? { action: debouncedAction } : {}),
+    ...(debouncedUserEmail ? { user_email: debouncedUserEmail } : {}),
+    ...(startDate ? { start_date: new Date(startDate).toISOString() } : {}),
+    ...(endDate ? { end_date: new Date(endDate).toISOString() } : {}),
+  };
 
-      const result = await api.listAuditLogs(opts);
-      setLogs(result.logs ?? []);
-      setTotal(result.pagination?.total ?? 0);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load audit logs');
-    } finally {
-      setLoading(false);
-    }
-  }, [page, rowsPerPage, resourceType, debouncedAction, debouncedUserEmail, startDate, endDate]);
+  const {
+    data,
+    isLoading: loading,
+    error: queryError,
+  } = useQuery({
+    queryKey: queryKeys.auditLogs.list(queryParams),
+    queryFn: () => api.listAuditLogs(queryParams),
+  });
 
-  useEffect(() => {
-    fetchLogs();
-  }, [fetchLogs]);
+  const logs = data?.logs ?? [];
+  const total = data?.pagination?.total ?? 0;
+
+  if (queryError && !error) {
+    setError(queryError instanceof Error ? queryError.message : 'Failed to load audit logs');
+  }
 
   // Debounce text filter changes
   const handleActionChange = (value: string) => {
