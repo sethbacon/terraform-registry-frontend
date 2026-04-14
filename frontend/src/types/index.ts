@@ -183,6 +183,9 @@ export interface ProviderDocEntry {
 export interface ProviderDocsResponse {
   docs: ProviderDocEntry[];
   categories: string[];
+  total: number;
+  limit: number;
+  offset: number;
 }
 
 export interface ProviderDocContent {

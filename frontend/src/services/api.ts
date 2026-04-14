@@ -258,10 +258,12 @@ class ApiClient {
     return response.data;
   }
 
-  async getProviderDocs(namespace: string, type: string, version: string, category?: string, language?: string) {
-    const params: Record<string, string> = {};
+  async getProviderDocs(namespace: string, type: string, version: string, category?: string, language?: string, limit?: number, offset?: number) {
+    const params: Record<string, string | number> = {};
     if (category) params.category = category;
     if (language) params.language = language;
+    if (limit !== undefined) params.limit = limit;
+    if (offset !== undefined) params.offset = offset;
     const response = await this.client.get(
       `/api/v1/providers/${namespace}/${type}/versions/${version}/docs`,
       { params }

@@ -9,6 +9,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.3] - 2026-04-14
+
+### Fixed
+
+- fix: sort provider versions by semver descending instead of relying on backend `created_at` order
+- fix: fetch all provider documentation pages (paginate with limit=1000) so large providers show all categories and docs in the sidebar
+
 ## [0.5.2] - 2026-04-14
 
 ### Performance
