@@ -94,7 +94,7 @@ jobs:
 
       - name: Run Playwright tests
         working-directory: e2e
-        run: npx playwright test --workers=1 --max-failures=1 --retries=1 --reporter=list
+        run: npx playwright test --max-failures=1 --retries=1 --reporter=list
 
       - name: Upload Playwright artifacts
         uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7
