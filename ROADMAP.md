@@ -1,764 +1,805 @@
-<!-- markdownlint-disable MD024 -->
+# Terraform Registry Frontend -- Roadmap
 
-# Improvement Roadmap
-
-> Generated from a comprehensive code review on 2026-04-10.
-> All file paths are relative to `frontend/src/` unless otherwise noted.
-> Each phase is self-contained — tasks within a phase can be executed in parallel by independent agents unless noted otherwise.
-
----
-
-## Phase 1 — Critical Foundations
-
-> **Priority:** Critical | **Tasks:** 4 | **Parallelizable:** All
-
-### Task 1.1: Add React error boundaries
-
-**Why:** Any unhandled rendering error in any component currently crashes the entire application with a white screen. There are zero error boundaries in the codebase.
-
-**Files to create:**
-
-- `components/ErrorBoundary.tsx`
-
-**Files to modify:**
-
-- `App.tsx` — wrap the `<Routes>` block and each `<Suspense>` fallback
-
-**Implementation details:**
-
-- Create a class component `ErrorBoundary` implementing `componentDidCatch` and `getDerivedStateFromError`
-- Render a user-friendly fallback UI with MUI `Alert` and a "Reload" button
-- Accept an optional `fallback` prop for customizable error UI
-- Wrap the top-level `<Routes>` in `App.tsx` with `<ErrorBoundary>`
-- Consider wrapping each lazy-loaded route individually so one page crash doesn't take down the whole app
-
-**Acceptance criteria:**
-
-- [ ] `npm run build` succeeds
-- [ ] `npm run lint` passes
-- [ ] Manually throwing an error in a component renders the fallback UI instead of a white screen
-- [ ] Other routes remain navigable after one route errors
+> **Goal**: Raise all review scores to 9/10 or 10/10.
+> **Out of scope**: v1.0 API stability (deferred), state management, runtime execution (plan/apply).
+> **Structure**: Phases are ordered by impact. Work items within each phase are **independent** and can be worked on by separate agents in parallel unless noted otherwise.
+> **Coordinates with**: `terraform-registry-backend/ROADMAP.md` -- the backend roadmap introduces new API endpoints for scanning setup, storage migration, advanced search, and module deprecation that this frontend will consume.
 
 ---
 
-### Task 1.2: Fix duplicate `ProviderPlatform` interface
+## Phase 1: Testing & CI Foundation (Maturity 6→9)
 
-**Why:** `types/index.ts` defines `ProviderPlatform` twice (lines 149-160 and lines 181-190). The second definition is missing `storage_path` and `storage_backend` fields. TypeScript declaration merging causes the second to silently override the first.
+### 1.1 Vitest Coverage Configuration & Enforcement
 
-**Files to modify:**
+**Why**: `vitest.config.ts` (18 lines) has zero coverage configuration -- no thresholds, no reporters, no include/exclude. There is no CI enforcement of frontend coverage at all. The backend enforces 75% minimum; the frontend enforces nothing.
 
-- `types/index.ts`
+**Current state**:
+- `frontend/vitest.config.ts`: `environment: 'happy-dom'`, `globals: true`, `setupFiles: './src/setupTests.ts'`. No `coverage` section.
+- 4 unit test files totaling 313 lines across `components/__tests__/`, `hooks/__tests__/`, `contexts/__tests__/`, `services/__tests__/`.
+- No `@vitest/coverage-v8` or `@vitest/coverage-istanbul` in `package.json`.
 
-**Implementation details:**
+**Work items**:
 
-- Delete the second definition (lines 181-190)
-- Keep the first definition (lines 149-160) which has all 10 fields: `id`, `provider_version_id`, `os`, `arch`, `filename`, `storage_path`, `storage_backend`, `size_bytes`, `shasum`, `download_count`
-- Grep all files for `ProviderPlatform` usage and verify no code depends on the narrower type
+1. **Install coverage provider**: Add `@vitest/coverage-v8` as a dev dependency in `frontend/package.json`.
 
-**Acceptance criteria:**
+2. **Add coverage configuration** to `frontend/vitest.config.ts`:
+   ```ts
+   test: {
+     environment: 'happy-dom',
+     setupFiles: './src/setupTests.ts',
+     globals: true,
+     unstubGlobals: true,
+     coverage: {
+       provider: 'v8',
+       reporter: ['text', 'text-summary', 'lcov', 'json-summary'],
+       reportsDirectory: './coverage',
+       include: ['src/**/*.{ts,tsx}'],
+       exclude: [
+         'src/**/*.test.{ts,tsx}',
+         'src/**/*.spec.{ts,tsx}',
+         'src/main.tsx',
+         'src/setupTests.ts',
+         'src/vite-env.d.ts',
+         'src/**/*.d.ts',
+       ],
+       thresholds: {
+         statements: 40,
+         branches: 40,
+         functions: 40,
+         lines: 40,
+       },
+     },
+   },
+   ```
+   Start with 40% thresholds (realistic for current state) and ratchet up as tests are added in 1.2-1.5.
 
-- [ ] Single `ProviderPlatform` interface with all 10 fields
-- [ ] `npm run build` succeeds
-- [ ] `npm run lint` passes
+3. **Add `test:coverage` script** to `frontend/package.json`:
+   ```json
+   "test:coverage": "vitest run --coverage"
+   ```
 
----
+4. **Add `.gitignore` entry** for `frontend/coverage/`.
 
-### Task 1.3: Fix duplicate `RoleTemplate` interface
+**Affected files**: `frontend/vitest.config.ts`, `frontend/package.json`, `.gitignore`
 
-**Why:** `RoleTemplate` is defined in both `types/index.ts` (lines 13-20, 7 fields, `is_system` optional) and `types/rbac.ts` (lines 3-12, 9 fields, `is_system` required, adds `created_at`/`updated_at`). This creates type inconsistency.
-
-**Files to modify:**
-
-- `types/index.ts`
-- `types/rbac.ts`
-
-**Implementation details:**
-
-- Keep the `types/rbac.ts` version as the canonical definition (it's the more complete type with timestamps and required `is_system`)
-- Remove the `RoleTemplate` definition from `types/index.ts`
-- Add a re-export in `types/index.ts`: `export type { RoleTemplate } from './rbac'`
-- Grep all imports of `RoleTemplate` across the codebase and update any that import from `types/index` (they'll work via re-export, but verify)
-
-**Acceptance criteria:**
-
-- [ ] Single `RoleTemplate` definition in `types/rbac.ts`
-- [ ] Re-export from `types/index.ts` for backwards compatibility
-- [ ] `npm run build` succeeds
-- [ ] `npm run lint` passes
-
----
-
-### Task 1.4: Configure Vitest and write foundational unit tests
-
-**Why:** The project has zero unit tests. No testing framework is configured. The entire quality assurance relies on TypeScript type-checking + ESLint + E2E tests. Critical logic in `api.ts` (1,291 lines, 88 methods), `AuthContext.tsx`, `ProtectedRoute.tsx`, and `useDebounce.ts` has no test coverage.
-
-**Files to create:**
-
-- `frontend/vitest.config.ts`
-- `frontend/src/setupTests.ts`
-- `frontend/src/hooks/__tests__/useDebounce.test.ts`
-- `frontend/src/components/__tests__/ProtectedRoute.test.tsx`
-- `frontend/src/contexts/__tests__/AuthContext.test.tsx`
-- `frontend/src/services/__tests__/api.test.ts`
-
-**Files to modify:**
-
-- `frontend/package.json` — add vitest + @testing-library/react + @testing-library/jest-dom + jsdom as devDependencies; add `"test"` and `"test:coverage"` scripts
-
-**Implementation details:**
-
-- Install: `npm install -D vitest @testing-library/react @testing-library/jest-dom jsdom @testing-library/user-event`
-- Create `vitest.config.ts` extending the existing Vite config with `test: { environment: 'jsdom', setupFiles: './src/setupTests.ts', globals: true }`
-- `useDebounce.test.ts`: test that value updates are delayed by the specified delay, test cleanup on unmount
-- `ProtectedRoute.test.tsx`: test redirect to `/login` when unauthenticated, test "Access Denied" when scope missing, test pass-through when scope present, test `admin` scope grants all access
-- `AuthContext.test.tsx`: test initial loading state, test `setToken` stores to localStorage, test `logout` clears all localStorage keys (`auth_token`, `user`, `role_template`, `allowed_scopes`), test 401 interceptor triggers logout
-- `api.test.ts`: test auth header injection, test 401 response interceptor, test `setupRequest` uses `SetupToken` header format, test mock data mode
-
-**Acceptance criteria:**
-
-- [ ] `npm test` runs all unit tests with exit code 0
-- [ ] `npm run test:coverage` outputs a coverage report
-- [ ] Minimum 4 test files with at least 3 tests each
-- [ ] `npm run build` still succeeds (no conflicts with vitest config)
+**Acceptance criteria**: `npm run test:coverage` generates a coverage report. Coverage thresholds fail the build below 40%.
 
 ---
 
-## Phase 2 — Code Quality
+### 1.2 Unit Tests: Services Layer
 
-> **Priority:** High | **Tasks:** 4 | **Parallelizable:** All
+**Why**: `services/__tests__/api.test.ts` is 29 lines with 3 structural tests (checks that `api` is an object, has `searchModules`, has `login`) and zero behavioral tests. The `ApiClient` class has 100+ methods across 1,308 lines.
 
-### Task 2.1: Extract shared utility functions
+**Current state**:
+- `frontend/src/services/api.ts` (1,308 lines): Axios-based client with Bearer token interceptor, 401 handler, mock data fallback, `SetupToken` header for setup endpoints.
+- `frontend/src/services/queryKeys.ts` (17 lines): Only 3 domains (modules, providers, dashboard).
+- `frontend/src/services/errorReporting.ts` (37 lines): Custom error reporter with `init()`, `captureError()`, `setUser()`.
 
-**Why:** `formatDate` is duplicated in `pages/admin/ApprovalsPage.tsx` (line 150, fallback `'N/A'`) and `pages/admin/MirrorsPage.tsx` (line 404, fallback `'Never'`). `getScopeInfo` is duplicated in `pages/admin/RolesPage.tsx` (line 38, fallback description `'Unknown scope'`) and `pages/admin/APIKeysPage.tsx` (line 322, fallback description `''`). `getScopeColor` exists only in `RolesPage.tsx` (line 47) but should be co-located with `getScopeInfo`.
+**Work items**:
 
-**Files to create:**
+1. **Create `services/__tests__/api.test.ts` (rewrite)** -- Behavioral tests for the ApiClient:
+   - Test auth interceptor: requests include `Authorization: Bearer <token>` when token is set.
+   - Test 401 interceptor: clears auth and redirects on 401 (except SCM OAuth 401s which should propagate).
+   - Test `setupRequest()`: uses `SetupToken` header instead of Bearer.
+   - Test a representative method from each category (module search, provider search, admin user list, storage config) to verify correct HTTP method, URL, and payload mapping.
+   - Mock Axios using `vitest.mock('axios')` or use `msw` (Mock Service Worker) for more realistic HTTP mocking.
 
-- `utils/formatting.ts`
-- `utils/scopes.ts`
-- `utils/index.ts` (barrel export)
+2. **Create `services/__tests__/errorReporting.test.ts`**:
+   - Test `init()` with and without `VITE_ERROR_REPORTING_DSN`.
+   - Test `captureError()` calls fetch with correct payload structure.
+   - Test `setUser()` sets user ID for subsequent reports.
+   - Test `captureError()` gracefully handles fetch failures.
 
-**Files to modify:**
+3. **Create `services/__tests__/queryKeys.test.ts`**:
+   - Test that query keys produce unique arrays for different parameters.
+   - Test that key hierarchy is stable (important for cache invalidation).
 
-- `pages/admin/ApprovalsPage.tsx`
-- `pages/admin/MirrorsPage.tsx`
-- `pages/admin/RolesPage.tsx`
-- `pages/admin/APIKeysPage.tsx`
+**Affected files**: `frontend/src/services/__tests__/api.test.ts` (rewrite), `frontend/src/services/__tests__/errorReporting.test.ts` (new), `frontend/src/services/__tests__/queryKeys.test.ts` (new)
 
-**Implementation details:**
-
-- `utils/formatting.ts`: export `formatDate(dateStr?: string, fallback = 'N/A'): string` — accepts optional fallback parameter for the different use cases
-- `utils/scopes.ts`: export `getScopeInfo(scopeValue: string)` and `getScopeColor(scopeValue: string)` — imports `AVAILABLE_SCOPES` from `types/rbac.ts`
-- `utils/index.ts`: barrel re-exports from both files
-- Update all 4 consuming files to import from `@/utils` instead of defining locally
-- Delete the local function definitions from each consuming file
-
-**Acceptance criteria:**
-
-- [ ] Zero duplicate `formatDate` or `getScopeInfo` definitions in the codebase
-- [ ] `npm run build` succeeds
-- [ ] `npm run lint` passes
+**Acceptance criteria**: Full behavioral coverage of the API client's interceptor logic, error handling, and header management. 80%+ coverage on the services layer.
 
 ---
 
-### Task 2.2: Decompose `ModuleDetailPage.tsx`
+### 1.3 Unit Tests: Hooks & Contexts
 
-**Why:** At 1,135 lines with 35 `useState` hooks, this is the largest file in the codebase. It contains at least 8 logical sections that impede readability and reuse.
+**Why**: `useModuleDetail.ts` (418 lines) is the most complex hook and has zero tests. `AuthContext.test.tsx` (104 lines, 4 cases) does not test `login`, `refreshToken`, or `fetchUser`. `ThemeContext.tsx` and `HelpContext.tsx` are untested.
 
-**Files to create (under `pages/` or `components/`):**
+**Current state**:
+- `hooks/useModuleDetail.ts` (418 lines): Large hook managing module detail fetching, version selection, tab state, SCM info, and scan results. No React Query -- uses imperative `useState`+`useEffect`.
+- `hooks/useDebounce.ts` (10 lines): Fully tested (71 lines of tests, 5 cases).
+- `contexts/AuthContext.tsx` (140 lines): Provides `user`, `roleTemplate`, `allowedScopes`, `isAuthenticated`, `isLoading`, `login`, `logout`, `refreshToken`, `setToken`. Uses `localStorage` for persistence, calls `api.getCurrentUserWithRole()`.
+- `contexts/ThemeContext.tsx` (108 lines): Provides `mode` and `toggleTheme`. Persists to `localStorage`.
+- `contexts/HelpContext.tsx` (51 lines): Provides `isHelpOpen`, `helpTopic`, `openHelp`, `closeHelp`.
 
-| Component                            | Source lines         | Purpose                                   |
-| ------------------------------------ | -------------------- | ----------------------------------------- |
-| `hooks/useModuleDetail.ts`           | 69-236 (~170 lines)  | Custom hook for all data fetching + state |
-| `components/ModuleDocumentation.tsx` | 542-655 (~113 lines) | Inputs/outputs/providers tables           |
-| `components/SecurityScanPanel.tsx`   | 947-1015 (~68 lines) | Scan status and severity chips            |
-| `components/SCMRepositoryPanel.tsx`  | 693-765 (~72 lines)  | SCM link status, sync/unlink              |
-| `components/WebhookEventsPanel.tsx`  | 767-865 (~98 lines)  | Expandable event list                     |
-| `components/VersionDetailsPanel.tsx` | 867-945 (~78 lines)  | Version info, deprecation controls        |
+**Work items**:
 
-**Files to modify:**
+1. **Create `hooks/__tests__/useModuleDetail.test.ts`**:
+   - Test initial loading state.
+   - Test successful data fetch (mock `api.getModuleVersions`, `api.getModule`).
+   - Test version selection (`selectVersion`).
+   - Test tab state management.
+   - Test SCM info loading when module has SCM link.
+   - Test scan result loading.
+   - Test error states (API failures).
+   - Use `@testing-library/react` `renderHook` for hook testing.
 
-- `pages/ModuleDetailPage.tsx`
+2. **Expand `contexts/__tests__/AuthContext.test.tsx`** (currently 4 cases):
+   - Add test for `login()` flow (calls `api.login()`, stores token, fetches user).
+   - Add test for `refreshToken()` flow.
+   - Add test for `fetchUser()` on mount when token exists in localStorage.
+   - Add test for `logout()` clearing state and localStorage.
+   - Add test for expired token handling (API returns 401 during `fetchUser`).
 
-**Implementation details:**
+3. **Create `contexts/__tests__/ThemeContext.test.tsx`**:
+   - Test default mode.
+   - Test `toggleTheme()` switches between light and dark.
+   - Test localStorage persistence across re-renders.
 
-- Start with `useModuleDetail` hook extraction — move all `useState`, `useEffect`, and handler functions; return the state + handlers as a typed object
-- Extract each sidebar panel as a standalone component accepting props
-- The parent `ModuleDetailPage` should be reduced to ~300-400 lines: route params, the custom hook call, the layout JSX composing the sub-components
-- Each extracted component should import its own MUI components and types
+4. **Create `contexts/__tests__/HelpContext.test.tsx`**:
+   - Test `openHelp(topic)` sets topic and opens panel.
+   - Test `closeHelp()` clears state.
 
-**Acceptance criteria:**
-
-- [ ] `ModuleDetailPage.tsx` reduced to under 500 lines
-- [ ] Each extracted component is independently importable
-- [ ] `npm run build` succeeds
-- [ ] `npm run lint` passes
-- [ ] E2E test `modules.spec.ts` still passes
-
----
-
-### Task 2.3: Normalize API import style
-
-**Why:** 16 files use `import api from '../services/api'` (default export) and 10 files use `import { apiClient } from '../services/api'` (named export). Both reference the same singleton instance.
-
-**Files to modify (the 10 using `{ apiClient }`):**
-
-| File                                  | Import line |
-| ------------------------------------- | ----------- |
-| `contexts/AuthContext.tsx`            | 3           |
-| `components/PublishFromSCMWizard.tsx` | 25          |
-| `pages/admin/ApprovalsPage.tsx`       | 29          |
-| `pages/LoginPage.tsx`                 | 15          |
-| `pages/admin/MirrorPoliciesPage.tsx`  | 35          |
-| `pages/SetupWizardPage.tsx`           | 37          |
-| `pages/admin/MirrorsPage.tsx`         | 45          |
-| `pages/admin/OIDCSettingsPage.tsx`    | 37          |
-| `pages/admin/SCMProvidersPage.tsx`    | 37          |
-| `pages/admin/StoragePage.tsx`         | 33          |
-
-Also modify `services/api.ts` to remove the named `apiClient` export (keep only the default export `api`).
-
-**Implementation details:**
-
-- In each of the 10 files, change `import { apiClient } from '...'` to `import api from '...'`
-- Find-and-replace all `apiClient.` calls to `api.` in each file
-- In `services/api.ts`, remove the `export { apiClient }` or `export const apiClient` line
-- Keep only `export default api`
-
-**Acceptance criteria:**
-
-- [ ] Zero imports of `apiClient` in the codebase
-- [ ] All 26 files use `import api from '...'`
-- [ ] `npm run build` succeeds
-- [ ] `npm run lint` passes
+**Affected files**: `frontend/src/hooks/__tests__/useModuleDetail.test.ts` (new), `frontend/src/contexts/__tests__/AuthContext.test.tsx` (expand), `frontend/src/contexts/__tests__/ThemeContext.test.tsx` (new), `frontend/src/contexts/__tests__/HelpContext.test.tsx` (new)
 
 ---
 
-### Task 2.4: Consolidate local type definitions into shared types
+### 1.4 Unit Tests: Core Components
 
-**Why:** `ApprovalsPage.tsx` (lines 31-44) defines a local `ApprovalRequest` that duplicates `MirrorApprovalRequest` from `types/rbac.ts` (lines 16-36) with field name mismatches (`reviewer_notes` vs `review_notes`). `MirrorPoliciesPage.tsx` (lines 37-51) defines a local `MirrorPolicy` that duplicates `MirrorPolicy` from `types/rbac.ts` (lines 40-58) with optionality differences. `PolicyFormData` (lines 53-63) is unique.
+**Why**: 18 component files (3,539 lines) with only 1 tested (`ProtectedRoute.test.tsx`, 109 lines). Key components like `ErrorBoundary`, `MarkdownRenderer`, `RegistryItemCard`, and `Layout` have zero tests.
 
-**Files to modify:**
+**Work items**:
 
-- `types/rbac.ts`
-- `pages/admin/ApprovalsPage.tsx`
-- `pages/admin/MirrorPoliciesPage.tsx`
+1. **Create `components/__tests__/ErrorBoundary.test.tsx`**:
+   - Test renders children when no error.
+   - Test renders fallback UI when child throws.
+   - Test calls `captureError()` on error.
+   - Test "Try Again" button resets error state.
+   - Test custom `fallback` prop is used when provided.
 
-**Implementation details:**
+2. **Create `components/__tests__/MarkdownRenderer.test.tsx`**:
+   - Test renders markdown content as HTML.
+   - Test sanitizes dangerous HTML (XSS prevention via `rehype-sanitize`).
+   - Test handles empty/null content.
+   - Test renders GFM features (tables, strikethrough, task lists).
 
-- Verify field names against actual backend API responses to determine which variant is correct (`reviewer_notes` vs `review_notes`)
-- Update `types/rbac.ts` to be the canonical source for both types, matching the backend API contract
-- Add `PolicyFormData` to `types/rbac.ts` (it's a form-specific type but still belongs with its domain types)
-- Remove local interface definitions from both pages
-- Update imports in both pages to use `types/rbac`
+3. **Create `components/__tests__/RegistryItemCard.test.tsx`**:
+   - Test renders module card with name, namespace, description.
+   - Test renders provider card variant.
+   - Test click navigates to detail page.
 
-**Acceptance criteria:**
+4. **Create `utils/__tests__/errors.test.ts`**:
+   - Test `getErrorMessage()` extracts from AxiosError, native Error, and string.
+   - Test `getErrorStatus()` returns HTTP status from AxiosError.
+   - Test fallback message when error is unrecognized.
 
-- [ ] Zero local interface definitions in `ApprovalsPage.tsx` or `MirrorPoliciesPage.tsx` (except `PolicyFormData` if it's truly page-specific)
-- [ ] `npm run build` succeeds
-- [ ] `npm run lint` passes
-- [ ] E2E tests `approvals.spec.ts` and `policies.spec.ts` still pass
+5. **Create `utils/__tests__/formatting.test.ts`**:
+   - Test all exported formatting functions with representative inputs.
 
----
-
-## Phase 3 — Strictness & Security
-
-> **Priority:** Medium | **Tasks:** 5 | **Parallelizable:** Tasks 3.1-3.3 are sequential; tasks 3.4-3.5 can run in parallel with everything
-
-### Task 3.1: Enable `react-hooks/exhaustive-deps` ESLint rule
-
-**Why:** Disabled at `eslint.config.js` line 34. Missing dependency arrays cause stale closures and subtle bugs that are hard to diagnose.
-
-**Files to modify:**
-
-- `frontend/eslint.config.js` (line 34: change `'off'` to `'warn'`)
-- All files with violations (run lint to discover)
-
-**Implementation details:**
-
-- Change the rule from `'off'` to `'warn'` first, run `npm run lint` to see the count of violations
-- Fix each violation: add missing dependencies to arrays, or wrap callbacks in `useCallback` where appropriate
-- Once all warnings are resolved, change `'warn'` to `'error'`
-- Common fix patterns: add state setters to dep arrays (they're stable), wrap fetch functions in `useCallback`, use functional state updates to avoid dependencies on current state
-- Note: the `--max-warnings 0` policy means even `'warn'` will fail CI, which is the desired behavior
-
-**Acceptance criteria:**
-
-- [ ] Rule set to `'warn'` or `'error'` in `eslint.config.js`
-- [ ] `npm run lint` passes with zero warnings
-- [ ] `npm run build` succeeds
+**Affected files**: `frontend/src/components/__tests__/ErrorBoundary.test.tsx` (new), `frontend/src/components/__tests__/MarkdownRenderer.test.tsx` (new), `frontend/src/components/__tests__/RegistryItemCard.test.tsx` (new), `frontend/src/utils/__tests__/errors.test.ts` (new), `frontend/src/utils/__tests__/formatting.test.ts` (new)
 
 ---
 
-### Task 3.2: Enable `@typescript-eslint/no-unused-vars` ESLint rule
+### 1.5 GitHub Actions CI Pipeline
 
-**Why:** Disabled at `eslint.config.js` line 31. Dead variables increase cognitive load and may mask real bugs.
+**Why**: The `.github/` directory only contains `dependabot.yml`. There are **no CI/CD pipelines** -- no lint, build, test, or deploy workflows. Every other aspect of quality enforcement depends on CI existing.
 
-**Files to modify:**
+**Work items**:
 
-- `frontend/eslint.config.js` (line 31)
-- All files with violations
+1. **Create `.github/workflows/ci.yml`**:
+   - **Trigger**: Push to `main`, pull requests to `main`.
+   - **Jobs** (run in parallel where possible):
+     - **lint**: `npm ci` + `npm run lint` in `frontend/`.
+     - **typecheck**: `npm ci` + `npx tsc --noEmit` in `frontend/`.
+     - **unit-test**: `npm ci` + `npm run test:coverage` in `frontend/`. Upload coverage report as artifact. Fail if coverage thresholds not met.
+     - **build**: `npm ci` + `npm run build` in `frontend/`. Upload `dist/` as artifact for deployment jobs.
+   - **Node version**: Use matrix or fixed version matching `.nvmrc` or engines field.
+   - **Caching**: Cache `node_modules` with `actions/cache` keyed on `package-lock.json` hash.
 
-**Implementation details:**
+2. **Create `.github/workflows/e2e.yml`**:
+   - **Trigger**: Push to `main`, pull requests to `main`.
+   - **Job**: Install Playwright browsers, start backend+frontend via Docker Compose (`deployments/docker-compose.test.yml`), run `npx playwright test` in `e2e/`.
+   - Upload Playwright report (HTML + traces + videos) as artifact.
+   - Separate workflow since E2E is slower and requires the Docker-based backend.
 
-- Change the rule from `'off'` to `['warn', { argsIgnorePattern: '^_', varsIgnorePattern: '^_' }]`
-- Run `npm run lint`, fix violations by: removing truly unused variables, prefixing intentionally-unused params with `_`
-- Once clean, change to `'error'`
+3. **Create `.github/workflows/release.yml`**:
+   - **Trigger**: Push of `v*` tag.
+   - Build production Docker image.
+   - Push to container registry (GHCR).
+   - Create GitHub Release with changelog.
 
-**Acceptance criteria:**
+4. **Create `.github/workflows/scheduled.yml`**:
+   - **Trigger**: Weekly cron.
+   - Run full CI pipeline to catch dependency drift.
+   - On failure, create a GitHub issue.
 
-- [ ] Rule enabled in `eslint.config.js`
-- [ ] `npm run lint` passes with zero warnings
-- [ ] `npm run build` succeeds
+5. **Pin all GitHub Actions to commit SHAs** (not version tags) for supply chain security, consistent with the backend repository pattern.
+
+**Affected files**: `.github/workflows/ci.yml` (new), `.github/workflows/e2e.yml` (new), `.github/workflows/release.yml` (new), `.github/workflows/scheduled.yml` (new)
+
+**Acceptance criteria**: PRs require passing lint, typecheck, unit tests with coverage, and build. E2E runs on every PR. Releases are automated on tag push.
 
 ---
 
-### Task 3.3: Enable `@typescript-eslint/no-explicit-any` ESLint rule (incremental)
+### 1.6 Ratchet Coverage Thresholds
 
-**Why:** Disabled at `eslint.config.js` line 30. There are **88 `any` instances across 19 files**. Top offenders: `services/api.ts` (12), `pages/admin/SCMProvidersPage.tsx` (8), `pages/ModuleDetailPage.tsx` (8).
+**Why**: After items 1.2-1.4 are complete, coverage will be significantly higher than the initial 40% threshold. The threshold should be ratcheted up to prevent regression.
 
-**Files to modify:**
+**Work items**:
 
-- `frontend/eslint.config.js` (line 30)
-- 19 files containing `any` (see breakdown below)
+1. **After completing 1.2-1.4**, run `npm run test:coverage` and note actual coverage.
+2. **Update thresholds** in `vitest.config.ts` to 5% below actual coverage (gives buffer for new untested code without allowing regression).
+3. **Target**: 60% statements/lines, 50% branches/functions as a post-Phase-1 baseline.
 
-**`any` count per file:**
+**Depends on**: 1.1, 1.2, 1.3, 1.4.
 
-| File                                  | Count |
-| ------------------------------------- | ----- |
-| `services/api.ts`                     | 12    |
-| `pages/admin/SCMProvidersPage.tsx`    | 8     |
-| `pages/ModuleDetailPage.tsx`          | 8     |
-| `pages/SetupWizardPage.tsx`           | 7     |
-| `pages/admin/TerraformMirrorPage.tsx` | 6     |
-| `pages/admin/UsersPage.tsx`           | 6     |
-| `pages/admin/OrganizationsPage.tsx`   | 5     |
-| `pages/admin/MirrorsPage.tsx`         | 5     |
-| `pages/ProviderDetailPage.tsx`        | 4     |
-| `pages/admin/APIKeysPage.tsx`         | 4     |
-| `pages/admin/MirrorPoliciesPage.tsx`  | 4     |
-| `pages/TerraformBinaryDetailPage.tsx` | 3     |
-| `pages/ApiDocumentation.tsx`          | 3     |
-| `pages/admin/ApprovalsPage.tsx`       | 3     |
-| `pages/admin/StoragePage.tsx`         | 3     |
-| `pages/admin/ModuleUploadPage.tsx`    | 2     |
-| `components/PublishFromSCMWizard.tsx` | 2     |
-| `components/RepositoryBrowser.tsx`    | 2     |
-| `pages/admin/ProviderUploadPage.tsx`  | 1     |
+---
 
-**Implementation details:**
+## Phase 2: Feature Completeness (Features 8→9, Ease of Use 7→9)
 
-- Change the rule from `'off'` to `'warn'`
-- The dominant pattern (~70 of 88) is `catch (err: any)` — replace with `catch (err: unknown)` and add type narrowing
-- Create a shared `utils/errors.ts` with `getErrorMessage(err: unknown): string` to DRY up the ~70 catch blocks:
-  ```typescript
-  export function getErrorMessage(err: unknown): string {
-    if (err instanceof Error) return err.message;
-    const axiosErr = err as { response?: { data?: { error?: string } } };
-    return axiosErr?.response?.data?.error || 'An unexpected error occurred';
-  }
+### 2.1 Security Scanning Step in Setup Wizard
+
+**Why**: The setup wizard (`SetupWizardPage.tsx`, 916 lines) configures OIDC, storage, and admin user but skips scanning. Users must manually set environment variables for scanning tools after setup. The backend roadmap (item 2.3) adds `POST /api/v1/setup/scanning/test` and `POST /api/v1/setup/scanning` endpoints.
+
+**Current state**:
+- Steps array (line 47): `['Authenticate', 'OIDC Provider', 'Storage Backend', 'Admin User', 'Complete']`.
+- Each step is rendered via `{activeStep === N && (...)}` conditionals.
+- State management: individual `useState` hooks for each step's form data, loading, and success flags.
+- API layer: `api.ts` has `getScanningConfig()` (line 660) and `getScanningStats()` (line 665) but no setup-specific scanning methods.
+
+**Work items**:
+
+1. **Add API methods** to `services/api.ts`:
+   ```ts
+   async testScanningConfig(setupToken: string, data: ScanningConfigInput): Promise<ScanningTestResult> {
+     return this.setupRequest(setupToken).post('/api/v1/setup/scanning/test', data);
+   }
+   async saveScanningConfig(setupToken: string, data: ScanningConfigInput): Promise<void> {
+     return this.setupRequest(setupToken).post('/api/v1/setup/scanning', data);
+   }
+   ```
+
+2. **Add TypeScript interfaces** to `types/` or inline in api.ts:
+   ```ts
+   interface ScanningConfigInput {
+     enabled: boolean;
+     tool: 'trivy' | 'checkov' | 'terrascan' | 'snyk' | 'custom';
+     binary_path: string;
+     expected_version?: string;
+     timeout_secs?: number;
+     worker_count?: number;
+   }
+   interface ScanningTestResult {
+     success: boolean;
+     detected_version: string;
+     error?: string;
+   }
+   ```
+
+3. **Update steps array** in `SetupWizardPage.tsx` (line 47):
+   ```ts
+   const steps = ['Authenticate', 'OIDC Provider', 'Storage Backend', 'Security Scanning', 'Admin User', 'Complete'];
+   ```
+   This inserts scanning as step 3 (after storage, before admin). Increment all subsequent `activeStep === N` conditionals by 1.
+
+4. **Add scanning step state**:
+   ```ts
+   const [scanningForm, setScanningForm] = useState<ScanningConfigInput>({ enabled: false, tool: 'trivy', binary_path: '' });
+   const [scanningTesting, setScanningTesting] = useState(false);
+   const [scanningTestResult, setScanningTestResult] = useState<ScanningTestResult | null>(null);
+   const [scanningSaving, setScanningSaving] = useState(false);
+   const [scanningSaved, setScanningSaved] = useState(false);
+   ```
+
+5. **Render scanning step** (new `{activeStep === 3 && (...)}` block):
+   - **Enable/disable toggle** (MUI Switch) at top.
+   - If enabled:
+     - **Tool selector** (MUI Select): `trivy`, `checkov`, `terrascan`, `snyk`, `custom`.
+     - **Binary path** (MUI TextField): File path to scanner binary.
+     - **Expected version** (MUI TextField, optional): Expected version string.
+     - **Advanced settings** (MUI Accordion):
+       - Timeout (seconds, default 300).
+       - Worker count (default 2).
+     - **Test button**: Calls `api.testScanningConfig(token, scanningForm)`. Shows detected version on success, error message on failure.
+     - **Save button** (enabled after successful test or if disabled): Calls `api.saveScanningConfig(token, scanningForm)`.
+   - If disabled: Show info text that scanning can be configured later via admin settings. Allow proceeding without configuring.
+   - **Skip button**: Allows skipping scanning configuration entirely (proceeds to admin step).
+
+6. **Update `GetSetupStatus` response handling**: The backend will add `scanning_configured` field. Handle it in the setup status check and the Complete step's summary chips.
+
+7. **Update Complete step**: Add scanning row to the review summary showing configured tool and version, or "Skipped".
+
+8. **Tests**:
+   - Unit test for the scanning step rendering.
+   - Expand E2E `setup-wizard.spec.ts` to cover the scanning step (test, save, skip flows).
+
+**Affected files**: `frontend/src/pages/SetupWizardPage.tsx`, `frontend/src/services/api.ts`, `e2e/tests/setup-wizard.spec.ts`
+
+**Acceptance criteria**: Setup wizard has a "Security Scanning" step that can test, configure, or skip scanner setup. Works with the backend's new setup endpoints.
+
+---
+
+### 2.2 Storage Migration Wizard UI
+
+**Why**: The admin StoragePage (`StoragePage.tsx`, 727 lines) shows existing configs as read-only cards with no edit, delete, activate, or migrate actions. `api.activateStorageConfig()`, `api.updateStorageConfig()`, and `api.deleteStorageConfig()` exist in `api.ts` but are not wired to any UI. The backend roadmap (item 2.4) adds a full storage migration service with plan/execute/cancel/status endpoints.
+
+**Current state**:
+- `StoragePage.tsx`: Two modes -- setup wizard (first-run) and read-only config view (post-setup).
+- Existing configs are displayed as static MUI Cards with Active/Inactive chips.
+- No migration UI, no edit UI, no activate UI.
+- `api.ts` storage methods (lines 1043-1080): `getActiveStorageConfig`, `listStorageConfigs`, `getStorageConfig`, `createStorageConfig`, `updateStorageConfig`, `deleteStorageConfig`, `activateStorageConfig`, `testStorageConfig`.
+
+**Work items**:
+
+1. **Add migration API methods** to `services/api.ts`:
+   ```ts
+   async planStorageMigration(sourceId: string, targetId: string): Promise<MigrationPlan> {
+     return this.client.post('/api/v1/admin/storage/migrations/plan', { source_config_id: sourceId, target_config_id: targetId });
+   }
+   async startStorageMigration(sourceId: string, targetId: string): Promise<Migration> {
+     return this.client.post('/api/v1/admin/storage/migrations', { source_config_id: sourceId, target_config_id: targetId });
+   }
+   async getStorageMigration(id: string): Promise<Migration> {
+     return this.client.get(`/api/v1/admin/storage/migrations/${id}`);
+   }
+   async cancelStorageMigration(id: string): Promise<void> {
+     return this.client.post(`/api/v1/admin/storage/migrations/${id}/cancel`);
+   }
+   async listStorageMigrations(): Promise<Migration[]> {
+     return this.client.get('/api/v1/admin/storage/migrations');
+   }
+   ```
+
+2. **Add TypeScript interfaces**:
+   ```ts
+   interface MigrationPlan {
+     source_config_id: string;
+     target_config_id: string;
+     total_artifacts: number;
+     total_modules: number;
+     total_providers: number;
+     estimated_size_bytes: number;
+   }
+   interface Migration {
+     id: string;
+     source_config_id: string;
+     target_config_id: string;
+     status: 'pending' | 'running' | 'completed' | 'failed' | 'cancelled';
+     total_artifacts: number;
+     migrated_artifacts: number;
+     failed_artifacts: number;
+     error_message?: string;
+     started_at?: string;
+     completed_at?: string;
+     created_at: string;
+   }
+   ```
+
+3. **Enhance `StoragePage.tsx` existing configs view**:
+   - **Add action buttons** to each config card:
+     - "Activate" button on inactive configs (calls `api.activateStorageConfig(id)` with confirmation dialog).
+     - "Edit" button opens an inline form or dialog (calls `api.updateStorageConfig(id, data)`).
+     - "Delete" button with confirmation (calls `api.deleteStorageConfig(id)`; disabled on active config).
+   - **Add "Migrate" button**: Visible when multiple configs exist. Opens migration wizard dialog.
+
+4. **Create `components/StorageMigrationWizard.tsx`** (new) -- MUI Dialog with stepper:
+   - **Step 1 -- Select Source & Target**: Two dropdowns showing storage configs. Source defaults to active config. Target defaults to first inactive config. Validation: source !== target.
+   - **Step 2 -- Review Plan**: Calls `api.planStorageMigration(source, target)`. Displays artifact count, breakdown by type (modules/providers), estimated size. Warning about duration for large migrations.
+   - **Step 3 -- Execute & Monitor**: Start button calls `api.startStorageMigration(source, target)`. Shows real-time progress:
+     - MUI LinearProgress with `(migrated / total) * 100`.
+     - Text: "Migrated X of Y artifacts (Z failed)".
+     - Status chip: pending → running → completed/failed/cancelled.
+     - Cancel button calls `api.cancelStorageMigration(id)`.
+     - Auto-polls `api.getStorageMigration(id)` every 2 seconds while status is `running`.
+   - **Step 4 -- Complete**: Summary of migration results. If failures, list failed artifacts with error messages. Option to retry failed items (start a new migration for just the failed ones).
+
+5. **Add migration history section** to StoragePage:
+   - Below config cards, show a collapsible "Migration History" section.
+   - Table with columns: ID, Source, Target, Status, Progress, Started, Completed.
+   - Data from `api.listStorageMigrations()`.
+
+6. **Tests**:
+   - Unit test for `StorageMigrationWizard` component (render steps, plan display, progress calculation).
+   - E2E test: create a second storage config, plan migration, verify artifact count.
+
+**Affected files**: `frontend/src/pages/admin/StoragePage.tsx`, `frontend/src/components/StorageMigrationWizard.tsx` (new), `frontend/src/services/api.ts`
+
+---
+
+### 2.3 Advanced Search UI
+
+**Why**: Current search on `ModulesPage.tsx` (258 lines) and `ProvidersPage.tsx` (187 lines) is a single text field with no filters, no sort options, and no URL state synchronization. The backend roadmap (item 2.2) adds PostgreSQL full-text search with relevance ranking, sort parameters, and namespace/system filters.
+
+**Current state**:
+- Both pages use `useDebounce(searchQuery, 300)` → `useQuery` with `api.searchModules({ query, limit, offset })`.
+- `searchQuery` and `page` are `useState` only -- URL params are read once on mount via `useSearchParams().get('q')` but **never written back**.
+- No sort selector, no filters, no namespace/system filter dropdowns.
+- Module page has "grid" and "grouped" view modes; provider page has only grid.
+
+**Work items**:
+
+1. **URL state synchronization** for both pages:
+   - Replace `useState` for `searchQuery`, `page`, `sort`, `order`, and filters with `useSearchParams`:
+     ```ts
+     const [searchParams, setSearchParams] = useSearchParams();
+     const query = searchParams.get('q') || '';
+     const page = parseInt(searchParams.get('page') || '1');
+     const sort = searchParams.get('sort') || 'relevance';
+     const order = searchParams.get('order') || 'desc';
+     const namespace = searchParams.get('namespace') || '';
+     ```
+   - Update `setSearchParams` when any parameter changes, debounced for the query field.
+   - This enables browser back/forward navigation to restore search state and shareable URLs.
+
+2. **Add filter/sort controls** to `ModulesPage.tsx`:
+   - **Sort dropdown** (MUI Select): `Relevance`, `Name (A-Z)`, `Name (Z-A)`, `Newest`, `Most Downloaded`.
+   - **Namespace filter** (MUI Autocomplete with free text or loaded from available namespaces).
+   - **System/provider filter** (MUI Autocomplete -- for modules, filter by target system like `aws`, `azurerm`, `gcp`).
+   - Layout: Filter row between search input and results grid using MUI Stack/Grid.
+
+3. **Add filter/sort controls** to `ProvidersPage.tsx`:
+   - **Sort dropdown**: `Relevance`, `Name (A-Z)`, `Name (Z-A)`, `Newest`.
+   - **Namespace filter** (Autocomplete).
+
+4. **Update API calls** in both pages:
+   - Pass `sort`, `order`, `namespace`, and `system` (modules only) parameters to `api.searchModules()` and `api.searchProviders()`.
+   - Update `queryKeys.ts` to include sort/filter params in query keys for proper cache invalidation:
+     ```ts
+     modules: {
+       search: (params: { query?: string; limit: number; offset: number; sort?: string; order?: string; namespace?: string; system?: string }) =>
+         [...queryKeys.modules._def, 'search', params] as const,
+     },
+     ```
+
+5. **Visual search result scoring**: When sort is `relevance`, show a subtle relevance indicator (e.g., match highlighting in the result card using `<mark>` tags on matched terms, or a small relevance chip). The backend returns `ts_rank` scores that can be used.
+
+6. **Empty state improvements**: When no results match, show suggestions ("Try searching for...", "Clear filters", link to browse all modules).
+
+7. **Tests**:
+   - Unit test: URL ↔ state sync (changes to search params update the UI, changes to filters update URL).
+   - E2E test: search with filters, verify URL contains params, navigate back/forward.
+
+**Affected files**: `frontend/src/pages/ModulesPage.tsx`, `frontend/src/pages/ProvidersPage.tsx`, `frontend/src/services/api.ts`, `frontend/src/services/queryKeys.ts`
+
+---
+
+### 2.4 Module Deprecation UI
+
+**Why**: The backend roadmap (item 4.1) adds module-level deprecation with migration guidance and successor module references. The frontend needs to display deprecation status and provide management UI.
+
+**Current state**:
+- Module detail pages show version-level deprecation (existing).
+- No module-level deprecation concept in the UI.
+- Module search results have no deprecation visual indicator.
+
+**Work items**:
+
+1. **Update module detail page** (`pages/ModuleDetailPage.tsx`):
+   - Show a prominent deprecation banner (MUI Alert, severity `warning`) when `module.deprecated === true`.
+   - Banner text: deprecation message + link to successor module (if set).
+   - Example: "This module is deprecated. Consider using [namespace/name/system] instead."
+
+2. **Add deprecation management** to module admin actions:
+   - "Deprecate Module" button in the module's admin toolbar.
+   - Opens dialog with: deprecation message (TextField, multiline), successor module selector (Autocomplete searching modules via `api.searchModules()`).
+   - Calls `api.deprecateModule(namespace, name, system, { message, successor })`.
+   - "Undeprecate Module" button visible when already deprecated. Calls `api.undeprecateModule(namespace, name, system)`.
+
+3. **Add API methods** to `services/api.ts`:
+   ```ts
+   async deprecateModule(ns: string, name: string, system: string, data: { message: string; successor?: { namespace: string; name: string; system: string } }): Promise<void>;
+   async undeprecateModule(ns: string, name: string, system: string): Promise<void>;
+   ```
+
+4. **Update search results** (`RegistryItemCard.tsx`):
+   - Show a "Deprecated" chip (MUI Chip, color `warning`) on deprecated modules.
+   - Reduce visual prominence (e.g., semi-transparent card) for deprecated modules.
+
+5. **Tests**: Unit test for deprecation banner rendering. E2E test for deprecate/undeprecate flow.
+
+**Affected files**: `frontend/src/pages/ModuleDetailPage.tsx`, `frontend/src/components/RegistryItemCard.tsx`, `frontend/src/services/api.ts`
+
+**Depends on**: Backend roadmap item 4.1 (module deprecation API endpoints).
+
+---
+
+## Phase 3: React Query Migration & Performance (Maturity 7→9, Ease of Use 7→9)
+
+### 3.1 React Query Migration for Admin Pages
+
+**Why**: All 16 admin pages (`pages/admin/`, 9,223 lines total) use imperative `useState` + `useEffect` + `try/catch` patterns instead of React Query. This means no request deduplication, no stale-while-revalidate, no automatic cache invalidation, no background refetching, and every page re-implements the same loading/error/data state manually.
+
+**Current state**:
+- Only 3 pages use React Query: `ModulesPage`, `ProvidersPage`, `DashboardPage`.
+- `queryKeys.ts` (17 lines) only has keys for `modules`, `providers`, `dashboard`.
+- Admin pages follow this anti-pattern:
+  ```tsx
+  const [data, setData] = useState<T[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  useEffect(() => {
+    const fetchData = async () => {
+      try { setLoading(true); const res = await api.listFoo(); setData(res); }
+      catch (e) { setError(getErrorMessage(e)); }
+      finally { setLoading(false); }
+    };
+    fetchData();
+  }, [deps]);
   ```
-- For `api.ts`: type the `transformUser(user: any)` and `transformOrganization(org: any)` params with proper API response interfaces
-- For `ApiDocumentation.tsx`: type the `spec: any` parameter with the OpenAPI spec type from swagger-ui-react
-- Once all warnings resolved, change to `'error'`
 
-**Acceptance criteria:**
+**Work items**:
 
-- [ ] Rule enabled in `eslint.config.js`
-- [ ] Zero `any` types remaining (or each justified with an `// eslint-disable-next-line` + comment)
-- [ ] `npm run lint` passes
-- [ ] `npm run build` succeeds
+1. **Expand `queryKeys.ts`** to cover all admin domains:
+   ```ts
+   export const queryKeys = {
+     modules: { /* existing */ },
+     providers: { /* existing */ },
+     dashboard: { /* existing */ },
+     users: {
+       _def: ['users'] as const,
+       list: (params?: { page?: number; limit?: number }) => [...queryKeys.users._def, 'list', params] as const,
+       detail: (id: string) => [...queryKeys.users._def, 'detail', id] as const,
+     },
+     organizations: {
+       _def: ['organizations'] as const,
+       list: (params?: { page?: number; limit?: number }) => [...queryKeys.organizations._def, 'list', params] as const,
+       detail: (id: string) => [...queryKeys.organizations._def, 'detail', id] as const,
+       members: (orgId: string) => [...queryKeys.organizations._def, 'members', orgId] as const,
+     },
+     apiKeys: { _def: ['apiKeys'] as const, list: () => [...queryKeys.apiKeys._def, 'list'] as const },
+     scmProviders: { _def: ['scmProviders'] as const, list: () => [...queryKeys.scmProviders._def, 'list'] as const },
+     auditLogs: { _def: ['auditLogs'] as const, list: (params?: Record<string, unknown>) => [...queryKeys.auditLogs._def, 'list', params] as const },
+     storageConfigs: { _def: ['storageConfigs'] as const, list: () => [...queryKeys.storageConfigs._def, 'list'] as const },
+     mirrors: { _def: ['mirrors'] as const, list: () => [...queryKeys.mirrors._def, 'list'] as const },
+     roles: { _def: ['roles'] as const, list: () => [...queryKeys.roles._def, 'list'] as const },
+     approvals: { _def: ['approvals'] as const, list: (params?: Record<string, unknown>) => [...queryKeys.approvals._def, 'list', params] as const },
+     policies: { _def: ['policies'] as const, list: () => [...queryKeys.policies._def, 'list'] as const },
+     scanning: { _def: ['scanning'] as const, config: () => [...queryKeys.scanning._def, 'config'] as const, stats: () => [...queryKeys.scanning._def, 'stats'] as const },
+     terraformBinaries: { _def: ['terraformBinaries'] as const, list: () => [...queryKeys.terraformBinaries._def, 'list'] as const },
+   } as const;
+   ```
 
----
+2. **Migrate each admin page** (each page is an independent work item):
+   - Replace `useState(data) + useState(loading) + useState(error) + useEffect(fetchData)` with `useQuery`.
+   - Replace mutation calls (`await api.createFoo(data); fetchData()`) with `useMutation` + `queryClient.invalidateQueries()`.
+   - Remove manual loading/error state management.
+   - Priority order (by complexity and traffic):
+     1. `UsersPage.tsx` (647 lines) -- list + CRUD
+     2. `OrganizationsPage.tsx` (580 lines) -- list + CRUD + members
+     3. `APIKeysPage.tsx` (914 lines) -- list + create + rotate + delete
+     4. `AuditLogPage.tsx` (429 lines) -- list with pagination and filters
+     5. `SCMProvidersPage.tsx` (757 lines) -- list + CRUD + OAuth
+     6. `StoragePage.tsx` (727 lines) -- list + create + test
+     7. `MirrorsPage.tsx` (887 lines) -- list + CRUD + sync
+     8. `MirrorPoliciesPage.tsx` (574 lines) -- list + CRUD + evaluate
+     9. `RolesPage.tsx` (297 lines) -- list + create
+     10. `ApprovalsPage.tsx` (397 lines) -- list + review
+     11. `OIDCSettingsPage.tsx` (423 lines) -- get + update
+     12. `SecurityScanningPage.tsx` (198 lines) -- get config + stats
+     13. `DashboardPage.tsx` (646 lines) -- already uses useQuery but may need update
+     14. `TerraformMirrorPage.tsx` (1,095 lines) -- complex; list + CRUD + sync + status
+     15. `ModuleUploadPage.tsx` (373 lines) -- form + upload
+     16. `ProviderUploadPage.tsx` (280 lines) -- form + upload
 
-### Task 3.4: Add `SECURITY.md`
+3. **Add React Query Devtools** (already in `package.json` as `@tanstack/react-query-devtools`). Ensure it's mounted in `App.tsx` (it may already be; verify and add if missing).
 
-**Why:** No `SECURITY.md` exists anywhere in the repository. Already identified as a remaining recommendation in `CLAUDE.md` line 313. Private vulnerability reporting needs a documented channel.
+4. **Tests**: After migration, unit tests should mock React Query's `QueryClientProvider` rather than mocking individual API calls.
 
-**Files to create:**
-
-- `SECURITY.md` at project root
-
-**Files to modify:**
-
-- `CLAUDE.md` — update "Remaining Recommendations" section to mark this item as done
-
-**Implementation details:**
-
-- Standard security policy format: Supported Versions table, Reporting a Vulnerability section (email or GitHub Security Advisories), disclosure timeline expectations, scope (what counts as a vulnerability)
-- Reference the Apache 2.0 license
-- Mention that the backend is in a separate repository with its own security policy
-
-**Acceptance criteria:**
-
-- [ ] `SECURITY.md` exists at project root
-- [ ] Contains reporting instructions, supported versions, and disclosure policy
-- [ ] `CLAUDE.md` "Remaining Recommendations" section updated
-
----
-
-### Task 3.5: Add `.env.example`
-
-**Why:** No `.env.example` exists. Four `VITE_*` variables are used across the codebase but undocumented.
-
-**Files to create:**
-
-- `frontend/.env.example`
-
-**Files to modify:**
-
-- `.gitignore` — add `.env` pattern if not already present
-
-**All `VITE_*` variables to document:**
-
-| Variable             | Default                 | Used in                                                     |
-| -------------------- | ----------------------- | ----------------------------------------------------------- |
-| `VITE_API_URL`       | `/api/v1`               | `services/api.ts` (line 5), `vite-env.d.ts` (line 9)        |
-| `VITE_USE_MOCK_DATA` | `false`                 | `services/api.ts` (line 8), `vite-env.d.ts` (line 10)       |
-| `VITE_PROXY_TARGET`  | `http://localhost:8080` | `frontend/vite.config.ts` (line 13)                         |
-| `VITE_MODE`          | `development`           | `frontend/Dockerfile` (lines 6, 9, 29) — build arg, not env |
-
-**Implementation details:**
-
-- Document all 4 variables with comments explaining purpose and defaults
-- All values should be commented out (prefixed with `#`) so the file serves as documentation, not active config
-- Add `frontend/.env` and `frontend/.env.local` to `.gitignore` if not already present
-
-**Acceptance criteria:**
-
-- [ ] `frontend/.env.example` exists with all 4 variables documented
-- [ ] `.gitignore` includes `.env` patterns
+**Acceptance criteria**: All admin pages use `useQuery`/`useMutation` instead of imperative fetch patterns. Cache invalidation works correctly (e.g., creating a user invalidates the users list). Loading/error states are handled consistently.
 
 ---
 
-## Phase 4 — Testing & Performance
+### 3.2 Frontend Performance Monitoring
 
-> **Priority:** Medium | **Tasks:** 5 | **Parallelizable:** All
+**Why**: No Web Vitals reporting, no performance monitoring. The custom error reporter (`errorReporting.ts`, 37 lines) only captures errors, not performance data.
 
-### Task 4.1: Add Firefox to E2E cross-browser testing
+**Current state**:
+- `errorReporting.ts` has `init()`, `captureError()`, `setUser()` -- POSTs to `VITE_ERROR_REPORTING_DSN`.
+- No `web-vitals` package installed.
+- No `@opentelemetry` packages installed.
+- No performance tracking anywhere in the codebase.
 
-**Why:** E2E tests only run in Chromium (`e2e/playwright.config.ts`). Firefox rendering and API differences could hide bugs.
+**Work items**:
 
-**Files to modify:**
+1. **Install `web-vitals`** package (`npm i web-vitals`).
 
-- `e2e/playwright.config.ts`
-- `.github/workflows/ci.yml` — add `npx playwright install firefox` to the E2E job
+2. **Create `services/performanceReporting.ts`**:
+   - Import `onCLS`, `onFID`, `onFCP`, `onLCP`, `onTTFB`, `onINP` from `web-vitals`.
+   - On init, register all vitals with a callback that:
+     - Logs to console in development.
+     - Batches and sends to `VITE_PERFORMANCE_DSN` endpoint (or reuses `VITE_ERROR_REPORTING_DSN` with a different event type) in production.
+   - Expose `reportNavigation(routeName, durationMs)` for route-level timing.
 
-**Implementation details:**
+3. **Add route-level timing** in `App.tsx`:
+   - Use React Router's `useNavigation()` (or a wrapper) to measure navigation durations.
+   - Report each route transition with `reportNavigation()`.
 
-- Add a Firefox project alongside the existing Chromium configuration in the `projects` array
-- Keep Chromium as the default; Firefox runs in CI only (use `process.env.CI` to conditionally include)
-- Update `.github/workflows/ci.yml` to install Firefox browser
+4. **Add build-time bundle analysis**:
+   - Install `rollup-plugin-visualizer` as dev dependency.
+   - Add `visualize` script: `VITE_ANALYZE=true vite build`.
+   - Add `vite.config.ts` conditional: when `VITE_ANALYZE` is set, include the visualizer plugin.
 
-**Acceptance criteria:**
+5. **Tests**: Unit test for the batching/sending logic in performanceReporting.
 
-- [ ] `npx playwright test --project=firefox` runs successfully
-- [ ] CI installs and uses both Chromium and Firefox
-
----
-
-### Task 4.2: Fix tautological E2E assertions
-
-**Why:** 1 pure tautology (`|| true`) and 13 weak `boolA || boolB` assertions reduce test value. 10 additional `.toBeTruthy()` assertions on generic page content test almost nothing.
-
-**Pure tautology (always passes, must fix):**
-
-| File            | Line | Assertion                                                 |
-| --------------- | ---- | --------------------------------------------------------- |
-| `admin.spec.ts` | 129  | `expect(hasCards \|\| hasEmptyText \|\| true).toBe(true)` |
-
-**Weak `boolA || boolB` assertions (should strengthen):**
-
-| File                             | Line                      |
-| -------------------------------- | ------------------------- |
-| `admin.spec.ts`                  | 31, 67, 86, 284, 343, 430 |
-| `approvals.spec.ts`              | 48                        |
-| `modules.spec.ts`                | 53, 186                   |
-| `policies.spec.ts`               | 49                        |
-| `providers.spec.ts`              | 51                        |
-| `terraform-binaries.spec.ts`     | 42                        |
-| `terraform-mirror-admin.spec.ts` | 42                        |
-
-**Weak `.toBeTruthy()` assertions (should strengthen):**
-
-| File                         | Line               |
-| ---------------------------- | ------------------ |
-| `admin.spec.ts`              | 212, 263, 303, 410 |
-| `home.spec.ts`               | 131                |
-| `modules.spec.ts`            | 113                |
-| `providers.spec.ts`          | 126                |
-| `terraform-binaries.spec.ts` | 117                |
-| `upload.spec.ts`             | 24, 112            |
-
-**Implementation details:**
-
-- For the pure tautology: remove `|| true` so it becomes `expect(hasCards || hasEmptyText).toBe(true)`
-- For weak `boolA || boolB` assertions: either seed test data so the assertion can be specific, or add a descriptive error message: `expect(hasCards || hasEmptyState, 'Expected either data cards or empty state message').toBe(true)`
-- For `.toBeTruthy()` on page content: replace with specific text checks where possible (e.g., `expect(pageContent).toContain('some expected heading')`)
-- If test data is not reliably seeded, the `boolA || boolB` pattern is acceptable with a comment explaining why — the pure tautology is the critical fix
-
-**Acceptance criteria:**
-
-- [ ] Zero `|| true` tautologies in the E2E suite
-- [ ] All assertions either test something specific or document why they accept multiple valid states
-- [ ] E2E suite still passes
+**Affected files**: `frontend/package.json`, `frontend/src/services/performanceReporting.ts` (new), `frontend/src/main.tsx`, `frontend/vite.config.ts`
 
 ---
 
-### Task 4.3: Add E2E test for SetupWizardPage
+### 3.3 Enhanced Error Reporting
 
-**Why:** `SetupWizardPage.tsx` is a critical first-run flow with zero test coverage. It has 5 steps (Authenticate, OIDC, Storage, Admin, Complete) and uses a separate auth mechanism (`SetupToken` header).
+**Why**: The custom error reporter (`errorReporting.ts`, 37 lines) is basic -- fire-and-forget POST with no batching, no source maps, no breadcrumbs, no session replay. For production use, this should either be replaced by a proper SDK or significantly enhanced.
 
-**Files to create:**
+**Work items**:
 
-- `e2e/tests/setup-wizard.spec.ts`
+1. **Add batching and retry** to `errorReporting.ts`:
+   - Queue errors in memory.
+   - Flush batch every 5 seconds or when batch reaches 10 errors.
+   - Retry with exponential backoff on network failure (max 3 retries).
 
-**Implementation details:**
+2. **Add breadcrumbs**: Capture user navigation (React Router transitions), API calls (Axios interceptor), console errors. Include last 20 breadcrumbs with each error report.
 
-- The test requires a fresh database (no existing setup). May need a dedicated docker-compose override or a backend API to reset setup state.
-- Test the 5-step flow: navigate to `/setup`, enter setup token, configure OIDC (or skip), configure storage (local), create admin user, complete setup
-- Test that `/setup` redirects to `/` when setup is already completed (based on `SetupWizardPage.tsx` line 97: `checkSetupStatus()` on mount)
-- Test form validation (required fields, invalid inputs)
+3. **Add source map support**: Upload source maps to the error reporting endpoint during CI build (`release.yml`). Include `release` version in error reports.
 
-**Acceptance criteria:**
+4. **Add session context**: Generate a random `sessionId` on page load. Include with all error reports for grouping.
 
-- [ ] New spec file with tests for the setup wizard flow
-- [ ] Tests pass against the E2E test stack
-- [ ] At minimum: test redirect-when-complete, test form validation
+5. **Optional Sentry integration**: If the user configures `VITE_SENTRY_DSN` instead of `VITE_ERROR_REPORTING_DSN`, initialize the Sentry SDK instead of the custom reporter. This allows both custom and managed error reporting:
+   ```ts
+   export function init() {
+     if (import.meta.env.VITE_SENTRY_DSN) {
+       Sentry.init({ dsn: import.meta.env.VITE_SENTRY_DSN, release: __APP_VERSION__ });
+     } else if (import.meta.env.VITE_ERROR_REPORTING_DSN) {
+       // existing custom reporter
+     }
+   }
+   ```
+   Add `@sentry/react` as optional peer dependency.
 
----
-
-### Task 4.4: Add memoization to Layout and key list-rendering components
-
-**Why:** `Layout.tsx` rebuilds the entire sidebar drawer (lines 175-303) on every render. `navigationItems` (line 95) and `adminNavGroups` (line 104) arrays are recreated every render. Zero `React.memo` usage in the entire codebase. Only 6 `useMemo` and 10 `useCallback` total across 53 source files.
-
-**Files to modify:**
-
-| File                              | Changes                                                                                                       |
-| --------------------------------- | ------------------------------------------------------------------------------------------------------------- |
-| `components/Layout.tsx`           | Wrap `navigationItems`, `adminNavGroups`, and `drawer` JSX in `useMemo`; wrap event handlers in `useCallback` |
-| `pages/ModulesPage.tsx`           | Memoize module card rendering and search handler                                                              |
-| `pages/ProvidersPage.tsx`         | Memoize provider card rendering and search handler                                                            |
-| `pages/admin/MirrorsPage.tsx`     | Memoize mirror cards (this page renders ALL mirrors with no pagination)                                       |
-| `components/RegistryItemCard.tsx` | Wrap with `React.memo` (pure presentational component)                                                        |
-
-**Implementation details:**
-
-- `Layout.tsx`: `const navigationItems = useMemo(() => [...], [])` (static array, empty deps); `const adminNavGroups = useMemo(() => [...], [allowedScopes])` (only recalculate when scopes change)
-- `RegistryItemCard.tsx`: `export default React.memo(RegistryItemCard)` — props are primitive values, this is a safe memo
-- Avoid over-memoizing — only target components that re-render frequently with expensive or stable outputs
-
-**Acceptance criteria:**
-
-- [ ] `Layout.tsx` sidebar nav arrays are memoized
-- [ ] `RegistryItemCard` is wrapped in `React.memo`
-- [ ] `npm run build` succeeds
-- [ ] `npm run lint` passes
-- [ ] No visual regressions (manual check or E2E)
+**Affected files**: `frontend/src/services/errorReporting.ts`, `frontend/src/main.tsx`, `frontend/package.json`
 
 ---
 
-### Task 4.5: Add pagination to MirrorsPage and limit ModulesPage grouped view
+### 3.4 `useModuleDetail` Hook Refactor to React Query
 
-**Why:** `MirrorsPage.tsx` renders all mirrors with no pagination (line 243: `apiClient.listMirrors()` with no params). `ModulesPage.tsx` line 70 fetches `limit: 500` modules at once for the grouped view without pagination or virtualization.
+**Why**: `useModuleDetail.ts` (418 lines) is the most complex piece of state management in the frontend and uses imperative `useState`+`useEffect` patterns. It fetches module versions, module metadata, SCM info, and scan results in a cascade of effects with manual loading/error tracking.
 
-**Files to modify:**
+**Work items**:
 
-- `pages/admin/MirrorsPage.tsx`
-- `pages/ModulesPage.tsx`
+1. **Extract into multiple React Query hooks**:
+   - `useModuleVersions(namespace, name, system)` → `useQuery(queryKeys.modules.versions(ns, name, sys), () => api.getModuleVersions(...))`
+   - `useModuleMetadata(namespace, name, system, version)` → `useQuery(queryKeys.modules.detail(ns, name, sys, version), () => api.getModule(...))`
+   - `useModuleSCMInfo(namespace, name, system)` → `useQuery(queryKeys.modules.scm(ns, name, sys), () => api.getModuleSCMInfo(...))`
+   - `useModuleScan(namespace, name, system, version)` → `useQuery(queryKeys.modules.scan(ns, name, sys, version), () => api.getModuleScan(...))`
 
-**Implementation details:**
+2. **Create a composed `useModuleDetail` hook** that calls the above hooks and derives computed state (selected version, tab state, etc.).
 
-- `MirrorsPage.tsx`: Add `TablePagination` or similar pagination control (consistent with other admin pages like `UsersPage.tsx` and `AuditLogPage.tsx`). Add `page`/`rowsPerPage` state, pass to API call.
-- `ModulesPage.tsx`: Either reduce `limit: 500` (line 70) to a reasonable default (50-100) with pagination for grouped view, or add virtualization via `react-window`. Pagination is simpler and more consistent with the rest of the codebase.
-- If adding `react-window`: install as a dependency, wrap the module card grid in a `FixedSizeGrid` or `FixedSizeList`
+3. **Add query keys** for the new hooks to `queryKeys.ts`.
 
-**Acceptance criteria:**
+4. **Update `ModuleDetailPage`** to use the refactored hook. The page's render logic should not change -- only the data fetching beneath it.
 
-- [ ] `MirrorsPage` paginates results (default 10-25 per page)
-- [ ] `ModulesPage` grouped view either paginates or virtualizes (no longer fetches 500 at once)
-- [ ] `npm run build` succeeds
-- [ ] E2E tests `modules.spec.ts` and `admin.spec.ts` (mirrors section) still pass
+5. **Tests**: The existing absence of tests is addressed in Phase 1 item 1.3. The refactored hook should be easier to test since each sub-hook can be tested independently.
 
----
+**Affected files**: `frontend/src/hooks/useModuleDetail.ts`, `frontend/src/services/queryKeys.ts`, `frontend/src/pages/ModuleDetailPage.tsx`
 
-## Phase 5 — UX & Accessibility
-
-> **Priority:** Low | **Tasks:** 6 | **Parallelizable:** All
-
-### Task 5.1: Add skip-to-content navigation
-
-**Why:** No skip navigation exists anywhere in the app. Keyboard users must tab through the entire sidebar to reach main content.
-
-**Files to modify:**
-
-- `components/Layout.tsx` — add `id="main-content"` to `<Box component="main">` (line 437), add skip link as first child
-- `index.css` — add `.skip-link` styles
-
-**Implementation details:**
-
-- Add `id="main-content"` to the `<Box component="main">` at `Layout.tsx` line 437
-- Add a visually-hidden skip link as the first child of the Layout: `<a href="#main-content" className="skip-link">Skip to main content</a>`
-- Add CSS in `index.css` for `.skip-link`: visually hidden by default, visible on `:focus` (positioned at top-left, high z-index, styled with the theme primary color)
-
-**Acceptance criteria:**
-
-- [ ] Pressing Tab as the first action on the page reveals a "Skip to main content" link
-- [ ] Activating the link moves focus to the main content area
-- [ ] The link is not visible when not focused
+**Depends on**: 3.1 (uses the expanded `queryKeys.ts` patterns).
 
 ---
 
-### Task 5.2: Add `aria-label` to all icon-only buttons
+## Phase 4: Documentation & Polish (Documentation 9→10)
 
-**Why:** ~45 `IconButton` instances across 16 files lack `aria-label`. Only 6 instances in the entire codebase have one (all in `Layout.tsx` and `HelpPanel.tsx`). Tooltip alone does not provide an accessible name for screen readers.
+### 4.1 Component Storybook or Style Guide
 
-**Files to modify:**
+**Why**: With 18 components and 16 admin pages, there is no way to browse or test UI components in isolation. New contributors cannot see what's available without reading source.
 
-| File                                  | Lines missing `aria-label`   |
-| ------------------------------------- | ---------------------------- |
-| `pages/admin/APIKeysPage.tsx`         | 556, 564, 572, 615, 782      |
-| `pages/admin/MirrorPoliciesPage.tsx`  | 338, 343                     |
-| `pages/admin/MirrorsPage.tsx`         | 67, 139, 554, 562, 573, 578  |
-| `pages/HomePage.tsx`                  | 429                          |
-| `components/RepositoryBrowser.tsx`    | 185                          |
-| `pages/TerraformBinaryDetailPage.tsx` | 176, 206, 212, 224, 449      |
-| `pages/admin/UsersPage.tsx`           | 440, 447, 543                |
-| `pages/SetupWizardPage.tsx`           | 428                          |
-| `pages/admin/SCMProvidersPage.tsx`    | 416, 479, 489, 506, 514      |
-| `pages/ProviderDetailPage.tsx`        | 377, 472, 520                |
-| `pages/admin/OIDCSettingsPage.tsx`    | 298, 301                     |
-| `pages/admin/OrganizationsPage.tsx`   | 324, 331, 491                |
-| `pages/admin/TerraformMirrorPage.tsx` | 116, 138, 289, 297, 303, 308 |
-| `pages/ModuleDetailPage.tsx`          | 436, 511, 786                |
+**Work items**:
 
-**Implementation details:**
+1. **Evaluate approach**: Storybook is the standard but heavy. A lighter alternative is a `/dev/components` route that renders all components with sample props (only available in dev mode).
 
-- Add `aria-label="<action description>"` to every `<IconButton>` listed above
-- Use the existing Tooltip `title` text as the `aria-label` value where a Tooltip wrapper exists
-- For buttons without Tooltip: derive the label from the icon's purpose (e.g., `<DeleteIcon>` button gets `aria-label="Delete"`)
+2. **If Storybook**:
+   - Install `@storybook/react-vite`.
+   - Create stories for key components: `RegistryItemCard`, `MarkdownRenderer`, `ErrorBoundary`, `Layout`, `ProviderIcon`, `SecurityScanPanel`, `VersionDetailsPanel`.
+   - Add Storybook build to CI (static export).
 
-**Acceptance criteria:**
+3. **If dev route** (lighter approach):
+   - Create `src/pages/dev/ComponentShowcase.tsx`.
+   - Register under `/dev/components` route (only in development mode).
+   - Render each component with representative props in a categorized list.
 
-- [ ] Every `<IconButton>` in the codebase has an `aria-label` prop
-- [ ] `npm run build` succeeds
-- [ ] `npm run lint` passes
+**Affected files**: Depends on approach. If Storybook: `.storybook/` (new), `src/components/*.stories.tsx` (new), `package.json`. If dev route: `src/pages/dev/ComponentShowcase.tsx` (new), `src/App.tsx`.
 
 ---
 
-### Task 5.3: Add `aria-busy` to loading state containers
+### 4.2 Accessibility Audit & Improvements
 
-**Why:** ~55 `CircularProgress` instances across 24 files have zero explicit ARIA attributes. While MUI's `CircularProgress` internally renders `role="progressbar"`, the parent containers don't set `aria-busy="true"`, so screen readers don't know a page region is loading.
+**Why**: No accessibility testing exists. MUI provides baseline a11y, but custom components (notably `RegistryItemCard`, `Layout`, `SetupWizardPage`) need manual verification.
 
-**Files with full-page loading patterns to update:**
+**Work items**:
 
-`components/AboutModal.tsx`, `components/DevUserSwitcher.tsx`, `components/ProtectedRoute.tsx`, `components/ProviderDocContent.tsx`, `components/PublishFromSCMWizard.tsx`, `components/RepositoryBrowser.tsx`, `pages/CallbackPage.tsx`, `pages/ModuleDetailPage.tsx`, `pages/ModulesPage.tsx`, `pages/ProvidersPage.tsx`, `pages/ProviderDetailPage.tsx`, `pages/SetupWizardPage.tsx`, `pages/TerraformBinariesPage.tsx`, `pages/TerraformBinaryDetailPage.tsx`, `pages/admin/APIKeysPage.tsx`, `pages/admin/ApprovalsPage.tsx`, `pages/admin/AuditLogPage.tsx`, `pages/admin/DashboardPage.tsx`, `pages/admin/MirrorPoliciesPage.tsx`, `pages/admin/MirrorsPage.tsx`, `pages/admin/ModuleUploadPage.tsx`, `pages/admin/OIDCSettingsPage.tsx`, `pages/admin/OrganizationsPage.tsx`, `pages/admin/ProviderUploadPage.tsx`, `pages/admin/RolesPage.tsx`, `pages/admin/SCMProvidersPage.tsx`, `pages/admin/StoragePage.tsx`, `pages/admin/TerraformMirrorPage.tsx`, `pages/admin/UsersPage.tsx`
+1. **Install `@axe-core/react`** (dev dependency) for runtime a11y warnings in development.
 
-**Implementation details:**
+2. **Add Playwright accessibility tests**: Use `@axe-core/playwright` in a new `e2e/tests/accessibility.spec.ts` to scan key pages.
 
-- For full-page loading states (the common pattern `{loading && <Box display="flex" ...><CircularProgress /></Box>}`): add `aria-busy="true"` to the parent container and `aria-live="polite"` so screen readers announce the state change
-- Don't add `aria-busy` to inline/small spinners (e.g., button loading indicators) — only to the region-level containers
-- Pattern: `<Box aria-busy={loading} aria-live="polite" ...>{loading ? <CircularProgress /> : <Content />}</Box>`
+3. **Manual audit and fix** for common issues:
+   - Ensure all images have `alt` text.
+   - Ensure all form inputs have associated labels.
+   - Verify keyboard navigation through the setup wizard.
+   - Add `aria-label` to icon-only buttons (e.g., theme toggle, help toggle).
+   - Verify color contrast ratios meet WCAG AA (MUI default theme should pass, but custom overrides may not).
 
-**Acceptance criteria:**
+4. **Add `lint-staged` + ESLint a11y rules**: Install `eslint-plugin-jsx-a11y` and enable recommended rules in ESLint config.
 
-- [ ] All full-page loading patterns include `aria-busy` on their container
-- [ ] `npm run build` succeeds
-
----
-
-### Task 5.4: Add data-fetching abstraction
-
-**Why:** Every page independently manages `loading`, `error`, and `success` state with identical boilerplate. No caching, no request deduplication, no stale-while-revalidate. Each of the 25+ pages has its own `useState` + `useEffect` + `try/catch` pattern.
-
-**Files to create (TanStack Query approach):**
-
-- Install `@tanstack/react-query` and optionally `@tanstack/react-query-devtools`
-- `services/queryKeys.ts` — query key constants
-- Update `App.tsx` — add `QueryClientProvider` to provider hierarchy
-
-**Files to create (custom hook approach):**
-
-- `hooks/useApiQuery.ts`
-
-**Implementation details (TanStack Query — recommended):**
-
-- Install `@tanstack/react-query` and `@tanstack/react-query-devtools`
-- Add `QueryClientProvider` to `App.tsx` provider hierarchy
-- Create query key constants in `services/queryKeys.ts`
-- Migrate 2-3 pages first as proof of concept (e.g., `ModulesPage.tsx`, `ProvidersPage.tsx`, `DashboardPage.tsx`)
-- Each migration replaces the `useState(loading/error/data)` + `useEffect(fetch)` pattern with a single `useQuery` call
-- Subsequent pages can be migrated incrementally
-
-**Implementation details (custom hook — alternative):**
-
-- Create `hooks/useApiQuery.ts`: generic hook accepting a fetch function, returning `{ data, loading, error, refetch }`
-- Add optional caching via a module-level `Map<string, { data, timestamp }>`
-- Migrate same 2-3 proof-of-concept pages
-
-**Acceptance criteria:**
-
-- [ ] Data-fetching abstraction exists and is used by at least 2-3 pages
-- [ ] Loading, error, and empty states work identically to the current behavior
-- [ ] `npm run build` succeeds
-- [ ] E2E tests pass
+**Affected files**: `frontend/package.json`, `frontend/eslint.config.js`, `e2e/tests/accessibility.spec.ts` (new), various component files for fixes
 
 ---
 
-### Task 5.5: Add error reporting integration placeholder
+### 4.3 Documentation Updates
 
-**Why:** No monitoring or error reporting exists. Production rendering errors, API failures, and unhandled promise rejections are invisible to operators.
+**Work items** (each is independent, can be written in parallel):
 
-**Files to create:**
+1. **Update `README.md`** with:
+   - Testing section (how to run unit tests, coverage, E2E).
+   - CI pipeline overview.
+   - Architecture diagram (component tree, data flow, state management).
+   - Link to roadmap.
 
-- `services/errorReporting.ts`
+2. **Create `TESTING.md`**:
+   - Unit test patterns and conventions.
+   - E2E test patterns and how to add new tests.
+   - How to run tests locally and in CI.
+   - Coverage expectations and how to check.
 
-**Files to modify:**
+3. **Update `CONTRIBUTING.md`** with:
+   - Test requirements for PRs (unit tests for new components, E2E for new flows).
+   - React Query patterns for data fetching.
+   - Component file organization conventions.
 
-- `components/ErrorBoundary.tsx` (from Task 1.1)
-- `main.tsx`
+4. **Create `ARCHITECTURE.md`**:
+   - Component hierarchy diagram.
+   - Data fetching patterns (React Query vs legacy useState/useEffect).
+   - Routing structure.
+   - Authentication flow (AuthContext → localStorage → API interceptor).
+   - State management philosophy (React Query for server state, React state for UI state, Context for app-level concerns).
 
-**Implementation details:**
-
-- Create `services/errorReporting.ts` with: `init()`, `captureError(error: Error, context?: Record<string, unknown>)`, `setUser(userId: string)`
-- Default implementation: `console.error` + optional POST to configurable endpoint
-- Design the interface to be Sentry-compatible (same method signatures) so swapping in Sentry later is a one-line change
-- Call `captureError` from `ErrorBoundary.componentDidCatch`
-- Add `window.addEventListener('unhandledrejection', ...)` in `main.tsx`
-- Gate behind a `VITE_ERROR_REPORTING_DSN` env variable (when empty, reports to console only)
-
-**Acceptance criteria:**
-
-- [ ] `errorReporting.ts` exists with `init`, `captureError`, and `setUser` exports
-- [ ] `ErrorBoundary` calls `captureError` on catch
-- [ ] Unhandled promise rejections are captured
-- [ ] No external dependencies when DSN is not configured
+**Affected files**: `README.md`, `TESTING.md` (new), `CONTRIBUTING.md`, `ARCHITECTURE.md` (new)
 
 ---
 
-### Task 5.6: Add tag protection rule documentation
+## Summary: Score Impact Projection
 
-**Why:** Already identified in `CLAUDE.md` line 315 as a remaining recommendation. Release tags (`v*.*.*`) can currently be deleted by anyone with push access.
+| Category                 | Before | After | Key Drivers                                                                                              |
+| ------------------------ | ------ | ----- | -------------------------------------------------------------------------------------------------------- |
+| **Security**             | 8      | 9     | Scanning setup wizard, accessibility audit                                                               |
+| **Ease of Use**          | 7      | 9     | Storage migration wizard, advanced search with filters/URL sync, scanning setup, React Query consistency |
+| **Documentation**        | 9      | 10    | TESTING.md, ARCHITECTURE.md, README update, CONTRIBUTING update, component showcase                      |
+| **Maturity**             | 6      | 9     | CI pipelines, unit test coverage (40→60%+), coverage enforcement, E2E improvements                       |
+| **Feature Completeness** | 8      | 9     | Advanced search UI, storage migration wizard, scanning setup, module deprecation UI                      |
+| **Enterprise Readiness** | 7      | 9     | CI/CD, error monitoring, performance monitoring, accessibility                                           |
 
-**Files to modify:**
+---
 
-- `CLAUDE.md` — update "Remaining Recommendations" section
+## Dependency Graph
 
-**Implementation details:**
+```
+Phase 1 (parallel -- all independent):
+  1.1 Vitest Coverage Config ────── independent (do first; gates 1.6)
+  1.2 Unit Tests: Services ──────── independent
+  1.3 Unit Tests: Hooks/Contexts ── independent
+  1.4 Unit Tests: Components ────── independent
+  1.5 GitHub Actions CI ─────────── independent
+  1.6 Ratchet Coverage Thresholds ─ depends on 1.1 + 1.2 + 1.3 + 1.4
 
-- Document the GitHub CLI command or API call to add a tag protection rule:
-  ```bash
-  gh api repos/{owner}/{repo}/rulesets --method POST \
-    --field name="Protect release tags" \
-    --field target=tag \
-    --field enforcement=active \
-    --field 'conditions[ref_name][include][]=refs/tags/v*.*.*' \
-    --field 'rules[][type]=deletion'
-  ```
-  Or via GitHub UI: Settings > Rules > Rulesets > New ruleset targeting tags matching `v*.*.*`
-- Move this item from "Remaining Recommendations" to a new "Applied" section or mark it as done
-- The actual rule should be applied via the GitHub UI or CLI (not automated in CI)
+Phase 2 (parallel, after Phase 1 CI exists):
+  2.1 Scanning Setup Wizard ────── requires backend roadmap 2.3
+  2.2 Storage Migration Wizard ─── requires backend roadmap 2.4
+  2.3 Advanced Search UI ───────── requires backend roadmap 2.2
+  2.4 Module Deprecation UI ────── requires backend roadmap 4.1
 
-**Acceptance criteria:**
+Phase 3 (parallel):
+  3.1 React Query Migration ────── independent (largest item; can be split across agents per page)
+  3.2 Performance Monitoring ───── independent
+  3.3 Enhanced Error Reporting ─── independent
+  3.4 useModuleDetail Refactor ─── depends on 3.1 (query key patterns)
 
-- [ ] `CLAUDE.md` documents the tag protection rule command
-- [ ] The "Remaining Recommendations" section is updated
+Phase 4 (after Phase 2-3):
+  4.1 Component Showcase ───────── independent
+  4.2 Accessibility Audit ──────── independent
+  4.3 Documentation Updates ────── depends on all prior phases (documents new patterns)
+```
