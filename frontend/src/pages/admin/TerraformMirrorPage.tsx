@@ -1,4 +1,6 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { queryKeys } from '../../services/queryKeys';
 import {
   Alert,
   Box,
@@ -350,8 +352,7 @@ const emptyCreate = (): CreateTerraformMirrorConfigRequest => ({
 // ---------------------------------------------------------------------------
 
 const TerraformMirrorPage: React.FC = () => {
-  const [configs, setConfigs] = useState<TerraformMirrorConfig[]>([]);
-  const [loading, setLoading] = useState(true);
+  const queryClient = useQueryClient();
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
@@ -360,18 +361,15 @@ const TerraformMirrorPage: React.FC = () => {
   const [createForm, setCreateForm] = useState<CreateTerraformMirrorConfigRequest>(emptyCreate());
   const [createVersionFilter, setCreateVersionFilter] = useState('');
   const [createPlatformFilter, setCreatePlatformFilter] = useState('');
-  const [creating, setCreating] = useState(false);
 
   // ---- edit dialog ----
   const [editConfig, setEditConfig] = useState<TerraformMirrorConfig | null>(null);
   const [editForm, setEditForm] = useState<UpdateTerraformMirrorConfigRequest>({});
   const [editVersionFilter, setEditVersionFilter] = useState('');
   const [editPlatformFilter, setEditPlatformFilter] = useState('');
-  const [editing, setEditing] = useState(false);
 
   // ---- delete dialog ----
   const [deleteConfig, setDeleteConfig] = useState<TerraformMirrorConfig | null>(null);
-  const [deleting, setDeleting] = useState(false);
 
   // ---- versions dialog ----
   const [versionsConfig, setVersionsConfig] = useState<TerraformMirrorConfig | null>(null);
@@ -392,45 +390,41 @@ const TerraformMirrorPage: React.FC = () => {
   const [syncingIds, setSyncingIds] = useState<Set<string>>(new Set());
 
   // ---------------------------------------------------------------------------
-  // Load
+  // Load configs via React Query
   // ---------------------------------------------------------------------------
-  const loadConfigs = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
+  const {
+    data: configs = [],
+    isLoading: loading,
+    error: queryError,
+  } = useQuery<TerraformMirrorConfig[]>({
+    queryKey: queryKeys.terraformMirrors.list(),
+    queryFn: async () => {
       const data = await api.listTerraformMirrorConfigs();
-      setConfigs(data.configs ?? []);
-    } catch (err: unknown) {
-      setError(getErrorMessage(err, 'Failed to load Terraform mirror configurations'));
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+      return data.configs ?? [];
+    },
+  });
 
+  if (queryError && !error) {
+    setError(getErrorMessage(queryError, 'Failed to load Terraform mirror configurations'));
+  }
+
+  // Lazy-load status for each card when configs change
   useEffect(() => {
-    loadConfigs();
-  }, [loadConfigs]);
-
-  // Lazy-load status for each card
-  const loadStatus = useCallback(async (configId: string) => {
-    try {
-      const s = await api.getTerraformMirrorStatus(configId);
-      setStatusMap((prev) => ({ ...prev, [configId]: s }));
-    } catch {
-      // ignore status load failures
-    }
-  }, []);
-
-  useEffect(() => {
-    configs.forEach((c) => loadStatus(c.id));
-  }, [configs, loadStatus]);
+    configs.forEach(async (c) => {
+      try {
+        const s = await api.getTerraformMirrorStatus(c.id);
+        setStatusMap((prev) => ({ ...prev, [c.id]: s }));
+      } catch {
+        // ignore status load failures
+      }
+    });
+  }, [configs]);
 
   // ---------------------------------------------------------------------------
   // Create
   // ---------------------------------------------------------------------------
-  const handleCreate = async () => {
-    setCreating(true);
-    try {
+  const createMutation = useMutation({
+    mutationFn: async () => {
       const platformFilter = createPlatformFilter
         .split(',')
         .map((s) => s.trim())
@@ -440,17 +434,22 @@ const TerraformMirrorPage: React.FC = () => {
         platform_filter: platformFilter.length > 0 ? platformFilter : undefined,
         version_filter: createVersionFilter.trim() || undefined,
       });
+    },
+    onSuccess: () => {
       setSuccess(`Mirror "${createForm.name}" created`);
       setCreateOpen(false);
       setCreateForm(emptyCreate());
       setCreateVersionFilter('');
       setCreatePlatformFilter('');
-      loadConfigs();
-    } catch (err: unknown) {
+      queryClient.invalidateQueries({ queryKey: queryKeys.terraformMirrors._def });
+    },
+    onError: (err: unknown) => {
       setError(getErrorMessage(err, 'Failed to create mirror config'));
-    } finally {
-      setCreating(false);
-    }
+    },
+  });
+
+  const handleCreate = () => {
+    createMutation.mutate();
   };
 
   // ---------------------------------------------------------------------------
@@ -472,10 +471,9 @@ const TerraformMirrorPage: React.FC = () => {
     });
   };
 
-  const handleEdit = async () => {
-    if (!editConfig) return;
-    setEditing(true);
-    try {
+  const editMutation = useMutation({
+    mutationFn: async () => {
+      if (!editConfig) throw new Error('No config to edit');
       const platformFilter = editPlatformFilter
         .split(',')
         .map((s) => s.trim())
@@ -485,32 +483,43 @@ const TerraformMirrorPage: React.FC = () => {
         platform_filter: platformFilter.length > 0 ? platformFilter : [],
         version_filter: editVersionFilter.trim() || '',
       });
-      setSuccess(`Mirror "${editConfig.name}" updated`);
+    },
+    onSuccess: () => {
+      setSuccess(`Mirror "${editConfig?.name}" updated`);
       setEditConfig(null);
-      loadConfigs();
-    } catch (err: unknown) {
+      queryClient.invalidateQueries({ queryKey: queryKeys.terraformMirrors._def });
+    },
+    onError: (err: unknown) => {
       setError(getErrorMessage(err, 'Failed to update mirror config'));
-    } finally {
-      setEditing(false);
-    }
+    },
+  });
+
+  const handleEdit = () => {
+    if (!editConfig) return;
+    editMutation.mutate();
   };
 
   // ---------------------------------------------------------------------------
   // Delete
   // ---------------------------------------------------------------------------
-  const handleDelete = async () => {
-    if (!deleteConfig) return;
-    setDeleting(true);
-    try {
+  const deleteMutation = useMutation({
+    mutationFn: async () => {
+      if (!deleteConfig) throw new Error('No config to delete');
       await api.deleteTerraformMirrorConfig(deleteConfig.id);
-      setSuccess(`Mirror "${deleteConfig.name}" deleted`);
+    },
+    onSuccess: () => {
+      setSuccess(`Mirror "${deleteConfig?.name}" deleted`);
       setDeleteConfig(null);
-      loadConfigs();
-    } catch (err: unknown) {
+      queryClient.invalidateQueries({ queryKey: queryKeys.terraformMirrors._def });
+    },
+    onError: (err: unknown) => {
       setError(getErrorMessage(err, 'Failed to delete mirror config'));
-    } finally {
-      setDeleting(false);
-    }
+    },
+  });
+
+  const handleDelete = () => {
+    if (!deleteConfig) return;
+    deleteMutation.mutate();
   };
 
   // ---------------------------------------------------------------------------
@@ -599,495 +608,495 @@ const TerraformMirrorPage: React.FC = () => {
         </Box>
       ) : (
         <Container maxWidth="lg" sx={{ py: 4 }}>
-      {/* Header */}
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-        <Box>
-          <Typography variant="h4">Mirroring — Binaries Config</Typography>
-        </Box>
-        <Box sx={{ display: 'flex', gap: 1 }}>
-          <Button
-            variant="outlined"
-            startIcon={<RefreshIcon />}
-            onClick={loadConfigs}
-            disabled={loading}
-          >
-            Refresh
-          </Button>
-          <Button
-            variant="contained"
-            startIcon={<AddIcon />}
-            onClick={() => { setCreateForm(emptyCreate()); setCreateVersionFilter(''); setCreatePlatformFilter(''); setCreateOpen(true); }}
-          >
-            Add Mirror
-          </Button>
-        </Box>
-      </Box>
+          {/* Header */}
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+            <Box>
+              <Typography variant="h4">Mirroring — Binaries Config</Typography>
+            </Box>
+            <Box sx={{ display: 'flex', gap: 1 }}>
+              <Button
+                variant="outlined"
+                startIcon={<RefreshIcon />}
+                onClick={() => queryClient.invalidateQueries({ queryKey: queryKeys.terraformMirrors._def })}
+                disabled={loading}
+              >
+                Refresh
+              </Button>
+              <Button
+                variant="contained"
+                startIcon={<AddIcon />}
+                onClick={() => { setCreateForm(emptyCreate()); setCreateVersionFilter(''); setCreatePlatformFilter(''); setCreateOpen(true); }}
+              >
+                Add Mirror
+              </Button>
+            </Box>
+          </Box>
 
-      {/* Help / info banner */}
-      <Alert severity="info" sx={{ mb: 2 }}>
-        <Typography variant="body2">
-          Clients download binaries at{' '}
-          <code>/terraform/binaries/&#123;name&#125;/versions/&#123;version&#125;/&#123;os&#125;/&#123;arch&#125;</code>.
-          This endpoint is unauthenticated — configure your CI or developer machines to point at
-          your registry host.
-        </Typography>
-      </Alert>
+          {/* Help / info banner */}
+          <Alert severity="info" sx={{ mb: 2 }}>
+            <Typography variant="body2">
+              Clients download binaries at{' '}
+              <code>/terraform/binaries/&#123;name&#125;/versions/&#123;version&#125;/&#123;os&#125;/&#123;arch&#125;</code>.
+              This endpoint is unauthenticated — configure your CI or developer machines to point at
+              your registry host.
+            </Typography>
+          </Alert>
 
-      {error && (
-        <Alert severity="error" onClose={() => setError(null)} sx={{ mb: 2 }}>
-          {error}
-        </Alert>
-      )}
-      {success && (
-        <Alert severity="success" onClose={() => setSuccess(null)} sx={{ mb: 2 }}>
-          {success}
-        </Alert>
-      )}
+          {error && (
+            <Alert severity="error" onClose={() => setError(null)} sx={{ mb: 2 }}>
+              {error}
+            </Alert>
+          )}
+          {success && (
+            <Alert severity="success" onClose={() => setSuccess(null)} sx={{ mb: 2 }}>
+              {success}
+            </Alert>
+          )}
 
-      {/* Config cards */}
-      {configs.length === 0 ? (
-        <Alert severity="info">
-          No Terraform binary mirror configurations exist yet. Create one to start mirroring
-          Terraform or OpenTofu binaries.
-        </Alert>
-      ) : (
-        <Grid container spacing={2} sx={{ mb: 3 }}>
-          {configs.map((cfg) => {
-            const status = statusMap[cfg.id];
-            return (
-              <Grid size={{ xs: 12, md: 6 }} key={cfg.id}>
-                <ConfigCard
-                  config={cfg}
-                  status={status}
-                  onEdit={openEdit}
-                  onDelete={setDeleteConfig}
-                  onSync={handleSync}
-                  onViewVersions={openVersions}
-                  onViewHistory={openHistory}
-                  syncing={syncingIds.has(cfg.id)}
-                />
-              </Grid>
-            );
-          })}
-        </Grid>
-      )}
+          {/* Config cards */}
+          {configs.length === 0 ? (
+            <Alert severity="info">
+              No Terraform binary mirror configurations exist yet. Create one to start mirroring
+              Terraform or OpenTofu binaries.
+            </Alert>
+          ) : (
+            <Grid container spacing={2} sx={{ mb: 3 }}>
+              {configs.map((cfg) => {
+                const status = statusMap[cfg.id];
+                return (
+                  <Grid size={{ xs: 12, md: 6 }} key={cfg.id}>
+                    <ConfigCard
+                      config={cfg}
+                      status={status}
+                      onEdit={openEdit}
+                      onDelete={setDeleteConfig}
+                      onSync={handleSync}
+                      onViewVersions={openVersions}
+                      onViewHistory={openHistory}
+                      syncing={syncingIds.has(cfg.id)}
+                    />
+                  </Grid>
+                );
+              })}
+            </Grid>
+          )}
 
-      {/* ==================================================================
+          {/* ==================================================================
           Create Dialog
       ================================================================== */}
-      <Dialog open={createOpen} onClose={() => setCreateOpen(false)} maxWidth="sm" fullWidth>
-        <DialogTitle>Add Terraform Binary Mirror</DialogTitle>
-        <DialogContent>
-          <Box sx={{ pt: 1, display: 'flex', flexDirection: 'column', gap: 2 }}>
-            <TextField
-              label="Name"
-              value={createForm.name}
-              onChange={(e) => setCreateForm((prev) => ({ ...prev, name: e.target.value }))}
-              helperText="Unique slug used in API paths (e.g. hashicorp-terraform)"
-              required
-              fullWidth
-            />
-            <TextField
-              label="Description"
-              value={createForm.description ?? ''}
-              onChange={(e) => setCreateForm((prev) => ({ ...prev, description: e.target.value }))}
-              fullWidth
-            />
-            <TextField
-              select
-              label="Tool"
-              value={createForm.tool}
-              onChange={(e) => {
-                const newTool = e.target.value;
-                setCreateForm((prev) => {
-                  // Auto-update upstream URL only if it still matches the previous tool's default
-                  const prevDefault = toolDefaultUrl(prev.tool);
-                  const shouldUpdate = prev.upstream_url === prevDefault || prev.upstream_url === '';
-                  return {
-                    ...prev,
-                    tool: newTool,
-                    upstream_url: shouldUpdate ? toolDefaultUrl(newTool) : prev.upstream_url,
-                  };
-                });
-              }}
-              fullWidth
-            >
-              <MenuItem value="terraform">Terraform (HashiCorp)</MenuItem>
-              <MenuItem value="opentofu">OpenTofu</MenuItem>
-              <MenuItem value="custom">Custom</MenuItem>
-            </TextField>
-            <TextField
-              label="Upstream URL"
-              value={createForm.upstream_url}
-              onChange={(e) => setCreateForm((prev) => ({ ...prev, upstream_url: e.target.value }))}
-              helperText={
-                createForm.tool === 'opentofu'
-                  ? 'OpenTofu releases server (releases.opentofu.org) or a GitHub repo URL (e.g. https://github.com/opentofu/opentofu).'
-                  : createForm.tool === 'terraform'
-                    ? 'Terraform releases are sourced from releases.hashicorp.com.'
-                    : 'URL of the upstream source. Use a releases server URL or a GitHub repository URL.'
-              }
-              required
-              fullWidth
-            />
-            <TextField
-              label="Sync Interval (hours)"
-              type="number"
-              value={createForm.sync_interval_hours ?? 24}
-              onChange={(e) =>
-                setCreateForm((prev) => ({
-                  ...prev,
-                  sync_interval_hours: parseInt(e.target.value, 10),
-                }))
-              }
-              inputProps={{ min: 1 }}
-              fullWidth
-            />
-            <Box sx={{ display: 'flex', gap: 2 }}>
-              <FormControlLabel
-                control={
-                  <Switch
-                    checked={createForm.enabled ?? true}
-                    onChange={(e) =>
-                      setCreateForm((prev) => ({ ...prev, enabled: e.target.checked }))
+          <Dialog open={createOpen} onClose={() => setCreateOpen(false)} maxWidth="sm" fullWidth>
+            <DialogTitle>Add Terraform Binary Mirror</DialogTitle>
+            <DialogContent>
+              <Box sx={{ pt: 1, display: 'flex', flexDirection: 'column', gap: 2 }}>
+                <TextField
+                  label="Name"
+                  value={createForm.name}
+                  onChange={(e) => setCreateForm((prev) => ({ ...prev, name: e.target.value }))}
+                  helperText="Unique slug used in API paths (e.g. hashicorp-terraform)"
+                  required
+                  fullWidth
+                />
+                <TextField
+                  label="Description"
+                  value={createForm.description ?? ''}
+                  onChange={(e) => setCreateForm((prev) => ({ ...prev, description: e.target.value }))}
+                  fullWidth
+                />
+                <TextField
+                  select
+                  label="Tool"
+                  value={createForm.tool}
+                  onChange={(e) => {
+                    const newTool = e.target.value;
+                    setCreateForm((prev) => {
+                      // Auto-update upstream URL only if it still matches the previous tool's default
+                      const prevDefault = toolDefaultUrl(prev.tool);
+                      const shouldUpdate = prev.upstream_url === prevDefault || prev.upstream_url === '';
+                      return {
+                        ...prev,
+                        tool: newTool,
+                        upstream_url: shouldUpdate ? toolDefaultUrl(newTool) : prev.upstream_url,
+                      };
+                    });
+                  }}
+                  fullWidth
+                >
+                  <MenuItem value="terraform">Terraform (HashiCorp)</MenuItem>
+                  <MenuItem value="opentofu">OpenTofu</MenuItem>
+                  <MenuItem value="custom">Custom</MenuItem>
+                </TextField>
+                <TextField
+                  label="Upstream URL"
+                  value={createForm.upstream_url}
+                  onChange={(e) => setCreateForm((prev) => ({ ...prev, upstream_url: e.target.value }))}
+                  helperText={
+                    createForm.tool === 'opentofu'
+                      ? 'OpenTofu releases server (releases.opentofu.org) or a GitHub repo URL (e.g. https://github.com/opentofu/opentofu).'
+                      : createForm.tool === 'terraform'
+                        ? 'Terraform releases are sourced from releases.hashicorp.com.'
+                        : 'URL of the upstream source. Use a releases server URL or a GitHub repository URL.'
+                  }
+                  required
+                  fullWidth
+                />
+                <TextField
+                  label="Sync Interval (hours)"
+                  type="number"
+                  value={createForm.sync_interval_hours ?? 24}
+                  onChange={(e) =>
+                    setCreateForm((prev) => ({
+                      ...prev,
+                      sync_interval_hours: parseInt(e.target.value, 10),
+                    }))
+                  }
+                  inputProps={{ min: 1 }}
+                  fullWidth
+                />
+                <Box sx={{ display: 'flex', gap: 2 }}>
+                  <FormControlLabel
+                    control={
+                      <Switch
+                        checked={createForm.enabled ?? true}
+                        onChange={(e) =>
+                          setCreateForm((prev) => ({ ...prev, enabled: e.target.checked }))
+                        }
+                      />
                     }
+                    label="Enabled"
                   />
-                }
-                label="Enabled"
-              />
-              <FormControlLabel
-                control={
-                  <Switch
-                    checked={createForm.gpg_verify ?? true}
-                    onChange={(e) =>
-                      setCreateForm((prev) => ({ ...prev, gpg_verify: e.target.checked }))
+                  <FormControlLabel
+                    control={
+                      <Switch
+                        checked={createForm.gpg_verify ?? true}
+                        onChange={(e) =>
+                          setCreateForm((prev) => ({ ...prev, gpg_verify: e.target.checked }))
+                        }
+                      />
                     }
+                    label="GPG Verify"
                   />
-                }
-                label="GPG Verify"
-              />
-              <FormControlLabel
-                control={
-                  <Switch
-                    checked={createForm.stable_only ?? false}
-                    onChange={(e) =>
-                      setCreateForm((prev) => ({ ...prev, stable_only: e.target.checked }))
+                  <FormControlLabel
+                    control={
+                      <Switch
+                        checked={createForm.stable_only ?? false}
+                        onChange={(e) =>
+                          setCreateForm((prev) => ({ ...prev, stable_only: e.target.checked }))
+                        }
+                      />
                     }
+                    label="Stable Only"
                   />
-                }
-                label="Stable Only"
-              />
-            </Box>
-            <TextField
-              label="Version Filter"
-              value={createVersionFilter}
-              onChange={(e) => setCreateVersionFilter(e.target.value)}
-              helperText='Limit versions to sync: "1.9." (prefix), "latest:5", ">=1.5.0" (semver), "1.5.0,1.6.0" (list). Leave blank for all.'
-              fullWidth
-            />
-            <TextField
-              label="Platform Filter"
-              value={createPlatformFilter}
-              onChange={(e) => setCreatePlatformFilter(e.target.value)}
-              helperText='Comma-separated os/arch pairs, e.g. "linux/amd64, darwin/arm64, windows/amd64". Leave blank for all platforms.'
-              fullWidth
-            />
-          </Box>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setCreateOpen(false)}>Cancel</Button>
-          <Button
-            onClick={handleCreate}
-            variant="contained"
-            disabled={creating || !createForm.name || !createForm.upstream_url}
-          >
-            {creating ? <CircularProgress size={18} /> : 'Create'}
-          </Button>
-        </DialogActions>
-      </Dialog>
+                </Box>
+                <TextField
+                  label="Version Filter"
+                  value={createVersionFilter}
+                  onChange={(e) => setCreateVersionFilter(e.target.value)}
+                  helperText='Limit versions to sync: "1.9." (prefix), "latest:5", ">=1.5.0" (semver), "1.5.0,1.6.0" (list). Leave blank for all.'
+                  fullWidth
+                />
+                <TextField
+                  label="Platform Filter"
+                  value={createPlatformFilter}
+                  onChange={(e) => setCreatePlatformFilter(e.target.value)}
+                  helperText='Comma-separated os/arch pairs, e.g. "linux/amd64, darwin/arm64, windows/amd64". Leave blank for all platforms.'
+                  fullWidth
+                />
+              </Box>
+            </DialogContent>
+            <DialogActions>
+              <Button onClick={() => setCreateOpen(false)}>Cancel</Button>
+              <Button
+                onClick={handleCreate}
+                variant="contained"
+                disabled={createMutation.isPending || !createForm.name || !createForm.upstream_url}
+              >
+                {createMutation.isPending ? <CircularProgress size={18} /> : 'Create'}
+              </Button>
+            </DialogActions>
+          </Dialog>
 
-      {/* ==================================================================
+          {/* ==================================================================
           Edit Dialog
       ================================================================== */}
-      <Dialog open={!!editConfig} onClose={() => setEditConfig(null)} maxWidth="sm" fullWidth>
-        <DialogTitle>Edit Mirror — {editConfig?.name}</DialogTitle>
-        <DialogContent>
-          <Box sx={{ pt: 1, display: 'flex', flexDirection: 'column', gap: 2 }}>
-            <TextField
-              label="Name"
-              value={editForm.name ?? ''}
-              onChange={(e) => setEditForm((prev) => ({ ...prev, name: e.target.value }))}
-              fullWidth
-            />
-            <TextField
-              label="Description"
-              value={editForm.description ?? ''}
-              onChange={(e) => setEditForm((prev) => ({ ...prev, description: e.target.value }))}
-              fullWidth
-            />
-            <TextField
-              select
-              label="Tool"
-              value={editForm.tool ?? 'terraform'}
-              onChange={(e) => {
-                const newTool = e.target.value;
-                setEditForm((prev) => {
-                  const prevDefault = toolDefaultUrl(prev.tool ?? 'terraform');
-                  const shouldUpdate = (prev.upstream_url ?? '') === prevDefault || (prev.upstream_url ?? '') === '';
-                  return {
-                    ...prev,
-                    tool: newTool,
-                    upstream_url: shouldUpdate ? toolDefaultUrl(newTool) : prev.upstream_url,
-                  };
-                });
-              }}
-              fullWidth
-            >
-              <MenuItem value="terraform">Terraform (HashiCorp)</MenuItem>
-              <MenuItem value="opentofu">OpenTofu</MenuItem>
-              <MenuItem value="custom">Custom</MenuItem>
-            </TextField>
-            <TextField
-              label="Upstream URL"
-              value={editForm.upstream_url ?? ''}
-              onChange={(e) => setEditForm((prev) => ({ ...prev, upstream_url: e.target.value }))}
-              helperText={
-                editForm.tool === 'opentofu'
-                  ? 'OpenTofu releases server (releases.opentofu.org) or a GitHub repo URL (e.g. https://github.com/opentofu/opentofu).'
-                  : editForm.tool === 'terraform'
-                    ? 'Terraform releases are sourced from releases.hashicorp.com.'
-                    : 'URL of the upstream source. Use a releases server URL or a GitHub repository URL.'
-              }
-              fullWidth
-            />
-            <TextField
-              label="Sync Interval (hours)"
-              type="number"
-              value={editForm.sync_interval_hours ?? 24}
-              onChange={(e) =>
-                setEditForm((prev) => ({
-                  ...prev,
-                  sync_interval_hours: parseInt(e.target.value, 10),
-                }))
-              }
-              inputProps={{ min: 1 }}
-              fullWidth
-            />
-            <Box sx={{ display: 'flex', gap: 2 }}>
-              <FormControlLabel
-                control={
-                  <Switch
-                    checked={editForm.enabled ?? true}
-                    onChange={(e) =>
-                      setEditForm((prev) => ({ ...prev, enabled: e.target.checked }))
+          <Dialog open={!!editConfig} onClose={() => setEditConfig(null)} maxWidth="sm" fullWidth>
+            <DialogTitle>Edit Mirror — {editConfig?.name}</DialogTitle>
+            <DialogContent>
+              <Box sx={{ pt: 1, display: 'flex', flexDirection: 'column', gap: 2 }}>
+                <TextField
+                  label="Name"
+                  value={editForm.name ?? ''}
+                  onChange={(e) => setEditForm((prev) => ({ ...prev, name: e.target.value }))}
+                  fullWidth
+                />
+                <TextField
+                  label="Description"
+                  value={editForm.description ?? ''}
+                  onChange={(e) => setEditForm((prev) => ({ ...prev, description: e.target.value }))}
+                  fullWidth
+                />
+                <TextField
+                  select
+                  label="Tool"
+                  value={editForm.tool ?? 'terraform'}
+                  onChange={(e) => {
+                    const newTool = e.target.value;
+                    setEditForm((prev) => {
+                      const prevDefault = toolDefaultUrl(prev.tool ?? 'terraform');
+                      const shouldUpdate = (prev.upstream_url ?? '') === prevDefault || (prev.upstream_url ?? '') === '';
+                      return {
+                        ...prev,
+                        tool: newTool,
+                        upstream_url: shouldUpdate ? toolDefaultUrl(newTool) : prev.upstream_url,
+                      };
+                    });
+                  }}
+                  fullWidth
+                >
+                  <MenuItem value="terraform">Terraform (HashiCorp)</MenuItem>
+                  <MenuItem value="opentofu">OpenTofu</MenuItem>
+                  <MenuItem value="custom">Custom</MenuItem>
+                </TextField>
+                <TextField
+                  label="Upstream URL"
+                  value={editForm.upstream_url ?? ''}
+                  onChange={(e) => setEditForm((prev) => ({ ...prev, upstream_url: e.target.value }))}
+                  helperText={
+                    editForm.tool === 'opentofu'
+                      ? 'OpenTofu releases server (releases.opentofu.org) or a GitHub repo URL (e.g. https://github.com/opentofu/opentofu).'
+                      : editForm.tool === 'terraform'
+                        ? 'Terraform releases are sourced from releases.hashicorp.com.'
+                        : 'URL of the upstream source. Use a releases server URL or a GitHub repository URL.'
+                  }
+                  fullWidth
+                />
+                <TextField
+                  label="Sync Interval (hours)"
+                  type="number"
+                  value={editForm.sync_interval_hours ?? 24}
+                  onChange={(e) =>
+                    setEditForm((prev) => ({
+                      ...prev,
+                      sync_interval_hours: parseInt(e.target.value, 10),
+                    }))
+                  }
+                  inputProps={{ min: 1 }}
+                  fullWidth
+                />
+                <Box sx={{ display: 'flex', gap: 2 }}>
+                  <FormControlLabel
+                    control={
+                      <Switch
+                        checked={editForm.enabled ?? true}
+                        onChange={(e) =>
+                          setEditForm((prev) => ({ ...prev, enabled: e.target.checked }))
+                        }
+                      />
                     }
+                    label="Enabled"
                   />
-                }
-                label="Enabled"
-              />
-              <FormControlLabel
-                control={
-                  <Switch
-                    checked={editForm.gpg_verify ?? true}
-                    onChange={(e) =>
-                      setEditForm((prev) => ({ ...prev, gpg_verify: e.target.checked }))
+                  <FormControlLabel
+                    control={
+                      <Switch
+                        checked={editForm.gpg_verify ?? true}
+                        onChange={(e) =>
+                          setEditForm((prev) => ({ ...prev, gpg_verify: e.target.checked }))
+                        }
+                      />
                     }
+                    label="GPG Verify"
                   />
-                }
-                label="GPG Verify"
-              />
-              <FormControlLabel
-                control={
-                  <Switch
-                    checked={editForm.stable_only ?? false}
-                    onChange={(e) =>
-                      setEditForm((prev) => ({ ...prev, stable_only: e.target.checked }))
+                  <FormControlLabel
+                    control={
+                      <Switch
+                        checked={editForm.stable_only ?? false}
+                        onChange={(e) =>
+                          setEditForm((prev) => ({ ...prev, stable_only: e.target.checked }))
+                        }
+                      />
                     }
+                    label="Stable Only"
                   />
-                }
-                label="Stable Only"
-              />
-            </Box>
-            <TextField
-              label="Version Filter"
-              value={editVersionFilter}
-              onChange={(e) => setEditVersionFilter(e.target.value)}
-              helperText='Limit versions to sync: "1.9." (prefix), "latest:5", ">=1.5.0" (semver), "1.5.0,1.6.0" (list). Leave blank for all.'
-              fullWidth
-            />
-            <TextField
-              label="Platform Filter"
-              value={editPlatformFilter}
-              onChange={(e) => setEditPlatformFilter(e.target.value)}
-              helperText='Comma-separated os/arch pairs, e.g. "linux/amd64, darwin/arm64, windows/amd64". Leave blank for all platforms.'
-              fullWidth
-            />
-          </Box>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setEditConfig(null)}>Cancel</Button>
-          <Button onClick={handleEdit} variant="contained" disabled={editing}>
-            {editing ? <CircularProgress size={18} /> : 'Save'}
-          </Button>
-        </DialogActions>
-      </Dialog>
+                </Box>
+                <TextField
+                  label="Version Filter"
+                  value={editVersionFilter}
+                  onChange={(e) => setEditVersionFilter(e.target.value)}
+                  helperText='Limit versions to sync: "1.9." (prefix), "latest:5", ">=1.5.0" (semver), "1.5.0,1.6.0" (list). Leave blank for all.'
+                  fullWidth
+                />
+                <TextField
+                  label="Platform Filter"
+                  value={editPlatformFilter}
+                  onChange={(e) => setEditPlatformFilter(e.target.value)}
+                  helperText='Comma-separated os/arch pairs, e.g. "linux/amd64, darwin/arm64, windows/amd64". Leave blank for all platforms.'
+                  fullWidth
+                />
+              </Box>
+            </DialogContent>
+            <DialogActions>
+              <Button onClick={() => setEditConfig(null)}>Cancel</Button>
+              <Button onClick={handleEdit} variant="contained" disabled={editMutation.isPending}>
+                {editMutation.isPending ? <CircularProgress size={18} /> : 'Save'}
+              </Button>
+            </DialogActions>
+          </Dialog>
 
-      {/* ==================================================================
+          {/* ==================================================================
           Delete Config Dialog
       ================================================================== */}
-      <Dialog open={!!deleteConfig} onClose={() => setDeleteConfig(null)}>
-        <DialogTitle>Delete Mirror Configuration</DialogTitle>
-        <DialogContent>
-          <Typography>
-            Are you sure you want to delete mirror <strong>{deleteConfig?.name}</strong>? This
-            will delete all synced version records and cannot be undone. Binaries in storage
-            will NOT be removed automatically.
-          </Typography>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setDeleteConfig(null)}>Cancel</Button>
-          <Button color="error" onClick={handleDelete} disabled={deleting}>
-            {deleting ? <CircularProgress size={18} /> : 'Delete'}
-          </Button>
-        </DialogActions>
-      </Dialog>
+          <Dialog open={!!deleteConfig} onClose={() => setDeleteConfig(null)}>
+            <DialogTitle>Delete Mirror Configuration</DialogTitle>
+            <DialogContent>
+              <Typography>
+                Are you sure you want to delete mirror <strong>{deleteConfig?.name}</strong>? This
+                will delete all synced version records and cannot be undone. Binaries in storage
+                will NOT be removed automatically.
+              </Typography>
+            </DialogContent>
+            <DialogActions>
+              <Button onClick={() => setDeleteConfig(null)}>Cancel</Button>
+              <Button color="error" onClick={handleDelete} disabled={deleteMutation.isPending}>
+                {deleteMutation.isPending ? <CircularProgress size={18} /> : 'Delete'}
+              </Button>
+            </DialogActions>
+          </Dialog>
 
-      {/* ==================================================================
+          {/* ==================================================================
           Versions Dialog
       ================================================================== */}
-      {versionsConfig && (
-        <Dialog
-          open
-          onClose={() => setVersionsConfig(null)}
-          maxWidth="lg"
-          fullWidth
-        >
-          <DialogTitle>
-            Versions — {versionsConfig.name}
-            <Box component="span" sx={{ ml: 1 }}>
-              <ToolChip tool={versionsConfig.tool} />
-            </Box>
-          </DialogTitle>
-          <DialogContent>
-            {versionsLoading ? (
-              <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
-                <CircularProgress />
-              </Box>
-            ) : versions.length === 0 ? (
-              <Alert severity="info">No versions have been synced yet.</Alert>
-            ) : (
-              <TableContainer component={Paper} variant="outlined">
-                <Table size="small">
-                  <TableHead>
-                    <TableRow>
-                      <TableCell width={48} />
-                      <TableCell>Version</TableCell>
-                      <TableCell>Status</TableCell>
-                      <TableCell>Synced At</TableCell>
-                      <TableCell align="right">Actions</TableCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {versions.map((v) => (
-                      <VersionRow
-                        key={v.id}
-                        version={v}
-                        configId={versionsConfig.id}
-                        onDelete={setDeleteVersion}
-                      />
-                    ))}
-                  </TableBody>
-                </Table>
-              </TableContainer>
-            )}
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={() => setVersionsConfig(null)}>Close</Button>
-          </DialogActions>
-        </Dialog>
-      )}
+          {versionsConfig && (
+            <Dialog
+              open
+              onClose={() => setVersionsConfig(null)}
+              maxWidth="lg"
+              fullWidth
+            >
+              <DialogTitle>
+                Versions — {versionsConfig.name}
+                <Box component="span" sx={{ ml: 1 }}>
+                  <ToolChip tool={versionsConfig.tool} />
+                </Box>
+              </DialogTitle>
+              <DialogContent>
+                {versionsLoading ? (
+                  <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
+                    <CircularProgress />
+                  </Box>
+                ) : versions.length === 0 ? (
+                  <Alert severity="info">No versions have been synced yet.</Alert>
+                ) : (
+                  <TableContainer component={Paper} variant="outlined">
+                    <Table size="small">
+                      <TableHead>
+                        <TableRow>
+                          <TableCell width={48} />
+                          <TableCell>Version</TableCell>
+                          <TableCell>Status</TableCell>
+                          <TableCell>Synced At</TableCell>
+                          <TableCell align="right">Actions</TableCell>
+                        </TableRow>
+                      </TableHead>
+                      <TableBody>
+                        {versions.map((v) => (
+                          <VersionRow
+                            key={v.id}
+                            version={v}
+                            configId={versionsConfig.id}
+                            onDelete={setDeleteVersion}
+                          />
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </TableContainer>
+                )}
+              </DialogContent>
+              <DialogActions>
+                <Button onClick={() => setVersionsConfig(null)}>Close</Button>
+              </DialogActions>
+            </Dialog>
+          )}
 
-      {/* ---- Delete Version Confirmation ---- */}
-      <Dialog open={!!deleteVersion} onClose={() => setDeleteVersion(null)}>
-        <DialogTitle>Delete Terraform Version</DialogTitle>
-        <DialogContent>
-          <Typography>
-            Are you sure you want to delete version{' '}
-            <strong>{deleteVersion?.version}</strong>? This will remove the version record
-            and cannot be undone.
-          </Typography>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setDeleteVersion(null)}>Cancel</Button>
-          <Button color="error" onClick={handleDeleteVersion} disabled={deletingVersion}>
-            {deletingVersion ? <CircularProgress size={18} /> : 'Delete'}
-          </Button>
-        </DialogActions>
-      </Dialog>
+          {/* ---- Delete Version Confirmation ---- */}
+          <Dialog open={!!deleteVersion} onClose={() => setDeleteVersion(null)}>
+            <DialogTitle>Delete Terraform Version</DialogTitle>
+            <DialogContent>
+              <Typography>
+                Are you sure you want to delete version{' '}
+                <strong>{deleteVersion?.version}</strong>? This will remove the version record
+                and cannot be undone.
+              </Typography>
+            </DialogContent>
+            <DialogActions>
+              <Button onClick={() => setDeleteVersion(null)}>Cancel</Button>
+              <Button color="error" onClick={handleDeleteVersion} disabled={deletingVersion}>
+                {deletingVersion ? <CircularProgress size={18} /> : 'Delete'}
+              </Button>
+            </DialogActions>
+          </Dialog>
 
-      {/* ==================================================================
+          {/* ==================================================================
           History Dialog
       ================================================================== */}
-      <Dialog
-        open={!!historyConfig}
-        onClose={() => setHistoryConfig(null)}
-        maxWidth="lg"
-        fullWidth
-      >
-        <DialogTitle>Sync History — {historyConfig?.name}</DialogTitle>
-        <DialogContent>
-          {historyLoading ? (
-            <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
-              <CircularProgress />
-            </Box>
-          ) : history.length === 0 ? (
-            <Alert severity="info">No sync history yet.</Alert>
-          ) : (
-            <TableContainer component={Paper} variant="outlined">
-              <Table size="small">
-                <TableHead>
-                  <TableRow>
-                    <TableCell>Started</TableCell>
-                    <TableCell>Completed</TableCell>
-                    <TableCell>Triggered By</TableCell>
-                    <TableCell>Status</TableCell>
-                    <TableCell>Versions</TableCell>
-                    <TableCell>Platforms</TableCell>
-                    <TableCell>Failures</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {history.map((h) => (
-                    <TableRow key={h.id} hover>
-                      <TableCell>{new Date(h.started_at).toLocaleString()}</TableCell>
-                      <TableCell>
-                        {h.completed_at ? new Date(h.completed_at).toLocaleString() : '—'}
-                      </TableCell>
-                      <TableCell>{h.triggered_by}</TableCell>
-                      <TableCell>
-                        <SyncStatusChip status={h.status} />
-                      </TableCell>
-                      <TableCell>{h.versions_synced}</TableCell>
-                      <TableCell>{h.platforms_synced}</TableCell>
-                      <TableCell>
-                        {h.versions_failed > 0 ? (
-                          <Chip label={h.versions_failed} color="error" size="small" />
-                        ) : (
-                          '0'
-                        )}
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </TableContainer>
-          )}
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setHistoryConfig(null)}>Close</Button>
-        </DialogActions>
-      </Dialog>
-    </Container>
+          <Dialog
+            open={!!historyConfig}
+            onClose={() => setHistoryConfig(null)}
+            maxWidth="lg"
+            fullWidth
+          >
+            <DialogTitle>Sync History — {historyConfig?.name}</DialogTitle>
+            <DialogContent>
+              {historyLoading ? (
+                <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
+                  <CircularProgress />
+                </Box>
+              ) : history.length === 0 ? (
+                <Alert severity="info">No sync history yet.</Alert>
+              ) : (
+                <TableContainer component={Paper} variant="outlined">
+                  <Table size="small">
+                    <TableHead>
+                      <TableRow>
+                        <TableCell>Started</TableCell>
+                        <TableCell>Completed</TableCell>
+                        <TableCell>Triggered By</TableCell>
+                        <TableCell>Status</TableCell>
+                        <TableCell>Versions</TableCell>
+                        <TableCell>Platforms</TableCell>
+                        <TableCell>Failures</TableCell>
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      {history.map((h) => (
+                        <TableRow key={h.id} hover>
+                          <TableCell>{new Date(h.started_at).toLocaleString()}</TableCell>
+                          <TableCell>
+                            {h.completed_at ? new Date(h.completed_at).toLocaleString() : '—'}
+                          </TableCell>
+                          <TableCell>{h.triggered_by}</TableCell>
+                          <TableCell>
+                            <SyncStatusChip status={h.status} />
+                          </TableCell>
+                          <TableCell>{h.versions_synced}</TableCell>
+                          <TableCell>{h.platforms_synced}</TableCell>
+                          <TableCell>
+                            {h.versions_failed > 0 ? (
+                              <Chip label={h.versions_failed} color="error" size="small" />
+                            ) : (
+                              '0'
+                            )}
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </TableContainer>
+              )}
+            </DialogContent>
+            <DialogActions>
+              <Button onClick={() => setHistoryConfig(null)}>Close</Button>
+            </DialogActions>
+          </Dialog>
+        </Container>
       )}
     </Box>
   );
