@@ -37,6 +37,7 @@ import Brightness7 from '@mui/icons-material/Brightness7';
 import HelpOutline from '@mui/icons-material/HelpOutline';
 import InfoOutlined from '@mui/icons-material/InfoOutlined';
 import Shield from '@mui/icons-material/Shield';
+import Security from '@mui/icons-material/Security';
 import Storage from '@mui/icons-material/Storage';
 import HourglassEmpty from '@mui/icons-material/HourglassEmpty';
 import Policy from '@mui/icons-material/Policy';
@@ -135,6 +136,7 @@ const Layout = () => {
       label: 'System',
       items: [
         { text: 'Storage', icon: <Storage />, path: '/admin/storage', tooltip: 'Configure backend storage for binaries and providers', scope: 'admin' },
+        { text: 'Security Scanning', icon: <Security />, path: '/admin/security-scanning', tooltip: 'View security scanning configuration and status', scope: 'admin' },
         { text: 'Audit Logs', icon: <History />, path: '/admin/audit-logs', tooltip: 'View system audit logs', scope: 'audit:read' },
       ],
     },

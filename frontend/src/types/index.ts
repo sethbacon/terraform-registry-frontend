@@ -422,6 +422,46 @@ export interface ModuleScan {
 
 // ---- Module terraform-docs ----
 
+// ---- Security Scanning Admin ----
+
+export interface ScanningConfig {
+  enabled: boolean;
+  tool: string;
+  expected_version?: string;
+  severity_threshold: string;
+  timeout: string;
+  worker_count: number;
+  scan_interval_mins: number;
+}
+
+export interface RecentScanEntry {
+  id: string;
+  module_version: string;
+  module_name: string;
+  namespace: string;
+  system: string;
+  scanner: string;
+  status: ModuleScanStatus;
+  critical_count: number;
+  high_count: number;
+  medium_count: number;
+  low_count: number;
+  scanned_at: string | null;
+  created_at: string;
+}
+
+export interface ScanningStats {
+  total: number;
+  pending: number;
+  scanning: number;
+  clean: number;
+  findings: number;
+  error: number;
+  recent_scans: RecentScanEntry[];
+}
+
+// ---- Module terraform-docs ----
+
 export interface ModuleInputVar {
   name: string;
   type: string;

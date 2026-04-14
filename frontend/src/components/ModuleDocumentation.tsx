@@ -1,9 +1,7 @@
 import React from 'react';
 import {
   Box,
-  Paper,
   Typography,
-  Divider,
   Chip,
   Table,
   TableHead,
@@ -20,7 +18,15 @@ interface ModuleDocumentationProps {
 }
 
 const ModuleDocumentation: React.FC<ModuleDocumentationProps> = ({ moduleDocs, docsLoading }) => {
-  if (docsLoading || !moduleDocs) return null;
+  if (docsLoading) return null;
+
+  if (!moduleDocs) {
+    return (
+      <Typography variant="body2" color="text.secondary">
+        No inputs, outputs, or provider requirements detected for this module version.
+      </Typography>
+    );
+  }
 
   const inputs = moduleDocs.inputs ?? [];
   const outputs = moduleDocs.outputs ?? [];
@@ -32,13 +38,15 @@ const ModuleDocumentation: React.FC<ModuleDocumentationProps> = ({ moduleDocs, d
     providers.length === 0 &&
     !moduleDocs.requirements?.required_version
   ) {
-    return null;
+    return (
+      <Typography variant="body2" color="text.secondary">
+        No inputs, outputs, or provider requirements detected for this module version.
+      </Typography>
+    );
   }
 
   return (
-    <Paper sx={{ p: 3, mt: 3 }}>
-      <Typography variant="h6" gutterBottom>Module Documentation</Typography>
-      <Divider sx={{ mb: 2 }} />
+    <Box>
 
       {moduleDocs.requirements?.required_version && (
         <Box mb={2}>
@@ -144,7 +152,7 @@ const ModuleDocumentation: React.FC<ModuleDocumentationProps> = ({ moduleDocs, d
           </TableContainer>
         </Box>
       )}
-    </Paper>
+    </Box>
   );
 };
 

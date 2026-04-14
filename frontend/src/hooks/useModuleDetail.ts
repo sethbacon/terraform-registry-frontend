@@ -327,6 +327,16 @@ export function useModuleDetail() {
     }
   };
 
+  const handleUpdateDescription = async (newDescription: string) => {
+    if (!module?.id) return;
+    try {
+      await api.updateModule(module.id, { description: newDescription });
+      setModule(prev => prev ? { ...prev, description: newDescription } : prev);
+    } catch (err: unknown) {
+      setError(getErrorMessage(err, 'Failed to update description'));
+    }
+  };
+
   const getTerraformExample = () => {
     if (!module || !selectedVersion) return '';
 
@@ -402,6 +412,7 @@ export function useModuleDetail() {
     openDeleteVersionDialog,
     handleDeprecateVersion,
     handleUndeprecateVersion,
+    handleUpdateDescription,
     getTerraformExample,
   };
 }

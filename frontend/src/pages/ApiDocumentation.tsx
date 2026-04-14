@@ -247,6 +247,7 @@ function buildNavTags(spec: OpenAPISpec): NavTag[] {
       }
     }
   }
+  tags.sort((a, b) => a.label.localeCompare(b.label));
   return tags;
 }
 
@@ -431,6 +432,7 @@ const ApiDocumentation: React.FC = () => {
             docExpansion="list"
             deepLinking
             tryItOutEnabled
+            tagsSorter="alpha"
             requestInterceptor={requestInterceptor}
             persistAuthorization
             onComplete={onComplete}
