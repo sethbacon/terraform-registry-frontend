@@ -9,6 +9,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.5] - 2026-04-14
+
+### Fixed
+
+- fix: repair API docs sidebar links for tags with spaces (underscore encoding mismatch)
+- fix: enable alphabetical tag sorting in SwaggerUI via wrapSelectors plugin
+
 ## [0.5.4] - 2026-04-14
 
 ### Added
