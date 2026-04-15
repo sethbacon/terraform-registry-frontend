@@ -333,7 +333,7 @@ const SetupWizardPage: React.FC = () => {
             {/* Header */}
             <Box sx={{ textAlign: 'center', mb: 4 }}>
               <SettingsIcon sx={{ fontSize: 48, color: 'primary.main', mb: 1 }} />
-              <Typography variant="h4" gutterBottom>
+              <Typography variant="h4" component="h1" gutterBottom>
                 Terraform Registry Setup
               </Typography>
               <Typography variant="body1" color="text.secondary">
@@ -343,7 +343,7 @@ const SetupWizardPage: React.FC = () => {
             </Box>
 
             {/* Stepper */}
-            <Stepper activeStep={activeStep} sx={{ mb: 4 }} alternativeLabel>
+            <Stepper activeStep={activeStep} sx={{ mb: 4 }} alternativeLabel aria-label="Setup progress">
               {steps.map((label) => (
                 <Step key={label}>
                   <StepLabel>{label}</StepLabel>
@@ -368,7 +368,7 @@ const SetupWizardPage: React.FC = () => {
               <Box>
                 <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
                   <SecurityIcon sx={{ mr: 1, color: 'primary.main' }} />
-                  <Typography variant="h6">Setup Token</Typography>
+                  <Typography variant="h6" component="h2">Setup Token</Typography>
                 </Box>
                 <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
                   Enter the setup token that was printed to the server logs when the registry started.
@@ -418,7 +418,7 @@ const SetupWizardPage: React.FC = () => {
               <Box>
                 <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
                   <SecurityIcon sx={{ mr: 1, color: 'primary.main' }} />
-                  <Typography variant="h6">OIDC Provider Configuration</Typography>
+                  <Typography variant="h6" component="h2">OIDC Provider Configuration</Typography>
                 </Box>
                 <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
                   Configure your OpenID Connect provider for user authentication.
@@ -533,7 +533,7 @@ const SetupWizardPage: React.FC = () => {
               <Box>
                 <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
                   <StorageIcon sx={{ mr: 1, color: 'primary.main' }} />
-                  <Typography variant="h6">Storage Backend Configuration</Typography>
+                  <Typography variant="h6" component="h2">Storage Backend Configuration</Typography>
                 </Box>
                 <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
                   Configure where Terraform modules and providers will be stored.
@@ -780,7 +780,7 @@ const SetupWizardPage: React.FC = () => {
               <Box>
                 <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
                   <ShieldIcon sx={{ mr: 1, color: 'primary.main' }} />
-                  <Typography variant="h6">Security Scanning</Typography>
+                  <Typography variant="h6" component="h2">Security Scanning</Typography>
                 </Box>
                 <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
                   Optionally configure a security scanning tool to automatically scan Terraform
@@ -912,7 +912,7 @@ const SetupWizardPage: React.FC = () => {
               <Box>
                 <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
                   <PersonIcon sx={{ mr: 1, color: 'primary.main' }} />
-                  <Typography variant="h6">Initial Admin User</Typography>
+                  <Typography variant="h6" component="h2">Initial Admin User</Typography>
                 </Box>
                 <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
                   Specify the email address of the first admin user. This must match the email
@@ -970,7 +970,7 @@ const SetupWizardPage: React.FC = () => {
               <Box>
                 <Box sx={{ textAlign: 'center', mb: 3 }}>
                   <CheckCircleIcon sx={{ fontSize: 64, color: 'success.main', mb: 2 }} />
-                  <Typography variant="h5" gutterBottom>
+                  <Typography variant="h5" component="h2" gutterBottom>
                     Ready to Complete Setup
                   </Typography>
                   <Typography variant="body1" color="text.secondary">

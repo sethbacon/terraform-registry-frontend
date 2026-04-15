@@ -61,9 +61,16 @@ const RegistryItemCard: React.FC<RegistryItemCardProps> = ({
   deprecated,
   sx,
 }) => (
-  <Card sx={[cardHoverSx, ...(deprecated ? [{ opacity: 0.7 } as const] : []), ...(Array.isArray(sx) ? sx : sx ? [sx] : [])]} onClick={onClick}>
+  <Card
+    sx={[cardHoverSx, ...(deprecated ? [{ opacity: 0.7 } as const] : []), ...(Array.isArray(sx) ? sx : sx ? [sx] : [])]}
+    onClick={onClick}
+    onKeyDown={(e: React.KeyboardEvent) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onClick(); } }}
+    tabIndex={0}
+    role="article"
+    aria-label={`${title}${deprecated ? ' (deprecated)' : ''}`}
+  >
     <CardContent sx={{ flexGrow: 1 }}>
-      <Typography variant="h6" gutterBottom noWrap>
+      <Typography variant="h6" component="h3" gutterBottom noWrap>
         {title}
       </Typography>
       {subtitle && (
@@ -94,7 +101,7 @@ const RegistryItemCard: React.FC<RegistryItemCardProps> = ({
       </Box>
     </CardContent>
     <CardActions>
-      <Button size="small" color={actionColor}>
+      <Button size="small" color={actionColor} onClick={onClick} aria-label={`${actionLabel} for ${title}`}>
         {actionLabel}
       </Button>
     </CardActions>

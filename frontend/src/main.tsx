@@ -13,6 +13,12 @@ window.addEventListener('unhandledrejection', (event) => {
   captureError(error, { type: 'unhandledrejection' })
 })
 
+if (import.meta.env.DEV) {
+  import('@axe-core/react').then(axe => {
+    axe.default(React, ReactDOM, 1000);
+  });
+}
+
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <App />

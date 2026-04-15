@@ -3,13 +3,30 @@ import { Box } from '@mui/material';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import rehypeSanitize from 'rehype-sanitize';
+import type { Components } from 'react-markdown';
 
 interface MarkdownRendererProps {
   children: string;
 }
 
+/**
+ * Custom heading components that shift markdown headings down by one level
+ * (h1 -> h2, h2 -> h3, h3 -> h4) so the page <h1> remains the top-level
+ * heading and markdown content maintains proper heading hierarchy.
+ */
+const markdownComponents: Partial<Components> = {
+  h1: ({ children, ...props }) => <h2 {...props}>{children}</h2>,
+  h2: ({ children, ...props }) => <h3 {...props}>{children}</h3>,
+  h3: ({ children, ...props }) => <h4 {...props}>{children}</h4>,
+  h4: ({ children, ...props }) => <h5 {...props}>{children}</h5>,
+  h5: ({ children, ...props }) => <h6 {...props}>{children}</h6>,
+  h6: ({ children, ...props }) => <h6 {...props}>{children}</h6>,
+};
+
 const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ children }) => (
   <Box
+    role="region"
+    aria-label="Rendered documentation"
     sx={(theme) => ({
       '& h1': { fontSize: '2rem', fontWeight: 600, mt: 2, mb: 1 },
       '& h2': { fontSize: '1.5rem', fontWeight: 600, mt: 2, mb: 1 },
@@ -48,7 +65,7 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ children }) => (
       },
     })}
   >
-    <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeSanitize]}>
+    <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeSanitize]} components={markdownComponents}>
       {children}
     </ReactMarkdown>
   </Box>
