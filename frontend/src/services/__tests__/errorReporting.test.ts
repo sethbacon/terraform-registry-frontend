@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { init, captureError, setUser } from '../errorReporting'
+import { captureError, setUser } from '../errorReporting'
 
 describe('errorReporting', () => {
   let originalFetch: typeof globalThis.fetch

@@ -46,6 +46,8 @@ export default [
           ([rule, level]) => [rule, level === 'error' ? 'warn' : level],
         ),
       ),
+      // autoFocus is intentional in MUI dialog text fields
+      'jsx-a11y/no-autofocus': 'off',
     },
   },
   // Non-TypeScript JS files (vite.config, etc.) — minimal rules

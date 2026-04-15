@@ -178,7 +178,7 @@ const ApprovalsPage: React.FC = () => {
               <Button
                 variant="outlined"
                 startIcon={<RefreshIcon />}
-                onClick={loadApprovals}
+                onClick={() => { loadApprovals(); }}
               >
                 Refresh
               </Button>

@@ -92,7 +92,6 @@ function handleMetric(metric: Metric): void {
   };
 
   if (import.meta.env.DEV) {
-    // eslint-disable-next-line no-console
     console.log(
       `[Perf] ${metric.name}: ${metric.value.toFixed(2)} (${metric.rating})`,
     );
@@ -121,10 +120,8 @@ export function init(): void {
     null;
 
   if (dsn) {
-    // eslint-disable-next-line no-console
     console.log('[Perf] Initialized — reporting to DSN endpoint');
   } else {
-    // eslint-disable-next-line no-console
     console.log('[Perf] No DSN configured — metrics logged to console only');
   }
 
@@ -166,7 +163,6 @@ export function reportNavigation(routeName: string, durationMs: number): void {
   };
 
   if (import.meta.env.DEV) {
-    // eslint-disable-next-line no-console
     console.log(`[Perf] Navigation → ${routeName}: ${durationMs.toFixed(1)}ms`);
   }
 

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   Container,
   Typography,
@@ -42,7 +42,7 @@ import InfoIcon from '@mui/icons-material/Info';
 import EditIcon from '@mui/icons-material/Edit';
 import AutorenewIcon from '@mui/icons-material/Autorenew';
 import api from '../../services/api';
-import { APIKey, UserMembership } from '../../types';
+import { APIKey } from '../../types';
 import { REGISTRY_HOST } from '../../config';
 import { useAuth } from '../../contexts/AuthContext';
 import { AVAILABLE_SCOPES } from '../../types/rbac';
@@ -642,7 +642,7 @@ const APIKeysPage: React.FC = () => {
                     onChange={(e) => setFormData({ ...formData, organization_id: e.target.value })}
                     label="Organization"
                   >
-                    {memberships.map((m) => (
+                    {memberships.map((m: { organization_id: string; organization_name: string; role_template_display_name?: string }) => (
                       <MenuItem key={m.organization_id} value={m.organization_id}>
                         {m.organization_name} {m.role_template_display_name && `(${m.role_template_display_name})`}
                       </MenuItem>

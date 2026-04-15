@@ -338,10 +338,8 @@ const MirrorsPage: React.FC = () => {
     setError(null);
     deleteMutation.mutate(mirrorToDelete.id);
   };
-}
-  };
 
-const handleTriggerSync = async (mirror: MirrorConfiguration) => {
+  const handleTriggerSync = async (mirror: MirrorConfiguration) => {
   try {
     setError(null);
     await api.triggerMirrorSync(mirror.id);
@@ -448,7 +446,7 @@ return (
             <Button
               variant="outlined"
               startIcon={<RefreshIcon />}
-              onClick={loadMirrors}
+              onClick={() => { loadMirrors(); }}
             >
               Refresh
             </Button>

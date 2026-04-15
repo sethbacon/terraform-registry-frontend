@@ -87,11 +87,23 @@ const sampleStorageConfigs: StorageConfigResponse[] = [
     id: 'sc-001',
     backend_type: 'local',
     is_active: true,
+    azure_account_key_set: false,
+    s3_access_key_id_set: false,
+    s3_secret_access_key_set: false,
+    gcs_credentials_json_set: false,
+    created_at: '2025-06-01T12:00:00Z',
+    updated_at: '2025-06-01T12:00:00Z',
   },
   {
     id: 'sc-002',
     backend_type: 's3',
     is_active: false,
+    azure_account_key_set: false,
+    s3_access_key_id_set: true,
+    s3_secret_access_key_set: true,
+    gcs_credentials_json_set: false,
+    created_at: '2025-06-01T12:00:00Z',
+    updated_at: '2025-06-01T12:00:00Z',
   },
 ];
 

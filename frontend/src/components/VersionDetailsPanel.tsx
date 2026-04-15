@@ -16,7 +16,7 @@ interface VersionDetailsPanelProps {
   selectedVersion: ModuleVersion | null;
   canManage: boolean;
   deprecating: boolean;
-  onUndeprecate: () => Promise<void>;
+  onUndeprecate: () => void;
   onOpenDeprecateDialog: () => void;
   onOpenDeleteVersionDialog: (version: string) => void;
 }
