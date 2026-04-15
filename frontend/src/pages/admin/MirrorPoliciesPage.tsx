@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   Box,
   Button,
@@ -35,6 +36,7 @@ import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import api from '../../services/api';
 import { MirrorPolicy } from '../../types/rbac';
 import { getErrorMessage } from '../../utils/errors';
+import { queryKeys } from '../../services/queryKeys';
 
 interface PolicyFormData {
   name: string;
@@ -61,8 +63,7 @@ const defaultFormData: PolicyFormData = {
 };
 
 const MirrorPoliciesPage: React.FC = () => {
-  const [policies, setPolicies] = useState<MirrorPolicy[]>([]);
-  const [loading, setLoading] = useState(true);
+  const queryClient = useQueryClient();
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
@@ -70,7 +71,6 @@ const MirrorPoliciesPage: React.FC = () => {
   const [formDialogOpen, setFormDialogOpen] = useState(false);
   const [editingPolicy, setEditingPolicy] = useState<MirrorPolicy | null>(null);
   const [formData, setFormData] = useState<PolicyFormData>(defaultFormData);
-  const [saving, setSaving] = useState(false);
 
   // Delete dialog
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -82,71 +82,78 @@ const MirrorPoliciesPage: React.FC = () => {
   const [evaluateResult, setEvaluateResult] = useState<{ allowed: boolean; matched_policy?: string; reason?: string } | null>(null);
   const [evaluating, setEvaluating] = useState(false);
 
-  useEffect(() => {
-    loadPolicies();
-  }, []);
-
-  const loadPolicies = async () => {
-    try {
-      setLoading(true);
-      setError(null);
+  const {
+    data: policies = [],
+    isLoading: loading,
+    error: queryError,
+    refetch: loadPolicies,
+  } = useQuery<MirrorPolicy[]>({
+    queryKey: queryKeys.policies.list(),
+    queryFn: async () => {
       const data = await api.listMirrorPolicies();
-      setPolicies(Array.isArray(data) ? data : []);
-    } catch (err: unknown) {
-      setError(getErrorMessage(err, 'Failed to load mirror policies'));
-      console.error('Error loading policies:', err);
-    } finally {
-      setLoading(false);
-    }
-  };
+      return Array.isArray(data) ? data : [];
+    },
+  });
 
-  const handleSave = async () => {
-    try {
-      setSaving(true);
-      setError(null);
-      const payload = {
-        name: formData.name,
-        description: formData.description || undefined,
-        policy_type: formData.policy_type,
-        upstream_registry: formData.upstream_registry || undefined,
-        namespace_pattern: formData.namespace_pattern || undefined,
-        provider_pattern: formData.provider_pattern || undefined,
-        priority: formData.priority,
-        is_active: formData.is_active,
-        requires_approval: formData.requires_approval,
-      };
+  if (queryError && !error) {
+    setError(getErrorMessage(queryError, 'Failed to load mirror policies'));
+  }
 
+  const saveMutation = useMutation({
+    mutationFn: async (payload: Parameters<typeof api.createMirrorPolicy>[0]) => {
       if (editingPolicy) {
-        await api.updateMirrorPolicy(editingPolicy.id, payload);
-        setSuccess('Policy updated successfully');
-      } else {
-        await api.createMirrorPolicy(payload);
-        setSuccess('Policy created successfully');
+        return api.updateMirrorPolicy(editingPolicy.id, payload);
       }
-
+      return api.createMirrorPolicy(payload);
+    },
+    onSuccess: () => {
+      setSuccess(editingPolicy ? 'Policy updated successfully' : 'Policy created successfully');
+      setError(null);
       setFormDialogOpen(false);
       setEditingPolicy(null);
       setFormData(defaultFormData);
-      await loadPolicies();
-    } catch (err: unknown) {
+      queryClient.invalidateQueries({ queryKey: queryKeys.policies._def });
+    },
+    onError: (err: unknown) => {
       setError(getErrorMessage(err, 'Failed to save policy'));
-    } finally {
-      setSaving(false);
-    }
-  };
+    },
+  });
 
-  const handleDelete = async () => {
-    if (!policyToDelete) return;
-    try {
-      setError(null);
-      await api.deleteMirrorPolicy(policyToDelete.id);
+  const deleteMutation = useMutation({
+    mutationFn: (id: string) => api.deleteMirrorPolicy(id),
+    onSuccess: () => {
       setDeleteDialogOpen(false);
       setPolicyToDelete(null);
       setSuccess('Policy deleted successfully');
-      await loadPolicies();
-    } catch (err: unknown) {
+      setError(null);
+      queryClient.invalidateQueries({ queryKey: queryKeys.policies._def });
+    },
+    onError: (err: unknown) => {
       setError(getErrorMessage(err, 'Failed to delete policy'));
-    }
+    },
+  });
+
+  const saving = saveMutation.isPending;
+
+  const handleSave = () => {
+    setError(null);
+    saveMutation.mutate({
+      name: formData.name,
+      description: formData.description || undefined,
+      policy_type: formData.policy_type,
+      upstream_registry: formData.upstream_registry || undefined,
+      namespace_pattern: formData.namespace_pattern || undefined,
+      provider_pattern: formData.provider_pattern || undefined,
+      priority: formData.priority,
+      is_active: formData.is_active,
+      requires_approval: formData.requires_approval,
+    });
+  };
+
+  const handleDelete = () => {
+    if (!policyToDelete) return;
+    setError(null);
+    deleteMutation.mutate(policyToDelete.id);
   };
 
   const handleEvaluate = async () => {
@@ -203,368 +210,368 @@ const MirrorPoliciesPage: React.FC = () => {
         </Box>
       ) : (
         <>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-        <Box>
-          <Typography variant="h4">Mirror Policies</Typography>
-          <Typography variant="body2" color="text.secondary">
-            Define allow/deny rules for provider mirroring
-          </Typography>
-        </Box>
-        <Box sx={{ display: 'flex', gap: 1 }}>
-          <Tooltip title="Evaluate a policy">
-            <Button
-              variant="outlined"
-              startIcon={<PlayArrowIcon />}
-              onClick={() => {
-                setEvaluateForm({ registry: '', namespace: '', provider: '' });
-                setEvaluateResult(null);
-                setEvaluateDialogOpen(true);
-              }}
-            >
-              Evaluate
-            </Button>
-          </Tooltip>
-          <Button
-            variant="outlined"
-            startIcon={<RefreshIcon />}
-            onClick={loadPolicies}
-          >
-            Refresh
-          </Button>
-          <Button
-            variant="contained"
-            startIcon={<AddIcon />}
-            onClick={openCreateDialog}
-          >
-            Create Policy
-          </Button>
-        </Box>
-      </Box>
-
-      {error && (
-        <Alert severity="error" sx={{ mb: 2 }} onClose={() => setError(null)}>
-          {error}
-        </Alert>
-      )}
-
-      {success && (
-        <Alert severity="success" sx={{ mb: 2 }} onClose={() => setSuccess(null)}>
-          {success}
-        </Alert>
-      )}
-
-      <Grid container spacing={3}>
-        {policies.map((policy) => (
-          <Grid size={{ xs: 12, md: 6 }} key={policy.id}>
-            <Card sx={{ opacity: policy.is_active ? 1 : 0.6 }}>
-              <CardContent>
-                <Box display="flex" justifyContent="space-between" alignItems="flex-start" mb={1}>
-                  <Typography variant="h6" sx={{ flex: 1, mr: 1 }}>
-                    {policy.name}
-                  </Typography>
-                  <Box display="flex" flexDirection="column" alignItems="flex-end" gap={0.5}>
-                    {getPolicyTypeChip(policy.policy_type)}
-                    <Chip
-                      label={policy.is_active ? 'Active' : 'Inactive'}
-                      size="small"
-                      color={policy.is_active ? 'default' : 'default'}
-                      variant={policy.is_active ? 'filled' : 'outlined'}
-                    />
-                  </Box>
-                </Box>
-
-                {policy.description && (
-                  <Typography variant="body2" color="textSecondary" paragraph>
-                    {policy.description}
-                  </Typography>
-                )}
-
-                <Box display="flex" flexWrap="wrap" gap={0.5} mb={1}>
-                  {policy.upstream_registry && (
-                    <Chip
-                      size="small"
-                      variant="outlined"
-                      label={`Registry: ${policy.upstream_registry}`}
-                    />
-                  )}
-                  {policy.namespace_pattern && (
-                    <Chip
-                      size="small"
-                      variant="outlined"
-                      label={`Namespace: ${policy.namespace_pattern}`}
-                    />
-                  )}
-                  {policy.provider_pattern && (
-                    <Chip
-                      size="small"
-                      variant="outlined"
-                      label={`Provider: ${policy.provider_pattern}`}
-                    />
-                  )}
-                  {policy.requires_approval && (
-                    <Chip
-                      size="small"
-                      color="warning"
-                      label="Requires approval"
-                    />
-                  )}
-                </Box>
-
-                {policy.priority !== undefined && policy.priority !== 0 && (
-                  <Typography variant="caption" color="textSecondary" display="block">
-                    Priority: {policy.priority}
-                  </Typography>
-                )}
-              </CardContent>
-
-              <CardActions>
-                <Tooltip title="Edit">
-                  <IconButton size="small" aria-label="Edit policy" onClick={() => openEditDialog(policy)}>
-                    <EditIcon />
-                  </IconButton>
-                </Tooltip>
-                <Tooltip title="Delete">
-                  <IconButton
-                    size="small"
-                    aria-label="Delete policy"
-                    color="error"
-                    onClick={() => {
-                      setPolicyToDelete(policy);
-                      setDeleteDialogOpen(true);
-                    }}
-                  >
-                    <DeleteIcon />
-                  </IconButton>
-                </Tooltip>
-              </CardActions>
-            </Card>
-          </Grid>
-        ))}
-
-        {policies.length === 0 && !loading && (
-          <Grid size={12}>
-            <Card>
-              <CardContent>
-                <Typography variant="body1" color="textSecondary" align="center">
-                  No mirror policies found. Create one to control which providers can be mirrored.
-                </Typography>
-              </CardContent>
-            </Card>
-          </Grid>
-        )}
-      </Grid>
-
-      {/* Create / Edit Dialog */}
-      <Dialog
-        open={formDialogOpen}
-        onClose={() => {
-          setFormDialogOpen(false);
-          setEditingPolicy(null);
-        }}
-        maxWidth="sm"
-        fullWidth
-      >
-        <DialogTitle>{editingPolicy ? 'Edit Policy' : 'Create Mirror Policy'}</DialogTitle>
-        <DialogContent>
-          <Box sx={{ pt: 2, display: 'flex', flexDirection: 'column', gap: 2 }}>
-            <TextField
-              label="Name"
-              fullWidth
-              required
-              value={formData.name}
-              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-              helperText="A unique name for this policy"
-            />
-
-            <TextField
-              label="Description"
-              fullWidth
-              multiline
-              rows={2}
-              value={formData.description}
-              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-            />
-
-            <FormControl fullWidth required>
-              <InputLabel>Policy Type</InputLabel>
-              <Select
-                label="Policy Type"
-                value={formData.policy_type}
-                onChange={(e) =>
-                  setFormData({ ...formData, policy_type: e.target.value as 'allow' | 'deny' })
-                }
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+            <Box>
+              <Typography variant="h4">Mirror Policies</Typography>
+              <Typography variant="body2" color="text.secondary">
+                Define allow/deny rules for provider mirroring
+              </Typography>
+            </Box>
+            <Box sx={{ display: 'flex', gap: 1 }}>
+              <Tooltip title="Evaluate a policy">
+                <Button
+                  variant="outlined"
+                  startIcon={<PlayArrowIcon />}
+                  onClick={() => {
+                    setEvaluateForm({ registry: '', namespace: '', provider: '' });
+                    setEvaluateResult(null);
+                    setEvaluateDialogOpen(true);
+                  }}
+                >
+                  Evaluate
+                </Button>
+              </Tooltip>
+              <Button
+                variant="outlined"
+                startIcon={<RefreshIcon />}
+                onClick={() => { loadPolicies(); }}
               >
-                <MenuItem value="allow">Allow — permit matching providers to be mirrored</MenuItem>
-                <MenuItem value="deny">Deny — block matching providers from being mirrored</MenuItem>
-              </Select>
-            </FormControl>
-
-            <TextField
-              label="Upstream Registry"
-              fullWidth
-              value={formData.upstream_registry}
-              onChange={(e) => setFormData({ ...formData, upstream_registry: e.target.value })}
-              helperText="e.g., registry.terraform.io (leave blank to match any)"
-              placeholder="registry.terraform.io"
-            />
-
-            <TextField
-              label="Namespace Pattern"
-              fullWidth
-              value={formData.namespace_pattern}
-              onChange={(e) => setFormData({ ...formData, namespace_pattern: e.target.value })}
-              helperText="Glob pattern, e.g., hashicorp or hash* (leave blank to match any)"
-            />
-
-            <TextField
-              label="Provider Pattern"
-              fullWidth
-              value={formData.provider_pattern}
-              onChange={(e) => setFormData({ ...formData, provider_pattern: e.target.value })}
-              helperText="Glob pattern, e.g., aws or a* (leave blank to match any)"
-            />
-
-            <TextField
-              label="Priority"
-              type="number"
-              fullWidth
-              value={formData.priority}
-              onChange={(e) =>
-                setFormData({ ...formData, priority: parseInt(e.target.value) || 0 })
-              }
-              helperText="Higher priority policies are evaluated first"
-            />
-
-            <FormControlLabel
-              control={
-                <Switch
-                  checked={formData.is_active}
-                  onChange={(e) => setFormData({ ...formData, is_active: e.target.checked })}
-                />
-              }
-              label="Active"
-            />
-
-            <FormControlLabel
-              control={
-                <Switch
-                  checked={formData.requires_approval}
-                  onChange={(e) =>
-                    setFormData({ ...formData, requires_approval: e.target.checked })
-                  }
-                />
-              }
-              label="Requires Approval"
-            />
+                Refresh
+              </Button>
+              <Button
+                variant="contained"
+                startIcon={<AddIcon />}
+                onClick={openCreateDialog}
+              >
+                Create Policy
+              </Button>
+            </Box>
           </Box>
-        </DialogContent>
-        <DialogActions>
-          <Button
-            onClick={() => {
+
+          {error && (
+            <Alert severity="error" sx={{ mb: 2 }} onClose={() => setError(null)}>
+              {error}
+            </Alert>
+          )}
+
+          {success && (
+            <Alert severity="success" sx={{ mb: 2 }} onClose={() => setSuccess(null)}>
+              {success}
+            </Alert>
+          )}
+
+          <Grid container spacing={3}>
+            {policies.map((policy) => (
+              <Grid size={{ xs: 12, md: 6 }} key={policy.id}>
+                <Card sx={{ opacity: policy.is_active ? 1 : 0.6 }}>
+                  <CardContent>
+                    <Box display="flex" justifyContent="space-between" alignItems="flex-start" mb={1}>
+                      <Typography variant="h6" sx={{ flex: 1, mr: 1 }}>
+                        {policy.name}
+                      </Typography>
+                      <Box display="flex" flexDirection="column" alignItems="flex-end" gap={0.5}>
+                        {getPolicyTypeChip(policy.policy_type)}
+                        <Chip
+                          label={policy.is_active ? 'Active' : 'Inactive'}
+                          size="small"
+                          color={policy.is_active ? 'default' : 'default'}
+                          variant={policy.is_active ? 'filled' : 'outlined'}
+                        />
+                      </Box>
+                    </Box>
+
+                    {policy.description && (
+                      <Typography variant="body2" color="textSecondary" paragraph>
+                        {policy.description}
+                      </Typography>
+                    )}
+
+                    <Box display="flex" flexWrap="wrap" gap={0.5} mb={1}>
+                      {policy.upstream_registry && (
+                        <Chip
+                          size="small"
+                          variant="outlined"
+                          label={`Registry: ${policy.upstream_registry}`}
+                        />
+                      )}
+                      {policy.namespace_pattern && (
+                        <Chip
+                          size="small"
+                          variant="outlined"
+                          label={`Namespace: ${policy.namespace_pattern}`}
+                        />
+                      )}
+                      {policy.provider_pattern && (
+                        <Chip
+                          size="small"
+                          variant="outlined"
+                          label={`Provider: ${policy.provider_pattern}`}
+                        />
+                      )}
+                      {policy.requires_approval && (
+                        <Chip
+                          size="small"
+                          color="warning"
+                          label="Requires approval"
+                        />
+                      )}
+                    </Box>
+
+                    {policy.priority !== undefined && policy.priority !== 0 && (
+                      <Typography variant="caption" color="textSecondary" display="block">
+                        Priority: {policy.priority}
+                      </Typography>
+                    )}
+                  </CardContent>
+
+                  <CardActions>
+                    <Tooltip title="Edit">
+                      <IconButton size="small" aria-label="Edit policy" onClick={() => openEditDialog(policy)}>
+                        <EditIcon />
+                      </IconButton>
+                    </Tooltip>
+                    <Tooltip title="Delete">
+                      <IconButton
+                        size="small"
+                        aria-label="Delete policy"
+                        color="error"
+                        onClick={() => {
+                          setPolicyToDelete(policy);
+                          setDeleteDialogOpen(true);
+                        }}
+                      >
+                        <DeleteIcon />
+                      </IconButton>
+                    </Tooltip>
+                  </CardActions>
+                </Card>
+              </Grid>
+            ))}
+
+            {policies.length === 0 && !loading && (
+              <Grid size={12}>
+                <Card>
+                  <CardContent>
+                    <Typography variant="body1" color="textSecondary" align="center">
+                      No mirror policies found. Create one to control which providers can be mirrored.
+                    </Typography>
+                  </CardContent>
+                </Card>
+              </Grid>
+            )}
+          </Grid>
+
+          {/* Create / Edit Dialog */}
+          <Dialog
+            open={formDialogOpen}
+            onClose={() => {
               setFormDialogOpen(false);
               setEditingPolicy(null);
             }}
-            disabled={saving}
+            maxWidth="sm"
+            fullWidth
           >
-            Cancel
-          </Button>
-          <Button
-            variant="contained"
-            onClick={handleSave}
-            disabled={!formData.name || saving}
-          >
-            {saving ? 'Saving...' : editingPolicy ? 'Update' : 'Create'}
-          </Button>
-        </DialogActions>
-      </Dialog>
+            <DialogTitle>{editingPolicy ? 'Edit Policy' : 'Create Mirror Policy'}</DialogTitle>
+            <DialogContent>
+              <Box sx={{ pt: 2, display: 'flex', flexDirection: 'column', gap: 2 }}>
+                <TextField
+                  label="Name"
+                  fullWidth
+                  required
+                  value={formData.name}
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  helperText="A unique name for this policy"
+                />
 
-      {/* Delete Confirmation Dialog */}
-      <Dialog open={deleteDialogOpen} onClose={() => setDeleteDialogOpen(false)}>
-        <DialogTitle>Confirm Delete</DialogTitle>
-        <DialogContent>
-          <Typography>
-            Are you sure you want to delete the policy "{policyToDelete?.name}"? This action cannot
-            be undone.
-          </Typography>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setDeleteDialogOpen(false)}>Cancel</Button>
-          <Button variant="contained" color="error" onClick={handleDelete}>
-            Delete
-          </Button>
-        </DialogActions>
-      </Dialog>
+                <TextField
+                  label="Description"
+                  fullWidth
+                  multiline
+                  rows={2}
+                  value={formData.description}
+                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                />
 
-      {/* Evaluate Policy Dialog */}
-      <Dialog
-        open={evaluateDialogOpen}
-        onClose={() => setEvaluateDialogOpen(false)}
-        maxWidth="sm"
-        fullWidth
-      >
-        <DialogTitle>Evaluate Policy</DialogTitle>
-        <DialogContent>
-          <Box sx={{ pt: 2, display: 'flex', flexDirection: 'column', gap: 2 }}>
-            <Typography variant="body2" color="textSecondary">
-              Check whether a specific provider would be allowed or denied by the current policy set.
-            </Typography>
-            <TextField
-              label="Registry"
-              fullWidth
-              required
-              value={evaluateForm.registry}
-              onChange={(e) => setEvaluateForm({ ...evaluateForm, registry: e.target.value })}
-              placeholder="registry.terraform.io"
-            />
-            <TextField
-              label="Namespace"
-              fullWidth
-              required
-              value={evaluateForm.namespace}
-              onChange={(e) => setEvaluateForm({ ...evaluateForm, namespace: e.target.value })}
-              placeholder="hashicorp"
-            />
-            <TextField
-              label="Provider"
-              fullWidth
-              required
-              value={evaluateForm.provider}
-              onChange={(e) => setEvaluateForm({ ...evaluateForm, provider: e.target.value })}
-              placeholder="aws"
-            />
-            {evaluateResult && (
-              <Alert
-                severity={evaluateResult.allowed ? 'success' : 'error'}
-                sx={{ mt: 1 }}
+                <FormControl fullWidth required>
+                  <InputLabel>Policy Type</InputLabel>
+                  <Select
+                    label="Policy Type"
+                    value={formData.policy_type}
+                    onChange={(e) =>
+                      setFormData({ ...formData, policy_type: e.target.value as 'allow' | 'deny' })
+                    }
+                  >
+                    <MenuItem value="allow">Allow — permit matching providers to be mirrored</MenuItem>
+                    <MenuItem value="deny">Deny — block matching providers from being mirrored</MenuItem>
+                  </Select>
+                </FormControl>
+
+                <TextField
+                  label="Upstream Registry"
+                  fullWidth
+                  value={formData.upstream_registry}
+                  onChange={(e) => setFormData({ ...formData, upstream_registry: e.target.value })}
+                  helperText="e.g., registry.terraform.io (leave blank to match any)"
+                  placeholder="registry.terraform.io"
+                />
+
+                <TextField
+                  label="Namespace Pattern"
+                  fullWidth
+                  value={formData.namespace_pattern}
+                  onChange={(e) => setFormData({ ...formData, namespace_pattern: e.target.value })}
+                  helperText="Glob pattern, e.g., hashicorp or hash* (leave blank to match any)"
+                />
+
+                <TextField
+                  label="Provider Pattern"
+                  fullWidth
+                  value={formData.provider_pattern}
+                  onChange={(e) => setFormData({ ...formData, provider_pattern: e.target.value })}
+                  helperText="Glob pattern, e.g., aws or a* (leave blank to match any)"
+                />
+
+                <TextField
+                  label="Priority"
+                  type="number"
+                  fullWidth
+                  value={formData.priority}
+                  onChange={(e) =>
+                    setFormData({ ...formData, priority: parseInt(e.target.value) || 0 })
+                  }
+                  helperText="Higher priority policies are evaluated first"
+                />
+
+                <FormControlLabel
+                  control={
+                    <Switch
+                      checked={formData.is_active}
+                      onChange={(e) => setFormData({ ...formData, is_active: e.target.checked })}
+                    />
+                  }
+                  label="Active"
+                />
+
+                <FormControlLabel
+                  control={
+                    <Switch
+                      checked={formData.requires_approval}
+                      onChange={(e) =>
+                        setFormData({ ...formData, requires_approval: e.target.checked })
+                      }
+                    />
+                  }
+                  label="Requires Approval"
+                />
+              </Box>
+            </DialogContent>
+            <DialogActions>
+              <Button
+                onClick={() => {
+                  setFormDialogOpen(false);
+                  setEditingPolicy(null);
+                }}
+                disabled={saving}
               >
-                <Typography variant="body2">
-                  <strong>{evaluateResult.allowed ? 'Allowed' : 'Denied'}</strong>
-                  {evaluateResult.matched_policy && (
-                    <> — matched policy: {evaluateResult.matched_policy}</>
-                  )}
-                  {evaluateResult.reason && <> ({evaluateResult.reason})</>}
-                </Typography>
-              </Alert>
-            )}
-          </Box>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setEvaluateDialogOpen(false)}>Close</Button>
-          <Button
-            variant="contained"
-            startIcon={evaluating ? <CircularProgress size={16} /> : <PlayArrowIcon />}
-            onClick={handleEvaluate}
-            disabled={
-              evaluating ||
-              !evaluateForm.registry ||
-              !evaluateForm.namespace ||
-              !evaluateForm.provider
-            }
+                Cancel
+              </Button>
+              <Button
+                variant="contained"
+                onClick={handleSave}
+                disabled={!formData.name || saving}
+              >
+                {saving ? 'Saving...' : editingPolicy ? 'Update' : 'Create'}
+              </Button>
+            </DialogActions>
+          </Dialog>
+
+          {/* Delete Confirmation Dialog */}
+          <Dialog open={deleteDialogOpen} onClose={() => setDeleteDialogOpen(false)}>
+            <DialogTitle>Confirm Delete</DialogTitle>
+            <DialogContent>
+              <Typography>
+                Are you sure you want to delete the policy "{policyToDelete?.name}"? This action cannot
+                be undone.
+              </Typography>
+            </DialogContent>
+            <DialogActions>
+              <Button onClick={() => setDeleteDialogOpen(false)}>Cancel</Button>
+              <Button variant="contained" color="error" onClick={handleDelete}>
+                Delete
+              </Button>
+            </DialogActions>
+          </Dialog>
+
+          {/* Evaluate Policy Dialog */}
+          <Dialog
+            open={evaluateDialogOpen}
+            onClose={() => setEvaluateDialogOpen(false)}
+            maxWidth="sm"
+            fullWidth
           >
-            {evaluating ? 'Evaluating...' : 'Evaluate'}
-          </Button>
-        </DialogActions>
-      </Dialog>
+            <DialogTitle>Evaluate Policy</DialogTitle>
+            <DialogContent>
+              <Box sx={{ pt: 2, display: 'flex', flexDirection: 'column', gap: 2 }}>
+                <Typography variant="body2" color="textSecondary">
+                  Check whether a specific provider would be allowed or denied by the current policy set.
+                </Typography>
+                <TextField
+                  label="Registry"
+                  fullWidth
+                  required
+                  value={evaluateForm.registry}
+                  onChange={(e) => setEvaluateForm({ ...evaluateForm, registry: e.target.value })}
+                  placeholder="registry.terraform.io"
+                />
+                <TextField
+                  label="Namespace"
+                  fullWidth
+                  required
+                  value={evaluateForm.namespace}
+                  onChange={(e) => setEvaluateForm({ ...evaluateForm, namespace: e.target.value })}
+                  placeholder="hashicorp"
+                />
+                <TextField
+                  label="Provider"
+                  fullWidth
+                  required
+                  value={evaluateForm.provider}
+                  onChange={(e) => setEvaluateForm({ ...evaluateForm, provider: e.target.value })}
+                  placeholder="aws"
+                />
+                {evaluateResult && (
+                  <Alert
+                    severity={evaluateResult.allowed ? 'success' : 'error'}
+                    sx={{ mt: 1 }}
+                  >
+                    <Typography variant="body2">
+                      <strong>{evaluateResult.allowed ? 'Allowed' : 'Denied'}</strong>
+                      {evaluateResult.matched_policy && (
+                        <> — matched policy: {evaluateResult.matched_policy}</>
+                      )}
+                      {evaluateResult.reason && <> ({evaluateResult.reason})</>}
+                    </Typography>
+                  </Alert>
+                )}
+              </Box>
+            </DialogContent>
+            <DialogActions>
+              <Button onClick={() => setEvaluateDialogOpen(false)}>Close</Button>
+              <Button
+                variant="contained"
+                startIcon={evaluating ? <CircularProgress size={16} /> : <PlayArrowIcon />}
+                onClick={handleEvaluate}
+                disabled={
+                  evaluating ||
+                  !evaluateForm.registry ||
+                  !evaluateForm.namespace ||
+                  !evaluateForm.provider
+                }
+              >
+                {evaluating ? 'Evaluating...' : 'Evaluate'}
+              </Button>
+            </DialogActions>
+          </Dialog>
         </>
       )}
     </Container>

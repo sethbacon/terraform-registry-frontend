@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   Box,
   Button,
@@ -39,6 +40,7 @@ import { getErrorMessage } from '../../utils/errors';
 import { useAuth } from '../../contexts/AuthContext';
 import type { SCMProvider, SCMProviderType, CreateSCMProviderRequest } from '../../types/scm';
 import type { UserMembership } from '../../types';
+import { queryKeys } from '../../services/queryKeys';
 
 interface TokenStatus {
   connected: boolean;
@@ -48,11 +50,9 @@ interface TokenStatus {
 }
 
 const SCMProvidersPage: React.FC = () => {
+  const queryClient = useQueryClient();
   const { user } = useAuth();
-  const [providers, setProviders] = useState<SCMProvider[]>([]);
-  const [memberships, setMemberships] = useState<UserMembership[]>([]);
   const [tokenStatuses, setTokenStatuses] = useState<Record<string, TokenStatus>>({});
-  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [editingProvider, setEditingProvider] = useState<SCMProvider | null>(null);
@@ -73,39 +73,39 @@ const SCMProvidersPage: React.FC = () => {
     webhook_secret: '',
   });
 
-  const loadMemberships = useCallback(async () => {
-    try {
-      if (user?.id) {
-        const data = await api.getCurrentUserMemberships();
-        setMemberships(data || []);
-        // Set first organization as default if available
-        if (data && data.length > 0) {
-          setFormData(prev => {
-            if (prev.organization_id) return prev;
-            return {
-              ...prev,
-              organization_id: data[0].organization_id,
-            };
-          });
-        }
-      }
-    } catch (err: unknown) {
-      console.error('Error loading memberships:', err);
-    }
-  }, [user?.id]);
+  // Memberships query
+  const {
+    data: memberships = [],
+  } = useQuery<UserMembership[]>({
+    queryKey: queryKeys.scmProviders.memberships(user?.id ?? ''),
+    queryFn: async () => {
+      const data = await api.getCurrentUserMemberships();
+      return data || [];
+    },
+    enabled: !!user?.id,
+  });
 
+  // Set default org when memberships load
   useEffect(() => {
-    loadProviders();
-    loadMemberships();
-  }, [loadMemberships]);
+    if (memberships.length > 0 && !formData.organization_id) {
+      setFormData(prev => ({
+        ...prev,
+        organization_id: memberships[0].organization_id,
+      }));
+    }
+  }, [memberships]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const loadProviders = async () => {
-    try {
-      setLoading(true);
-      setError(null);
+  // Providers query
+  const {
+    data: providers = [],
+    isLoading: loading,
+    error: queryError,
+    refetch: loadProviders,
+  } = useQuery<SCMProvider[]>({
+    queryKey: queryKeys.scmProviders.list(),
+    queryFn: async () => {
       const data = await api.listSCMProviders();
       const providerList = Array.isArray(data) ? data : [];
-      setProviders(providerList);
 
       // Fetch token status for each provider in parallel
       const statusEntries = await Promise.allSettled(
@@ -119,31 +119,32 @@ const SCMProvidersPage: React.FC = () => {
         }
       });
       setTokenStatuses(statuses);
-    } catch (err: unknown) {
-      setError(getErrorMessage(err, 'Failed to load SCM providers'));
-      console.error('Error loading providers:', err);
-    } finally {
-      setLoading(false);
-    }
-  };
 
-  const handleCreate = async () => {
-    try {
-      setError(null);
-      await api.createSCMProvider(formData as CreateSCMProviderRequest);
+      return providerList;
+    },
+  });
+
+  if (queryError && !error) {
+    setError(getErrorMessage(queryError, 'Failed to load SCM providers'));
+  }
+
+  const createMutation = useMutation({
+    mutationFn: () => api.createSCMProvider(formData as CreateSCMProviderRequest),
+    onSuccess: () => {
       setCreateDialogOpen(false);
       resetForm();
-      await loadProviders();
-    } catch (err: unknown) {
-      setError(getErrorMessage(err, 'Failed to create provider'));
-    }
-  };
-
-  const handleUpdate = async () => {
-    if (!editingProvider) return;
-    try {
       setError(null);
-      await api.updateSCMProvider(editingProvider.id, {
+      queryClient.invalidateQueries({ queryKey: queryKeys.scmProviders._def });
+    },
+    onError: (err: unknown) => {
+      setError(getErrorMessage(err, 'Failed to create provider'));
+    },
+  });
+
+  const updateMutation = useMutation({
+    mutationFn: () => {
+      if (!editingProvider) throw new Error('No provider to update');
+      return api.updateSCMProvider(editingProvider.id, {
         name: formData.name,
         base_url: formData.base_url,
         tenant_id: formData.tenant_id,
@@ -151,25 +152,45 @@ const SCMProvidersPage: React.FC = () => {
         client_secret: formData.client_secret,
         webhook_secret: formData.webhook_secret,
       });
+    },
+    onSuccess: () => {
       setEditingProvider(null);
       resetForm();
-      await loadProviders();
-    } catch (err: unknown) {
-      setError(getErrorMessage(err, 'Failed to update provider'));
-    }
-  };
-
-  const handleDelete = async () => {
-    if (!providerToDelete) return;
-    try {
       setError(null);
-      await api.deleteSCMProvider(providerToDelete.id);
+      queryClient.invalidateQueries({ queryKey: queryKeys.scmProviders._def });
+    },
+    onError: (err: unknown) => {
+      setError(getErrorMessage(err, 'Failed to update provider'));
+    },
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: (id: string) => api.deleteSCMProvider(id),
+    onSuccess: () => {
       setDeleteConfirmOpen(false);
       setProviderToDelete(null);
-      await loadProviders();
-    } catch (err: unknown) {
+      setError(null);
+      queryClient.invalidateQueries({ queryKey: queryKeys.scmProviders._def });
+    },
+    onError: (err: unknown) => {
       setError(getErrorMessage(err, 'Failed to delete provider'));
-    }
+    },
+  });
+
+  const handleCreate = () => {
+    setError(null);
+    createMutation.mutate();
+  };
+
+  const handleUpdate = () => {
+    setError(null);
+    updateMutation.mutate();
+  };
+
+  const handleDelete = () => {
+    if (!providerToDelete) return;
+    setError(null);
+    deleteMutation.mutate(providerToDelete.id);
   };
 
   const handleConnect = async (provider: SCMProvider) => {
@@ -316,438 +337,438 @@ const SCMProvidersPage: React.FC = () => {
         </Box>
       ) : (
         <>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-        <Box>
-          <Typography variant="h4">SCM Providers</Typography>
-        </Box>
-        <Box sx={{ display: 'flex', gap: 1 }}>
-          <Button
-            variant="outlined"
-            startIcon={<RefreshIcon />}
-            onClick={loadProviders}
-          >
-            Refresh
-          </Button>
-          <Button
-            variant="contained"
-            startIcon={<AddIcon />}
-            onClick={() => {
-              resetForm();
-              setCreateDialogOpen(true);
-            }}
-          >
-            Add Provider
-          </Button>
-        </Box>
-      </Box>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+            <Box>
+              <Typography variant="h4">SCM Providers</Typography>
+            </Box>
+            <Box sx={{ display: 'flex', gap: 1 }}>
+              <Button
+                variant="outlined"
+                startIcon={<RefreshIcon />}
+                onClick={() => { loadProviders(); }}
+              >
+                Refresh
+              </Button>
+              <Button
+                variant="contained"
+                startIcon={<AddIcon />}
+                onClick={() => {
+                  resetForm();
+                  setCreateDialogOpen(true);
+                }}
+              >
+                Add Provider
+              </Button>
+            </Box>
+          </Box>
 
-      {error && (
-        <Alert severity="error" sx={{ mb: 2 }} onClose={() => setError(null)}>
-          {error}
-        </Alert>
-      )}
+          {error && (
+            <Alert severity="error" sx={{ mb: 2 }} onClose={() => setError(null)}>
+              {error}
+            </Alert>
+          )}
 
-      <Grid container spacing={3}>
-        {providers.map((provider) => (
-          <Grid size={{ xs: 12, md: 6, lg: 4 }} key={provider.id}>
-            <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
-              <CardContent sx={{ flexGrow: 1 }}>
-                <Box display="flex" alignItems="center" mb={2}>
-                  <Box mr={2}>{getProviderIcon(provider.provider_type)}</Box>
-                  <Box flexGrow={1}>
-                    <Typography variant="h6">{provider.name}</Typography>
-                    <Typography variant="body2" color="textSecondary">
-                      {getProviderLabel(provider.provider_type)}
+          <Grid container spacing={3}>
+            {providers.map((provider) => (
+              <Grid size={{ xs: 12, md: 6, lg: 4 }} key={provider.id}>
+                <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+                  <CardContent sx={{ flexGrow: 1 }}>
+                    <Box display="flex" alignItems="center" mb={2}>
+                      <Box mr={2}>{getProviderIcon(provider.provider_type)}</Box>
+                      <Box flexGrow={1}>
+                        <Typography variant="h6">{provider.name}</Typography>
+                        <Typography variant="body2" color="textSecondary">
+                          {getProviderLabel(provider.provider_type)}
+                        </Typography>
+                      </Box>
+                      <Chip
+                        label={provider.is_active ? 'Active' : 'Inactive'}
+                        color={provider.is_active ? 'success' : 'default'}
+                        size="small"
+                      />
+                    </Box>
+
+                    {provider.tenant_id && (
+                      <Typography variant="body2" color="textSecondary" gutterBottom>
+                        Tenant ID: {provider.tenant_id}
+                      </Typography>
+                    )}
+
+                    <Typography variant="body2" color="textSecondary" gutterBottom>
+                      {getClientIdLabel(provider.provider_type)}: {provider.client_id}
                     </Typography>
-                  </Box>
-                  <Chip
-                    label={provider.is_active ? 'Active' : 'Inactive'}
-                    color={provider.is_active ? 'success' : 'default'}
-                    size="small"
-                  />
-                </Box>
 
-                {provider.tenant_id && (
-                  <Typography variant="body2" color="textSecondary" gutterBottom>
-                    Tenant ID: {provider.tenant_id}
-                  </Typography>
-                )}
+                    {provider.base_url && (
+                      <Typography variant="body2" color="textSecondary" gutterBottom>
+                        Base URL: {provider.base_url}
+                      </Typography>
+                    )}
 
-                <Typography variant="body2" color="textSecondary" gutterBottom>
-                  {getClientIdLabel(provider.provider_type)}: {provider.client_id}
-                </Typography>
-
-                {provider.base_url && (
-                  <Typography variant="body2" color="textSecondary" gutterBottom>
-                    Base URL: {provider.base_url}
-                  </Typography>
-                )}
-
-                {provider.provider_type !== 'bitbucket_dc' && (
-                  <Box
-                    mt={2}
-                    p={1.5}
-                    sx={{
-                      backgroundColor: (theme) =>
-                        theme.palette.mode === 'dark' ? '#2a2a2a' : '#f5f5f5',
-                      borderRadius: 1,
-                      border: (theme) =>
-                        `1px solid ${theme.palette.mode === 'dark' ? '#404040' : '#e0e0e0'}`,
-                    }}
-                  >
-                    <Typography variant="caption" color="textSecondary" display="block" mb={0.5}>
-                      OAuth Callback URL:
-                    </Typography>
-                    <Box display="flex" alignItems="center" gap={1}>
-                      <Typography
-                        variant="caption"
+                    {provider.provider_type !== 'bitbucket_dc' && (
+                      <Box
+                        mt={2}
+                        p={1.5}
                         sx={{
-                          fontFamily: 'monospace',
-                          fontSize: '0.75rem',
-                          wordBreak: 'break-all',
-                          flex: 1,
-                          color: (theme) =>
-                            theme.palette.mode === 'dark'
-                              ? theme.palette.primary.light
-                              : theme.palette.primary.main,
+                          backgroundColor: (theme) =>
+                            theme.palette.mode === 'dark' ? '#2a2a2a' : '#f5f5f5',
+                          borderRadius: 1,
+                          border: (theme) =>
+                            `1px solid ${theme.palette.mode === 'dark' ? '#404040' : '#e0e0e0'}`,
                         }}
                       >
-                        {getCallbackUrl(provider.id)}
-                      </Typography>
-                      <Tooltip title="Copy to clipboard">
+                        <Typography variant="caption" color="textSecondary" display="block" mb={0.5}>
+                          OAuth Callback URL:
+                        </Typography>
+                        <Box display="flex" alignItems="center" gap={1}>
+                          <Typography
+                            variant="caption"
+                            sx={{
+                              fontFamily: 'monospace',
+                              fontSize: '0.75rem',
+                              wordBreak: 'break-all',
+                              flex: 1,
+                              color: (theme) =>
+                                theme.palette.mode === 'dark'
+                                  ? theme.palette.primary.light
+                                  : theme.palette.primary.main,
+                            }}
+                          >
+                            {getCallbackUrl(provider.id)}
+                          </Typography>
+                          <Tooltip title="Copy to clipboard">
+                            <IconButton
+                              size="small"
+                              aria-label="Copy callback URL"
+                              onClick={() => copyToClipboard(getCallbackUrl(provider.id))}
+                              sx={{ flexShrink: 0 }}
+                            >
+                              <ContentCopyIcon sx={{ fontSize: '1rem' }} />
+                            </IconButton>
+                          </Tooltip>
+                        </Box>
+                      </Box>
+                    )}
+
+                    <Divider sx={{ my: 1.5 }} />
+
+                    <Box display="flex" alignItems="flex-start" gap={1}>
+                      <Box flex={1}>
+                        <Typography variant="caption" color="textSecondary" display="block">
+                          Created: {new Date(provider.created_at).toLocaleDateString()}
+                        </Typography>
+                        {(() => {
+                          const status = tokenStatuses[provider.id];
+                          if (!status) return null;
+                          return status.connected ? (
+                            <Box display="flex" alignItems="center" gap={0.5} mt={0.5}>
+                              <CheckCircleIcon sx={{ fontSize: '0.9rem', color: 'success.main' }} />
+                              <Box>
+                                <Typography variant="caption" sx={{ color: 'success.main', fontWeight: 600, lineHeight: 1.2, display: 'block' }}>
+                                  Connected
+                                </Typography>
+                                {status.connected_at && (
+                                  <Typography variant="caption" color="textSecondary" sx={{ fontSize: '0.7rem', display: 'block' }}>
+                                    {new Date(status.connected_at).toLocaleString()}
+                                  </Typography>
+                                )}
+                              </Box>
+                            </Box>
+                          ) : (
+                            <Box display="flex" alignItems="center" gap={0.5} mt={0.5}>
+                              <LinkOffIcon sx={{ fontSize: '0.9rem', color: 'text.disabled' }} />
+                              <Typography variant="caption" color="textDisabled" sx={{ fontStyle: 'italic' }}>
+                                Not connected
+                              </Typography>
+                            </Box>
+                          );
+                        })()}
+                      </Box>
+                      {tokenStatuses[provider.id]?.connected && (
+                        <Chip
+                          label={tokenStatuses[provider.id]?.token_type === 'pat' ? 'PAT' : 'OAuth'}
+                          size="small"
+                          variant="outlined"
+                          color="success"
+                          sx={{ fontSize: '0.65rem', height: 20 }}
+                        />
+                      )}
+                    </Box>
+                  </CardContent>
+
+                  <CardActions>
+                    <Tooltip title={tokenStatuses[provider.id]?.connected
+                      ? (provider.provider_type === 'bitbucket_dc' ? 'Update PAT' : 'Reconnect OAuth')
+                      : (provider.provider_type === 'bitbucket_dc' ? 'Connect PAT' : 'Connect OAuth')
+                    }>
+                      <IconButton
+                        size="small"
+                        aria-label="Connect SCM provider"
+                        color="primary"
+                        onClick={() => handleConnect(provider)}
+                      >
+                        <LinkIcon />
+                      </IconButton>
+                    </Tooltip>
+                    {tokenStatuses[provider.id]?.connected && (
+                      <Tooltip title="Disconnect">
                         <IconButton
                           size="small"
-                          aria-label="Copy callback URL"
-                          onClick={() => copyToClipboard(getCallbackUrl(provider.id))}
-                          sx={{ flexShrink: 0 }}
+                          aria-label="Disconnect SCM provider"
+                          color="warning"
+                          onClick={async () => {
+                            try {
+                              await api.revokeSCMToken(provider.id);
+                              queryClient.invalidateQueries({ queryKey: queryKeys.scmProviders._def });
+                            } catch (err: unknown) {
+                              setError(getErrorMessage(err, 'Failed to disconnect'));
+                            }
+                          }}
                         >
-                          <ContentCopyIcon sx={{ fontSize: '1rem' }} />
+                          <LinkOffIcon />
                         </IconButton>
                       </Tooltip>
-                    </Box>
-                  </Box>
-                )}
+                    )}
+                    <Tooltip title="Edit">
+                      <IconButton
+                        size="small"
+                        aria-label="Edit SCM provider"
+                        onClick={() => openEditDialog(provider)}
+                      >
+                        <EditIcon />
+                      </IconButton>
+                    </Tooltip>
+                    <Tooltip title="Delete">
+                      <IconButton
+                        size="small"
+                        aria-label="Delete SCM provider"
+                        color="error"
+                        onClick={() => {
+                          setProviderToDelete(provider);
+                          setDeleteConfirmOpen(true);
+                        }}
+                      >
+                        <DeleteIcon />
+                      </IconButton>
+                    </Tooltip>
+                  </CardActions>
+                </Card>
+              </Grid>
+            ))}
 
-                <Divider sx={{ my: 1.5 }} />
-
-                <Box display="flex" alignItems="flex-start" gap={1}>
-                  <Box flex={1}>
-                    <Typography variant="caption" color="textSecondary" display="block">
-                      Created: {new Date(provider.created_at).toLocaleDateString()}
+            {providers.length === 0 && !loading && (
+              <Grid size={12}>
+                <Card>
+                  <CardContent>
+                    <Typography variant="body1" color="textSecondary" align="center">
+                      No SCM providers configured. Add one to get started!
                     </Typography>
-                    {(() => {
-                      const status = tokenStatuses[provider.id];
-                      if (!status) return null;
-                      return status.connected ? (
-                        <Box display="flex" alignItems="center" gap={0.5} mt={0.5}>
-                          <CheckCircleIcon sx={{ fontSize: '0.9rem', color: 'success.main' }} />
-                          <Box>
-                            <Typography variant="caption" sx={{ color: 'success.main', fontWeight: 600, lineHeight: 1.2, display: 'block' }}>
-                              Connected
-                            </Typography>
-                            {status.connected_at && (
-                              <Typography variant="caption" color="textSecondary" sx={{ fontSize: '0.7rem', display: 'block' }}>
-                                {new Date(status.connected_at).toLocaleString()}
-                              </Typography>
-                            )}
-                          </Box>
-                        </Box>
-                      ) : (
-                        <Box display="flex" alignItems="center" gap={0.5} mt={0.5}>
-                          <LinkOffIcon sx={{ fontSize: '0.9rem', color: 'text.disabled' }} />
-                          <Typography variant="caption" color="textDisabled" sx={{ fontStyle: 'italic' }}>
-                            Not connected
-                          </Typography>
-                        </Box>
-                      );
-                    })()}
-                  </Box>
-                  {tokenStatuses[provider.id]?.connected && (
-                    <Chip
-                      label={tokenStatuses[provider.id]?.token_type === 'pat' ? 'PAT' : 'OAuth'}
-                      size="small"
-                      variant="outlined"
-                      color="success"
-                      sx={{ fontSize: '0.65rem', height: 20 }}
-                    />
-                  )}
-                </Box>
-              </CardContent>
-
-              <CardActions>
-                <Tooltip title={tokenStatuses[provider.id]?.connected
-                  ? (provider.provider_type === 'bitbucket_dc' ? 'Update PAT' : 'Reconnect OAuth')
-                  : (provider.provider_type === 'bitbucket_dc' ? 'Connect PAT' : 'Connect OAuth')
-                }>
-                  <IconButton
-                    size="small"
-                    aria-label="Connect SCM provider"
-                    color="primary"
-                    onClick={() => handleConnect(provider)}
-                  >
-                    <LinkIcon />
-                  </IconButton>
-                </Tooltip>
-                {tokenStatuses[provider.id]?.connected && (
-                  <Tooltip title="Disconnect">
-                    <IconButton
-                      size="small"
-                      aria-label="Disconnect SCM provider"
-                      color="warning"
-                      onClick={async () => {
-                        try {
-                          await api.revokeSCMToken(provider.id);
-                          await loadProviders();
-                        } catch (err: unknown) {
-                          setError(getErrorMessage(err, 'Failed to disconnect'));
-                        }
-                      }}
-                    >
-                      <LinkOffIcon />
-                    </IconButton>
-                  </Tooltip>
-                )}
-                <Tooltip title="Edit">
-                  <IconButton
-                    size="small"
-                    aria-label="Edit SCM provider"
-                    onClick={() => openEditDialog(provider)}
-                  >
-                    <EditIcon />
-                  </IconButton>
-                </Tooltip>
-                <Tooltip title="Delete">
-                  <IconButton
-                    size="small"
-                    aria-label="Delete SCM provider"
-                    color="error"
-                    onClick={() => {
-                      setProviderToDelete(provider);
-                      setDeleteConfirmOpen(true);
-                    }}
-                  >
-                    <DeleteIcon />
-                  </IconButton>
-                </Tooltip>
-              </CardActions>
-            </Card>
+                  </CardContent>
+                </Card>
+              </Grid>
+            )}
           </Grid>
-        ))}
 
-        {providers.length === 0 && !loading && (
-          <Grid size={12}>
-            <Card>
-              <CardContent>
-                <Typography variant="body1" color="textSecondary" align="center">
-                  No SCM providers configured. Add one to get started!
-                </Typography>
-              </CardContent>
-            </Card>
-          </Grid>
-        )}
-      </Grid>
-
-      {/* Create/Edit Dialog */}
-      <Dialog
-        open={createDialogOpen || !!editingProvider}
-        onClose={() => {
-          setCreateDialogOpen(false);
-          setEditingProvider(null);
-          resetForm();
-        }}
-        maxWidth="sm"
-        fullWidth
-      >
-        <DialogTitle>{editingProvider ? 'Edit Provider' : 'Add SCM Provider'}</DialogTitle>
-        <DialogContent>
-          <Box sx={{ pt: 2, display: 'flex', flexDirection: 'column', gap: 2 }}>
-            {memberships.length > 0 && (
-              <FormControl fullWidth disabled={!!editingProvider}>
-                <InputLabel id="organization-label">Organization</InputLabel>
-                <Select
-                  labelId="organization-label"
-                  value={formData.organization_id || ''}
-                  label="Organization"
-                  onChange={(e) =>
-                    setFormData({ ...formData, organization_id: e.target.value as string })
-                  }
-                >
-                  {memberships.map((membership) => (
-                    <MenuItem key={membership.organization_id} value={membership.organization_id}>
-                      {membership.organization_name}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            )}
-
-            {!editingProvider && (
-              <FormControl fullWidth>
-                <InputLabel id="provider-type-label">Provider Type</InputLabel>
-                <Select
-                  labelId="provider-type-label"
-                  value={formData.provider_type}
-                  label="Provider Type"
-                  onChange={(e) =>
-                    setFormData({ ...formData, provider_type: e.target.value as SCMProviderType })
-                  }
-                >
-                  <MenuItem value="azuredevops">Azure DevOps</MenuItem>
-                  <MenuItem value="bitbucket_dc">Bitbucket Data Center</MenuItem>
-                  <MenuItem value="github">GitHub</MenuItem>
-                  <MenuItem value="gitlab">GitLab</MenuItem>
-                </Select>
-              </FormControl>
-            )}
-
-            <TextField
-              label="Name"
-              fullWidth
-              value={formData.name}
-              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-              required
-              helperText="Friendly name to identify this SCM connection (e.g., 'GitHub Production', 'Internal GitLab')"
-            />
-
-            {(editingProvider?.provider_type || formData.provider_type) === 'azuredevops' && (
-              <TextField
-                label="Tenant ID"
-                fullWidth
-                value={formData.tenant_id || ''}
-                onChange={(e) => setFormData({ ...formData, tenant_id: e.target.value || null })}
-                required
-                helperText="Your Azure AD / Entra Tenant ID (found in Azure Portal → Azure Active Directory → Overview)"
-              />
-            )}
-
-            {!isPATProvider(editingProvider?.provider_type || formData.provider_type) && (
-              <>
-                <TextField
-                  label={getClientIdLabel(editingProvider?.provider_type || formData.provider_type || 'github')}
-                  fullWidth
-                  value={formData.client_id}
-                  onChange={(e) => setFormData({ ...formData, client_id: e.target.value })}
-                  required
-                  helperText="OAuth App Client ID from your SCM provider's application or developer settings"
-                />
-
-                <TextField
-                  label={getClientSecretLabel(editingProvider?.provider_type || formData.provider_type || 'github')}
-                  type="password"
-                  fullWidth
-                  value={formData.client_secret}
-                  onChange={(e) => setFormData({ ...formData, client_secret: e.target.value })}
-                  required={!editingProvider}
-                  helperText={editingProvider ? 'Leave blank to keep existing secret' : ''}
-                />
-              </>
-            )}
-
-            <TextField
-              label={isPATProvider(editingProvider?.provider_type || formData.provider_type) ? 'Base URL' : 'Base URL (optional)'}
-              fullWidth
-              value={formData.base_url || ''}
-              onChange={(e) =>
-                setFormData({ ...formData, base_url: e.target.value || null })
-              }
-              required={isPATProvider(editingProvider?.provider_type || formData.provider_type)}
-              helperText={getBaseUrlHelper(editingProvider?.provider_type || formData.provider_type || 'github')}
-            />
-
-            <TextField
-              label="Webhook Secret (optional)"
-              fullWidth
-              value={formData.webhook_secret}
-              onChange={(e) => setFormData({ ...formData, webhook_secret: e.target.value })}
-              helperText="Used to validate webhook signatures from your SCM system. Can be added later."
-            />
-          </Box>
-        </DialogContent>
-        <DialogActions>
-          <Button
-            onClick={() => {
+          {/* Create/Edit Dialog */}
+          <Dialog
+            open={createDialogOpen || !!editingProvider}
+            onClose={() => {
               setCreateDialogOpen(false);
               setEditingProvider(null);
               resetForm();
             }}
+            maxWidth="sm"
+            fullWidth
           >
-            Cancel
-          </Button>
-          <Button
-            variant="contained"
-            onClick={editingProvider ? handleUpdate : handleCreate}
-            disabled={!formData.name || (!isPATProvider(formData.provider_type) && (!formData.client_id || !formData.client_secret)) || (isPATProvider(formData.provider_type) && !formData.base_url)}
-          >
-            {editingProvider ? 'Update' : 'Create'}
-          </Button>
-        </DialogActions>
-      </Dialog>
+            <DialogTitle>{editingProvider ? 'Edit Provider' : 'Add SCM Provider'}</DialogTitle>
+            <DialogContent>
+              <Box sx={{ pt: 2, display: 'flex', flexDirection: 'column', gap: 2 }}>
+                {memberships.length > 0 && (
+                  <FormControl fullWidth disabled={!!editingProvider}>
+                    <InputLabel id="organization-label">Organization</InputLabel>
+                    <Select
+                      labelId="organization-label"
+                      value={formData.organization_id || ''}
+                      label="Organization"
+                      onChange={(e) =>
+                        setFormData({ ...formData, organization_id: e.target.value as string })
+                      }
+                    >
+                      {memberships.map((membership) => (
+                        <MenuItem key={membership.organization_id} value={membership.organization_id}>
+                          {membership.organization_name}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                )}
 
-      {/* Delete Confirmation Dialog */}
-      <Dialog open={deleteConfirmOpen} onClose={() => setDeleteConfirmOpen(false)}>
-        <DialogTitle>Confirm Delete</DialogTitle>
-        <DialogContent>
-          <Typography>
-            Are you sure you want to delete the provider "{providerToDelete?.name}"? This action
-            cannot be undone and will remove all associated OAuth tokens and module links.
-          </Typography>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setDeleteConfirmOpen(false)}>Cancel</Button>
-          <Button variant="contained" color="error" onClick={handleDelete}>
-            Delete
-          </Button>
-        </DialogActions>
-      </Dialog>
+                {!editingProvider && (
+                  <FormControl fullWidth>
+                    <InputLabel id="provider-type-label">Provider Type</InputLabel>
+                    <Select
+                      labelId="provider-type-label"
+                      value={formData.provider_type}
+                      label="Provider Type"
+                      onChange={(e) =>
+                        setFormData({ ...formData, provider_type: e.target.value as SCMProviderType })
+                      }
+                    >
+                      <MenuItem value="azuredevops">Azure DevOps</MenuItem>
+                      <MenuItem value="bitbucket_dc">Bitbucket Data Center</MenuItem>
+                      <MenuItem value="github">GitHub</MenuItem>
+                      <MenuItem value="gitlab">GitLab</MenuItem>
+                    </Select>
+                  </FormControl>
+                )}
 
-      {/* PAT Dialog for Bitbucket Data Center */}
-      <Dialog
-        open={patDialogOpen}
-        onClose={() => {
-          setPatDialogOpen(false);
-          setPatValue('');
-          setPatProvider(null);
-        }}
-        maxWidth="sm"
-        fullWidth
-      >
-        <DialogTitle>Connect to {patProvider?.name}</DialogTitle>
-        <DialogContent>
-          <Box sx={{ pt: 2, display: 'flex', flexDirection: 'column', gap: 2 }}>
-            <Typography variant="body2" color="textSecondary">
-              Enter your Bitbucket Data Center Personal Access Token. You can generate one from your
-              Bitbucket account settings under HTTP access tokens.
-            </Typography>
-            <TextField
-              label="Personal Access Token"
-              type="password"
-              fullWidth
-              value={patValue}
-              onChange={(e) => setPatValue(e.target.value)}
-              required
-              autoFocus
-            />
-          </Box>
-        </DialogContent>
-        <DialogActions>
-          <Button
-            onClick={() => {
+                <TextField
+                  label="Name"
+                  fullWidth
+                  value={formData.name}
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  required
+                  helperText="Friendly name to identify this SCM connection (e.g., 'GitHub Production', 'Internal GitLab')"
+                />
+
+                {(editingProvider?.provider_type || formData.provider_type) === 'azuredevops' && (
+                  <TextField
+                    label="Tenant ID"
+                    fullWidth
+                    value={formData.tenant_id || ''}
+                    onChange={(e) => setFormData({ ...formData, tenant_id: e.target.value || null })}
+                    required
+                    helperText="Your Azure AD / Entra Tenant ID (found in Azure Portal → Azure Active Directory → Overview)"
+                  />
+                )}
+
+                {!isPATProvider(editingProvider?.provider_type || formData.provider_type) && (
+                  <>
+                    <TextField
+                      label={getClientIdLabel(editingProvider?.provider_type || formData.provider_type || 'github')}
+                      fullWidth
+                      value={formData.client_id}
+                      onChange={(e) => setFormData({ ...formData, client_id: e.target.value })}
+                      required
+                      helperText="OAuth App Client ID from your SCM provider's application or developer settings"
+                    />
+
+                    <TextField
+                      label={getClientSecretLabel(editingProvider?.provider_type || formData.provider_type || 'github')}
+                      type="password"
+                      fullWidth
+                      value={formData.client_secret}
+                      onChange={(e) => setFormData({ ...formData, client_secret: e.target.value })}
+                      required={!editingProvider}
+                      helperText={editingProvider ? 'Leave blank to keep existing secret' : ''}
+                    />
+                  </>
+                )}
+
+                <TextField
+                  label={isPATProvider(editingProvider?.provider_type || formData.provider_type) ? 'Base URL' : 'Base URL (optional)'}
+                  fullWidth
+                  value={formData.base_url || ''}
+                  onChange={(e) =>
+                    setFormData({ ...formData, base_url: e.target.value || null })
+                  }
+                  required={isPATProvider(editingProvider?.provider_type || formData.provider_type)}
+                  helperText={getBaseUrlHelper(editingProvider?.provider_type || formData.provider_type || 'github')}
+                />
+
+                <TextField
+                  label="Webhook Secret (optional)"
+                  fullWidth
+                  value={formData.webhook_secret}
+                  onChange={(e) => setFormData({ ...formData, webhook_secret: e.target.value })}
+                  helperText="Used to validate webhook signatures from your SCM system. Can be added later."
+                />
+              </Box>
+            </DialogContent>
+            <DialogActions>
+              <Button
+                onClick={() => {
+                  setCreateDialogOpen(false);
+                  setEditingProvider(null);
+                  resetForm();
+                }}
+              >
+                Cancel
+              </Button>
+              <Button
+                variant="contained"
+                onClick={editingProvider ? handleUpdate : handleCreate}
+                disabled={!formData.name || (!isPATProvider(formData.provider_type) && (!formData.client_id || !formData.client_secret)) || (isPATProvider(formData.provider_type) && !formData.base_url)}
+              >
+                {editingProvider ? 'Update' : 'Create'}
+              </Button>
+            </DialogActions>
+          </Dialog>
+
+          {/* Delete Confirmation Dialog */}
+          <Dialog open={deleteConfirmOpen} onClose={() => setDeleteConfirmOpen(false)}>
+            <DialogTitle>Confirm Delete</DialogTitle>
+            <DialogContent>
+              <Typography>
+                Are you sure you want to delete the provider "{providerToDelete?.name}"? This action
+                cannot be undone and will remove all associated OAuth tokens and module links.
+              </Typography>
+            </DialogContent>
+            <DialogActions>
+              <Button onClick={() => setDeleteConfirmOpen(false)}>Cancel</Button>
+              <Button variant="contained" color="error" onClick={handleDelete}>
+                Delete
+              </Button>
+            </DialogActions>
+          </Dialog>
+
+          {/* PAT Dialog for Bitbucket Data Center */}
+          <Dialog
+            open={patDialogOpen}
+            onClose={() => {
               setPatDialogOpen(false);
               setPatValue('');
               setPatProvider(null);
             }}
+            maxWidth="sm"
+            fullWidth
           >
-            Cancel
-          </Button>
-          <Button
-            variant="contained"
-            onClick={handleSavePAT}
-            disabled={!patValue}
-          >
-            Save Token
-          </Button>
-        </DialogActions>
-      </Dialog>
+            <DialogTitle>Connect to {patProvider?.name}</DialogTitle>
+            <DialogContent>
+              <Box sx={{ pt: 2, display: 'flex', flexDirection: 'column', gap: 2 }}>
+                <Typography variant="body2" color="textSecondary">
+                  Enter your Bitbucket Data Center Personal Access Token. You can generate one from your
+                  Bitbucket account settings under HTTP access tokens.
+                </Typography>
+                <TextField
+                  label="Personal Access Token"
+                  type="password"
+                  fullWidth
+                  value={patValue}
+                  onChange={(e) => setPatValue(e.target.value)}
+                  required
+                  autoFocus
+                />
+              </Box>
+            </DialogContent>
+            <DialogActions>
+              <Button
+                onClick={() => {
+                  setPatDialogOpen(false);
+                  setPatValue('');
+                  setPatProvider(null);
+                }}
+              >
+                Cancel
+              </Button>
+              <Button
+                variant="contained"
+                onClick={handleSavePAT}
+                disabled={!patValue}
+              >
+                Save Token
+              </Button>
+            </DialogActions>
+          </Dialog>
         </>
       )}
     </Container>

@@ -113,6 +113,28 @@ For Docker / production builds, set `VITE_API_URL=http://your-backend-host:8080`
 | Linting     | ESLint 9 with TypeScript ESLint |
 | E2E Tests   | Playwright                      |
 
+## Architecture
+
+The frontend follows a layered architecture: routes render pages, pages compose components, and components consume data via hooks.
+
+```
+App
+ +-- ThemeProvider / AuthProvider / HelpProvider / QueryClientProvider
+      +-- Router
+           +-- Layout (sidebar + topbar)
+           |    +-- Public pages:  HomePage, ModulesPage, ProvidersPage, ...
+           |    +-- Admin pages:   ProtectedRoute -> DashboardPage, UsersPage, ...
+           +-- Standalone pages: LoginPage, SetupWizardPage
+```
+
+**State management**: React Query (`@tanstack/react-query`) for all server state; React Context for app-level concerns (auth, theme, help panel); local `useState` for UI-only state.
+
+**Data fetching**: API calls go through `services/api.ts` (Axios). Query cache keys are defined in `services/queryKeys.ts` using a factory pattern. Mutations invalidate related queries via `queryClient.invalidateQueries()`.
+
+**Authentication**: `AuthContext` reads a JWT from `localStorage`, attaches it via an Axios request interceptor, and handles 401 responses by clearing the session and redirecting to `/login`.
+
+For a full deep-dive, see [ARCHITECTURE.md](ARCHITECTURE.md).
+
 ## Development
 
 ### Frontend Commands
@@ -120,16 +142,28 @@ For Docker / production builds, set `VITE_API_URL=http://your-backend-host:8080`
 ```bash
 cd frontend
 
-npm install        # Install dependencies
-npm run dev        # Start development server (http://localhost:5173)
-npm run build      # Build for production
-npm run lint       # Lint (zero warnings enforced)
-npm run preview    # Preview production build
+npm install           # Install dependencies
+npm run dev           # Start development server (http://localhost:5173)
+npm run build         # Build for production
+npm run lint          # Lint (zero warnings enforced)
+npm run preview       # Preview production build
 ```
 
-### E2E Tests
+### Testing
 
-The E2E suite uses Playwright and requires the full stack running (backend + postgres + frontend).
+**Unit tests** use Vitest with happy-dom and @testing-library/react:
+
+```bash
+cd frontend
+
+npm test              # Run all unit tests once
+npm run test:watch    # Run in watch mode
+npm run test:coverage # Run with V8 coverage report
+```
+
+Coverage thresholds (statements, branches, functions, lines) are enforced at 40% in `vitest.config.ts` and will be ratcheted up as coverage grows.
+
+**E2E tests** use Playwright and require the full stack (backend + postgres + frontend):
 
 ```bash
 cd e2e
@@ -151,10 +185,29 @@ cd ../e2e
 npx playwright test --workers=1
 ```
 
+For test patterns, conventions, and coverage details, see [TESTING.md](TESTING.md).
+
+### CI Pipeline
+
+The CI pipeline is defined in `.github/workflows/ci.yml` and runs on pushes to `main` and PRs to `main`/`development`. Jobs run in parallel:
+
+| Job | What it does |
+| --- | --- |
+| **lint** | `npm run lint` (zero warnings) |
+| **typecheck** | `npx tsc --noEmit` |
+| **unit-test** | `npm run test:coverage` with artifact upload |
+| **build** | Production build, uploads `dist/` artifact |
+| **e2e-gated** | Playwright against the Docker Compose test stack (main branch, manual dispatch, or release) |
+
+Additional workflows: `e2e.yml`, `release.yml` (tag-triggered image build + GHCR push), `scheduled-build.yml` (weekly drift check), `auto-tag.yml`, `pr-checks.yml`.
+
 ## Documentation
 
-- [Changelog](CHANGELOG.md) - Version history
+- [Architecture](ARCHITECTURE.md) - Component hierarchy, data flow, auth flow
+- [Testing](TESTING.md) - Test patterns, running tests, coverage
 - [Contributing](CONTRIBUTING.md) - How to contribute
+- [Changelog](CHANGELOG.md) - Version history
+- [Roadmap](ROADMAP.md) - Planned improvements and phases
 - [Backend Repository](https://github.com/sethbacon/terraform-registry-backend) - API, architecture, and configuration
 - [Backend API Reference](https://github.com/sethbacon/terraform-registry-backend/blob/main/docs/api-reference.md)
 - [Backend Architecture](https://github.com/sethbacon/terraform-registry-backend/blob/main/docs/architecture.md)

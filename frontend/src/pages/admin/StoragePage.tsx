@@ -1,9 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
+import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query';
 import {
   Box,
   Button,
   Card,
   CardContent,
+  CardActions,
   Typography,
   Grid,
   TextField,
@@ -23,6 +25,17 @@ import {
   StepLabel,
   Paper,
   Container,
+  Accordion,
+  AccordionSummary,
+  AccordionDetails,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  IconButton,
+  Tooltip,
 } from '@mui/material';
 import StorageIcon from '@mui/icons-material/Storage';
 import CloudIcon from '@mui/icons-material/Cloud';
@@ -30,18 +43,24 @@ import FolderIcon from '@mui/icons-material/Folder';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import InfoIcon from '@mui/icons-material/Info';
+import DeleteIcon from '@mui/icons-material/Delete';
+import PlayArrowIcon from '@mui/icons-material/PlayArrow';
+import SyncIcon from '@mui/icons-material/Sync';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import HistoryIcon from '@mui/icons-material/History';
 import api from '../../services/api';
 import { getErrorMessage } from '../../utils/errors';
-import type { StorageConfigResponse, StorageConfigInput, StorageBackendType, SetupStatus } from '../../types';
+import type { StorageConfigResponse, StorageConfigInput, StorageBackendType, StorageMigration } from '../../types';
+import { queryKeys } from '../../services/queryKeys';
+import StorageMigrationWizard from '../../components/StorageMigrationWizard';
 
 const StoragePage: React.FC = () => {
-  const [setupStatus, setSetupStatus] = useState<SetupStatus | null>(null);
-  const [configs, setConfigs] = useState<StorageConfigResponse[]>([]);
-  const [loading, setLoading] = useState(true);
+  const queryClient = useQueryClient();
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [testing, setTesting] = useState(false);
+  const [migrationWizardOpen, setMigrationWizardOpen] = useState(false);
 
   // Wizard state
   const [activeStep, setActiveStep] = useState(0);
@@ -53,28 +72,89 @@ const StoragePage: React.FC = () => {
 
   const steps = ['Select Backend', 'Configure Settings', 'Review & Save'];
 
-  useEffect(() => {
-    loadData();
-  }, []);
-
-  const loadData = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-
+  const {
+    data: storageData,
+    isLoading: loading,
+    error: queryError,
+  } = useQuery({
+    queryKey: [...queryKeys.storageConfigs.list(), 'withSetup'],
+    queryFn: async () => {
       const status = await api.getSetupStatus();
-      setSetupStatus(status);
-
+      let configs: StorageConfigResponse[] = [];
       if (!status.setup_required) {
         const configList = await api.listStorageConfigs();
-        setConfigs(Array.isArray(configList) ? configList : []);
+        configs = Array.isArray(configList) ? configList : [];
       }
-    } catch (err: unknown) {
-      setError(getErrorMessage(err, 'Failed to load storage configuration'));
-    } finally {
-      setLoading(false);
-    }
-  };
+      return { setupStatus: status, configs };
+    },
+  });
+
+  const setupStatus = storageData?.setupStatus ?? null;
+  const configs = storageData?.configs ?? [];
+
+  // Migration history query
+  const { data: migrations = [] } = useQuery<StorageMigration[]>({
+    queryKey: queryKeys.storageMigrations.list(),
+    queryFn: () => api.listStorageMigrations(),
+    enabled: !storageData?.setupStatus?.setup_required && configs.length > 0,
+  });
+
+  // Config action mutations
+  const activateMutation = useMutation({
+    mutationFn: (id: string) => api.activateStorageConfig(id),
+    onSuccess: (data) => {
+      setSuccess(data.message || 'Configuration activated successfully');
+      queryClient.invalidateQueries({ queryKey: queryKeys.storageConfigs._def });
+    },
+    onError: (err) => setError(getErrorMessage(err, 'Failed to activate configuration')),
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: (id: string) => api.deleteStorageConfig(id),
+    onSuccess: () => {
+      setSuccess('Configuration deleted successfully');
+      queryClient.invalidateQueries({ queryKey: queryKeys.storageConfigs._def });
+    },
+    onError: (err) => setError(getErrorMessage(err, 'Failed to delete configuration')),
+  });
+
+  const testMutation = useMutation({
+    mutationFn: (config: StorageConfigResponse) => {
+      // Build a StorageConfigInput from the response for testing
+      const input: StorageConfigInput = { backend_type: config.backend_type };
+      if (config.backend_type === 'local') {
+        input.local_base_path = config.local_base_path;
+        input.local_serve_directly = config.local_serve_directly;
+      } else if (config.backend_type === 'azure') {
+        input.azure_account_name = config.azure_account_name;
+        input.azure_container_name = config.azure_container_name;
+        input.azure_cdn_url = config.azure_cdn_url;
+      } else if (config.backend_type === 's3') {
+        input.s3_bucket = config.s3_bucket;
+        input.s3_region = config.s3_region;
+        input.s3_endpoint = config.s3_endpoint;
+        input.s3_auth_method = config.s3_auth_method;
+      } else if (config.backend_type === 'gcs') {
+        input.gcs_bucket = config.gcs_bucket;
+        input.gcs_project_id = config.gcs_project_id;
+        input.gcs_auth_method = config.gcs_auth_method;
+        input.gcs_endpoint = config.gcs_endpoint;
+      }
+      return api.testStorageConfig(input);
+    },
+    onSuccess: (result) => {
+      if (result.success) {
+        setSuccess('Storage configuration test passed');
+      } else {
+        setError(result.message || 'Storage configuration test failed');
+      }
+    },
+    onError: (err) => setError(getErrorMessage(err, 'Configuration test failed')),
+  });
+
+  if (queryError && !error) {
+    setError(getErrorMessage(queryError, 'Failed to load storage configuration'));
+  }
 
   const handleBackendChange = (type: StorageBackendType) => {
     const newFormData: StorageConfigInput = { backend_type: type };
@@ -124,7 +204,7 @@ const StoragePage: React.FC = () => {
       setError(null);
       await api.createStorageConfig(formData);
       setSuccess('Storage configuration saved successfully!');
-      await loadData();
+      queryClient.invalidateQueries({ queryKey: queryKeys.storageConfigs._def });
       setActiveStep(0);
     } catch (err: unknown) {
       setError(getErrorMessage(err, 'Failed to save configuration'));
@@ -608,10 +688,19 @@ const StoragePage: React.FC = () => {
           <Typography variant="h4">Storage Settings</Typography>
         </Box>
         <Box sx={{ display: 'flex', gap: 1 }}>
+          {configs.length >= 2 && (
+            <Button
+              variant="outlined"
+              startIcon={<SyncIcon />}
+              onClick={() => setMigrationWizardOpen(true)}
+            >
+              Migrate Data
+            </Button>
+          )}
           <Button
             variant="outlined"
             startIcon={<RefreshIcon />}
-            onClick={loadData}
+            onClick={() => queryClient.invalidateQueries({ queryKey: queryKeys.storageConfigs._def })}
           >
             Refresh
           </Button>
@@ -703,10 +792,129 @@ const StoragePage: React.FC = () => {
                   Updated: {new Date(config.updated_at).toLocaleString()}
                 </Typography>
               </CardContent>
+              <CardActions sx={{ justifyContent: 'flex-end', px: 2, pb: 2 }}>
+                <Tooltip title="Test connection">
+                  <IconButton
+                    size="small"
+                    onClick={() => testMutation.mutate(config)}
+                    disabled={testMutation.isPending}
+                    aria-label={`Test ${getBackendLabel(config.backend_type)}`}
+                  >
+                    <PlayArrowIcon fontSize="small" />
+                  </IconButton>
+                </Tooltip>
+                {!config.is_active && (
+                  <Tooltip title="Activate">
+                    <IconButton
+                      size="small"
+                      color="primary"
+                      onClick={() => activateMutation.mutate(config.id)}
+                      disabled={activateMutation.isPending}
+                      aria-label={`Activate ${getBackendLabel(config.backend_type)}`}
+                    >
+                      <CheckCircleIcon fontSize="small" />
+                    </IconButton>
+                  </Tooltip>
+                )}
+                {!config.is_active && (
+                  <Tooltip title="Delete">
+                    <IconButton
+                      size="small"
+                      color="error"
+                      onClick={() => {
+                        if (window.confirm('Are you sure you want to delete this storage configuration?')) {
+                          deleteMutation.mutate(config.id);
+                        }
+                      }}
+                      disabled={deleteMutation.isPending}
+                      aria-label={`Delete ${getBackendLabel(config.backend_type)}`}
+                    >
+                      <DeleteIcon fontSize="small" />
+                    </IconButton>
+                  </Tooltip>
+                )}
+              </CardActions>
             </Card>
           </Grid>
         ))}
       </Grid>
+
+      {/* Migration History */}
+      {migrations.length > 0 && (
+        <Accordion sx={{ mt: 4 }}>
+          <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+            <Box display="flex" alignItems="center" gap={1}>
+              <HistoryIcon />
+              <Typography variant="h6">Migration History</Typography>
+            </Box>
+          </AccordionSummary>
+          <AccordionDetails>
+            <TableContainer>
+              <Table size="small">
+                <TableHead>
+                  <TableRow>
+                    <TableCell>Status</TableCell>
+                    <TableCell>Source</TableCell>
+                    <TableCell>Target</TableCell>
+                    <TableCell align="right">Migrated</TableCell>
+                    <TableCell align="right">Failed</TableCell>
+                    <TableCell>Started</TableCell>
+                    <TableCell>Completed</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {migrations.map((m) => {
+                    const src = configs.find((c) => c.id === m.source_config_id);
+                    const tgt = configs.find((c) => c.id === m.target_config_id);
+                    return (
+                      <TableRow key={m.id}>
+                        <TableCell>
+                          <Chip
+                            label={m.status}
+                            size="small"
+                            color={
+                              m.status === 'completed'
+                                ? 'success'
+                                : m.status === 'failed'
+                                  ? 'error'
+                                  : m.status === 'running'
+                                    ? 'info'
+                                    : 'default'
+                            }
+                          />
+                        </TableCell>
+                        <TableCell>
+                          {src ? getBackendLabel(src.backend_type) : m.source_config_id.slice(0, 8)}
+                        </TableCell>
+                        <TableCell>
+                          {tgt ? getBackendLabel(tgt.backend_type) : m.target_config_id.slice(0, 8)}
+                        </TableCell>
+                        <TableCell align="right">
+                          {m.migrated_artifacts} / {m.total_artifacts}
+                        </TableCell>
+                        <TableCell align="right">{m.failed_artifacts}</TableCell>
+                        <TableCell>
+                          {m.started_at ? new Date(m.started_at).toLocaleString() : '-'}
+                        </TableCell>
+                        <TableCell>
+                          {m.completed_at ? new Date(m.completed_at).toLocaleString() : '-'}
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
+            </TableContainer>
+          </AccordionDetails>
+        </Accordion>
+      )}
+
+      {/* Migration Wizard Dialog */}
+      <StorageMigrationWizard
+        open={migrationWizardOpen}
+        onClose={() => setMigrationWizardOpen(false)}
+        configs={configs}
+      />
     </Container>
   );
 

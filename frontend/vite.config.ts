@@ -4,6 +4,9 @@ import path from 'path'
 import fs from 'fs'
 import pkg from './package.json'
 
+// Bundle analysis — enabled via `npm run visualize` (sets VITE_ANALYZE=true)
+const analyzeBundle = process.env.VITE_ANALYZE === 'true'
+
 // Only read certs when they exist (skipped during Docker build)
 const certPath = path.resolve(__dirname, '../backend/certs/server.crt')
 const keyPath = path.resolve(__dirname, '../backend/certs/server.key')
@@ -13,8 +16,14 @@ const certsExist = fs.existsSync(certPath) && fs.existsSync(keyPath)
 const proxyTarget = process.env.VITE_PROXY_TARGET ?? 'http://localhost:8080'
 
 // https://vitejs.dev/config/
-export default defineConfig({
-  plugins: [react()],
+export default defineConfig(async () => {
+  // Conditionally load the visualizer plugin only when needed
+  const visualizerPlugin = analyzeBundle
+    ? [(await import('rollup-plugin-visualizer')).visualizer({ open: true, filename: 'stats.html', gzipSize: true })]
+    : [];
+
+  return {
+  plugins: [react(), ...visualizerPlugin],
   define: {
     __APP_VERSION__: JSON.stringify(pkg.version),
   },
@@ -99,6 +108,6 @@ export default defineConfig({
         secure: false,
       },
     },
-
   },
+  };
 })

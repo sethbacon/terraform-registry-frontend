@@ -15,6 +15,7 @@ import {
   ListItemText,
   ListItemButton,
   Divider,
+  Chip,
   Collapse,
   useTheme,
   useMediaQuery,
@@ -46,6 +47,7 @@ import Description from '@mui/icons-material/Description';
 import ExpandMore from '@mui/icons-material/ExpandMore';
 import History from '@mui/icons-material/History';
 import ExpandLess from '@mui/icons-material/ExpandLess';
+import Palette from '@mui/icons-material/Palette';
 import { useState, useMemo, useCallback } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useThemeMode } from '../contexts/ThemeContext';
@@ -189,7 +191,7 @@ const Layout = () => {
   }, []);
 
   const drawer = (
-    <Box>
+    <Box component="nav" aria-label="Main navigation">
       <Toolbar>
         <Typography variant="h6" noWrap component="div">
           Terraform Registry
@@ -227,6 +229,43 @@ const Layout = () => {
           );
         })}
       </List>
+      {import.meta.env.DEV && (
+        <>
+          <Divider />
+          <List>
+            <ListItem disablePadding>
+              <Tooltip title="Component Showcase (dev only)" placement="right" arrow>
+                <ListItemButton
+                  component={RouterLink}
+                  to="/dev/components"
+                  onClick={handleCloseMobileDrawer}
+                  sx={{
+                    borderLeft: location.pathname === '/dev/components'
+                      ? `3px solid ${theme.palette.warning.main}`
+                      : '3px solid transparent',
+                    bgcolor: location.pathname === '/dev/components'
+                      ? `${theme.palette.warning.main}14`
+                      : 'transparent',
+                    pl: location.pathname === '/dev/components' ? '13px' : '16px',
+                  }}
+                >
+                  <ListItemIcon sx={{ color: theme.palette.warning.main }}>
+                    <Palette />
+                  </ListItemIcon>
+                  <ListItemText
+                    primary="Components"
+                    primaryTypographyProps={{
+                      fontWeight: location.pathname === '/dev/components' ? 600 : 400,
+                      fontSize: '0.875rem',
+                    }}
+                  />
+                  <Chip label="DEV" size="small" color="warning" sx={{ height: 20, fontSize: '0.65rem' }} />
+                </ListItemButton>
+              </Tooltip>
+            </ListItem>
+          </List>
+        </>
+      )}
       {visibleAdminGroups.length > 0 && (
         <>
           <Divider />

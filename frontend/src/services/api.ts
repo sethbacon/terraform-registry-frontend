@@ -1,4 +1,5 @@
-import axios, { AxiosInstance, AxiosError } from 'axios';
+import axios, { AxiosInstance, AxiosError, InternalAxiosRequestConfig } from 'axios';
+import { addApiBreadcrumb } from './errorReporting';
 
 // In dev mode, use empty baseURL to use relative paths (goes through Vite proxy)
 // In production, use the configured URL or default to current origin
@@ -28,6 +29,8 @@ class ApiClient {
         if (token) {
           config.headers.Authorization = `Bearer ${token}`;
         }
+        // Stamp the request start time for breadcrumb duration tracking
+        (config as InternalAxiosRequestConfig & { _startTime?: number })._startTime = Date.now();
         return config;
       },
       (error) => Promise.reject(error)
@@ -65,6 +68,22 @@ class ApiClient {
             // If no token, allow the error to propagate (for public endpoints)
           }
         }
+        return Promise.reject(error);
+      }
+    );
+
+    // Breadcrumb interceptor — records API calls for error reporting context
+    this.client.interceptors.response.use(
+      (response) => {
+        const cfg = response.config as InternalAxiosRequestConfig & { _startTime?: number };
+        const duration = cfg._startTime ? Date.now() - cfg._startTime : undefined;
+        addApiBreadcrumb(cfg.method ?? 'GET', cfg.url ?? '', response.status, duration);
+        return response;
+      },
+      (error: AxiosError) => {
+        const cfg = (error.config ?? {}) as InternalAxiosRequestConfig & { _startTime?: number };
+        const duration = cfg._startTime ? Date.now() - cfg._startTime : undefined;
+        addApiBreadcrumb(cfg.method ?? 'GET', cfg.url ?? '', error.response?.status, duration);
         return Promise.reject(error);
       }
     );
@@ -133,14 +152,16 @@ class ApiClient {
   }
 
   // Modules
-  async searchModules(options?: { query?: string; limit?: number; offset?: number; page?: number; per_page?: number }) {
+  async searchModules(options?: { query?: string; limit?: number; offset?: number; page?: number; per_page?: number; sort?: string; order?: string }) {
     const params: Record<string, string | number> = {};
 
     if (options?.query) params.q = options.query;
     if (options?.limit) params.limit = options.limit;
-    if (options?.offset) params.offset = options.offset;
+    if (options?.offset !== undefined) params.offset = options.offset;
     if (options?.page) params.page = options.page;
     if (options?.per_page) params.per_page = options.per_page;
+    if (options?.sort) params.sort = options.sort;
+    if (options?.order) params.order = options.order;
 
     const response = await this.client.get('/api/v1/modules/search', { params });
     return response.data;
@@ -200,15 +221,27 @@ class ApiClient {
     return response.data;
   }
 
+  async deprecateModule(namespace: string, name: string, system: string, data: { message: string; successor_module_id?: string }) {
+    const response = await this.client.post(`/api/v1/modules/${namespace}/${name}/${system}/deprecate`, data);
+    return response.data;
+  }
+
+  async undeprecateModule(namespace: string, name: string, system: string) {
+    const response = await this.client.delete(`/api/v1/modules/${namespace}/${name}/${system}/deprecate`);
+    return response.data;
+  }
+
   // Providers
-  async searchProviders(options?: { query?: string; limit?: number; offset?: number; page?: number; per_page?: number }) {
+  async searchProviders(options?: { query?: string; limit?: number; offset?: number; page?: number; per_page?: number; sort?: string; order?: string }) {
     const params: Record<string, string | number> = {};
 
     if (options?.query) params.q = options.query;
     if (options?.limit) params.limit = options.limit;
-    if (options?.offset) params.offset = options.offset;
+    if (options?.offset !== undefined) params.offset = options.offset;
     if (options?.page) params.page = options.page;
     if (options?.per_page) params.per_page = options.per_page;
+    if (options?.sort) params.sort = options.sort;
+    if (options?.order) params.order = options.order;
 
     const response = await this.client.get('/api/v1/providers/search', { params });
     return response.data;
@@ -1008,6 +1041,30 @@ class ApiClient {
     return response.data;
   }
 
+  async testScanningConfig(
+    setupToken: string,
+    data: import('../types').ScanningConfigInput
+  ): Promise<import('../types').ScanningTestResult> {
+    const response = await this.client.post(
+      '/api/v1/setup/scanning/test',
+      data,
+      this.setupRequest(setupToken)
+    );
+    return response.data;
+  }
+
+  async saveScanningConfig(
+    setupToken: string,
+    data: import('../types').ScanningConfigInput
+  ): Promise<{ message: string }> {
+    const response = await this.client.post(
+      '/api/v1/setup/scanning',
+      data,
+      this.setupRequest(setupToken)
+    );
+    return response.data;
+  }
+
   async configureAdmin(
     setupToken: string,
     data: import('../types').ConfigureAdminInput
@@ -1079,6 +1136,47 @@ class ApiClient {
 
   async testStorageConfig(data: import('../types').StorageConfigInput): Promise<{ success: boolean; message: string }> {
     const response = await this.client.post('/api/v1/storage/configs/test', data);
+    return response.data;
+  }
+
+  // ============================================================================
+  // Storage Migrations
+  // ============================================================================
+
+  async planStorageMigration(
+    sourceId: string,
+    targetId: string
+  ): Promise<import('../types').MigrationPlan> {
+    const response = await this.client.post('/api/v1/admin/storage/migrations/plan', {
+      source_config_id: sourceId,
+      target_config_id: targetId,
+    });
+    return response.data;
+  }
+
+  async startStorageMigration(
+    sourceId: string,
+    targetId: string
+  ): Promise<import('../types').StorageMigration> {
+    const response = await this.client.post('/api/v1/admin/storage/migrations', {
+      source_config_id: sourceId,
+      target_config_id: targetId,
+    });
+    return response.data;
+  }
+
+  async getStorageMigration(id: string): Promise<import('../types').StorageMigration> {
+    const response = await this.client.get(`/api/v1/admin/storage/migrations/${id}`);
+    return response.data;
+  }
+
+  async cancelStorageMigration(id: string): Promise<import('../types').StorageMigration> {
+    const response = await this.client.post(`/api/v1/admin/storage/migrations/${id}/cancel`);
+    return response.data;
+  }
+
+  async listStorageMigrations(): Promise<import('../types').StorageMigration[]> {
+    const response = await this.client.get('/api/v1/admin/storage/migrations');
     return response.data;
   }
 

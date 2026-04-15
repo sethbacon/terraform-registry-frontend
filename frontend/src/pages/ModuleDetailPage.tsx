@@ -1,5 +1,5 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link as RouterLink } from 'react-router-dom';
 import MarkdownRenderer from '../components/MarkdownRenderer';
 import {
   Container,
@@ -73,6 +73,15 @@ const ModuleDetailPage: React.FC = () => {
     deprecationMessage,
     setDeprecationMessage,
     deprecating,
+    deprecateModuleDialogOpen,
+    setDeprecateModuleDialogOpen,
+    moduleDeprecationMessage,
+    setModuleDeprecationMessage,
+    successorModuleId,
+    setSuccessorModuleId,
+    undeprecateModuleDialogOpen,
+    setUndeprecateModuleDialogOpen,
+    deprecatingModule,
     scmLink,
     scmLinkLoaded,
     scmWizardOpen,
@@ -101,6 +110,8 @@ const ModuleDetailPage: React.FC = () => {
     openDeleteVersionDialog,
     handleDeprecateVersion,
     handleUndeprecateVersion,
+    handleDeprecateModule,
+    handleUndeprecateModule,
     handleUpdateDescription,
     getTerraformExample,
   } = useModuleDetail();
@@ -141,6 +152,21 @@ const ModuleDetailPage: React.FC = () => {
               <Typography color="text.primary">v{selectedVersion.version}</Typography>
             )}
           </Breadcrumbs>
+
+          {/* Module Deprecation Banner */}
+          {module.deprecated && (
+            <Alert severity="warning" sx={{ mb: 2 }}>
+              This module is deprecated. {module.deprecation_message}
+              {module.successor_module && (
+                <> Consider using <Link
+                  component={RouterLink}
+                  to={`/modules/${module.successor_module.namespace}/${module.successor_module.name}/${module.successor_module.system}`}
+                >
+                  {module.successor_module.namespace}/{module.successor_module.name}/{module.successor_module.system}
+                </Link> instead.</>
+              )}
+            </Alert>
+          )}
 
           {/* Header */}
           <Box sx={{ mb: 4 }}>
@@ -265,6 +291,27 @@ const ModuleDetailPage: React.FC = () => {
                   onClick={() => setDeleteModuleDialogOpen(true)}
                 >
                   Delete Module
+                </Button>
+              )}
+              {canManage && !module.deprecated && (
+                <Button
+                  variant="outlined"
+                  color="warning"
+                  size="small"
+                  startIcon={<Warning />}
+                  onClick={() => setDeprecateModuleDialogOpen(true)}
+                >
+                  Deprecate Module
+                </Button>
+              )}
+              {canManage && module.deprecated && (
+                <Button
+                  variant="outlined"
+                  color="success"
+                  size="small"
+                  onClick={() => setUndeprecateModuleDialogOpen(true)}
+                >
+                  Undeprecate Module
                 </Button>
               )}
             </Stack>
@@ -509,6 +556,76 @@ const ModuleDetailPage: React.FC = () => {
               </Button>
               <Button onClick={handleDeprecateVersion} color="warning" disabled={deprecating}>
                 {deprecating ? 'Deprecating...' : 'Deprecate Version'}
+              </Button>
+            </DialogActions>
+          </Dialog>
+
+          {/* Deprecate Module Dialog */}
+          <Dialog
+            open={deprecateModuleDialogOpen}
+            onClose={() => setDeprecateModuleDialogOpen(false)}
+          >
+            <DialogTitle>Deprecate Module</DialogTitle>
+            <DialogContent>
+              <DialogContentText sx={{ mb: 2 }}>
+                Are you sure you want to deprecate the module <strong>{namespace}/{name}/{system}</strong>?
+                This will mark the entire module as deprecated, warning users not to use it.
+              </DialogContentText>
+              <TextField
+                autoFocus
+                label="Deprecation Message"
+                placeholder="e.g., This module has been replaced by namespace/new-module/system"
+                fullWidth
+                multiline
+                rows={3}
+                value={moduleDeprecationMessage}
+                onChange={(e) => setModuleDeprecationMessage(e.target.value)}
+                sx={{ mb: 2 }}
+              />
+              <TextField
+                label="Successor Module ID (optional)"
+                placeholder="e.g., namespace/name/system"
+                fullWidth
+                value={successorModuleId}
+                onChange={(e) => setSuccessorModuleId(e.target.value)}
+                helperText="If this module has a replacement, enter its ID to help users migrate."
+              />
+            </DialogContent>
+            <DialogActions>
+              <Button
+                onClick={() => {
+                  setDeprecateModuleDialogOpen(false);
+                  setModuleDeprecationMessage('');
+                  setSuccessorModuleId('');
+                }}
+                disabled={deprecatingModule}
+              >
+                Cancel
+              </Button>
+              <Button onClick={handleDeprecateModule} color="warning" disabled={deprecatingModule}>
+                {deprecatingModule ? 'Deprecating...' : 'Deprecate Module'}
+              </Button>
+            </DialogActions>
+          </Dialog>
+
+          {/* Undeprecate Module Confirmation Dialog */}
+          <Dialog
+            open={undeprecateModuleDialogOpen}
+            onClose={() => setUndeprecateModuleDialogOpen(false)}
+          >
+            <DialogTitle>Undeprecate Module</DialogTitle>
+            <DialogContent>
+              <DialogContentText>
+                Are you sure you want to remove the deprecation from <strong>{namespace}/{name}/{system}</strong>?
+                This will make the module available for normal use again.
+              </DialogContentText>
+            </DialogContent>
+            <DialogActions>
+              <Button onClick={() => setUndeprecateModuleDialogOpen(false)} disabled={deprecatingModule}>
+                Cancel
+              </Button>
+              <Button onClick={handleUndeprecateModule} color="success" disabled={deprecatingModule}>
+                {deprecatingModule ? 'Processing...' : 'Undeprecate Module'}
               </Button>
             </DialogActions>
           </Dialog>

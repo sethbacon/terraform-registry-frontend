@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   Container,
   Typography,
@@ -41,12 +42,13 @@ import InfoIcon from '@mui/icons-material/Info';
 import EditIcon from '@mui/icons-material/Edit';
 import AutorenewIcon from '@mui/icons-material/Autorenew';
 import api from '../../services/api';
-import { APIKey, UserMembership } from '../../types';
+import { APIKey } from '../../types';
 import { REGISTRY_HOST } from '../../config';
 import { useAuth } from '../../contexts/AuthContext';
 import { AVAILABLE_SCOPES } from '../../types/rbac';
 import { getScopeInfo } from '../../utils';
 import { getErrorMessage } from '../../utils/errors';
+import { queryKeys } from '../../services/queryKeys';
 
 function getExpirationStatus(expiresAt?: string | null): 'expired' | 'expiring-soon' | 'active' | 'never' {
   if (!expiresAt) return 'never';
@@ -69,12 +71,38 @@ function toDatetimeLocalValue(isoString?: string | null): string {
 }
 
 const APIKeysPage: React.FC = () => {
+  const queryClient = useQueryClient();
   const { allowedScopes, roleTemplate, user } = useAuth();
-  const [apiKeys, setApiKeys] = useState<APIKey[]>([]);
-  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [memberships, setMemberships] = useState<UserMembership[]>([]);
-  const [membershipsLoading, setMembershipsLoading] = useState(true);
+
+  // Memberships query
+  const {
+    data: memberships = [],
+    isLoading: membershipsLoading,
+  } = useQuery({
+    queryKey: queryKeys.apiKeys.memberships(user?.id ?? ''),
+    queryFn: () => api.getCurrentUserMemberships(),
+    enabled: !!user?.id,
+  });
+
+  // API Keys query
+  const {
+    data: apiKeys = [],
+    isLoading: loading,
+    error: queryError,
+  } = useQuery<APIKey[]>({
+    queryKey: queryKeys.apiKeys.list(),
+    queryFn: async () => {
+      const keys = await api.listAPIKeys();
+      return Array.isArray(keys) ? keys : [];
+    },
+  });
+
+  useEffect(() => {
+    if (queryError && !error) {
+      setError('Failed to load API keys. Please try again.');
+    }
+  }, [queryError]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Create dialog state
   const [openDialog, setOpenDialog] = useState(false);
@@ -119,42 +147,6 @@ const APIKeysPage: React.FC = () => {
     ? AVAILABLE_SCOPES.map((s) => s.value)
     : allowedScopes;
 
-  const loadMemberships = useCallback(async () => {
-    if (!user?.id) return;
-    try {
-      setMembershipsLoading(true);
-      // Use self-access endpoint that doesn't require users:read scope
-      const userMemberships = await api.getCurrentUserMemberships();
-      setMemberships(userMemberships);
-    } catch (err) {
-      console.error('Failed to load memberships:', err);
-      setMemberships([]);
-    } finally {
-      setMembershipsLoading(false);
-    }
-  }, [user?.id]);
-
-  useEffect(() => {
-    loadAPIKeys();
-    loadMemberships();
-  }, [user?.id, loadMemberships]);
-
-  const loadAPIKeys = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      const keys = await api.listAPIKeys();
-      // Ensure keys is always an array
-      setApiKeys(Array.isArray(keys) ? keys : []);
-    } catch (err) {
-      console.error('Failed to load API keys:', err);
-      setApiKeys([]);
-      setError('Failed to load API keys. Please try again.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
   // --- Create Dialog ---
 
   const handleOpenDialog = () => {
@@ -194,7 +186,7 @@ const APIKeysPage: React.FC = () => {
         expires_at: formData.expires_at ? new Date(formData.expires_at).toISOString() : undefined,
       });
       setNewKeyValue(response.key);
-      await loadAPIKeys();
+      queryClient.invalidateQueries({ queryKey: queryKeys.apiKeys._def });
     } catch (err: unknown) {
       console.error('Failed to create API key:', err);
       setError(getErrorMessage(err, 'Failed to create API key. Please try again.'));
@@ -234,7 +226,7 @@ const APIKeysPage: React.FC = () => {
       });
       setEditDialogOpen(false);
       setKeyToEdit(null);
-      await loadAPIKeys();
+      queryClient.invalidateQueries({ queryKey: queryKeys.apiKeys._def });
     } catch (err: unknown) {
       console.error('Failed to update API key:', err);
       setError(getErrorMessage(err, 'Failed to update API key. Please try again.'));
@@ -265,7 +257,7 @@ const APIKeysPage: React.FC = () => {
         oldStatus: response.old_key_status,
         oldExpiresAt: response.old_expires_at,
       });
-      await loadAPIKeys();
+      queryClient.invalidateQueries({ queryKey: queryKeys.apiKeys._def });
     } catch (err: unknown) {
       console.error('Failed to rotate API key:', err);
       setError(getErrorMessage(err, 'Failed to rotate API key. Please try again.'));
@@ -293,7 +285,7 @@ const APIKeysPage: React.FC = () => {
       await api.deleteAPIKey(keyToDelete.id);
       setDeleteDialogOpen(false);
       setKeyToDelete(null);
-      loadAPIKeys();
+      queryClient.invalidateQueries({ queryKey: queryKeys.apiKeys._def });
     } catch (err: unknown) {
       console.error('Failed to delete API key:', err);
       setError(getErrorMessage(err, 'Failed to delete API key. Please try again.'));
@@ -367,8 +359,8 @@ const APIKeysPage: React.FC = () => {
                 scope === 'admin'
                   ? 'error.light'
                   : scope.includes(':write') || scope.includes(':manage')
-                  ? 'warning.light'
-                  : 'success.light',
+                    ? 'warning.light'
+                    : 'success.light',
             }}
           />
         ))}
@@ -424,8 +416,8 @@ const APIKeysPage: React.FC = () => {
                             scope === 'admin'
                               ? 'error.light'
                               : scope.includes(':write') || scope.includes(':manage')
-                              ? 'warning.light'
-                              : 'success.light',
+                                ? 'warning.light'
+                                : 'success.light',
                         }}
                       />
                     </Box>
@@ -650,7 +642,7 @@ const APIKeysPage: React.FC = () => {
                     onChange={(e) => setFormData({ ...formData, organization_id: e.target.value })}
                     label="Organization"
                   >
-                    {memberships.map((m) => (
+                    {memberships.map((m: { organization_id: string; organization_name: string; role_template_display_name?: string }) => (
                       <MenuItem key={m.organization_id} value={m.organization_id}>
                         {m.organization_name} {m.role_template_display_name && `(${m.role_template_display_name})`}
                       </MenuItem>

@@ -42,9 +42,9 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
       }
 
       return (
-        <Container maxWidth="sm" sx={{ py: 8 }}>
+        <Container maxWidth="sm" sx={{ py: 8 }} role="alert" aria-live="assertive">
           <Alert severity="error">
-            <AlertTitle>Something went wrong</AlertTitle>
+            <AlertTitle component="h2">Something went wrong</AlertTitle>
             <Typography variant="body2" sx={{ mb: 2 }}>
               An unexpected error occurred. You can try again or reload the page.
             </Typography>

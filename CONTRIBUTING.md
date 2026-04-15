@@ -115,15 +115,128 @@ TypeScript strict mode is enforced. `any` types require explicit justification i
 Before submitting a pull request:
 
 ```bash
-# Frontend: must lint and build clean
+# Frontend: must lint, typecheck, test, and build clean
 cd frontend
 npm run lint
+npx tsc --noEmit
+npm test
 npm run build
-
-# E2E: run the Playwright suite against a running stack
-cd e2e
-npx playwright test --workers=1
 ```
+
+### What needs tests
+
+| Change type | Required tests |
+| ----------- | -------------- |
+| New component | Unit test in `components/__tests__/ComponentName.test.tsx` |
+| New hook | Unit test in `hooks/__tests__/hookName.test.ts` with `renderHook` + `QueryClientProvider` wrapper |
+| New context | Unit test in `contexts/__tests__/ContextName.test.tsx` |
+| New service function | Unit test in `services/__tests__/serviceName.test.ts` |
+| New utility | Unit test in `utils/__tests__/utilName.test.ts` |
+| New page / user flow | E2E spec in `e2e/tests/feature-name.spec.ts` |
+| Bug fix | Regression test covering the fixed behavior |
+
+Tests must pass with `npm test`. Coverage thresholds are enforced at 40% (statements, branches, functions, lines) via `vitest.config.ts` and will increase over time.
+
+For detailed test patterns and examples, see [TESTING.md](TESTING.md).
+
+---
+
+## Data Fetching: React Query Patterns
+
+All server state should use React Query (`@tanstack/react-query`), not `useState` + `useEffect` for data fetching.
+
+### Preferred pattern
+
+```tsx
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { queryKeys } from '../services/queryKeys';
+import api from '../services/api';
+
+// Reading data
+const { data, isLoading, error } = useQuery({
+  queryKey: queryKeys.users.list({ page: 1 }),
+  queryFn: () => api.listUsers(1, 20),
+});
+
+// Mutating data
+const queryClient = useQueryClient();
+const createUser = useMutation({
+  mutationFn: (data: CreateUserInput) => api.createUser(data),
+  onSuccess: () => {
+    queryClient.invalidateQueries({ queryKey: queryKeys.users._def });
+  },
+});
+```
+
+### Query keys
+
+Query keys are defined in `services/queryKeys.ts` using a factory pattern. Each domain has a `_def` base key and specific sub-keys:
+
+```ts
+queryKeys.modules.search({ query: 'vpc', limit: 10, offset: 0, viewMode: 'grid' })
+// → ['modules', 'search', { query: 'vpc', ... }]
+
+queryKeys.users.detail('user-123')
+// → ['users', 'detail', 'user-123']
+```
+
+When adding a new domain, add its keys to `queryKeys.ts` following the existing pattern. Mutations should invalidate the `_def` key to refresh all related queries.
+
+### Anti-pattern (do not use for server state)
+
+```tsx
+// BAD: manual fetch with useState + useEffect
+const [data, setData] = useState([]);
+const [loading, setLoading] = useState(true);
+useEffect(() => {
+  api.listFoo().then(setData).finally(() => setLoading(false));
+}, []);
+```
+
+Some older admin pages still use this pattern and are being migrated. New code should always use React Query.
+
+---
+
+## Component File Organization
+
+```
+frontend/src/
+  components/          # Shared, reusable UI components
+    __tests__/         # Component unit tests
+    Layout.tsx         # App shell (sidebar + topbar + outlet)
+    ProtectedRoute.tsx # Auth guard wrapper
+    ErrorBoundary.tsx  # Error boundary with fallback UI
+    ...
+  contexts/            # React Context providers (auth, theme, help)
+    __tests__/
+  hooks/               # Custom React hooks
+    __tests__/
+  pages/               # Route-level page components
+    __tests__/
+    admin/             # Admin-only pages (behind ProtectedRoute)
+  services/            # API client, query keys, error reporting
+    __tests__/
+  types/               # TypeScript type definitions
+  utils/               # Pure utility functions
+    __tests__/
+```
+
+**Conventions**:
+- One component per file. File name matches the exported component/function.
+- Tests live in a `__tests__/` directory alongside the source, named `SourceFile.test.ts(x)`.
+- New pages go in `pages/` (public) or `pages/admin/` (admin). Register the route in `App.tsx`.
+- Admin routes must be wrapped in `<ProtectedRoute requiredScope="...">`.
+
+---
+
+## Code Style
+
+- **TypeScript strict mode** is enforced. Avoid `any` types; if unavoidable, add a comment explaining why.
+- **ESLint** runs with zero warnings (`npm run lint`). No `// eslint-disable` without a comment justifying it.
+- **No unused variables or imports**. ESLint catches these.
+- **All API calls** go through `services/api.ts`. Never use `fetch` or create separate Axios instances.
+- **MUI TextField inputs** for non-obvious fields must include a `helperText` prop.
+- **Imports**: prefer named imports. Group imports: React/external libraries first, then internal modules.
 
 ---
 
