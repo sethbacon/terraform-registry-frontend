@@ -46,6 +46,11 @@ export function useModuleDetail() {
   const [deprecateDialogOpen, setDeprecateDialogOpen] = useState(false);
   const [deprecationMessage, setDeprecationMessage] = useState('');
 
+  // Module-level deprecation UI state
+  const [deprecateModuleDialogOpen, setDeprecateModuleDialogOpen] = useState(false);
+  const [moduleDeprecationMessage, setModuleDeprecationMessage] = useState('');
+  const [successorModuleId, setSuccessorModuleId] = useState('');
+  const [undeprecateModuleDialogOpen, setUndeprecateModuleDialogOpen] = useState(false);
   // SCM linking UI state
   const [scmWizardOpen, setScmWizardOpen] = useState(false);
 
@@ -253,6 +258,39 @@ export function useModuleDetail() {
     },
   });
 
+  const deprecateModuleMutation = useMutation({
+    mutationFn: (args: { message: string; successor_module_id?: string }) =>
+      api.deprecateModule(namespace!, name!, system!, args),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.modules.detail(namespace ?? '', name ?? '', system ?? ''),
+      });
+      setModuleDeprecationMessage('');
+      setSuccessorModuleId('');
+    },
+    onError: (err: unknown) => {
+      setError(getErrorMessage(err, 'Failed to deprecate module. Please try again.'));
+    },
+    onSettled: () => {
+      setDeprecateModuleDialogOpen(false);
+    },
+  });
+
+  const undeprecateModuleMutation = useMutation({
+    mutationFn: () => api.undeprecateModule(namespace!, name!, system!),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.modules.detail(namespace ?? '', name ?? '', system ?? ''),
+      });
+    },
+    onError: (err: unknown) => {
+      setError(getErrorMessage(err, 'Failed to remove module deprecation. Please try again.'));
+    },
+    onSettled: () => {
+      setUndeprecateModuleDialogOpen(false);
+    },
+  });
+
   const updateDescriptionMutation = useMutation({
     mutationFn: (newDescription: string) => api.updateModule(module!.id, { description: newDescription }),
     onSuccess: (_data, newDescription) => {
@@ -387,6 +425,19 @@ export function useModuleDetail() {
     updateDescriptionMutation.mutate(newDescription);
   };
 
+  const handleDeprecateModule = () => {
+    if (!namespace || !name || !system) return;
+    deprecateModuleMutation.mutate({
+      message: moduleDeprecationMessage,
+      successor_module_id: successorModuleId || undefined,
+    });
+  };
+
+  const handleUndeprecateModule = () => {
+    if (!namespace || !name || !system) return;
+    undeprecateModuleMutation.mutate();
+  };
+
   const getTerraformExample = () => {
     if (!module || !selectedVersion) return '';
 
@@ -429,6 +480,16 @@ export function useModuleDetail() {
     deprecationMessage,
     setDeprecationMessage,
     deprecating: deprecateVersionMutation.isPending || undeprecateVersionMutation.isPending,
+    // Module-level deprecation
+    deprecateModuleDialogOpen,
+    setDeprecateModuleDialogOpen,
+    moduleDeprecationMessage,
+    setModuleDeprecationMessage,
+    successorModuleId,
+    setSuccessorModuleId,
+    undeprecateModuleDialogOpen,
+    setUndeprecateModuleDialogOpen,
+    deprecatingModule: deprecateModuleMutation.isPending || undeprecateModuleMutation.isPending,
     // SCM linking
     scmLink,
     scmLinkLoaded,
@@ -462,6 +523,8 @@ export function useModuleDetail() {
     openDeleteVersionDialog,
     handleDeprecateVersion,
     handleUndeprecateVersion,
+    handleDeprecateModule,
+    handleUndeprecateModule,
     handleUpdateDescription,
     getTerraformExample,
   };

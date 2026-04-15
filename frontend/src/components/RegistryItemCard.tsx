@@ -6,6 +6,7 @@ import {
   Button,
   Typography,
   Box,
+  Chip,
   type SxProps,
   type Theme,
 } from '@mui/material';
@@ -30,6 +31,8 @@ export interface RegistryItemCardProps {
   actionColor?: 'primary' | 'secondary';
   /** Click handler attached to both the card and the action button. */
   onClick: () => void;
+  /** Whether this item is deprecated. Adds a visual indicator. */
+  deprecated?: boolean;
   /** Additional sx overrides for the root Card element. */
   sx?: SxProps<Theme>;
 }
@@ -55,9 +58,10 @@ const RegistryItemCard: React.FC<RegistryItemCardProps> = ({
   actionLabel = 'View Details',
   actionColor = 'primary',
   onClick,
+  deprecated,
   sx,
 }) => (
-  <Card sx={[cardHoverSx, ...(Array.isArray(sx) ? sx : sx ? [sx] : [])]} onClick={onClick}>
+  <Card sx={[cardHoverSx, ...(deprecated ? [{ opacity: 0.7 } as const] : []), ...(Array.isArray(sx) ? sx : sx ? [sx] : [])]} onClick={onClick}>
     <CardContent sx={{ flexGrow: 1 }}>
       <Typography variant="h6" gutterBottom noWrap>
         {title}
@@ -85,6 +89,7 @@ const RegistryItemCard: React.FC<RegistryItemCardProps> = ({
       </Typography>
       <Box sx={{ mt: 'auto' }}>
         {badge && <Box sx={{ mb: 1 }}>{badge}</Box>}
+        {deprecated && <Chip label="Deprecated" color="warning" size="small" sx={{ mr: 1 }} />}
         {chips}
       </Box>
     </CardContent>

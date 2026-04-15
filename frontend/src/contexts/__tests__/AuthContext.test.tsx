@@ -3,12 +3,12 @@ import { AuthProvider, useAuth } from '../AuthContext'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 
 // Mock the api module
-const mockApi = {
+const mockApi = vi.hoisted(() => ({
   getCurrentUserWithRole: vi.fn(),
   login: vi.fn(),
   logout: vi.fn(),
   refreshToken: vi.fn(),
-}
+}))
 
 vi.mock('../../services/api', () => ({
   default: mockApi,

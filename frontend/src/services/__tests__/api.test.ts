@@ -14,6 +14,7 @@ type ResRejected = (error: AxiosError) => unknown
 let capturedReqFulfilled: ReqFulfilled
 let capturedResFulfilled: ResFulfilled
 let capturedResRejected: ResRejected
+let capturedResRejectedHandlers: ResRejected[]
 let mockAxiosInstance: AxiosInstance
 
 vi.mock('axios', () => {
@@ -55,6 +56,7 @@ function getApiClient() {
   vi.resetModules()
   // Re-apply the mock since resetModules clears it
   vi.doMock('axios', () => {
+    const resRejectedHandlers: ResRejected[] = []
     const mockInstance = {
       get: vi.fn(),
       post: vi.fn(),
@@ -70,6 +72,8 @@ function getApiClient() {
           use: vi.fn((fulfilled: ResFulfilled, rejected: ResRejected) => {
             capturedResFulfilled = fulfilled
             capturedResRejected = rejected
+            resRejectedHandlers.push(rejected)
+            capturedResRejectedHandlers = resRejectedHandlers
           }),
         },
       },
@@ -140,7 +144,9 @@ describe('ApiClient', () => {
       // window.location.href is mocked by happy-dom
       const originalHref = window.location.href
 
-      await expect(capturedResRejected(error)).rejects.toBe(error)
+      // Use the first response rejected handler (401 auth handler), not the last (breadcrumb handler)
+      const authRejectedHandler = capturedResRejectedHandlers[0]
+      await expect(authRejectedHandler(error)).rejects.toBe(error)
       expect(localStorage.getItem('auth_token')).toBeNull()
       expect(localStorage.getItem('user')).toBeNull()
     })

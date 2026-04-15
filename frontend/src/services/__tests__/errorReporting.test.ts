@@ -57,13 +57,17 @@ describe('errorReporting', () => {
 
     it('sends error payload via fetch when DSN is configured', async () => {
       vi.stubEnv('VITE_ERROR_REPORTING_DSN', 'https://errors.example.com/report')
+      vi.stubEnv('VITE_SENTRY_DSN', '')
 
-      const { init: freshInit, captureError: freshCapture } = await import('../errorReporting')
+      const { init: freshInit, captureError: freshCapture, flush: freshFlush } = await import('../errorReporting')
       freshInit()
 
       const error = new Error('Test error')
       error.stack = 'Error: Test error\n    at test.ts:1'
       freshCapture(error, { component: 'TestComp' })
+
+      // Errors are batched — flush to trigger the fetch call
+      freshFlush()
 
       expect(globalThis.fetch).toHaveBeenCalledWith(
         'https://errors.example.com/report',
@@ -73,11 +77,13 @@ describe('errorReporting', () => {
         })
       )
 
-      // Verify payload structure
+      // Verify payload structure (batched format)
       const body = JSON.parse(
         (globalThis.fetch as ReturnType<typeof vi.fn>).mock.calls[0][1].body
       )
-      expect(body).toMatchObject({
+      expect(body.type).toBe('errors')
+      expect(body.entries).toHaveLength(1)
+      expect(body.entries[0]).toMatchObject({
         message: 'Test error',
         stack: expect.stringContaining('Test error'),
         context: { component: 'TestComp' },
@@ -96,6 +102,7 @@ describe('errorReporting', () => {
 
     it('gracefully handles fetch failures', async () => {
       vi.stubEnv('VITE_ERROR_REPORTING_DSN', 'https://errors.example.com/report')
+      vi.stubEnv('VITE_SENTRY_DSN', '')
       globalThis.fetch = vi.fn().mockRejectedValue(new Error('Network error'))
 
       const { init: freshInit, captureError: freshCapture } = await import('../errorReporting')
@@ -111,21 +118,24 @@ describe('errorReporting', () => {
   describe('setUser()', () => {
     it('includes userId in subsequent error reports', async () => {
       vi.stubEnv('VITE_ERROR_REPORTING_DSN', 'https://errors.example.com/report')
+      vi.stubEnv('VITE_SENTRY_DSN', '')
 
       const {
         init: freshInit,
         setUser: freshSetUser,
         captureError: freshCapture,
+        flush: freshFlush,
       } = await import('../errorReporting')
       freshInit()
       freshSetUser('user-42')
 
       freshCapture(new Error('User error'))
+      freshFlush()
 
       const body = JSON.parse(
         (globalThis.fetch as ReturnType<typeof vi.fn>).mock.calls[0][1].body
       )
-      expect(body.userId).toBe('user-42')
+      expect(body.entries[0].userId).toBe('user-42')
     })
 
     it('logs the user context', () => {

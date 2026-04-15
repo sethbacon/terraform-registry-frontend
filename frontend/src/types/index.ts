@@ -102,6 +102,11 @@ export interface Module {
   created_by_name?: string; // User name who created this module
   created_at: string;
   updated_at: string;
+  deprecated?: boolean;
+  deprecated_at?: string;
+  deprecation_message?: string;
+  successor_module_id?: string;
+  successor_module?: { namespace: string; name: string; system: string };
 }
 
 export interface ModuleVersion {
@@ -298,7 +303,24 @@ export interface SetupStatus {
   // Enhanced fields from setup wizard
   setup_completed?: boolean;
   oidc_configured?: boolean;
+  scanning_configured?: boolean;
   admin_configured?: boolean;
+}
+
+// Setup Wizard — Security Scanning configuration
+export interface ScanningConfigInput {
+  enabled: boolean;
+  tool: string;
+  binary_path?: string;
+  severity_threshold?: string;
+  timeout?: string;
+}
+
+export interface ScanningTestResult {
+  success: boolean;
+  message: string;
+  tool?: string;
+  version?: string;
 }
 
 // Setup Wizard Types
@@ -491,4 +513,29 @@ export interface ModuleDoc {
   outputs: ModuleOutputVal[];
   providers: ModuleProviderReq[];
   requirements: ModuleRequirements | null;
+}
+
+// ---- Storage Migration ----
+
+export interface MigrationPlan {
+  source_config_id: string;
+  target_config_id: string;
+  total_artifacts: number;
+  total_modules: number;
+  total_providers: number;
+  estimated_size_bytes: number;
+}
+
+export interface StorageMigration {
+  id: string;
+  source_config_id: string;
+  target_config_id: string;
+  status: 'pending' | 'running' | 'completed' | 'failed' | 'cancelled';
+  total_artifacts: number;
+  migrated_artifacts: number;
+  failed_artifacts: number;
+  error_message?: string;
+  started_at?: string;
+  completed_at?: string;
+  created_at: string;
 }

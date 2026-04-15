@@ -1,12 +1,13 @@
+---
 name: CI
 
-on:
+"on":
   push:
     branches: [main]
   pull_request:
     branches: [main, development]
   workflow_dispatch: {}
-  workflow_call: {} # allows release.yml to call this as a prerequisite
+  workflow_call: {}  # allows release.yml to call this
 
 concurrency:
   group: ci-${{ github.event_name }}-${{ github.head_ref || github.ref }}
@@ -16,16 +17,16 @@ permissions:
   packages: read
 
 jobs:
-  # ── Lint ────────────────────────────────────────────────────────────────
+  # ── Lint ──────────────────────────────────────────────
   lint:
     name: Lint
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6
 
       - name: Set up Node
-        uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5
+        uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444  # v5
         with:
           node-version: "22"
           cache: "npm"
@@ -39,16 +40,16 @@ jobs:
         working-directory: frontend
         run: npm run lint
 
-  # ── Typecheck ───────────────────────────────────────────────────────────
+  # ── Typecheck ─────────────────────────────────────────
   typecheck:
     name: Typecheck
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6
 
       - name: Set up Node
-        uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5
+        uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444  # v5
         with:
           node-version: "22"
           cache: "npm"
@@ -62,16 +63,16 @@ jobs:
         working-directory: frontend
         run: npx tsc --noEmit
 
-  # ── Unit Tests with Coverage ────────────────────────────────────────────
+  # ── Unit Tests with Coverage ──────────────────────────
   unit-test:
     name: Unit Tests
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6
 
       - name: Set up Node
-        uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5
+        uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444  # v5
         with:
           node-version: "22"
           cache: "npm"
@@ -87,21 +88,22 @@ jobs:
 
       - name: Upload coverage report
         if: always()
-        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7
+        # v7
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f
         with:
           name: coverage-report
           path: frontend/coverage/
 
-  # ── Build ───────────────────────────────────────────────────────────────
+  # ── Build ─────────────────────────────────────────────
   build:
     name: Build
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6
 
       - name: Set up Node
-        uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5
+        uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444  # v5
         with:
           node-version: "22"
           cache: "npm"
@@ -116,7 +118,8 @@ jobs:
         run: npm run build
 
       - name: Upload build artifact
-        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7
+        # v7
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f
         with:
           name: frontend-dist
           path: frontend/dist
@@ -125,39 +128,52 @@ jobs:
     name: E2E (gated/manual)
     runs-on: ubuntu-latest
     needs: frontend-lint-build
-    if: github.event_name == 'workflow_dispatch' || github.event_name == 'workflow_call' || github.ref == 'refs/heads/main'
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      github.event_name == 'workflow_call' ||
+      github.ref == 'refs/heads/main'
 
     steps:
       - name: Checkout
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6
 
-      - name: Log in to GitHub Container Registry
-        uses: docker/login-action@b45d80f862d83dbcd57f89517bcf500b2ab88fb2 # v4
+      - name: Log in to GHCR
+        uses: docker/login-action@b45d80f862d83dbcd57f89517bcf500b2ab88fb2  # v4
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Set up Node
-        uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5
+        uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444  # v5
         with:
           node-version: "22"
 
       - name: Start test compose
         # Pulls backend from ghcr.io; builds frontend locally
-        run: docker compose -f deployments/docker-compose.test.yml up -d
+        run: >-
+          docker compose
+          -f deployments/docker-compose.test.yml up -d
 
       - name: Wait for frontend
         run: |
-          echo "Waiting for frontend HTTPS on port 3000..."
-          echo "(backend/postgres readiness is enforced by Docker healthchecks in compose)"
+          echo "Waiting for frontend on port 3000..."
+          echo "(backend/postgres readiness via Docker healthchecks)"
           frontend_up=0
           for i in {1..60}; do
-            code=$(curl -sk https://localhost:3000/ -o /dev/null -w "%{http_code}" 2>/dev/null || true)
-            if echo "$code" | grep -qE "^[23]"; then echo "Frontend ready (HTTP $code)"; frontend_up=1; break; fi
+            code=$(curl -sk https://localhost:3000/ \
+              -o /dev/null -w "%{http_code}" 2>/dev/null || true)
+            if echo "$code" | grep -qE "^[23]"; then
+              echo "Frontend ready (HTTP $code)"
+              frontend_up=1
+              break
+            fi
             sleep 3
           done
-          if [ "$frontend_up" -eq 0 ]; then echo "ERROR: frontend never became ready"; exit 1; fi
+          if [ "$frontend_up" -eq 0 ]; then
+            echo "ERROR: frontend never became ready"
+            exit 1
+          fi
 
       - name: Install e2e deps & Playwright
         working-directory: e2e
@@ -167,10 +183,13 @@ jobs:
 
       - name: Run Playwright tests
         working-directory: e2e
-        run: npx playwright test --max-failures=1 --retries=1 --reporter=list
+        run: >-
+          npx playwright test
+          --max-failures=1 --retries=1 --reporter=list
 
       - name: Upload Playwright artifacts
-        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f # v7
+        # v7
+        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f
         with:
           name: playwright-report
           path: e2e/playwright-report
@@ -178,15 +197,15 @@ jobs:
       - name: Dump container logs
         if: always()
         run: |
-          echo "===== backend ====="
-          docker compose -f deployments/docker-compose.test.yml logs backend || true
-          echo "===== seed-db ====="
-          docker compose -f deployments/docker-compose.test.yml logs seed-db || true
-          echo "===== frontend ====="
-          docker compose -f deployments/docker-compose.test.yml logs frontend || true
-          echo "===== postgres ====="
-          docker compose -f deployments/docker-compose.test.yml logs postgres || true
+          for svc in backend seed-db frontend postgres; do
+            echo "===== $svc ====="
+            docker compose \
+              -f deployments/docker-compose.test.yml \
+              logs "$svc" || true
+          done
 
       - name: Tear down test compose
         if: always()
-        run: docker compose -f deployments/docker-compose.test.yml down --volumes
+        run: >-
+          docker compose
+          -f deployments/docker-compose.test.yml down --volumes

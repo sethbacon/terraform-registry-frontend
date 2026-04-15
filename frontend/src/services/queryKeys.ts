@@ -1,7 +1,7 @@
 export const queryKeys = {
   modules: {
     _def: ['modules'] as const,
-    search: (params: { query?: string; limit: number; offset: number; viewMode: string }) =>
+    search: (params: { query?: string; limit: number; offset: number; viewMode: string; sort?: string; order?: string }) =>
       [...queryKeys.modules._def, 'search', params] as const,
     detail: (namespace: string, name: string, system: string) =>
       [...queryKeys.modules._def, 'detail', namespace, name, system] as const,
@@ -18,7 +18,7 @@ export const queryKeys = {
   },
   providers: {
     _def: ['providers'] as const,
-    search: (params: { query?: string; limit: number; offset: number }) =>
+    search: (params: { query?: string; limit: number; offset: number; sort?: string; order?: string }) =>
       [...queryKeys.providers._def, 'search', params] as const,
     detail: (namespace: string, type: string) =>
       [...queryKeys.providers._def, 'detail', namespace, type] as const,
@@ -72,6 +72,11 @@ export const queryKeys = {
     _def: ['storageConfigs'] as const,
     list: () => [...queryKeys.storageConfigs._def, 'list'] as const,
     setupStatus: () => [...queryKeys.storageConfigs._def, 'setupStatus'] as const,
+  },
+  storageMigrations: {
+    _def: ['storageMigrations'] as const,
+    list: () => [...queryKeys.storageMigrations._def, 'list'] as const,
+    detail: (id: string) => [...queryKeys.storageMigrations._def, 'detail', id] as const,
   },
   mirrors: {
     _def: ['mirrors'] as const,

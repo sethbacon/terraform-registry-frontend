@@ -152,14 +152,16 @@ class ApiClient {
   }
 
   // Modules
-  async searchModules(options?: { query?: string; limit?: number; offset?: number; page?: number; per_page?: number }) {
+  async searchModules(options?: { query?: string; limit?: number; offset?: number; page?: number; per_page?: number; sort?: string; order?: string }) {
     const params: Record<string, string | number> = {};
 
     if (options?.query) params.q = options.query;
     if (options?.limit) params.limit = options.limit;
-    if (options?.offset) params.offset = options.offset;
+    if (options?.offset !== undefined) params.offset = options.offset;
     if (options?.page) params.page = options.page;
     if (options?.per_page) params.per_page = options.per_page;
+    if (options?.sort) params.sort = options.sort;
+    if (options?.order) params.order = options.order;
 
     const response = await this.client.get('/api/v1/modules/search', { params });
     return response.data;
@@ -219,15 +221,27 @@ class ApiClient {
     return response.data;
   }
 
+  async deprecateModule(namespace: string, name: string, system: string, data: { message: string; successor_module_id?: string }) {
+    const response = await this.client.post(`/api/v1/modules/${namespace}/${name}/${system}/deprecate`, data);
+    return response.data;
+  }
+
+  async undeprecateModule(namespace: string, name: string, system: string) {
+    const response = await this.client.delete(`/api/v1/modules/${namespace}/${name}/${system}/deprecate`);
+    return response.data;
+  }
+
   // Providers
-  async searchProviders(options?: { query?: string; limit?: number; offset?: number; page?: number; per_page?: number }) {
+  async searchProviders(options?: { query?: string; limit?: number; offset?: number; page?: number; per_page?: number; sort?: string; order?: string }) {
     const params: Record<string, string | number> = {};
 
     if (options?.query) params.q = options.query;
     if (options?.limit) params.limit = options.limit;
-    if (options?.offset) params.offset = options.offset;
+    if (options?.offset !== undefined) params.offset = options.offset;
     if (options?.page) params.page = options.page;
     if (options?.per_page) params.per_page = options.per_page;
+    if (options?.sort) params.sort = options.sort;
+    if (options?.order) params.order = options.order;
 
     const response = await this.client.get('/api/v1/providers/search', { params });
     return response.data;
@@ -1027,6 +1041,30 @@ class ApiClient {
     return response.data;
   }
 
+  async testScanningConfig(
+    setupToken: string,
+    data: import('../types').ScanningConfigInput
+  ): Promise<import('../types').ScanningTestResult> {
+    const response = await this.client.post(
+      '/api/v1/setup/scanning/test',
+      data,
+      this.setupRequest(setupToken)
+    );
+    return response.data;
+  }
+
+  async saveScanningConfig(
+    setupToken: string,
+    data: import('../types').ScanningConfigInput
+  ): Promise<{ message: string }> {
+    const response = await this.client.post(
+      '/api/v1/setup/scanning',
+      data,
+      this.setupRequest(setupToken)
+    );
+    return response.data;
+  }
+
   async configureAdmin(
     setupToken: string,
     data: import('../types').ConfigureAdminInput
@@ -1098,6 +1136,47 @@ class ApiClient {
 
   async testStorageConfig(data: import('../types').StorageConfigInput): Promise<{ success: boolean; message: string }> {
     const response = await this.client.post('/api/v1/storage/configs/test', data);
+    return response.data;
+  }
+
+  // ============================================================================
+  // Storage Migrations
+  // ============================================================================
+
+  async planStorageMigration(
+    sourceId: string,
+    targetId: string
+  ): Promise<import('../types').MigrationPlan> {
+    const response = await this.client.post('/api/v1/admin/storage/migrations/plan', {
+      source_config_id: sourceId,
+      target_config_id: targetId,
+    });
+    return response.data;
+  }
+
+  async startStorageMigration(
+    sourceId: string,
+    targetId: string
+  ): Promise<import('../types').StorageMigration> {
+    const response = await this.client.post('/api/v1/admin/storage/migrations', {
+      source_config_id: sourceId,
+      target_config_id: targetId,
+    });
+    return response.data;
+  }
+
+  async getStorageMigration(id: string): Promise<import('../types').StorageMigration> {
+    const response = await this.client.get(`/api/v1/admin/storage/migrations/${id}`);
+    return response.data;
+  }
+
+  async cancelStorageMigration(id: string): Promise<import('../types').StorageMigration> {
+    const response = await this.client.post(`/api/v1/admin/storage/migrations/${id}/cancel`);
+    return response.data;
+  }
+
+  async listStorageMigrations(): Promise<import('../types').StorageMigration[]> {
+    const response = await this.client.get('/api/v1/admin/storage/migrations');
     return response.data;
   }
 

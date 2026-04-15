@@ -1,5 +1,7 @@
+import React from 'react'
 import { renderHook, act, waitFor } from '@testing-library/react'
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 
 // ── Mocks ────────────────────────────────────────────────────────────────
 
@@ -16,7 +18,7 @@ vi.mock('../../contexts/AuthContext', () => ({
   })),
 }))
 
-const mockApi = {
+const mockApi = vi.hoisted(() => ({
   getModule: vi.fn(),
   getModuleVersions: vi.fn(),
   getModuleSCMInfo: vi.fn(),
@@ -29,7 +31,9 @@ const mockApi = {
   unlinkModuleFromSCM: vi.fn(),
   triggerManualSync: vi.fn(),
   getWebhookEvents: vi.fn(),
-}
+  deprecateModule: vi.fn(),
+  undeprecateModule: vi.fn(),
+}))
 
 vi.mock('../../services/api', () => ({
   default: mockApi,
@@ -65,11 +69,25 @@ const versionsData = {
   }],
 }
 
+// ── Wrapper ─────────────────────────────────────────────────────────────
+
+function createWrapper() {
+  const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })
+  return ({ children }: { children: React.ReactNode }) =>
+    React.createElement(QueryClientProvider, { client: queryClient }, children)
+}
+
 // ── Tests ────────────────────────────────────────────────────────────────
 
 describe('useModuleDetail', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    // Restore default mocks that individual tests may override
+    vi.mocked(useParams).mockReturnValue({ namespace: 'hashicorp', name: 'consul', system: 'aws' })
+    vi.mocked(useAuth).mockReturnValue({
+      isAuthenticated: true,
+      allowedScopes: ['admin'],
+    } as any)
     mockApi.getModule.mockResolvedValue(moduleData)
     mockApi.getModuleVersions.mockResolvedValue(versionsData)
     mockApi.getModuleSCMInfo.mockRejectedValue(new Error('404'))
@@ -82,7 +100,7 @@ describe('useModuleDetail', () => {
     mockApi.getModule.mockReturnValue(new Promise(() => { }))
     mockApi.getModuleVersions.mockReturnValue(new Promise(() => { }))
 
-    const { result } = renderHook(() => useModuleDetail())
+    const { result } = renderHook(() => useModuleDetail(), { wrapper: createWrapper() })
 
     expect(result.current.loading).toBe(true)
     expect(result.current.module).toBeNull()
@@ -90,7 +108,7 @@ describe('useModuleDetail', () => {
   })
 
   it('loads module data and selects latest version', async () => {
-    const { result } = renderHook(() => useModuleDetail())
+    const { result } = renderHook(() => useModuleDetail(), { wrapper: createWrapper() })
 
     await waitFor(() => {
       expect(result.current.loading).toBe(false)
@@ -103,7 +121,7 @@ describe('useModuleDetail', () => {
   })
 
   it('sorts versions by semver descending', async () => {
-    const { result } = renderHook(() => useModuleDetail())
+    const { result } = renderHook(() => useModuleDetail(), { wrapper: createWrapper() })
 
     await waitFor(() => {
       expect(result.current.loading).toBe(false)
@@ -114,7 +132,7 @@ describe('useModuleDetail', () => {
   })
 
   it('allows changing selected version', async () => {
-    const { result } = renderHook(() => useModuleDetail())
+    const { result } = renderHook(() => useModuleDetail(), { wrapper: createWrapper() })
 
     await waitFor(() => {
       expect(result.current.loading).toBe(false)
@@ -130,7 +148,7 @@ describe('useModuleDetail', () => {
   it('sets error state when module is not found', async () => {
     mockApi.getModule.mockResolvedValue(null)
 
-    const { result } = renderHook(() => useModuleDetail())
+    const { result } = renderHook(() => useModuleDetail(), { wrapper: createWrapper() })
 
     await waitFor(() => {
       expect(result.current.loading).toBe(false)
@@ -142,7 +160,7 @@ describe('useModuleDetail', () => {
   it('sets error state on API failure', async () => {
     mockApi.getModule.mockRejectedValue(new Error('Network error'))
 
-    const { result } = renderHook(() => useModuleDetail())
+    const { result } = renderHook(() => useModuleDetail(), { wrapper: createWrapper() })
 
     await waitFor(() => {
       expect(result.current.loading).toBe(false)
@@ -152,7 +170,7 @@ describe('useModuleDetail', () => {
   })
 
   it('attempts to load SCM link when authenticated', async () => {
-    const { result } = renderHook(() => useModuleDetail())
+    const { result } = renderHook(() => useModuleDetail(), { wrapper: createWrapper() })
 
     await waitFor(() => {
       expect(result.current.loading).toBe(false)
@@ -164,7 +182,7 @@ describe('useModuleDetail', () => {
   it('loads module scan for selected version when user can manage', async () => {
     mockApi.getModuleScan.mockResolvedValue({ status: 'completed', findings: [] })
 
-    const { result } = renderHook(() => useModuleDetail())
+    const { result } = renderHook(() => useModuleDetail(), { wrapper: createWrapper() })
 
     await waitFor(() => {
       expect(result.current.loading).toBe(false)
@@ -186,7 +204,7 @@ describe('useModuleDetail', () => {
 
     mockApi.getModuleSCMInfo.mockRejectedValue(new Error('404'))
 
-    const { result } = renderHook(() => useModuleDetail())
+    const { result } = renderHook(() => useModuleDetail(), { wrapper: createWrapper() })
 
     await waitFor(() => {
       expect(result.current.loading).toBe(false)
@@ -199,17 +217,18 @@ describe('useModuleDetail', () => {
   it('does not load details when route params are missing', async () => {
     vi.mocked(useParams).mockReturnValue({})
 
-    const { result } = renderHook(() => useModuleDetail())
+    const { result } = renderHook(() => useModuleDetail(), { wrapper: createWrapper() })
 
     // Should remain in loading state since loadModuleDetails returns early
     expect(mockApi.getModule).not.toHaveBeenCalled()
   })
 
   it('generates correct Terraform example', async () => {
-    const { result } = renderHook(() => useModuleDetail())
+    const { result } = renderHook(() => useModuleDetail(), { wrapper: createWrapper() })
 
     await waitFor(() => {
       expect(result.current.loading).toBe(false)
+      expect(result.current.selectedVersion).not.toBeNull()
     })
 
     const example = result.current.getTerraformExample()
@@ -220,7 +239,7 @@ describe('useModuleDetail', () => {
   it('exposes route params', () => {
     vi.mocked(useParams).mockReturnValue({ namespace: 'hashicorp', name: 'consul', system: 'aws' })
 
-    const { result } = renderHook(() => useModuleDetail())
+    const { result } = renderHook(() => useModuleDetail(), { wrapper: createWrapper() })
 
     expect(result.current.namespace).toBe('hashicorp')
     expect(result.current.name).toBe('consul')
