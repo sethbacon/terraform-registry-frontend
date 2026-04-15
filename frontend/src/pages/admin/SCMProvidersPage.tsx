@@ -345,7 +345,7 @@ const SCMProvidersPage: React.FC = () => {
               <Button
                 variant="outlined"
                 startIcon={<RefreshIcon />}
-                onClick={loadProviders}
+                onClick={() => { loadProviders(); }}
               >
                 Refresh
               </Button>

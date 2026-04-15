@@ -9,7 +9,7 @@ import ComponentShowcase from '../ComponentShowcase'
 // AboutModal references the Vite-injected __APP_VERSION__ global which is not
 // defined in the vitest environment. Provide a fallback.
 beforeAll(() => {
-  if (typeof globalThis.__APP_VERSION__ === 'undefined') {
+  if (typeof (globalThis as Record<string, unknown>).__APP_VERSION__ === 'undefined') {
     (globalThis as Record<string, unknown>).__APP_VERSION__ = '0.0.0-test';
   }
 })

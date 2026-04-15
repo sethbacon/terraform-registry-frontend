@@ -155,6 +155,7 @@ describe('AuthContext', () => {
     )
 
     await act(async () => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       await authState!.login(mockUser as any)
     })
 
@@ -277,11 +278,9 @@ describe('AuthContext', () => {
 
     mockApi.getCurrentUserWithRole.mockRejectedValueOnce(new Error('401 Unauthorized'))
 
-    let authState: ReturnType<typeof useAuth> | null = null
-
     render(
       <AuthProvider>
-        <AuthConsumer onRender={(auth) => { authState = auth }} />
+        <AuthConsumer onRender={(auth) => { void auth }} />
       </AuthProvider>
     )
 

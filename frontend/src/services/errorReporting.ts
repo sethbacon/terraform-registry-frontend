@@ -143,24 +143,20 @@ export function init(): void {
           release: getRelease(),
           environment: import.meta.env.MODE,
         });
-        // eslint-disable-next-line no-console
         console.log('[ErrorReporting] Sentry SDK initialized');
       })
       .catch(() => {
         // Sentry package not installed — fall back to custom reporter
         useSentry = false;
         dsn = customDsn ?? null;
-        // eslint-disable-next-line no-console
         console.warn(
           '[ErrorReporting] @sentry/react not installed; falling back to custom reporter',
         );
       });
   } else if (customDsn) {
     dsn = customDsn;
-    // eslint-disable-next-line no-console
     console.log('[ErrorReporting] Initialized with DSN endpoint');
   } else {
-    // eslint-disable-next-line no-console
     console.log('[ErrorReporting] No DSN configured — errors will be logged to console only');
   }
 
@@ -180,7 +176,6 @@ export function init(): void {
  * sent to the configured DSN (or Sentry) on the next flush cycle.
  */
 export function captureError(error: Error, context?: Record<string, unknown>): void {
-  // eslint-disable-next-line no-console
   console.error('[ErrorReporting]', error.message, context);
 
   // Delegate to Sentry when available
@@ -234,7 +229,6 @@ export function setUser(userId: string): void {
       .catch(() => { /* noop */ });
   }
 
-  // eslint-disable-next-line no-console
   console.log(`[ErrorReporting] User context set: ${userId}`);
 }
 

@@ -234,7 +234,7 @@ const MirrorPoliciesPage: React.FC = () => {
               <Button
                 variant="outlined"
                 startIcon={<RefreshIcon />}
-                onClick={loadPolicies}
+                onClick={() => { loadPolicies(); }}
               >
                 Refresh
               </Button>

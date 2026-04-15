@@ -108,6 +108,6 @@ export default defineConfig(async () => {
         secure: false,
       },
     },
-
+  },
   };
 })

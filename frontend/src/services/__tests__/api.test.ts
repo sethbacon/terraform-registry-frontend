@@ -1,5 +1,4 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import axios from 'axios'
 import type { AxiosInstance, InternalAxiosRequestConfig, AxiosResponse, AxiosError } from 'axios'
 
 // ---------------------------------------------------------------------------
@@ -12,7 +11,6 @@ type ResFulfilled = (response: AxiosResponse) => AxiosResponse
 type ResRejected = (error: AxiosError) => unknown
 
 let capturedReqFulfilled: ReqFulfilled
-let capturedResFulfilled: ResFulfilled
 let capturedResRejected: ResRejected
 let capturedResRejectedHandlers: ResRejected[]
 let mockAxiosInstance: AxiosInstance
@@ -30,8 +28,7 @@ vi.mock('axios', () => {
         }),
       },
       response: {
-        use: vi.fn((fulfilled: ResFulfilled, rejected: ResRejected) => {
-          capturedResFulfilled = fulfilled
+        use: vi.fn((_fulfilled: ResFulfilled, rejected: ResRejected) => {
           capturedResRejected = rejected
         }),
       },
@@ -69,8 +66,7 @@ function getApiClient() {
           }),
         },
         response: {
-          use: vi.fn((fulfilled: ResFulfilled, rejected: ResRejected) => {
-            capturedResFulfilled = fulfilled
+          use: vi.fn((_fulfilled: ResFulfilled, rejected: ResRejected) => {
             capturedResRejected = rejected
             resRejectedHandlers.push(rejected)
             capturedResRejectedHandlers = resRejectedHandlers
@@ -142,7 +138,6 @@ describe('ApiClient', () => {
       } as AxiosError
 
       // window.location.href is mocked by happy-dom
-      const originalHref = window.location.href
 
       // Use the first response rejected handler (401 auth handler), not the last (breadcrumb handler)
       const authRejectedHandler = capturedResRejectedHandlers[0]

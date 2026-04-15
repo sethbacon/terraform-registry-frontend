@@ -1,8 +1,8 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import api from '../services/api';
-import { Module, ModuleVersion, ModuleScan, ModuleDoc } from '../types';
+import { ModuleVersion, ModuleScan, ModuleDoc } from '../types';
 import type { ModuleSCMLink, SCMWebhookEvent } from '../types/scm';
 import { useAuth } from '../contexts/AuthContext';
 import { REGISTRY_HOST } from '../config';
@@ -89,7 +89,7 @@ export function useModuleDetail() {
   });
 
   const module = moduleData?.module ?? null;
-  const versions = moduleData?.versions ?? [];
+  const versions = useMemo(() => moduleData?.versions ?? [], [moduleData?.versions]);
 
   // Derive error from query
   useEffect(() => {

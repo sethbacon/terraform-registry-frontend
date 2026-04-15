@@ -20,8 +20,8 @@ interface SCMRepositoryPanelProps {
   scmLink: ModuleSCMLink | null;
   scmSyncing: boolean;
   scmUnlinking: boolean;
-  onSync: () => Promise<void>;
-  onUnlink: () => Promise<void>;
+  onSync: () => void;
+  onUnlink: () => void;
   onOpenWizard: () => void;
 }
 

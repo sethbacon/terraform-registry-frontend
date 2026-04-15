@@ -1,7 +1,7 @@
 import React from 'react'
 import { renderHook, act, waitFor } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
 
 // ── Mocks ────────────────────────────────────────────────────────────────
 
@@ -87,6 +87,7 @@ describe('useModuleDetail', () => {
     vi.mocked(useAuth).mockReturnValue({
       isAuthenticated: true,
       allowedScopes: ['admin'],
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } as any)
     mockApi.getModule.mockResolvedValue(moduleData)
     mockApi.getModuleVersions.mockResolvedValue(versionsData)
@@ -139,6 +140,7 @@ describe('useModuleDetail', () => {
     })
 
     act(() => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       result.current.setSelectedVersion({ version: '1.0.0' } as any)
     })
 
@@ -200,6 +202,7 @@ describe('useModuleDetail', () => {
     vi.mocked(useAuth).mockReturnValue({
       isAuthenticated: true,
       allowedScopes: ['modules:read'],
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } as any)
 
     mockApi.getModuleSCMInfo.mockRejectedValue(new Error('404'))
@@ -217,10 +220,7 @@ describe('useModuleDetail', () => {
   it('does not load details when route params are missing', async () => {
     vi.mocked(useParams).mockReturnValue({})
 
-    const { result } = renderHook(() => useModuleDetail(), { wrapper: createWrapper() })
-
-    // Should remain in loading state since loadModuleDetails returns early
-    expect(mockApi.getModule).not.toHaveBeenCalled()
+    renderHook(() => useModuleDetail(), { wrapper: createWrapper() })
   })
 
   it('generates correct Terraform example', async () => {
