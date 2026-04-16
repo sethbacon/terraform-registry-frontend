@@ -19,6 +19,8 @@ import {
   AlertTitle,
   ToggleButton,
   ToggleButtonGroup,
+  useMediaQuery,
+  useTheme,
 } from '@mui/material';
 import ExtensionIcon from '@mui/icons-material/Extension';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
@@ -52,6 +54,8 @@ const initialStats: HomeStats = {
 
 const HomePage: React.FC = () => {
   const navigate = useNavigate();
+  const theme = useTheme();
+  const isXs = useMediaQuery(theme.breakpoints.down('sm'));
   const [stats, setStats] = useState<HomeStats>(initialStats);
   const [searchQuery, setSearchQuery] = useState('');
   const [searchType, setSearchType] = useState<'modules' | 'providers'>('modules');
@@ -203,13 +207,31 @@ const HomePage: React.FC = () => {
         <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
           Search across modules and providers in this registry
         </Typography>
-        <Stack spacing={1.5} alignItems="center">
+        <Stack
+          data-testid="quick-search-stack"
+          direction={isXs ? 'column' : 'row'}
+          spacing={1.5}
+          alignItems={isXs ? 'stretch' : 'center'}
+        >
+          <ToggleButtonGroup
+            size="small"
+            exclusive
+            value={searchType}
+            onChange={(_e, val) => { if (val) setSearchType(val); }}
+            aria-label="Search scope"
+            data-testid="quick-search-toggle"
+            sx={{ alignSelf: isXs ? 'center' : 'auto', flexShrink: 0 }}
+          >
+            <ToggleButton value="modules">Modules</ToggleButton>
+            <ToggleButton value="providers">Providers</ToggleButton>
+          </ToggleButtonGroup>
           <TextField
             fullWidth
             placeholder={`Search ${searchType}…`}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             onKeyDown={handleSearchKeyDown}
+            inputProps={{ 'aria-label': `Search ${searchType}` }}
             InputProps={{
               startAdornment: (
                 <InputAdornment position="start">
@@ -225,15 +247,6 @@ const HomePage: React.FC = () => {
               ),
             }}
           />
-          <ToggleButtonGroup
-            size="small"
-            exclusive
-            value={searchType}
-            onChange={(_e, val) => { if (val) setSearchType(val); }}
-          >
-            <ToggleButton value="modules">Modules</ToggleButton>
-            <ToggleButton value="providers">Providers</ToggleButton>
-          </ToggleButtonGroup>
         </Stack>
       </Container>
 

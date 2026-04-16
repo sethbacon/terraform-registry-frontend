@@ -91,6 +91,26 @@ test.describe('Home page', () => {
 
     await context.close();
   });
+
+  test('quick search navigates to /modules via Enter key (roadmap 3.4)', async ({ page }) => {
+    await page.goto('/');
+    const input = page.getByRole('textbox', { name: /Search modules/i });
+    await input.fill('example');
+    await input.press('Enter');
+    await page.waitForURL(/\/modules\?q=example/, { timeout: 10_000 });
+    expect(page.url()).toMatch(/\/modules\?q=example/);
+  });
+
+  test('quick search toggles placeholder and routes to /providers (roadmap 3.4)', async ({ page }) => {
+    await page.goto('/');
+    await page.getByRole('button', { name: 'Providers' }).click();
+    const input = page.getByRole('textbox', { name: /Search providers/i });
+    await expect(input).toBeVisible();
+    await input.fill('aws');
+    await input.press('Enter');
+    await page.waitForURL(/\/providers\?q=aws/, { timeout: 10_000 });
+    expect(page.url()).toMatch(/\/providers\?q=aws/);
+  });
 });
 
 test.describe('API Documentation page', () => {

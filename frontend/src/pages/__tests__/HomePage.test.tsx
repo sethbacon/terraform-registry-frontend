@@ -1,4 +1,5 @@
 import { render, screen, waitFor } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { MemoryRouter } from 'react-router-dom'
 
@@ -142,5 +143,59 @@ describe('HomePage', () => {
       expect(screen.getByText('Private Terraform Registry')).toBeInTheDocument()
     })
     expect(screen.queryByText('Setup Required')).not.toBeInTheDocument()
+  })
+
+  describe('Quick Search (roadmap 3.4)', () => {
+    it('renders the scope toggle before the input in DOM order', async () => {
+      mockSuccessfulLoad()
+      renderPage()
+      await waitFor(() => {
+        expect(screen.getByTestId('quick-search-toggle')).toBeInTheDocument()
+      })
+      const stack = screen.getByTestId('quick-search-stack')
+      const toggle = screen.getByTestId('quick-search-toggle')
+      const input = screen.getByPlaceholderText(/Search modules/)
+      expect(stack).toContainElement(toggle)
+      expect(stack).toContainElement(input)
+      // Node.DOCUMENT_POSITION_FOLLOWING === 4
+      expect(toggle.compareDocumentPosition(input) & 4).toBe(4)
+    })
+
+    it('updates the placeholder when toggling scope to Providers', async () => {
+      mockSuccessfulLoad()
+      renderPage()
+      await waitFor(() => {
+        expect(screen.getByPlaceholderText(/Search modules/)).toBeInTheDocument()
+      })
+      await userEvent.click(screen.getByRole('button', { name: 'Providers' }))
+      expect(screen.getByPlaceholderText(/Search providers/)).toBeInTheDocument()
+    })
+
+    it('navigates to /modules with q param on Enter', async () => {
+      mockSuccessfulLoad()
+      renderPage()
+      await waitFor(() => {
+        expect(screen.getByPlaceholderText(/Search modules/)).toBeInTheDocument()
+      })
+      const input = screen.getByPlaceholderText(/Search modules/) as HTMLInputElement
+      await userEvent.type(input, 'consul{Enter}')
+      await waitFor(() =>
+        expect(navigateMock).toHaveBeenCalledWith(expect.stringMatching(/^\/modules\?q=consul/))
+      )
+    })
+
+    it('navigates to /providers when toggle is on Providers and Enter is pressed', async () => {
+      mockSuccessfulLoad()
+      renderPage()
+      await waitFor(() => {
+        expect(screen.getByPlaceholderText(/Search modules/)).toBeInTheDocument()
+      })
+      await userEvent.click(screen.getByRole('button', { name: 'Providers' }))
+      const input = screen.getByPlaceholderText(/Search providers/) as HTMLInputElement
+      await userEvent.type(input, 'aws{Enter}')
+      await waitFor(() =>
+        expect(navigateMock).toHaveBeenCalledWith(expect.stringMatching(/^\/providers\?q=aws/))
+      )
+    })
   })
 })
