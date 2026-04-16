@@ -9,6 +9,8 @@ const getSetupStatusMock = vi.fn()
 const searchModulesMock = vi.fn()
 const searchProvidersMock = vi.fn()
 const listPublicTerraformMirrorConfigsMock = vi.fn()
+const getCurrentUserMembershipsMock = vi.fn().mockResolvedValue([])
+const createAPIKeyMock = vi.fn()
 
 vi.mock('../../services/api', () => ({
   default: {
@@ -16,7 +18,16 @@ vi.mock('../../services/api', () => ({
     searchModules: (...args: unknown[]) => searchModulesMock(...args),
     searchProviders: (...args: unknown[]) => searchProvidersMock(...args),
     listPublicTerraformMirrorConfigs: (...args: unknown[]) => listPublicTerraformMirrorConfigsMock(...args),
+    getCurrentUserMemberships: (...args: unknown[]) => getCurrentUserMembershipsMock(...args),
+    createAPIKey: (...args: unknown[]) => createAPIKeyMock(...args),
   },
+}))
+
+// Mock AuthContext — toggle isAuthenticated via setAuthState.
+let authState: { isAuthenticated: boolean } = { isAuthenticated: false }
+function setAuthState(next: { isAuthenticated: boolean }) { authState = next }
+vi.mock('../../contexts/AuthContext', () => ({
+  useAuth: () => ({ isAuthenticated: authState.isAuthenticated }),
 }))
 
 const navigateMock = vi.fn()
@@ -26,13 +37,16 @@ vi.mock('react-router-dom', async () => {
 })
 
 import HomePage from '../HomePage'
+import { AnnouncerProvider } from '../../contexts/AnnouncerContext'
 
 // ---- Helpers ----
 
 function renderPage() {
   return render(
     <MemoryRouter>
-      <HomePage />
+      <AnnouncerProvider>
+        <HomePage />
+      </AnnouncerProvider>
     </MemoryRouter>,
   )
 }
@@ -62,6 +76,8 @@ function mockSuccessfulLoad() {
 describe('HomePage', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    setAuthState({ isAuthenticated: false })
+    getCurrentUserMembershipsMock.mockResolvedValue([])
   })
 
   it('renders heading after data loads', async () => {
@@ -196,6 +212,44 @@ describe('HomePage', () => {
       await waitFor(() =>
         expect(navigateMock).toHaveBeenCalledWith(expect.stringMatching(/^\/providers\?q=aws/))
       )
+    })
+  })
+
+  describe('Getting Started API key CTA (roadmap 1.1)', () => {
+    it('shows a Sign-in CTA (not Create API key) when unauthenticated', async () => {
+      setAuthState({ isAuthenticated: false })
+      mockSuccessfulLoad()
+      renderPage()
+      await waitFor(() => {
+        expect(screen.getByTestId('getting-started-signin')).toBeInTheDocument()
+      })
+      expect(screen.queryByTestId('getting-started-create-key')).not.toBeInTheDocument()
+    })
+
+    it('shows Create API key + Manage all keys when authenticated', async () => {
+      setAuthState({ isAuthenticated: true })
+      getCurrentUserMembershipsMock.mockResolvedValue([
+        { organization_id: 'org-1', organization_name: 'Acme' },
+      ])
+      mockSuccessfulLoad()
+      renderPage()
+      await waitFor(() => {
+        expect(screen.getByTestId('getting-started-create-key')).toBeInTheDocument()
+      })
+      expect(screen.getByTestId('getting-started-manage-keys')).toBeInTheDocument()
+      expect(screen.queryByTestId('getting-started-signin')).not.toBeInTheDocument()
+    })
+
+    it('opens the QuickApiKeyDialog when Create API key is clicked', async () => {
+      setAuthState({ isAuthenticated: true })
+      getCurrentUserMembershipsMock.mockResolvedValue([
+        { organization_id: 'org-1', organization_name: 'Acme' },
+      ])
+      mockSuccessfulLoad()
+      renderPage()
+      const btn = await screen.findByTestId('getting-started-create-key')
+      await userEvent.click(btn)
+      expect(await screen.findByRole('dialog', { name: /Create API key/i })).toBeInTheDocument()
     })
   })
 })

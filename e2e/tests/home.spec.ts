@@ -113,6 +113,35 @@ test.describe('Home page', () => {
   });
 });
 
+test.describe('Getting Started API key CTA (roadmap 1.1)', () => {
+  test('unauthenticated visitor sees Sign-in CTA', async ({ browser }) => {
+    const context = await browser.newContext({ storageState: undefined });
+    const page = await context.newPage();
+    try {
+      await page.goto('/');
+      await expect(page.getByTestId('getting-started-signin')).toBeVisible();
+      await expect(page.getByTestId('getting-started-create-key')).toHaveCount(0);
+    } finally {
+      await context.close();
+    }
+  });
+
+  test('authenticated user can open QuickApiKeyDialog', async ({ page }) => {
+    await page.goto('/login');
+    const devLoginBtn = page.getByRole('button', { name: 'Dev Login (Admin)' });
+    const isDevMode = await devLoginBtn.isVisible({ timeout: 3_000 }).catch(() => false);
+    test.skip(!isDevMode, 'Dev login not available — backend not running in DEV_MODE');
+
+    await devLoginBtn.click();
+    await page.waitForURL((url) => !url.pathname.endsWith('/login'), { timeout: 10_000 });
+    await page.goto('/');
+    const createBtn = page.getByTestId('getting-started-create-key');
+    await expect(createBtn).toBeVisible({ timeout: 10_000 });
+    await createBtn.click();
+    await expect(page.getByRole('dialog', { name: /Create API key/i })).toBeVisible();
+  });
+});
+
 test.describe('API Documentation page', () => {
   test('page loads and shows API documentation heading', async ({ page }) => {
     await page.goto('/api-docs');
