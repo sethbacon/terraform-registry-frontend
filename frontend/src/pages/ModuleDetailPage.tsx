@@ -10,7 +10,6 @@ import {
   Link,
   Chip,
   Divider,
-  CircularProgress,
   Alert,
   Button,
   Stack,
@@ -39,6 +38,7 @@ import VersionDetailsPanel from '../components/VersionDetailsPanel';
 import ConfirmDialog from '../components/ConfirmDialog';
 import VersionSelector from '../components/VersionSelector';
 import ModuleActionsMenu from '../components/ModuleActionsMenu';
+import DetailPageSkeleton from '../components/skeletons/DetailPageSkeleton';
 import { useModuleDetail } from '../hooks/useModuleDetail';
 
 const ModuleDetailPage: React.FC = () => {
@@ -116,9 +116,7 @@ const ModuleDetailPage: React.FC = () => {
   return (
     <Box aria-busy={loading} aria-live="polite">
       {loading ? (
-        <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
-          <CircularProgress />
-        </Box>
+        <DetailPageSkeleton />
       ) : error || !module ? (
         <Container maxWidth="lg" sx={{ py: 4 }}>
           <Alert severity="error">{error || 'Module not found'}</Alert>

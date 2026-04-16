@@ -85,10 +85,10 @@ describe('ProvidersPage', () => {
     vi.clearAllMocks()
   })
 
-  it('shows loading spinner while fetching', () => {
+  it('shows loading skeleton while fetching', () => {
     searchProvidersMock.mockReturnValue(new Promise(() => {}))
     renderPage()
-    expect(screen.getByRole('progressbar')).toBeInTheDocument()
+    expect(screen.getByTestId('registry-item-grid-skeleton')).toBeInTheDocument()
   })
 
   it('renders page heading', () => {

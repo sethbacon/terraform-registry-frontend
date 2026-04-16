@@ -11,7 +11,6 @@ import {
   Grid,
   Button,
   Chip,
-  CircularProgress,
   Alert,
   Pagination,
   ToggleButton,
@@ -33,6 +32,7 @@ import { Module } from '../types';
 import { useAuth } from '../contexts/AuthContext';
 import { ProviderIcon, providerDisplayName } from '../components/ProviderIcon';
 import RegistryItemCard from '../components/RegistryItemCard';
+import { RegistryItemGridSkeleton } from '../components/skeletons/RegistryItemCardSkeleton';
 
 type ViewMode = 'grid' | 'grouped';
 
@@ -322,9 +322,7 @@ const ModulesPage: React.FC = () => {
 
       {/* Loading State */}
       {loading ? (
-        <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
-          <CircularProgress />
-        </Box>
+        <RegistryItemGridSkeleton />
       ) : modules.length === 0 ? (
         <Box sx={{ textAlign: 'center', py: 8 }}>
           <Typography variant="h6" color="text.secondary">
