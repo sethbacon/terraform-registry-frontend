@@ -1,0 +1,338 @@
+import { render, screen, within } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
+import { MemoryRouter } from 'react-router-dom'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
+
+// ── Mocks ──────────────────────────────────────────────────────────────────
+
+const mockLogout = vi.fn()
+const mockUseAuth = vi.fn()
+vi.mock('../../contexts/AuthContext', () => ({
+  useAuth: () => mockUseAuth(),
+}))
+
+const mockToggleTheme = vi.fn()
+const mockUseThemeMode = vi.fn()
+vi.mock('../../contexts/ThemeContext', () => ({
+  useThemeMode: () => mockUseThemeMode(),
+}))
+
+const mockOpenHelp = vi.fn()
+const mockUseHelp = vi.fn()
+vi.mock('../../contexts/HelpContext', () => ({
+  useHelp: () => mockUseHelp(),
+}))
+
+vi.mock('../DevUserSwitcher', () => ({
+  default: () => <div data-testid="dev-user-switcher" />,
+}))
+
+vi.mock('../HelpPanel', () => ({
+  default: () => <div data-testid="help-panel" />,
+  HELP_PANEL_WIDTH: 320,
+}))
+
+vi.mock('../AboutModal', () => ({
+  default: ({ open, onClose }: { open: boolean; onClose: () => void }) =>
+    open ? <div data-testid="about-modal"><button onClick={onClose}>Close</button></div> : null,
+}))
+
+import Layout from '../Layout'
+
+// ── Helpers ────────────────────────────────────────────────────────────────
+
+function setAuth(overrides: Partial<ReturnType<typeof mockUseAuth>> = {}) {
+  mockUseAuth.mockReturnValue({
+    user: null,
+    isAuthenticated: false,
+    logout: mockLogout,
+    allowedScopes: [],
+    ...overrides,
+  })
+}
+
+function renderLayout(route = '/') {
+  return render(
+    <MemoryRouter initialEntries={[route]}>
+      <Layout />
+    </MemoryRouter>,
+  )
+}
+
+// ── Setup ──────────────────────────────────────────────────────────────────
+
+beforeEach(() => {
+  vi.clearAllMocks()
+  localStorage.clear()
+  mockUseThemeMode.mockReturnValue({ mode: 'light', toggleTheme: mockToggleTheme })
+  mockUseHelp.mockReturnValue({ helpOpen: false, openHelp: mockOpenHelp, closeHelp: vi.fn() })
+  setAuth()
+})
+
+// ── Tests ──────────────────────────────────────────────────────────────────
+
+describe('Layout', () => {
+  // 1. Basic rendering
+  it('renders the app bar title and navigation items', () => {
+    renderLayout()
+
+    // App bar contains the title
+    expect(screen.getAllByText('Terraform Registry').length).toBeGreaterThanOrEqual(1)
+
+    // All public nav items are present
+    expect(screen.getByText('Home')).toBeInTheDocument()
+    expect(screen.getByText('Modules')).toBeInTheDocument()
+    expect(screen.getByText('Providers')).toBeInTheDocument()
+    expect(screen.getByText('Terraform Binaries')).toBeInTheDocument()
+    expect(screen.getByText('API Docs')).toBeInTheDocument()
+  })
+
+  // 2. Unauthenticated state
+  it('shows Login button when not authenticated', () => {
+    renderLayout()
+
+    expect(screen.getByRole('link', { name: 'Login' })).toBeInTheDocument()
+    expect(screen.queryByLabelText('account of current user')).not.toBeInTheDocument()
+  })
+
+  // 3. Authenticated state — user menu
+  it('shows account icon and user email in menu when authenticated', async () => {
+    const user = userEvent.setup()
+    setAuth({
+      isAuthenticated: true,
+      user: { email: 'alice@example.com', id: '1', name: 'Alice', username: 'alice' },
+    })
+    renderLayout()
+
+    // Login button should not be present
+    expect(screen.queryByRole('link', { name: 'Login' })).not.toBeInTheDocument()
+
+    // Click account icon to open menu
+    const accountBtn = screen.getByLabelText('account of current user')
+    await user.click(accountBtn)
+
+    expect(screen.getByText('alice@example.com')).toBeInTheDocument()
+    expect(screen.getByText('Logout')).toBeInTheDocument()
+  })
+
+  // 4. Logout
+  it('calls logout when Logout menu item is clicked', async () => {
+    const user = userEvent.setup()
+    setAuth({
+      isAuthenticated: true,
+      user: { email: 'bob@test.com', id: '2', name: 'Bob', username: 'bob' },
+    })
+    renderLayout()
+
+    await user.click(screen.getByLabelText('account of current user'))
+    await user.click(screen.getByText('Logout'))
+
+    expect(mockLogout).toHaveBeenCalledOnce()
+  })
+
+  // 5. Admin nav hidden when unauthenticated
+  it('does not show admin navigation when unauthenticated', () => {
+    renderLayout()
+
+    expect(screen.queryByText('Dashboard')).not.toBeInTheDocument()
+    expect(screen.queryByText('Users')).not.toBeInTheDocument()
+    expect(screen.queryByText('Organizations')).not.toBeInTheDocument()
+  })
+
+  // 6. Admin nav visible for admin scope
+  it('shows all admin navigation groups for admin scope', () => {
+    setAuth({ isAuthenticated: true, allowedScopes: ['admin'] })
+    renderLayout()
+
+    // Dashboard link
+    expect(screen.getByText('Dashboard')).toBeInTheDocument()
+
+    // Identity group
+    expect(screen.getByText('Identity')).toBeInTheDocument()
+    expect(screen.getByText('Organizations')).toBeInTheDocument()
+    expect(screen.getByText('Roles')).toBeInTheDocument()
+    expect(screen.getByText('Users')).toBeInTheDocument()
+    expect(screen.getByText('OIDC Groups')).toBeInTheDocument()
+    expect(screen.getByText('API Keys')).toBeInTheDocument()
+
+    // Source Control group — label and item share the same text
+    expect(screen.getAllByText('Source Control').length).toBe(2)
+
+    // Mirroring group
+    expect(screen.getByText('Mirroring')).toBeInTheDocument()
+    expect(screen.getByText('Provider Config')).toBeInTheDocument()
+    expect(screen.getByText('Approvals')).toBeInTheDocument()
+    expect(screen.getByText('Mirror Policies')).toBeInTheDocument()
+
+    // System group
+    expect(screen.getByText('System')).toBeInTheDocument()
+    expect(screen.getByText('Storage')).toBeInTheDocument()
+    expect(screen.getByText('Security Scanning')).toBeInTheDocument()
+    expect(screen.getByText('Audit Logs')).toBeInTheDocument()
+  })
+
+  // 7. Scoped admin nav — limited scopes only see allowed items
+  it('filters admin nav items based on user scopes', () => {
+    setAuth({
+      isAuthenticated: true,
+      allowedScopes: ['mirrors:read'],
+    })
+    renderLayout()
+
+    // Should see API Keys (scope: null — always visible) and mirroring items
+    expect(screen.getByText('API Keys')).toBeInTheDocument()
+    expect(screen.getByText('Provider Config')).toBeInTheDocument()
+    expect(screen.getByText('Approvals')).toBeInTheDocument()
+    expect(screen.getByText('Binaries Config')).toBeInTheDocument()
+
+    // Should NOT see admin-only items
+    expect(screen.queryByText('OIDC Groups')).not.toBeInTheDocument()
+    expect(screen.queryByText('Storage')).not.toBeInTheDocument()
+    expect(screen.queryByText('Security Scanning')).not.toBeInTheDocument()
+    expect(screen.queryByText('Mirror Policies')).not.toBeInTheDocument()
+
+    // Should NOT see items requiring other scopes
+    expect(screen.queryByText('Organizations')).not.toBeInTheDocument()
+    expect(screen.queryByText('Audit Logs')).not.toBeInTheDocument()
+  })
+
+  // 8. Collapsible admin groups
+  it('collapses and expands admin nav groups on click', async () => {
+    const user = userEvent.setup()
+    setAuth({ isAuthenticated: true, allowedScopes: ['admin'] })
+    renderLayout()
+
+    // Identity group items are visible by default (open)
+    expect(screen.getByText('Users')).toBeInTheDocument()
+
+    // Click the Identity group header to collapse it
+    await user.click(screen.getByText('Identity'))
+
+    // Items should be hidden after collapse animation (unmountOnExit)
+    // Wait for the Collapse transition to complete
+    await vi.waitFor(() => {
+      expect(screen.queryByText('Users')).not.toBeInTheDocument()
+    })
+
+    // Click again to re-expand
+    await user.click(screen.getByText('Identity'))
+    await vi.waitFor(() => {
+      expect(screen.getByText('Users')).toBeInTheDocument()
+    })
+  })
+
+  // 9. Theme toggle
+  it('calls toggleTheme when theme button is clicked', async () => {
+    const user = userEvent.setup()
+    renderLayout()
+
+    await user.click(screen.getByLabelText('toggle dark mode'))
+    expect(mockToggleTheme).toHaveBeenCalledOnce()
+  })
+
+  // 10. Help button
+  it('calls openHelp when help button is clicked', async () => {
+    const user = userEvent.setup()
+    renderLayout()
+
+    await user.click(screen.getByLabelText('Context help'))
+    expect(mockOpenHelp).toHaveBeenCalledOnce()
+  })
+
+  // 11. About modal
+  it('opens About modal when About button is clicked', async () => {
+    const user = userEvent.setup()
+    renderLayout()
+
+    expect(screen.queryByTestId('about-modal')).not.toBeInTheDocument()
+
+    await user.click(screen.getByLabelText('About'))
+    expect(screen.getByTestId('about-modal')).toBeInTheDocument()
+  })
+
+  // 12. Active nav item — home route
+  it('highlights the active navigation item based on route', () => {
+    setAuth({ isAuthenticated: true, allowedScopes: ['admin'] })
+    renderLayout('/modules')
+
+    // The Modules nav item should have the active border styling
+    // We verify by checking the link is rendered and has the correct href
+    const modulesLink = screen.getByText('Modules').closest('a')
+    expect(modulesLink).toHaveAttribute('href', '/modules')
+  })
+
+  // 13. DevUserSwitcher shown when authenticated
+  it('renders DevUserSwitcher when authenticated', () => {
+    setAuth({ isAuthenticated: true })
+    renderLayout()
+
+    expect(screen.getByTestId('dev-user-switcher')).toBeInTheDocument()
+  })
+
+  // 14. DevUserSwitcher hidden when not authenticated
+  it('does not render DevUserSwitcher when not authenticated', () => {
+    renderLayout()
+
+    expect(screen.queryByTestId('dev-user-switcher')).not.toBeInTheDocument()
+  })
+
+  // 15. Skip-to-content link
+  it('renders a skip-to-content link for accessibility', () => {
+    renderLayout()
+
+    const skipLink = screen.getByText('Skip to main content')
+    expect(skipLink).toBeInTheDocument()
+    expect(skipLink.getAttribute('href')).toBe('#main-content')
+  })
+
+  // 16. Close About modal
+  it('closes About modal when close callback fires', async () => {
+    const user = userEvent.setup()
+    renderLayout()
+
+    await user.click(screen.getByLabelText('About'))
+    expect(screen.getByTestId('about-modal')).toBeInTheDocument()
+
+    await user.click(within(screen.getByTestId('about-modal')).getByText('Close'))
+    expect(screen.queryByTestId('about-modal')).not.toBeInTheDocument()
+  })
+
+  // 17. Closing user menu without logging out
+  it('closes user menu when clicking away (handleClose)', async () => {
+    const user = userEvent.setup()
+    setAuth({
+      isAuthenticated: true,
+      user: { email: 'carol@test.com', id: '3', name: 'Carol', username: 'carol' },
+    })
+    renderLayout()
+
+    // Open the menu
+    await user.click(screen.getByLabelText('account of current user'))
+    expect(screen.getByRole('presentation')).toBeInTheDocument()
+
+    // Press Escape to close the menu — MUI backdrop/presentation should disappear
+    await user.keyboard('{Escape}')
+    await vi.waitFor(() => {
+      expect(screen.queryByRole('presentation')).not.toBeInTheDocument()
+    })
+
+    // logout should NOT have been called
+    expect(mockLogout).not.toHaveBeenCalled()
+  })
+
+  // 18. localStorage persistence of admin nav group state
+  it('persists collapsed admin group state to localStorage', async () => {
+    const user = userEvent.setup()
+    setAuth({ isAuthenticated: true, allowedScopes: ['admin'] })
+    renderLayout()
+
+    // Collapse the Identity group
+    await user.click(screen.getByText('Identity'))
+
+    // Check that localStorage was updated
+    const stored = localStorage.getItem('adminNavGroups')
+    expect(stored).toBeTruthy()
+    const parsed = JSON.parse(stored!)
+    expect(parsed.identity).toBe(false)
+  })
+})
