@@ -370,7 +370,8 @@ describe('Layout', () => {
       setAuth({ isAuthenticated: true, allowedScopes: ['admin'] })
       renderLayout('/admin/storage')
       // System group contains /admin/storage and should be the only open group.
-      expect(screen.getByText('Storage')).toBeInTheDocument()
+      // "Storage" appears twice: once in the breadcrumb and once in the nav item.
+      expect(screen.getAllByText('Storage').length).toBeGreaterThanOrEqual(2)
       expect(screen.queryByText('Users')).not.toBeInTheDocument()
     })
 
@@ -384,8 +385,9 @@ describe('Layout', () => {
       await vi.waitFor(() => {
         expect(screen.getByText('Users')).toBeInTheDocument()
       })
+      // After System collapses, only the breadcrumb entry for "Storage" remains.
       await vi.waitFor(() => {
-        expect(screen.queryByText('Storage')).not.toBeInTheDocument()
+        expect(screen.getAllByText('Storage')).toHaveLength(1)
       })
     })
   })

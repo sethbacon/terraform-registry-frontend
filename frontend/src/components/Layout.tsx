@@ -55,6 +55,7 @@ import { useHelp } from '../contexts/HelpContext';
 import DevUserSwitcher from './DevUserSwitcher';
 import HelpPanel, { HELP_PANEL_WIDTH } from './HelpPanel';
 import AboutModal from './AboutModal';
+import AdminBreadcrumbs from './AdminBreadcrumbs';
 
 const drawerWidth = 240;
 
@@ -554,6 +555,7 @@ const Layout = () => {
         }}
       >
         <Toolbar />
+        <AdminBreadcrumbs />
         <Outlet />
       </Box>
 
