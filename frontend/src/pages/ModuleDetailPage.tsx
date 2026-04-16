@@ -23,7 +23,6 @@ import {
   Tab,
 } from '@mui/material';
 import ArrowBack from '@mui/icons-material/ArrowBack';
-import ContentCopy from '@mui/icons-material/ContentCopy';
 import Add from '@mui/icons-material/Add';
 import Warning from '@mui/icons-material/Warning';
 import EditIcon from '@mui/icons-material/Edit';
@@ -39,6 +38,8 @@ import ConfirmDialog from '../components/ConfirmDialog';
 import VersionSelector from '../components/VersionSelector';
 import ModuleActionsMenu from '../components/ModuleActionsMenu';
 import DetailPageSkeleton from '../components/skeletons/DetailPageSkeleton';
+import UsageExample from '../components/UsageExample';
+import { REGISTRY_HOST } from '../config';
 import { useModuleDetail } from '../hooks/useModuleDetail';
 
 const ModuleDetailPage: React.FC = () => {
@@ -58,7 +59,6 @@ const ModuleDetailPage: React.FC = () => {
     setSelectedVersion,
     loading,
     error,
-    copiedSource,
     deleteModuleDialogOpen,
     setDeleteModuleDialogOpen,
     deleting,
@@ -110,7 +110,6 @@ const ModuleDetailPage: React.FC = () => {
     handleDeprecateModule,
     handleUndeprecateModule,
     handleUpdateDescription,
-    getTerraformExample,
   } = useModuleDetail();
 
   return (
@@ -279,29 +278,15 @@ const ModuleDetailPage: React.FC = () => {
             {/* Main Content */}
             <Box sx={{ flex: 1 }}>
               {/* Usage Example */}
-              <Paper sx={{ p: 3, mb: 3 }}>
-                <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
-                  <Typography variant="h6">Usage Example</Typography>
-                  <Tooltip title={copiedSource ? 'Copied!' : 'Copy source'}>
-                    <IconButton aria-label="Copy source URL" onClick={handleCopySource} size="small">
-                      <ContentCopy />
-                    </IconButton>
-                  </Tooltip>
-                </Stack>
-                <Box
-                  component="pre"
-                  sx={{
-                    p: 2,
-                    backgroundColor: (theme) => theme.palette.mode === 'dark' ? '#2d2d2d' : '#f5f5f5',
-                    color: (theme) => theme.palette.mode === 'dark' ? '#e6e6e6' : '#1e1e1e',
-                    borderRadius: 1,
-                    overflow: 'auto',
-                    fontSize: '0.875rem',
-                  }}
-                >
-                  <code>{getTerraformExample()}</code>
-                </Box>
-              </Paper>
+              <UsageExample
+                registryHost={REGISTRY_HOST}
+                namespace={namespace || ''}
+                name={name || ''}
+                system={system || ''}
+                version={selectedVersion?.version || ''}
+                inputs={moduleDocs?.inputs ?? null}
+                onCopied={handleCopySource}
+              />
 
               {/* Documentation Tabs */}
               <Paper sx={{ p: 3 }}>
