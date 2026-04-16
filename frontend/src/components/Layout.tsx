@@ -48,7 +48,7 @@ import ExpandMore from '@mui/icons-material/ExpandMore';
 import History from '@mui/icons-material/History';
 import ExpandLess from '@mui/icons-material/ExpandLess';
 import Palette from '@mui/icons-material/Palette';
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useThemeMode } from '../contexts/ThemeContext';
 import { useHelp } from '../contexts/HelpContext';
@@ -144,8 +144,22 @@ const Layout = () => {
     },
   ], []);
 
+  // Determine which group contains the current route (for mobile auto-open).
+  const activeGroupKey = useMemo(() => {
+    const match = adminNavGroups.find(g =>
+      g.items.some(it => location.pathname.startsWith(it.path)),
+    );
+    return match?.key ?? null;
+  }, [adminNavGroups, location.pathname]);
+
   // Track which groups are open — persisted to localStorage so state survives navigation/refresh.
+  // On mobile, default to an accordion pattern: only the active group (or none) is open.
   const [openGroups, setOpenGroups] = useState<Record<string, boolean>>(() => {
+    if (isMobile) {
+      return Object.fromEntries(
+        adminNavGroups.map(g => [g.key, activeGroupKey ? g.key === activeGroupKey : false]),
+      );
+    }
     try {
       const stored = localStorage.getItem('adminNavGroups');
       if (stored) {
@@ -159,12 +173,33 @@ const Layout = () => {
     return Object.fromEntries(adminNavGroups.map(g => [g.key, true]));
   });
 
+  // When the viewport crosses the mobile/desktop boundary, re-apply sensible defaults.
+  useEffect(() => {
+    if (isMobile) {
+      setOpenGroups(
+        Object.fromEntries(
+          adminNavGroups.map(g => [g.key, activeGroupKey ? g.key === activeGroupKey : false]),
+        ),
+      );
+    }
+    // Desktop: do not reset; keep whatever the user had, honoring their localStorage prefs.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isMobile]);
+
   const toggleGroup = useCallback((key: string) =>
     setOpenGroups(prev => {
+      if (isMobile) {
+        // Accordion: opening a group closes all others; toggling the open one closes it.
+        const wasOpen = !!prev[key];
+        const next = Object.fromEntries(
+          adminNavGroups.map(g => [g.key, !wasOpen && g.key === key]),
+        );
+        return next;
+      }
       const next = { ...prev, [key]: !prev[key] };
       try { localStorage.setItem('adminNavGroups', JSON.stringify(next)); } catch { /* quota */ }
       return next;
-    }), []);
+    }), [isMobile, adminNavGroups]);
 
   // Filter each group's items by the user's scopes, then drop empty groups
   const visibleAdminGroups = useMemo(() =>

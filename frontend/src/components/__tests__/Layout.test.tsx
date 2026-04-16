@@ -335,4 +335,58 @@ describe('Layout', () => {
     const parsed = JSON.parse(stored!)
     expect(parsed.identity).toBe(false)
   })
+
+  // 19. Mobile: admin groups collapsed by default; active group auto-opens
+  describe('mobile admin nav (roadmap 3.3)', () => {
+    function mockMobile(matches: boolean) {
+      Object.defineProperty(window, 'matchMedia', {
+        writable: true,
+        configurable: true,
+        value: vi.fn().mockImplementation((query: string) => ({
+          matches: query.includes('max-width') ? matches : !matches,
+          media: query,
+          onchange: null,
+          addListener: vi.fn(),
+          removeListener: vi.fn(),
+          addEventListener: vi.fn(),
+          removeEventListener: vi.fn(),
+          dispatchEvent: vi.fn(),
+        })),
+      })
+    }
+
+    it('collapses all admin groups by default on mobile when not on an admin route', () => {
+      mockMobile(true)
+      setAuth({ isAuthenticated: true, allowedScopes: ['admin'] })
+      renderLayout('/modules')
+      // Group headers are visible but their items are not.
+      expect(screen.getByText('Identity')).toBeInTheDocument()
+      expect(screen.queryByText('Users')).not.toBeInTheDocument()
+      expect(screen.queryByText('Storage')).not.toBeInTheDocument()
+    })
+
+    it('auto-opens the active group on mobile based on the current URL', () => {
+      mockMobile(true)
+      setAuth({ isAuthenticated: true, allowedScopes: ['admin'] })
+      renderLayout('/admin/storage')
+      // System group contains /admin/storage and should be the only open group.
+      expect(screen.getByText('Storage')).toBeInTheDocument()
+      expect(screen.queryByText('Users')).not.toBeInTheDocument()
+    })
+
+    it('opening a group on mobile closes all other groups (accordion)', async () => {
+      mockMobile(true)
+      const user = userEvent.setup()
+      setAuth({ isAuthenticated: true, allowedScopes: ['admin'] })
+      renderLayout('/admin/storage')
+      // Open Identity; System should collapse.
+      await user.click(screen.getByText('Identity'))
+      await vi.waitFor(() => {
+        expect(screen.getByText('Users')).toBeInTheDocument()
+      })
+      await vi.waitFor(() => {
+        expect(screen.queryByText('Storage')).not.toBeInTheDocument()
+      })
+    })
+  })
 })
