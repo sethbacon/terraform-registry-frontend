@@ -391,4 +391,27 @@ describe('Layout', () => {
       })
     })
   })
+
+  describe('command palette (roadmap 3.1)', () => {
+    it('renders a palette trigger in the AppBar and opens on click', async () => {
+      const user = userEvent.setup()
+      setAuth({ isAuthenticated: true, allowedScopes: ['admin'] })
+      renderLayout('/')
+      const trigger = screen.getByTestId('command-palette-trigger')
+      expect(trigger).toBeInTheDocument()
+      await user.click(trigger)
+      expect(screen.getByTestId('command-palette-input')).toBeInTheDocument()
+    })
+
+    it('opens on Cmd+K hotkey', async () => {
+      setAuth({ isAuthenticated: true, allowedScopes: ['admin'] })
+      renderLayout('/')
+      // dispatch a native keydown (jsdom)
+      const ev = new KeyboardEvent('keydown', { key: 'k', metaKey: true })
+      window.dispatchEvent(ev)
+      await vi.waitFor(() => {
+        expect(screen.getByTestId('command-palette-input')).toBeInTheDocument()
+      })
+    })
+  })
 })

@@ -37,6 +37,7 @@ import Brightness4 from '@mui/icons-material/Brightness4';
 import Brightness7 from '@mui/icons-material/Brightness7';
 import HelpOutline from '@mui/icons-material/HelpOutline';
 import InfoOutlined from '@mui/icons-material/InfoOutlined';
+import SearchIcon from '@mui/icons-material/Search';
 import Shield from '@mui/icons-material/Shield';
 import Security from '@mui/icons-material/Security';
 import Storage from '@mui/icons-material/Storage';
@@ -56,6 +57,8 @@ import DevUserSwitcher from './DevUserSwitcher';
 import HelpPanel, { HELP_PANEL_WIDTH } from './HelpPanel';
 import AboutModal from './AboutModal';
 import AdminBreadcrumbs from './AdminBreadcrumbs';
+import CommandPalette from './CommandPalette';
+import { useHotkey } from '../hooks/useHotkey';
 
 const drawerWidth = 240;
 
@@ -70,6 +73,8 @@ const Layout = () => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [aboutOpen, setAboutOpen] = useState(false);
+  const [paletteOpen, setPaletteOpen] = useState(false);
+  useHotkey('mod+k', useCallback(() => setPaletteOpen((v) => !v), []));
 
   // Helper to check if user has a specific scope (or admin which grants all)
   const hasScope = useCallback((scope: string) => {
@@ -419,6 +424,17 @@ const Layout = () => {
             Terraform Registry
           </Typography>
           {isAuthenticated && <DevUserSwitcher />}
+          <Tooltip title="Quick navigation (Ctrl/⌘K)">
+            <IconButton
+              color="inherit"
+              onClick={() => setPaletteOpen(true)}
+              aria-label="Open command palette"
+              data-testid="command-palette-trigger"
+              sx={{ mr: 1 }}
+            >
+              <SearchIcon />
+            </IconButton>
+          </Tooltip>
           <Tooltip title={mode === 'dark' ? 'Light mode' : 'Dark mode'}>
             <IconButton
               color="inherit"
@@ -563,6 +579,7 @@ const Layout = () => {
           its root element doesn't consume flex space when closed. */}
       <HelpPanel />
       <AboutModal open={aboutOpen} onClose={handleCloseAbout} />
+      <CommandPalette open={paletteOpen} onClose={() => setPaletteOpen(false)} />
     </Box>
   );
 };
