@@ -16,9 +16,6 @@ import {
   Stack,
   IconButton,
   Tooltip,
-  Select,
-  MenuItem,
-  FormControl,
   Dialog,
   DialogTitle,
   DialogContent,
@@ -41,6 +38,7 @@ import SCMRepositoryPanel from '../components/SCMRepositoryPanel';
 import WebhookEventsPanel from '../components/WebhookEventsPanel';
 import VersionDetailsPanel from '../components/VersionDetailsPanel';
 import ConfirmDialog from '../components/ConfirmDialog';
+import VersionSelector from '../components/VersionSelector';
 import { useModuleDetail } from '../hooks/useModuleDetail';
 
 const ModuleDetailPage: React.FC = () => {
@@ -250,28 +248,12 @@ const ModuleDetailPage: React.FC = () => {
             </Stack>
             <Stack direction="row" spacing={1} alignItems="center" sx={{ mt: 2 }} flexWrap="wrap">
               <Chip label={`${namespace}/${system}`} />
-              <FormControl size="small" sx={{ minWidth: 220 }}>
-                <Select
-                  value={selectedVersion?.version || ''}
-                  onChange={(e) => {
-                    const version = versions.find(v => v.version === e.target.value);
-                    if (version) setSelectedVersion(version);
-                  }}
-                  displayEmpty
-                >
-                  {versions.map((v) => (
-                    <MenuItem
-                      key={v.id}
-                      value={v.version}
-                      sx={{ color: v.deprecated ? 'text.disabled' : 'inherit' }}
-                    >
-                      v{v.version}
-                      {versions.find(ver => !ver.deprecated)?.id === v.id ? ' (latest)' : ''}
-                      {v.deprecated ? ' [DEPRECATED]' : ''}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
+              <VersionSelector
+                versions={versions}
+                selectedVersion={selectedVersion}
+                onSelectVersion={setSelectedVersion}
+                data-testid="module-version-selector"
+              />
               {selectedVersion?.deprecated && (
                 <Chip
                   label="Deprecated"
