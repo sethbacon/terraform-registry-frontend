@@ -85,14 +85,14 @@ describe('ProvidersPage', () => {
     vi.clearAllMocks()
   })
 
-  it('shows loading spinner while fetching', () => {
-    searchProvidersMock.mockReturnValue(new Promise(() => {}))
+  it('shows loading skeleton while fetching', () => {
+    searchProvidersMock.mockReturnValue(new Promise(() => { }))
     renderPage()
-    expect(screen.getByRole('progressbar')).toBeInTheDocument()
+    expect(screen.getByTestId('registry-item-grid-skeleton')).toBeInTheDocument()
   })
 
   it('renders page heading', () => {
-    searchProvidersMock.mockReturnValue(new Promise(() => {}))
+    searchProvidersMock.mockReturnValue(new Promise(() => { }))
     renderPage()
     expect(screen.getByText('Terraform Providers')).toBeInTheDocument()
     expect(screen.getByText(/Browse and discover/)).toBeInTheDocument()
@@ -130,13 +130,13 @@ describe('ProvidersPage', () => {
   })
 
   it('shows search field', () => {
-    searchProvidersMock.mockReturnValue(new Promise(() => {}))
+    searchProvidersMock.mockReturnValue(new Promise(() => { }))
     renderPage()
     expect(screen.getByPlaceholderText('Search providers...')).toBeInTheDocument()
   })
 
   it('shows sort dropdown', () => {
-    searchProvidersMock.mockReturnValue(new Promise(() => {}))
+    searchProvidersMock.mockReturnValue(new Promise(() => { }))
     renderPage()
     expect(screen.getByLabelText('Sort By')).toBeInTheDocument()
   })

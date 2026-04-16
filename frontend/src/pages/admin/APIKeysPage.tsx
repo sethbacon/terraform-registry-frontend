@@ -37,6 +37,8 @@ import {
 } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import AddIcon from '@mui/icons-material/Add';
+import KeyIcon from '@mui/icons-material/Key';
+import EmptyState from '../../components/EmptyState';
 import CopyIcon from '@mui/icons-material/ContentCopy';
 import InfoIcon from '@mui/icons-material/Info';
 import EditIcon from '@mui/icons-material/Edit';
@@ -475,17 +477,17 @@ const APIKeysPage: React.FC = () => {
             <CircularProgress />
           </Box>
         ) : apiKeys.length === 0 ? (
-          <Box sx={{ textAlign: 'center', py: 8 }}>
-            <Typography color="text.secondary">No API keys found</Typography>
-            <Button
-              variant="outlined"
-              startIcon={<AddIcon />}
-              onClick={handleOpenDialog}
-              sx={{ mt: 2 }}
-            >
-              Create First API Key
-            </Button>
-          </Box>
+          <EmptyState
+            title="No API keys yet"
+            description="Create an API key to authenticate Terraform and CI/CD clients against this registry."
+            icon={<KeyIcon />}
+            primaryAction={{
+              label: 'Create API key',
+              icon: <AddIcon />,
+              onClick: handleOpenDialog,
+            }}
+            data-testid="apikeys-empty-state"
+          />
         ) : (
           <TableContainer>
             <Table>

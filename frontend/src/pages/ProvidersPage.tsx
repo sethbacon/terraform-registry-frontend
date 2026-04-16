@@ -11,7 +11,6 @@ import {
   Grid,
   Button,
   Chip,
-  CircularProgress,
   Alert,
   Pagination,
   FormControl,
@@ -27,6 +26,7 @@ import { queryKeys } from '../services/queryKeys';
 import { Provider } from '../types';
 import { useAuth } from '../contexts/AuthContext';
 import RegistryItemCard from '../components/RegistryItemCard';
+import { RegistryItemGridSkeleton } from '../components/skeletons/RegistryItemCardSkeleton';
 
 /** Sort option value encodes both API sort field and order, separated by a colon. */
 const SORT_OPTIONS = [
@@ -236,9 +236,7 @@ const ProvidersPage: React.FC = () => {
 
       {/* Loading State */}
       {loading ? (
-        <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
-          <CircularProgress />
-        </Box>
+        <RegistryItemGridSkeleton />
       ) : providers.length === 0 ? (
         <Box sx={{ textAlign: 'center', py: 8 }}>
           <Typography variant="h6" color="text.secondary">

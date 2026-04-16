@@ -1,0 +1,139 @@
+import React from 'react';
+import {
+  Box, Typography, Stack, FormControlLabel, Switch, Collapse, FormControl, InputLabel,
+  Select, MenuItem, TextField, Alert, Button, CircularProgress,
+} from '@mui/material';
+import ShieldIcon from '@mui/icons-material/Shield';
+import { useSetupWizard } from '../../../contexts/SetupWizardContext';
+
+const ScanningStep: React.FC = () => {
+  const {
+    scanningForm, setScanningForm, scanningTesting, scanningTestResult, setScanningTestResult,
+    scanningSaving, scanningSaved, setScanningSaved, testScanning, saveScanning, goToStep,
+  } = useSetupWizard();
+
+  return (
+    <Box>
+      <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+        <ShieldIcon sx={{ mr: 1, color: 'primary.main' }} />
+        <Typography variant="h6" component="h2">Security Scanning</Typography>
+      </Box>
+      <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+        Optionally configure a security scanning tool to automatically scan Terraform
+        modules and providers for vulnerabilities when they are published.
+      </Typography>
+
+      <Stack spacing={2}>
+        <FormControlLabel
+          control={
+            <Switch
+              checked={scanningForm.enabled}
+              onChange={(e) => {
+                setScanningForm({ ...scanningForm, enabled: e.target.checked });
+                setScanningTestResult(null);
+                setScanningSaved(false);
+              }}
+            />
+          }
+          label="Enable security scanning"
+        />
+
+        <Collapse in={scanningForm.enabled}>
+          <Stack spacing={2}>
+            <FormControl fullWidth>
+              <InputLabel>Scanning Tool</InputLabel>
+              <Select
+                value={scanningForm.tool}
+                label="Scanning Tool"
+                onChange={(e) => {
+                  setScanningForm({ ...scanningForm, tool: e.target.value });
+                  setScanningTestResult(null);
+                  setScanningSaved(false);
+                }}
+              >
+                <MenuItem value="trivy">Trivy</MenuItem>
+                <MenuItem value="checkov">Checkov</MenuItem>
+                <MenuItem value="terrascan">Terrascan</MenuItem>
+                <MenuItem value="snyk">Snyk</MenuItem>
+                <MenuItem value="custom">Custom</MenuItem>
+              </Select>
+            </FormControl>
+
+            <TextField
+              fullWidth
+              label="Binary Path"
+              value={scanningForm.binary_path || ''}
+              onChange={(e) => setScanningForm({ ...scanningForm, binary_path: e.target.value })}
+              placeholder={`/usr/local/bin/${scanningForm.tool}`}
+              helperText="Path to the scanning tool binary. Leave empty to use the tool from PATH."
+            />
+
+            <TextField
+              fullWidth
+              label="Severity Threshold (optional)"
+              value={scanningForm.severity_threshold || ''}
+              onChange={(e) => setScanningForm({ ...scanningForm, severity_threshold: e.target.value })}
+              placeholder="HIGH"
+              helperText="Minimum severity to report (e.g. LOW, MEDIUM, HIGH, CRITICAL)"
+            />
+
+            {scanningTestResult && (
+              <Alert severity={scanningTestResult.success ? 'success' : 'error'}>
+                {scanningTestResult.message}
+                {scanningTestResult.success && scanningTestResult.version && (
+                  <Typography variant="body2" sx={{ mt: 0.5 }}>
+                    Detected version: {scanningTestResult.version}
+                  </Typography>
+                )}
+              </Alert>
+            )}
+
+            <Stack direction="row" spacing={2}>
+              <Button
+                variant="outlined"
+                onClick={testScanning}
+                disabled={scanningTesting || !scanningForm.tool}
+              >
+                {scanningTesting ? <CircularProgress size={20} sx={{ mr: 1 }} /> : null}
+                Test Configuration
+              </Button>
+              <Button
+                variant="contained"
+                onClick={saveScanning}
+                disabled={scanningSaving || (!scanningTestResult?.success)}
+              >
+                {scanningSaving ? <CircularProgress size={20} sx={{ mr: 1 }} /> : null}
+                Save Scanning Configuration
+              </Button>
+            </Stack>
+          </Stack>
+        </Collapse>
+
+        <Stack direction="row" spacing={2}>
+          <Button variant="text" onClick={() => goToStep(2)}>&#8592; Back</Button>
+          {!scanningForm.enabled && (
+            <Button
+              variant="outlined"
+              onClick={() => {
+                setScanningSaved(true);
+                goToStep(4);
+              }}
+            >
+              Skip
+            </Button>
+          )}
+        </Stack>
+
+        {scanningSaved && scanningForm.enabled && (
+          <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 1 }}>
+            <Button variant="contained" color="primary" onClick={() => goToStep(4)}>
+              Next: Configure Admin &#8594;
+            </Button>
+          </Box>
+        )}
+      </Stack>
+    </Box>
+  );
+};
+
+export default ScanningStep;

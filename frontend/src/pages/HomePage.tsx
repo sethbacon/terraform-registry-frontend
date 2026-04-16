@@ -19,6 +19,8 @@ import {
   AlertTitle,
   ToggleButton,
   ToggleButtonGroup,
+  useMediaQuery,
+  useTheme,
 } from '@mui/material';
 import ExtensionIcon from '@mui/icons-material/Extension';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
@@ -27,8 +29,13 @@ import GetAppIcon from '@mui/icons-material/GetApp';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import WarningAmberIcon from '@mui/icons-material/WarningAmber';
 import MenuBookIcon from '@mui/icons-material/MenuBook';
-import { useNavigate } from 'react-router-dom';
+import VpnKeyIcon from '@mui/icons-material/VpnKey';
+import LoginIcon from '@mui/icons-material/Login';
+import { useNavigate, Link as RouterLink } from 'react-router-dom';
 import api from '../services/api';
+import { useAuth } from '../contexts/AuthContext';
+import { useAnnouncer } from '../contexts/AnnouncerContext';
+import QuickApiKeyDialog from '../components/QuickApiKeyDialog';
 
 interface HomeStats {
   setupRequired: boolean;
@@ -52,10 +59,33 @@ const initialStats: HomeStats = {
 
 const HomePage: React.FC = () => {
   const navigate = useNavigate();
+  const theme = useTheme();
+  const isXs = useMediaQuery(theme.breakpoints.down('sm'));
+  const { isAuthenticated } = useAuth();
+  const { announce } = useAnnouncer();
   const [stats, setStats] = useState<HomeStats>(initialStats);
   const [searchQuery, setSearchQuery] = useState('');
   const [searchType, setSearchType] = useState<'modules' | 'providers'>('modules');
   const [copied, setCopied] = useState(false);
+  const [quickKeyOpen, setQuickKeyOpen] = useState(false);
+  const [primaryOrgId, setPrimaryOrgId] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!isAuthenticated) {
+      setPrimaryOrgId(null);
+      return;
+    }
+    let cancelled = false;
+    api.getCurrentUserMemberships()
+      .then((memberships: Array<{ organization_id: string }>) => {
+        if (cancelled) return;
+        setPrimaryOrgId(memberships?.[0]?.organization_id ?? null);
+      })
+      .catch(() => {
+        if (!cancelled) setPrimaryOrgId(null);
+      });
+    return () => { cancelled = true; };
+  }, [isAuthenticated]);
 
   useEffect(() => {
     Promise.allSettled([
@@ -95,6 +125,7 @@ const HomePage: React.FC = () => {
     const snippet = `credentials "${window.location.hostname}" {\n  token = "<your-api-key>"\n}`;
     navigator.clipboard.writeText(snippet).then(() => {
       setCopied(true);
+      announce('Credentials snippet copied to clipboard');
       setTimeout(() => setCopied(false), 2000);
     });
   };
@@ -203,13 +234,31 @@ const HomePage: React.FC = () => {
         <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
           Search across modules and providers in this registry
         </Typography>
-        <Stack spacing={1.5} alignItems="center">
+        <Stack
+          data-testid="quick-search-stack"
+          direction={isXs ? 'column' : 'row'}
+          spacing={1.5}
+          alignItems={isXs ? 'stretch' : 'center'}
+        >
+          <ToggleButtonGroup
+            size="small"
+            exclusive
+            value={searchType}
+            onChange={(_e, val) => { if (val) setSearchType(val); }}
+            aria-label="Search scope"
+            data-testid="quick-search-toggle"
+            sx={{ alignSelf: isXs ? 'center' : 'auto', flexShrink: 0 }}
+          >
+            <ToggleButton value="modules">Modules</ToggleButton>
+            <ToggleButton value="providers">Providers</ToggleButton>
+          </ToggleButtonGroup>
           <TextField
             fullWidth
             placeholder={`Search ${searchType}…`}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             onKeyDown={handleSearchKeyDown}
+            inputProps={{ 'aria-label': `Search ${searchType}` }}
             InputProps={{
               startAdornment: (
                 <InputAdornment position="start">
@@ -225,15 +274,6 @@ const HomePage: React.FC = () => {
               ),
             }}
           />
-          <ToggleButtonGroup
-            size="small"
-            exclusive
-            value={searchType}
-            onChange={(_e, val) => { if (val) setSearchType(val); }}
-          >
-            <ToggleButton value="modules">Modules</ToggleButton>
-            <ToggleButton value="providers">Providers</ToggleButton>
-          </ToggleButtonGroup>
         </Stack>
       </Container>
 
@@ -401,41 +441,95 @@ const HomePage: React.FC = () => {
                     2. Get an API Key
                   </Typography>
                   <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }}>
-                    Generate an API key from <strong>Admin → API Keys</strong> and add it to your
-                    Terraform CLI credentials file:
+                    {isAuthenticated
+                      ? 'Generate an API key and add it to your Terraform CLI credentials file:'
+                      : 'Sign in to generate an API key, then add it to your Terraform CLI credentials file:'}
                   </Typography>
-                  <Box
-                    sx={{
-                      position: 'relative',
-                      borderRadius: 1,
-                      overflow: 'hidden',
-                    }}
-                  >
-                    <Box
-                      component="pre"
-                      sx={{
-                        m: 0,
-                        p: 1.5,
-                        pr: 5,
-                        fontSize: '0.75rem',
-                        lineHeight: 1.6,
-                        overflowX: 'auto',
-                        borderRadius: 1,
-                      }}
-                    >
-                      {`credentials "${window.location.hostname}" {\n  token = "<your-api-key>"\n}`}
-                    </Box>
-                    <Tooltip title={copied ? 'Copied!' : 'Copy to clipboard'} placement="top">
-                      <IconButton
+
+                  {!isAuthenticated ? (
+                    <Stack spacing={1.5}>
+                      <Button
+                        variant="contained"
                         size="small"
-                        aria-label="Copy usage example"
-                        onClick={handleCopyCredentials}
-                        sx={{ position: 'absolute', top: 4, right: 4, opacity: 0.6, '&:hover': { opacity: 1 } }}
+                        startIcon={<LoginIcon />}
+                        component={RouterLink}
+                        to="/login"
+                        data-testid="getting-started-signin"
                       >
-                        <ContentCopyIcon fontSize="small" />
-                      </IconButton>
-                    </Tooltip>
-                  </Box>
+                        Sign in to generate a key
+                      </Button>
+                      <Box
+                        sx={{
+                          position: 'relative',
+                          borderRadius: 1,
+                          overflow: 'hidden',
+                          opacity: 0.6,
+                        }}
+                      >
+                        <Box
+                          component="pre"
+                          sx={{ m: 0, p: 1.5, fontSize: '0.75rem', lineHeight: 1.6, overflowX: 'auto' }}
+                        >
+                          {`credentials "${window.location.hostname}" {\n  token = "<your-api-key>"\n}`}
+                        </Box>
+                      </Box>
+                    </Stack>
+                  ) : (
+                    <Stack spacing={1.5}>
+                      <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
+                        <Button
+                          variant="contained"
+                          size="small"
+                          startIcon={<VpnKeyIcon />}
+                          onClick={() => setQuickKeyOpen(true)}
+                          data-testid="getting-started-create-key"
+                        >
+                          Create API key
+                        </Button>
+                        <Button
+                          variant="text"
+                          size="small"
+                          component={RouterLink}
+                          to="/admin/apikeys"
+                          data-testid="getting-started-manage-keys"
+                        >
+                          Manage all keys →
+                        </Button>
+                      </Stack>
+                      <Box
+                        sx={{
+                          position: 'relative',
+                          borderRadius: 1,
+                          overflow: 'hidden',
+                        }}
+                      >
+                        <Box
+                          component="pre"
+                          sx={{
+                            m: 0,
+                            p: 1.5,
+                            pr: 5,
+                            fontSize: '0.75rem',
+                            lineHeight: 1.6,
+                            overflowX: 'auto',
+                            borderRadius: 1,
+                          }}
+                        >
+                          {`credentials "${window.location.hostname}" {\n  token = "<your-api-key>"\n}`}
+                        </Box>
+                        <Tooltip title={copied ? 'Copied!' : 'Copy to clipboard'} placement="top">
+                          <IconButton
+                            size="small"
+                            aria-label="Copy usage example"
+                            onClick={handleCopyCredentials}
+                            sx={{ position: 'absolute', top: 4, right: 4, opacity: 0.6, '&:hover': { opacity: 1 } }}
+                          >
+                            <ContentCopyIcon fontSize="small" />
+                          </IconButton>
+                        </Tooltip>
+                      </Box>
+                    </Stack>
+                  )}
                 </CardContent>
               </Card>
             </Grid>
@@ -479,6 +573,13 @@ const HomePage: React.FC = () => {
           View API Documentation
         </Button>
       </Container>
+
+      <QuickApiKeyDialog
+        open={quickKeyOpen}
+        onClose={() => setQuickKeyOpen(false)}
+        organizationId={primaryOrgId}
+        hostname={typeof window !== 'undefined' ? window.location.hostname : ''}
+      />
 
     </Box>
   );
