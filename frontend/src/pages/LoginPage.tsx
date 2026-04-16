@@ -8,6 +8,8 @@ import {
   Stack,
   Divider,
   Alert,
+  CircularProgress,
+  Skeleton,
 } from '@mui/material';
 import LoginIcon from '@mui/icons-material/Login';
 import { useAuth } from '../contexts/AuthContext';
@@ -15,62 +17,90 @@ import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import type { User } from '../types';
 
+type ProviderId = 'oidc' | 'azuread';
+
+interface ProviderDef {
+  id: ProviderId;
+  label: string;
+  sx?: Record<string, unknown>;
+}
+
+const PROVIDERS: ProviderDef[] = [
+  { id: 'oidc', label: 'Sign in with SSO' },
+  {
+    id: 'azuread',
+    label: 'Sign in with Azure AD',
+    sx: {
+      backgroundColor: '#0078d4',
+      '&:hover': { backgroundColor: '#106ebe' },
+    },
+  },
+];
+
+async function probeProvider(id: ProviderId): Promise<boolean> {
+  try {
+    const res = await fetch(`/api/v1/auth/login?provider=${id}`, {
+      method: 'GET',
+      redirect: 'manual',
+    });
+    return res.type === 'opaqueredirect' || res.status === 0;
+  } catch {
+    return false;
+  }
+}
+
 const LoginPage: React.FC = () => {
   const { login } = useAuth();
   const navigate = useNavigate();
   const [loginError, setLoginError] = React.useState<string | null>(null);
-  // import.meta.env.DEV is tied to NODE_ENV, which Vite forces to 'production'
-  // during any `vite build` regardless of --mode. Check MODE instead, which
-  // correctly reflects the --mode argument (e.g. 'development').
   const isDev = import.meta.env.MODE === 'development';
-  const [azureADAvailable, setAzureADAvailable] = React.useState<boolean>(false);
+  const [providerAvailable, setProviderAvailable] = React.useState<Record<ProviderId, boolean>>({
+    oidc: false,
+    azuread: false,
+  });
+  const [probingProviders, setProbingProviders] = React.useState(true);
 
   React.useEffect(() => {
-    fetch('/api/v1/auth/login?provider=azuread', { method: 'GET', redirect: 'manual' })
-      .then(res => {
-        setAzureADAvailable(res.type === 'opaqueredirect' || res.status === 0);
-      })
-      .catch(() => {
-        setAzureADAvailable(false);
-      });
+    let cancelled = false;
+    Promise.all(PROVIDERS.map(p => probeProvider(p.id).then(ok => [p.id, ok] as const))).then(results => {
+      if (cancelled) return;
+      const map = { oidc: false, azuread: false } as Record<ProviderId, boolean>;
+      for (const [id, ok] of results) map[id] = ok;
+      setProviderAvailable(map);
+      setProbingProviders(false);
+    });
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   const handleDevLogin = async () => {
-    // Call the dev login endpoint to get a JWT (no hardcoded keys)
-    // This endpoint is gated by DevModeMiddleware and returns 403 in production
-    const response = await api.devLogin();
-    localStorage.setItem('auth_token', response.token);
-
-    // Clear any cached user data to force fresh fetch from API
-    localStorage.removeItem('user');
-    localStorage.removeItem('role_template');
-    localStorage.removeItem('allowed_scopes');
-
-    // login() will call fetchCurrentUser() which validates the JWT via /auth/me
-    await login({} as User);
-    navigate('/');
+    setLoginError(null);
+    try {
+      const response = await api.devLogin();
+      localStorage.setItem('auth_token', response.token);
+      localStorage.removeItem('user');
+      localStorage.removeItem('role_template');
+      localStorage.removeItem('allowed_scopes');
+      await login({} as User);
+      navigate('/');
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Dev login failed. Check server logs.';
+      setLoginError(message);
+    }
   };
 
-  // Validates that the provider login endpoint is reachable before redirecting.
-  // If the backend returns a non-redirect error (e.g. provider not configured),
-  // this displays a user-friendly alert on the login page instead of showing
-  // raw JSON in the browser.
-  const handleProviderLogin = async (provider: 'oidc' | 'azuread') => {
+  const handleProviderLogin = async (provider: ProviderId) => {
     setLoginError(null);
     try {
       const res = await fetch(`/api/v1/auth/login?provider=${provider}`, {
         method: 'GET',
         redirect: 'manual',
       });
-      // A 'manual' redirect fetch returns opaqueredirect (type='opaqueredirect') or
-      // status 0 for actual redirects. Any non-redirect response means the backend
-      // returned an error (e.g. 400 provider not configured).
       if (res.type === 'opaqueredirect' || res.status === 0) {
-        // Normal redirect — let the browser follow it
         api.login(provider);
         return;
       }
-      // The backend returned a non-redirect response — extract the error message
       let message = `${provider === 'oidc' ? 'OIDC' : 'Azure AD'} provider is not configured. Contact your administrator.`;
       try {
         const body = await res.json();
@@ -80,13 +110,12 @@ const LoginPage: React.FC = () => {
       }
       setLoginError(message);
     } catch {
-      // Network error or CORS issue — fall back to direct redirect
       api.login(provider);
     }
   };
 
-  const handleOIDCLogin = () => handleProviderLogin('oidc');
-  const handleAzureADLogin = () => handleProviderLogin('azuread');
+  const availableCount = Object.values(providerAvailable).filter(Boolean).length;
+  const showNoProvidersAlert = !probingProviders && availableCount === 0 && !isDev;
 
   return (
     <Container maxWidth="sm" sx={{ mx: 'auto' }}>
@@ -116,6 +145,12 @@ const LoginPage: React.FC = () => {
               </Alert>
             )}
 
+            {showNoProvidersAlert && (
+              <Alert severity="info" data-testid="no-providers-alert">
+                No SSO providers configured. Contact your administrator.
+              </Alert>
+            )}
+
             {isDev && (
               <>
                 <Alert severity="info">
@@ -131,48 +166,45 @@ const LoginPage: React.FC = () => {
                 >
                   Dev Login (Admin)
                 </Button>
-                <Divider>
-                  <Typography variant="body2" color="text.secondary">
-                    OR USE PRODUCTION AUTH
-                  </Typography>
-                </Divider>
+                {(probingProviders || availableCount > 0) && (
+                  <Divider>
+                    <Typography variant="body2" color="text.secondary">
+                      OR USE PRODUCTION AUTH
+                    </Typography>
+                  </Divider>
+                )}
               </>
             )}
 
-            <Button
-              variant="contained"
-              size="large"
-              fullWidth
-              onClick={handleOIDCLogin}
-              sx={{ py: 1.5 }}
-            >
-              Sign in with SSO
-            </Button>
-
-            {azureADAvailable && (
-              <>
-                <Divider>
-                  <Typography variant="body2" color="text.secondary">
-                    OR
-                  </Typography>
-                </Divider>
-
-                <Button
-                  variant="contained"
-                  size="large"
-                  fullWidth
-                  onClick={handleAzureADLogin}
-                  sx={{
-                    py: 1.5,
-                    backgroundColor: '#0078d4',
-                    '&:hover': {
-                      backgroundColor: '#106ebe',
-                    },
-                  }}
-                >
-                  Sign in with Azure AD
-                </Button>
-              </>
+            {probingProviders ? (
+              <Stack spacing={1} data-testid="provider-probing">
+                <Skeleton variant="rounded" height={48} />
+                <Skeleton variant="rounded" height={48} />
+                <Box sx={{ display: 'flex', justifyContent: 'center', pt: 1 }}>
+                  <CircularProgress size={18} aria-label="Checking available sign-in providers" />
+                </Box>
+              </Stack>
+            ) : (
+              PROVIDERS.filter(p => providerAvailable[p.id]).map((p, idx, visible) => (
+                <React.Fragment key={p.id}>
+                  <Button
+                    variant="contained"
+                    size="large"
+                    fullWidth
+                    onClick={() => handleProviderLogin(p.id)}
+                    sx={{ py: 1.5, ...(p.sx ?? {}) }}
+                  >
+                    {p.label}
+                  </Button>
+                  {idx < visible.length - 1 && (
+                    <Divider>
+                      <Typography variant="body2" color="text.secondary">
+                        OR
+                      </Typography>
+                    </Divider>
+                  )}
+                </React.Fragment>
+              ))
             )}
           </Stack>
 

@@ -101,3 +101,38 @@ test.describe('Logout', () => {
     expect(swaggerAuth).toBeNull();
   });
 });
+
+test.describe('Provider probing (UX roadmap 1.2)', () => {
+  test('does not render OIDC button when the OIDC probe is unreachable', async ({ page }) => {
+    // Intercept ONLY the probe request (mount-time, manual-redirect GET)
+    // and force it to fail. Real login redirects still work for other providers.
+    await page.route('**/api/v1/auth/login?provider=oidc', (route) => route.abort());
+
+    await page.goto('/login');
+
+    // Wait for the probe loading state to disappear.
+    await expect(page.getByTestId('provider-probing')).toHaveCount(0, { timeout: 10_000 });
+
+    await expect(page.getByRole('button', { name: 'Sign in with SSO' })).toHaveCount(0);
+  });
+
+  test('shows inline alert (not ErrorBoundary) when dev login endpoint fails', async ({ page }) => {
+    await page.goto('/login');
+
+    const devLoginBtn = page.getByRole('button', { name: 'Dev Login (Admin)' });
+    const isDevMode = await devLoginBtn.isVisible({ timeout: 3_000 }).catch(() => false);
+    test.skip(!isDevMode, 'Dev login not available — backend not running in DEV_MODE');
+
+    // Force dev-login to fail with 500.
+    await page.route('**/api/v1/auth/dev-login', (route) =>
+      route.fulfill({ status: 500, body: JSON.stringify({ error: 'dev login exploded' }) })
+    );
+
+    await devLoginBtn.click();
+
+    // Page should NOT crash into the ErrorBoundary fallback.
+    await expect(page.getByText(/Something went wrong/i)).toHaveCount(0);
+    // The dev login button stays visible on the login page.
+    await expect(devLoginBtn).toBeVisible();
+  });
+});
