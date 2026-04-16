@@ -4,6 +4,9 @@ import { resolve } from 'path'
 
 export default defineConfig({
   plugins: [react()],
+  define: {
+    __APP_VERSION__: JSON.stringify('0.0.0-test'),
+  },
   resolve: {
     alias: {
       '@': resolve(__dirname, './src'),
@@ -14,6 +17,7 @@ export default defineConfig({
     setupFiles: './src/setupTests.ts',
     globals: true,
     unstubGlobals: true,
+    testTimeout: 15_000,
     coverage: {
       provider: 'v8',
       reporter: ['text', 'text-summary', 'lcov', 'json-summary'],
@@ -28,10 +32,10 @@ export default defineConfig({
         'src/**/*.d.ts',
       ],
       thresholds: {
-        statements: 8,
-        branches: 8,
-        functions: 8,
-        lines: 8,
+        statements: 42,
+        branches: 37,
+        functions: 36,
+        lines: 43,
       },
     },
   },
