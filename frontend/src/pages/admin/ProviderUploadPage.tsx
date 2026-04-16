@@ -18,12 +18,14 @@ import {
   Card,
   CardActionArea,
   CardContent,
+  LinearProgress,
 } from '@mui/material';
 import CloudUpload from '@mui/icons-material/CloudUpload';
 import CloudDownload from '@mui/icons-material/CloudDownload';
 import ArrowBack from '@mui/icons-material/ArrowBack';
 import api from '../../services/api';
 import { getErrorMessage } from '../../utils/errors';
+import FileDropZone from '../../components/FileDropZone';
 
 type ProviderMethod = 'choose' | 'upload' | 'mirror';
 
@@ -41,6 +43,7 @@ const ProviderUploadPage: React.FC = () => {
   );
 
   const [uploading, setUploading] = useState(false);
+  const [uploadPercent, setUploadPercent] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
@@ -52,12 +55,9 @@ const ProviderUploadPage: React.FC = () => {
   const [providerOS, setProviderOS] = useState('');
   const [providerArch, setProviderArch] = useState('');
 
-  const handleProviderFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      setProviderFile(file);
-      setError(null);
-    }
+  const handleProviderFileSelected = (file: File) => {
+    setProviderFile(file);
+    setError(null);
   };
 
   const handleProviderUpload = async () => {
@@ -79,12 +79,16 @@ const ProviderUploadPage: React.FC = () => {
       formData.append('arch', providerArch);
       formData.append('file', providerFile);
 
-      await api.uploadProvider(formData);
+      setUploadPercent(0);
+      await api.uploadProvider(formData, {
+        onUploadProgress: (percent) => setUploadPercent(percent),
+      });
 
       navigate(`/providers/${providerNamespace}/${providerName}`);
     } catch (err: unknown) {
       setError(getErrorMessage(err, 'Failed to upload provider. Please try again.'));
       setUploading(false);
+      setUploadPercent(null);
     }
   };
 
@@ -223,26 +227,23 @@ const ProviderUploadPage: React.FC = () => {
           </Typography>
         </FormControl>
 
-        <Box>
-          <input
-            id="provider-file-input"
-            type="file"
-            accept=".zip"
-            onChange={handleProviderFileChange}
-            style={{ display: 'none' }}
-          />
-          <label htmlFor="provider-file-input">
-            <Button
-              variant="outlined"
-              component="span"
-              startIcon={<CloudUpload />}
-              fullWidth
-              sx={{ py: 2 }}
-            >
-              {providerFile ? providerFile.name : 'Select Provider Binary (.zip)'}
-            </Button>
-          </label>
-        </Box>
+        <FileDropZone
+          file={providerFile}
+          onFileSelected={handleProviderFileSelected}
+          onClear={() => setProviderFile(null)}
+          acceptedExtensions={['.zip']}
+          disabled={uploading}
+          data-testid="provider-upload-dropzone"
+        />
+
+        {uploading && uploadPercent !== null && (
+          <Box data-testid="provider-upload-progress">
+            <LinearProgress variant="determinate" value={uploadPercent} />
+            <Typography variant="caption" color="text.secondary">
+              Uploading… {uploadPercent}%
+            </Typography>
+          </Box>
+        )}
 
         {error && <Alert severity="error">{error}</Alert>}
         {success && <Alert severity="success">{success}</Alert>}

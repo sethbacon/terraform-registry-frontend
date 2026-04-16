@@ -13,6 +13,7 @@ import {
   Card,
   CardActionArea,
   CardContent,
+  LinearProgress,
 } from '@mui/material';
 import CloudUpload from '@mui/icons-material/CloudUpload';
 import SCMIcon from '@mui/icons-material/AccountTree';
@@ -20,6 +21,7 @@ import ArrowBack from '@mui/icons-material/ArrowBack';
 import api from '../../services/api';
 import { getErrorMessage } from '../../utils/errors';
 import PublishFromSCMWizard from '../../components/PublishFromSCMWizard';
+import FileDropZone from '../../components/FileDropZone';
 
 type ModuleMethod = 'choose' | 'upload' | 'scm';
 
@@ -44,6 +46,7 @@ const ModuleUploadPage: React.FC = () => {
   const [scmError, setScmError] = useState<string | null>(null);
 
   const [uploading, setUploading] = useState(false);
+  const [uploadPercent, setUploadPercent] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
@@ -55,12 +58,9 @@ const ModuleUploadPage: React.FC = () => {
   const [moduleVersion, setModuleVersion] = useState('');
   const [moduleDescription, setModuleDescription] = useState('');
 
-  const handleModuleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      setModuleFile(file);
-      setError(null);
-    }
+  const handleModuleFileSelected = (file: File) => {
+    setModuleFile(file);
+    setError(null);
   };
 
   const handleModuleUpload = async () => {
@@ -71,6 +71,7 @@ const ModuleUploadPage: React.FC = () => {
 
     try {
       setUploading(true);
+      setUploadPercent(0);
       setError(null);
       setSuccess(null);
 
@@ -82,12 +83,15 @@ const ModuleUploadPage: React.FC = () => {
       if (moduleDescription) formData.append('description', moduleDescription);
       formData.append('file', moduleFile);
 
-      await api.uploadModule(formData);
+      await api.uploadModule(formData, {
+        onUploadProgress: (percent) => setUploadPercent(percent),
+      });
 
       navigate(`/modules/${moduleNamespace}/${moduleName}/${moduleProvider}`);
     } catch (err: unknown) {
       setError(getErrorMessage(err, 'Failed to upload module. Please try again.'));
       setUploading(false);
+      setUploadPercent(null);
     }
   };
 
@@ -268,15 +272,58 @@ const ModuleUploadPage: React.FC = () => {
       </Box>
 
       <Stack spacing={3}>
+        <Stack direction={{ xs: 'column', md: 'row' }} spacing={2} alignItems="flex-start">
+          <TextField
+            label="Namespace"
+            value={moduleNamespace}
+            onChange={(e) => setModuleNamespace(e.target.value)}
+            placeholder="e.g., bconline"
+            required
+            fullWidth
+            disabled={uploading}
+            helperText="Your organization identifier"
+          />
+          <TextField
+            label="Module Name"
+            value={moduleName}
+            onChange={(e) => setModuleName(e.target.value)}
+            placeholder="e.g., networking-vpc"
+            required
+            fullWidth
+            disabled={uploading}
+            helperText="Descriptive name for what the module does"
+          />
+          <TextField
+            label="Provider"
+            value={moduleProvider}
+            onChange={(e) => setModuleProvider(e.target.value)}
+            placeholder="e.g., aws"
+            required
+            fullWidth
+            disabled={uploading}
+            helperText="Target cloud (aws, azure, google, etc.)"
+          />
+        </Stack>
         <TextField
-          label="Namespace"
-          value={moduleNamespace}
-          onChange={(e) => setModuleNamespace(e.target.value)}
-          placeholder="e.g., bconline"
+          label="Version"
+          value={moduleVersion}
+          onChange={(e) => setModuleVersion(e.target.value)}
+          placeholder="e.g., 1.0.0"
           required
           fullWidth
-          helperText="Your organization identifier (like a GitHub or DevOps org)."
+          disabled={uploading}
+          helperText="Semantic version in format X.Y.Z (e.g., 1.0.0, 2.1.3). Use 0.x.x for pre-release."
         />
+
+        <FileDropZone
+          file={moduleFile}
+          onFileSelected={handleModuleFileSelected}
+          onClear={() => setModuleFile(null)}
+          acceptedExtensions={['.tar.gz', '.tgz']}
+          disabled={uploading}
+          data-testid="module-upload-dropzone"
+        />
+
         <TextField
           label="Description"
           value={moduleDescription}
@@ -285,56 +332,18 @@ const ModuleUploadPage: React.FC = () => {
           fullWidth
           multiline
           rows={3}
-          helperText="Brief description of what this module does and its purpose."
-        />
-        <TextField
-          label="Module Name"
-          value={moduleName}
-          onChange={(e) => setModuleName(e.target.value)}
-          placeholder="e.g., networking-vpc"
-          required
-          fullWidth
-          helperText="Descriptive name for what the module does"
-        />
-        <TextField
-          label="Provider"
-          value={moduleProvider}
-          onChange={(e) => setModuleProvider(e.target.value)}
-          placeholder="e.g., aws"
-          required
-          fullWidth
-          helperText="Cloud provider this module targets (aws, azure, google, etc.)"
-        />
-        <TextField
-          label="Version"
-          value={moduleVersion}
-          onChange={(e) => setModuleVersion(e.target.value)}
-          placeholder="e.g., 1.0.0"
-          required
-          fullWidth
-          helperText="Semantic version in format X.Y.Z (e.g., 1.0.0, 2.1.3). Use 0.x.x for pre-release."
+          disabled={uploading}
+          helperText="Optional. Brief description of what this module does."
         />
 
-        <Box>
-          <input
-            id="module-file-input"
-            type="file"
-            accept=".tar.gz,.tgz"
-            onChange={handleModuleFileChange}
-            style={{ display: 'none' }}
-          />
-          <label htmlFor="module-file-input">
-            <Button
-              variant="outlined"
-              component="span"
-              startIcon={<CloudUpload />}
-              fullWidth
-              sx={{ py: 2 }}
-            >
-              {moduleFile ? moduleFile.name : 'Select Module File (.tar.gz)'}
-            </Button>
-          </label>
-        </Box>
+        {uploading && uploadPercent !== null && (
+          <Box data-testid="module-upload-progress">
+            <LinearProgress variant="determinate" value={uploadPercent} />
+            <Typography variant="caption" color="text.secondary">
+              Uploading… {uploadPercent}%
+            </Typography>
+          </Box>
+        )}
 
         {error && <Alert severity="error">{error}</Alert>}
         {success && <Alert severity="success">{success}</Alert>}

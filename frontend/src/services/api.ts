@@ -184,11 +184,19 @@ class ApiClient {
     return response.data;
   }
 
-  async uploadModule(formData: FormData) {
+  async uploadModule(formData: FormData, options?: { onUploadProgress?: (percent: number) => void }) {
     const response = await this.client.post('/api/v1/modules', formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
       },
+      onUploadProgress: options?.onUploadProgress
+        ? (event) => {
+            if (event.total && event.total > 0) {
+              const percent = Math.round((event.loaded / event.total) * 100);
+              options.onUploadProgress?.(percent);
+            }
+          }
+        : undefined,
     });
     return response.data;
   }
@@ -254,11 +262,19 @@ class ApiClient {
     return response.data;
   }
 
-  async uploadProvider(formData: FormData) {
+  async uploadProvider(formData: FormData, options?: { onUploadProgress?: (percent: number) => void }) {
     const response = await this.client.post('/api/v1/providers', formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
       },
+      onUploadProgress: options?.onUploadProgress
+        ? (event) => {
+            if (event.total && event.total > 0) {
+              const percent = Math.round((event.loaded / event.total) * 100);
+              options.onUploadProgress?.(percent);
+            }
+          }
+        : undefined,
     });
     return response.data;
   }
