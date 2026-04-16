@@ -32,7 +32,7 @@ function setAuth(overrides: { isAuthenticated?: boolean; allowedScopes?: string[
 function renderPalette(open = true) {
   return render(
     <MemoryRouter>
-      <CommandPalette open={open} onClose={() => {}} />
+      <CommandPalette open={open} onClose={() => { }} />
     </MemoryRouter>,
   );
 }
