@@ -139,7 +139,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       fetchCurrentUser();
     }
     setIsLoading(false);
-  }, [fetchCurrentUser]);
+  }, [fetchCurrentUser, scheduleSessionWarning]);
 
   const login = async (userOrProvider: User | 'oidc' | 'azuread'): Promise<void> => {
     if (typeof userOrProvider === 'string') {
