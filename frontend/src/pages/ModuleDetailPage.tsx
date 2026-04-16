@@ -22,8 +22,6 @@ import {
   Dialog,
   DialogTitle,
   DialogContent,
-  DialogContentText,
-  DialogActions,
   TextField,
   Tabs,
   Tab,
@@ -42,6 +40,7 @@ import SecurityScanPanel from '../components/SecurityScanPanel';
 import SCMRepositoryPanel from '../components/SCMRepositoryPanel';
 import WebhookEventsPanel from '../components/WebhookEventsPanel';
 import VersionDetailsPanel from '../components/VersionDetailsPanel';
+import ConfirmDialog from '../components/ConfirmDialog';
 import { useModuleDetail } from '../hooks/useModuleDetail';
 
 const ModuleDetailPage: React.FC = () => {
@@ -449,51 +448,45 @@ const ModuleDetailPage: React.FC = () => {
           </Box>
 
           {/* Delete Module Confirmation Dialog */}
-          <Dialog
+          <ConfirmDialog
             open={deleteModuleDialogOpen}
             onClose={() => setDeleteModuleDialogOpen(false)}
-          >
-            <DialogTitle>Delete Module</DialogTitle>
-            <DialogContent>
-              <DialogContentText>
+            onConfirm={handleDeleteModule}
+            title="Delete Module"
+            description={
+              <>
                 Are you sure you want to delete the module <strong>{namespace}/{name}/{system}</strong>?
                 This will permanently delete all versions and associated files.
                 This action cannot be undone.
-              </DialogContentText>
-            </DialogContent>
-            <DialogActions>
-              <Button onClick={() => setDeleteModuleDialogOpen(false)} disabled={deleting}>
-                Cancel
-              </Button>
-              <Button onClick={handleDeleteModule} color="error" disabled={deleting}>
-                {deleting ? 'Deleting...' : 'Delete Module'}
-              </Button>
-            </DialogActions>
-          </Dialog>
+              </>
+            }
+            confirmLabel={deleting ? 'Deleting...' : 'Delete Module'}
+            severity="error"
+            typeToConfirmText={`${namespace}/${name}/${system}`}
+            loading={deleting}
+            data-testid="delete-module-dialog"
+          />
 
           {/* Delete Version Confirmation Dialog */}
-          <Dialog
+          <ConfirmDialog
             open={deleteVersionDialogOpen}
             onClose={() => setDeleteVersionDialogOpen(false)}
-          >
-            <DialogTitle>Delete Version</DialogTitle>
-            <DialogContent>
-              <DialogContentText>
+            onConfirm={handleDeleteVersion}
+            title="Delete Version"
+            description={
+              <>
                 Are you sure you want to delete version <strong>{versionToDelete}</strong> of{' '}
                 <strong>{namespace}/{name}/{system}</strong>?
                 This will permanently delete the version and its associated files.
                 This action cannot be undone.
-              </DialogContentText>
-            </DialogContent>
-            <DialogActions>
-              <Button onClick={() => setDeleteVersionDialogOpen(false)} disabled={deleting}>
-                Cancel
-              </Button>
-              <Button onClick={handleDeleteVersion} color="error" disabled={deleting}>
-                {deleting ? 'Deleting...' : 'Delete Version'}
-              </Button>
-            </DialogActions>
-          </Dialog>
+              </>
+            }
+            confirmLabel={deleting ? 'Deleting...' : 'Delete Version'}
+            severity="error"
+            typeToConfirmText={versionToDelete || undefined}
+            loading={deleting}
+            data-testid="delete-version-dialog"
+          />
 
           {/* SCM Link Wizard Dialog */}
           <Dialog
@@ -522,113 +515,104 @@ const ModuleDetailPage: React.FC = () => {
           </Dialog>
 
           {/* Deprecate Version Dialog */}
-          <Dialog
+          <ConfirmDialog
             open={deprecateDialogOpen}
-            onClose={() => setDeprecateDialogOpen(false)}
-          >
-            <DialogTitle>Deprecate Version</DialogTitle>
-            <DialogContent>
-              <DialogContentText sx={{ mb: 2 }}>
+            onClose={() => {
+              setDeprecateDialogOpen(false);
+              setDeprecationMessage('');
+            }}
+            onSubmit={async (values) => {
+              setDeprecationMessage(values.message ?? '');
+              // Defer one tick so the message state is applied before the handler reads it.
+              await Promise.resolve();
+              handleDeprecateVersion();
+            }}
+            title="Deprecate Version"
+            description={
+              <>
                 Are you sure you want to deprecate version <strong>{selectedVersion?.version}</strong> of{' '}
                 <strong>{namespace}/{name}/{system}</strong>?
                 This will mark the version as deprecated, warning users not to use it.
-              </DialogContentText>
-              <TextField
-                autoFocus
-                label="Deprecation Message (optional)"
-                placeholder="e.g., Use version 2.0.0 instead - this version has a critical bug"
-                fullWidth
-                multiline
-                rows={3}
-                value={deprecationMessage}
-                onChange={(e) => setDeprecationMessage(e.target.value)}
-              />
-            </DialogContent>
-            <DialogActions>
-              <Button
-                onClick={() => {
-                  setDeprecateDialogOpen(false);
-                  setDeprecationMessage('');
-                }}
-                disabled={deprecating}
-              >
-                Cancel
-              </Button>
-              <Button onClick={handleDeprecateVersion} color="warning" disabled={deprecating}>
-                {deprecating ? 'Deprecating...' : 'Deprecate Version'}
-              </Button>
-            </DialogActions>
-          </Dialog>
+              </>
+            }
+            severity="warning"
+            confirmLabel={deprecating ? 'Deprecating...' : 'Deprecate Version'}
+            loading={deprecating}
+            fields={[
+              {
+                id: 'message',
+                label: 'Deprecation Message (optional)',
+                placeholder: 'e.g., Use version 2.0.0 instead - this version has a critical bug',
+                multiline: true,
+                rows: 3,
+                initialValue: deprecationMessage,
+              },
+            ]}
+            data-testid="deprecate-version-dialog"
+          />
 
           {/* Deprecate Module Dialog */}
-          <Dialog
+          <ConfirmDialog
             open={deprecateModuleDialogOpen}
-            onClose={() => setDeprecateModuleDialogOpen(false)}
-          >
-            <DialogTitle>Deprecate Module</DialogTitle>
-            <DialogContent>
-              <DialogContentText sx={{ mb: 2 }}>
+            onClose={() => {
+              setDeprecateModuleDialogOpen(false);
+              setModuleDeprecationMessage('');
+              setSuccessorModuleId('');
+            }}
+            onSubmit={async (values) => {
+              setModuleDeprecationMessage(values.message ?? '');
+              setSuccessorModuleId(values.successor ?? '');
+              await Promise.resolve();
+              handleDeprecateModule();
+            }}
+            title="Deprecate Module"
+            description={
+              <>
                 Are you sure you want to deprecate the module <strong>{namespace}/{name}/{system}</strong>?
                 This will mark the entire module as deprecated, warning users not to use it.
-              </DialogContentText>
-              <TextField
-                autoFocus
-                label="Deprecation Message"
-                placeholder="e.g., This module has been replaced by namespace/new-module/system"
-                fullWidth
-                multiline
-                rows={3}
-                value={moduleDeprecationMessage}
-                onChange={(e) => setModuleDeprecationMessage(e.target.value)}
-                sx={{ mb: 2 }}
-              />
-              <TextField
-                label="Successor Module ID (optional)"
-                placeholder="e.g., namespace/name/system"
-                fullWidth
-                value={successorModuleId}
-                onChange={(e) => setSuccessorModuleId(e.target.value)}
-                helperText="If this module has a replacement, enter its ID to help users migrate."
-              />
-            </DialogContent>
-            <DialogActions>
-              <Button
-                onClick={() => {
-                  setDeprecateModuleDialogOpen(false);
-                  setModuleDeprecationMessage('');
-                  setSuccessorModuleId('');
-                }}
-                disabled={deprecatingModule}
-              >
-                Cancel
-              </Button>
-              <Button onClick={handleDeprecateModule} color="warning" disabled={deprecatingModule}>
-                {deprecatingModule ? 'Deprecating...' : 'Deprecate Module'}
-              </Button>
-            </DialogActions>
-          </Dialog>
+              </>
+            }
+            severity="warning"
+            confirmLabel={deprecatingModule ? 'Deprecating...' : 'Deprecate Module'}
+            loading={deprecatingModule}
+            fields={[
+              {
+                id: 'message',
+                label: 'Deprecation Message',
+                placeholder: 'e.g., This module has been replaced by namespace/new-module/system',
+                multiline: true,
+                rows: 3,
+                required: true,
+                initialValue: moduleDeprecationMessage,
+              },
+              {
+                id: 'successor',
+                label: 'Successor Module ID (optional)',
+                placeholder: 'e.g., namespace/name/system',
+                helperText: 'If this module has a replacement, enter its ID to help users migrate.',
+                initialValue: successorModuleId,
+              },
+            ]}
+            data-testid="deprecate-module-dialog"
+          />
 
           {/* Undeprecate Module Confirmation Dialog */}
-          <Dialog
+          <ConfirmDialog
             open={undeprecateModuleDialogOpen}
             onClose={() => setUndeprecateModuleDialogOpen(false)}
-          >
-            <DialogTitle>Undeprecate Module</DialogTitle>
-            <DialogContent>
-              <DialogContentText>
+            onConfirm={handleUndeprecateModule}
+            title="Undeprecate Module"
+            description={
+              <>
                 Are you sure you want to remove the deprecation from <strong>{namespace}/{name}/{system}</strong>?
                 This will make the module available for normal use again.
-              </DialogContentText>
-            </DialogContent>
-            <DialogActions>
-              <Button onClick={() => setUndeprecateModuleDialogOpen(false)} disabled={deprecatingModule}>
-                Cancel
-              </Button>
-              <Button onClick={handleUndeprecateModule} color="success" disabled={deprecatingModule}>
-                {deprecatingModule ? 'Processing...' : 'Undeprecate Module'}
-              </Button>
-            </DialogActions>
-          </Dialog>
+              </>
+            }
+            severity="info"
+            confirmLabel={deprecatingModule ? 'Processing...' : 'Undeprecate Module'}
+            loading={deprecatingModule}
+            data-testid="undeprecate-module-dialog"
+          />
         </Container>
       )}
     </Box>
