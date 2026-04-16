@@ -103,7 +103,7 @@ describe('ConfirmDialog', () => {
 
   it('keeps loading state while onConfirm promise is pending', async () => {
     const user = userEvent.setup();
-    let resolve: () => void = () => {};
+    let resolve: () => void = () => { };
     const onConfirm = vi.fn().mockImplementation(() => new Promise<void>((r) => { resolve = r; }));
     render(
       <ConfirmDialog open onClose={vi.fn()} onConfirm={onConfirm} title="T" />,

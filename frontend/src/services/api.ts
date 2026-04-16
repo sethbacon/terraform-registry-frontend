@@ -191,11 +191,11 @@ class ApiClient {
       },
       onUploadProgress: options?.onUploadProgress
         ? (event) => {
-            if (event.total && event.total > 0) {
-              const percent = Math.round((event.loaded / event.total) * 100);
-              options.onUploadProgress?.(percent);
-            }
+          if (event.total && event.total > 0) {
+            const percent = Math.round((event.loaded / event.total) * 100);
+            options.onUploadProgress?.(percent);
           }
+        }
         : undefined,
     });
     return response.data;
@@ -269,11 +269,11 @@ class ApiClient {
       },
       onUploadProgress: options?.onUploadProgress
         ? (event) => {
-            if (event.total && event.total > 0) {
-              const percent = Math.round((event.loaded / event.total) * 100);
-              options.onUploadProgress?.(percent);
-            }
+          if (event.total && event.total > 0) {
+            const percent = Math.round((event.loaded / event.total) * 100);
+            options.onUploadProgress?.(percent);
           }
+        }
         : undefined,
     });
     return response.data;

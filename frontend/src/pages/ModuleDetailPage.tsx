@@ -26,7 +26,6 @@ import {
 import ArrowBack from '@mui/icons-material/ArrowBack';
 import ContentCopy from '@mui/icons-material/ContentCopy';
 import Add from '@mui/icons-material/Add';
-import Delete from '@mui/icons-material/Delete';
 import Warning from '@mui/icons-material/Warning';
 import EditIcon from '@mui/icons-material/Edit';
 import Check from '@mui/icons-material/Check';
@@ -39,6 +38,7 @@ import WebhookEventsPanel from '../components/WebhookEventsPanel';
 import VersionDetailsPanel from '../components/VersionDetailsPanel';
 import ConfirmDialog from '../components/ConfirmDialog';
 import VersionSelector from '../components/VersionSelector';
+import ModuleActionsMenu from '../components/ModuleActionsMenu';
 import { useModuleDetail } from '../hooks/useModuleDetail';
 
 const ModuleDetailPage: React.FC = () => {
@@ -263,38 +263,17 @@ const ModuleDetailPage: React.FC = () => {
                 />
               )}
               <Chip label={`${module.download_count ?? 0} downloads`} />
-              {canManage && (
-                <Button
-                  variant="outlined"
-                  color="error"
-                  size="small"
-                  startIcon={<Delete />}
-                  onClick={() => setDeleteModuleDialogOpen(true)}
-                >
-                  Delete Module
-                </Button>
-              )}
-              {canManage && !module.deprecated && (
-                <Button
-                  variant="outlined"
-                  color="warning"
-                  size="small"
-                  startIcon={<Warning />}
-                  onClick={() => setDeprecateModuleDialogOpen(true)}
-                >
-                  Deprecate Module
-                </Button>
-              )}
-              {canManage && module.deprecated && (
-                <Button
-                  variant="outlined"
-                  color="success"
-                  size="small"
-                  onClick={() => setUndeprecateModuleDialogOpen(true)}
-                >
-                  Undeprecate Module
-                </Button>
-              )}
+              <ModuleActionsMenu
+                canManage={canManage}
+                deprecated={!!module.deprecated}
+                onEditDescription={() => {
+                  setEditDescription(module.description || '');
+                  setEditingDescription(true);
+                }}
+                onDeprecateModule={() => setDeprecateModuleDialogOpen(true)}
+                onUndeprecateModule={() => setUndeprecateModuleDialogOpen(true)}
+                onDeleteModule={() => setDeleteModuleDialogOpen(true)}
+              />
             </Stack>
           </Box>
 
