@@ -1,5 +1,5 @@
 import { render, act, waitFor } from '@testing-library/react'
-import { AuthProvider, useAuth } from '../AuthContext'
+import { AuthProvider, useAuth, parseTokenExpiry, SESSION_WARNING_LEAD_MS } from '../AuthContext'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 
 // Mock the api module
@@ -328,5 +328,136 @@ describe('AuthContext', () => {
     expect(authState!.allowedScopes).toEqual([])
     expect(authState!.isAuthenticated).toBe(false)
     expect(mockApi.logout).toHaveBeenCalled()
+  })
+})
+
+// Build a signature-less JWT with a specific exp (seconds since epoch).
+function fakeJwt(expSec: number | 'invalid'): string {
+  const header = btoa(JSON.stringify({ alg: 'none', typ: 'JWT' }))
+    .replace(/=+$/, '').replace(/\+/g, '-').replace(/\//g, '_')
+  if (expSec === 'invalid') return 'not-a-jwt'
+  const payload = btoa(JSON.stringify({ exp: expSec }))
+    .replace(/=+$/, '').replace(/\+/g, '-').replace(/\//g, '_')
+  return `${header}.${payload}.`
+}
+
+describe('AuthContext session expiry (roadmap 4.2)', () => {
+  beforeEach(() => {
+    const keys: string[] = []
+    for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i); if (k) keys.push(k) }
+    keys.forEach((k) => localStorage.removeItem(k))
+    vi.clearAllMocks()
+    vi.useRealTimers()
+  })
+
+  it('parseTokenExpiry returns Date for valid token', () => {
+    const exp = Math.floor(Date.now() / 1000) + 600
+    const date = parseTokenExpiry(fakeJwt(exp))
+    expect(date).toBeInstanceOf(Date)
+    expect(Math.abs(date!.getTime() - exp * 1000)).toBeLessThan(1000)
+  })
+
+  it('parseTokenExpiry returns null for malformed token', () => {
+    expect(parseTokenExpiry('not-a-jwt')).toBeNull()
+    expect(parseTokenExpiry('')).toBeNull()
+    expect(parseTokenExpiry(null)).toBeNull()
+  })
+
+  it('setToken parses expiry and schedules warning', () => {
+    vi.useFakeTimers()
+    vi.setSystemTime(new Date('2026-01-01T00:00:00Z'))
+    const exp = Math.floor(new Date('2026-01-01T00:10:00Z').getTime() / 1000) // 10min out
+
+    let authState: ReturnType<typeof useAuth> | null = null
+    render(
+      <AuthProvider>
+        <AuthConsumer onRender={(auth) => { authState = auth }} />
+      </AuthProvider>
+    )
+
+    act(() => { authState!.setToken(fakeJwt(exp)) })
+    expect(authState!.sessionExpiresAt).not.toBeNull()
+    expect(authState!.sessionExpiresSoon).toBe(false)
+
+    // Advance to just before the warning window.
+    act(() => { vi.advanceTimersByTime(10 * 60 * 1000 - SESSION_WARNING_LEAD_MS - 1) })
+    expect(authState!.sessionExpiresSoon).toBe(false)
+
+    // Cross the warning threshold.
+    act(() => { vi.advanceTimersByTime(2) })
+    expect(authState!.sessionExpiresSoon).toBe(true)
+    vi.useRealTimers()
+  })
+
+  it('setToken with malformed JWT does not crash and leaves expiry null', () => {
+    let authState: ReturnType<typeof useAuth> | null = null
+    render(
+      <AuthProvider>
+        <AuthConsumer onRender={(auth) => { authState = auth }} />
+      </AuthProvider>
+    )
+
+    act(() => { authState!.setToken('not-a-jwt') })
+    expect(authState!.sessionExpiresAt).toBeNull()
+    expect(authState!.sessionExpiresSoon).toBe(false)
+  })
+
+  it('setToken with already-expiring token flags sessionExpiresSoon immediately', () => {
+    vi.useFakeTimers()
+    vi.setSystemTime(new Date('2026-01-01T00:00:00Z'))
+    const exp = Math.floor(Date.now() / 1000) + 30 // 30s from now, inside window
+
+    let authState: ReturnType<typeof useAuth> | null = null
+    render(
+      <AuthProvider>
+        <AuthConsumer onRender={(auth) => { authState = auth }} />
+      </AuthProvider>
+    )
+
+    act(() => { authState!.setToken(fakeJwt(exp)) })
+    expect(authState!.sessionExpiresSoon).toBe(true)
+    vi.useRealTimers()
+  })
+
+  it('logout clears sessionExpiresSoon and sessionExpiresAt', () => {
+    vi.useFakeTimers()
+    vi.setSystemTime(new Date('2026-01-01T00:00:00Z'))
+    const exp = Math.floor(Date.now() / 1000) + 30
+    let authState: ReturnType<typeof useAuth> | null = null
+    render(
+      <AuthProvider>
+        <AuthConsumer onRender={(auth) => { authState = auth }} />
+      </AuthProvider>
+    )
+    act(() => { authState!.setToken(fakeJwt(exp)) })
+    expect(authState!.sessionExpiresSoon).toBe(true)
+
+    act(() => { authState!.logout() })
+    expect(authState!.sessionExpiresAt).toBeNull()
+    expect(authState!.sessionExpiresSoon).toBe(false)
+    vi.useRealTimers()
+  })
+
+  it('refreshToken reschedules warning with the new expiry', async () => {
+    vi.useFakeTimers()
+    vi.setSystemTime(new Date('2026-01-01T00:00:00Z'))
+    const initialExp = Math.floor(Date.now() / 1000) + 30 // inside warning window
+    const refreshedExp = Math.floor(Date.now() / 1000) + 10 * 60 // 10 min out
+
+    mockApi.refreshToken.mockResolvedValueOnce({ token: fakeJwt(refreshedExp) })
+
+    let authState: ReturnType<typeof useAuth> | null = null
+    render(
+      <AuthProvider>
+        <AuthConsumer onRender={(auth) => { authState = auth }} />
+      </AuthProvider>
+    )
+    act(() => { authState!.setToken(fakeJwt(initialExp)) })
+    expect(authState!.sessionExpiresSoon).toBe(true)
+
+    await act(async () => { await authState!.refreshToken() })
+    expect(authState!.sessionExpiresSoon).toBe(false)
+    expect(authState!.sessionExpiresAt).not.toBeNull()
+    vi.useRealTimers()
   })
 })

@@ -59,6 +59,7 @@ import AboutModal from './AboutModal';
 import AdminBreadcrumbs from './AdminBreadcrumbs';
 import CommandPalette from './CommandPalette';
 import { useHotkey } from '../hooks/useHotkey';
+import SessionExpiryWarning from './SessionExpiryWarning';
 
 const drawerWidth = 240;
 
@@ -580,6 +581,7 @@ const Layout = () => {
       <HelpPanel />
       <AboutModal open={aboutOpen} onClose={handleCloseAbout} />
       <CommandPalette open={paletteOpen} onClose={() => setPaletteOpen(false)} />
+      <SessionExpiryWarning />
     </Box>
   );
 };
