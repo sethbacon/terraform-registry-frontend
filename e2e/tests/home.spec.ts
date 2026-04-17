@@ -91,6 +91,55 @@ test.describe('Home page', () => {
 
     await context.close();
   });
+
+  test('quick search navigates to /modules via Enter key (roadmap 3.4)', async ({ page }) => {
+    await page.goto('/');
+    const input = page.getByRole('textbox', { name: /Search modules/i });
+    await input.fill('example');
+    await input.press('Enter');
+    await page.waitForURL(/\/modules\?q=example/, { timeout: 10_000 });
+    expect(page.url()).toMatch(/\/modules\?q=example/);
+  });
+
+  test('quick search toggles placeholder and routes to /providers (roadmap 3.4)', async ({ page }) => {
+    await page.goto('/');
+    await page.getByRole('button', { name: 'Providers' }).click();
+    const input = page.getByRole('textbox', { name: /Search providers/i });
+    await expect(input).toBeVisible();
+    await input.fill('aws');
+    await input.press('Enter');
+    await page.waitForURL(/\/providers\?q=aws/, { timeout: 10_000 });
+    expect(page.url()).toMatch(/\/providers\?q=aws/);
+  });
+});
+
+test.describe('Getting Started API key CTA (roadmap 1.1)', () => {
+  test('unauthenticated visitor sees Sign-in CTA', async ({ browser }) => {
+    const context = await browser.newContext({ storageState: undefined });
+    const page = await context.newPage();
+    try {
+      await page.goto('/');
+      await expect(page.getByTestId('getting-started-signin')).toBeVisible();
+      await expect(page.getByTestId('getting-started-create-key')).toHaveCount(0);
+    } finally {
+      await context.close();
+    }
+  });
+
+  test('authenticated user can open QuickApiKeyDialog', async ({ page }) => {
+    await page.goto('/login');
+    const devLoginBtn = page.getByRole('button', { name: 'Dev Login (Admin)' });
+    const isDevMode = await devLoginBtn.isVisible({ timeout: 3_000 }).catch(() => false);
+    test.skip(!isDevMode, 'Dev login not available — backend not running in DEV_MODE');
+
+    await devLoginBtn.click();
+    await page.waitForURL((url) => !url.pathname.endsWith('/login'), { timeout: 10_000 });
+    await page.goto('/');
+    const createBtn = page.getByTestId('getting-started-create-key');
+    await expect(createBtn).toBeVisible({ timeout: 10_000 });
+    await createBtn.click();
+    await expect(page.getByRole('dialog', { name: /Create API key/i })).toBeVisible();
+  });
 });
 
 test.describe('API Documentation page', () => {

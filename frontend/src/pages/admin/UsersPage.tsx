@@ -37,6 +37,8 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import AddIcon from '@mui/icons-material/Add';
 import SearchIcon from '@mui/icons-material/Search';
 import BusinessIcon from '@mui/icons-material/Business';
+import PersonIcon from '@mui/icons-material/Person';
+import EmptyState from '../../components/EmptyState';
 import api from '../../services/api';
 import { User, UserMembership, Organization } from '../../types';
 import { RoleTemplate } from '../../types/rbac';
@@ -396,8 +398,13 @@ const UsersPage: React.FC = () => {
                 </TableRow>
               ) : users.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={5} align="center" sx={{ py: 8 }}>
-                    <Typography color="text.secondary">No users found</Typography>
+                  <TableCell colSpan={5} sx={{ p: 0, border: 0 }}>
+                    <EmptyState
+                      title="No users found"
+                      description="Users appear here after they sign in for the first time. Invite teammates by sharing the registry URL and an OIDC or dev-login provider."
+                      icon={<PersonIcon />}
+                      data-testid="users-empty-state"
+                    />
                   </TableCell>
                 </TableRow>
               ) : (

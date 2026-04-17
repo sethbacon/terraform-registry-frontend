@@ -213,6 +213,8 @@ export interface AuthContextType {
   memberships?: UserMembership[]; // Per-org memberships with role templates
   isAuthenticated: boolean;
   isLoading: boolean;
+  sessionExpiresAt: Date | null;
+  sessionExpiresSoon: boolean;
   login: (userOrProvider: User | 'oidc' | 'azuread') => Promise<void>;
   logout: () => void;
   refreshToken: () => Promise<void>;

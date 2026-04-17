@@ -112,7 +112,7 @@ describe('AuditLogPage', () => {
     renderPage()
     await waitFor(() => {
       expect(
-        screen.getByText('No audit log entries match the current filters.'),
+        screen.getByText('No audit entries match the current filters'),
       ).toBeInTheDocument()
     })
   })

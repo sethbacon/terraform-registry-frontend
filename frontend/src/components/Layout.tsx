@@ -37,6 +37,7 @@ import Brightness4 from '@mui/icons-material/Brightness4';
 import Brightness7 from '@mui/icons-material/Brightness7';
 import HelpOutline from '@mui/icons-material/HelpOutline';
 import InfoOutlined from '@mui/icons-material/InfoOutlined';
+import SearchIcon from '@mui/icons-material/Search';
 import Shield from '@mui/icons-material/Shield';
 import Security from '@mui/icons-material/Security';
 import Storage from '@mui/icons-material/Storage';
@@ -48,13 +49,17 @@ import ExpandMore from '@mui/icons-material/ExpandMore';
 import History from '@mui/icons-material/History';
 import ExpandLess from '@mui/icons-material/ExpandLess';
 import Palette from '@mui/icons-material/Palette';
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useThemeMode } from '../contexts/ThemeContext';
 import { useHelp } from '../contexts/HelpContext';
 import DevUserSwitcher from './DevUserSwitcher';
 import HelpPanel, { HELP_PANEL_WIDTH } from './HelpPanel';
 import AboutModal from './AboutModal';
+import AdminBreadcrumbs from './AdminBreadcrumbs';
+import CommandPalette from './CommandPalette';
+import { useHotkey } from '../hooks/useHotkey';
+import SessionExpiryWarning from './SessionExpiryWarning';
 
 const drawerWidth = 240;
 
@@ -69,6 +74,8 @@ const Layout = () => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [aboutOpen, setAboutOpen] = useState(false);
+  const [paletteOpen, setPaletteOpen] = useState(false);
+  useHotkey('mod+k', useCallback(() => setPaletteOpen((v) => !v), []));
 
   // Helper to check if user has a specific scope (or admin which grants all)
   const hasScope = useCallback((scope: string) => {
@@ -144,8 +151,22 @@ const Layout = () => {
     },
   ], []);
 
+  // Determine which group contains the current route (for mobile auto-open).
+  const activeGroupKey = useMemo(() => {
+    const match = adminNavGroups.find(g =>
+      g.items.some(it => location.pathname.startsWith(it.path)),
+    );
+    return match?.key ?? null;
+  }, [adminNavGroups, location.pathname]);
+
   // Track which groups are open — persisted to localStorage so state survives navigation/refresh.
+  // On mobile, default to an accordion pattern: only the active group (or none) is open.
   const [openGroups, setOpenGroups] = useState<Record<string, boolean>>(() => {
+    if (isMobile) {
+      return Object.fromEntries(
+        adminNavGroups.map(g => [g.key, activeGroupKey ? g.key === activeGroupKey : false]),
+      );
+    }
     try {
       const stored = localStorage.getItem('adminNavGroups');
       if (stored) {
@@ -159,12 +180,33 @@ const Layout = () => {
     return Object.fromEntries(adminNavGroups.map(g => [g.key, true]));
   });
 
+  // When the viewport crosses the mobile/desktop boundary, re-apply sensible defaults.
+  useEffect(() => {
+    if (isMobile) {
+      setOpenGroups(
+        Object.fromEntries(
+          adminNavGroups.map(g => [g.key, activeGroupKey ? g.key === activeGroupKey : false]),
+        ),
+      );
+    }
+    // Desktop: do not reset; keep whatever the user had, honoring their localStorage prefs.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isMobile]);
+
   const toggleGroup = useCallback((key: string) =>
     setOpenGroups(prev => {
+      if (isMobile) {
+        // Accordion: opening a group closes all others; toggling the open one closes it.
+        const wasOpen = !!prev[key];
+        const next = Object.fromEntries(
+          adminNavGroups.map(g => [g.key, !wasOpen && g.key === key]),
+        );
+        return next;
+      }
       const next = { ...prev, [key]: !prev[key] };
       try { localStorage.setItem('adminNavGroups', JSON.stringify(next)); } catch { /* quota */ }
       return next;
-    }), []);
+    }), [isMobile, adminNavGroups]);
 
   // Filter each group's items by the user's scopes, then drop empty groups
   const visibleAdminGroups = useMemo(() =>
@@ -383,6 +425,17 @@ const Layout = () => {
             Terraform Registry
           </Typography>
           {isAuthenticated && <DevUserSwitcher />}
+          <Tooltip title="Quick navigation (Ctrl/⌘K)">
+            <IconButton
+              color="inherit"
+              onClick={() => setPaletteOpen(true)}
+              aria-label="Open command palette"
+              data-testid="command-palette-trigger"
+              sx={{ mr: 1 }}
+            >
+              <SearchIcon />
+            </IconButton>
+          </Tooltip>
           <Tooltip title={mode === 'dark' ? 'Light mode' : 'Dark mode'}>
             <IconButton
               color="inherit"
@@ -519,6 +572,7 @@ const Layout = () => {
         }}
       >
         <Toolbar />
+        <AdminBreadcrumbs />
         <Outlet />
       </Box>
 
@@ -526,6 +580,8 @@ const Layout = () => {
           its root element doesn't consume flex space when closed. */}
       <HelpPanel />
       <AboutModal open={aboutOpen} onClose={handleCloseAbout} />
+      <CommandPalette open={paletteOpen} onClose={() => setPaletteOpen(false)} />
+      <SessionExpiryWarning />
     </Box>
   );
 };

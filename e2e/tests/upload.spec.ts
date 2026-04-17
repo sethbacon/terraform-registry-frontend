@@ -177,3 +177,21 @@ test.describe('Provider Upload page', () => {
     await expect(submitBtn).toBeDisabled();
   });
 });
+
+test.describe('FileDropZone (roadmap 2.5)', () => {
+  test('module upload form renders drag-and-drop zone', async ({ loggedInPage: page }) => {
+    await page.goto('/admin/upload/module');
+    await page.getByText('Upload from File').click();
+    const zone = page.getByTestId('module-upload-dropzone');
+    await expect(zone).toBeVisible({ timeout: 10_000 });
+    await expect(zone).toContainText(/Drop .+ file here or click to browse/i);
+  });
+
+  test('provider upload form renders drag-and-drop zone', async ({ loggedInPage: page }) => {
+    await page.goto('/admin/upload/provider');
+    await page.getByText('Manual Upload').click();
+    const zone = page.getByTestId('provider-upload-dropzone');
+    await expect(zone).toBeVisible({ timeout: 10_000 });
+    await expect(zone).toContainText(/\.zip/);
+  });
+});

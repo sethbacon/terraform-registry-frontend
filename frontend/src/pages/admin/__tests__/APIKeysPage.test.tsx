@@ -140,9 +140,9 @@ describe('APIKeysPage', () => {
     listAPIKeysMock.mockResolvedValue([])
     renderPage()
     await waitFor(() => {
-      expect(screen.getByText('No API keys found')).toBeInTheDocument()
+      expect(screen.getByText('No API keys yet')).toBeInTheDocument()
     })
-    expect(screen.getByText('Create First API Key')).toBeInTheDocument()
+    expect(screen.getByTestId('apikeys-empty-state-primary')).toHaveTextContent('Create API key')
   })
 
   // 5. Expiration chip: expired

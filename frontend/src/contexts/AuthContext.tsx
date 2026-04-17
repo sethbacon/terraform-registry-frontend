@@ -1,8 +1,24 @@
-import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, useRef, ReactNode } from 'react';
+import { jwtDecode } from 'jwt-decode';
 import { User, AuthContextType, RoleTemplateInfo } from '../types';
 import api from '../services/api';
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
+// Warn the user this many ms before the JWT exp claim.
+export const SESSION_WARNING_LEAD_MS = 2 * 60 * 1000;
+
+/** Extract the `exp` claim (seconds since epoch) from a JWT. Returns null for malformed tokens. */
+export function parseTokenExpiry(token: string | null | undefined): Date | null {
+  if (!token) return null;
+  try {
+    const decoded = jwtDecode<{ exp?: number }>(token);
+    if (typeof decoded.exp !== 'number' || !isFinite(decoded.exp)) return null;
+    return new Date(decoded.exp * 1000);
+  } catch {
+    return null;
+  }
+}
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
@@ -22,6 +38,33 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [allowedScopes, setAllowedScopes] = useState<string[]>([]);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [sessionExpiresAt, setSessionExpiresAt] = useState<Date | null>(null);
+  const [sessionExpiresSoon, setSessionExpiresSoon] = useState(false);
+  const warningTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const clearWarningTimer = useCallback(() => {
+    if (warningTimerRef.current !== null) {
+      clearTimeout(warningTimerRef.current);
+      warningTimerRef.current = null;
+    }
+  }, []);
+
+  const scheduleSessionWarning = useCallback((token: string | null | undefined) => {
+    clearWarningTimer();
+    setSessionExpiresSoon(false);
+    const exp = parseTokenExpiry(token);
+    setSessionExpiresAt(exp);
+    if (!exp) return;
+    const delay = exp.getTime() - Date.now() - SESSION_WARNING_LEAD_MS;
+    if (delay <= 0) {
+      // Already in the warning window (or past exp); flag immediately.
+      setSessionExpiresSoon(true);
+      return;
+    }
+    warningTimerRef.current = setTimeout(() => {
+      setSessionExpiresSoon(true);
+    }, delay);
+  }, [clearWarningTimer]);
 
   const logout = useCallback(() => {
     // Clear local session state and storage first
@@ -29,6 +72,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     setRoleTemplate(null);
     setAllowedScopes([]);
     setIsAuthenticated(false);
+    clearWarningTimer();
+    setSessionExpiresAt(null);
+    setSessionExpiresSoon(false);
     localStorage.removeItem('auth_token');
     localStorage.removeItem('user');
     localStorage.removeItem('role_template');
@@ -41,7 +87,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     // at the identity provider level. Without this, the IdP session remains active and
     // clicking "Login with OIDC" again would silently re-authenticate the user.
     api.logout();
-  }, []);
+  }, [clearWarningTimer]);
 
   const fetchCurrentUser = useCallback(async () => {
     try {
@@ -75,6 +121,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           setAllowedScopes(JSON.parse(storedAllowedScopes));
         }
         setIsAuthenticated(true);
+        scheduleSessionWarning(token);
         // Refresh user data from server
         fetchCurrentUser();
       } catch (error) {
@@ -88,10 +135,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       // Token exists but no cached user (e.g. fresh OIDC login where only the token
       // was stored). Mark authenticated optimistically and fetch user from the server.
       setIsAuthenticated(true);
+      scheduleSessionWarning(token);
       fetchCurrentUser();
     }
     setIsLoading(false);
-  }, [fetchCurrentUser]);
+  }, [fetchCurrentUser, scheduleSessionWarning]);
 
   const login = async (userOrProvider: User | 'oidc' | 'azuread'): Promise<void> => {
     if (typeof userOrProvider === 'string') {
@@ -112,6 +160,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     try {
       const response = await api.refreshToken();
       localStorage.setItem('auth_token', response.token);
+      scheduleSessionWarning(response.token);
     } catch (error) {
       console.error('Failed to refresh token:', error);
       logout();
@@ -121,8 +170,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const setToken = (token: string) => {
     localStorage.setItem('auth_token', token);
     setIsAuthenticated(true);
+    scheduleSessionWarning(token);
     // User data will be refreshed on page reload
   };
+
+  // Cleanup timer on unmount.
+  useEffect(() => {
+    return () => { clearWarningTimer(); };
+  }, [clearWarningTimer]);
 
   const value: AuthContextType = {
     user,
@@ -130,6 +185,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     allowedScopes,
     isAuthenticated,
     isLoading,
+    sessionExpiresAt,
+    sessionExpiresSoon,
     login,
     logout,
     refreshToken,

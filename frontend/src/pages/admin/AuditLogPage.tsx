@@ -28,6 +28,8 @@ import {
   SelectChangeEvent,
 } from '@mui/material';
 import DownloadIcon from '@mui/icons-material/Download';
+import HistoryIcon from '@mui/icons-material/History';
+import EmptyState from '../../components/EmptyState';
 import api from '../../services/api';
 import { AuditLog } from '../../types';
 import { queryKeys } from '../../services/queryKeys';
@@ -307,8 +309,13 @@ const AuditLogPage: React.FC = () => {
                 <TableBody>
                   {logs.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={5}>
-                        <Alert severity="info">No audit log entries match the current filters.</Alert>
+                      <TableCell colSpan={5} sx={{ p: 0, border: 0 }}>
+                        <EmptyState
+                          title="No audit entries match the current filters"
+                          description="Audit log entries appear when users make changes. Adjust the filters above or publish a module to see one."
+                          icon={<HistoryIcon />}
+                          data-testid="audit-log-empty-state"
+                        />
                       </TableCell>
                     </TableRow>
                   ) : (
