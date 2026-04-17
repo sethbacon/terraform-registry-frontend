@@ -157,6 +157,12 @@ export const SetupWizardProvider: React.FC<SetupWizardProviderProps> = ({
         onSetupCompleted();
         return;
       }
+      // Initialize saved-flags from backend status so features configured in
+      // a previous session (or before a new feature was added) show as complete.
+      if (status.oidc_configured) setOidcSaved(true);
+      if (status.storage_configured) setStorageSaved(true);
+      if (status.scanning_configured) setScanningSaved(true);
+      if (status.admin_configured) setAdminSaved(true);
       setOidcForm((prev) => {
         if (prev.redirect_url) return prev;
         const baseUrl = window.location.origin;

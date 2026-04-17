@@ -5,6 +5,7 @@ React 19 TypeScript SPA for the [Enterprise Terraform Registry](https://github.c
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 [![React](https://img.shields.io/badge/React-19+-61DAFB?logo=react)](https://react.dev/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5+-3178C6?logo=typescript)](https://www.typescriptlang.org/)
+[![Coverage](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/sethbacon/59239e8575b4f784f875647e2b344b41/raw/frontend-coverage.json)](https://github.com/sethbacon/terraform-registry-frontend/actions/workflows/ci.yml)
 
 ## Overview
 
@@ -101,17 +102,18 @@ For Docker / production builds, set `VITE_API_URL=http://your-backend-host:8080`
 
 ## Tech Stack
 
-| Concern     | Technology                      |
-| ----------- | ------------------------------- |
-| Language    | TypeScript 5.7.2 (strict mode)  |
-| Framework   | React 19                        |
-| Build Tool  | Vite 6.1.11                     |
-| UI          | Material-UI v7 + Emotion        |
-| HTTP Client | Axios 1.6.7                     |
-| Router      | React Router v6                 |
-| Markdown    | react-markdown + remark-gfm     |
-| Linting     | ESLint 9 with TypeScript ESLint |
-| E2E Tests   | Playwright                      |
+| Concern     | Technology                          |
+| ----------- | ----------------------------------- |
+| Language    | TypeScript 5.7.2 (strict mode)      |
+| Framework   | React 19                            |
+| Build Tool  | Vite 6.1.11                         |
+| UI          | Material-UI v7 + Emotion            |
+| HTTP Client | Axios 1.6.7                         |
+| Router      | React Router v6                     |
+| Markdown    | react-markdown + remark-gfm         |
+| Linting     | ESLint 9 with TypeScript ESLint     |
+| Formatting  | Prettier 3 (eslint-config-prettier) |
+| E2E Tests   | Playwright                          |
 
 ## Architecture
 
@@ -146,6 +148,8 @@ npm install           # Install dependencies
 npm run dev           # Start development server (http://localhost:5173)
 npm run build         # Build for production
 npm run lint          # Lint (zero warnings enforced)
+npm run format        # Format code with Prettier
+npm run format:check  # Check formatting (CI)
 npm run preview       # Preview production build
 ```
 
@@ -161,7 +165,7 @@ npm run test:watch    # Run in watch mode
 npm run test:coverage # Run with V8 coverage report
 ```
 
-Coverage thresholds (statements, branches, functions, lines) are enforced at 40% in `vitest.config.ts` and will be ratcheted up as coverage grows.
+Coverage thresholds are enforced in `vitest.config.ts`: statements 70%, branches 60%, functions 60%, lines 70%. These are ratcheted up as coverage grows.
 
 **E2E tests** use Playwright and require the full stack (backend + postgres + frontend):
 
@@ -191,12 +195,12 @@ For test patterns, conventions, and coverage details, see [TESTING.md](TESTING.m
 
 The CI pipeline is defined in `.github/workflows/ci.yml` and runs on pushes to `main` and PRs to `main`/`development`. Jobs run in parallel:
 
-| Job | What it does |
-| --- | --- |
-| **lint** | `npm run lint` (zero warnings) |
-| **typecheck** | `npx tsc --noEmit` |
-| **unit-test** | `npm run test:coverage` with artifact upload |
-| **build** | Production build, uploads `dist/` artifact |
+| Job           | What it does                                                                                |
+| ------------- | ------------------------------------------------------------------------------------------- |
+| **lint**      | `npm run lint` (zero warnings)                                                              |
+| **typecheck** | `npx tsc --noEmit`                                                                          |
+| **unit-test** | `npm run test:coverage` with artifact upload                                                |
+| **build**     | Production build, uploads `dist/` artifact                                                  |
 | **e2e-gated** | Playwright against the Docker Compose test stack (main branch, manual dispatch, or release) |
 
 Additional workflows: `e2e.yml`, `release.yml` (tag-triggered image build + GHCR push), `scheduled-build.yml` (weekly drift check), `auto-tag.yml`, `pr-checks.yml`.
@@ -204,6 +208,7 @@ Additional workflows: `e2e.yml`, `release.yml` (tag-triggered image build + GHCR
 ## Documentation
 
 - [Architecture](ARCHITECTURE.md) - Component hierarchy, data flow, auth flow
+- [Accessibility](ACCESSIBILITY.md) - WCAG 2.1 AA compliance, testing tools
 - [Testing](TESTING.md) - Test patterns, running tests, coverage
 - [Contributing](CONTRIBUTING.md) - How to contribute
 - [Changelog](CHANGELOG.md) - Version history
