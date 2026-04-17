@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
   Container,
@@ -16,9 +16,13 @@ const CallbackPage: React.FC = () => {
   const [searchParams] = useSearchParams();
   const { setToken } = useAuth();
   const [error, setError] = useState<string | null>(null);
+  const exchangedRef = useRef(false);
 
   useEffect(() => {
     const handleCallback = async () => {
+      // Guard against duplicate calls (e.g. React StrictMode double-mount in dev)
+      if (exchangedRef.current) return;
+      exchangedRef.current = true;
       const errorParam = searchParams.get('error');
       const errorDescription = searchParams.get('error_description');
 
