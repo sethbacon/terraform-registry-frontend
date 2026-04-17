@@ -136,7 +136,10 @@ test.describe('Provider probing (UX roadmap 1.2)', () => {
     await devLoginBtn.click();
 
     // The inline error alert should appear (handleDevLogin catch block).
-    await expect(page.getByRole('alert')).toBeVisible({ timeout: 5_000 });
+    // Use a filter to avoid strict-mode violation — the page also has the
+    // "Development mode" info alert (and potentially a no-providers alert).
+    const errorAlert = page.getByRole('alert').filter({ hasText: /failed|error/i });
+    await expect(errorAlert).toBeVisible({ timeout: 5_000 });
 
     // Page should NOT crash into the ErrorBoundary fallback.
     await expect(page.getByText(/Something went wrong/i)).toHaveCount(0);
