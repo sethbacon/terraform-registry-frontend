@@ -1,11 +1,18 @@
 import { render, screen } from '@testing-library/react'
 import { describe, it, expect, vi } from 'vitest'
+import type { ProviderDocEntry } from '../../types'
 import ProviderDocsSidebar from '../ProviderDocsSidebar'
+
+const doc = (overrides: Partial<ProviderDocEntry> & Pick<ProviderDocEntry, 'title' | 'slug' | 'category'>): ProviderDocEntry => ({
+  id: crypto.randomUUID(),
+  language: 'hcl',
+  ...overrides,
+})
 
 describe('ProviderDocsSidebar', () => {
   const defaultProps = {
     providerName: 'aws',
-    docs: [] as Array<{ title: string; slug: string; category: string; subcategory?: string }>,
+    docs: [] as ProviderDocEntry[],
     onSelect: vi.fn(),
     loading: false,
   }
@@ -22,8 +29,8 @@ describe('ProviderDocsSidebar', () => {
 
   it('renders docs when provided', () => {
     const docs = [
-      { title: 'Overview', slug: 'index', category: 'overview' },
-      { title: 'Getting Started', slug: 'getting-started', category: 'guides' },
+      doc({ title: 'Overview', slug: 'index', category: 'overview' }),
+      doc({ title: 'Getting Started', slug: 'getting-started', category: 'guides' }),
     ]
     render(<ProviderDocsSidebar {...defaultProps} docs={docs} />)
     // The component renders provider name for index slug in overview section
@@ -32,7 +39,7 @@ describe('ProviderDocsSidebar', () => {
 
   it('renders filter text field', () => {
     const docs = [
-      { title: 'Instance Resource', slug: 'instance', category: 'resources', subcategory: 'ec2' },
+      doc({ title: 'Instance Resource', slug: 'instance', category: 'resources', subcategory: 'ec2' }),
     ]
     render(<ProviderDocsSidebar {...defaultProps} docs={docs} />)
     expect(screen.getByRole('textbox')).toBeInTheDocument()

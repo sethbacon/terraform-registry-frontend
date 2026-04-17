@@ -1,13 +1,39 @@
 import { render, screen } from '@testing-library/react'
 import { describe, it, expect } from 'vitest'
+import type { ModuleVersion, ModuleScan } from '../../types'
 import SecurityScanPanel from '../SecurityScanPanel'
+
+const fakeVersion: ModuleVersion = {
+  id: 'v1',
+  module_id: 'm1',
+  version: '1.0.0',
+  download_count: 0,
+}
+
+const baseScan: ModuleScan = {
+  id: 's1',
+  module_version_id: 'v1',
+  scanner: 'trivy',
+  scanner_version: '0.50.0',
+  expected_version: null,
+  status: 'clean',
+  scanned_at: '2025-01-01T00:00:00Z',
+  critical_count: 0,
+  high_count: 0,
+  medium_count: 0,
+  low_count: 0,
+  raw_results: null,
+  error_message: null,
+  created_at: '2025-01-01T00:00:00Z',
+  updated_at: '2025-01-01T00:00:00Z',
+}
 
 describe('SecurityScanPanel', () => {
   it('renders nothing when canManage is false', () => {
     const { container } = render(
       <SecurityScanPanel
         canManage={false}
-        selectedVersion="1.0.0"
+        selectedVersion={fakeVersion}
         moduleScan={null}
         scanLoading={false}
         scanNotFound={false}
@@ -16,11 +42,11 @@ describe('SecurityScanPanel', () => {
     expect(container.innerHTML).toBe('')
   })
 
-  it('renders nothing when selectedVersion is empty', () => {
+  it('renders nothing when selectedVersion is null', () => {
     const { container } = render(
       <SecurityScanPanel
         canManage={true}
-        selectedVersion=""
+        selectedVersion={null}
         moduleScan={null}
         scanLoading={false}
         scanNotFound={false}
@@ -33,7 +59,7 @@ describe('SecurityScanPanel', () => {
     render(
       <SecurityScanPanel
         canManage={true}
-        selectedVersion="1.0.0"
+        selectedVersion={fakeVersion}
         moduleScan={null}
         scanLoading={true}
         scanNotFound={false}
@@ -46,7 +72,7 @@ describe('SecurityScanPanel', () => {
     render(
       <SecurityScanPanel
         canManage={true}
-        selectedVersion="1.0.0"
+        selectedVersion={fakeVersion}
         moduleScan={null}
         scanLoading={false}
         scanNotFound={true}
@@ -59,14 +85,8 @@ describe('SecurityScanPanel', () => {
     render(
       <SecurityScanPanel
         canManage={true}
-        selectedVersion="1.0.0"
-        moduleScan={{
-          status: 'clean',
-          critical: 0,
-          high: 0,
-          medium: 0,
-          low: 0,
-        }}
+        selectedVersion={fakeVersion}
+        moduleScan={{ ...baseScan, status: 'clean' }}
         scanLoading={false}
         scanNotFound={false}
       />,
@@ -78,14 +98,8 @@ describe('SecurityScanPanel', () => {
     render(
       <SecurityScanPanel
         canManage={true}
-        selectedVersion="1.0.0"
-        moduleScan={{
-          status: 'findings',
-          critical: 1,
-          high: 2,
-          medium: 3,
-          low: 4,
-        }}
+        selectedVersion={fakeVersion}
+        moduleScan={{ ...baseScan, status: 'findings', critical_count: 1, high_count: 2, medium_count: 3, low_count: 4 }}
         scanLoading={false}
         scanNotFound={false}
       />,
@@ -97,15 +111,8 @@ describe('SecurityScanPanel', () => {
     render(
       <SecurityScanPanel
         canManage={true}
-        selectedVersion="1.0.0"
-        moduleScan={{
-          status: 'error',
-          message: 'Scanner timed out',
-          critical: 0,
-          high: 0,
-          medium: 0,
-          low: 0,
-        }}
+        selectedVersion={fakeVersion}
+        moduleScan={{ ...baseScan, status: 'error', error_message: 'Scanner timed out' }}
         scanLoading={false}
         scanNotFound={false}
       />,
