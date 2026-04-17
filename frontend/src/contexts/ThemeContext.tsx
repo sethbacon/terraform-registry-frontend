@@ -55,7 +55,7 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
             main: '#5C4EE5',
           },
           secondary: {
-            main: '#00D9C0',
+            main: '#009688',
           },
           ...(mode === 'dark' && {
             background: {
