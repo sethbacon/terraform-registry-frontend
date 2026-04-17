@@ -11,6 +11,52 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.7.1] - 2026-04-17
 
+### Fixed
+
+- fix: handle rate-limited auth probes to prevent false "No SSO providers configured" message
+- fix: remove redundant fetch in login handler to reduce auth rate limit consumption
+- fix: prevent duplicate exchange-token requests in callback page
+
+## [0.7.0] - 2026-04-16
+
+### Added
+
+- feat(home): actionable Getting Started section with QuickApiKeyDialog (roadmap 1.1)
+- feat(login): symmetric provider probing with resilient dev login fallback (roadmap 1.2)
+- feat(modules): dynamic UsageExample with tool selector and required-input placeholders (roadmap 2.1)
+- feat(modules): skeleton loading states for modules, providers, and module detail pages (roadmap 2.2)
+- feat(upload): FileDropZone with drag-and-drop, upload progress, and reordered fields (roadmap 2.5)
+- feat(ux): global command palette with Cmd/Ctrl+K hotkey (roadmap 3.1)
+- feat(admin): path-driven AdminBreadcrumbs rendered in Layout (roadmap 3.2)
+- feat(ux): AnnouncerContext for aria-live screen reader feedback (roadmap 4.1)
+- feat(auth): session expiry warning snackbar with refresh/sign-out actions (roadmap 4.2)
+- feat(admin): targeted EmptyState component for API keys, users, and audit logs (roadmap 4.3)
+
+### Changed
+
+- refactor(setup): split SetupWizardPage into SetupWizardContext + per-step components (roadmap 1.3)
+- refactor(modules): consolidate module header actions into ModuleActionsMenu kebab (roadmap 2.3)
+- change(modules): filter deprecated versions in the version selector by default (roadmap 2.4)
+- change(layout): collapse admin nav groups on mobile (roadmap 3.3)
+- change(home): reorder quick-search toggle before input (roadmap 3.4)
+- refactor(modules): unified ConfirmDialog with type-to-confirm for destructive actions (roadmap 4.4)
+
+### Fixed
+
+- fix(deployments): serve Keycloak over HTTPS for local OIDC UAT (backend >=0.6.0 requires HTTPS issuer URLs)
+
+### Chore
+
+- chore(ci): bump vitest coverage thresholds to Phase 4 targets (55 / 49 / 47 / 56)
+
+## [0.6.3] - 2026-04-16
+
+## [0.6.2] - 2026-04-16
+
+## [0.6.1] - 2026-04-16
+
+## [0.6.0] - 2026-04-15
+
 ## [0.5.6] - 2026-04-14
 
 ### Fixed
