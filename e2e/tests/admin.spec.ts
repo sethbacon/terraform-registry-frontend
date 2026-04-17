@@ -79,13 +79,13 @@ test.describe('Admin: API Keys', () => {
     // MuiPaper appears immediately (while the API call is still in-flight)
     // and the old spinner-check dance misses the loading window on fast backends.
     const table = page.locator('table, [class*="MuiTable"]');
-    const emptyState = page.getByText('No API keys found');
+    const emptyState = page.getByText('No API keys yet');
     await expect(table.or(emptyState).first()).toBeVisible({ timeout: 15_000 });
 
     const hasTable = await table.count() > 0;
     const hasEmptyState = await emptyState.isVisible().catch(() => false);
 
-    // Page should show either an API keys table or a "No API keys found" empty state
+    // Page should show either an API keys table or a "No API keys yet" empty state
     expect(hasTable || hasEmptyState).toBe(true);
   });
 
