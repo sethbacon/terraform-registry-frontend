@@ -61,12 +61,12 @@ The following items require coordinated work with `terraform-registry-backend`:
 - **Files:** `frontend/Dockerfile`, `.github/dependabot.yml`
 - **AC:** Digests pinned; Dependabot config updated.
 
-### E0.1 · Raise coverage thresholds to match measured · [P0/S]
+### E0.1 · Set coverage ratchet floor · [P0/S] ✅
 
-- `vitest.config.ts`: raise thresholds from **55/49/47/56** → **70/60/60/70** (statements/branches/functions/lines).
-- Track in TESTING.md.
-- **Files:** `frontend/vitest.config.ts`, `TESTING.md`
-- **AC:** CI gate enforced; no drop below new floor.
+- `vitest.config.ts`: thresholds set to current measured floor **55/49/47/56** (statements/branches/functions/lines).
+- Thresholds ratchet upward as tests are added (see T-track below and E5.1).
+- **Files:** `frontend/vitest.config.ts`
+- **AC:** CI gate enforced; no drop below current floor; thresholds increase per T-track milestones.
 
 ### E0.2 · Remove `continue-on-error: true` on E2E · [P0/S]
 
@@ -170,6 +170,55 @@ The following items require coordinated work with `terraform-registry-backend`:
 - **Proposal:** On the binary version detail view, add a "Changelog" or "Release notes" link that opens the upstream release page (e.g., `https://github.com/hashicorp/terraform/releases/tag/v{version}`). If the binary is a mirrored tool with a known upstream, derive the URL from the tool name + version; otherwise hide the link.
 - **Files:** Binary detail page component (likely `TerraformBinaryDetail.tsx` or similar), possibly `api.ts` if upstream URL metadata needs fetching.
 - **AC:** Each binary version row/card includes a clickable changelog link when an upstream URL is derivable; link opens in a new tab.
+
+---
+
+## Phase 0.5 — Test coverage ramp (prerequisite for 0.8.0 release)
+
+Current coverage: **55/49/47/56** (statements/branches/functions/lines).
+Target for 0.8.0: **70/60/60/70** — matching the original E0.1 goal.
+
+Items are ordered by coverage-per-effort; each raises the ratchet floor in `vitest.config.ts` on merge.
+
+### Track T — Unit test coverage
+
+#### T0.1 · Services layer tests · [P0/M]
+
+- Test `api.ts` (remaining uncovered branches), `errorReporting.ts`, `performanceReporting.ts`, `queryKeys.ts`.
+- Mock Axios, window globals, and performance APIs.
+- **Target delta:** statements +5%, functions +5%.
+- **Files:** `frontend/src/services/__tests__/api.test.ts`, `frontend/src/services/__tests__/errorReporting.test.ts`, `frontend/src/services/__tests__/performanceReporting.test.ts`
+- **AC:** Service layer ≥90% line coverage; ratchet raised to **60/54/52/61**.
+
+#### T0.2 · Admin page tests (high-value, low-coverage) · [P0/L]
+
+- Pages with <35% coverage: `UsersPage`, `StoragePage`, `MirrorsPage`, `AuditLogPage`, `OIDCSettingsPage`, `OrganizationsPage`, `APIKeysPage`, `SecurityScanningPage`, `RolesPage`.
+- Use `msw` (Mock Service Worker) for API mocking; test CRUD flows, error states, loading states.
+- **Target delta:** statements +8%, branches +6%.
+- **Files:** `frontend/src/pages/admin/__tests__/*.test.tsx`
+- **AC:** Each listed page ≥60% line coverage; ratchet raised to **65/58/56/65**.
+
+#### T0.3 · Hooks and contexts tests · [P0/M]
+
+- `AuthContext`, `ThemeContext`, `AnnouncerContext`, `SetupWizardContext`.
+- `useHotkey` and any other custom hooks.
+- **Target delta:** functions +4%.
+- **Files:** `frontend/src/contexts/__tests__/*.test.tsx`, `frontend/src/hooks/__tests__/*.test.ts`
+- **AC:** All contexts and hooks ≥85% line coverage; ratchet raised to **67/59/60/67**.
+
+#### T0.4 · Remaining component + page tests · [P1/M]
+
+- Fill gaps in `DashboardPage`, `ModuleDetailPage`, `ProviderDetailPage`, `LoginPage`, `CallbackPage`.
+- Cover `StorageMigrationWizard`, `PublishFromSCMWizard`, setup wizard steps.
+- **Target delta:** statements +3%, branches +2%.
+- **Files:** `frontend/src/pages/__tests__/*.test.tsx`, `frontend/src/components/__tests__/*.test.tsx`
+- **AC:** All pages ≥50% line coverage; ratchet reaches **70/60/60/70**.
+
+#### T0.5 · Types and utilities 100% · [P2/S]
+
+- Cover `src/types/index.ts`, `src/utils/index.ts`, `src/types/scm.ts`, `src/types/terraform_mirror.ts`.
+- **Files:** `frontend/src/types/__tests__/*.test.ts`, `frontend/src/utils/__tests__/*.test.ts`
+- **AC:** Types/utils at 100%; no further ratchet change expected (small files).
 
 ---
 
@@ -445,9 +494,13 @@ The following items require coordinated work with `terraform-registry-backend`:
 
 ### E5.1 · Raise coverage floor to 80% by v1.0.0 · [P1/M]
 
-- Incremental 70 → 75 → 80 across 0.8 → 0.9 → 1.0.
-- **Files:** `frontend/vitest.config.ts`, `TESTING.md`
-- **AC:** Tracked in CHANGELOG.
+- Phase 0.5 (T-track) reaches 70/60/60/70 for v0.8.0.
+- Incremental 70 → 75 → 80 across 0.8 → 0.9 → 1.0:
+  - **v0.8.0:** 70/60/60/70 (T0.1–T0.4 complete)
+  - **v0.9.0:** 75/65/65/75 (new features ship with tests; ratchet on merge)
+  - **v1.0.0:** 80/70/70/80 (remaining gaps + visual component tests)
+- **Files:** `frontend/vitest.config.ts`
+- **AC:** Each milestone release meets its threshold; CHANGELOG tracks ratchet bumps.
 
 ### E5.2 · E2E matrix: Chromium + Firefox + WebKit on main · [P1/M]
 
@@ -473,7 +526,7 @@ The following items require coordinated work with `terraform-registry-backend`:
 
 | Version    | Target content                                         |
 | ---------- | ------------------------------------------------------ |
-| **0.8.0**  | Phase 0 complete + Phase 1 Track A items A1.1, A1.2    |
+| **0.8.0**  | Phase 0 + Phase 0.5 (T-track: coverage ≥70/60/60/70) + Phase 1 Track A items A1.1, A1.2 |
 | **0.9.0**  | Phase 2 (SAML / LDAP / SCIM UX)                        |
 | **0.10.0** | Phase 3 (WCAG 2.1 AA + telemetry opt-out)              |
 | **0.11.0** | Phase 4 (feature surface for new backend capabilities) |
