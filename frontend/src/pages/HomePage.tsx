@@ -331,7 +331,7 @@ const HomePage: React.FC = () => {
           <Grid size={{ xs: 12, md: 4 }}>
             <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column', transition: 'transform 0.2s', '&:hover': { transform: 'translateY(-4px)' } }}>
               <CardContent sx={{ flexGrow: 1 }}>
-                <Box sx={{ color: '#00D9C0', mb: 2 }}>
+                <Box sx={{ color: 'secondary.main', mb: 2 }}>
                   <CloudUploadIcon sx={{ fontSize: 40 }} />
                 </Box>
                 <Typography variant="h6" gutterBottom>
@@ -363,7 +363,7 @@ const HomePage: React.FC = () => {
                 </Box>
               </CardContent>
               <CardActions>
-                <Button size="small" onClick={() => navigate('/providers')} sx={{ color: '#00D9C0' }}>
+                <Button size="small" onClick={() => navigate('/providers')} color="secondary">
                   Browse All Providers →
                 </Button>
               </CardActions>
@@ -374,7 +374,7 @@ const HomePage: React.FC = () => {
           <Grid size={{ xs: 12, md: 4 }}>
             <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column', transition: 'transform 0.2s', '&:hover': { transform: 'translateY(-4px)' } }}>
               <CardContent sx={{ flexGrow: 1 }}>
-                <Box sx={{ color: '#FF6B6B', mb: 2 }}>
+                <Box sx={{ color: 'error.main', mb: 2 }}>
                   <GetAppIcon sx={{ fontSize: 40 }} />
                 </Box>
                 <Typography variant="h6" gutterBottom>
@@ -404,7 +404,7 @@ const HomePage: React.FC = () => {
                 </Box>
               </CardContent>
               <CardActions>
-                <Button size="small" onClick={() => navigate('/terraform-binaries')} sx={{ color: '#FF6B6B' }}>
+                <Button size="small" onClick={() => navigate('/terraform-binaries')} color="error">
                   View Binaries →
                 </Button>
               </CardActions>
