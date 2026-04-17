@@ -163,7 +163,7 @@ const HomePage: React.FC = () => {
       {/* Hero Section */}
       <Box
         sx={{
-          background: 'linear-gradient(135deg, #5C4EE5 0%, #00D9C0 100%)',
+          background: 'linear-gradient(135deg, #5C4EE5 0%, #00796B 100%)',
           color: 'white',
           py: 8,
           mb: 6,
@@ -219,7 +219,7 @@ const HomePage: React.FC = () => {
           {stats.loading ? (
             <Skeleton variant="text" width={320} sx={{ bgcolor: 'rgba(255,255,255,0.2)' }} />
           ) : summaryParts.length > 0 ? (
-            <Typography variant="body2" sx={{ opacity: 0.75 }}>
+            <Typography variant="body2">
               {summaryParts.join(' · ')} available
             </Typography>
           ) : null}
@@ -331,7 +331,7 @@ const HomePage: React.FC = () => {
           <Grid size={{ xs: 12, md: 4 }}>
             <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column', transition: 'transform 0.2s', '&:hover': { transform: 'translateY(-4px)' } }}>
               <CardContent sx={{ flexGrow: 1 }}>
-                <Box sx={{ color: '#00D9C0', mb: 2 }}>
+                <Box sx={{ color: '#008577', mb: 2 }}>
                   <CloudUploadIcon sx={{ fontSize: 40 }} />
                 </Box>
                 <Typography variant="h6" gutterBottom>
@@ -363,7 +363,7 @@ const HomePage: React.FC = () => {
                 </Box>
               </CardContent>
               <CardActions>
-                <Button size="small" onClick={() => navigate('/providers')} sx={{ color: '#00D9C0' }}>
+                <Button size="small" onClick={() => navigate('/providers')} sx={{ color: '#008577' }}>
                   Browse All Providers →
                 </Button>
               </CardActions>
@@ -374,7 +374,7 @@ const HomePage: React.FC = () => {
           <Grid size={{ xs: 12, md: 4 }}>
             <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column', transition: 'transform 0.2s', '&:hover': { transform: 'translateY(-4px)' } }}>
               <CardContent sx={{ flexGrow: 1 }}>
-                <Box sx={{ color: '#FF6B6B', mb: 2 }}>
+                <Box sx={{ color: '#D32F2F', mb: 2 }}>
                   <GetAppIcon sx={{ fontSize: 40 }} />
                 </Box>
                 <Typography variant="h6" gutterBottom>
@@ -404,7 +404,7 @@ const HomePage: React.FC = () => {
                 </Box>
               </CardContent>
               <CardActions>
-                <Button size="small" onClick={() => navigate('/terraform-binaries')} sx={{ color: '#FF6B6B' }}>
+                <Button size="small" onClick={() => navigate('/terraform-binaries')} sx={{ color: '#D32F2F' }}>
                   View Binaries →
                 </Button>
               </CardActions>
@@ -463,12 +463,11 @@ const HomePage: React.FC = () => {
                           position: 'relative',
                           borderRadius: 1,
                           overflow: 'hidden',
-                          opacity: 0.6,
                         }}
                       >
                         <Box
                           component="pre"
-                          sx={{ m: 0, p: 1.5, fontSize: '0.75rem', lineHeight: 1.6, overflowX: 'auto' }}
+                          sx={{ m: 0, p: 1.5, fontSize: '0.75rem', lineHeight: 1.6, overflowX: 'auto', color: '#595959' }}
                         >
                           {`credentials "${window.location.hostname}" {\n  token = "<your-api-key>"\n}`}
                         </Box>

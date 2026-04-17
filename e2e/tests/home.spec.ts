@@ -103,7 +103,7 @@ test.describe('Home page', () => {
 
   test('quick search toggles placeholder and routes to /providers (roadmap 3.4)', async ({ page }) => {
     await page.goto('/');
-    await page.getByRole('button', { name: 'Providers' }).click();
+    await page.getByTestId('quick-search-toggle').getByRole('button', { name: 'Providers' }).click();
     const input = page.getByRole('textbox', { name: /Search providers/i });
     await expect(input).toBeVisible();
     await input.fill('aws');

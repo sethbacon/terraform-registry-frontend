@@ -146,4 +146,110 @@ describe('errorReporting', () => {
       )
     })
   })
+
+  describe('breadcrumbs', () => {
+    it('addNavigationBreadcrumb includes from/to data', async () => {
+      vi.stubEnv('VITE_ERROR_REPORTING_DSN', 'https://errors.example.com/report')
+      vi.stubEnv('VITE_SENTRY_DSN', '')
+
+      const mod = await import('../errorReporting')
+      mod.init()
+      mod.addNavigationBreadcrumb('/home', '/modules')
+      mod.captureError(new Error('nav error'))
+      mod.flush()
+
+      const body = JSON.parse(
+        (globalThis.fetch as ReturnType<typeof vi.fn>).mock.calls[0][1].body
+      )
+      const bc = body.entries[0].breadcrumbs
+      expect(bc).toHaveLength(1)
+      expect(bc[0].type).toBe('navigation')
+      expect(bc[0].data).toEqual({ from: '/home', to: '/modules' })
+    })
+
+    it('addApiBreadcrumb records method and status', async () => {
+      vi.stubEnv('VITE_ERROR_REPORTING_DSN', 'https://errors.example.com/report')
+      vi.stubEnv('VITE_SENTRY_DSN', '')
+
+      const mod = await import('../errorReporting')
+      mod.init()
+      mod.addApiBreadcrumb('GET', '/api/v1/modules', 200, 42)
+      mod.captureError(new Error('api error'))
+      mod.flush()
+
+      const body = JSON.parse(
+        (globalThis.fetch as ReturnType<typeof vi.fn>).mock.calls[0][1].body
+      )
+      const bc = body.entries[0].breadcrumbs
+      expect(bc[0].type).toBe('api')
+      expect(bc[0].data).toMatchObject({ method: 'GET', url: '/api/v1/modules', status: 200 })
+    })
+
+    it('addConsoleBreadcrumb records message', async () => {
+      vi.stubEnv('VITE_ERROR_REPORTING_DSN', 'https://errors.example.com/report')
+      vi.stubEnv('VITE_SENTRY_DSN', '')
+
+      const mod = await import('../errorReporting')
+      mod.init()
+      mod.addConsoleBreadcrumb('test console message')
+      mod.captureError(new Error('console error'))
+      mod.flush()
+
+      const body = JSON.parse(
+        (globalThis.fetch as ReturnType<typeof vi.fn>).mock.calls[0][1].body
+      )
+      expect(body.entries[0].breadcrumbs[0].type).toBe('console')
+    })
+
+    it('addCustomBreadcrumb records message and data', async () => {
+      vi.stubEnv('VITE_ERROR_REPORTING_DSN', 'https://errors.example.com/report')
+      vi.stubEnv('VITE_SENTRY_DSN', '')
+
+      const mod = await import('../errorReporting')
+      mod.init()
+      mod.addCustomBreadcrumb('user clicked button', { buttonId: 'submit' })
+      mod.captureError(new Error('custom error'))
+      mod.flush()
+
+      const body = JSON.parse(
+        (globalThis.fetch as ReturnType<typeof vi.fn>).mock.calls[0][1].body
+      )
+      expect(body.entries[0].breadcrumbs[0].type).toBe('custom')
+      expect(body.entries[0].breadcrumbs[0].data).toEqual({ buttonId: 'submit' })
+    })
+  })
+
+  describe('destroy()', () => {
+    it('clears state and prevents further flushes', async () => {
+      vi.stubEnv('VITE_ERROR_REPORTING_DSN', 'https://errors.example.com/report')
+      vi.stubEnv('VITE_SENTRY_DSN', '')
+
+      const mod = await import('../errorReporting')
+      mod.init()
+      mod.captureError(new Error('before destroy'))
+      mod.destroy()
+      mod.flush()
+
+      // fetch should not be called because destroy clears dsn and buffer
+      expect(globalThis.fetch).not.toHaveBeenCalled()
+    })
+  })
+
+  describe('batch overflow', () => {
+    it('auto-flushes when buffer reaches MAX_BATCH_SIZE', async () => {
+      vi.stubEnv('VITE_ERROR_REPORTING_DSN', 'https://errors.example.com/report')
+      vi.stubEnv('VITE_SENTRY_DSN', '')
+
+      const mod = await import('../errorReporting')
+      mod.init()
+
+      // Capture 10 errors (MAX_BATCH_SIZE) to trigger auto-flush
+      for (let i = 0; i < 10; i++) {
+        mod.captureError(new Error(`error ${i}`))
+      }
+
+      // Auto-flush should have been triggered
+      expect(globalThis.fetch).toHaveBeenCalled()
+    })
+  })
 })
