@@ -114,19 +114,21 @@ describe('LoginPage', () => {
     await waitFor(() => expect(mockApiLogin).toHaveBeenCalledWith('oidc'))
   })
 
-  it('shows inline error Alert when provider login returns non-redirect error body', async () => {
-    let probesDone = false
-    vi.spyOn(globalThis, 'fetch').mockImplementation(async (input: Request | URL | string) => {
-      const url = typeof input === 'string' ? input : input instanceof URL ? input.href : input.url
-      if (!probesDone && url.includes('provider=')) {
-        return { type: 'opaqueredirect', status: 0 } as Response
-      }
-      return { type: 'basic', status: 400, json: async () => ({ error: 'OIDC not configured' }) } as unknown as Response
-    })
+  it('triggers api.login directly when OIDC button is clicked (no extra fetch)', async () => {
+    mockProviderProbes({ oidc: 'ok', azuread: 'fail' })
     renderLoginPage()
     const btn = await screen.findByRole('button', { name: 'Sign in with SSO' })
-    probesDone = true
+    const fetchCallsBefore = vi.mocked(globalThis.fetch).mock.calls.length
     await act(async () => { await userEvent.click(btn) })
-    expect(await screen.findByText('OIDC not configured')).toBeInTheDocument()
+    // handleProviderLogin should NOT make another fetch — just call api.login
+    expect(vi.mocked(globalThis.fetch).mock.calls.length).toBe(fetchCallsBefore)
+    expect(mockApiLogin).toHaveBeenCalledWith('oidc')
+  })
+
+  it('treats 429 rate-limited probes as available providers', async () => {
+    mockProviderProbes({ oidc: { status: 429 }, azuread: 'fail' })
+    renderLoginPage()
+    expect(await screen.findByRole('button', { name: 'Sign in with SSO' })).toBeInTheDocument()
+    expect(screen.queryByTestId('no-providers-alert')).not.toBeInTheDocument()
   })
 })

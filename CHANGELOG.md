@@ -9,6 +9,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.7.1] - 2026-04-17
+
+### Fixed
+
+- fix: handle rate-limited auth probes to prevent false "No SSO providers configured" message
+- fix: remove redundant fetch in login handler to reduce auth rate limit consumption
+- fix: prevent duplicate exchange-token requests in callback page
+
 ## [0.7.0] - 2026-04-16
 
 ### Added
@@ -48,7 +56,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.6.1] - 2026-04-16
 
 ## [0.6.0] - 2026-04-15
-
 
 ## [0.5.6] - 2026-04-14
 

@@ -43,6 +43,9 @@ async function probeProvider(id: ProviderId): Promise<boolean> {
       method: 'GET',
       redirect: 'manual',
     });
+    // 429 means rate-limited — the provider may still be configured, so treat
+    // it as available to avoid hiding login buttons after a burst of requests.
+    if (res.status === 429) return true;
     return res.type === 'opaqueredirect' || res.status === 0;
   } catch {
     return false;
@@ -90,28 +93,11 @@ const LoginPage: React.FC = () => {
     }
   };
 
-  const handleProviderLogin = async (provider: ProviderId) => {
+  const handleProviderLogin = (provider: ProviderId) => {
     setLoginError(null);
-    try {
-      const res = await fetch(`/api/v1/auth/login?provider=${provider}`, {
-        method: 'GET',
-        redirect: 'manual',
-      });
-      if (res.type === 'opaqueredirect' || res.status === 0) {
-        api.login(provider);
-        return;
-      }
-      let message = `${provider === 'oidc' ? 'OIDC' : 'Azure AD'} provider is not configured. Contact your administrator.`;
-      try {
-        const body = await res.json();
-        if (body?.error) message = body.error;
-      } catch {
-        // ignore parse errors
-      }
-      setLoginError(message);
-    } catch {
-      api.login(provider);
-    }
+    // Provider availability was already confirmed by probeProvider() — go
+    // straight to the redirect to avoid consuming an extra rate-limit token.
+    api.login(provider);
   };
 
   const availableCount = Object.values(providerAvailable).filter(Boolean).length;
