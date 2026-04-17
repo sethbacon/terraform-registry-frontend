@@ -163,7 +163,7 @@ const HomePage: React.FC = () => {
       {/* Hero Section */}
       <Box
         sx={{
-          background: 'linear-gradient(135deg, #5C4EE5 0%, #009688 100%)',
+          background: 'linear-gradient(135deg, #5C4EE5 0%, #00796B 100%)',
           color: 'white',
           py: 8,
           mb: 6,
@@ -219,7 +219,7 @@ const HomePage: React.FC = () => {
           {stats.loading ? (
             <Skeleton variant="text" width={320} sx={{ bgcolor: 'rgba(255,255,255,0.2)' }} />
           ) : summaryParts.length > 0 ? (
-            <Typography variant="body2" sx={{ opacity: 0.9 }}>
+            <Typography variant="body2">
               {summaryParts.join(' · ')} available
             </Typography>
           ) : null}
