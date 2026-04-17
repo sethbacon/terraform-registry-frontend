@@ -16,6 +16,7 @@ import {
   MenuItem,
   Alert,
   CircularProgress,
+  Divider,
   LinearProgress,
   Paper,
   Grid,
@@ -206,7 +207,16 @@ const StorageMigrationWizard: React.FC<StorageMigrationWizardProps> = ({
                 labelId="target-config-label"
                 value={targetConfigId}
                 label="Target Configuration"
-                onChange={(e) => setTargetConfigId(e.target.value)}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  if (val === '__create_new__') {
+                    // Open the storage admin page so the user can create a new config,
+                    // then return to complete migration.
+                    window.open('/admin/storage', '_blank', 'noopener');
+                    return;
+                  }
+                  setTargetConfigId(val);
+                }}
               >
                 {configs.map((config) => (
                   <MenuItem key={config.id} value={config.id} disabled={config.id === sourceConfigId}>
@@ -214,6 +224,10 @@ const StorageMigrationWizard: React.FC<StorageMigrationWizardProps> = ({
                     {config.is_active ? ' (Active)' : ''}
                   </MenuItem>
                 ))}
+                <Divider />
+                <MenuItem value="__create_new__" sx={{ fontStyle: 'italic', color: 'primary.main' }}>
+                  + Create new configuration…
+                </MenuItem>
               </Select>
             </FormControl>
 

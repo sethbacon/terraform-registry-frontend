@@ -57,47 +57,47 @@ Routes are defined in `App.tsx`. The app uses React Router v6 with the following
 
 ### Standalone routes (no Layout shell)
 
-| Path | Component | Notes |
-| ---- | --------- | ----- |
-| `/login` | `LoginPage` | OIDC and dev login |
-| `/auth/callback` | `CallbackPage` | OAuth redirect handler |
-| `/setup` | `SetupWizardPage` | First-run setup wizard |
+| Path             | Component         | Notes                  |
+| ---------------- | ----------------- | ---------------------- |
+| `/login`         | `LoginPage`       | OIDC and dev login     |
+| `/auth/callback` | `CallbackPage`    | OAuth redirect handler |
+| `/setup`         | `SetupWizardPage` | First-run setup wizard |
 
 ### Public routes (inside Layout)
 
-| Path | Component | Loading |
-| ---- | --------- | ------- |
-| `/` | `HomePage` | Eager |
-| `/modules` | `ModulesPage` | Eager |
-| `/modules/:namespace/:name/:system` | `ModuleDetailPage` | Lazy |
-| `/providers` | `ProvidersPage` | Eager |
-| `/providers/:namespace/:type` | `ProviderDetailPage` | Lazy |
-| `/terraform-binaries` | `TerraformBinariesPage` | Eager |
-| `/terraform-binaries/:name` | `TerraformBinaryDetailPage` | Lazy |
-| `/api-docs` | `ApiDocumentation` | Lazy |
+| Path                                | Component                   | Loading |
+| ----------------------------------- | --------------------------- | ------- |
+| `/`                                 | `HomePage`                  | Eager   |
+| `/modules`                          | `ModulesPage`               | Eager   |
+| `/modules/:namespace/:name/:system` | `ModuleDetailPage`          | Lazy    |
+| `/providers`                        | `ProvidersPage`             | Eager   |
+| `/providers/:namespace/:type`       | `ProviderDetailPage`        | Lazy    |
+| `/terraform-binaries`               | `TerraformBinariesPage`     | Eager   |
+| `/terraform-binaries/:name`         | `TerraformBinaryDetailPage` | Lazy    |
+| `/api-docs`                         | `ApiDocumentation`          | Lazy    |
 
 ### Admin routes (inside Layout, behind ProtectedRoute)
 
 All admin routes are lazy-loaded and wrapped in `<ProtectedRoute requiredScope="...">`.
 
-| Path | Component | Required Scope |
-| ---- | --------- | -------------- |
-| `/admin` | `DashboardPage` | (authenticated) |
-| `/admin/users` | `UsersPage` | `users:read` |
-| `/admin/organizations` | `OrganizationsPage` | `organizations:read` |
-| `/admin/roles` | `RolesPage` | `users:read` |
-| `/admin/apikeys` | `APIKeysPage` | (authenticated) |
-| `/admin/upload/module` | `ModuleUploadPage` | `modules:write` |
-| `/admin/upload/provider` | `ProviderUploadPage` | `providers:write` |
-| `/admin/scm-providers` | `SCMProvidersPage` | `scm:read` |
-| `/admin/mirrors` | `MirrorsPage` | `mirrors:read` |
-| `/admin/terraform-mirror` | `TerraformMirrorPage` | `mirrors:read` |
-| `/admin/storage` | `StoragePage` | `admin` |
-| `/admin/approvals` | `ApprovalsPage` | `mirrors:read` |
-| `/admin/policies` | `MirrorPoliciesPage` | `admin` |
-| `/admin/oidc` | `OIDCSettingsPage` | `admin` |
-| `/admin/audit-logs` | `AuditLogPage` | `audit:read` |
-| `/admin/security-scanning` | `SecurityScanningPage` | `admin` |
+| Path                       | Component              | Required Scope       |
+| -------------------------- | ---------------------- | -------------------- |
+| `/admin`                   | `DashboardPage`        | (authenticated)      |
+| `/admin/users`             | `UsersPage`            | `users:read`         |
+| `/admin/organizations`     | `OrganizationsPage`    | `organizations:read` |
+| `/admin/roles`             | `RolesPage`            | `users:read`         |
+| `/admin/apikeys`           | `APIKeysPage`          | (authenticated)      |
+| `/admin/upload/module`     | `ModuleUploadPage`     | `modules:write`      |
+| `/admin/upload/provider`   | `ProviderUploadPage`   | `providers:write`    |
+| `/admin/scm-providers`     | `SCMProvidersPage`     | `scm:read`           |
+| `/admin/mirrors`           | `MirrorsPage`          | `mirrors:read`       |
+| `/admin/terraform-mirror`  | `TerraformMirrorPage`  | `mirrors:read`       |
+| `/admin/storage`           | `StoragePage`          | `admin`              |
+| `/admin/approvals`         | `ApprovalsPage`        | `mirrors:read`       |
+| `/admin/policies`          | `MirrorPoliciesPage`   | `admin`              |
+| `/admin/oidc`              | `OIDCSettingsPage`     | `admin`              |
+| `/admin/audit-logs`        | `AuditLogPage`         | `audit:read`         |
+| `/admin/security-scanning` | `SecurityScanningPage` | `admin`              |
 
 `ProtectedRoute` checks `useAuth()` for authentication and scope. If loading, it shows a spinner. If unauthenticated, it redirects to `/login`. If the required scope is missing (and the user does not have `admin`), it shows "Access Denied".
 
@@ -184,32 +184,36 @@ React Query Devtools are mounted in production-excluded mode (`<ReactQueryDevtoo
 
 ## Authentication Flow
 
-```
-User clicks "Login with OIDC"
-        |
-        v
-AuthContext.login('oidc')
-        |
-        v
-api.login('oidc')  -->  browser redirects to IdP
-        |
-        v
-IdP authenticates  -->  redirects to /auth/callback
-        |
-        v
-CallbackPage extracts token from URL  -->  AuthContext.setToken(token)
-        |
-        v
-Token stored in localStorage('auth_token')
-        |
-        v
-AuthContext.fetchCurrentUser()  -->  api.getCurrentUserWithRole()
-        |
-        v
-User, roleTemplate, allowedScopes stored in state + localStorage
-        |
-        v
-Axios request interceptor attaches Bearer token to all API calls
+```mermaid
+sequenceDiagram
+    participant U as User/Browser
+    participant FE as Frontend (React)
+    participant BE as Backend API
+    participant IdP as OIDC Provider
+
+    U->>FE: Click "Login with OIDC"
+    FE->>FE: AuthContext.login('oidc')
+    FE->>BE: GET /api/v1/auth/login?provider=oidc
+    BE-->>U: 302 Redirect to IdP authorize URL
+    U->>IdP: Authenticate (credentials / MFA)
+    IdP-->>U: 302 Redirect to /auth/callback?code=...
+    U->>FE: /auth/callback (CallbackPage)
+    FE->>FE: Extract token from URL fragment
+    FE->>FE: AuthContext.setToken(token)
+    FE->>FE: Store in localStorage('auth_token')
+    FE->>BE: GET /api/v1/auth/me (Bearer token)
+    BE-->>FE: { user, role_template, allowed_scopes }
+    FE->>FE: Cache user + scopes in state & localStorage
+
+    Note over FE,BE: Subsequent API calls
+    FE->>BE: Any request (Axios interceptor adds Bearer token)
+    BE-->>FE: Response (or 401 → logout + redirect to /login)
+
+    Note over FE,IdP: Logout
+    U->>FE: Click "Logout"
+    FE->>FE: Clear localStorage
+    FE->>BE: GET /api/v1/auth/logout
+    BE-->>U: Redirect to IdP logout endpoint
 ```
 
 ### Key details
@@ -224,19 +228,19 @@ Axios request interceptor attaches Bearer token to all API calls
 
 The application uses three state layers:
 
-| Layer | Tool | Scope | Examples |
-| ----- | ---- | ----- | -------- |
-| **Server state** | React Query | API data, cached across components | Module lists, user lists, provider data, dashboard stats |
-| **App-level state** | React Context | Shared across the entire app | Auth session (`AuthContext`), theme mode (`ThemeContext`), help panel (`HelpContext`) |
-| **UI state** | React `useState` | Local to a single component or hook | Form inputs, dialog open/close, selected tab, pagination |
+| Layer               | Tool             | Scope                               | Examples                                                                              |
+| ------------------- | ---------------- | ----------------------------------- | ------------------------------------------------------------------------------------- |
+| **Server state**    | React Query      | API data, cached across components  | Module lists, user lists, provider data, dashboard stats                              |
+| **App-level state** | React Context    | Shared across the entire app        | Auth session (`AuthContext`), theme mode (`ThemeContext`), help panel (`HelpContext`) |
+| **UI state**        | React `useState` | Local to a single component or hook | Form inputs, dialog open/close, selected tab, pagination                              |
 
 ### Contexts
 
-| Context | File | Provides |
-| ------- | ---- | -------- |
-| `AuthContext` | `contexts/AuthContext.tsx` | `user`, `roleTemplate`, `allowedScopes`, `isAuthenticated`, `isLoading`, `login`, `logout`, `refreshToken`, `setToken` |
+| Context        | File                        | Provides                                                                                                                                 |
+| -------------- | --------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| `AuthContext`  | `contexts/AuthContext.tsx`  | `user`, `roleTemplate`, `allowedScopes`, `isAuthenticated`, `isLoading`, `login`, `logout`, `refreshToken`, `setToken`                   |
 | `ThemeContext` | `contexts/ThemeContext.tsx` | `mode` (`'light'` or `'dark'`), `toggleTheme()`. Persists to `localStorage`. Falls back to system preference via `prefers-color-scheme`. |
-| `HelpContext` | `contexts/HelpContext.tsx` | `helpOpen`, `openHelp()`, `closeHelp()`. Persists panel state to `localStorage`. |
+| `HelpContext`  | `contexts/HelpContext.tsx`  | `helpOpen`, `openHelp()`, `closeHelp()`. Persists panel state to `localStorage`.                                                         |
 
 Each context has a corresponding `use*` hook that throws if called outside the provider.
 
@@ -290,17 +294,17 @@ Critical-path pages (HomePage, LoginPage, ModulesPage, ProvidersPage, etc.) are 
 
 ## Shared Components
 
-| Component | Purpose |
-| --------- | ------- |
-| `Layout` | App shell with collapsible sidebar, topbar, and `<Outlet />` for nested routes |
-| `ProtectedRoute` | Auth guard checking authentication and scope |
-| `ErrorBoundary` | Catches render errors with fallback UI |
-| `RegistryItemCard` | Card component for module/provider search results |
-| `MarkdownRenderer` | Renders markdown content (README files) with GFM and HTML sanitization |
-| `SecurityScanPanel` | Displays security scan results for a module version |
-| `VersionDetailsPanel` | Shows version metadata, inputs/outputs, dependencies |
-| `WebhookEventsPanel` | Collapsible panel showing SCM webhook events |
-| `RepositoryBrowser` | SCM repository picker with branch/tag selection |
-| `StorageMigrationWizard` | Multi-step dialog for storage backend migration |
-| `ProviderIcon` | Renders provider brand icons from simple-icons |
-| `HelpPanel` | Slide-out contextual help panel |
+| Component                | Purpose                                                                        |
+| ------------------------ | ------------------------------------------------------------------------------ |
+| `Layout`                 | App shell with collapsible sidebar, topbar, and `<Outlet />` for nested routes |
+| `ProtectedRoute`         | Auth guard checking authentication and scope                                   |
+| `ErrorBoundary`          | Catches render errors with fallback UI                                         |
+| `RegistryItemCard`       | Card component for module/provider search results                              |
+| `MarkdownRenderer`       | Renders markdown content (README files) with GFM and HTML sanitization         |
+| `SecurityScanPanel`      | Displays security scan results for a module version                            |
+| `VersionDetailsPanel`    | Shows version metadata, inputs/outputs, dependencies                           |
+| `WebhookEventsPanel`     | Collapsible panel showing SCM webhook events                                   |
+| `RepositoryBrowser`      | SCM repository picker with branch/tag selection                                |
+| `StorageMigrationWizard` | Multi-step dialog for storage backend migration                                |
+| `ProviderIcon`           | Renders provider brand icons from simple-icons                                 |
+| `HelpPanel`              | Slide-out contextual help panel                                                |
