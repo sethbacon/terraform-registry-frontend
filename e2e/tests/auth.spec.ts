@@ -117,18 +117,26 @@ test.describe('Provider probing (UX roadmap 1.2)', () => {
   });
 
   test('shows inline alert (not ErrorBoundary) when dev login endpoint fails', async ({ page }) => {
+    // Register the route mock BEFORE navigating so it is guaranteed to be in
+    // place before the browser dispatches any matching requests.
+    await page.route('**/api/v1/dev/login', (route) =>
+      route.fulfill({
+        status: 500,
+        contentType: 'application/json',
+        body: JSON.stringify({ error: 'dev login exploded' }),
+      })
+    );
+
     await page.goto('/login');
 
     const devLoginBtn = page.getByRole('button', { name: 'Dev Login (Admin)' });
     const isDevMode = await devLoginBtn.isVisible({ timeout: 3_000 }).catch(() => false);
     test.skip(!isDevMode, 'Dev login not available — backend not running in DEV_MODE');
 
-    // Force dev-login to fail with 500.
-    await page.route('**/api/v1/auth/dev-login', (route) =>
-      route.fulfill({ status: 500, body: JSON.stringify({ error: 'dev login exploded' }) })
-    );
-
     await devLoginBtn.click();
+
+    // The inline error alert should appear (handleDevLogin catch block).
+    await expect(page.getByRole('alert')).toBeVisible({ timeout: 5_000 });
 
     // Page should NOT crash into the ErrorBoundary fallback.
     await expect(page.getByText(/Something went wrong/i)).toHaveCount(0);
