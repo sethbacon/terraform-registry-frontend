@@ -38,7 +38,7 @@ The following items require coordinated work with `terraform-registry-backend`:
 
 ## Phase 0 — Quick wins (all parallel; target: 1 sprint)
 
-### H0.1 · Add Prettier · [P0/S]
+### H0.1 · Add Prettier · [P0/S] ✅
 
 - Install Prettier + `eslint-config-prettier`; create `.prettierrc`.
 - Add `npm run format` + `npm run format:check`.
@@ -47,14 +47,14 @@ The following items require coordinated work with `terraform-registry-backend`:
 - **Files:** `frontend/package.json`, `frontend/.prettierrc`, `frontend/eslint.config.js`, `CONTRIBUTING.md`, `.github/workflows/ci.yml`
 - **AC:** CI fails on unformatted code; all existing files conform.
 
-### H0.2 · Add browserslist · [P0/S]
+### H0.2 · Add browserslist · [P0/S] ✅
 
 - `frontend/package.json`: add `"browserslist": ["defaults", "not IE 11", "not dead", "last 2 versions"]`.
 - Update README "Browser Support" section.
 - **Files:** `frontend/package.json`, `README.md`
 - **AC:** Vite uses browserslist; declared in README.
 
-### A0.1 · Pin Docker base-image digests · [P0/S]
+### A0.1 · Pin Docker base-image digests · [P0/S] ✅
 
 - `frontend/Dockerfile`: pin `node:22-alpine` and `nginx:1.25-alpine` to `@sha256:<digest>`.
 - Add Dependabot entry for `docker` ecosystem.
@@ -68,41 +68,41 @@ The following items require coordinated work with `terraform-registry-backend`:
 - **Files:** `frontend/vitest.config.ts`
 - **AC:** CI gate enforced; no drop below current floor; thresholds increase per T-track milestones.
 
-### E0.2 · Remove `continue-on-error: true` on E2E · [P0/S]
+### E0.2 · Remove `continue-on-error: true` on E2E · [P0/S] ✅
 
 - `.github/workflows/ci.yml`: E2E required on `main`.
 - Nightly full-matrix workflow stays separate with retries.
 - **Files:** `.github/workflows/ci.yml`
 - **AC:** `main` branch protection includes E2E.
 
-### C0.1 · Declare WCAG 2.1 AA target · [P1/S]
+### C0.1 · Declare WCAG 2.1 AA target · [P1/S] ✅
 
 - Create `ACCESSIBILITY.md` stating conformance target + known exceptions.
 - Link from README + SECURITY.md.
 - **Files:** `ACCESSIBILITY.md`, `README.md`, `SECURITY.md`
 - **AC:** Document merged; scope stated.
 
-### C0.2 · Add skip-to-content link · [P1/S]
+### C0.2 · Add skip-to-content link · [P1/S] ✅
 
 - Add `<a href="#main-content" className="skip-link">` in `Layout.tsx`.
 - Focus-visible styles.
 - **Files:** `frontend/src/components/Layout.tsx`
 - **AC:** Keyboard Tab from top of page reaches skip link; activates focus on main content.
 
-### G0.1 · Update ARCHITECTURE.md with auth flow diagram · [P2/S]
+### G0.1 · Update ARCHITECTURE.md with auth flow diagram · [P2/S] ✅
 
 - Include OIDC/SAML/cookie flow; reference backend endpoints.
 - **Files:** `ARCHITECTURE.md`
 - **AC:** Diagram merged as Mermaid in markdown.
 
-### D0.1 · Remove CDN dependency — bundle ReDoc locally · [P1/S]
+### D0.1 · Remove CDN dependency — bundle ReDoc locally · [P1/S] ✅
 
 - Remove `cdn.jsdelivr.net` from CSP in `nginx.conf`.
 - `npm i redoc` and import locally in `ApiDocumentation.tsx`.
 - **Files:** `frontend/package.json`, `frontend/src/pages/ApiDocumentation.tsx`, `frontend/nginx.conf`
 - **AC:** Air-gap install renders API docs with no external requests.
 
-### U0.1 · Fix Command Palette (Ctrl+K) modal margins · [P1/S]
+### U0.1 · Fix Command Palette (Ctrl+K) modal margins · [P1/S] ✅
 
 - The search modal’s left and right margins are too tight at smaller viewport widths.
 - `CommandPalette.tsx` uses `fullWidth` + `maxWidth="sm"` but items use only `px: 2` (16px) padding and the list has zero horizontal padding.
@@ -124,7 +124,7 @@ The following items require coordinated work with `terraform-registry-backend`:
 - **Source:** UAT
 - **↔ Backend:** Requires new endpoint or field on `/api/v1/setup/status` to persist feature-completion flags.
 
-### U0.3 · Storage page: allow creating new storage config inline for migration · [P1/M]
+### U0.3 · Storage page: allow creating new storage config inline for migration · [P1/M] ✅
 
 - **Problem (from UAT):** The storage migration wizard allows selecting an existing storage config as the migration target, but there is no way to create a **new** storage configuration directly from the migration flow. Users must navigate away to create a config first, then return to start migration.
 - Add an inline "Create new storage config" option within `StorageMigrationWizard.tsx`:
@@ -135,7 +135,7 @@ The following items require coordinated work with `terraform-registry-backend`:
 - **AC:** Admin can create a brand-new storage config and start migration in a single flow without leaving the page.
 - **Source:** UAT
 
-### U0.4 · Admin dashboard: add security scanning summary card · [P1/S]
+### U0.4 · Admin dashboard: add security scanning summary card · [P1/S] ✅
 
 - **Problem (from UAT):** The admin dashboard shows scanning-enabled status and basic counts but scanning results are not prominent enough — users report no security scanning info visible.
 - Enhance the scanning card on `DashboardPage.tsx`:
@@ -148,7 +148,7 @@ The following items require coordinated work with `terraform-registry-backend`:
 - **AC:** Dashboard renders severity breakdown, last scan time, and top-3 findings modules; E2E test covers card visibility.
 - **Source:** UAT
 
-### H0.3 · Streamline release workflow · [P1/M]
+### H0.3 · Streamline release workflow · [P1/M] ✅
 
 - **Problem (from UAT):** Current release process (per `CLAUDE.md`) has high friction — merge conflicts on CHANGELOG / `package.json` version bumps when `prepare-release.yml` races against feature merges, redundant CI runs (full lint/test/build on release branch + again on tag), and frontend deployment-manifest updates live in the **backend** repo requiring cross-repo coordination.
 - Evaluate and implement best-practice improvements:
@@ -162,7 +162,7 @@ The following items require coordinated work with `terraform-registry-backend`:
 - **Source:** UAT
 - **↔ Backend H0.2:** Coordinate shared deployment-manifest update strategy.
 
-#### U0.5 · Binary detail — link to version changelog · [P2/S]
+#### U0.5 · Binary detail — link to version changelog · [P2/S] ✅
 
 - **Source:** UAT
 - **Priority:** Low — cosmetic/UX improvement.
@@ -175,14 +175,14 @@ The following items require coordinated work with `terraform-registry-backend`:
 
 ## Phase 0.5 — Test coverage ramp (prerequisite for 0.8.0 release)
 
-Current coverage: **55/49/47/56** (statements/branches/functions/lines).
+Current coverage: **65/62/53/67** (statements/branches/functions/lines).
 Target for 0.8.0: **70/60/60/70** — matching the original E0.1 goal.
 
 Items are ordered by coverage-per-effort; each raises the ratchet floor in `vitest.config.ts` on merge.
 
 ### Track T — Unit test coverage
 
-#### T0.1 · Services layer tests · [P0/M]
+#### T0.1 · Services layer tests · [P0/M] ✅
 
 - Test `api.ts` (remaining uncovered branches), `errorReporting.ts`, `performanceReporting.ts`, `queryKeys.ts`.
 - Mock Axios, window globals, and performance APIs.
@@ -190,7 +190,7 @@ Items are ordered by coverage-per-effort; each raises the ratchet floor in `vite
 - **Files:** `frontend/src/services/__tests__/api.test.ts`, `frontend/src/services/__tests__/errorReporting.test.ts`, `frontend/src/services/__tests__/performanceReporting.test.ts`
 - **AC:** Service layer ≥90% line coverage; ratchet raised to **60/54/52/61**.
 
-#### T0.2 · Admin page tests (high-value, low-coverage) · [P0/L]
+#### T0.2 · Admin page tests (high-value, low-coverage) · [P0/L] ✅
 
 - Pages with <35% coverage: `UsersPage`, `StoragePage`, `MirrorsPage`, `AuditLogPage`, `OIDCSettingsPage`, `OrganizationsPage`, `APIKeysPage`, `SecurityScanningPage`, `RolesPage`.
 - Use `msw` (Mock Service Worker) for API mocking; test CRUD flows, error states, loading states.
@@ -198,7 +198,7 @@ Items are ordered by coverage-per-effort; each raises the ratchet floor in `vite
 - **Files:** `frontend/src/pages/admin/__tests__/*.test.tsx`
 - **AC:** Each listed page ≥60% line coverage; ratchet raised to **65/58/56/65**.
 
-#### T0.3 · Hooks and contexts tests · [P0/M]
+#### T0.3 · Hooks and contexts tests · [P0/M] ✅
 
 - `AuthContext`, `ThemeContext`, `AnnouncerContext`, `SetupWizardContext`.
 - `useHotkey` and any other custom hooks.
@@ -214,7 +214,7 @@ Items are ordered by coverage-per-effort; each raises the ratchet floor in `vite
 - **Files:** `frontend/src/pages/__tests__/*.test.tsx`, `frontend/src/components/__tests__/*.test.tsx`
 - **AC:** All pages ≥50% line coverage; ratchet reaches **70/60/60/70**.
 
-#### T0.5 · Types and utilities 100% · [P2/S]
+#### T0.5 · Types and utilities 100% · [P2/S] ✅
 
 - Cover `src/types/index.ts`, `src/utils/index.ts`, `src/types/scm.ts`, `src/types/terraform_mirror.ts`.
 - **Files:** `frontend/src/types/__tests__/*.test.ts`, `frontend/src/utils/__tests__/*.test.ts`
@@ -245,7 +245,7 @@ Items are ordered by coverage-per-effort; each raises the ratchet floor in `vite
 - **Files:** `frontend/src/contexts/AuthContext.tsx`, `frontend/src/components/SessionExpiryWarning.tsx`
 - **AC:** Sessions extend transparently during active use; warning fires only on failure.
 
-#### A1.3 · CSP nonces (remove `'unsafe-inline'` for styles) · [P1/M]
+#### A1.3 · CSP nonces (remove `'unsafe-inline'` for styles) · [P1/M] ✅
 
 - nginx config injects per-request nonce into `index.html` via `sub_filter`.
 - Vite plugin or runtime patch to add nonce to style/script tags.
@@ -259,7 +259,7 @@ Items are ordered by coverage-per-effort; each raises the ratchet floor in `vite
 - **Files:** `frontend/index.html`
 - **AC:** Verified via SRI scanner.
 
-#### A1.5 · Dependabot security-only auto-merge · [P2/S]
+#### A1.5 · Dependabot security-only auto-merge · [P2/S] ✅
 
 - Dependabot security PRs auto-merge on passing CI (restricted to patch-level bumps).
 - **Files:** `.github/workflows/dependabot-automerge.yml`
@@ -524,13 +524,13 @@ Items are ordered by coverage-per-effort; each raises the ratchet floor in `vite
 
 ## Milestones
 
-| Version    | Target content                                         |
-| ---------- | ------------------------------------------------------ |
+| Version    | Target content                                                                          |
+| ---------- | --------------------------------------------------------------------------------------- |
 | **0.8.0**  | Phase 0 + Phase 0.5 (T-track: coverage ≥70/60/60/70) + Phase 1 Track A items A1.1, A1.2 |
-| **0.9.0**  | Phase 2 (SAML / LDAP / SCIM UX)                        |
-| **0.10.0** | Phase 3 (WCAG 2.1 AA + telemetry opt-out)              |
-| **0.11.0** | Phase 4 (feature surface for new backend capabilities) |
-| **1.0.0**  | Phase 5 (whitelabel + i18n baseline); all P0/P1 closed |
+| **0.9.0**  | Phase 2 (SAML / LDAP / SCIM UX)                                                         |
+| **0.10.0** | Phase 3 (WCAG 2.1 AA + telemetry opt-out)                                               |
+| **0.11.0** | Phase 4 (feature surface for new backend capabilities)                                  |
+| **1.0.0**  | Phase 5 (whitelabel + i18n baseline); all P0/P1 closed                                  |
 
 ---
 

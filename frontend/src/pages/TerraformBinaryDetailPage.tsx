@@ -34,6 +34,7 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import ErrorIcon from '@mui/icons-material/Error';
+import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 import api from '../services/api';
 import { getErrorMessage } from '../utils/errors';
 import {
@@ -145,9 +146,23 @@ const PlatformRows: React.FC<{ mirrorName: string; version: string }> = ({
 // Version row
 // ---------------------------------------------------------------------------
 
+/** Derive the upstream release-notes URL for known tools. Returns null for custom/unknown tools. */
+function getChangelogUrl(tool: string, version: string): string | null {
+  const v = version.startsWith('v') ? version : `v${version}`;
+  switch (tool) {
+    case 'terraform':
+      return `https://github.com/hashicorp/terraform/releases/tag/${v}`;
+    case 'opentofu':
+      return `https://github.com/opentofu/opentofu/releases/tag/${v}`;
+    default:
+      return null;
+  }
+}
+
 interface VersionRowProps {
   version: TerraformVersion;
   mirrorName: string;
+  tool: string;
   canManage: boolean;
   onDeprecate: (v: TerraformVersion) => void;
   onUndeprecate: (v: TerraformVersion) => void;
@@ -157,12 +172,14 @@ interface VersionRowProps {
 const VersionRow: React.FC<VersionRowProps> = ({
   version,
   mirrorName,
+  tool,
   canManage,
   onDeprecate,
   onUndeprecate,
   onDelete,
 }) => {
   const [open, setOpen] = useState(false);
+  const changelogUrl = getChangelogUrl(tool, version.version);
 
   return (
     <>
@@ -183,6 +200,20 @@ const VersionRow: React.FC<VersionRowProps> = ({
             <Typography variant="body2" fontFamily="monospace">
               {version.version}
             </Typography>
+            {changelogUrl && (
+              <Tooltip title="View release notes">
+                <IconButton
+                  size="small"
+                  component="a"
+                  href={changelogUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={`Release notes for ${version.version}`}
+                >
+                  <OpenInNewIcon fontSize="small" />
+                </IconButton>
+              </Tooltip>
+            )}
             {version.is_latest && <Chip label="latest" color="primary" size="small" />}
             {version.is_deprecated && (
               <Chip label="deprecated" color="warning" size="small" icon={<WarningIcon />} />
@@ -504,6 +535,7 @@ const TerraformBinaryDetailPage: React.FC = () => {
                   key={v.id}
                   version={v}
                   mirrorName={name ?? ''}
+                  tool={config?.tool ?? ''}
                   canManage={canManage}
                   onDeprecate={setDeprecateTarget}
                   onUndeprecate={handleUndeprecate}
