@@ -36,6 +36,9 @@ const fakeRepos = [
     owner: 'hashicorp',
     name: 'terraform-aws-vpc',
     description: 'AWS VPC module',
+    default_branch: 'main',
+    clone_url: 'https://github.com/hashicorp/terraform-aws-vpc.git',
+    html_url: 'https://github.com/hashicorp/terraform-aws-vpc',
     private: false,
   },
   {
@@ -44,6 +47,9 @@ const fakeRepos = [
     owner: 'hashicorp',
     name: 'internal-module',
     description: 'Private module',
+    default_branch: 'main',
+    clone_url: 'https://github.com/hashicorp/internal-module.git',
+    html_url: 'https://github.com/hashicorp/internal-module',
     private: true,
   },
 ]
@@ -56,7 +62,7 @@ describe('RepositoryBrowser', () => {
   })
 
   it('shows loading spinner initially', () => {
-    listSCMRepositoriesMock.mockReturnValue(new Promise(() => {}))
+    listSCMRepositoriesMock.mockReturnValue(new Promise(() => { }))
     render(<RepositoryBrowser providerId="scm-1" />)
     expect(screen.getByRole('progressbar')).toBeInTheDocument()
   })

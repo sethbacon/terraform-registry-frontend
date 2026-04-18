@@ -11,8 +11,8 @@ const mockHookReturn = {
   isAuthenticated: true,
   canManage: true,
   module: null as Record<string, unknown> | null,
-  versions: [] as string[],
-  selectedVersion: '',
+  versions: [] as any[],
+  selectedVersion: null as any,
   setSelectedVersion: vi.fn(),
   loading: false,
   error: null as string | null,
@@ -96,7 +96,7 @@ describe('ModuleDetailPage', () => {
     mockHookReturn.error = null
     mockHookReturn.module = null
     mockHookReturn.versions = []
-    mockHookReturn.selectedVersion = ''
+    mockHookReturn.selectedVersion = null
     mockHookReturn.canManage = true
     mockHookReturn.isAuthenticated = true
     mockHookReturn.deleteModuleDialogOpen = false
@@ -137,8 +137,8 @@ describe('ModuleDetailPage', () => {
       downloads: 1234,
       deprecated: false,
     }
-    mockHookReturn.versions = ['1.0.0', '0.9.0']
-    mockHookReturn.selectedVersion = '1.0.0'
+    mockHookReturn.versions = [{ version: '1.0.0', deprecated: false }, { version: '0.9.0', deprecated: false }]
+    mockHookReturn.selectedVersion = { version: '1.0.0', deprecated: false }
     renderPage()
     expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('consul')
   })
@@ -152,8 +152,8 @@ describe('ModuleDetailPage', () => {
       deprecated: true,
       deprecation_message: 'Use terraform-aws-modules/consul instead',
     }
-    mockHookReturn.versions = ['1.0.0']
-    mockHookReturn.selectedVersion = '1.0.0'
+    mockHookReturn.versions = [{ version: '1.0.0', deprecated: false }]
+    mockHookReturn.selectedVersion = { version: '1.0.0', deprecated: false }
     renderPage()
     expect(screen.getByRole('alert')).toBeInTheDocument()
     expect(screen.getByText(/terraform-aws-modules/)).toBeInTheDocument()
@@ -167,8 +167,8 @@ describe('ModuleDetailPage', () => {
       description: '',
       deprecated: false,
     }
-    mockHookReturn.versions = ['1.0.0']
-    mockHookReturn.selectedVersion = '1.0.0'
+    mockHookReturn.versions = [{ version: '1.0.0', deprecated: false }]
+    mockHookReturn.selectedVersion = { version: '1.0.0', deprecated: false }
     renderPage()
     expect(screen.getByText('Modules')).toBeInTheDocument()
   })
@@ -339,8 +339,8 @@ describe('ModuleDetailPage', () => {
     mockHookReturn.versions = [{ version: '1.0.0', deprecated: false }]
     mockHookReturn.selectedVersion = { version: '1.0.0', deprecated: false }
     mockHookReturn.deleteVersionDialogOpen = true
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    ;(mockHookReturn as any).versionToDelete = '1.0.0'
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      ; (mockHookReturn as any).versionToDelete = '1.0.0'
     renderPage()
     expect(screen.getByTestId('delete-version-dialog')).toBeInTheDocument()
   })
@@ -431,8 +431,8 @@ describe('ModuleDetailPage', () => {
     mockHookReturn.versions = [{ version: '1.0.0', deprecated: false }]
     mockHookReturn.selectedVersion = { version: '1.0.0', deprecated: false }
     mockHookReturn.deleteVersionDialogOpen = true
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    ;(mockHookReturn as any).versionToDelete = '1.0.0'
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      ; (mockHookReturn as any).versionToDelete = '1.0.0'
     renderPage()
     const dialog = screen.getByTestId('delete-version-dialog')
     const typeInput = dialog.querySelector('[data-testid="confirm-dialog-type-input"]') as HTMLInputElement
