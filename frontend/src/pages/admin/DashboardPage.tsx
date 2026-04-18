@@ -380,6 +380,7 @@ const QuickLink: React.FC<QuickLinkProps> = ({ label, icon, route, color }) => {
 const DashboardPage: React.FC = () => {
   const { allowedScopes } = useAuth();
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
 
   const { data: raw, isLoading: loading, isFetching: refreshing, error: queryError } = useQuery({
     queryKey: queryKeys.dashboard.stats(),
@@ -479,165 +480,192 @@ const DashboardPage: React.FC = () => {
       ) : (error || !data) ? (
         <Alert severity="error">{error ?? 'Failed to load dashboard'}</Alert>
       ) : (
-      <>
-      {/* Header */}
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-        <Box>
-          <Typography variant="h4" fontWeight={700}>Dashboard</Typography>
-          <Typography variant="body2" color="text.secondary">
-            Registry health at a glance
-          </Typography>
-        </Box>
-        <Button
-          variant="outlined"
-          startIcon={<Refresh />}
-          onClick={() => queryClient.invalidateQueries({ queryKey: queryKeys.dashboard.stats() })}
-          disabled={refreshing}
-        >
-          Refresh
-        </Button>
-      </Box>
-
-      {/* Zone 1 — System health bar */}
-      {anyMirrorIssue && (
-        <Alert severity="error" sx={{ mb: 2 }}>
-          One or more mirrors have failed their last sync. Check the mirror pages for details.
-        </Alert>
-      )}
-
-      <Box sx={{ display: 'flex', gap: 1.5, flexWrap: 'wrap', mb: 4 }}>
-        {hasScope('mirrors:read') && (
-          <>
-            <HealthPill
-              label="Binary Mirrors"
-              total={data.binary_mirrors.total}
-              failed={data.binary_mirrors.failed}
-              syncing={data.binary_mirrors.syncing}
-              icon={<GetApp fontSize="small" />}
-              route="/admin/terraform-mirror"
-            />
-            <HealthPill
-              label="Provider Mirrors"
-              total={data.provider_mirrors.total}
-              failed={data.provider_mirrors.failed}
-              icon={<CloudDownload fontSize="small" />}
-              route="/admin/mirrors"
-            />
-          </>
-        )}
-        {hasScope('admin') && (
-          <HealthPill
-            label="Storage"
-            total={1}
-            failed={0}
-            icon={<Storage fontSize="small" />}
-            route="/admin/storage"
-          />
-        )}
-        {hasScope('admin') && data.scanning.enabled && (
-          <HealthPill
-            label="Security Scanning"
-            total={data.scanning.total}
-            failed={data.scanning.error}
-            syncing={data.scanning.pending}
-            icon={<Security fontSize="small" />}
-            route="/admin/security-scanning"
-          />
-        )}
-      </Box>
-
-      {/* Zone 2 — Stat cards */}
-      <Grid container spacing={2.5} sx={{ mb: 4 }}>
-        {statCards.map((card) => (
-          <Grid size={{ xs: 12, sm: 6, md: card.gridMd }} key={card.title}>
-            <StatCard {...card} />
-          </Grid>
-        ))}
-      </Grid>
-
-      <Divider sx={{ mb: 4 }} />
-
-      {/* Zone 3 — Recent syncs + quick links */}
-      <Grid container spacing={3}>
-
-        {/* Recent sync activity */}
-        <Grid size={{ xs: 12, md: 8 }}>
-          <Typography variant="h6" fontWeight={600} gutterBottom>
-            Recent Sync Activity
-          </Typography>
-          {recentSyncs.length === 0 ? (
-            <Paper sx={{ p: 3, textAlign: 'center' }}>
+        <>
+          {/* Header */}
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+            <Box>
+              <Typography variant="h4" fontWeight={700}>Dashboard</Typography>
               <Typography variant="body2" color="text.secondary">
-                No sync history yet. Trigger a sync from the mirror pages.
+                Registry health at a glance
               </Typography>
-            </Paper>
-          ) : (
-            <TableContainer component={Paper} variant="outlined">
-              <Table size="small">
-                <TableHead>
-                  <TableRow>
-                    <TableCell>Mirror</TableCell>
-                    <TableCell>Type</TableCell>
-                    <TableCell>Status</TableCell>
-                    <TableCell align="right">Synced</TableCell>
-                    <TableCell align="right">Platforms</TableCell>
-                    <TableCell align="right">When</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {recentSyncs.map((s, i) => (
-                    <TableRow key={i} hover>
-                      <TableCell>
-                        <Typography variant="body2" fontFamily="monospace" noWrap>
-                          {s.mirror_name}
-                        </Typography>
-                      </TableCell>
-                      <TableCell>
-                        <Chip
-                          label={s.mirror_type}
-                          size="small"
-                          color={s.mirror_type === 'binary' ? 'warning' : 'default'}
-                          variant="outlined"
-                        />
-                      </TableCell>
-                      <TableCell>{syncStatusChip(s.status)}</TableCell>
-                      <TableCell align="right">
-                        <Typography variant="body2">{s.versions_synced}</Typography>
-                      </TableCell>
-                      <TableCell align="right">
-                        <Typography variant="body2">
-                          {s.mirror_type === 'binary' ? s.platforms_synced : '—'}
-                        </Typography>
-                      </TableCell>
-                      <TableCell align="right">
-                        <Tooltip title={new Date(s.started_at).toLocaleString()}>
-                          <Typography variant="caption" color="text.secondary">
-                            {timeAgo(s.started_at)}
-                          </Typography>
-                        </Tooltip>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </TableContainer>
-          )}
-        </Grid>
-
-        {/* Quick links */}
-        <Grid size={{ xs: 12, md: 4 }}>
-          <Typography variant="h6" fontWeight={600} gutterBottom>
-            Quick Links
-          </Typography>
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-            {quickLinks.map((link) => (
-              <QuickLink key={link.label} {...link} />
-            ))}
+            </Box>
+            <Button
+              variant="outlined"
+              startIcon={<Refresh />}
+              onClick={() => queryClient.invalidateQueries({ queryKey: queryKeys.dashboard.stats() })}
+              disabled={refreshing}
+            >
+              Refresh
+            </Button>
           </Box>
-        </Grid>
 
-      </Grid>
-      </>
+          {/* Zone 1 — System health bar */}
+          {anyMirrorIssue && (
+            <Alert severity="error" sx={{ mb: 2 }}>
+              One or more mirrors have failed their last sync. Check the mirror pages for details.
+            </Alert>
+          )}
+
+          <Box sx={{ display: 'flex', gap: 1.5, flexWrap: 'wrap', mb: 4 }}>
+            {hasScope('mirrors:read') && (
+              <>
+                <HealthPill
+                  label="Binary Mirrors"
+                  total={data.binary_mirrors.total}
+                  failed={data.binary_mirrors.failed}
+                  syncing={data.binary_mirrors.syncing}
+                  icon={<GetApp fontSize="small" />}
+                  route="/admin/terraform-mirror"
+                />
+                <HealthPill
+                  label="Provider Mirrors"
+                  total={data.provider_mirrors.total}
+                  failed={data.provider_mirrors.failed}
+                  icon={<CloudDownload fontSize="small" />}
+                  route="/admin/mirrors"
+                />
+              </>
+            )}
+            {hasScope('admin') && (
+              <HealthPill
+                label="Storage"
+                total={1}
+                failed={0}
+                icon={<Storage fontSize="small" />}
+                route="/admin/storage"
+              />
+            )}
+            {hasScope('admin') && data.scanning.enabled && (
+              <Tooltip title={
+                data.scanning.total === 0
+                  ? 'No modules scanned yet'
+                  : `${data.scanning.clean} clean · ${data.scanning.findings} with findings · ${data.scanning.pending} pending · ${data.scanning.error} errors`
+              }>
+                <Paper
+                  onClick={() => navigate('/admin/security-scanning')}
+                  sx={{
+                    px: 2, py: 1.5,
+                    display: 'flex', alignItems: 'center', gap: 1.5,
+                    cursor: 'pointer', flex: 1, minWidth: 220,
+                    transition: 'box-shadow 0.15s',
+                    '&:hover': { boxShadow: 3 },
+                  }}
+                >
+                  <Box sx={{ color: 'text.secondary', display: 'flex' }}><Security fontSize="small" /></Box>
+                  <Box sx={{ flex: 1, minWidth: 0 }}>
+                    <Typography variant="caption" color="text.secondary" noWrap>Security Scanning</Typography>
+                    <Typography variant="body2" fontWeight={600} noWrap>
+                      {data.scanning.total === 0 ? 'None' : `${data.scanning.total - data.scanning.error} / ${data.scanning.total} OK`}
+                    </Typography>
+                    {data.scanning.total > 0 && (
+                      <Box sx={{ display: 'flex', gap: 0.5, mt: 0.5, flexWrap: 'wrap' }}>
+                        {data.scanning.clean > 0 && <Chip label={`${data.scanning.clean} clean`} size="small" color="success" variant="outlined" sx={{ height: 20, fontSize: '0.7rem' }} />}
+                        {data.scanning.findings > 0 && <Chip label={`${data.scanning.findings} findings`} size="small" color="warning" variant="outlined" sx={{ height: 20, fontSize: '0.7rem' }} />}
+                        {data.scanning.pending > 0 && <Chip label={`${data.scanning.pending} pending`} size="small" color="info" variant="outlined" sx={{ height: 20, fontSize: '0.7rem' }} />}
+                        {data.scanning.error > 0 && <Chip label={`${data.scanning.error} errors`} size="small" color="error" variant="outlined" sx={{ height: 20, fontSize: '0.7rem' }} />}
+                      </Box>
+                    )}
+                  </Box>
+                  <Box sx={{ color: data.scanning.error > 0 ? 'error.main' : data.scanning.findings > 0 ? 'warning.main' : data.scanning.pending > 0 ? 'info.main' : 'success.main', display: 'flex' }}>
+                    {data.scanning.error > 0 ? <Error fontSize="small" /> : data.scanning.pending > 0 ? <Sync fontSize="small" /> : <CheckCircle fontSize="small" />}
+                  </Box>
+                </Paper>
+              </Tooltip>
+            )}
+          </Box>
+
+          {/* Zone 2 — Stat cards */}
+          <Grid container spacing={2.5} sx={{ mb: 4 }}>
+            {statCards.map((card) => (
+              <Grid size={{ xs: 12, sm: 6, md: card.gridMd }} key={card.title}>
+                <StatCard {...card} />
+              </Grid>
+            ))}
+          </Grid>
+
+          <Divider sx={{ mb: 4 }} />
+
+          {/* Zone 3 — Recent syncs + quick links */}
+          <Grid container spacing={3}>
+
+            {/* Recent sync activity */}
+            <Grid size={{ xs: 12, md: 8 }}>
+              <Typography variant="h6" fontWeight={600} gutterBottom>
+                Recent Sync Activity
+              </Typography>
+              {recentSyncs.length === 0 ? (
+                <Paper sx={{ p: 3, textAlign: 'center' }}>
+                  <Typography variant="body2" color="text.secondary">
+                    No sync history yet. Trigger a sync from the mirror pages.
+                  </Typography>
+                </Paper>
+              ) : (
+                <TableContainer component={Paper} variant="outlined">
+                  <Table size="small">
+                    <TableHead>
+                      <TableRow>
+                        <TableCell>Mirror</TableCell>
+                        <TableCell>Type</TableCell>
+                        <TableCell>Status</TableCell>
+                        <TableCell align="right">Synced</TableCell>
+                        <TableCell align="right">Platforms</TableCell>
+                        <TableCell align="right">When</TableCell>
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      {recentSyncs.map((s, i) => (
+                        <TableRow key={i} hover>
+                          <TableCell>
+                            <Typography variant="body2" fontFamily="monospace" noWrap>
+                              {s.mirror_name}
+                            </Typography>
+                          </TableCell>
+                          <TableCell>
+                            <Chip
+                              label={s.mirror_type}
+                              size="small"
+                              color={s.mirror_type === 'binary' ? 'warning' : 'default'}
+                              variant="outlined"
+                            />
+                          </TableCell>
+                          <TableCell>{syncStatusChip(s.status)}</TableCell>
+                          <TableCell align="right">
+                            <Typography variant="body2">{s.versions_synced}</Typography>
+                          </TableCell>
+                          <TableCell align="right">
+                            <Typography variant="body2">
+                              {s.mirror_type === 'binary' ? s.platforms_synced : '—'}
+                            </Typography>
+                          </TableCell>
+                          <TableCell align="right">
+                            <Tooltip title={new Date(s.started_at).toLocaleString()}>
+                              <Typography variant="caption" color="text.secondary">
+                                {timeAgo(s.started_at)}
+                              </Typography>
+                            </Tooltip>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </TableContainer>
+              )}
+            </Grid>
+
+            {/* Quick links */}
+            <Grid size={{ xs: 12, md: 4 }}>
+              <Typography variant="h6" fontWeight={600} gutterBottom>
+                Quick Links
+              </Typography>
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                {quickLinks.map((link) => (
+                  <QuickLink key={link.label} {...link} />
+                ))}
+              </Box>
+            </Grid>
+
+          </Grid>
+        </>
       )}
     </Container>
   );

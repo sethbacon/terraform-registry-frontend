@@ -30,13 +30,17 @@ test.describe('Accessibility', () => {
     await page.goto('/');
     const results = await new AxeBuilder({ page }).analyze();
     const serious = results.violations.filter(v => v.impact === 'serious');
-    // Log serious violations for awareness but don't fail yet
+    // Log serious violations with full node details for debugging
     if (serious.length > 0) {
-      console.warn(
-        'Serious a11y violations found:',
-        serious.map(v => `${v.id}: ${v.description} (${v.nodes.length} instances)`),
-      );
+      for (const v of serious) {
+        console.warn(`a11y [${v.id}]: ${v.description}`);
+        for (const node of v.nodes) {
+          console.warn(`  target: ${JSON.stringify(node.target)}`);
+          console.warn(`  html: ${node.html}`);
+          console.warn(`  message: ${node.failureSummary}`);
+        }
+      }
     }
-    expect(serious.length).toBeLessThanOrEqual(5);
+    expect(serious).toEqual([]);
   });
 });

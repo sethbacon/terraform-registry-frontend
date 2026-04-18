@@ -4,9 +4,13 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 
 const listApprovalRequestsMock = vi.fn()
+const createApprovalRequestMock = vi.fn()
+const reviewApprovalMock = vi.fn()
 vi.mock('../../../services/api', () => ({
   default: {
     listApprovalRequests: (...args: unknown[]) => listApprovalRequestsMock(...args),
+    createApprovalRequest: (...args: unknown[]) => createApprovalRequestMock(...args),
+    reviewApproval: (...args: unknown[]) => reviewApprovalMock(...args),
   },
 }))
 
@@ -184,5 +188,81 @@ describe('ApprovalsPage', () => {
     await waitFor(() => {
       expect(screen.getByText('customns')).toBeInTheDocument()
     })
+  })
+
+  it('creates an approval request via the dialog', async () => {
+    listApprovalRequestsMock.mockResolvedValue([])
+    createApprovalRequestMock.mockResolvedValue({ id: 'new' })
+    const user = userEvent.setup()
+    renderWithProviders(<ApprovalsPage />)
+    await waitFor(() => expect(screen.getByText('Create Request')).toBeInTheDocument())
+    await user.click(screen.getByText('Create Request'))
+    await waitFor(() => expect(screen.getByText('Create Approval Request')).toBeInTheDocument())
+    const textboxes = screen.getAllByRole('textbox')
+    await user.type(textboxes[0], 'mirror-xyz')
+    await user.type(textboxes[1], 'hashicorp')
+    await user.click(screen.getByText('Submit Request'))
+    await waitFor(() => expect(createApprovalRequestMock).toHaveBeenCalled())
+  })
+
+  it('opens review dialog and approves a pending request', async () => {
+    listApprovalRequestsMock.mockResolvedValue(fakeApprovals)
+    reviewApprovalMock.mockResolvedValue({})
+    const user = userEvent.setup()
+    renderWithProviders(<ApprovalsPage />)
+    await waitFor(() => expect(screen.getByText('Approve')).toBeInTheDocument())
+    await user.click(screen.getByText('Approve'))
+    await waitFor(() => expect(screen.getByRole('dialog')).toBeInTheDocument())
+    const dialogBtns = screen.getAllByRole('button', { name: /^approve$/i })
+    await user.click(dialogBtns[dialogBtns.length - 1])
+    await waitFor(() => expect(reviewApprovalMock).toHaveBeenCalledWith('apr-1', expect.objectContaining({ status: 'approved' })))
+  })
+
+  it('opens review dialog and rejects a pending request', async () => {
+    listApprovalRequestsMock.mockResolvedValue(fakeApprovals)
+    reviewApprovalMock.mockResolvedValue({})
+    const user = userEvent.setup()
+    renderWithProviders(<ApprovalsPage />)
+    await waitFor(() => expect(screen.getByText('Reject')).toBeInTheDocument())
+    await user.click(screen.getByText('Reject'))
+    await waitFor(() => expect(screen.getByRole('dialog')).toBeInTheDocument())
+    const dialogBtns = screen.getAllByRole('button', { name: /^reject$/i })
+    await user.click(dialogBtns[dialogBtns.length - 1])
+    await waitFor(() => expect(reviewApprovalMock).toHaveBeenCalledWith('apr-1', expect.objectContaining({ status: 'rejected' })))
+  })
+
+  it('cancels create dialog', async () => {
+    listApprovalRequestsMock.mockResolvedValue([])
+    const user = userEvent.setup()
+    renderWithProviders(<ApprovalsPage />)
+    await waitFor(() => expect(screen.getByText('Create Request')).toBeInTheDocument())
+    await user.click(screen.getByText('Create Request'))
+    await waitFor(() => expect(screen.getByText('Create Approval Request')).toBeInTheDocument())
+    await user.click(screen.getByRole('button', { name: /^cancel$/i }))
+    await waitFor(() => expect(screen.queryByText('Create Approval Request')).not.toBeInTheDocument())
+  })
+
+  it('refresh button re-fetches approvals', async () => {
+    listApprovalRequestsMock.mockResolvedValue(fakeApprovals)
+    const user = userEvent.setup()
+    renderWithProviders(<ApprovalsPage />)
+    await waitFor(() => expect(screen.getByText('Refresh')).toBeInTheDocument())
+    listApprovalRequestsMock.mockClear()
+    await user.click(screen.getByText('Refresh'))
+    await waitFor(() => expect(listApprovalRequestsMock).toHaveBeenCalled())
+  })
+
+  it('shows error alert on API failure', async () => {
+    listApprovalRequestsMock.mockRejectedValue(new Error('load failed'))
+    renderWithProviders(<ApprovalsPage />)
+    await waitFor(() => {
+      expect(screen.getByText('load failed')).toBeInTheDocument()
+    })
+  })
+
+  it('shows Auto Approved chip for auto-approved requests', async () => {
+    listApprovalRequestsMock.mockResolvedValue(fakeApprovals)
+    renderWithProviders(<ApprovalsPage />)
+    await waitFor(() => expect(screen.getByText(/auto[\s-]*approved/i)).toBeInTheDocument())
   })
 })

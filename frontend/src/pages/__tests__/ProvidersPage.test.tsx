@@ -1,4 +1,5 @@
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, screen, waitFor, fireEvent } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Routes, Route } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
@@ -12,9 +13,10 @@ vi.mock('react-router-dom', async () => {
   }
 })
 
+let mockIsAuthenticated = false
 vi.mock('../../contexts/AuthContext', () => ({
   useAuth: () => ({
-    isAuthenticated: false,
+    isAuthenticated: mockIsAuthenticated,
     user: null,
     roleTemplate: null,
     allowedScopes: [],
@@ -83,6 +85,7 @@ const fakeProviders = [
 describe('ProvidersPage', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    mockIsAuthenticated = false
   })
 
   it('shows loading skeleton while fetching', () => {
@@ -161,6 +164,114 @@ describe('ProvidersPage', () => {
     await waitFor(() => {
       expect(screen.getByText('1000 downloads')).toBeInTheDocument()
       expect(screen.getByText('500 downloads')).toBeInTheDocument()
+    })
+  })
+
+  it('renders Publish Provider button for authenticated users', () => {
+    mockIsAuthenticated = true
+    searchProvidersMock.mockReturnValue(new Promise(() => { }))
+    renderPage()
+    expect(screen.getByRole('button', { name: /publish provider/i })).toBeInTheDocument()
+  })
+
+  it('navigates to upload page when Publish Provider is clicked', async () => {
+    mockIsAuthenticated = true
+    searchProvidersMock.mockReturnValue(new Promise(() => { }))
+    renderPage()
+    await userEvent.click(screen.getByRole('button', { name: /publish provider/i }))
+    expect(mockNavigate).toHaveBeenCalledWith('/admin/upload/provider')
+  })
+
+  it('navigates to provider detail when a card is clicked', async () => {
+    searchProvidersMock.mockResolvedValue({
+      providers: fakeProviders,
+      meta: { total: 2 },
+    })
+    renderPage()
+    await waitFor(() => expect(screen.getByText('aws')).toBeInTheDocument())
+    await userEvent.click(screen.getByText('aws'))
+    expect(mockNavigate).toHaveBeenCalledWith('/providers/hashicorp/aws')
+  })
+
+  it('updates the URL when typing in the search box', async () => {
+    const user = userEvent.setup()
+    searchProvidersMock.mockResolvedValue({ providers: [], meta: { total: 0 } })
+    renderPage()
+    const input = screen.getByPlaceholderText('Search providers...')
+    await user.type(input, 'aws')
+    await waitFor(() => {
+      expect(searchProvidersMock).toHaveBeenCalledWith(
+        expect.objectContaining({ query: 'aws' }),
+      )
+    })
+  })
+
+  it('renders Clear filters button when a search query is present and no results', async () => {
+    searchProvidersMock.mockResolvedValue({ providers: [], meta: { total: 0 } })
+    renderPage('/providers?q=none')
+    await waitFor(() => expect(screen.getByText('No providers found')).toBeInTheDocument())
+    expect(screen.getByRole('button', { name: /clear filters/i })).toBeInTheDocument()
+  })
+
+  it('clears the search query when Clear filters is clicked', async () => {
+    const user = userEvent.setup()
+    searchProvidersMock.mockResolvedValue({ providers: [], meta: { total: 0 } })
+    renderPage('/providers?q=none&sort=name&order=asc')
+    await waitFor(() => expect(screen.getByText('No providers found')).toBeInTheDocument())
+    await user.click(screen.getByRole('button', { name: /clear filters/i }))
+    await waitFor(() => {
+      expect((screen.getByPlaceholderText('Search providers...') as HTMLInputElement).value).toBe('')
+    })
+  })
+
+  it('changes the sort field via the dropdown', async () => {
+    searchProvidersMock.mockResolvedValue({ providers: fakeProviders, meta: { total: 2 } })
+    renderPage()
+    const sortSelect = screen.getByLabelText('Sort By')
+    fireEvent.mouseDown(sortSelect)
+    const opt = await screen.findByRole('option', { name: /name a-z/i })
+    fireEvent.click(opt)
+    await waitFor(() => {
+      expect(searchProvidersMock).toHaveBeenCalledWith(
+        expect.objectContaining({ sort: 'name', order: 'asc' }),
+      )
+    })
+  })
+
+  it('renders pagination when total exceeds one page', async () => {
+    searchProvidersMock.mockResolvedValue({
+      providers: fakeProviders,
+      meta: { total: 48 },
+    })
+    renderPage()
+    await waitFor(() => {
+      expect(screen.getByRole('navigation')).toBeInTheDocument()
+    })
+  })
+
+  it('updates the URL when pagination page is changed', async () => {
+    searchProvidersMock.mockResolvedValue({
+      providers: fakeProviders,
+      meta: { total: 48 },
+    })
+    renderPage()
+    await waitFor(() => expect(screen.getByRole('navigation')).toBeInTheDocument())
+    const page2 = screen.getByRole('button', { name: /go to page 2/i })
+    await userEvent.click(page2)
+    await waitFor(() => {
+      expect(searchProvidersMock).toHaveBeenCalledWith(
+        expect.objectContaining({ offset: 12 }),
+      )
+    })
+  })
+
+  it('reflects a sort URL param on initial render', async () => {
+    searchProvidersMock.mockResolvedValue({ providers: fakeProviders, meta: { total: 2 } })
+    renderPage('/providers?sort=created_at&order=desc')
+    await waitFor(() => {
+      expect(searchProvidersMock).toHaveBeenCalledWith(
+        expect.objectContaining({ sort: 'created_at', order: 'desc' }),
+      )
     })
   })
 })

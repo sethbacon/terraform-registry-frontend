@@ -1,6 +1,6 @@
 {
   "name": "terraform-registry-frontend",
-  "version": "0.7.1",
+  "version": "0.8.0",
   "private": true,
   "type": "module",
   "scripts": {
@@ -11,9 +11,12 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
-    "visualize": "VITE_ANALYZE=true vite build"
+    "visualize": "VITE_ANALYZE=true vite build",
+    "format": "prettier --write 'src/**/*.{ts,tsx,css,json}'",
+    "format:check": "prettier --check 'src/**/*.{ts,tsx,css,json}'"
   },
   "dependencies": {
+    "@emotion/cache": "^11.14.0",
     "@emotion/react": "^11.11.3",
     "@emotion/styled": "^11.11.0",
     "@fortawesome/fontawesome-svg-core": "^7.2.0",
@@ -52,13 +55,20 @@
     "@vitest/coverage-v8": "^4.1.4",
     "eslint": "^9.0.0",
     "eslint-plugin-jsx-a11y": "^6.10.2",
+    "eslint-config-prettier": "^10.1.0",
     "eslint-plugin-react-hooks": "^5.1.0",
     "eslint-plugin-react-refresh": "^0.4.16",
+    "prettier": "^3.5.0",
     "happy-dom": "^20.8.9",
     "jsdom": "^29.0.2",
     "rollup-plugin-visualizer": "^5.14.0",
     "typescript": "^5.7.2",
     "vite": "^6.4.2",
     "vitest": "^4.1.4"
-  }
+  },
+  "browserslist": [
+    ">0.2%",
+    "not dead",
+    "not op_mini all"
+  ]
 }

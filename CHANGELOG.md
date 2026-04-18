@@ -9,6 +9,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.8.0] - 2026-04-18
+
+### Added
+
+- feat: Phase 0 quick wins — Prettier, browserslist, pinned Docker digests, coverage ratchet, skip-to-content link, ARCHITECTURE.md, CDN removal, admin dashboard scanning card (#147)
+- feat: Phase 1 security hardening — CSP nonces, Subresource Integrity, Dependabot security auto-merge, vendored ReDoc, offline markdown sanitization audit (#148)
+- feat: coverage phase 2 — 100+ new unit tests, F1.2 markdown audit, coverage ratchet to 75%, changelog link on binary detail page (#152)
+- test: Phase 0.5 T-track coverage ramp — 54 new unit tests (#150)
+
+### Fixed
+
+- fix: lower coverage thresholds to ratchet floor (#149)
+
 ## [0.7.1] - 2026-04-17
 
 ### Fixed

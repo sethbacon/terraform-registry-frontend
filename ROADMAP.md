@@ -1,805 +1,553 @@
-# Terraform Registry Frontend -- Roadmap
+# Terraform Registry Frontend — Roadmap
 
-> **Goal**: Raise all review scores to 9/10 or 10/10.
-> **Out of scope**: v1.0 API stability (deferred), state management, runtime execution (plan/apply).
-> **Structure**: Phases are ordered by impact. Work items within each phase are **independent** and can be worked on by separate agents in parallel unless noted otherwise.
-> **Coordinates with**: `terraform-registry-backend/ROADMAP.md` -- the backend roadmap introduces new API endpoints for scanning setup, storage migration, advanced search, and module deprecation that this frontend will consume.
+**Baseline:** v0.7.0 (2026-04-17)
+**Goal:** Close enterprise-adoption gaps identified in the 2026-04-17 independent evaluation; bring the UI to WCAG 2.1 AA, add enterprise identity UX, raise test quality, and remove external CDN dependencies.
 
----
-
-## Phase 1: Testing & CI Foundation (Maturity 6→9)
-
-### 1.1 Vitest Coverage Configuration & Enforcement
-
-**Why**: `vitest.config.ts` (18 lines) has zero coverage configuration -- no thresholds, no reporters, no include/exclude. There is no CI enforcement of frontend coverage at all. The backend enforces 75% minimum; the frontend enforces nothing.
-
-**Current state**:
-- `frontend/vitest.config.ts`: `environment: 'happy-dom'`, `globals: true`, `setupFiles: './src/setupTests.ts'`. No `coverage` section.
-- 4 unit test files totaling 313 lines across `components/__tests__/`, `hooks/__tests__/`, `contexts/__tests__/`, `services/__tests__/`.
-- No `@vitest/coverage-v8` or `@vitest/coverage-istanbul` in `package.json`.
-
-**Work items**:
-
-1. **Install coverage provider**: Add `@vitest/coverage-v8` as a dev dependency in `frontend/package.json`.
-
-2. **Add coverage configuration** to `frontend/vitest.config.ts`:
-   ```ts
-   test: {
-     environment: 'happy-dom',
-     setupFiles: './src/setupTests.ts',
-     globals: true,
-     unstubGlobals: true,
-     coverage: {
-       provider: 'v8',
-       reporter: ['text', 'text-summary', 'lcov', 'json-summary'],
-       reportsDirectory: './coverage',
-       include: ['src/**/*.{ts,tsx}'],
-       exclude: [
-         'src/**/*.test.{ts,tsx}',
-         'src/**/*.spec.{ts,tsx}',
-         'src/main.tsx',
-         'src/setupTests.ts',
-         'src/vite-env.d.ts',
-         'src/**/*.d.ts',
-       ],
-       thresholds: {
-         statements: 40,
-         branches: 40,
-         functions: 40,
-         lines: 40,
-       },
-     },
-   },
-   ```
-   Start with 40% thresholds (realistic for current state) and ratchet up as tests are added in 1.2-1.5.
-
-3. **Add `test:coverage` script** to `frontend/package.json`:
-   ```json
-   "test:coverage": "vitest run --coverage"
-   ```
-
-4. **Add `.gitignore` entry** for `frontend/coverage/`.
-
-**Affected files**: `frontend/vitest.config.ts`, `frontend/package.json`, `.gitignore`
-
-**Acceptance criteria**: `npm run test:coverage` generates a coverage report. Coverage thresholds fail the build below 40%.
+UX-specific items continue to live in [`ROADMAP-UX.md`](ROADMAP-UX.md); this roadmap references that document but focuses on **engineering, security, testing, and enterprise-readiness** work.
 
 ---
 
-### 1.2 Unit Tests: Services Layer
+## Cross-repo dependency summary
 
-**Why**: `services/__tests__/api.test.ts` is 29 lines with 3 structural tests (checks that `api` is an object, has `searchModules`, has `login`) and zero behavioral tests. The `ApiClient` class has 100+ methods across 1,308 lines.
+The following items require coordinated work with `terraform-registry-backend`:
 
-**Current state**:
-- `frontend/src/services/api.ts` (1,308 lines): Axios-based client with Bearer token interceptor, 401 handler, mock data fallback, `SetupToken` header for setup endpoints.
-- `frontend/src/services/queryKeys.ts` (17 lines): Only 3 domains (modules, providers, dashboard).
-- `frontend/src/services/errorReporting.ts` (37 lines): Custom error reporter with `init()`, `captureError()`, `setUser()`.
-
-**Work items**:
-
-1. **Create `services/__tests__/api.test.ts` (rewrite)** -- Behavioral tests for the ApiClient:
-   - Test auth interceptor: requests include `Authorization: Bearer <token>` when token is set.
-   - Test 401 interceptor: clears auth and redirects on 401 (except SCM OAuth 401s which should propagate).
-   - Test `setupRequest()`: uses `SetupToken` header instead of Bearer.
-   - Test a representative method from each category (module search, provider search, admin user list, storage config) to verify correct HTTP method, URL, and payload mapping.
-   - Mock Axios using `vitest.mock('axios')` or use `msw` (Mock Service Worker) for more realistic HTTP mocking.
-
-2. **Create `services/__tests__/errorReporting.test.ts`**:
-   - Test `init()` with and without `VITE_ERROR_REPORTING_DSN`.
-   - Test `captureError()` calls fetch with correct payload structure.
-   - Test `setUser()` sets user ID for subsequent reports.
-   - Test `captureError()` gracefully handles fetch failures.
-
-3. **Create `services/__tests__/queryKeys.test.ts`**:
-   - Test that query keys produce unique arrays for different parameters.
-   - Test that key hierarchy is stable (important for cache invalidation).
-
-**Affected files**: `frontend/src/services/__tests__/api.test.ts` (rewrite), `frontend/src/services/__tests__/errorReporting.test.ts` (new), `frontend/src/services/__tests__/queryKeys.test.ts` (new)
-
-**Acceptance criteria**: Full behavioral coverage of the API client's interceptor logic, error handling, and header management. 80%+ coverage on the services layer.
+| Frontend item                   | Backend item                     | Topic                |
+| ------------------------------- | -------------------------------- | -------------------- |
+| A1.1 (httpOnly cookie auth)     | B2.4 (OIDC refresh + CSRF)       | Auth token migration |
+| A1.2 (Silent renew)             | B2.4 (OIDC refresh)              | Refresh flow         |
+| B2.1 (SAML login picker)        | B2.1 (SAML connector)            | SAML login flow      |
+| B2.2 (LDAP login form)          | B2.2 (LDAP connector)            | LDAP login flow      |
+| B2.3 (SCIM admin page)          | B2.3 (SCIM endpoints)            | SCIM provisioning    |
+| E4.1 (Deprecation banner)       | E4.1 (Module deprecation API)    | Module deprecation   |
+| E4.2 (Policy results in upload) | E4.3 (OPA/Rego policy)           | Policy evaluation    |
+| E4.3 (Test results UI)          | E4.4 (Module test orchestration) | Module test display  |
+| E4.4 (Quota dashboard)          | D3.4 (Per-org quotas)            | Org quota management |
+| E4.5 (OCI pull snippet)         | E4.2 (OCI endpoint)              | OCI distribution     |
+| G5.1 (Whitelabel theme)         | New config endpoint              | Theme API            |
+| H0.3 (Release workflow)         | H0.2 (Release workflow)          | CI/CD streamlining   |
 
 ---
 
-### 1.3 Unit Tests: Hooks & Contexts
+## Legend
 
-**Why**: `useModuleDetail.ts` (418 lines) is the most complex hook and has zero tests. `AuthContext.test.tsx` (104 lines, 4 cases) does not test `login`, `refreshToken`, or `fetchUser`. `ThemeContext.tsx` and `HelpContext.tsx` are untested.
-
-**Current state**:
-- `hooks/useModuleDetail.ts` (418 lines): Large hook managing module detail fetching, version selection, tab state, SCM info, and scan results. No React Query -- uses imperative `useState`+`useEffect`.
-- `hooks/useDebounce.ts` (10 lines): Fully tested (71 lines of tests, 5 cases).
-- `contexts/AuthContext.tsx` (140 lines): Provides `user`, `roleTemplate`, `allowedScopes`, `isAuthenticated`, `isLoading`, `login`, `logout`, `refreshToken`, `setToken`. Uses `localStorage` for persistence, calls `api.getCurrentUserWithRole()`.
-- `contexts/ThemeContext.tsx` (108 lines): Provides `mode` and `toggleTheme`. Persists to `localStorage`.
-- `contexts/HelpContext.tsx` (51 lines): Provides `isHelpOpen`, `helpTopic`, `openHelp`, `closeHelp`.
-
-**Work items**:
-
-1. **Create `hooks/__tests__/useModuleDetail.test.ts`**:
-   - Test initial loading state.
-   - Test successful data fetch (mock `api.getModuleVersions`, `api.getModule`).
-   - Test version selection (`selectVersion`).
-   - Test tab state management.
-   - Test SCM info loading when module has SCM link.
-   - Test scan result loading.
-   - Test error states (API failures).
-   - Use `@testing-library/react` `renderHook` for hook testing.
-
-2. **Expand `contexts/__tests__/AuthContext.test.tsx`** (currently 4 cases):
-   - Add test for `login()` flow (calls `api.login()`, stores token, fetches user).
-   - Add test for `refreshToken()` flow.
-   - Add test for `fetchUser()` on mount when token exists in localStorage.
-   - Add test for `logout()` clearing state and localStorage.
-   - Add test for expired token handling (API returns 401 during `fetchUser`).
-
-3. **Create `contexts/__tests__/ThemeContext.test.tsx`**:
-   - Test default mode.
-   - Test `toggleTheme()` switches between light and dark.
-   - Test localStorage persistence across re-renders.
-
-4. **Create `contexts/__tests__/HelpContext.test.tsx`**:
-   - Test `openHelp(topic)` sets topic and opens panel.
-   - Test `closeHelp()` clears state.
-
-**Affected files**: `frontend/src/hooks/__tests__/useModuleDetail.test.ts` (new), `frontend/src/contexts/__tests__/AuthContext.test.tsx` (expand), `frontend/src/contexts/__tests__/ThemeContext.test.tsx` (new), `frontend/src/contexts/__tests__/HelpContext.test.tsx` (new)
+- **Size:** S (<1d), M (1–3d), L (1–2w), XL (>2w)
+- **Priority:** P0 (adoption blocker), P1 (high), P2 (medium), P3 (nice-to-have)
+- **Track:** A = Security · B = Enterprise identity UX · C = Accessibility · D = Telemetry / privacy · E = Feature UX (backend-dependent) · F = Air-gap / bundling · G = Whitelabel / theming · H = Developer experience · I = Internationalization
 
 ---
 
-### 1.4 Unit Tests: Core Components
+## Phase 0 — Quick wins (all parallel; target: 1 sprint)
 
-**Why**: 18 component files (3,539 lines) with only 1 tested (`ProtectedRoute.test.tsx`, 109 lines). Key components like `ErrorBoundary`, `MarkdownRenderer`, `RegistryItemCard`, and `Layout` have zero tests.
+### H0.1 · Add Prettier · [P0/S] ✅
 
-**Work items**:
+- Install Prettier + `eslint-config-prettier`; create `.prettierrc`.
+- Add `npm run format` + `npm run format:check`.
+- CI step runs `format:check` (fail on diff).
+- Bulk-format existing codebase in a single commit; update CONTRIBUTING.md.
+- **Files:** `frontend/package.json`, `frontend/.prettierrc`, `frontend/eslint.config.js`, `CONTRIBUTING.md`, `.github/workflows/ci.yml`
+- **AC:** CI fails on unformatted code; all existing files conform.
 
-1. **Create `components/__tests__/ErrorBoundary.test.tsx`**:
-   - Test renders children when no error.
-   - Test renders fallback UI when child throws.
-   - Test calls `captureError()` on error.
-   - Test "Try Again" button resets error state.
-   - Test custom `fallback` prop is used when provided.
+### H0.2 · Add browserslist · [P0/S] ✅
 
-2. **Create `components/__tests__/MarkdownRenderer.test.tsx`**:
-   - Test renders markdown content as HTML.
-   - Test sanitizes dangerous HTML (XSS prevention via `rehype-sanitize`).
-   - Test handles empty/null content.
-   - Test renders GFM features (tables, strikethrough, task lists).
+- `frontend/package.json`: add `"browserslist": ["defaults", "not IE 11", "not dead", "last 2 versions"]`.
+- Update README "Browser Support" section.
+- **Files:** `frontend/package.json`, `README.md`
+- **AC:** Vite uses browserslist; declared in README.
 
-3. **Create `components/__tests__/RegistryItemCard.test.tsx`**:
-   - Test renders module card with name, namespace, description.
-   - Test renders provider card variant.
-   - Test click navigates to detail page.
+### A0.1 · Pin Docker base-image digests · [P0/S] ✅
 
-4. **Create `utils/__tests__/errors.test.ts`**:
-   - Test `getErrorMessage()` extracts from AxiosError, native Error, and string.
-   - Test `getErrorStatus()` returns HTTP status from AxiosError.
-   - Test fallback message when error is unrecognized.
+- `frontend/Dockerfile`: pin `node:22-alpine` and `nginx:1.25-alpine` to `@sha256:<digest>`.
+- Add Dependabot entry for `docker` ecosystem.
+- **Files:** `frontend/Dockerfile`, `.github/dependabot.yml`
+- **AC:** Digests pinned; Dependabot config updated.
 
-5. **Create `utils/__tests__/formatting.test.ts`**:
-   - Test all exported formatting functions with representative inputs.
+### E0.1 · Set coverage ratchet floor · [P0/S] ✅
 
-**Affected files**: `frontend/src/components/__tests__/ErrorBoundary.test.tsx` (new), `frontend/src/components/__tests__/MarkdownRenderer.test.tsx` (new), `frontend/src/components/__tests__/RegistryItemCard.test.tsx` (new), `frontend/src/utils/__tests__/errors.test.ts` (new), `frontend/src/utils/__tests__/formatting.test.ts` (new)
+- `vitest.config.ts`: thresholds set to current measured floor **55/49/47/56** (statements/branches/functions/lines).
+- Thresholds ratchet upward as tests are added (see T-track below and E5.1).
+- **Files:** `frontend/vitest.config.ts`
+- **AC:** CI gate enforced; no drop below current floor; thresholds increase per T-track milestones.
 
----
+### E0.2 · Remove `continue-on-error: true` on E2E · [P0/S] ✅
 
-### 1.5 GitHub Actions CI Pipeline
+- `.github/workflows/ci.yml`: E2E required on `main`.
+- Nightly full-matrix workflow stays separate with retries.
+- **Files:** `.github/workflows/ci.yml`
+- **AC:** `main` branch protection includes E2E.
 
-**Why**: The `.github/` directory only contains `dependabot.yml`. There are **no CI/CD pipelines** -- no lint, build, test, or deploy workflows. Every other aspect of quality enforcement depends on CI existing.
+### C0.1 · Declare WCAG 2.1 AA target · [P1/S] ✅
 
-**Work items**:
+- Create `ACCESSIBILITY.md` stating conformance target + known exceptions.
+- Link from README + SECURITY.md.
+- **Files:** `ACCESSIBILITY.md`, `README.md`, `SECURITY.md`
+- **AC:** Document merged; scope stated.
 
-1. **Create `.github/workflows/ci.yml`**:
-   - **Trigger**: Push to `main`, pull requests to `main`.
-   - **Jobs** (run in parallel where possible):
-     - **lint**: `npm ci` + `npm run lint` in `frontend/`.
-     - **typecheck**: `npm ci` + `npx tsc --noEmit` in `frontend/`.
-     - **unit-test**: `npm ci` + `npm run test:coverage` in `frontend/`. Upload coverage report as artifact. Fail if coverage thresholds not met.
-     - **build**: `npm ci` + `npm run build` in `frontend/`. Upload `dist/` as artifact for deployment jobs.
-   - **Node version**: Use matrix or fixed version matching `.nvmrc` or engines field.
-   - **Caching**: Cache `node_modules` with `actions/cache` keyed on `package-lock.json` hash.
+### C0.2 · Add skip-to-content link · [P1/S] ✅
 
-2. **Create `.github/workflows/e2e.yml`**:
-   - **Trigger**: Push to `main`, pull requests to `main`.
-   - **Job**: Install Playwright browsers, start backend+frontend via Docker Compose (`deployments/docker-compose.test.yml`), run `npx playwright test` in `e2e/`.
-   - Upload Playwright report (HTML + traces + videos) as artifact.
-   - Separate workflow since E2E is slower and requires the Docker-based backend.
+- Add `<a href="#main-content" className="skip-link">` in `Layout.tsx`.
+- Focus-visible styles.
+- **Files:** `frontend/src/components/Layout.tsx`
+- **AC:** Keyboard Tab from top of page reaches skip link; activates focus on main content.
 
-3. **Create `.github/workflows/release.yml`**:
-   - **Trigger**: Push of `v*` tag.
-   - Build production Docker image.
-   - Push to container registry (GHCR).
-   - Create GitHub Release with changelog.
+### G0.1 · Update ARCHITECTURE.md with auth flow diagram · [P2/S] ✅
 
-4. **Create `.github/workflows/scheduled.yml`**:
-   - **Trigger**: Weekly cron.
-   - Run full CI pipeline to catch dependency drift.
-   - On failure, create a GitHub issue.
+- Include OIDC/SAML/cookie flow; reference backend endpoints.
+- **Files:** `ARCHITECTURE.md`
+- **AC:** Diagram merged as Mermaid in markdown.
 
-5. **Pin all GitHub Actions to commit SHAs** (not version tags) for supply chain security, consistent with the backend repository pattern.
+### D0.1 · Remove CDN dependency — bundle ReDoc locally · [P1/S] ✅
 
-**Affected files**: `.github/workflows/ci.yml` (new), `.github/workflows/e2e.yml` (new), `.github/workflows/release.yml` (new), `.github/workflows/scheduled.yml` (new)
+- Remove `cdn.jsdelivr.net` from CSP in `nginx.conf`.
+- `npm i redoc` and import locally in `ApiDocumentation.tsx`.
+- **Files:** `frontend/package.json`, `frontend/src/pages/ApiDocumentation.tsx`, `frontend/nginx.conf`
+- **AC:** Air-gap install renders API docs with no external requests.
 
-**Acceptance criteria**: PRs require passing lint, typecheck, unit tests with coverage, and build. E2E runs on every PR. Releases are automated on tag push.
+### U0.1 · Fix Command Palette (Ctrl+K) modal margins · [P1/S] ✅
 
----
+- The search modal’s left and right margins are too tight at smaller viewport widths.
+- `CommandPalette.tsx` uses `fullWidth` + `maxWidth="sm"` but items use only `px: 2` (16px) padding and the list has zero horizontal padding.
+- Increase horizontal padding on the dialog content/paper and item list to provide comfortable breathing room (minimum 24px or `px: 3`).
+- Verify at 360px, 768px, and 1280px viewports.
+- **Files:** `frontend/src/components/CommandPalette.tsx`
+- **AC:** Modal content has ≥24px left/right padding at all breakpoints; visual regression screenshot updated.
+- **Source:** UAT
 
-### 1.6 Ratchet Coverage Thresholds
+### U0.2 · Setup wizard: prompt to configure newly added features · [P1/M]
 
-**Why**: After items 1.2-1.4 are complete, coverage will be significantly higher than the initial 40% threshold. The threshold should be ratcheted up to prevent regression.
+- **Problem (from UAT):** When new features are added to the setup wizard (e.g., security scanning), there is no way to know whether a feature has been configured at least once. Existing deployments that completed the wizard before a feature was added never see its configuration step.
+- Add a `feature_flags` / `setup_features_completed` tracking mechanism:
+  1. **Backend (↔):** New DB column or JSON field on the setup/config table tracking which wizard features have been completed (e.g., `{"oidc": true, "storage": true, "scanning": false, "admin_user": true}`).
+  2. **Frontend:** On app load, compare the backend’s feature-completion map against the current wizard step list. If any feature is `false` or missing, surface a non-blocking banner/toast: _"New feature available: Security Scanning. [Configure now]"_ linking to the relevant admin page or a mini re-run of that wizard step.
+  3. `SetupWizardContext` gains persistent state (not just transient `oidcSaved`/`storageSaved`/`scanningSaved` booleans).
+- **Files:** `frontend/src/contexts/SetupWizardContext.tsx`, `frontend/src/components/Layout.tsx` (banner), `frontend/src/services/api.ts`, `frontend/src/types/index.ts`
+- **AC:** After upgrading to a version with a new wizard step, admin sees a prompt; dismissing it persists `completed` for that feature; new installs see no extra prompts.
+- **Source:** UAT
+- **↔ Backend:** Requires new endpoint or field on `/api/v1/setup/status` to persist feature-completion flags.
 
-**Work items**:
+### U0.3 · Storage page: allow creating new storage config inline for migration · [P1/M] ✅
 
-1. **After completing 1.2-1.4**, run `npm run test:coverage` and note actual coverage.
-2. **Update thresholds** in `vitest.config.ts` to 5% below actual coverage (gives buffer for new untested code without allowing regression).
-3. **Target**: 60% statements/lines, 50% branches/functions as a post-Phase-1 baseline.
+- **Problem (from UAT):** The storage migration wizard allows selecting an existing storage config as the migration target, but there is no way to create a **new** storage configuration directly from the migration flow. Users must navigate away to create a config first, then return to start migration.
+- Add an inline "Create new storage config" option within `StorageMigrationWizard.tsx`:
+  1. "Migrate to" dropdown gains a "+ Create new configuration" entry at the bottom.
+  2. Selecting it opens an inline form (or modal) matching the fields from the StoragePage create-config flow.
+  3. On save, the new config is auto-selected as the migration target and the wizard continues.
+- **Files:** `frontend/src/components/StorageMigrationWizard.tsx`, `frontend/src/pages/admin/StoragePage.tsx` (extract shared form component)
+- **AC:** Admin can create a brand-new storage config and start migration in a single flow without leaving the page.
+- **Source:** UAT
 
-**Depends on**: 1.1, 1.2, 1.3, 1.4.
+### U0.4 · Admin dashboard: add security scanning summary card · [P1/S] ✅
 
----
+- **Problem (from UAT):** The admin dashboard shows scanning-enabled status and basic counts but scanning results are not prominent enough — users report no security scanning info visible.
+- Enhance the scanning card on `DashboardPage.tsx`:
+  1. Show severity breakdown (Critical / High / Medium / Low) aggregated across all scanned modules.
+  2. Show last-scan timestamp and next-scheduled-scan time.
+  3. Show top-3 modules with highest finding counts (link to their detail pages).
+  4. If scanning is disabled, show a prominent "Enable Scanning" CTA.
+- **↔ Backend:** May need a new `/api/v1/scanning/summary` endpoint returning aggregated severity counts and top-N modules. Check if existing endpoints already provide this data.
+- **Files:** `frontend/src/pages/admin/DashboardPage.tsx`, `frontend/src/services/api.ts`
+- **AC:** Dashboard renders severity breakdown, last scan time, and top-3 findings modules; E2E test covers card visibility.
+- **Source:** UAT
 
-## Phase 2: Feature Completeness (Features 8→9, Ease of Use 7→9)
+### H0.3 · Streamline release workflow · [P1/M] ✅
 
-### 2.1 Security Scanning Step in Setup Wizard
+- **Problem (from UAT):** Current release process (per `CLAUDE.md`) has high friction — merge conflicts on CHANGELOG / `package.json` version bumps when `prepare-release.yml` races against feature merges, redundant CI runs (full lint/test/build on release branch + again on tag), and frontend deployment-manifest updates live in the **backend** repo requiring cross-repo coordination.
+- Evaluate and implement best-practice improvements:
+  1. **Single-commit release:** `prepare-release.yml` should rebase the version-bump commit onto latest `main` atomically, not create a merge-conflict-prone PR.
+  2. **Tag-triggered release:** Auto-tag on version-bump commit; `release.yml` triggers on `v*` push. Skip manual dispatch.
+  3. **Skip redundant CI:** Release workflow reuses CI artifacts from the triggering commit (download-artifact or workflow_call passthrough).
+  4. **Deployment manifest auto-PR:** Backend repo's `prepare-release.yml` bumps Helm `Chart.yaml` `appVersion` in its release commit. Post-release job in backend `release.yml` opens a cross-repo PR bumping frontend image tag. Kustomize overlays keep `<IMAGE_TAG>` placeholders (substituted by per-environment CD pipelines).
+  5. **Document** the streamlined flow in `CLAUDE.md` and `CONTRIBUTING.md`.
+- **Files:** `.github/workflows/prepare-release.yml`, `.github/workflows/release.yml`, `.github/workflows/auto-tag.yml`, `CLAUDE.md`, `CONTRIBUTING.md`
+- **AC:** Release requires ≤1 manual step; no merge conflicts on CHANGELOG; deployment manifests auto-updated via cross-repo PR.
+- **Source:** UAT
+- **↔ Backend H0.2:** Coordinate shared deployment-manifest update strategy.
 
-**Why**: The setup wizard (`SetupWizardPage.tsx`, 916 lines) configures OIDC, storage, and admin user but skips scanning. Users must manually set environment variables for scanning tools after setup. The backend roadmap (item 2.3) adds `POST /api/v1/setup/scanning/test` and `POST /api/v1/setup/scanning` endpoints.
+#### U0.5 · Binary detail — link to version changelog · [P2/S] ✅
 
-**Current state**:
-- Steps array (line 47): `['Authenticate', 'OIDC Provider', 'Storage Backend', 'Admin User', 'Complete']`.
-- Each step is rendered via `{activeStep === N && (...)}` conditionals.
-- State management: individual `useState` hooks for each step's form data, loading, and success flags.
-- API layer: `api.ts` has `getScanningConfig()` (line 660) and `getScanningStats()` (line 665) but no setup-specific scanning methods.
-
-**Work items**:
-
-1. **Add API methods** to `services/api.ts`:
-   ```ts
-   async testScanningConfig(setupToken: string, data: ScanningConfigInput): Promise<ScanningTestResult> {
-     return this.setupRequest(setupToken).post('/api/v1/setup/scanning/test', data);
-   }
-   async saveScanningConfig(setupToken: string, data: ScanningConfigInput): Promise<void> {
-     return this.setupRequest(setupToken).post('/api/v1/setup/scanning', data);
-   }
-   ```
-
-2. **Add TypeScript interfaces** to `types/` or inline in api.ts:
-   ```ts
-   interface ScanningConfigInput {
-     enabled: boolean;
-     tool: 'trivy' | 'checkov' | 'terrascan' | 'snyk' | 'custom';
-     binary_path: string;
-     expected_version?: string;
-     timeout_secs?: number;
-     worker_count?: number;
-   }
-   interface ScanningTestResult {
-     success: boolean;
-     detected_version: string;
-     error?: string;
-   }
-   ```
-
-3. **Update steps array** in `SetupWizardPage.tsx` (line 47):
-   ```ts
-   const steps = ['Authenticate', 'OIDC Provider', 'Storage Backend', 'Security Scanning', 'Admin User', 'Complete'];
-   ```
-   This inserts scanning as step 3 (after storage, before admin). Increment all subsequent `activeStep === N` conditionals by 1.
-
-4. **Add scanning step state**:
-   ```ts
-   const [scanningForm, setScanningForm] = useState<ScanningConfigInput>({ enabled: false, tool: 'trivy', binary_path: '' });
-   const [scanningTesting, setScanningTesting] = useState(false);
-   const [scanningTestResult, setScanningTestResult] = useState<ScanningTestResult | null>(null);
-   const [scanningSaving, setScanningSaving] = useState(false);
-   const [scanningSaved, setScanningSaved] = useState(false);
-   ```
-
-5. **Render scanning step** (new `{activeStep === 3 && (...)}` block):
-   - **Enable/disable toggle** (MUI Switch) at top.
-   - If enabled:
-     - **Tool selector** (MUI Select): `trivy`, `checkov`, `terrascan`, `snyk`, `custom`.
-     - **Binary path** (MUI TextField): File path to scanner binary.
-     - **Expected version** (MUI TextField, optional): Expected version string.
-     - **Advanced settings** (MUI Accordion):
-       - Timeout (seconds, default 300).
-       - Worker count (default 2).
-     - **Test button**: Calls `api.testScanningConfig(token, scanningForm)`. Shows detected version on success, error message on failure.
-     - **Save button** (enabled after successful test or if disabled): Calls `api.saveScanningConfig(token, scanningForm)`.
-   - If disabled: Show info text that scanning can be configured later via admin settings. Allow proceeding without configuring.
-   - **Skip button**: Allows skipping scanning configuration entirely (proceeds to admin step).
-
-6. **Update `GetSetupStatus` response handling**: The backend will add `scanning_configured` field. Handle it in the setup status check and the Complete step's summary chips.
-
-7. **Update Complete step**: Add scanning row to the review summary showing configured tool and version, or "Skipped".
-
-8. **Tests**:
-   - Unit test for the scanning step rendering.
-   - Expand E2E `setup-wizard.spec.ts` to cover the scanning step (test, save, skip flows).
-
-**Affected files**: `frontend/src/pages/SetupWizardPage.tsx`, `frontend/src/services/api.ts`, `e2e/tests/setup-wizard.spec.ts`
-
-**Acceptance criteria**: Setup wizard has a "Security Scanning" step that can test, configure, or skip scanner setup. Works with the backend's new setup endpoints.
+- **Source:** UAT
+- **Priority:** Low — cosmetic/UX improvement.
+- **Problem (from UAT):** The Terraform binary detail page shows available versions and platforms but provides no link to the upstream changelog for a given version. Users must manually search HashiCorp's releases page to understand what changed.
+- **Proposal:** On the binary version detail view, add a "Changelog" or "Release notes" link that opens the upstream release page (e.g., `https://github.com/hashicorp/terraform/releases/tag/v{version}`). If the binary is a mirrored tool with a known upstream, derive the URL from the tool name + version; otherwise hide the link.
+- **Files:** Binary detail page component (likely `TerraformBinaryDetail.tsx` or similar), possibly `api.ts` if upstream URL metadata needs fetching.
+- **AC:** Each binary version row/card includes a clickable changelog link when an upstream URL is derivable; link opens in a new tab.
 
 ---
 
-### 2.2 Storage Migration Wizard UI
+## Phase 0.5 — Test coverage ramp (prerequisite for 0.8.0 release)
 
-**Why**: The admin StoragePage (`StoragePage.tsx`, 727 lines) shows existing configs as read-only cards with no edit, delete, activate, or migrate actions. `api.activateStorageConfig()`, `api.updateStorageConfig()`, and `api.deleteStorageConfig()` exist in `api.ts` but are not wired to any UI. The backend roadmap (item 2.4) adds a full storage migration service with plan/execute/cancel/status endpoints.
+Current coverage: **78/73/71/81** (statements/branches/functions/lines).
+Target for 0.8.0: **70/60/60/70** — matching the original E0.1 goal.
 
-**Current state**:
-- `StoragePage.tsx`: Two modes -- setup wizard (first-run) and read-only config view (post-setup).
-- Existing configs are displayed as static MUI Cards with Active/Inactive chips.
-- No migration UI, no edit UI, no activate UI.
-- `api.ts` storage methods (lines 1043-1080): `getActiveStorageConfig`, `listStorageConfigs`, `getStorageConfig`, `createStorageConfig`, `updateStorageConfig`, `deleteStorageConfig`, `activateStorageConfig`, `testStorageConfig`.
+Items are ordered by coverage-per-effort; each raises the ratchet floor in `vitest.config.ts` on merge.
 
-**Work items**:
+### Track T — Unit test coverage
 
-1. **Add migration API methods** to `services/api.ts`:
-   ```ts
-   async planStorageMigration(sourceId: string, targetId: string): Promise<MigrationPlan> {
-     return this.client.post('/api/v1/admin/storage/migrations/plan', { source_config_id: sourceId, target_config_id: targetId });
-   }
-   async startStorageMigration(sourceId: string, targetId: string): Promise<Migration> {
-     return this.client.post('/api/v1/admin/storage/migrations', { source_config_id: sourceId, target_config_id: targetId });
-   }
-   async getStorageMigration(id: string): Promise<Migration> {
-     return this.client.get(`/api/v1/admin/storage/migrations/${id}`);
-   }
-   async cancelStorageMigration(id: string): Promise<void> {
-     return this.client.post(`/api/v1/admin/storage/migrations/${id}/cancel`);
-   }
-   async listStorageMigrations(): Promise<Migration[]> {
-     return this.client.get('/api/v1/admin/storage/migrations');
-   }
-   ```
+#### T0.1 · Services layer tests · [P0/M] ✅
 
-2. **Add TypeScript interfaces**:
-   ```ts
-   interface MigrationPlan {
-     source_config_id: string;
-     target_config_id: string;
-     total_artifacts: number;
-     total_modules: number;
-     total_providers: number;
-     estimated_size_bytes: number;
-   }
-   interface Migration {
-     id: string;
-     source_config_id: string;
-     target_config_id: string;
-     status: 'pending' | 'running' | 'completed' | 'failed' | 'cancelled';
-     total_artifacts: number;
-     migrated_artifacts: number;
-     failed_artifacts: number;
-     error_message?: string;
-     started_at?: string;
-     completed_at?: string;
-     created_at: string;
-   }
-   ```
+- Test `api.ts` (remaining uncovered branches), `errorReporting.ts`, `performanceReporting.ts`, `queryKeys.ts`.
+- Mock Axios, window globals, and performance APIs.
+- **Target delta:** statements +5%, functions +5%.
+- **Files:** `frontend/src/services/__tests__/api.test.ts`, `frontend/src/services/__tests__/errorReporting.test.ts`, `frontend/src/services/__tests__/performanceReporting.test.ts`
+- **AC:** Service layer ≥90% line coverage; ratchet raised to **60/54/52/61**.
 
-3. **Enhance `StoragePage.tsx` existing configs view**:
-   - **Add action buttons** to each config card:
-     - "Activate" button on inactive configs (calls `api.activateStorageConfig(id)` with confirmation dialog).
-     - "Edit" button opens an inline form or dialog (calls `api.updateStorageConfig(id, data)`).
-     - "Delete" button with confirmation (calls `api.deleteStorageConfig(id)`; disabled on active config).
-   - **Add "Migrate" button**: Visible when multiple configs exist. Opens migration wizard dialog.
+#### T0.2 · Admin page tests (high-value, low-coverage) · [P0/L] ✅
 
-4. **Create `components/StorageMigrationWizard.tsx`** (new) -- MUI Dialog with stepper:
-   - **Step 1 -- Select Source & Target**: Two dropdowns showing storage configs. Source defaults to active config. Target defaults to first inactive config. Validation: source !== target.
-   - **Step 2 -- Review Plan**: Calls `api.planStorageMigration(source, target)`. Displays artifact count, breakdown by type (modules/providers), estimated size. Warning about duration for large migrations.
-   - **Step 3 -- Execute & Monitor**: Start button calls `api.startStorageMigration(source, target)`. Shows real-time progress:
-     - MUI LinearProgress with `(migrated / total) * 100`.
-     - Text: "Migrated X of Y artifacts (Z failed)".
-     - Status chip: pending → running → completed/failed/cancelled.
-     - Cancel button calls `api.cancelStorageMigration(id)`.
-     - Auto-polls `api.getStorageMigration(id)` every 2 seconds while status is `running`.
-   - **Step 4 -- Complete**: Summary of migration results. If failures, list failed artifacts with error messages. Option to retry failed items (start a new migration for just the failed ones).
+- Pages with <35% coverage: `UsersPage`, `StoragePage`, `MirrorsPage`, `AuditLogPage`, `OIDCSettingsPage`, `OrganizationsPage`, `APIKeysPage`, `SecurityScanningPage`, `RolesPage`.
+- Use `msw` (Mock Service Worker) for API mocking; test CRUD flows, error states, loading states.
+- **Target delta:** statements +8%, branches +6%.
+- **Files:** `frontend/src/pages/admin/__tests__/*.test.tsx`
+- **AC:** Each listed page ≥60% line coverage; ratchet raised to **65/58/56/65**.
 
-5. **Add migration history section** to StoragePage:
-   - Below config cards, show a collapsible "Migration History" section.
-   - Table with columns: ID, Source, Target, Status, Progress, Started, Completed.
-   - Data from `api.listStorageMigrations()`.
+#### T0.3 · Hooks and contexts tests · [P0/M] ✅
 
-6. **Tests**:
-   - Unit test for `StorageMigrationWizard` component (render steps, plan display, progress calculation).
-   - E2E test: create a second storage config, plan migration, verify artifact count.
+- `AuthContext`, `ThemeContext`, `AnnouncerContext`, `SetupWizardContext`.
+- `useHotkey` and any other custom hooks.
+- **Target delta:** functions +4%.
+- **Files:** `frontend/src/contexts/__tests__/*.test.tsx`, `frontend/src/hooks/__tests__/*.test.ts`
+- **AC:** All contexts and hooks ≥85% line coverage; ratchet raised to **67/59/60/67**.
 
-**Affected files**: `frontend/src/pages/admin/StoragePage.tsx`, `frontend/src/components/StorageMigrationWizard.tsx` (new), `frontend/src/services/api.ts`
+#### T0.4 · Remaining component + page tests · [P1/M] ✅
+
+- Fill gaps in `DashboardPage`, `ModuleDetailPage`, `ProviderDetailPage`, `LoginPage`, `CallbackPage`.
+- Cover `StorageMigrationWizard`, `PublishFromSCMWizard`, setup wizard steps.
+- **Target delta:** statements +3%, branches +2%.
+- **Files:** `frontend/src/pages/__tests__/*.test.tsx`, `frontend/src/components/__tests__/*.test.tsx`
+- **AC:** All pages ≥50% line coverage; ratchet reaches **70/60/60/70**.
+
+#### T0.5 · Types and utilities 100% · [P2/S] ✅
+
+- Cover `src/types/index.ts`, `src/utils/index.ts`, `src/types/scm.ts`, `src/types/terraform_mirror.ts`.
+- **Files:** `frontend/src/types/__tests__/*.test.ts`, `frontend/src/utils/__tests__/*.test.ts`
+- **AC:** Types/utils at 100%; no further ratchet change expected (small files).
 
 ---
 
-### 2.3 Advanced Search UI
+## Phase 1 — Security hardening (parallel tracks)
 
-**Why**: Current search on `ModulesPage.tsx` (258 lines) and `ProvidersPage.tsx` (187 lines) is a single text field with no filters, no sort options, and no URL state synchronization. The backend roadmap (item 2.2) adds PostgreSQL full-text search with relevance ranking, sort parameters, and namespace/system filters.
+### Track A — Security
 
-**Current state**:
-- Both pages use `useDebounce(searchQuery, 300)` → `useQuery` with `api.searchModules({ query, limit, offset })`.
-- `searchQuery` and `page` are `useState` only -- URL params are read once on mount via `useSearchParams().get('q')` but **never written back**.
-- No sort selector, no filters, no namespace/system filter dropdowns.
-- Module page has "grid" and "grouped" view modes; provider page has only grid.
+#### A1.1 · httpOnly cookie auth + CSRF token · [P0/L]
 
-**Work items**:
+- **↔ Backend B2.4:** Coordinate refresh-token endpoint and `Set-Cookie` response.
+- Remove `localStorage.setItem('auth_token', ...)` in `AuthContext.tsx`, `services/api.ts`, and all related consumers.
+- Backend sets `auth_token` as `HttpOnly; Secure; SameSite=Strict` cookie.
+- Add double-submit CSRF pattern: non-HttpOnly `csrf` cookie + `X-CSRF-Token` header on mutating requests.
+- Axios: enable `withCredentials: true`.
+- Keep minimal user info in localStorage (role template, allowed_scopes) for UI gating — no secrets.
+- **Files:** `frontend/src/contexts/AuthContext.tsx`, `frontend/src/services/api.ts`, `frontend/src/components/ProtectedRoute.tsx`, `frontend/src/pages/LoginPage.tsx`, `frontend/src/pages/CallbackPage.tsx`
+- **AC:** No `auth_token` visible in browser DevTools Storage; CSRF token verified on POST/PUT/DELETE; e2e login still passes.
 
-1. **URL state synchronization** for both pages:
-   - Replace `useState` for `searchQuery`, `page`, `sort`, `order`, and filters with `useSearchParams`:
-     ```ts
-     const [searchParams, setSearchParams] = useSearchParams();
-     const query = searchParams.get('q') || '';
-     const page = parseInt(searchParams.get('page') || '1');
-     const sort = searchParams.get('sort') || 'relevance';
-     const order = searchParams.get('order') || 'desc';
-     const namespace = searchParams.get('namespace') || '';
-     ```
-   - Update `setSearchParams` when any parameter changes, debounced for the query field.
-   - This enables browser back/forward navigation to restore search state and shareable URLs.
+#### A1.2 · Automatic silent renew · [P1/M]
 
-2. **Add filter/sort controls** to `ModulesPage.tsx`:
-   - **Sort dropdown** (MUI Select): `Relevance`, `Name (A-Z)`, `Name (Z-A)`, `Newest`, `Most Downloaded`.
-   - **Namespace filter** (MUI Autocomplete with free text or loaded from available namespaces).
-   - **System/provider filter** (MUI Autocomplete -- for modules, filter by target system like `aws`, `azurerm`, `gcp`).
-   - Layout: Filter row between search input and results grid using MUI Stack/Grid.
+- **↔ Backend B2.4:** Uses `/auth/refresh` endpoint.
+- Replace proactive `SessionExpiryWarning` approach with silent refresh ~2min before expiry.
+- Warning dialog retained as fallback if refresh fails.
+- **Files:** `frontend/src/contexts/AuthContext.tsx`, `frontend/src/components/SessionExpiryWarning.tsx`
+- **AC:** Sessions extend transparently during active use; warning fires only on failure.
 
-3. **Add filter/sort controls** to `ProvidersPage.tsx`:
-   - **Sort dropdown**: `Relevance`, `Name (A-Z)`, `Name (Z-A)`, `Newest`.
-   - **Namespace filter** (Autocomplete).
+#### A1.3 · CSP nonces (remove `'unsafe-inline'` for styles) · [P1/M] ✅
 
-4. **Update API calls** in both pages:
-   - Pass `sort`, `order`, `namespace`, and `system` (modules only) parameters to `api.searchModules()` and `api.searchProviders()`.
-   - Update `queryKeys.ts` to include sort/filter params in query keys for proper cache invalidation:
-     ```ts
-     modules: {
-       search: (params: { query?: string; limit: number; offset: number; sort?: string; order?: string; namespace?: string; system?: string }) =>
-         [...queryKeys.modules._def, 'search', params] as const,
-     },
-     ```
+- nginx config injects per-request nonce into `index.html` via `sub_filter`.
+- Vite plugin or runtime patch to add nonce to style/script tags.
+- MUI/Emotion: configure Emotion cache with `nonce` prop.
+- **Files:** `frontend/nginx.conf`, `frontend/index.html`, `frontend/src/main.tsx`, `frontend/vite.config.ts`
+- **AC:** CSP report-only for 1 release; then enforced; `'unsafe-inline'` removed from style-src.
 
-5. **Visual search result scoring**: When sort is `relevance`, show a subtle relevance indicator (e.g., match highlighting in the result card using `<mark>` tags on matched terms, or a small relevance chip). The backend returns `ts_rank` scores that can be used.
+#### A1.4 · Subresource Integrity for any remaining CDN assets · [P1/M] ✅
 
-6. **Empty state improvements**: When no results match, show suggestions ("Try searching for...", "Clear filters", link to browse all modules).
+- If any external asset remains post-D0.1, add SRI hashes.
+- **Files:** `frontend/index.html`
+- **AC:** Verified via SRI scanner.
+- **Note:** No CDN assets remain after D0.1 — all dependencies are bundled locally.
 
-7. **Tests**:
-   - Unit test: URL ↔ state sync (changes to search params update the UI, changes to filters update URL).
-   - E2E test: search with filters, verify URL contains params, navigate back/forward.
+#### A1.5 · Dependabot security-only auto-merge · [P2/S] ✅
 
-**Affected files**: `frontend/src/pages/ModulesPage.tsx`, `frontend/src/pages/ProvidersPage.tsx`, `frontend/src/services/api.ts`, `frontend/src/services/queryKeys.ts`
+- Dependabot security PRs auto-merge on passing CI (restricted to patch-level bumps).
+- **Files:** `.github/workflows/dependabot-automerge.yml`
+- **AC:** Workflow active.
 
----
+### Track F — Air-gap / bundling
 
-### 2.4 Module Deprecation UI
+#### F1.1 · Vendor ReDoc locally · [P1/S] ✅
 
-**Why**: The backend roadmap (item 4.1) adds module-level deprecation with migration guidance and successor module references. The frontend needs to display deprecation status and provide management UI.
+- Full implementation of D0.1 if not already done.
+- **Files:** `frontend/package.json`, `frontend/src/pages/ApiDocumentation.tsx`
+- **AC:** No `jsdelivr` references in codebase.
+- **Note:** D0.1 replaced ReDoc with bundled swagger-ui-react.
 
-**Current state**:
-- Module detail pages show version-level deprecation (existing).
-- No module-level deprecation concept in the UI.
-- Module search results have no deprecation visual indicator.
+#### F1.2 · Offline markdown sanitization audit · [P2/M] ✅
 
-**Work items**:
-
-1. **Update module detail page** (`pages/ModuleDetailPage.tsx`):
-   - Show a prominent deprecation banner (MUI Alert, severity `warning`) when `module.deprecated === true`.
-   - Banner text: deprecation message + link to successor module (if set).
-   - Example: "This module is deprecated. Consider using [namespace/name/system] instead."
-
-2. **Add deprecation management** to module admin actions:
-   - "Deprecate Module" button in the module's admin toolbar.
-   - Opens dialog with: deprecation message (TextField, multiline), successor module selector (Autocomplete searching modules via `api.searchModules()`).
-   - Calls `api.deprecateModule(namespace, name, system, { message, successor })`.
-   - "Undeprecate Module" button visible when already deprecated. Calls `api.undeprecateModule(namespace, name, system)`.
-
-3. **Add API methods** to `services/api.ts`:
-   ```ts
-   async deprecateModule(ns: string, name: string, system: string, data: { message: string; successor?: { namespace: string; name: string; system: string } }): Promise<void>;
-   async undeprecateModule(ns: string, name: string, system: string): Promise<void>;
-   ```
-
-4. **Update search results** (`RegistryItemCard.tsx`):
-   - Show a "Deprecated" chip (MUI Chip, color `warning`) on deprecated modules.
-   - Reduce visual prominence (e.g., semi-transparent card) for deprecated modules.
-
-5. **Tests**: Unit test for deprecation banner rendering. E2E test for deprecate/undeprecate flow.
-
-**Affected files**: `frontend/src/pages/ModuleDetailPage.tsx`, `frontend/src/components/RegistryItemCard.tsx`, `frontend/src/services/api.ts`
-
-**Depends on**: Backend roadmap item 4.1 (module deprecation API endpoints).
+- Audit `rehype-sanitize` + `remark-gfm` for any network calls; confirm fully offline.
+- **Files:** `frontend/src/components/MarkdownRenderer.tsx`
+- **AC:** Network inspector shows zero requests during module detail render.
+- **Result:** All three packages (`react-markdown` 9.1.0, `remark-gfm` 4.0.1, `rehype-sanitize` 6.0.0) are fully offline — zero CDN loads, zero fetch calls. Sanitization uses default GitHub schema.
 
 ---
 
-## Phase 3: React Query Migration & Performance (Maturity 7→9, Ease of Use 7→9)
+## Phase 2 — Enterprise identity UX (↔ backend Track B)
 
-### 3.1 React Query Migration for Admin Pages
+### Track B — Identity UX
 
-**Why**: All 16 admin pages (`pages/admin/`, 9,223 lines total) use imperative `useState` + `useEffect` + `try/catch` patterns instead of React Query. This means no request deduplication, no stale-while-revalidate, no automatic cache invalidation, no background refetching, and every page re-implements the same loading/error/data state manually.
+#### B2.1 · SAML login provider picker · [P0/L]
 
-**Current state**:
-- Only 3 pages use React Query: `ModulesPage`, `ProvidersPage`, `DashboardPage`.
-- `queryKeys.ts` (17 lines) only has keys for `modules`, `providers`, `dashboard`.
-- Admin pages follow this anti-pattern:
-  ```tsx
-  const [data, setData] = useState<T[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  useEffect(() => {
-    const fetchData = async () => {
-      try { setLoading(true); const res = await api.listFoo(); setData(res); }
-      catch (e) { setError(getErrorMessage(e)); }
-      finally { setLoading(false); }
-    };
-    fetchData();
-  }, [deps]);
-  ```
+- **↔ Backend B2.1:** Consume `/auth/providers` listing SAML IdPs.
+- Login page renders SAML buttons per configured IdP.
+- SP-initiated flow: redirect to `/auth/saml/:idp/init`.
+- Handle IdP-initiated ACS landing.
+- **Files:** `frontend/src/pages/LoginPage.tsx`, `frontend/src/services/api.ts`, `frontend/src/types/index.ts`
+- **AC:** E2E test logs in via Okta SAML and Entra SAML.
 
-**Work items**:
+#### B2.2 · LDAP login form · [P0/M]
 
-1. **Expand `queryKeys.ts`** to cover all admin domains:
-   ```ts
-   export const queryKeys = {
-     modules: { /* existing */ },
-     providers: { /* existing */ },
-     dashboard: { /* existing */ },
-     users: {
-       _def: ['users'] as const,
-       list: (params?: { page?: number; limit?: number }) => [...queryKeys.users._def, 'list', params] as const,
-       detail: (id: string) => [...queryKeys.users._def, 'detail', id] as const,
-     },
-     organizations: {
-       _def: ['organizations'] as const,
-       list: (params?: { page?: number; limit?: number }) => [...queryKeys.organizations._def, 'list', params] as const,
-       detail: (id: string) => [...queryKeys.organizations._def, 'detail', id] as const,
-       members: (orgId: string) => [...queryKeys.organizations._def, 'members', orgId] as const,
-     },
-     apiKeys: { _def: ['apiKeys'] as const, list: () => [...queryKeys.apiKeys._def, 'list'] as const },
-     scmProviders: { _def: ['scmProviders'] as const, list: () => [...queryKeys.scmProviders._def, 'list'] as const },
-     auditLogs: { _def: ['auditLogs'] as const, list: (params?: Record<string, unknown>) => [...queryKeys.auditLogs._def, 'list', params] as const },
-     storageConfigs: { _def: ['storageConfigs'] as const, list: () => [...queryKeys.storageConfigs._def, 'list'] as const },
-     mirrors: { _def: ['mirrors'] as const, list: () => [...queryKeys.mirrors._def, 'list'] as const },
-     roles: { _def: ['roles'] as const, list: () => [...queryKeys.roles._def, 'list'] as const },
-     approvals: { _def: ['approvals'] as const, list: (params?: Record<string, unknown>) => [...queryKeys.approvals._def, 'list', params] as const },
-     policies: { _def: ['policies'] as const, list: () => [...queryKeys.policies._def, 'list'] as const },
-     scanning: { _def: ['scanning'] as const, config: () => [...queryKeys.scanning._def, 'config'] as const, stats: () => [...queryKeys.scanning._def, 'stats'] as const },
-     terraformBinaries: { _def: ['terraformBinaries'] as const, list: () => [...queryKeys.terraformBinaries._def, 'list'] as const },
-   } as const;
-   ```
+- **↔ Backend B2.2:** POST `/auth/ldap/login` with username + password.
+- Form respects Caps-Lock warning, password reveal toggle, rate-limit UX (429 → "Too many attempts" message).
+- **Files:** `frontend/src/pages/LoginPage.tsx`, `frontend/src/components/LDAPLoginForm.tsx`
+- **AC:** E2E test logs in against OpenLDAP.
 
-2. **Migrate each admin page** (each page is an independent work item):
-   - Replace `useState(data) + useState(loading) + useState(error) + useEffect(fetchData)` with `useQuery`.
-   - Replace mutation calls (`await api.createFoo(data); fetchData()`) with `useMutation` + `queryClient.invalidateQueries()`.
-   - Remove manual loading/error state management.
-   - Priority order (by complexity and traffic):
-     1. `UsersPage.tsx` (647 lines) -- list + CRUD
-     2. `OrganizationsPage.tsx` (580 lines) -- list + CRUD + members
-     3. `APIKeysPage.tsx` (914 lines) -- list + create + rotate + delete
-     4. `AuditLogPage.tsx` (429 lines) -- list with pagination and filters
-     5. `SCMProvidersPage.tsx` (757 lines) -- list + CRUD + OAuth
-     6. `StoragePage.tsx` (727 lines) -- list + create + test
-     7. `MirrorsPage.tsx` (887 lines) -- list + CRUD + sync
-     8. `MirrorPoliciesPage.tsx` (574 lines) -- list + CRUD + evaluate
-     9. `RolesPage.tsx` (297 lines) -- list + create
-     10. `ApprovalsPage.tsx` (397 lines) -- list + review
-     11. `OIDCSettingsPage.tsx` (423 lines) -- get + update
-     12. `SecurityScanningPage.tsx` (198 lines) -- get config + stats
-     13. `DashboardPage.tsx` (646 lines) -- already uses useQuery but may need update
-     14. `TerraformMirrorPage.tsx` (1,095 lines) -- complex; list + CRUD + sync + status
-     15. `ModuleUploadPage.tsx` (373 lines) -- form + upload
-     16. `ProviderUploadPage.tsx` (280 lines) -- form + upload
+#### B2.3 · SCIM provisioning admin page · [P0/L]
 
-3. **Add React Query Devtools** (already in `package.json` as `@tanstack/react-query-devtools`). Ensure it's mounted in `App.tsx` (it may already be; verify and add if missing).
+- **↔ Backend B2.3:** New admin page `pages/admin/SCIMProvisioningPage.tsx`.
+- Token management (create / rotate / revoke), per-IdP config, last-sync status, provisioning event log.
+- Route: `/admin/scim` requiring scope `admin`.
+- **Files:** `frontend/src/pages/admin/SCIMProvisioningPage.tsx`, `frontend/src/App.tsx`, `frontend/src/services/api.ts`
+- **AC:** Admin can generate SCIM token and copy-to-clipboard; Okta completes user sync.
 
-4. **Tests**: After migration, unit tests should mock React Query's `QueryClientProvider` rather than mocking individual API calls.
+#### B2.4 · IdP group → role mapping UI enhancements · [P1/M]
 
-**Acceptance criteria**: All admin pages use `useQuery`/`useMutation` instead of imperative fetch patterns. Cache invalidation works correctly (e.g., creating a user invalidates the users list). Loading/error states are handled consistently.
+- Extend `OIDCSettingsPage` to cover SAML + LDAP group claims.
+- Preview: "Given group `X`, resulting scopes = `[…]`".
+- **Files:** `frontend/src/pages/admin/OIDCSettingsPage.tsx`
+- **AC:** Mapping saved, applied on next login; E2E verified.
+
+#### B2.5 · Per-org IdP binding UI · [P1/M]
+
+- **↔ Backend B2.1:** Optional per-org IdP.
+- Organization page gains "Identity Provider" tab.
+- **Files:** `frontend/src/pages/admin/OrganizationsPage.tsx`
+- **AC:** Org-scoped login routes enforce the bound IdP.
+
+#### B2.6 · mTLS client auth docs in UI · [P2/M]
+
+- Admin page surfaces per-principal cert-subject mappings (read-only display + CRUD).
+- **Files:** `frontend/src/pages/admin/MTLSPage.tsx`, `frontend/src/App.tsx`
+- **AC:** Mapping CRUD operational.
 
 ---
 
-### 3.2 Frontend Performance Monitoring
+## Phase 3 — Accessibility + telemetry / privacy (parallel tracks)
 
-**Why**: No Web Vitals reporting, no performance monitoring. The custom error reporter (`errorReporting.ts`, 37 lines) only captures errors, not performance data.
+### Track C — Accessibility (WCAG 2.1 AA)
 
-**Current state**:
-- `errorReporting.ts` has `init()`, `captureError()`, `setUser()` -- POSTs to `VITE_ERROR_REPORTING_DSN`.
-- No `web-vitals` package installed.
-- No `@opentelemetry` packages installed.
-- No performance tracking anywhere in the codebase.
+#### C3.1 · Full WCAG 2.1 AA audit + remediation · [P0/L]
 
-**Work items**:
+- Automated pass (axe on every page in E2E).
+- Manual pass: screen reader (NVDA + VoiceOver), keyboard-only, high-contrast, 200% zoom.
+- Track violations as issues tagged `a11y`.
+- Raise e2e policy from "≤5 serious" to "0 serious, 0 critical".
+- **Files:** `e2e/tests/accessibility.spec.ts`, `ACCESSIBILITY.md`
+- **AC:** `ACCESSIBILITY.md` updated with conformance report.
 
-1. **Install `web-vitals`** package (`npm i web-vitals`).
+#### C3.2 · jsx-a11y: warn → error · [P1/M]
 
-2. **Create `services/performanceReporting.ts`**:
-   - Import `onCLS`, `onFID`, `onFCP`, `onLCP`, `onTTFB`, `onINP` from `web-vitals`.
-   - On init, register all vitals with a callback that:
-     - Logs to console in development.
-     - Batches and sends to `VITE_PERFORMANCE_DSN` endpoint (or reuses `VITE_ERROR_REPORTING_DSN` with a different event type) in production.
-   - Expose `reportNavigation(routeName, durationMs)` for route-level timing.
+- Flip eslint severity from `warn` to `error`; fix all violations.
+- Add `eslint-plugin-jsx-a11y/recommended` fully.
+- **Files:** `frontend/eslint.config.js`, affected component files
+- **AC:** CI lint passes with zero jsx-a11y warnings.
 
-3. **Add route-level timing** in `App.tsx`:
-   - Use React Router's `useNavigation()` (or a wrapper) to measure navigation durations.
-   - Report each route transition with `reportNavigation()`.
+#### C3.3 · Focus management in SPA routes · [P1/M]
 
-4. **Add build-time bundle analysis**:
-   - Install `rollup-plugin-visualizer` as dev dependency.
-   - Add `visualize` script: `VITE_ANALYZE=true vite build`.
-   - Add `vite.config.ts` conditional: when `VITE_ANALYZE` is set, include the visualizer plugin.
+- On route change, move focus to main heading; announce page title via `AnnouncerContext`.
+- **Files:** `frontend/src/App.tsx`, `frontend/src/contexts/AnnouncerContext.tsx`
+- **AC:** Manual screen-reader test verified; E2E assertion added.
 
-5. **Tests**: Unit test for the batching/sending logic in performanceReporting.
+#### C3.4 · Reduced-motion support · [P1/M]
 
-**Affected files**: `frontend/package.json`, `frontend/src/services/performanceReporting.ts` (new), `frontend/src/main.tsx`, `frontend/vite.config.ts`
+- `prefers-reduced-motion` media query disables transitions.
+- MUI theme transitions conditional.
+- **Files:** `frontend/src/contexts/ThemeContext.tsx`
+- **AC:** Verified in DevTools emulation.
 
----
+#### C3.5 · Color-contrast audit of theme tokens · [P2/M]
 
-### 3.3 Enhanced Error Reporting
+- All text/background pairs ≥ 4.5:1 (normal) / 3:1 (large).
+- Fix or document exceptions for dark theme secondary color.
+- **Files:** `frontend/src/contexts/ThemeContext.tsx`, `ACCESSIBILITY.md`
+- **AC:** Audit doc published.
 
-**Why**: The custom error reporter (`errorReporting.ts`, 37 lines) is basic -- fire-and-forget POST with no batching, no source maps, no breadcrumbs, no session replay. For production use, this should either be replaced by a proper SDK or significantly enhanced.
+### Track D — Telemetry / privacy
 
-**Work items**:
+#### D3.1 · User-facing telemetry opt-out · [P0/M]
 
-1. **Add batching and retry** to `errorReporting.ts`:
-   - Queue errors in memory.
-   - Flush batch every 5 seconds or when batch reaches 10 errors.
-   - Retry with exponential backoff on network failure (max 3 retries).
+- New user settings page `pages/SettingsPage.tsx` with toggles:
+  - Error reporting
+  - Performance reporting
+  - Anonymous usage analytics
+- Default: **opt-in required** (GDPR-safe default).
+- Consent banner on first visit.
+- Stored client-side + echoed to server for audit.
+- **Files:** `frontend/src/pages/SettingsPage.tsx`, `frontend/src/App.tsx`, `frontend/src/components/ConsentBanner.tsx`, `frontend/src/services/api.ts`
+- **AC:** Opt-out disables Sentry + performance + anonymous reporting globally; E2E verified.
 
-2. **Add breadcrumbs**: Capture user navigation (React Router transitions), API calls (Axios interceptor), console errors. Include last 20 breadcrumbs with each error report.
+#### D3.2 · Cookie banner + preference center · [P1/M]
 
-3. **Add source map support**: Upload source maps to the error reporting endpoint during CI build (`release.yml`). Include `release` version in error reports.
+- Only required if analytics cookies introduced; currently minimal.
+- If telemetry DSNs set, show banner.
+- **Files:** `frontend/src/components/ConsentBanner.tsx`
+- **AC:** Banner conforms to ePrivacy/GDPR.
 
-4. **Add session context**: Generate a random `sessionId` on page load. Include with all error reports for grouping.
+#### D3.3 · Privacy policy + data handling doc · [P2/S]
 
-5. **Optional Sentry integration**: If the user configures `VITE_SENTRY_DSN` instead of `VITE_ERROR_REPORTING_DSN`, initialize the Sentry SDK instead of the custom reporter. This allows both custom and managed error reporting:
-   ```ts
-   export function init() {
-     if (import.meta.env.VITE_SENTRY_DSN) {
-       Sentry.init({ dsn: import.meta.env.VITE_SENTRY_DSN, release: __APP_VERSION__ });
-     } else if (import.meta.env.VITE_ERROR_REPORTING_DSN) {
-       // existing custom reporter
-     }
-   }
-   ```
-   Add `@sentry/react` as optional peer dependency.
-
-**Affected files**: `frontend/src/services/errorReporting.ts`, `frontend/src/main.tsx`, `frontend/package.json`
-
----
-
-### 3.4 `useModuleDetail` Hook Refactor to React Query
-
-**Why**: `useModuleDetail.ts` (418 lines) is the most complex piece of state management in the frontend and uses imperative `useState`+`useEffect` patterns. It fetches module versions, module metadata, SCM info, and scan results in a cascade of effects with manual loading/error tracking.
-
-**Work items**:
-
-1. **Extract into multiple React Query hooks**:
-   - `useModuleVersions(namespace, name, system)` → `useQuery(queryKeys.modules.versions(ns, name, sys), () => api.getModuleVersions(...))`
-   - `useModuleMetadata(namespace, name, system, version)` → `useQuery(queryKeys.modules.detail(ns, name, sys, version), () => api.getModule(...))`
-   - `useModuleSCMInfo(namespace, name, system)` → `useQuery(queryKeys.modules.scm(ns, name, sys), () => api.getModuleSCMInfo(...))`
-   - `useModuleScan(namespace, name, system, version)` → `useQuery(queryKeys.modules.scan(ns, name, sys, version), () => api.getModuleScan(...))`
-
-2. **Create a composed `useModuleDetail` hook** that calls the above hooks and derives computed state (selected version, tab state, etc.).
-
-3. **Add query keys** for the new hooks to `queryKeys.ts`.
-
-4. **Update `ModuleDetailPage`** to use the refactored hook. The page's render logic should not change -- only the data fetching beneath it.
-
-5. **Tests**: The existing absence of tests is addressed in Phase 1 item 1.3. The refactored hook should be easier to test since each sub-hook can be tested independently.
-
-**Affected files**: `frontend/src/hooks/useModuleDetail.ts`, `frontend/src/services/queryKeys.ts`, `frontend/src/pages/ModuleDetailPage.tsx`
-
-**Depends on**: 3.1 (uses the expanded `queryKeys.ts` patterns).
+- `PRIVACY.md` describing what's collected, retention, opt-out.
+- Linked from footer.
+- **Files:** `PRIVACY.md`, `frontend/src/components/Layout.tsx`
+- **AC:** Merged.
 
 ---
 
-## Phase 4: Documentation & Polish (Documentation 9→10)
+## Phase 4 — Feature surface for new backend capabilities (↔ backend Tracks D/E/F)
 
-### 4.1 Component Storybook or Style Guide
+### Track E — Feature UX
 
-**Why**: With 18 components and 16 admin pages, there is no way to browse or test UI components in isolation. New contributors cannot see what's available without reading source.
+#### E4.1 · Module deprecation banner + admin toggle · [P0/M]
 
-**Work items**:
+- **↔ Backend E4.1:** Consume `deprecation` block from module metadata.
+- On `ModuleDetailPage`, render `<Alert severity="warning">` with deprecation reason + replacement link.
+- Admin "Manage Versions" section exposes deprecation toggle + replacement_source.
+- **Files:** `frontend/src/pages/ModuleDetailPage.tsx`, `frontend/src/pages/admin/ModuleUploadPage.tsx`, `frontend/src/types/index.ts`
+- **AC:** E2E: deprecated version shows banner; non-deprecated does not.
 
-1. **Evaluate approach**: Storybook is the standard but heavy. A lighter alternative is a `/dev/components` route that renders all components with sample props (only available in dev mode).
+#### E4.2 · Policy evaluation results in upload flow · [P1/M]
 
-2. **If Storybook**:
-   - Install `@storybook/react-vite`.
-   - Create stories for key components: `RegistryItemCard`, `MarkdownRenderer`, `ErrorBoundary`, `Layout`, `ProviderIcon`, `SecurityScanPanel`, `VersionDetailsPanel`.
-   - Add Storybook build to CI (static export).
+- **↔ Backend E4.3:** Consume policy evaluation response from upload API.
+- Upload page displays policy check results; blocks submit on `deny`.
+- Violation details expandable.
+- **Files:** `frontend/src/pages/admin/ModuleUploadPage.tsx`, `frontend/src/components/PolicyResultsPanel.tsx`
+- **AC:** E2E: upload violating policy fails with clear error surface.
 
-3. **If dev route** (lighter approach):
-   - Create `src/pages/dev/ComponentShowcase.tsx`.
-   - Register under `/dev/components` route (only in development mode).
-   - Render each component with representative props in a categorized list.
+#### E4.3 · Module test results UI · [P1/M]
 
-**Affected files**: Depends on approach. If Storybook: `.storybook/` (new), `src/components/*.stories.tsx` (new), `package.json`. If dev route: `src/pages/dev/ComponentShowcase.tsx` (new), `src/App.tsx`.
+- **↔ Backend E4.4:** Consume test results from version metadata.
+- Version detail panel shows pass/fail per declared example; logs expandable.
+- **Files:** `frontend/src/components/VersionDetailsPanel.tsx`, `frontend/src/components/TestResultsPanel.tsx`
+- **AC:** Module with failing example shows red status.
 
----
+#### E4.4 · Per-org quota dashboard · [P2/M]
 
-### 4.2 Accessibility Audit & Improvements
+- **↔ Backend D3.4:** Consume quota + usage API.
+- Extend admin dashboard with quota usage charts (bar/gauge).
+- **Files:** `frontend/src/pages/admin/DashboardPage.tsx`, `frontend/src/components/QuotaUsageChart.tsx`
+- **AC:** Real-time usage renders from dedicated API endpoint.
 
-**Why**: No accessibility testing exists. MUI provides baseline a11y, but custom components (notably `RegistryItemCard`, `Layout`, `SetupWizardPage`) need manual verification.
+#### E4.5 · OCI distribution affordances · [P2/M]
 
-**Work items**:
-
-1. **Install `@axe-core/react`** (dev dependency) for runtime a11y warnings in development.
-
-2. **Add Playwright accessibility tests**: Use `@axe-core/playwright` in a new `e2e/tests/accessibility.spec.ts` to scan key pages.
-
-3. **Manual audit and fix** for common issues:
-   - Ensure all images have `alt` text.
-   - Ensure all form inputs have associated labels.
-   - Verify keyboard navigation through the setup wizard.
-   - Add `aria-label` to icon-only buttons (e.g., theme toggle, help toggle).
-   - Verify color contrast ratios meet WCAG AA (MUI default theme should pass, but custom overrides may not).
-
-4. **Add `lint-staged` + ESLint a11y rules**: Install `eslint-plugin-jsx-a11y` and enable recommended rules in ESLint config.
-
-**Affected files**: `frontend/package.json`, `frontend/eslint.config.js`, `e2e/tests/accessibility.spec.ts` (new), various component files for fixes
+- **↔ Backend E4.2:** Detect OCI support from backend capabilities endpoint.
+- Module detail page adds "Pull via OCI" snippet alongside Terraform snippet.
+- **Files:** `frontend/src/components/UsageExample.tsx`
+- **AC:** Snippet copy works; shows only when OCI endpoint available.
 
 ---
 
-### 4.3 Documentation Updates
+## Phase 5 — UX polish: whitelabel + internationalization
 
-**Work items** (each is independent, can be written in parallel):
+### Track G — Whitelabel / theming
 
-1. **Update `README.md`** with:
-   - Testing section (how to run unit tests, coverage, E2E).
-   - CI pipeline overview.
-   - Architecture diagram (component tree, data flow, state management).
-   - Link to roadmap.
+#### G5.1 · Whitelabel theme system · [P0/L]
 
-2. **Create `TESTING.md`**:
-   - Unit test patterns and conventions.
-   - E2E test patterns and how to add new tests.
-   - How to run tests locally and in CI.
-   - Coverage expectations and how to check.
+- **↔ Backend:** New config-driven `/api/v1/ui/theme` endpoint returning theme tokens.
+- Extract theme tokens into JSON consumed at runtime.
+- Support: primary color, secondary color, logo URL, product name, favicon, login-page hero image.
+- CSS custom properties for easy override.
+- Per-tenant theme optional (deferred).
+- **Files:** `frontend/src/contexts/ThemeContext.tsx`, `frontend/src/services/api.ts`, `frontend/src/components/Layout.tsx`, `frontend/src/components/AboutModal.tsx`
+- **AC:** Deploy-time env var or backend config changes branding without rebuild.
 
-3. **Update `CONTRIBUTING.md`** with:
-   - Test requirements for PRs (unit tests for new components, E2E for new flows).
-   - React Query patterns for data fetching.
-   - Component file organization conventions.
+#### G5.2 · Custom logo + product name · [P1/M]
 
-4. **Create `ARCHITECTURE.md`**:
-   - Component hierarchy diagram.
-   - Data fetching patterns (React Query vs legacy useState/useEffect).
-   - Routing structure.
-   - Authentication flow (AuthContext → localStorage → API interceptor).
-   - State management philosophy (React Query for server state, React state for UI state, Context for app-level concerns).
+- Subset of G5.1 if phased.
+- **Files:** `frontend/src/components/Layout.tsx`, `frontend/src/components/AboutModal.tsx`
+- **AC:** Logo in sidebar + AboutModal swappable via theme config.
 
-**Affected files**: `README.md`, `TESTING.md` (new), `CONTRIBUTING.md`, `ARCHITECTURE.md` (new)
+### Track I — Internationalization
+
+#### I5.1 · Introduce `react-i18next` · [P1/L]
+
+- Wrap app with `I18nextProvider`; extract all user-visible strings into translation keys.
+- Language detector (browser preference + user setting).
+- Initial locales: `en` (reference) + `es`, `fr`, `de`, `ja` (machine-translated baseline flagged for review).
+- Language switcher in header/footer.
+- Dates/numbers via `Intl`.
+- **Files:** `frontend/package.json`, `frontend/src/i18n.ts`, `frontend/src/locales/<lang>/*.json`, `frontend/src/App.tsx`, `frontend/src/components/Layout.tsx`, all page/component files (string extraction)
+- **AC:** E2E passes in at least two locales; strings externalized.
+
+#### I5.2 · RTL support · [P2/M]
+
+- Configure MUI RTL; verify on `ar`/`he` pseudo-locale.
+- **Files:** `frontend/src/contexts/ThemeContext.tsx`
+- **AC:** Smoke test in RTL mode.
+
+#### I5.3 · Translation contribution workflow · [P3/M]
+
+- Integrate with Crowdin or similar; document in CONTRIBUTING.md.
+- **Files:** `CONTRIBUTING.md`, `.github/workflows/crowdin.yml`
+- **AC:** External contributor can propose translations.
 
 ---
 
-## Summary: Score Impact Projection
+## Cross-cutting: test quality
 
-| Category                 | Before | After | Key Drivers                                                                                              |
-| ------------------------ | ------ | ----- | -------------------------------------------------------------------------------------------------------- |
-| **Security**             | 8      | 9     | Scanning setup wizard, accessibility audit                                                               |
-| **Ease of Use**          | 7      | 9     | Storage migration wizard, advanced search with filters/URL sync, scanning setup, React Query consistency |
-| **Documentation**        | 9      | 10    | TESTING.md, ARCHITECTURE.md, README update, CONTRIBUTING update, component showcase                      |
-| **Maturity**             | 6      | 9     | CI pipelines, unit test coverage (40→60%+), coverage enforcement, E2E improvements                       |
-| **Feature Completeness** | 8      | 9     | Advanced search UI, storage migration wizard, scanning setup, module deprecation UI                      |
-| **Enterprise Readiness** | 7      | 9     | CI/CD, error monitoring, performance monitoring, accessibility                                           |
+### E5.1 · Raise coverage floor to 80% by v1.0.0 · [P1/M]
+
+- Phase 0.5 (T-track) reaches 70/60/60/70 for v0.8.0.
+- Incremental 70 → 75 → 80 across 0.8 → 0.9 → 1.0:
+  - **v0.8.0:** 70/60/60/70 (T0.1–T0.4 complete)
+  - **v0.9.0:** 75/65/65/75 (new features ship with tests; ratchet on merge)
+  - **v1.0.0:** 80/70/70/80 (remaining gaps + visual component tests)
+- **Files:** `frontend/vitest.config.ts`
+- **AC:** Each milestone release meets its threshold; CHANGELOG tracks ratchet bumps.
+
+### E5.2 · E2E matrix: Chromium + Firefox + WebKit on main · [P1/M]
+
+- Currently Chromium local, Firefox CI. Add WebKit to CI.
+- **Files:** `e2e/playwright.config.ts`, `.github/workflows/e2e.yml`
+- **AC:** Playwright project `webkit` included in CI pipeline.
+
+### E5.3 · Visual regression tests · [P2/M]
+
+- Playwright screenshot diffs on key pages (home, module detail, admin dashboard, login).
+- **Files:** `e2e/tests/visual-regression.spec.ts`, `e2e/screenshots/` (baselines)
+- **AC:** Baseline committed; diffs flagged in PR.
+
+### E5.4 · Contract tests against backend Swagger · [P2/M]
+
+- Generate TypeScript client from `swagger.json`; type-check API usage at build time.
+- **Files:** `frontend/scripts/generate-api-client.sh`, `frontend/src/services/generated/`, `frontend/tsconfig.json`
+- **AC:** Build fails if backend removes an endpoint the frontend uses.
 
 ---
 
-## Dependency Graph
+## Milestones
 
-```
-Phase 1 (parallel -- all independent):
-  1.1 Vitest Coverage Config ────── independent (do first; gates 1.6)
-  1.2 Unit Tests: Services ──────── independent
-  1.3 Unit Tests: Hooks/Contexts ── independent
-  1.4 Unit Tests: Components ────── independent
-  1.5 GitHub Actions CI ─────────── independent
-  1.6 Ratchet Coverage Thresholds ─ depends on 1.1 + 1.2 + 1.3 + 1.4
+| Version    | Target content                                                                          |
+| ---------- | --------------------------------------------------------------------------------------- |
+| **0.8.0**  | Phase 0 + Phase 0.5 (T-track: coverage ≥70/60/60/70) + Phase 1 Track A items A1.1, A1.2 |
+| **0.9.0**  | Phase 2 (SAML / LDAP / SCIM UX)                                                         |
+| **0.10.0** | Phase 3 (WCAG 2.1 AA + telemetry opt-out)                                               |
+| **0.11.0** | Phase 4 (feature surface for new backend capabilities)                                  |
+| **1.0.0**  | Phase 5 (whitelabel + i18n baseline); all P0/P1 closed                                  |
 
-Phase 2 (parallel, after Phase 1 CI exists):
-  2.1 Scanning Setup Wizard ────── requires backend roadmap 2.3
-  2.2 Storage Migration Wizard ─── requires backend roadmap 2.4
-  2.3 Advanced Search UI ───────── requires backend roadmap 2.2
-  2.4 Module Deprecation UI ────── requires backend roadmap 4.1
+---
 
-Phase 3 (parallel):
-  3.1 React Query Migration ────── independent (largest item; can be split across agents per page)
-  3.2 Performance Monitoring ───── independent
-  3.3 Enhanced Error Reporting ─── independent
-  3.4 useModuleDetail Refactor ─── depends on 3.1 (query key patterns)
+## Scope boundaries
 
-Phase 4 (after Phase 2-3):
-  4.1 Component Showcase ───────── independent
-  4.2 Accessibility Audit ──────── independent
-  4.3 Documentation Updates ────── depends on all prior phases (documents new patterns)
-```
+**Included:** React SPA, nginx container, Playwright E2E, build/CI under this repo.
+
+**Explicitly excluded:** Backend server changes (see `terraform-registry-backend/ROADMAP.md`); see [`ROADMAP-UX.md`](ROADMAP-UX.md) for non-enterprise UX polish not listed here.
+
+---
+
+## How to contribute to this roadmap
+
+1. Pick an item by ID (e.g., `B2.1`).
+2. Open an issue titled `[roadmap:B2.1] <short title>`.
+3. Submit PR referencing the issue.
+4. Cross-repo items (`↔`) must coordinate via linked issues to `terraform-registry-backend`.

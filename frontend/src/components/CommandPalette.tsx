@@ -233,7 +233,7 @@ const PaletteItem: React.FC<PaletteItemProps> = ({ value, label, hint, onSelect 
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
-          px: 2,
+          px: 3,
           py: 1,
           cursor: 'pointer',
           '&[data-selected="true"], &:hover': {

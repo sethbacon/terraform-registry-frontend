@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, screen, waitFor, fireEvent, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
@@ -511,5 +511,159 @@ describe('StoragePage', () => {
     await waitFor(() => {
       expect(screen.getByText('Refresh')).toBeInTheDocument()
     })
+  })
+
+  it('types into local Base Path field', async () => {
+    mockSetupRequired()
+    const user = userEvent.setup()
+    renderWithProviders(<StoragePage />)
+    await waitFor(() => expect(screen.getByText('Next')).toBeInTheDocument())
+    await user.click(screen.getByText('Next'))
+    const basePath = screen.getByLabelText(/Base Path/) as HTMLInputElement
+    await user.clear(basePath)
+    await user.type(basePath, '/var/data')
+    expect(basePath.value).toBe('/var/data')
+  })
+
+  it('toggles Serve files directly switch on local backend', async () => {
+    mockSetupRequired()
+    const user = userEvent.setup()
+    renderWithProviders(<StoragePage />)
+    await waitFor(() => expect(screen.getByText('Next')).toBeInTheDocument())
+    await user.click(screen.getByText('Next'))
+    const toggle = screen.getByRole('switch')
+    await user.click(toggle)
+    expect(toggle).not.toBeChecked()
+  })
+
+  it('types into Azure settings fields', async () => {
+    mockSetupRequired()
+    const user = userEvent.setup()
+    renderWithProviders(<StoragePage />)
+    await waitFor(() => expect(screen.getByText('Azure Blob Storage')).toBeInTheDocument())
+    await user.click(screen.getByText('Azure Blob Storage'))
+    await user.click(screen.getByText('Next'))
+    await user.type(screen.getByLabelText(/Account Name/), 'myacct')
+    await user.type(screen.getByLabelText(/Account Key/), 'secretkey')
+    await user.type(screen.getByLabelText(/Container Name/), 'mycontainer')
+    await user.type(screen.getByLabelText(/CDN URL/), 'https://cdn.example.com')
+    expect((screen.getByLabelText(/Account Name/) as HTMLInputElement).value).toBe('myacct')
+  })
+
+  it('switches S3 auth method to static and types access key fields', async () => {
+    mockSetupRequired()
+    const user = userEvent.setup()
+    renderWithProviders(<StoragePage />)
+    await waitFor(() => expect(screen.getByText('Amazon S3 / S3-Compatible')).toBeInTheDocument())
+    await user.click(screen.getByText('Amazon S3 / S3-Compatible'))
+    await user.click(screen.getByText('Next'))
+    await user.type(screen.getByLabelText(/Bucket/), 'my-bucket')
+    await user.type(screen.getByLabelText(/Endpoint/), 'https://s3.example.com')
+    // Open MUI Select via mouseDown on the combobox
+    const authSelect = screen.getByRole('combobox')
+    fireEvent.mouseDown(authSelect)
+    const listbox = await screen.findByRole('listbox')
+    fireEvent.click(within(listbox).getByText(/Access Key/i))
+    await user.type(screen.getByLabelText(/Access Key ID/), 'AKIAxxxx')
+    await user.type(screen.getByLabelText(/Secret Access Key/), 'secret')
+    expect(screen.getByLabelText(/Access Key ID/)).toBeInTheDocument()
+  })
+
+  it('switches S3 auth method to oidc and types role ARN + token file', async () => {
+    mockSetupRequired()
+    const user = userEvent.setup()
+    renderWithProviders(<StoragePage />)
+    await waitFor(() => expect(screen.getByText('Amazon S3 / S3-Compatible')).toBeInTheDocument())
+    await user.click(screen.getByText('Amazon S3 / S3-Compatible'))
+    await user.click(screen.getByText('Next'))
+    const authSelect = screen.getByRole('combobox')
+    fireEvent.mouseDown(authSelect)
+    const listbox = await screen.findByRole('listbox')
+    fireEvent.click(within(listbox).getByText(/OIDC/i))
+    await user.type(screen.getByLabelText(/Role ARN/), 'arn:aws:iam::123:role/X')
+    await user.type(screen.getByLabelText(/Role Session Name/), 'session')
+    await user.type(screen.getByLabelText(/Web Identity Token File/), '/var/run/token')
+    expect(screen.getByLabelText(/Role ARN/)).toBeInTheDocument()
+  })
+
+  it('switches S3 auth method to assume_role and types external ID', async () => {
+    mockSetupRequired()
+    const user = userEvent.setup()
+    renderWithProviders(<StoragePage />)
+    await waitFor(() => expect(screen.getByText('Amazon S3 / S3-Compatible')).toBeInTheDocument())
+    await user.click(screen.getByText('Amazon S3 / S3-Compatible'))
+    await user.click(screen.getByText('Next'))
+    const authSelect = screen.getByRole('combobox')
+    fireEvent.mouseDown(authSelect)
+    const listbox = await screen.findByRole('listbox')
+    fireEvent.click(within(listbox).getByText(/AssumeRole/i))
+    await user.type(screen.getByLabelText(/External ID/), 'ext-123')
+    expect(screen.getByLabelText(/External ID/)).toBeInTheDocument()
+  })
+
+  it('switches GCS auth method to service_account and types credentials', async () => {
+    mockSetupRequired()
+    const user = userEvent.setup()
+    renderWithProviders(<StoragePage />)
+    await waitFor(() => expect(screen.getByText('Google Cloud Storage')).toBeInTheDocument())
+    await user.click(screen.getByText('Google Cloud Storage'))
+    await user.click(screen.getByText('Next'))
+    await user.type(screen.getByLabelText(/^Bucket/), 'gcs-bucket')
+    await user.type(screen.getByLabelText(/Project ID/), 'proj-123')
+    const authSelect = screen.getByRole('combobox')
+    fireEvent.mouseDown(authSelect)
+    const listbox = await screen.findByRole('listbox')
+    fireEvent.click(within(listbox).getByText(/Service Account/i))
+    await user.type(screen.getByLabelText(/Credentials File Path/), '/etc/key.json')
+    fireEvent.change(screen.getByLabelText(/Credentials JSON/), { target: { value: '{"x":1}' } })
+    await user.type(screen.getByLabelText(/Endpoint/), 'https://gcs.example.com')
+    expect(screen.getByLabelText(/Credentials File Path/)).toBeInTheDocument()
+  })
+
+  it('shows error when test config returns failure message', async () => {
+    mockSetupRequired()
+    testStorageConfigMock.mockResolvedValue({ success: false, message: 'Invalid creds' })
+    const user = userEvent.setup()
+    renderWithProviders(<StoragePage />)
+    await waitFor(() => expect(screen.getByText('Next')).toBeInTheDocument())
+    await user.click(screen.getByText('Next'))
+    await user.click(screen.getByText('Next'))
+    await user.click(screen.getByText('Test Configuration'))
+    // No "configuration is valid" message
+    await waitFor(() => expect(testStorageConfigMock).toHaveBeenCalled())
+  })
+
+  it('dismisses error alert via close button', async () => {
+    mockSetupRequired()
+    createStorageConfigMock.mockRejectedValue(new Error('Boom'))
+    const user = userEvent.setup()
+    renderWithProviders(<StoragePage />)
+    await waitFor(() => expect(screen.getByText('Next')).toBeInTheDocument())
+    await user.click(screen.getByText('Next'))
+    await user.click(screen.getByText('Next'))
+    await user.click(screen.getByText('Save Configuration'))
+    await waitFor(() => expect(screen.getByText('Boom')).toBeInTheDocument())
+    const closeBtn = screen.getByRole('button', { name: /close/i })
+    await user.click(closeBtn)
+    await waitFor(() => expect(screen.queryByText('Boom')).not.toBeInTheDocument())
+  })
+
+  it('clicks Refresh button in existing configs view to invalidate queries', async () => {
+    mockExistingConfigs()
+    const user = userEvent.setup()
+    renderWithProviders(<StoragePage />)
+    await waitFor(() => expect(screen.getByText('Refresh')).toBeInTheDocument())
+    listStorageConfigsMock.mockClear()
+    await user.click(screen.getByText('Refresh'))
+    await waitFor(() => expect(listStorageConfigsMock).toHaveBeenCalled())
+  })
+
+  it('closes migration wizard via onClose callback', async () => {
+    mockExistingConfigs([fakeLocalConfig, fakeS3Config])
+    const user = userEvent.setup()
+    renderWithProviders(<StoragePage />)
+    await waitFor(() => expect(screen.getByText('Migrate Data')).toBeInTheDocument())
+    await user.click(screen.getByText('Migrate Data'))
+    expect(screen.getByTestId('migration-wizard')).toBeInTheDocument()
   })
 })

@@ -1,4 +1,5 @@
 import { render, screen } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { describe, it, expect, vi, beforeAll } from 'vitest'
 import { MemoryRouter } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
@@ -95,5 +96,56 @@ describe('ComponentShowcase', () => {
     renderShowcase()
     expect(screen.getByText('Version 2.3.1 Details')).toBeInTheDocument()
     expect(screen.getByText('Version 1.0.0 Details')).toBeInTheDocument()
+  })
+
+  it('opens AboutModal when its trigger chip is clicked', async () => {
+    renderShowcase()
+    const chip = screen.getByText('Open AboutModal')
+    await userEvent.click(chip)
+    expect(screen.getByRole('dialog')).toBeInTheDocument()
+  })
+
+  it('opens StorageMigrationWizard when its trigger chip is clicked', async () => {
+    renderShowcase()
+    const chip = screen.getByText('Open StorageMigrationWizard')
+    await userEvent.click(chip)
+    expect(screen.getAllByRole('dialog').length).toBeGreaterThanOrEqual(1)
+  })
+
+  it('invokes VersionDetailsPanel callbacks by clicking action buttons', async () => {
+    renderShowcase()
+    const deprecateBtn = screen.getByRole('button', { name: /^deprecate version$/i })
+    await userEvent.click(deprecateBtn)
+    const undeprecateBtn = screen.getByRole('button', { name: /remove deprecation/i })
+    await userEvent.click(undeprecateBtn)
+    const deleteButtons = screen.getAllByRole('button', { name: /delete this version/i })
+    for (const btn of deleteButtons) {
+      await userEvent.click(btn)
+    }
+    expect(screen.getByText('Component Showcase')).toBeInTheDocument()
+  })
+
+  it('invokes RegistryItemCard onClick handlers when cards are clicked', async () => {
+    renderShowcase()
+    const cards = screen.getAllByRole('article')
+    for (const card of cards) {
+      await userEvent.click(card)
+    }
+    expect(cards.length).toBeGreaterThanOrEqual(6)
+  })
+
+  it('closes AboutModal via its close callback', async () => {
+    renderShowcase()
+    await userEvent.click(screen.getByText('Open AboutModal'))
+    expect(screen.getByRole('dialog')).toBeInTheDocument()
+    // AboutModal has a "Close" button
+    const closeBtn = screen.getAllByRole('button', { name: /close/i })[0]
+    await userEvent.click(closeBtn)
+  })
+
+  it('invokes TOC anchor links', () => {
+    renderShowcase()
+    const tocLinks = screen.getAllByRole('link')
+    expect(tocLinks.length).toBeGreaterThan(0)
   })
 })

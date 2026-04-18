@@ -1,7 +1,7 @@
 # Multi-stage Dockerfile for Terraform Registry Frontend
 
 # Stage 1: Build the React application
-FROM node:22-alpine AS builder
+FROM node:22-alpine@sha256:8ea2348b068a9544dae7317b4f3aafcdc032df1647bb7d768a05a5cad1a7683f AS builder
 
 # VITE_MODE controls the Vite build mode.
 # Use "development" to enable the Dev Login button for E2E/staging environments.
@@ -29,7 +29,7 @@ COPY . .
 RUN npx vite build --mode ${VITE_MODE}
 
 # Stage 2: Serve with nginx
-FROM nginx:1.25-alpine
+FROM nginx:1.25-alpine@sha256:516475cc129da42866742567714ddc681e5eed7b9ee0b9e9c015e464b4221a00
 
 # Copy built files from builder
 COPY --from=builder /app/dist /usr/share/nginx/html

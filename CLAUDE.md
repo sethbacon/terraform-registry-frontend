@@ -185,17 +185,18 @@ terraform-registry-frontend/
 
 ## Tech Stack
 
-| Concern    | Technology                      |
-| ---------- | ------------------------------- |
-| Language   | TypeScript 5.7.2 (strict mode)  |
-| Framework  | React 19                        |
-| Build Tool | Vite 6.1.11                     |
-| UI         | Material-UI v7 + Emotion        |
-| HTTP       | Axios 1.6.7                     |
-| Router     | React Router v6                 |
-| Markdown   | react-markdown + remark-gfm     |
-| Linting    | ESLint 9 with TypeScript ESLint |
-| E2E Tests  | Playwright                      |
+| Concern    | Technology                          |
+| ---------- | ----------------------------------- |
+| Language   | TypeScript 5.7.2 (strict mode)      |
+| Framework  | React 19                            |
+| Build Tool | Vite 6.1.11                         |
+| UI         | Material-UI v7 + Emotion            |
+| HTTP       | Axios 1.6.7                         |
+| Router     | React Router v6                     |
+| Markdown   | react-markdown + remark-gfm         |
+| Linting    | ESLint 9 with TypeScript ESLint     |
+| Formatting | Prettier 3 (eslint-config-prettier) |
+| E2E Tests  | Playwright                          |
 
 ---
 
@@ -217,6 +218,12 @@ npm run build
 
 # Lint (zero warnings enforced)
 npm run lint
+
+# Format code with Prettier
+npm run format
+
+# Check formatting (CI — fails on unformatted files)
+npm run format:check
 
 # Preview production build
 npm run preview

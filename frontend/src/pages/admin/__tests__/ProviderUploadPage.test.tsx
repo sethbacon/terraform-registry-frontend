@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react'
+import { render, screen, waitFor, fireEvent } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router-dom'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
@@ -12,9 +12,10 @@ vi.mock('react-router-dom', async () => {
   }
 })
 
+const uploadProviderMock = vi.fn()
 vi.mock('../../../services/api', () => ({
   default: {
-    uploadProvider: vi.fn(),
+    uploadProvider: (...args: unknown[]) => uploadProviderMock(...args),
   },
 }))
 
@@ -91,5 +92,73 @@ describe('ProviderUploadPage', () => {
     await user.click(screen.getByText('Manual Upload'))
     const uploadButton = screen.getByRole('button', { name: /Upload Provider/i })
     expect(uploadButton).toBeDisabled()
+  })
+
+  it('enables upload button after file is selected and uploads provider', async () => {
+    const user = userEvent.setup()
+    uploadProviderMock.mockResolvedValue({})
+    renderPage()
+    await user.click(screen.getByText('Manual Upload'))
+
+    await user.type(screen.getByLabelText(/Namespace/), 'myorg')
+    await user.type(screen.getByLabelText(/Provider Name/), 'widget')
+    await user.type(screen.getByLabelText(/Version/), '1.0.0')
+
+    const combos = screen.getAllByRole('combobox')
+    await user.click(combos[0])
+    await user.click(await screen.findByRole('option', { name: /^Linux$/i }))
+    await user.click(combos[1])
+    await user.click(await screen.findByRole('option', { name: /AMD64/i }))
+
+    // Simulate file selection via the hidden input in FileDropZone
+    const input = document.querySelector('input[type="file"]') as HTMLInputElement
+    const file = new File(['zipdata'], 'terraform-provider-widget_1.0.0_linux_amd64.zip', { type: 'application/zip' })
+    fireEvent.change(input, { target: { files: [file] } })
+
+    await waitFor(() => {
+      const btn = screen.getByRole('button', { name: /^upload provider$/i })
+      expect(btn).not.toBeDisabled()
+    })
+
+    await user.click(screen.getByRole('button', { name: /^upload provider$/i }))
+    await waitFor(() => expect(uploadProviderMock).toHaveBeenCalled())
+    await waitFor(() => expect(mockNavigate).toHaveBeenCalledWith('/providers/myorg/widget'))
+  })
+
+  it('shows error alert when upload fails', async () => {
+    const user = userEvent.setup()
+    uploadProviderMock.mockRejectedValue(new Error('upload blew up'))
+    renderPage()
+    await user.click(screen.getByText('Manual Upload'))
+
+    await user.type(screen.getByLabelText(/Namespace/), 'myorg')
+    await user.type(screen.getByLabelText(/Provider Name/), 'widget')
+    await user.type(screen.getByLabelText(/Version/), '1.0.0')
+
+    const combos = screen.getAllByRole('combobox')
+    await user.click(combos[0])
+    await user.click(await screen.findByRole('option', { name: /^Linux$/i }))
+    await user.click(combos[1])
+    await user.click(await screen.findByRole('option', { name: /AMD64/i }))
+
+    const input = document.querySelector('input[type="file"]') as HTMLInputElement
+    const file = new File(['x'], 'terraform-provider-widget_1.0.0_linux_amd64.zip', { type: 'application/zip' })
+    fireEvent.change(input, { target: { files: [file] } })
+
+    await waitFor(() => expect(screen.getByRole('button', { name: /^upload provider$/i })).not.toBeDisabled())
+    await user.click(screen.getByRole('button', { name: /^upload provider$/i }))
+    await waitFor(() => expect(screen.getByText(/upload blew up/)).toBeInTheDocument())
+  })
+
+  it('shows validation error when required fields are missing', async () => {
+    const user = userEvent.setup()
+    renderPage()
+    await user.click(screen.getByText('Manual Upload'))
+    const input = document.querySelector('input[type="file"]') as HTMLInputElement
+    const file = new File(['x'], 'terraform-provider-w_1.0.0_linux_amd64.zip', { type: 'application/zip' })
+    fireEvent.change(input, { target: { files: [file] } })
+    await waitFor(() => expect(screen.getByRole('button', { name: /^upload provider$/i })).not.toBeDisabled())
+    await user.click(screen.getByRole('button', { name: /^upload provider$/i }))
+    await waitFor(() => expect(screen.getByText(/Please fill in all required fields/)).toBeInTheDocument())
   })
 })
