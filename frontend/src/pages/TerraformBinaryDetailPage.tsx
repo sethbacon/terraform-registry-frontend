@@ -438,8 +438,8 @@ const TerraformBinaryDetailPage: React.FC = () => {
     config?.tool === 'terraform'
       ? 'Terraform (HashiCorp)'
       : config?.tool === 'opentofu'
-      ? 'OpenTofu'
-      : config?.tool ?? '';
+        ? 'OpenTofu'
+        : config?.tool ?? '';
 
   const toolColor =
     config?.tool === 'terraform' ? 'primary' : config?.tool === 'opentofu' ? 'secondary' : 'default';
@@ -461,154 +461,154 @@ const TerraformBinaryDetailPage: React.FC = () => {
         </Container>
       ) : (
         <Container maxWidth="lg" sx={{ py: 4 }}>
-      {/* Breadcrumbs */}
-      <Breadcrumbs sx={{ mb: 2 }}>
-        <Link component={RouterLink} to="/terraform-binaries" underline="hover" color="inherit">
-          Terraform Binaries
-        </Link>
-        <Typography color="text.primary" fontFamily="monospace">
-          {name}
-        </Typography>
-      </Breadcrumbs>
+          {/* Breadcrumbs */}
+          <Breadcrumbs sx={{ mb: 2 }}>
+            <Link component={RouterLink} to="/terraform-binaries" underline="hover" color="inherit">
+              Terraform Binaries
+            </Link>
+            <Typography color="text.primary" fontFamily="monospace">
+              {name}
+            </Typography>
+          </Breadcrumbs>
 
-      {/* Back button + title */}
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-        <Tooltip title="Back to mirrors">
-          <IconButton size="small" aria-label="Back to binaries" onClick={() => navigate('/terraform-binaries')}>
-            <ArrowBack />
-          </IconButton>
-        </Tooltip>
-        <Typography variant="h4" fontFamily="monospace">
-          {name}
-        </Typography>
-        <Chip label={toolLabel} color={toolColor as 'primary' | 'secondary' | 'default'} size="small" variant="outlined" />
-        {/* Public endpoint only returns enabled configs; no disabled chip needed */}
-      </Box>
+          {/* Back button + title */}
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+            <Tooltip title="Back to mirrors">
+              <IconButton size="small" aria-label="Back to binaries" onClick={() => navigate('/terraform-binaries')}>
+                <ArrowBack />
+              </IconButton>
+            </Tooltip>
+            <Typography variant="h4" fontFamily="monospace">
+              {name}
+            </Typography>
+            <Chip label={toolLabel} color={toolColor as 'primary' | 'secondary' | 'default'} size="small" variant="outlined" />
+            {/* Public endpoint only returns enabled configs; no disabled chip needed */}
+          </Box>
 
-      {config?.description && (
-        <Typography variant="body1" color="text.secondary" sx={{ mb: 2 }}>
-          {config.description}
-        </Typography>
-      )}
+          {config?.description && (
+            <Typography variant="body1" color="text.secondary" sx={{ mb: 2 }}>
+              {config.description}
+            </Typography>
+          )}
 
-      {/* Download URL hint */}
-      <Alert severity="info" sx={{ mb: 3 }}>
-        <Typography variant="body2">
-          <strong>Mirror download URL: </strong>
-          <code>{window.location.origin}/terraform/binaries/{name}/versions/&#123;version&#125;/&#123;os&#125;/&#123;arch&#125;</code>
-        </Typography>
-      </Alert>
+          {/* Download URL hint */}
+          <Alert severity="info" sx={{ mb: 3 }}>
+            <Typography variant="body2">
+              <strong>Mirror download URL: </strong>
+              <code>{window.location.origin}/terraform/binaries/{name}/versions/&#123;version&#125;/&#123;os&#125;/&#123;arch&#125;</code>
+            </Typography>
+          </Alert>
 
-      {actionError && (
-        <Alert severity="error" onClose={() => setActionError(null)} sx={{ mb: 2 }}>
-          {actionError}
-        </Alert>
-      )}
-      {actionSuccess && (
-        <Alert severity="success" onClose={() => setActionSuccess(null)} sx={{ mb: 2 }}>
-          {actionSuccess}
-        </Alert>
-      )}
-
-      {/* Versions table */}
-      <Typography variant="h6" sx={{ mb: 1 }}>
-        Versions
-      </Typography>
-
-      {versions.length === 0 ? (
-        <Alert severity="info">No versions have been synced yet.</Alert>
-      ) : (
-        <TableContainer component={Paper} variant="outlined">
-          <Table size="small">
-            <TableHead>
-              <TableRow>
-                <TableCell width={48} />
-                <TableCell>Version</TableCell>
-                <TableCell>Status</TableCell>
-                <TableCell>Synced At</TableCell>
-                {canManage && <TableCell align="right">Actions</TableCell>}
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {versions.map((v) => (
-                <VersionRow
-                  key={v.id}
-                  version={v}
-                  mirrorName={name ?? ''}
-                  tool={config?.tool ?? ''}
-                  canManage={canManage}
-                  onDeprecate={setDeprecateTarget}
-                  onUndeprecate={handleUndeprecate}
-                  onDelete={setDeleteTarget}
-                />
-              ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
-      )}
-
-      {/* ---- Deprecate Dialog ---- */}
-      <Dialog
-        open={!!deprecateTarget}
-        onClose={() => { setDeprecateTarget(null); setDeprecateMessage(''); }}
-        maxWidth="sm"
-        fullWidth
-      >
-        <DialogTitle>Deprecate Version {deprecateTarget?.version}</DialogTitle>
-        <DialogContent>
-          <Typography variant="body2" sx={{ mb: 2 }}>
-            Marking this version as deprecated prevents it from being re-synced in future sync
-            runs. It will remain available for download but will be flagged as deprecated.
-          </Typography>
-          <TextField
-            label="Reason (optional)"
-            value={deprecateMessage}
-            onChange={(e) => setDeprecateMessage(e.target.value)}
-            fullWidth
-            multiline
-            rows={2}
-            helperText="Explain why this version is deprecated, e.g. security vulnerability."
-          />
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => { setDeprecateTarget(null); setDeprecateMessage(''); }}>
-            Cancel
-          </Button>
-          <Button
-            color="warning"
-            variant="contained"
-            onClick={handleDeprecate}
-            disabled={deprecating || undeprecating}
-          >
-            {deprecating ? <CircularProgress size={18} /> : 'Deprecate'}
-          </Button>
-        </DialogActions>
-      </Dialog>
-
-      {/* ---- Delete Dialog ---- */}
-      <Dialog open={!!deleteTarget} onClose={() => setDeleteTarget(null)}>
-        <DialogTitle>Delete Version {deleteTarget?.version}</DialogTitle>
-        <DialogContent>
-          <Typography>
-            Are you sure you want to delete version{' '}
-            <strong>{deleteTarget?.version}</strong>? This removes the version record and cannot
-            be undone. Any synced binaries in storage will also be removed.
-          </Typography>
-          {deleteTarget?.is_deprecated === false && (
-            <Alert severity="info" sx={{ mt: 2 }}>
-              Consider deprecating instead of deleting — deprecated versions are retained for
-              download but will not be re-synced.
+          {actionError && (
+            <Alert severity="error" onClose={() => setActionError(null)} sx={{ mb: 2 }}>
+              {actionError}
             </Alert>
           )}
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setDeleteTarget(null)}>Cancel</Button>
-          <Button color="error" variant="contained" onClick={handleDelete} disabled={deleting}>
-            {deleting ? <CircularProgress size={18} /> : 'Delete'}
-          </Button>
-        </DialogActions>
-      </Dialog>
-    </Container>
+          {actionSuccess && (
+            <Alert severity="success" onClose={() => setActionSuccess(null)} sx={{ mb: 2 }}>
+              {actionSuccess}
+            </Alert>
+          )}
+
+          {/* Versions table */}
+          <Typography variant="h6" sx={{ mb: 1 }}>
+            Versions
+          </Typography>
+
+          {versions.length === 0 ? (
+            <Alert severity="info">No versions have been synced yet.</Alert>
+          ) : (
+            <TableContainer component={Paper} variant="outlined">
+              <Table size="small">
+                <TableHead>
+                  <TableRow>
+                    <TableCell width={48} />
+                    <TableCell>Version</TableCell>
+                    <TableCell>Status</TableCell>
+                    <TableCell>Synced At</TableCell>
+                    {canManage && <TableCell align="right">Actions</TableCell>}
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {versions.map((v) => (
+                    <VersionRow
+                      key={v.id}
+                      version={v}
+                      mirrorName={name ?? ''}
+                      tool={config?.tool ?? ''}
+                      canManage={canManage}
+                      onDeprecate={setDeprecateTarget}
+                      onUndeprecate={handleUndeprecate}
+                      onDelete={setDeleteTarget}
+                    />
+                  ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
+          )}
+
+          {/* ---- Deprecate Dialog ---- */}
+          <Dialog
+            open={!!deprecateTarget}
+            onClose={() => { setDeprecateTarget(null); setDeprecateMessage(''); }}
+            maxWidth="sm"
+            fullWidth
+          >
+            <DialogTitle>Deprecate Version {deprecateTarget?.version}</DialogTitle>
+            <DialogContent>
+              <Typography variant="body2" sx={{ mb: 2 }}>
+                Marking this version as deprecated prevents it from being re-synced in future sync
+                runs. It will remain available for download but will be flagged as deprecated.
+              </Typography>
+              <TextField
+                label="Reason (optional)"
+                value={deprecateMessage}
+                onChange={(e) => setDeprecateMessage(e.target.value)}
+                fullWidth
+                multiline
+                rows={2}
+                helperText="Explain why this version is deprecated, e.g. security vulnerability."
+              />
+            </DialogContent>
+            <DialogActions>
+              <Button onClick={() => { setDeprecateTarget(null); setDeprecateMessage(''); }}>
+                Cancel
+              </Button>
+              <Button
+                color="warning"
+                variant="contained"
+                onClick={handleDeprecate}
+                disabled={deprecating || undeprecating}
+              >
+                {deprecating ? <CircularProgress size={18} /> : 'Deprecate'}
+              </Button>
+            </DialogActions>
+          </Dialog>
+
+          {/* ---- Delete Dialog ---- */}
+          <Dialog open={!!deleteTarget} onClose={() => setDeleteTarget(null)}>
+            <DialogTitle>Delete Version {deleteTarget?.version}</DialogTitle>
+            <DialogContent>
+              <Typography>
+                Are you sure you want to delete version{' '}
+                <strong>{deleteTarget?.version}</strong>? This removes the version record and cannot
+                be undone. Any synced binaries in storage will also be removed.
+              </Typography>
+              {deleteTarget?.is_deprecated === false && (
+                <Alert severity="info" sx={{ mt: 2 }}>
+                  Consider deprecating instead of deleting — deprecated versions are retained for
+                  download but will not be re-synced.
+                </Alert>
+              )}
+            </DialogContent>
+            <DialogActions>
+              <Button onClick={() => setDeleteTarget(null)}>Cancel</Button>
+              <Button color="error" variant="contained" onClick={handleDelete} disabled={deleting}>
+                {deleting ? <CircularProgress size={18} /> : 'Delete'}
+              </Button>
+            </DialogActions>
+          </Dialog>
+        </Container>
       )}
     </Box>
   );

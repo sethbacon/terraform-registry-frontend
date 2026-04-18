@@ -175,7 +175,7 @@ The following items require coordinated work with `terraform-registry-backend`:
 
 ## Phase 0.5 — Test coverage ramp (prerequisite for 0.8.0 release)
 
-Current coverage: **65/62/53/67** (statements/branches/functions/lines).
+Current coverage: **78/73/71/81** (statements/branches/functions/lines).
 Target for 0.8.0: **70/60/60/70** — matching the original E0.1 goal.
 
 Items are ordered by coverage-per-effort; each raises the ratchet floor in `vitest.config.ts` on merge.
@@ -275,11 +275,12 @@ Items are ordered by coverage-per-effort; each raises the ratchet floor in `vite
 - **AC:** No `jsdelivr` references in codebase.
 - **Note:** D0.1 replaced ReDoc with bundled swagger-ui-react.
 
-#### F1.2 · Offline markdown sanitization audit · [P2/M]
+#### F1.2 · Offline markdown sanitization audit · [P2/M] ✅
 
 - Audit `rehype-sanitize` + `remark-gfm` for any network calls; confirm fully offline.
 - **Files:** `frontend/src/components/MarkdownRenderer.tsx`
 - **AC:** Network inspector shows zero requests during module detail render.
+- **Result:** All three packages (`react-markdown` 9.1.0, `remark-gfm` 4.0.1, `rehype-sanitize` 6.0.0) are fully offline — zero CDN loads, zero fetch calls. Sanitization uses default GitHub schema.
 
 ---
 
