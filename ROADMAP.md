@@ -206,7 +206,7 @@ Items are ordered by coverage-per-effort; each raises the ratchet floor in `vite
 - **Files:** `frontend/src/contexts/__tests__/*.test.tsx`, `frontend/src/hooks/__tests__/*.test.ts`
 - **AC:** All contexts and hooks ≥85% line coverage; ratchet raised to **67/59/60/67**.
 
-#### T0.4 · Remaining component + page tests · [P1/M]
+#### T0.4 · Remaining component + page tests · [P1/M] ✅
 
 - Fill gaps in `DashboardPage`, `ModuleDetailPage`, `ProviderDetailPage`, `LoginPage`, `CallbackPage`.
 - Cover `StorageMigrationWizard`, `PublishFromSCMWizard`, setup wizard steps.
@@ -253,11 +253,12 @@ Items are ordered by coverage-per-effort; each raises the ratchet floor in `vite
 - **Files:** `frontend/nginx.conf`, `frontend/index.html`, `frontend/src/main.tsx`, `frontend/vite.config.ts`
 - **AC:** CSP report-only for 1 release; then enforced; `'unsafe-inline'` removed from style-src.
 
-#### A1.4 · Subresource Integrity for any remaining CDN assets · [P1/M]
+#### A1.4 · Subresource Integrity for any remaining CDN assets · [P1/M] ✅
 
 - If any external asset remains post-D0.1, add SRI hashes.
 - **Files:** `frontend/index.html`
 - **AC:** Verified via SRI scanner.
+- **Note:** No CDN assets remain after D0.1 — all dependencies are bundled locally.
 
 #### A1.5 · Dependabot security-only auto-merge · [P2/S] ✅
 
@@ -267,11 +268,12 @@ Items are ordered by coverage-per-effort; each raises the ratchet floor in `vite
 
 ### Track F — Air-gap / bundling
 
-#### F1.1 · Vendor ReDoc locally · [P1/S]
+#### F1.1 · Vendor ReDoc locally · [P1/S] ✅
 
 - Full implementation of D0.1 if not already done.
 - **Files:** `frontend/package.json`, `frontend/src/pages/ApiDocumentation.tsx`
 - **AC:** No `jsdelivr` references in codebase.
+- **Note:** D0.1 replaced ReDoc with bundled swagger-ui-react.
 
 #### F1.2 · Offline markdown sanitization audit · [P2/M]
 
