@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react'
+import { render, screen, fireEvent } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 
@@ -102,5 +102,94 @@ describe('StorageStep', () => {
     render(<StorageStep />)
     await userEvent.setup().click(screen.getByRole('button', { name: /Back/i }))
     expect(mockCtx.goToStep).toHaveBeenCalledWith(1)
+  })
+
+  it('updates local_base_path on Base Path change', () => {
+    render(<StorageStep />)
+    fireEvent.change(screen.getByLabelText('Base Path'), { target: { value: '/new/path' } })
+    expect(mockCtx.setStorageForm).toHaveBeenCalledWith(
+      expect.objectContaining({ local_base_path: '/new/path' })
+    )
+  })
+
+  it('toggles serve-directly switch', () => {
+    render(<StorageStep />)
+    const sw = document.querySelector('input[type="checkbox"]') as HTMLInputElement
+    fireEvent.click(sw)
+    expect(mockCtx.setStorageForm).toHaveBeenCalled()
+  })
+
+  it('updates Azure fields on change', () => {
+    mockCtx.storageForm = { backend_type: 'azure' }
+    render(<StorageStep />)
+    fireEvent.change(screen.getByLabelText(/Account Name/), { target: { value: 'acct' } })
+    fireEvent.change(screen.getByLabelText(/Account Key/), { target: { value: 'key' } })
+    fireEvent.change(screen.getByLabelText(/Container Name/), { target: { value: 'cont' } })
+    fireEvent.change(screen.getByLabelText(/CDN URL/), { target: { value: 'https://cdn.example.com' } })
+    expect(mockCtx.setStorageForm).toHaveBeenCalledTimes(4)
+  })
+
+  it('updates S3 fields on change and shows assume_role inputs', () => {
+    mockCtx.storageForm = { backend_type: 's3', s3_auth_method: 'assume_role' }
+    render(<StorageStep />)
+    expect(screen.getByLabelText(/Role ARN/)).toBeInTheDocument()
+    expect(screen.getByLabelText(/Role Session Name/)).toBeInTheDocument()
+    fireEvent.change(screen.getByLabelText(/Role ARN/), { target: { value: 'arn:...:role/x' } })
+    fireEvent.change(screen.getByLabelText(/Role Session Name/), { target: { value: 'sess' } })
+    expect(mockCtx.setStorageForm).toHaveBeenCalledTimes(2)
+  })
+
+  it('updates S3 fields on change for access_key method', () => {
+    mockCtx.storageForm = { backend_type: 's3', s3_auth_method: 'access_key' }
+    render(<StorageStep />)
+    fireEvent.change(screen.getByLabelText(/Region/), { target: { value: 'us-west-2' } })
+    fireEvent.change(screen.getByLabelText(/^Bucket/), { target: { value: 'my-bucket' } })
+    fireEvent.change(screen.getByLabelText(/Endpoint/), { target: { value: 'https://s3.example.com' } })
+    fireEvent.change(screen.getByLabelText(/Access Key ID/), { target: { value: 'AKIA...' } })
+    fireEvent.change(screen.getByLabelText(/Secret Access Key/), { target: { value: 'secret' } })
+    expect(mockCtx.setStorageForm).toHaveBeenCalledTimes(5)
+  })
+
+  it('updates GCS fields on change and shows credentials file input', () => {
+    mockCtx.storageForm = { backend_type: 'gcs', gcs_auth_method: 'credentials_file' }
+    render(<StorageStep />)
+    expect(screen.getByLabelText(/Credentials File Path/)).toBeInTheDocument()
+    fireEvent.change(screen.getByLabelText(/^Bucket/), { target: { value: 'gcs-b' } })
+    fireEvent.change(screen.getByLabelText(/Project ID/), { target: { value: 'proj-1' } })
+    fireEvent.change(screen.getByLabelText(/Credentials File Path/), { target: { value: '/path/sa.json' } })
+    expect(mockCtx.setStorageForm).toHaveBeenCalledTimes(3)
+  })
+
+  it('shows credentials JSON textarea for credentials_json gcs method', () => {
+    mockCtx.storageForm = { backend_type: 'gcs', gcs_auth_method: 'credentials_json' }
+    render(<StorageStep />)
+    expect(screen.getByLabelText(/Credentials JSON/)).toBeInTheDocument()
+    fireEvent.change(screen.getByLabelText(/Credentials JSON/), { target: { value: '{"a":1}' } })
+    expect(mockCtx.setStorageForm).toHaveBeenCalled()
+  })
+
+  it('shows error result alert when test result is failure', () => {
+    mockCtx.storageTestResult = { success: false, message: 'connection failed' }
+    render(<StorageStep />)
+    expect(screen.getByText('connection failed')).toBeInTheDocument()
+  })
+
+  it('disables Test Connection button while testing', () => {
+    mockCtx.storageTesting = true
+    render(<StorageStep />)
+    expect(screen.getByRole('button', { name: /Test Connection/i })).toBeDisabled()
+  })
+
+  it('disables Save button while saving', () => {
+    mockCtx.storageSaving = true
+    render(<StorageStep />)
+    expect(screen.getByRole('button', { name: /Save Storage/i })).toBeDisabled()
+  })
+
+  it('navigates to next step when Next is clicked', async () => {
+    mockCtx.storageSaved = true
+    render(<StorageStep />)
+    await userEvent.setup().click(screen.getByRole('button', { name: /Next: Security Scanning/i }))
+    expect(mockCtx.goToStep).toHaveBeenCalledWith(3)
   })
 })
