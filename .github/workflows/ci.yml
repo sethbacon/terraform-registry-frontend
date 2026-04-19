@@ -95,8 +95,8 @@ jobs:
           path: frontend/coverage/
 
       - name: Compute coverage badge inputs
-        # Only update the badge on pushes to main/development — not on PRs.
-        if: github.event_name == 'push'
+        # Only update the badge on pushes to main/development or manual dispatch — not on PRs.
+        if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
         id: badge
         working-directory: frontend
         run: |
@@ -121,7 +121,7 @@ jobs:
         #   vars.COVERAGE_GIST_ID — ID of a pre-created public gist (same gist as backend, different filename)
         # The action writes / overwrites 'frontend-coverage.json' in that gist, which the
         # shields.io endpoint badge in README.md reads.
-        if: github.event_name == 'push'
+        if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
         uses: schneegans/dynamic-badges-action@e9a478b16159b4d31420099ba146cdc50f134483 # v1.7.0
         with:
           auth: ${{ secrets.GIST_TOKEN }}
