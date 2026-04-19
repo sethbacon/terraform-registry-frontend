@@ -463,12 +463,11 @@ const HomePage: React.FC = () => {
                           position: 'relative',
                           borderRadius: 1,
                           overflow: 'hidden',
-                          opacity: 0.6,
                         }}
                       >
                         <Box
                           component="pre"
-                          sx={{ m: 0, p: 1.5, fontSize: '0.75rem', lineHeight: 1.6, overflowX: 'auto' }}
+                          sx={{ m: 0, p: 1.5, fontSize: '0.75rem', lineHeight: 1.6, overflowX: 'auto', color: 'text.secondary' }}
                         >
                           {`credentials "${window.location.hostname}" {\n  token = "<your-api-key>"\n}`}
                         </Box>
