@@ -226,7 +226,7 @@ Items are ordered by coverage-per-effort; each raises the ratchet floor in `vite
 
 ### Track A — Security
 
-#### A1.1 · httpOnly cookie auth + CSRF token · [P0/L]
+#### A1.1 · httpOnly cookie auth + CSRF token · [P0/L] ✅
 
 - **↔ Backend B2.4:** Coordinate refresh-token endpoint and `Set-Cookie` response.
 - Remove `localStorage.setItem('auth_token', ...)` in `AuthContext.tsx`, `services/api.ts`, and all related consumers.
@@ -237,7 +237,7 @@ Items are ordered by coverage-per-effort; each raises the ratchet floor in `vite
 - **Files:** `frontend/src/contexts/AuthContext.tsx`, `frontend/src/services/api.ts`, `frontend/src/components/ProtectedRoute.tsx`, `frontend/src/pages/LoginPage.tsx`, `frontend/src/pages/CallbackPage.tsx`
 - **AC:** No `auth_token` visible in browser DevTools Storage; CSRF token verified on POST/PUT/DELETE; e2e login still passes.
 
-#### A1.2 · Automatic silent renew · [P1/M]
+#### A1.2 · Automatic silent renew · [P1/M] ✅
 
 - **↔ Backend B2.4:** Uses `/auth/refresh` endpoint.
 - Replace proactive `SessionExpiryWarning` approach with silent refresh ~2min before expiry.
@@ -288,7 +288,7 @@ Items are ordered by coverage-per-effort; each raises the ratchet floor in `vite
 
 ### Track B — Identity UX
 
-#### B2.1 · SAML login provider picker · [P0/L]
+#### B2.1 · SAML login provider picker · [P0/L] ✅
 
 - **↔ Backend B2.1:** Consume `/auth/providers` listing SAML IdPs.
 - Login page renders SAML buttons per configured IdP.
@@ -297,14 +297,14 @@ Items are ordered by coverage-per-effort; each raises the ratchet floor in `vite
 - **Files:** `frontend/src/pages/LoginPage.tsx`, `frontend/src/services/api.ts`, `frontend/src/types/index.ts`
 - **AC:** E2E test logs in via Okta SAML and Entra SAML.
 
-#### B2.2 · LDAP login form · [P0/M]
+#### B2.2 · LDAP login form · [P0/M] ✅
 
 - **↔ Backend B2.2:** POST `/auth/ldap/login` with username + password.
 - Form respects Caps-Lock warning, password reveal toggle, rate-limit UX (429 → "Too many attempts" message).
 - **Files:** `frontend/src/pages/LoginPage.tsx`, `frontend/src/components/LDAPLoginForm.tsx`
 - **AC:** E2E test logs in against OpenLDAP.
 
-#### B2.3 · SCIM provisioning admin page · [P0/L]
+#### B2.3 · SCIM provisioning admin page · [P0/L] ✅
 
 - **↔ Backend B2.3:** New admin page `pages/admin/SCIMProvisioningPage.tsx`.
 - Token management (create / rotate / revoke), per-IdP config, last-sync status, provisioning event log.
@@ -312,21 +312,21 @@ Items are ordered by coverage-per-effort; each raises the ratchet floor in `vite
 - **Files:** `frontend/src/pages/admin/SCIMProvisioningPage.tsx`, `frontend/src/App.tsx`, `frontend/src/services/api.ts`
 - **AC:** Admin can generate SCIM token and copy-to-clipboard; Okta completes user sync.
 
-#### B2.4 · IdP group → role mapping UI enhancements · [P1/M]
+#### B2.4 · IdP group → role mapping UI enhancements · [P1/M] ✅
 
 - Extend `OIDCSettingsPage` to cover SAML + LDAP group claims.
 - Preview: "Given group `X`, resulting scopes = `[…]`".
 - **Files:** `frontend/src/pages/admin/OIDCSettingsPage.tsx`
 - **AC:** Mapping saved, applied on next login; E2E verified.
 
-#### B2.5 · Per-org IdP binding UI · [P1/M]
+#### B2.5 · Per-org IdP binding UI · [P1/M] ✅
 
 - **↔ Backend B2.1:** Optional per-org IdP.
 - Organization page gains "Identity Provider" tab.
 - **Files:** `frontend/src/pages/admin/OrganizationsPage.tsx`
 - **AC:** Org-scoped login routes enforce the bound IdP.
 
-#### B2.6 · mTLS client auth docs in UI · [P2/M]
+#### B2.6 · mTLS client auth docs in UI · [P2/M] ✅
 
 - Admin page surfaces per-principal cert-subject mappings (read-only display + CRUD).
 - **Files:** `frontend/src/pages/admin/MTLSPage.tsx`, `frontend/src/App.tsx`

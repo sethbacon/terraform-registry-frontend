@@ -36,7 +36,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import ManageAccountsIcon from '@mui/icons-material/ManageAccounts';
 import SaveIcon from '@mui/icons-material/Save';
 import api from '../../services/api';
-import type { OIDCConfigResponse, OIDCGroupMapping, OIDCGroupMappingInput, Organization } from '../../types';
+import type { OIDCConfigResponse, OIDCGroupMapping, OIDCGroupMappingInput, Organization, IdentityGroupMappings } from '../../types';
 import { queryKeys } from '../../services/queryKeys';
 
 // Available roles that can be assigned to mapped groups — must match system role template names
@@ -76,6 +76,12 @@ const OIDCSettingsPage: React.FC = () => {
   } = useQuery<OIDCConfigResponse>({
     queryKey: queryKeys.oidcConfig.get(),
     queryFn: () => api.getAdminOIDCConfig(),
+  });
+
+  // Fetch SAML + LDAP group mappings (read-only)
+  const { data: identityMappings } = useQuery<IdentityGroupMappings>({
+    queryKey: ['identity', 'group-mappings'],
+    queryFn: () => api.getIdentityGroupMappings(),
   });
 
   // Sync local form state when config loads
@@ -421,6 +427,89 @@ const OIDCSettingsPage: React.FC = () => {
             </DialogActions>
           </Dialog>
         </>
+      )}
+
+      {/* SAML Group Mappings (read-only from server config) */}
+      {identityMappings?.saml && (
+        <Paper sx={{ p: 3, mt: 4 }}>
+          <Typography variant="h6" gutterBottom>
+            SAML Group Mappings
+          </Typography>
+          <Alert severity="info" sx={{ mb: 2 }}>
+            SAML group mappings are configured in the server configuration file and are read-only.
+          </Alert>
+          <Stack direction="row" spacing={2} sx={{ mb: 2 }}>
+            <Chip label={`Group attribute: ${identityMappings.saml.group_attribute_name || '(not set)'}`} />
+            <Chip label={`Default role: ${identityMappings.saml.default_role || '(none)'}`} color="secondary" />
+          </Stack>
+          {identityMappings.saml.group_mappings.length > 0 ? (
+            <TableContainer>
+              <Table size="small">
+                <TableHead>
+                  <TableRow>
+                    <TableCell>SAML Group</TableCell>
+                    <TableCell>Organization</TableCell>
+                    <TableCell>Role</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {identityMappings.saml.group_mappings.map((m, i) => (
+                    <TableRow key={i}>
+                      <TableCell>{m.group}</TableCell>
+                      <TableCell>{m.organization}</TableCell>
+                      <TableCell>
+                        <Chip label={m.role} size="small" />
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
+          ) : (
+            <Typography color="text.secondary">No SAML group mappings configured.</Typography>
+          )}
+        </Paper>
+      )}
+
+      {/* LDAP Group Mappings (read-only from server config) */}
+      {identityMappings?.ldap && (
+        <Paper sx={{ p: 3, mt: 4 }}>
+          <Typography variant="h6" gutterBottom>
+            LDAP Group Mappings
+          </Typography>
+          <Alert severity="info" sx={{ mb: 2 }}>
+            LDAP group mappings are configured in the server configuration file and are read-only.
+          </Alert>
+          <Stack direction="row" spacing={2} sx={{ mb: 2 }}>
+            <Chip label={`Default role: ${identityMappings.ldap.default_role || '(none)'}`} color="secondary" />
+          </Stack>
+          {identityMappings.ldap.group_mappings.length > 0 ? (
+            <TableContainer>
+              <Table size="small">
+                <TableHead>
+                  <TableRow>
+                    <TableCell>LDAP Group DN</TableCell>
+                    <TableCell>Organization</TableCell>
+                    <TableCell>Role</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {identityMappings.ldap.group_mappings.map((m, i) => (
+                    <TableRow key={i}>
+                      <TableCell>{m.group_dn}</TableCell>
+                      <TableCell>{m.organization}</TableCell>
+                      <TableCell>
+                        <Chip label={m.role} size="small" />
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
+          ) : (
+            <Typography color="text.secondary">No LDAP group mappings configured.</Typography>
+          )}
+        </Paper>
       )}
     </Container>
   );

@@ -34,6 +34,10 @@ describe('AuthContext', () => {
   beforeEach(() => {
     clearStorage()
     vi.clearAllMocks()
+    // By default, /auth/me returns no session (unauthenticated).
+    // Individual tests override this when needed.
+    mockApi.getCurrentUserWithRole.mockRejectedValue(new Error('Unauthorized'))
+    mockApi.refreshToken.mockRejectedValue(new Error('Unauthorized'))
   })
 
   it('throws when useAuth is called outside AuthProvider', () => {
@@ -48,7 +52,7 @@ describe('AuthContext', () => {
     consoleSpy.mockRestore()
   })
 
-  it('starts with isAuthenticated false when no token is stored', () => {
+  it('starts with isAuthenticated false when no token is stored', async () => {
     let authState: ReturnType<typeof useAuth> | null = null
 
     render(
@@ -57,6 +61,10 @@ describe('AuthContext', () => {
       </AuthProvider>
     )
 
+    // Wait for the async /auth/me check to complete
+    await waitFor(() => {
+      expect(authState!.isLoading).toBe(false)
+    })
     expect(authState!.isAuthenticated).toBe(false)
     expect(authState!.user).toBeNull()
   })
@@ -140,11 +148,15 @@ describe('AuthContext', () => {
 
   it('login with user object (dev mode) sets authenticated and fetches user from API', async () => {
     const mockUser = { id: '1', email: 'dev@test.com', name: 'Dev User', created_at: '', updated_at: '' }
-    mockApi.getCurrentUserWithRole.mockResolvedValueOnce({
-      user: mockUser,
-      role_template: { name: 'admin', display_name: 'Admin' },
-      allowed_scopes: ['admin'],
-    })
+    // First call: mount effect tries /auth/me (no session → reject).
+    // Second call: dev-mode login calls fetchCurrentUser (succeeds).
+    mockApi.getCurrentUserWithRole
+      .mockRejectedValueOnce(new Error('Unauthorized'))
+      .mockResolvedValueOnce({
+        user: mockUser,
+        role_template: { name: 'admin', display_name: 'Admin' },
+        allowed_scopes: ['admin'],
+      })
 
     let authState: ReturnType<typeof useAuth> | null = null
 
@@ -154,13 +166,18 @@ describe('AuthContext', () => {
       </AuthProvider>
     )
 
+    // Wait for mount effect to complete
+    await waitFor(() => {
+      expect(authState!.isLoading).toBe(false)
+    })
+
     await act(async () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       await authState!.login(mockUser as any)
     })
 
     expect(authState!.isAuthenticated).toBe(true)
-    expect(mockApi.getCurrentUserWithRole).toHaveBeenCalled()
+    expect(mockApi.getCurrentUserWithRole).toHaveBeenCalledTimes(2)
     expect(authState!.user).toEqual(mockUser)
   })
 
@@ -363,7 +380,7 @@ describe('AuthContext session expiry (roadmap 4.2)', () => {
     expect(parseTokenExpiry(null)).toBeNull()
   })
 
-  it('setToken parses expiry and schedules warning', () => {
+  it('setToken parses expiry and schedules warning', async () => {
     vi.useFakeTimers()
     vi.setSystemTime(new Date('2026-01-01T00:00:00Z'))
     const exp = Math.floor(new Date('2026-01-01T00:10:00Z').getTime() / 1000) // 10min out
@@ -383,8 +400,9 @@ describe('AuthContext session expiry (roadmap 4.2)', () => {
     act(() => { vi.advanceTimersByTime(10 * 60 * 1000 - SESSION_WARNING_LEAD_MS - 1) })
     expect(authState!.sessionExpiresSoon).toBe(false)
 
-    // Cross the warning threshold.
-    act(() => { vi.advanceTimersByTime(2) })
+    // Cross the warning threshold — silent refresh fires and fails (default mock rejects),
+    // then the catch handler sets sessionExpiresSoon = true.
+    await act(async () => { vi.advanceTimersByTime(2) })
     expect(authState!.sessionExpiresSoon).toBe(true)
     vi.useRealTimers()
   })
@@ -402,7 +420,7 @@ describe('AuthContext session expiry (roadmap 4.2)', () => {
     expect(authState!.sessionExpiresSoon).toBe(false)
   })
 
-  it('setToken with already-expiring token flags sessionExpiresSoon immediately', () => {
+  it('setToken with already-expiring token flags sessionExpiresSoon immediately', async () => {
     vi.useFakeTimers()
     vi.setSystemTime(new Date('2026-01-01T00:00:00Z'))
     const exp = Math.floor(Date.now() / 1000) + 30 // 30s from now, inside window
@@ -414,12 +432,14 @@ describe('AuthContext session expiry (roadmap 4.2)', () => {
       </AuthProvider>
     )
 
-    act(() => { authState!.setToken(fakeJwt(exp)) })
+    // Silent refresh attempt fires immediately and fails (mock rejects),
+    // then catch sets sessionExpiresSoon = true.
+    await act(async () => { authState!.setToken(fakeJwt(exp)) })
     expect(authState!.sessionExpiresSoon).toBe(true)
     vi.useRealTimers()
   })
 
-  it('logout clears sessionExpiresSoon and sessionExpiresAt', () => {
+  it('logout clears sessionExpiresSoon and sessionExpiresAt', async () => {
     vi.useFakeTimers()
     vi.setSystemTime(new Date('2026-01-01T00:00:00Z'))
     const exp = Math.floor(Date.now() / 1000) + 30
@@ -429,7 +449,7 @@ describe('AuthContext session expiry (roadmap 4.2)', () => {
         <AuthConsumer onRender={(auth) => { authState = auth }} />
       </AuthProvider>
     )
-    act(() => { authState!.setToken(fakeJwt(exp)) })
+    await act(async () => { authState!.setToken(fakeJwt(exp)) })
     expect(authState!.sessionExpiresSoon).toBe(true)
 
     act(() => { authState!.logout() })
@@ -444,7 +464,11 @@ describe('AuthContext session expiry (roadmap 4.2)', () => {
     const initialExp = Math.floor(Date.now() / 1000) + 30 // inside warning window
     const refreshedExp = Math.floor(Date.now() / 1000) + 10 * 60 // 10 min out
 
-    mockApi.refreshToken.mockResolvedValueOnce({ token: fakeJwt(refreshedExp) })
+    // First call: silent refresh attempt on setToken (already-expiring). Let it reject
+    // so sessionExpiresSoon is set. Second call: manual refresh with new token.
+    mockApi.refreshToken
+      .mockRejectedValueOnce(new Error('Unauthorized'))
+      .mockResolvedValueOnce({ token: fakeJwt(refreshedExp) })
 
     let authState: ReturnType<typeof useAuth> | null = null
     render(
@@ -452,7 +476,7 @@ describe('AuthContext session expiry (roadmap 4.2)', () => {
         <AuthConsumer onRender={(auth) => { authState = auth }} />
       </AuthProvider>
     )
-    act(() => { authState!.setToken(fakeJwt(initialExp)) })
+    await act(async () => { authState!.setToken(fakeJwt(initialExp)) })
     expect(authState!.sessionExpiresSoon).toBe(true)
 
     await act(async () => { await authState!.refreshToken() })

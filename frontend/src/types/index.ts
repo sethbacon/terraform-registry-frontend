@@ -23,6 +23,8 @@ export interface Organization {
   id: string;
   name: string;
   display_name: string;
+  idp_type?: string | null;  // "oidc", "saml", "ldap", or null
+  idp_name?: string | null;  // IdP name within the type
   created_at: string;
   updated_at: string;
 }
@@ -363,6 +365,42 @@ export interface OIDCConfigResponse {
   default_role?: string;
   created_at: string;
   updated_at: string;
+}
+
+// SAML + LDAP identity group mapping types (read-only from server config)
+export interface SAMLGroupMapping {
+  group: string;
+  organization: string;
+  role: string;
+}
+
+export interface LDAPGroupMapping {
+  group_dn: string;
+  organization: string;
+  role: string;
+}
+
+export interface IdentityGroupMappings {
+  saml?: {
+    group_attribute_name: string;
+    default_role: string;
+    group_mappings: SAMLGroupMapping[];
+  };
+  ldap?: {
+    default_role: string;
+    group_mappings: LDAPGroupMapping[];
+  };
+}
+
+export interface MTLSSubjectMapping {
+  subject: string;
+  scopes: string[];
+}
+
+export interface MTLSConfigResponse {
+  enabled: boolean;
+  client_ca_file: string;
+  mappings: MTLSSubjectMapping[];
 }
 
 export interface SetupValidateTokenResponse {

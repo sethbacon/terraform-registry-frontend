@@ -16,28 +16,21 @@ vi.mock('react-router-dom', async () => {
 
 const mockApiLogin = vi.fn()
 const mockDevLogin = vi.fn().mockResolvedValue({ token: 'test-jwt' })
+const mockGetAuthProviders = vi.fn()
+const mockLdapLogin = vi.fn()
 vi.mock('../../services/api', () => ({
   default: {
     devLogin: (...args: unknown[]) => mockDevLogin(...args),
     login: (...args: unknown[]) => mockApiLogin(...args),
+    getAuthProviders: (...args: unknown[]) => mockGetAuthProviders(...args),
+    ldapLogin: (...args: unknown[]) => mockLdapLogin(...args),
   },
 }))
 
 import LoginPage from '../LoginPage'
 
-type ProbeResponse = 'ok' | 'fail' | 'reject' | { status: number; body?: unknown }
-
-function mockProviderProbes(responses: Record<'oidc' | 'azuread', ProbeResponse>) {
-  vi.spyOn(globalThis, 'fetch').mockImplementation(async (input: Request | URL | string) => {
-    const url = typeof input === 'string' ? input : input instanceof URL ? input.href : input.url
-    const m = url.match(/provider=(\w+)/)
-    const provider = (m?.[1] ?? '') as 'oidc' | 'azuread'
-    const spec = responses[provider]
-    if (spec === 'ok') return { type: 'opaqueredirect', status: 0 } as Response
-    if (spec === 'reject') throw new Error('network')
-    if (spec === 'fail') return { type: 'basic', status: 400, json: async () => ({}) } as unknown as Response
-    return { type: 'basic', status: spec.status, json: async () => spec.body ?? {} } as unknown as Response
-  })
+function mockProviders(providers: Array<{ type: string; name: string; id?: string }>) {
+  mockGetAuthProviders.mockResolvedValue({ providers })
 }
 
 function renderLoginPage() {
@@ -53,82 +46,92 @@ beforeEach(() => {
 })
 
 describe('LoginPage', () => {
-  it('renders the login heading', () => {
-    mockProviderProbes({ oidc: 'ok', azuread: 'ok' })
+  it('renders the login heading', async () => {
+    mockProviders([{ type: 'oidc', name: 'OpenID Connect' }])
     renderLoginPage()
     expect(screen.getByText('Terraform Registry')).toBeInTheDocument()
   })
 
-  it('shows loading skeletons while probing providers', () => {
-    mockProviderProbes({ oidc: 'ok', azuread: 'ok' })
+  it('shows loading skeletons while fetching providers', () => {
+    mockGetAuthProviders.mockReturnValue(new Promise(() => { })) // never resolves
     renderLoginPage()
-    expect(screen.getByTestId('provider-probing')).toBeInTheDocument()
+    expect(screen.getByTestId('provider-loading')).toBeInTheDocument()
   })
 
-  it('renders only SSO button when OIDC probe succeeds and Azure fails', async () => {
-    mockProviderProbes({ oidc: 'ok', azuread: 'fail' })
+  it('renders only SSO button when only OIDC provider is configured', async () => {
+    mockProviders([{ type: 'oidc', name: 'OpenID Connect' }])
     renderLoginPage()
     expect(await screen.findByRole('button', { name: 'Sign in with SSO' })).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Sign in with Azure AD' })).not.toBeInTheDocument()
   })
 
-  it('renders only Azure AD button when Azure probe succeeds and OIDC fails', async () => {
-    mockProviderProbes({ oidc: 'fail', azuread: 'ok' })
+  it('renders only Azure AD button when only Azure provider is configured', async () => {
+    mockProviders([{ type: 'azuread', name: 'Azure AD' }])
     renderLoginPage()
     expect(await screen.findByRole('button', { name: 'Sign in with Azure AD' })).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Sign in with SSO' })).not.toBeInTheDocument()
   })
 
-  it('renders both buttons when both providers are reachable', async () => {
-    mockProviderProbes({ oidc: 'ok', azuread: 'ok' })
+  it('renders both buttons when both providers are configured', async () => {
+    mockProviders([
+      { type: 'oidc', name: 'OpenID Connect' },
+      { type: 'azuread', name: 'Azure AD' },
+    ])
     renderLoginPage()
     expect(await screen.findByRole('button', { name: 'Sign in with SSO' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Sign in with Azure AD' })).toBeInTheDocument()
   })
 
-  it('shows "no providers" info alert when both probes fail', async () => {
-    mockProviderProbes({ oidc: 'fail', azuread: 'reject' })
+  it('shows "no providers" info alert when no providers are configured', async () => {
+    mockProviders([])
     renderLoginPage()
     expect(await screen.findByTestId('no-providers-alert')).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Sign in with SSO' })).not.toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: 'Sign in with Azure AD' })).not.toBeInTheDocument()
   })
 
   it('shows info text about SSO', () => {
-    mockProviderProbes({ oidc: 'ok', azuread: 'ok' })
+    mockProviders([{ type: 'oidc', name: 'OpenID Connect' }])
     renderLoginPage()
     expect(screen.getByText(/single sign-on for authentication/)).toBeInTheDocument()
   })
 
   it('does not render dev login button in test mode', () => {
-    mockProviderProbes({ oidc: 'ok', azuread: 'ok' })
+    mockProviders([{ type: 'oidc', name: 'OpenID Connect' }])
     renderLoginPage()
     expect(screen.queryByText('Dev Login (Admin)')).not.toBeInTheDocument()
   })
 
-  it('triggers api.login when OIDC button is clicked after successful probe', async () => {
-    mockProviderProbes({ oidc: 'ok', azuread: 'fail' })
+  it('triggers api.login with provider type when SSO button is clicked', async () => {
+    mockProviders([{ type: 'oidc', name: 'OpenID Connect' }])
     renderLoginPage()
     const btn = await screen.findByRole('button', { name: 'Sign in with SSO' })
     await act(async () => { await userEvent.click(btn) })
     await waitFor(() => expect(mockApiLogin).toHaveBeenCalledWith('oidc'))
   })
 
-  it('triggers api.login directly when OIDC button is clicked (no extra fetch)', async () => {
-    mockProviderProbes({ oidc: 'ok', azuread: 'fail' })
+  it('triggers api.login with provider id for SAML IdPs', async () => {
+    mockProviders([{ type: 'saml', name: 'Okta', id: 'okta-prod' }])
     renderLoginPage()
-    const btn = await screen.findByRole('button', { name: 'Sign in with SSO' })
-    const fetchCallsBefore = vi.mocked(globalThis.fetch).mock.calls.length
+    const btn = await screen.findByRole('button', { name: 'Sign in with Okta' })
     await act(async () => { await userEvent.click(btn) })
-    // handleProviderLogin should NOT make another fetch — just call api.login
-    expect(vi.mocked(globalThis.fetch).mock.calls.length).toBe(fetchCallsBefore)
-    expect(mockApiLogin).toHaveBeenCalledWith('oidc')
+    await waitFor(() => expect(mockApiLogin).toHaveBeenCalledWith('okta-prod'))
   })
 
-  it('treats 429 rate-limited probes as available providers', async () => {
-    mockProviderProbes({ oidc: { status: 429 }, azuread: 'fail' })
+  it('renders LDAP form when LDAP provider is configured', async () => {
+    mockProviders([{ type: 'ldap', name: 'LDAP' }])
+    renderLoginPage()
+    expect(await screen.findByRole('textbox', { name: /username/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Sign In' })).toBeInTheDocument()
+  })
+
+  it('shows SSO buttons and LDAP form together', async () => {
+    mockProviders([
+      { type: 'oidc', name: 'OpenID Connect' },
+      { type: 'ldap', name: 'LDAP' },
+    ])
     renderLoginPage()
     expect(await screen.findByRole('button', { name: 'Sign in with SSO' })).toBeInTheDocument()
-    expect(screen.queryByTestId('no-providers-alert')).not.toBeInTheDocument()
+    expect(screen.getByRole('textbox', { name: /username/i })).toBeInTheDocument()
+    expect(screen.getByText('OR SIGN IN WITH LDAP')).toBeInTheDocument()
   })
 })

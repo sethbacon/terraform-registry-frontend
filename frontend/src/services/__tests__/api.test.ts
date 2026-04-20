@@ -1580,6 +1580,51 @@ describe('ApiClient', () => {
     })
   })
 
+  // ─── Phase 2: Enterprise Identity ──────────────────────────────────────────
+  describe('enterprise identity methods', () => {
+    it('getAuthProviders calls GET /api/v1/auth/providers', async () => {
+      const client = await getApiClient()
+        ; (mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+          data: { providers: [{ type: 'oidc', name: 'Corporate' }, { type: 'saml', name: 'Okta', id: 's1' }] },
+        })
+      const result = await client.getAuthProviders()
+      expect(mockAxiosInstance.get).toHaveBeenCalledWith('/api/v1/auth/providers')
+      expect(result.providers).toHaveLength(2)
+      expect(result.providers[1].type).toBe('saml')
+    })
+
+    it('ldapLogin calls POST /api/v1/auth/ldap/login with credentials', async () => {
+      const client = await getApiClient()
+        ; (mockAxiosInstance.post as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+          data: { token: 'ldap-jwt-token' },
+        })
+      const result = await client.ldapLogin('admin', 'secret')
+      expect(mockAxiosInstance.post).toHaveBeenCalledWith('/api/v1/auth/ldap/login', { username: 'admin', password: 'secret' })
+      expect(result.token).toBe('ldap-jwt-token')
+    })
+
+    it('getIdentityGroupMappings calls GET /api/v1/admin/identity/group-mappings', async () => {
+      const client = await getApiClient()
+        ; (mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+          data: { saml: { group_mappings: [] }, ldap: { group_mappings: [] } },
+        })
+      const result = await client.getIdentityGroupMappings()
+      expect(mockAxiosInstance.get).toHaveBeenCalledWith('/api/v1/admin/identity/group-mappings')
+      expect(result).toHaveProperty('saml')
+      expect(result).toHaveProperty('ldap')
+    })
+
+    it('getMTLSConfig calls GET /api/v1/admin/mtls/config', async () => {
+      const client = await getApiClient()
+        ; (mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+          data: { enabled: true, client_ca_file: '/ca.pem', mappings: [] },
+        })
+      const result = await client.getMTLSConfig()
+      expect(mockAxiosInstance.get).toHaveBeenCalledWith('/api/v1/admin/mtls/config')
+      expect(result.enabled).toBe(true)
+    })
+  })
+
   // ─── Version Info ─────────────────────────────────────────────────────────
   describe('version info', () => {
     it('getVersionInfo', async () => {
