@@ -41,6 +41,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [sessionExpiresAt, setSessionExpiresAt] = useState<Date | null>(null);
   const [sessionExpiresSoon, setSessionExpiresSoon] = useState(false);
   const warningTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Ref to break the circular dependency between scheduleSessionWarning and refreshToken.
+  const silentRefreshRef = useRef<() => Promise<void>>(async () => { });
 
   const clearWarningTimer = useCallback(() => {
     if (warningTimerRef.current !== null) {
@@ -57,12 +59,17 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     if (!exp) return;
     const delay = exp.getTime() - Date.now() - SESSION_WARNING_LEAD_MS;
     if (delay <= 0) {
-      // Already in the warning window (or past exp); flag immediately.
-      setSessionExpiresSoon(true);
+      // Already in the warning window — attempt silent refresh immediately.
+      silentRefreshRef.current().catch(() => {
+        setSessionExpiresSoon(true);
+      });
       return;
     }
     warningTimerRef.current = setTimeout(() => {
-      setSessionExpiresSoon(true);
+      // Attempt silent refresh; show warning only if it fails.
+      silentRefreshRef.current().catch(() => {
+        setSessionExpiresSoon(true);
+      });
     }, delay);
   }, [clearWarningTimer]);
 
@@ -75,6 +82,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     clearWarningTimer();
     setSessionExpiresAt(null);
     setSessionExpiresSoon(false);
+    // Remove legacy token (migration period) and cached UI state
     localStorage.removeItem('auth_token');
     localStorage.removeItem('user');
     localStorage.removeItem('role_template');
@@ -84,8 +92,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     // is enabled; leaving it in localStorage would expose the key across sessions.
     localStorage.removeItem('authorized');
     // Redirect to the backend logout endpoint, which terminates the OIDC SSO session
-    // at the identity provider level. Without this, the IdP session remains active and
-    // clicking "Login with OIDC" again would silently re-authenticate the user.
+    // at the identity provider level and clears the HttpOnly auth cookie.
     api.logout();
   }, [clearWarningTimer]);
 
@@ -105,13 +112,16 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   }, [logout]);
 
   useEffect(() => {
-    // Check if user is already logged in
+    // Check if user is already logged in.
+    // Legacy path: auth_token in localStorage (migration period).
+    // New path: HttpOnly cookie — detected by calling /auth/me.
     const token = localStorage.getItem('auth_token');
     const storedUser = localStorage.getItem('user');
     const storedRoleTemplate = localStorage.getItem('role_template');
     const storedAllowedScopes = localStorage.getItem('allowed_scopes');
 
     if (token && storedUser) {
+      // Legacy path: token still in localStorage
       try {
         setUser(JSON.parse(storedUser));
         if (storedRoleTemplate) {
@@ -131,14 +141,48 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         localStorage.removeItem('role_template');
         localStorage.removeItem('allowed_scopes');
       }
+      setIsLoading(false);
     } else if (token) {
       // Token exists but no cached user (e.g. fresh OIDC login where only the token
       // was stored). Mark authenticated optimistically and fetch user from the server.
       setIsAuthenticated(true);
       scheduleSessionWarning(token);
       fetchCurrentUser();
+      setIsLoading(false);
+    } else if (storedUser) {
+      // Cookie-based auth: no localStorage token but cached user info means a previous
+      // session used HttpOnly cookies. Optimistically restore UI state, then validate
+      // the cookie via /auth/me.
+      try {
+        setUser(JSON.parse(storedUser));
+        if (storedRoleTemplate) setRoleTemplate(JSON.parse(storedRoleTemplate));
+        if (storedAllowedScopes) setAllowedScopes(JSON.parse(storedAllowedScopes));
+        setIsAuthenticated(true);
+      } catch {
+        // corrupted localStorage — clear and fall through
+        localStorage.removeItem('user');
+        localStorage.removeItem('role_template');
+        localStorage.removeItem('allowed_scopes');
+      }
+      fetchCurrentUser().finally(() => setIsLoading(false));
+    } else {
+      // No local state at all — try /auth/me in case an HttpOnly cookie exists
+      // (e.g. after OIDC callback set the cookie and redirected here).
+      api.getCurrentUserWithRole()
+        .then((response) => {
+          setUser(response.user);
+          setRoleTemplate(response.role_template || null);
+          setAllowedScopes(response.allowed_scopes || []);
+          setIsAuthenticated(true);
+          localStorage.setItem('user', JSON.stringify(response.user));
+          localStorage.setItem('role_template', JSON.stringify(response.role_template));
+          localStorage.setItem('allowed_scopes', JSON.stringify(response.allowed_scopes));
+        })
+        .catch(() => {
+          // No valid session — remain unauthenticated
+        })
+        .finally(() => setIsLoading(false));
     }
-    setIsLoading(false);
   }, [fetchCurrentUser, scheduleSessionWarning]);
 
   const login = async (userOrProvider: User | 'oidc' | 'azuread'): Promise<void> => {
@@ -159,15 +203,33 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const refreshToken = async () => {
     try {
       const response = await api.refreshToken();
-      localStorage.setItem('auth_token', response.token);
-      scheduleSessionWarning(response.token);
+      // The backend sets the new JWT as an HttpOnly cookie in the response.
+      // For legacy compatibility, also update localStorage if a token was returned.
+      if (response.token) {
+        localStorage.setItem('auth_token', response.token);
+        scheduleSessionWarning(response.token);
+      }
     } catch (error) {
       console.error('Failed to refresh token:', error);
       logout();
     }
   };
 
+  // Silent refresh: same as refreshToken but throws on failure instead of logging out.
+  // The scheduleSessionWarning timer uses this — if it fails, the warning dialog appears
+  // and the user can manually refresh or sign out.
+  const silentRefresh = async () => {
+    const response = await api.refreshToken();
+    if (response.token) {
+      localStorage.setItem('auth_token', response.token);
+      scheduleSessionWarning(response.token);
+    }
+  };
+  silentRefreshRef.current = silentRefresh;
+
   const setToken = (token: string) => {
+    // Legacy method: store token in localStorage. Used by CallbackPage during
+    // migration period. New flow uses HttpOnly cookies set by the backend.
     localStorage.setItem('auth_token', token);
     setIsAuthenticated(true);
     scheduleSessionWarning(token);

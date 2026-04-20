@@ -51,15 +51,10 @@ describe('CallbackPage', () => {
     })
   })
 
-  it('shows error when no token is available', async () => {
-    // Mock fetch to return non-ok
-    vi.spyOn(globalThis, 'fetch').mockResolvedValue({
-      ok: false,
-    } as Response)
-
+  it('redirects to home when no token param (cookie-based auth)', async () => {
     renderWithParams('')
     await waitFor(() => {
-      expect(screen.getByText('No authentication token received.')).toBeInTheDocument()
+      expect(window.location.replace).toHaveBeenCalledWith('/')
     })
   })
 

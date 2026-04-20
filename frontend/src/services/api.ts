@@ -8,6 +8,12 @@ const API_BASE_URL = import.meta.env.DEV ? '' : (import.meta.env.VITE_API_URL ||
 // Only use mock responses when explicitly enabled (e.g., when backend is not running)
 const USE_MOCK_DATA = import.meta.env.VITE_USE_MOCK_DATA === 'true';
 
+/** Read a cookie value by name. Returns empty string if not found. */
+function getCookie(name: string): string {
+  const match = document.cookie.match(new RegExp('(?:^|; )' + name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '=([^;]*)'));
+  return match ? decodeURIComponent(match[1]) : '';
+}
+
 class ApiClient {
   private client: AxiosInstance;
 
@@ -17,18 +23,35 @@ class ApiClient {
       headers: {
         'Content-Type': 'application/json',
       },
+      // Include cookies (HttpOnly auth cookie + CSRF cookie) on all requests.
+      withCredentials: true,
       // Only validate successful status codes (2xx and 3xx)
       // This ensures errors are properly caught by the error interceptor
       validateStatus: (status) => status >= 200 && status < 400,
     });
 
-    // Request interceptor to add auth token
+    // Request interceptor to add CSRF token on mutating requests
     this.client.interceptors.request.use(
       (config) => {
-        const token = localStorage.getItem('auth_token');
-        if (token) {
-          config.headers.Authorization = `Bearer ${token}`;
+        // For backward compatibility: if an auth token is in localStorage (migration
+        // period), include it as a Bearer header. Once all sessions have migrated to
+        // HttpOnly cookies this block can be removed.
+        const legacyToken = localStorage.getItem('auth_token');
+        if (legacyToken) {
+          config.headers.Authorization = `Bearer ${legacyToken}`;
         }
+
+        // Add CSRF token header on mutating requests. The backend sets a non-HttpOnly
+        // "tfr_csrf" cookie; we read it and echo it in X-CSRF-Token so the server can
+        // validate the double-submit pattern.
+        const method = (config.method || 'get').toUpperCase();
+        if (method === 'POST' || method === 'PUT' || method === 'PATCH' || method === 'DELETE') {
+          const csrfToken = getCookie('tfr_csrf');
+          if (csrfToken) {
+            config.headers['X-CSRF-Token'] = csrfToken;
+          }
+        }
+
         // Stamp the request start time for breadcrumb duration tracking
         (config as InternalAxiosRequestConfig & { _startTime?: number })._startTime = Date.now();
         return config;
@@ -57,15 +80,11 @@ class ApiClient {
             (url.includes('/repositories') || url.includes('/tags') || url.includes('/branches'));
 
           if (!isSCMOAuthFailure) {
-            // Only redirect to login if user was authenticated (has token)
-            const token = localStorage.getItem('auth_token');
-            if (token) {
-              // User JWT expired or invalid
-              localStorage.removeItem('auth_token');
-              localStorage.removeItem('user');
-              window.location.href = '/login';
-            }
-            // If no token, allow the error to propagate (for public endpoints)
+            // Session expired or invalid — redirect to login.
+            // Clear any legacy localStorage token from migration period.
+            localStorage.removeItem('auth_token');
+            localStorage.removeItem('user');
+            window.location.href = '/login';
           }
         }
         return Promise.reject(error);
@@ -113,8 +132,27 @@ class ApiClient {
   }
 
   // Authentication
-  async login(provider: 'oidc' | 'azuread') {
+
+  /**
+   * Fetch the list of available authentication providers from the backend.
+   * Returns providers with type, name, and optional id (for SAML IdPs).
+   */
+  async getAuthProviders(): Promise<{ providers: Array<{ type: string; name: string; id?: string }> }> {
+    const response = await this.client.get('/api/v1/auth/providers');
+    return response.data;
+  }
+
+  async login(provider: string) {
     window.location.href = `${API_BASE_URL}/api/v1/auth/login?provider=${provider}`;
+  }
+
+  /**
+   * Authenticate via LDAP with username and password.
+   * Returns a JWT token on success.
+   */
+  async ldapLogin(username: string, password: string): Promise<{ token: string }> {
+    const response = await this.client.post('/api/v1/auth/ldap/login', { username, password });
+    return response.data;
   }
 
   /**
@@ -433,7 +471,7 @@ class ApiClient {
     return this.transformOrganization(response.data.organization);
   }
 
-  async updateOrganization(id: string, data: { display_name: string }) {
+  async updateOrganization(id: string, data: { display_name: string; idp_type?: string | null; idp_name?: string | null }) {
     const response = await this.client.put(`/api/v1/organizations/${id}`, data);
     return this.transformOrganization(response.data.organization);
   }
@@ -1030,6 +1068,22 @@ class ApiClient {
     data: import('../types').OIDCGroupMappingInput
   ): Promise<import('../types').OIDCConfigResponse> {
     const response = await this.client.put('/api/v1/admin/oidc/group-mapping', data);
+    return response.data;
+  }
+
+  /**
+   * Fetch SAML + LDAP group mapping configuration (read-only, from server config).
+   */
+  async getIdentityGroupMappings(): Promise<import('../types').IdentityGroupMappings> {
+    const response = await this.client.get('/api/v1/admin/identity/group-mappings');
+    return response.data;
+  }
+
+  /**
+   * Fetch mTLS certificate mapping configuration (read-only, from server config).
+   */
+  async getMTLSConfig(): Promise<import('../types').MTLSConfigResponse> {
+    const response = await this.client.get('/api/v1/admin/mtls/config');
     return response.data;
   }
 
