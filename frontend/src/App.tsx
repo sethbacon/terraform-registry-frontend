@@ -37,6 +37,8 @@ const TerraformMirrorPage = lazy(() => import('./pages/admin/TerraformMirrorPage
 const ApprovalsPage = lazy(() => import('./pages/admin/ApprovalsPage'));
 const MirrorPoliciesPage = lazy(() => import('./pages/admin/MirrorPoliciesPage'));
 const OIDCSettingsPage = lazy(() => import('./pages/admin/OIDCSettingsPage'));
+const SCIMProvisioningPage = lazy(() => import('./pages/admin/SCIMProvisioningPage'));
+const MTLSPage = lazy(() => import('./pages/admin/MTLSPage'));
 const AuditLogPage = lazy(() => import('./pages/admin/AuditLogPage'));
 const SecurityScanningPage = lazy(() => import('./pages/admin/SecurityScanningPage'));
 const ComponentShowcase = lazy(() => import('./pages/dev/ComponentShowcase'));
@@ -104,6 +106,8 @@ function App() {
                       <Route path="/admin/approvals" element={<ProtectedRoute requiredScope="mirrors:read"><ErrorBoundary><Suspense fallback={loader}><ApprovalsPage /></Suspense></ErrorBoundary></ProtectedRoute>} />
                       <Route path="/admin/policies" element={<ProtectedRoute requiredScope="admin"><ErrorBoundary><Suspense fallback={loader}><MirrorPoliciesPage /></Suspense></ErrorBoundary></ProtectedRoute>} />
                       <Route path="/admin/oidc" element={<ProtectedRoute requiredScope="admin"><ErrorBoundary><Suspense fallback={loader}><OIDCSettingsPage /></Suspense></ErrorBoundary></ProtectedRoute>} />
+                      <Route path="/admin/scim" element={<ProtectedRoute requiredScope="admin"><ErrorBoundary><Suspense fallback={loader}><SCIMProvisioningPage /></Suspense></ErrorBoundary></ProtectedRoute>} />
+                      <Route path="/admin/mtls" element={<ProtectedRoute requiredScope="admin"><ErrorBoundary><Suspense fallback={loader}><MTLSPage /></Suspense></ErrorBoundary></ProtectedRoute>} />
                       <Route path="/admin/audit-logs" element={<ProtectedRoute requiredScope="audit:read"><ErrorBoundary><Suspense fallback={loader}><AuditLogPage /></Suspense></ErrorBoundary></ProtectedRoute>} />
                       <Route path="/admin/security-scanning" element={<ProtectedRoute requiredScope="admin"><ErrorBoundary><Suspense fallback={loader}><SecurityScanningPage /></Suspense></ErrorBoundary></ProtectedRoute>} />
 

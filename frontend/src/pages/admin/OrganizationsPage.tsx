@@ -27,6 +27,7 @@ import {
   MenuItem,
   Autocomplete,
   SelectChangeEvent,
+  Chip,
 } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -67,6 +68,8 @@ const OrganizationsPage: React.FC = () => {
   const [formData, setFormData] = useState({
     name: '',
     display_name: '',
+    idp_type: '' as string,
+    idp_name: '' as string,
   });
 
   const {
@@ -91,12 +94,16 @@ const OrganizationsPage: React.FC = () => {
       setFormData({
         name: org.name,
         display_name: org.display_name || '',
+        idp_type: org.idp_type || '',
+        idp_name: org.idp_name || '',
       });
     } else {
       setEditingOrg(null);
       setFormData({
         name: '',
         display_name: '',
+        idp_type: '',
+        idp_name: '',
       });
     }
     setOpenDialog(true);
@@ -111,7 +118,11 @@ const OrganizationsPage: React.FC = () => {
   const saveOrgMutation = useMutation({
     mutationFn: async () => {
       if (editingOrg) {
-        await api.updateOrganization(editingOrg.id, { display_name: formData.display_name });
+        await api.updateOrganization(editingOrg.id, {
+          display_name: formData.display_name,
+          idp_type: formData.idp_type || null,
+          idp_name: formData.idp_name || null,
+        });
       } else {
         await api.createOrganization({ name: formData.name, display_name: formData.display_name });
       }
@@ -296,6 +307,7 @@ const OrganizationsPage: React.FC = () => {
                 <TableRow>
                   <TableCell>Name</TableCell>
                   <TableCell>Display Name</TableCell>
+                  <TableCell>Identity Provider</TableCell>
                   <TableCell>Members</TableCell>
                   <TableCell>Created</TableCell>
                   <TableCell align="right">Actions</TableCell>
@@ -308,6 +320,17 @@ const OrganizationsPage: React.FC = () => {
                       <Typography fontWeight="medium">{org.name}</Typography>
                     </TableCell>
                     <TableCell>{org.display_name || '-'}</TableCell>
+                    <TableCell>
+                      {org.idp_type ? (
+                        <Chip
+                          label={`${org.idp_type.toUpperCase()}${org.idp_name ? `: ${org.idp_name}` : ''}`}
+                          size="small"
+                          color="info"
+                        />
+                      ) : (
+                        <Typography variant="body2" color="text.secondary">Any</Typography>
+                      )}
+                    </TableCell>
                     <TableCell>
                       <Button
                         size="small"
@@ -367,6 +390,34 @@ const OrganizationsPage: React.FC = () => {
               fullWidth
               helperText="Display name for the organization"
             />
+            {editingOrg && (
+              <>
+                <FormControl fullWidth>
+                  <InputLabel>Identity Provider Type</InputLabel>
+                  <Select
+                    value={formData.idp_type}
+                    label="Identity Provider Type"
+                    onChange={(e: SelectChangeEvent) => setFormData({ ...formData, idp_type: e.target.value, idp_name: '' })}
+                  >
+                    <MenuItem value="">
+                      <em>Any (no restriction)</em>
+                    </MenuItem>
+                    <MenuItem value="oidc">OIDC</MenuItem>
+                    <MenuItem value="saml">SAML</MenuItem>
+                    <MenuItem value="ldap">LDAP</MenuItem>
+                  </Select>
+                </FormControl>
+                {formData.idp_type && (
+                  <TextField
+                    label="IdP Name"
+                    value={formData.idp_name}
+                    onChange={(e) => setFormData({ ...formData, idp_name: e.target.value })}
+                    fullWidth
+                    helperText="Name of the identity provider (e.g., SAML IdP name from config)"
+                  />
+                )}
+              </>
+            )}
           </Stack>
         </DialogContent>
         <DialogActions>

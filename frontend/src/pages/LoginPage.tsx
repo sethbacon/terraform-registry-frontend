@@ -10,6 +10,7 @@ import {
   Alert,
   CircularProgress,
   Skeleton,
+  TextField,
 } from '@mui/material';
 import LoginIcon from '@mui/icons-material/Login';
 import { useAuth } from '../contexts/AuthContext';
@@ -17,39 +18,30 @@ import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import type { User } from '../types';
 
-type ProviderId = 'oidc' | 'azuread';
-
-interface ProviderDef {
-  id: ProviderId;
-  label: string;
-  sx?: Record<string, unknown>;
+interface AuthProvider {
+  type: string;
+  name: string;
+  id?: string;
 }
 
-const PROVIDERS: ProviderDef[] = [
-  { id: 'oidc', label: 'Sign in with SSO' },
-  {
-    id: 'azuread',
-    label: 'Sign in with Azure AD',
-    sx: {
-      backgroundColor: '#0078d4',
-      '&:hover': { backgroundColor: '#106ebe' },
-    },
-  },
-];
-
-async function probeProvider(id: ProviderId): Promise<boolean> {
-  try {
-    const res = await fetch(`/api/v1/auth/login?provider=${id}`, {
-      method: 'GET',
-      redirect: 'manual',
-    });
-    // 429 means rate-limited — the provider may still be configured, so treat
-    // it as available to avoid hiding login buttons after a burst of requests.
-    if (res.status === 429) return true;
-    return res.type === 'opaqueredirect' || res.status === 0;
-  } catch {
-    return false;
+function providerLabel(p: AuthProvider): string {
+  switch (p.type) {
+    case 'oidc':
+      return 'Sign in with SSO';
+    case 'azuread':
+      return 'Sign in with Azure AD';
+    case 'saml':
+      return `Sign in with ${p.name}`;
+    default:
+      return `Sign in with ${p.name}`;
   }
+}
+
+function providerSx(p: AuthProvider): Record<string, unknown> | undefined {
+  if (p.type === 'azuread') {
+    return { backgroundColor: '#0078d4', '&:hover': { backgroundColor: '#106ebe' } };
+  }
+  return undefined;
 }
 
 const LoginPage: React.FC = () => {
@@ -57,21 +49,27 @@ const LoginPage: React.FC = () => {
   const navigate = useNavigate();
   const [loginError, setLoginError] = React.useState<string | null>(null);
   const isDev = import.meta.env.MODE === 'development';
-  const [providerAvailable, setProviderAvailable] = React.useState<Record<ProviderId, boolean>>({
-    oidc: false,
-    azuread: false,
-  });
-  const [probingProviders, setProbingProviders] = React.useState(true);
+  const [providers, setProviders] = React.useState<AuthProvider[]>([]);
+  const [loading, setLoading] = React.useState(true);
+
+  // LDAP form state
+  const [ldapUsername, setLdapUsername] = React.useState('');
+  const [ldapPassword, setLdapPassword] = React.useState('');
+  const [ldapLoading, setLdapLoading] = React.useState(false);
 
   React.useEffect(() => {
     let cancelled = false;
-    Promise.all(PROVIDERS.map(p => probeProvider(p.id).then(ok => [p.id, ok] as const))).then(results => {
-      if (cancelled) return;
-      const map = { oidc: false, azuread: false } as Record<ProviderId, boolean>;
-      for (const [id, ok] of results) map[id] = ok;
-      setProviderAvailable(map);
-      setProbingProviders(false);
-    });
+    api
+      .getAuthProviders()
+      .then((res) => {
+        if (!cancelled) setProviders(res.providers || []);
+      })
+      .catch(() => {
+        // Silently ignore — providers will be empty
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false);
+      });
     return () => {
       cancelled = true;
     };
@@ -93,15 +91,36 @@ const LoginPage: React.FC = () => {
     }
   };
 
-  const handleProviderLogin = (provider: ProviderId) => {
+  const handleProviderLogin = (provider: AuthProvider) => {
     setLoginError(null);
-    // Provider availability was already confirmed by probeProvider() — go
-    // straight to the redirect to avoid consuming an extra rate-limit token.
-    api.login(provider);
+    const providerParam = provider.id || provider.type;
+    api.login(providerParam);
   };
 
-  const availableCount = Object.values(providerAvailable).filter(Boolean).length;
-  const showNoProvidersAlert = !probingProviders && availableCount === 0 && !isDev;
+  const handleLdapLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoginError(null);
+    setLdapLoading(true);
+    try {
+      const response = await api.ldapLogin(ldapUsername, ldapPassword);
+      localStorage.setItem('auth_token', response.token);
+      localStorage.removeItem('user');
+      localStorage.removeItem('role_template');
+      localStorage.removeItem('allowed_scopes');
+      await login({} as User);
+      navigate('/');
+    } catch (err) {
+      const message =
+        err instanceof Error ? err.message : 'LDAP login failed. Check your credentials.';
+      setLoginError(message);
+    } finally {
+      setLdapLoading(false);
+    }
+  };
+
+  const ssoProviders = providers.filter((p) => p.type !== 'ldap');
+  const hasLdap = providers.some((p) => p.type === 'ldap');
+  const showNoProvidersAlert = !loading && providers.length === 0 && !isDev;
 
   return (
     <Container maxWidth="sm" sx={{ mx: 'auto' }}>
@@ -152,7 +171,7 @@ const LoginPage: React.FC = () => {
                 >
                   Dev Login (Admin)
                 </Button>
-                {(probingProviders || availableCount > 0) && (
+                {(loading || providers.length > 0) && (
                   <Divider>
                     <Typography variant="body2" color="text.secondary">
                       OR USE PRODUCTION AUTH
@@ -162,35 +181,86 @@ const LoginPage: React.FC = () => {
               </>
             )}
 
-            {probingProviders ? (
-              <Stack spacing={1} data-testid="provider-probing">
+            {loading ? (
+              <Stack spacing={1} data-testid="provider-loading">
                 <Skeleton variant="rounded" height={48} />
                 <Skeleton variant="rounded" height={48} />
                 <Box sx={{ display: 'flex', justifyContent: 'center', pt: 1 }}>
-                  <CircularProgress size={18} aria-label="Checking available sign-in providers" />
+                  <CircularProgress size={18} aria-label="Loading sign-in providers" />
                 </Box>
               </Stack>
             ) : (
-              PROVIDERS.filter(p => providerAvailable[p.id]).map((p, idx, visible) => (
-                <React.Fragment key={p.id}>
-                  <Button
-                    variant="contained"
-                    size="large"
-                    fullWidth
-                    onClick={() => handleProviderLogin(p.id)}
-                    sx={{ py: 1.5, ...(p.sx ?? {}) }}
-                  >
-                    {p.label}
-                  </Button>
-                  {idx < visible.length - 1 && (
-                    <Divider>
-                      <Typography variant="body2" color="text.secondary">
-                        OR
-                      </Typography>
-                    </Divider>
-                  )}
-                </React.Fragment>
-              ))
+              <>
+                {ssoProviders.map((p, idx, visible) => (
+                  <React.Fragment key={p.id || p.type}>
+                    <Button
+                      variant="contained"
+                      size="large"
+                      fullWidth
+                      onClick={() => handleProviderLogin(p)}
+                      sx={{ py: 1.5, ...(providerSx(p) ?? {}) }}
+                    >
+                      {providerLabel(p)}
+                    </Button>
+                    {idx < visible.length - 1 && (
+                      <Divider>
+                        <Typography variant="body2" color="text.secondary">
+                          OR
+                        </Typography>
+                      </Divider>
+                    )}
+                  </React.Fragment>
+                ))}
+
+                {hasLdap && ssoProviders.length > 0 && (
+                  <Divider>
+                    <Typography variant="body2" color="text.secondary">
+                      OR SIGN IN WITH LDAP
+                    </Typography>
+                  </Divider>
+                )}
+
+                {hasLdap && (
+                  <Box component="form" onSubmit={handleLdapLogin}>
+                    <Stack spacing={2}>
+                      {ssoProviders.length === 0 && (
+                        <Typography variant="subtitle2" color="text.secondary" textAlign="center">
+                          Sign in with LDAP
+                        </Typography>
+                      )}
+                      <TextField
+                        label="Username"
+                        value={ldapUsername}
+                        onChange={(e) => setLdapUsername(e.target.value)}
+                        required
+                        fullWidth
+                        autoComplete="username"
+                        size="small"
+                      />
+                      <TextField
+                        label="Password"
+                        type="password"
+                        value={ldapPassword}
+                        onChange={(e) => setLdapPassword(e.target.value)}
+                        required
+                        fullWidth
+                        autoComplete="current-password"
+                        size="small"
+                      />
+                      <Button
+                        type="submit"
+                        variant="contained"
+                        size="large"
+                        fullWidth
+                        disabled={ldapLoading || !ldapUsername || !ldapPassword}
+                        sx={{ py: 1.5 }}
+                      >
+                        {ldapLoading ? <CircularProgress size={24} /> : 'Sign In'}
+                      </Button>
+                    </Stack>
+                  </Box>
+                )}
+              </>
             )}
           </Stack>
 

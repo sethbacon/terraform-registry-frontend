@@ -375,4 +375,27 @@ describe('OrganizationsPage', () => {
       expect(removeOrgMemberMock).toHaveBeenCalledWith('org-1', 'u1'),
     )
   })
+
+  // ── Phase 2: Identity Provider fields ─────────────────────────────────────
+  it('shows Identity Provider column with IdP chip', async () => {
+    const orgsWithIdp = [
+      { ...fakeOrgs[0], idp_type: 'saml', idp_name: 'Okta' },
+      { ...fakeOrgs[1] },
+    ]
+    listOrganizationsMock.mockResolvedValue(orgsWithIdp)
+    renderPage()
+    await waitFor(() => expect(screen.getByText('acme-corp')).toBeInTheDocument())
+    expect(screen.getByText('Identity Provider')).toBeInTheDocument()
+    expect(screen.getByText('SAML: Okta')).toBeInTheDocument()
+  })
+
+  it('shows IdP chip without name when idp_name is empty', async () => {
+    const orgsWithIdp = [
+      { ...fakeOrgs[0], idp_type: 'ldap' },
+    ]
+    listOrganizationsMock.mockResolvedValue(orgsWithIdp)
+    renderPage()
+    await waitFor(() => expect(screen.getByText('acme-corp')).toBeInTheDocument())
+    expect(screen.getByText('LDAP')).toBeInTheDocument()
+  })
 })

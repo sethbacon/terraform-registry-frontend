@@ -9,8 +9,6 @@ import {
 } from '@mui/material';
 import { useAuth } from '../contexts/AuthContext';
 
-const API_BASE_URL = import.meta.env.DEV ? '' : (import.meta.env.VITE_API_URL || '');
-
 const CallbackPage: React.FC = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -33,36 +31,17 @@ const CallbackPage: React.FC = () => {
       }
 
       // Check URL param first (backward compat / dev mode)
-      let token = searchParams.get('token');
+      const token = searchParams.get('token');
 
-      // If no URL param, exchange the HttpOnly cookie for a token.
-      // The backend sets a tfr_auth_token cookie during the OIDC callback redirect;
-      // this endpoint reads it, validates the JWT, returns it in the response body,
-      // and clears the cookie.
-      if (!token) {
-        try {
-          const response = await fetch(`${API_BASE_URL}/api/v1/auth/exchange-token`, {
-            credentials: 'include',
-          });
-          if (response.ok) {
-            const data = await response.json();
-            token = data.token;
-          }
-        } catch {
-          // fall through to error below
-        }
+      if (token) {
+        // Legacy flow: token was passed as a URL parameter.
+        // Store the JWT via AuthContext (writes to localStorage).
+        setToken(token);
       }
 
-      if (!token) {
-        setError('No authentication token received.');
-        setTimeout(() => navigate('/login'), 3000);
-        return;
-      }
-
-      // Store the JWT via AuthContext (writes to localStorage).
-      // Use a full-page navigation so AuthProvider's mount effect re-runs,
-      // picks up the stored token, and fetches the current user before rendering.
-      setToken(token);
+      // New flow: The backend set an HttpOnly cookie during the OIDC callback
+      // redirect. AuthContext will detect the session via /auth/me on mount.
+      // Navigate to the return URL; AuthContext handles the rest.
       const returnUrl = sessionStorage.getItem('returnUrl') || '/';
       sessionStorage.removeItem('returnUrl');
       window.location.replace(returnUrl);

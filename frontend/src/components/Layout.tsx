@@ -44,6 +44,7 @@ import Storage from '@mui/icons-material/Storage';
 import HourglassEmpty from '@mui/icons-material/HourglassEmpty';
 import Policy from '@mui/icons-material/Policy';
 import ManageAccounts from '@mui/icons-material/ManageAccounts';
+import SyncAlt from '@mui/icons-material/SyncAlt';
 import Description from '@mui/icons-material/Description';
 import ExpandMore from '@mui/icons-material/ExpandMore';
 import History from '@mui/icons-material/History';
@@ -120,6 +121,8 @@ const Layout = () => {
         { text: 'Roles', icon: <Shield />, path: '/admin/roles', tooltip: 'Configure role templates and permissions', scope: 'users:read' },
         { text: 'Users', icon: <People />, path: '/admin/users', tooltip: 'View and manage registry users', scope: 'users:read' },
         { text: 'OIDC Groups', icon: <ManageAccounts />, path: '/admin/oidc', tooltip: 'Map identity provider groups to registry roles', scope: 'admin' },
+        { text: 'SCIM', icon: <SyncAlt />, path: '/admin/scim', tooltip: 'SCIM 2.0 user and group provisioning configuration', scope: 'admin' },
+        { text: 'mTLS Certs', icon: <Shield />, path: '/admin/mtls', tooltip: 'View mTLS client certificate-to-scope mappings', scope: 'admin' },
         { text: 'API Keys', icon: <Key />, path: '/admin/apikeys', tooltip: 'Create and manage personal API keys', scope: null },
       ],
     },
