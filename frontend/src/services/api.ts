@@ -80,11 +80,17 @@ class ApiClient {
             (url.includes('/repositories') || url.includes('/tags') || url.includes('/branches'));
 
           if (!isSCMOAuthFailure) {
-            // Session expired or invalid — redirect to login.
-            // Clear any legacy localStorage token from migration period.
+            // Only redirect when the user previously had an active session
+            // (token or cached user). Fresh anonymous visitors receive 401 on
+            // probing endpoints like /auth/me — this is expected and should
+            // NOT trigger a redirect so public pages remain accessible.
+            const hadSession =
+              !!localStorage.getItem('auth_token') || !!localStorage.getItem('user');
             localStorage.removeItem('auth_token');
             localStorage.removeItem('user');
-            window.location.href = '/login';
+            if (hadSession) {
+              window.location.href = '/login';
+            }
           }
         }
         return Promise.reject(error);

@@ -9,7 +9,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.9.1] - 2026-04-20
+
+### Fixed
+
+- fix: Axios 401 interceptor no longer redirects anonymous visitors on public pages — only redirects when a previously authenticated session expires (#E2E)
+- fix: E2E tests promoted from best-effort to required CI gate (removed continue-on-error) (#E2E)
+- fix: accessibility E2E test waits for network idle before axe analysis (#E2E)
+- fix: auth E2E test uses auto-retry assertion for login button visibility (#E2E)
+
 ## [0.9.0] - 2026-04-20
+
+### Added
+
+- feat: Phase 2 enterprise identity — SCIM provisioning, mTLS, LDAP, SAML admin pages, identity group mapping, expanded API + test coverage (#E2)
 
 ## [0.8.0] - 2026-04-18
 

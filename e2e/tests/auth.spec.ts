@@ -17,17 +17,11 @@ test.describe('Login page', () => {
     await expect(page.getByRole('heading', { name: 'Terraform Registry' })).toBeVisible();
     await expect(page.getByText('Sign in to continue')).toBeVisible();
 
-    // At least one of the login buttons should be visible
-    const devBtn = page.getByRole('button', { name: 'Dev Login (Admin)' });
-    const oidcBtn = page.getByRole('button', { name: 'Sign in with OIDC' });
-    const azureBtn = page.getByRole('button', { name: 'Sign in with Azure AD' });
-
-    const anyVisible =
-      (await devBtn.isVisible()) ||
-      (await oidcBtn.isVisible()) ||
-      (await azureBtn.isVisible());
-
-    expect(anyVisible).toBe(true);
+    // At least one of the login buttons should be visible.
+    // Use a combined locator with auto-retry (toBeVisible) instead of point-in-time
+    // isVisible() checks, which are fragile during React hydration.
+    const anyLoginButton = page.getByRole('button', { name: /Dev Login \(Admin\)|Sign in with OIDC|Sign in with Azure AD/ });
+    await expect(anyLoginButton.first()).toBeVisible();
   });
 
   test('dev login redirects away from /login', async ({ page }) => {
