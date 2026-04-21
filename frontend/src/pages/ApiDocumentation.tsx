@@ -29,6 +29,85 @@ const TagsSorterPlugin = (): any => ({
 /* eslint-enable @typescript-eslint/no-explicit-any */
 
 // ---------------------------------------------------------------------------
+// a11y: Direct DOM style enforcement for Swagger UI elements
+//
+// Swagger UI's JS applies inline styles that override CSS !important in some
+// bundler configurations.  We enforce WCAG AA colours via JS after render and
+// use a MutationObserver to catch re-renders.
+// ---------------------------------------------------------------------------
+
+const METHOD_COLORS: Record<string, string> = {
+  get: '#5C4EE5',
+  post: '#00875a',
+  put: '#b36d00',
+  delete: '#c0392b',
+  patch: '#0a7fa0',
+  head: '#5C4EE5',
+  options: '#5C4EE5',
+};
+
+/** Apply WCAG-compliant colours directly to Swagger UI DOM elements. */
+function enforceSwaggerA11yStyles(dark: boolean): void {
+  // Method badges — white text on dark bg
+  for (const [method, bg] of Object.entries(METHOD_COLORS)) {
+    document
+      .querySelectorAll<HTMLElement>(
+        `.swagger-ui .opblock.opblock-${method} .opblock-summary-method`,
+      )
+      .forEach((el) => {
+        el.style.setProperty('background', bg, 'important');
+        el.style.setProperty('color', '#fff', 'important');
+      });
+  }
+
+  // Version stamps — theme-aware contrast
+  const versionColor = dark ? '#ccc' : '#555';
+  const versionBg = dark ? '#333' : '#e8e8e8';
+  document.querySelectorAll<HTMLElement>('.swagger-ui pre.version').forEach((el) => {
+    el.style.setProperty('color', versionColor, 'important');
+    el.style.setProperty('background', versionBg, 'important');
+  });
+
+  // URL field
+  const urlColor = dark ? '#8ab4f8' : '#3b6fb6';
+  document.querySelectorAll<HTMLElement>('.swagger-ui span.url').forEach((el) => {
+    el.style.setProperty('color', urlColor, 'important');
+  });
+
+  // Info links (terms of service, contact, etc.)
+  const linkColor = dark ? '#8ab4f8' : '#3b6fb6';
+  document
+    .querySelectorAll<HTMLElement>('.swagger-ui .info a.link, .swagger-ui .info .link')
+    .forEach((el) => {
+      el.style.setProperty('color', linkColor, 'important');
+    });
+
+  // Authorize button
+  const authColor = dark ? '#2ea77a' : '#00875a';
+  document.querySelectorAll<HTMLElement>('.swagger-ui .btn.authorize').forEach((btn) => {
+    btn.style.setProperty('border-color', authColor, 'important');
+    btn.style.setProperty('color', authColor, 'important');
+    const span = btn.querySelector<HTMLElement>('span');
+    if (span) span.style.setProperty('color', authColor, 'important');
+    const svg = btn.querySelector<SVGElement>('svg');
+    if (svg) svg.style.setProperty('fill', authColor, 'important');
+  });
+
+  // Nested-interactive fix: replace <a> inside summary buttons with <span>
+  document
+    .querySelectorAll<HTMLAnchorElement>('.swagger-ui .opblock-summary-control a')
+    .forEach((a) => {
+      const span = document.createElement('span');
+      span.className = a.className;
+      span.textContent = a.textContent;
+      Array.from(a.attributes).forEach((attr) => {
+        if (attr.name.startsWith('data-')) span.setAttribute(attr.name, attr.value);
+      });
+      a.replaceWith(span);
+    });
+}
+
+// ---------------------------------------------------------------------------
 // Theme-aligned CSS overrides for Swagger UI
 //
 // Goals:
@@ -325,6 +404,7 @@ const ApiDocumentation: React.FC = () => {
   const specRef = useRef<OpenAPISpec | null>(null);
   const observerRef = useRef<IntersectionObserver | null>(null);
   const contentRef = useRef<HTMLDivElement>(null);
+  const mutationObserverRef = useRef<MutationObserver | null>(null);
 
   // Forward the user's bearer token so "Try it out" works on auth'd endpoints.
   // eslint-disable-next-line @typescript-eslint/no-explicit-any -- swagger-ui-react's Request type lacks headers
@@ -348,24 +428,10 @@ const ApiDocumentation: React.FC = () => {
       // spec not available yet — harmless
     }
 
-    // a11y fix: replace <a> elements inside summary <button>s with inert <span>s
-    // to fully resolve the nested-interactive axe violation. tabindex="-1" alone
-    // does not prevent assistive technologies from focusing nested links.
-    setTimeout(() => {
-      document.querySelectorAll<HTMLAnchorElement>(
-        '.swagger-ui .opblock-summary-control a',
-      ).forEach((a) => {
-        const span = document.createElement('span');
-        span.className = a.className;
-        span.textContent = a.textContent;
-        // Copy any data attributes
-        Array.from(a.attributes).forEach((attr) => {
-          if (attr.name.startsWith('data-')) span.setAttribute(attr.name, attr.value);
-        });
-        a.replaceWith(span);
-      });
-    }, 300);
-  }, []);
+    // a11y fix: enforce WCAG-compliant styles after Swagger UI renders.
+    // Small delay to allow Swagger UI to finish its own DOM mutations.
+    setTimeout(() => enforceSwaggerA11yStyles(isDark), 300);
+  }, [isDark]);
 
   // Set up an IntersectionObserver to track which tag section is visible.
   useEffect(() => {
@@ -400,6 +466,28 @@ const ApiDocumentation: React.FC = () => {
       observer.disconnect();
     };
   }, [navTags]);
+
+  // MutationObserver: re-enforce a11y styles whenever Swagger UI mutates its DOM
+  // (e.g. user expands/collapses an operation, switches tabs, etc.)
+  useEffect(() => {
+    const container = contentRef.current;
+    if (!container) return;
+
+    let debounceTimer: ReturnType<typeof setTimeout>;
+    const mo = new MutationObserver(() => {
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(() => enforceSwaggerA11yStyles(isDark), 100);
+    });
+
+    mo.observe(container, { childList: true, subtree: true });
+    mutationObserverRef.current = mo;
+
+    return () => {
+      clearTimeout(debounceTimer);
+      mo.disconnect();
+      mutationObserverRef.current = null;
+    };
+  }, [isDark]);
 
   const scrollToTag = useCallback((id: string) => {
     const el = document.getElementById(id);
