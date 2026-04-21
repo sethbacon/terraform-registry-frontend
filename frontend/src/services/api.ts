@@ -1063,6 +1063,30 @@ class ApiClient {
     return response.data;
   }
 
+  async testLDAPConfig(
+    setupToken: string,
+    data: import('../types').LDAPConfigInput
+  ): Promise<import('../types').SetupTestResult> {
+    const response = await this.client.post(
+      '/api/v1/setup/ldap/test',
+      data,
+      this.setupRequest(setupToken)
+    );
+    return response.data;
+  }
+
+  async saveLDAPConfig(
+    setupToken: string,
+    data: import('../types').LDAPConfigInput
+  ): Promise<{ message: string; host: string; port: number }> {
+    const response = await this.client.post(
+      '/api/v1/setup/ldap',
+      data,
+      this.setupRequest(setupToken)
+    );
+    return response.data;
+  }
+
   // Admin OIDC config endpoints
 
   async getAdminOIDCConfig(): Promise<import('../types').OIDCConfigResponse> {

@@ -10,12 +10,17 @@ import { useSetupWizard } from '../../../contexts/SetupWizardContext';
 
 const ReviewStep: React.FC = () => {
   const {
+    setupStatus, authMethod,
     oidcForm, oidcSaved,
+    ldapForm, ldapSaved,
     storageForm, storageSaved,
     scanningForm, scanningSaved, scanningTestResult,
     adminEmail, adminSaved,
     completing, completeSetup, goToStep,
   } = useSetupWizard();
+
+  const isPending = setupStatus?.pending_feature_setup ?? false;
+  const authSaved = authMethod === 'oidc' ? oidcSaved : ldapSaved;
 
   return (
     <Box>
@@ -35,17 +40,22 @@ const ReviewStep: React.FC = () => {
         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <Typography variant="body1">
             <SecurityIcon sx={{ mr: 1, verticalAlign: 'middle', fontSize: 20 }} />
-            OIDC Provider
+            Identity Provider
           </Typography>
-          {oidcSaved ? (
+          {authSaved ? (
             <Chip label="Configured" color="success" size="small" icon={<CheckCircleIcon />} />
           ) : (
             <Chip label="Not configured" color="error" size="small" icon={<ErrorIcon />} />
           )}
         </Box>
-        {oidcSaved && (
+        {authSaved && authMethod === 'oidc' && (
           <Typography variant="body2" color="text.secondary" sx={{ pl: 4 }}>
             {oidcForm.provider_type === 'azuread' ? 'Azure AD' : 'Generic OIDC'} — {oidcForm.issuer_url}
+          </Typography>
+        )}
+        {authSaved && authMethod === 'ldap' && (
+          <Typography variant="body2" color="text.secondary" sx={{ pl: 4 }}>
+            LDAP — {ldapForm.host}:{ldapForm.port || 389}
           </Typography>
         )}
 
@@ -118,13 +128,13 @@ const ReviewStep: React.FC = () => {
       </Alert>
 
       <Stack direction="row" spacing={2} justifyContent="center">
-        <Button variant="text" onClick={() => goToStep(4)}>← Back</Button>
+        <Button variant="text" onClick={() => goToStep(isPending ? 3 : 4)}>← Back</Button>
         <Button
           variant="contained"
           color="primary"
           size="large"
           onClick={completeSetup}
-          disabled={completing || !oidcSaved || !storageSaved || !adminSaved}
+          disabled={completing || !authSaved || !storageSaved || !adminSaved}
         >
           {completing ? <CircularProgress size={24} sx={{ mr: 1 }} /> : null}
           Complete Setup & Finalize

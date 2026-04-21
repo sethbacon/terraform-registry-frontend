@@ -28,6 +28,8 @@ vi.mock('../../services/api', () => ({
     validateSetupToken: (...args: unknown[]) => validateSetupTokenMock(...args),
     testOIDCConfig: vi.fn(),
     saveOIDCConfig: (...args: unknown[]) => saveOIDCConfigMock(...args),
+    testLDAPConfig: vi.fn(),
+    saveLDAPConfig: vi.fn(),
     testSetupStorageConfig: vi.fn(),
     saveSetupStorageConfig: (...args: unknown[]) => saveSetupStorageConfigMock(...args),
     testScanningConfig: (...args: unknown[]) => testScanningConfigMock(...args),
@@ -64,7 +66,7 @@ async function advanceToStep(stepIndex: number) {
     await user.type(tokenInput, 'tfr_setup_test123')
     await user.click(screen.getByRole('button', { name: 'Verify Token' }))
     await waitFor(() => {
-      expect(screen.getByText('OIDC Provider Configuration')).toBeInTheDocument()
+      expect(screen.getByRole('heading', { name: 'Identity Provider' })).toBeInTheDocument()
     })
   }
 
@@ -125,7 +127,7 @@ describe('SetupWizardPage — Security Scanning step', () => {
       expect(screen.getByText('Authenticate')).toBeInTheDocument()
     })
 
-    expect(screen.getByText('OIDC Provider')).toBeInTheDocument()
+    expect(screen.getByText('Identity Provider')).toBeInTheDocument()
     expect(screen.getByText('Storage Backend')).toBeInTheDocument()
     expect(screen.getByText('Security Scanning')).toBeInTheDocument()
     expect(screen.getByText('Admin User')).toBeInTheDocument()
@@ -141,7 +143,7 @@ describe('SetupWizardPage — Security Scanning step', () => {
 
     const stepLabels = [
       'Authenticate',
-      'OIDC Provider',
+      'Identity Provider',
       'Storage Backend',
       'Security Scanning',
       'Admin User',
@@ -173,7 +175,7 @@ describe('SetupWizardPage — Security Scanning step', () => {
 
     await advanceToStep(1)
 
-    expect(screen.getByText('OIDC Provider Configuration')).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Identity Provider' })).toBeInTheDocument()
   })
 
   it('includes Security Scanning in the stepper while on step 0', async () => {

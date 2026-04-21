@@ -10,7 +10,7 @@ import ScanningStep from './setup/steps/ScanningStep';
 import AdminUserStep from './setup/steps/AdminUserStep';
 import ReviewStep from './setup/steps/ReviewStep';
 
-const steps = ['Authenticate', 'OIDC Provider', 'Storage Backend', 'Security Scanning', 'Admin User', 'Complete'];
+const steps = ['Authenticate', 'Identity Provider', 'Storage Backend', 'Security Scanning', 'Admin User', 'Complete'];
 
 const stepComponents: Record<number, React.FC> = {
   0: AuthenticateStep,
@@ -26,7 +26,20 @@ const SetupWizardShell: React.FC = () => {
 
   if (!loading && setupStatus?.setup_completed && !setupStatus?.pending_feature_setup) return null;
 
+  const isPending = setupStatus?.pending_feature_setup ?? false;
   const StepComponent = stepComponents[activeStep];
+
+  // In pending-feature mode, show only Token + the unconfigured steps + Complete
+  const pendingSteps = isPending
+    ? [
+      { label: 'Authenticate', index: 0 },
+      ...(!setupStatus?.scanning_configured ? [{ label: 'Security Scanning', index: 3 }] : []),
+      { label: 'Complete', index: 5 },
+    ]
+    : steps.map((label, index) => ({ label, index }));
+
+  // Map the activeStep to the stepper's visual position
+  const visualActiveStep = pendingSteps.findIndex((s) => s.index === activeStep);
 
   return (
     <Box aria-busy={loading} aria-live="polite">
@@ -40,16 +53,17 @@ const SetupWizardShell: React.FC = () => {
             <Box sx={{ textAlign: 'center', mb: 4 }}>
               <SettingsIcon sx={{ fontSize: 48, color: 'primary.main', mb: 1 }} />
               <Typography variant="h4" component="h1" gutterBottom>
-                Terraform Registry Setup
+                {isPending ? 'Configure New Features' : 'Terraform Registry Setup'}
               </Typography>
               <Typography variant="body1" color="text.secondary">
-                Configure your registry for first-time use. This wizard will guide you through
-                setting up OIDC authentication, storage backend, and the initial admin user.
+                {isPending
+                  ? 'New features have been added that require configuration. Your existing OIDC, storage, and admin settings are preserved.'
+                  : 'Configure your registry for first-time use. This wizard will guide you through setting up OIDC authentication, storage backend, and the initial admin user.'}
               </Typography>
             </Box>
 
-            <Stepper activeStep={activeStep} sx={{ mb: 4 }} alternativeLabel aria-label="Setup progress">
-              {steps.map((label) => (
+            <Stepper activeStep={visualActiveStep} sx={{ mb: 4 }} alternativeLabel aria-label="Setup progress">
+              {pendingSteps.map(({ label }) => (
                 <Step key={label}><StepLabel>{label}</StepLabel></Step>
               ))}
             </Stepper>
