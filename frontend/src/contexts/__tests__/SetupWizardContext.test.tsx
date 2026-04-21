@@ -8,6 +8,8 @@ const mockApi = vi.hoisted(() => ({
   validateSetupToken: vi.fn(),
   testOIDCConfig: vi.fn(),
   saveOIDCConfig: vi.fn(),
+  testLDAPConfig: vi.fn(),
+  saveLDAPConfig: vi.fn(),
   testSetupStorageConfig: vi.fn(),
   saveSetupStorageConfig: vi.fn(),
   testScanningConfig: vi.fn(),

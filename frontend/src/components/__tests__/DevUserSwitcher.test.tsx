@@ -15,10 +15,12 @@ vi.mock('../../services/api', () => ({
 
 const mockAuth = {
   isAuthenticated: true,
+  user: { id: 'u1', email: 'admin@example.com', name: 'Admin', primary_role: 'admin' },
   currentUser: { id: 'u1', email: 'admin@example.com', name: 'Admin', role_template_name: 'admin' },
   allowedScopes: ['admin'],
   login: vi.fn(),
   logout: vi.fn(),
+  setToken: vi.fn(),
 }
 
 vi.mock('../../contexts/AuthContext', () => ({
@@ -55,5 +57,46 @@ describe('DevUserSwitcher', () => {
     getDevStatusMock.mockReturnValue(new Promise(() => { }))
     const { container } = render(<DevUserSwitcher />)
     expect(container.innerHTML).toBe('')
+  })
+
+  it('renders user list when dev mode and users available', async () => {
+    getDevStatusMock.mockResolvedValue({ dev_mode: true })
+    listUsersForImpersonationMock.mockResolvedValue({
+      users: [
+        { id: 'u1', email: 'admin@example.com', name: 'Admin', primary_role: 'admin' },
+        { id: 'u2', email: 'user@example.com', name: 'Regular User', primary_role: 'viewer' },
+      ],
+    })
+    render(<DevUserSwitcher />)
+    await waitFor(() => {
+      expect(screen.getByText(/DEV/)).toBeInTheDocument()
+    })
+    // The Select should show the current user
+    expect(screen.getByText('Admin')).toBeInTheDocument()
+  })
+
+  it('renders nothing when dev status endpoint fails', async () => {
+    getDevStatusMock.mockRejectedValue(new Error('Not found'))
+    const { container } = render(<DevUserSwitcher />)
+    await waitFor(() => {
+      expect(getDevStatusMock).toHaveBeenCalled()
+    })
+    // Should render nothing when dev mode check fails
+    expect(container.querySelector('[class*="Chip"]')).toBeNull()
+  })
+
+  it('shows select user placeholder when current user not in list', async () => {
+    mockAuth.user = { id: 'u999', email: 'other@example.com', name: 'Other', primary_role: 'admin' }
+    getDevStatusMock.mockResolvedValue({ dev_mode: true })
+    listUsersForImpersonationMock.mockResolvedValue({
+      users: [
+        { id: 'u1', email: 'admin@example.com', name: 'Admin', primary_role: 'admin' },
+      ],
+    })
+    render(<DevUserSwitcher />)
+    await waitFor(() => {
+      expect(screen.getByText(/DEV/)).toBeInTheDocument()
+    })
+    expect(screen.getByText('Select user')).toBeInTheDocument()
   })
 })

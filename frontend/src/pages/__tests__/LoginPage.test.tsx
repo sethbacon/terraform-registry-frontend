@@ -134,4 +134,38 @@ describe('LoginPage', () => {
     expect(screen.getByRole('textbox', { name: /username/i })).toBeInTheDocument()
     expect(screen.getByText('OR SIGN IN WITH LDAP')).toBeInTheDocument()
   })
+
+  it('calls ldapLogin and navigates on successful LDAP sign-in', async () => {
+    mockLdapLogin.mockResolvedValue({ token: 'ldap-jwt' })
+    mockProviders([{ type: 'ldap', name: 'LDAP' }])
+    renderLoginPage()
+    const usernameInput = await screen.findByRole('textbox', { name: /username/i })
+    const passwordInput = screen.getByLabelText(/password/i)
+    const signInBtn = screen.getByRole('button', { name: 'Sign In' })
+    await act(async () => {
+      await userEvent.type(usernameInput, 'testuser')
+      await userEvent.type(passwordInput, 'testpass')
+      await userEvent.click(signInBtn)
+    })
+    await waitFor(() => {
+      expect(mockLdapLogin).toHaveBeenCalledWith('testuser', 'testpass')
+    })
+  })
+
+  it('shows error when LDAP login fails', async () => {
+    mockLdapLogin.mockRejectedValue(new Error('Invalid credentials'))
+    mockProviders([{ type: 'ldap', name: 'LDAP' }])
+    renderLoginPage()
+    const usernameInput = await screen.findByRole('textbox', { name: /username/i })
+    const passwordInput = screen.getByLabelText(/password/i)
+    const signInBtn = screen.getByRole('button', { name: 'Sign In' })
+    await act(async () => {
+      await userEvent.type(usernameInput, 'testuser')
+      await userEvent.type(passwordInput, 'wrongpass')
+      await userEvent.click(signInBtn)
+    })
+    await waitFor(() => {
+      expect(screen.getByText('Invalid credentials')).toBeInTheDocument()
+    })
+  })
 })

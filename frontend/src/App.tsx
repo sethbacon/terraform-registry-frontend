@@ -7,9 +7,12 @@ import { ThemeProvider } from './contexts/ThemeContext';
 import { AuthProvider } from './contexts/AuthContext';
 import { HelpProvider } from './contexts/HelpContext';
 import { AnnouncerProvider } from './contexts/AnnouncerContext';
+import { ConsentProvider } from './contexts/ConsentContext';
 import Layout from './components/Layout';
+import ConsentBanner from './components/ConsentBanner';
 import ErrorBoundary from './components/ErrorBoundary';
 import ProtectedRoute from './components/ProtectedRoute';
+import RouteFocusManager from './components/RouteFocusManager';
 // Critical-path pages loaded eagerly (small, always needed on first visit)
 import HomePage from './pages/HomePage';
 import LoginPage from './pages/LoginPage';
@@ -42,6 +45,7 @@ const MTLSPage = lazy(() => import('./pages/admin/MTLSPage'));
 const AuditLogPage = lazy(() => import('./pages/admin/AuditLogPage'));
 const SecurityScanningPage = lazy(() => import('./pages/admin/SecurityScanningPage'));
 const ComponentShowcase = lazy(() => import('./pages/dev/ComponentShowcase'));
+const SettingsPage = lazy(() => import('./pages/SettingsPage'));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -59,74 +63,81 @@ function App() {
   return (
     <ThemeProvider>
       <CssBaseline />
-      <AuthProvider>
-        <HelpProvider>
-          <AnnouncerProvider>
-            <QueryClientProvider client={queryClient}>
-              <Router>
-                <ErrorBoundary>
-                  <Routes>
-                    {/* Public routes */}
-                    <Route path="/login" element={<LoginPage />} />
-                    <Route path="/auth/callback" element={<CallbackPage />} />
-                    <Route path="/setup" element={<SetupWizardPage />} />
+      <ConsentProvider>
+        <AuthProvider>
+          <HelpProvider>
+            <AnnouncerProvider>
+              <QueryClientProvider client={queryClient}>
+                <Router>
+                  <RouteFocusManager />
+                  <ErrorBoundary>
+                    <Routes>
+                      {/* Public routes */}
+                      <Route path="/login" element={<LoginPage />} />
+                      <Route path="/auth/callback" element={<CallbackPage />} />
+                      <Route path="/setup" element={<SetupWizardPage />} />
 
-                    {/* Layout routes */}
-                    <Route element={<Layout />}>
-                      <Route path="/" element={<HomePage />} />
+                      {/* Layout routes */}
+                      <Route element={<Layout />}>
+                        <Route path="/" element={<HomePage />} />
 
-                      {/* Modules */}
-                      <Route path="/modules" element={<ModulesPage />} />
-                      <Route path="/modules/:namespace/:name/:system" element={<ErrorBoundary><Suspense fallback={loader}><ModuleDetailPage /></Suspense></ErrorBoundary>} />
+                        {/* Modules */}
+                        <Route path="/modules" element={<ModulesPage />} />
+                        <Route path="/modules/:namespace/:name/:system" element={<ErrorBoundary><Suspense fallback={loader}><ModuleDetailPage /></Suspense></ErrorBoundary>} />
 
-                      {/* Providers */}
-                      <Route path="/providers" element={<ProvidersPage />} />
-                      <Route path="/providers/:namespace/:type" element={<ErrorBoundary><Suspense fallback={loader}><ProviderDetailPage /></Suspense></ErrorBoundary>} />
+                        {/* Providers */}
+                        <Route path="/providers" element={<ProvidersPage />} />
+                        <Route path="/providers/:namespace/:type" element={<ErrorBoundary><Suspense fallback={loader}><ProviderDetailPage /></Suspense></ErrorBoundary>} />
 
-                      {/* Terraform Binaries */}
-                      <Route path="/terraform-binaries" element={<TerraformBinariesPage />} />
-                      <Route path="/terraform-binaries/:name" element={<ErrorBoundary><Suspense fallback={loader}><TerraformBinaryDetailPage /></Suspense></ErrorBoundary>} />
+                        {/* Terraform Binaries */}
+                        <Route path="/terraform-binaries" element={<TerraformBinariesPage />} />
+                        <Route path="/terraform-binaries/:name" element={<ErrorBoundary><Suspense fallback={loader}><TerraformBinaryDetailPage /></Suspense></ErrorBoundary>} />
 
-                      {/* API Documentation */}
-                      <Route path="/api-docs" element={<ErrorBoundary><Suspense fallback={loader}><ApiDocumentation /></Suspense></ErrorBoundary>} />
+                        {/* API Documentation */}
+                        <Route path="/api-docs" element={<ErrorBoundary><Suspense fallback={loader}><ApiDocumentation /></Suspense></ErrorBoundary>} />
 
-                      {/* Admin routes (protected with scope requirements) */}
-                      <Route path="/admin" element={<ProtectedRoute><ErrorBoundary><Suspense fallback={loader}><DashboardPage /></Suspense></ErrorBoundary></ProtectedRoute>} />
-                      <Route path="/admin/users" element={<ProtectedRoute requiredScope="users:read"><ErrorBoundary><Suspense fallback={loader}><UsersPage /></Suspense></ErrorBoundary></ProtectedRoute>} />
-                      <Route path="/admin/organizations" element={<ProtectedRoute requiredScope="organizations:read"><ErrorBoundary><Suspense fallback={loader}><OrganizationsPage /></Suspense></ErrorBoundary></ProtectedRoute>} />
-                      <Route path="/admin/roles" element={<ProtectedRoute requiredScope="users:read"><ErrorBoundary><Suspense fallback={loader}><RolesPage /></Suspense></ErrorBoundary></ProtectedRoute>} />
-                      <Route path="/admin/apikeys" element={<ProtectedRoute><ErrorBoundary><Suspense fallback={loader}><APIKeysPage /></Suspense></ErrorBoundary></ProtectedRoute>} />
-                      <Route path="/admin/upload" element={<Navigate to="/admin/upload/module" replace />} />
-                      <Route path="/admin/upload/module" element={<ProtectedRoute requiredScope="modules:write"><ErrorBoundary><Suspense fallback={loader}><ModuleUploadPage /></Suspense></ErrorBoundary></ProtectedRoute>} />
-                      <Route path="/admin/upload/provider" element={<ProtectedRoute requiredScope="providers:write"><ErrorBoundary><Suspense fallback={loader}><ProviderUploadPage /></Suspense></ErrorBoundary></ProtectedRoute>} />
-                      <Route path="/admin/scm-providers" element={<ProtectedRoute requiredScope="scm:read"><ErrorBoundary><Suspense fallback={loader}><SCMProvidersPage /></Suspense></ErrorBoundary></ProtectedRoute>} />
-                      <Route path="/admin/mirrors" element={<ProtectedRoute requiredScope="mirrors:read"><ErrorBoundary><Suspense fallback={loader}><MirrorsPage /></Suspense></ErrorBoundary></ProtectedRoute>} />
-                      <Route path="/admin/terraform-mirror" element={<ProtectedRoute requiredScope="mirrors:read"><ErrorBoundary><Suspense fallback={loader}><TerraformMirrorPage /></Suspense></ErrorBoundary></ProtectedRoute>} />
-                      <Route path="/admin/storage" element={<ProtectedRoute requiredScope="admin"><ErrorBoundary><Suspense fallback={loader}><StoragePage /></Suspense></ErrorBoundary></ProtectedRoute>} />
-                      <Route path="/admin/approvals" element={<ProtectedRoute requiredScope="mirrors:read"><ErrorBoundary><Suspense fallback={loader}><ApprovalsPage /></Suspense></ErrorBoundary></ProtectedRoute>} />
-                      <Route path="/admin/policies" element={<ProtectedRoute requiredScope="admin"><ErrorBoundary><Suspense fallback={loader}><MirrorPoliciesPage /></Suspense></ErrorBoundary></ProtectedRoute>} />
-                      <Route path="/admin/oidc" element={<ProtectedRoute requiredScope="admin"><ErrorBoundary><Suspense fallback={loader}><OIDCSettingsPage /></Suspense></ErrorBoundary></ProtectedRoute>} />
-                      <Route path="/admin/scim" element={<ProtectedRoute requiredScope="admin"><ErrorBoundary><Suspense fallback={loader}><SCIMProvisioningPage /></Suspense></ErrorBoundary></ProtectedRoute>} />
-                      <Route path="/admin/mtls" element={<ProtectedRoute requiredScope="admin"><ErrorBoundary><Suspense fallback={loader}><MTLSPage /></Suspense></ErrorBoundary></ProtectedRoute>} />
-                      <Route path="/admin/audit-logs" element={<ProtectedRoute requiredScope="audit:read"><ErrorBoundary><Suspense fallback={loader}><AuditLogPage /></Suspense></ErrorBoundary></ProtectedRoute>} />
-                      <Route path="/admin/security-scanning" element={<ProtectedRoute requiredScope="admin"><ErrorBoundary><Suspense fallback={loader}><SecurityScanningPage /></Suspense></ErrorBoundary></ProtectedRoute>} />
+                        {/* Settings & Privacy */}
+                        <Route path="/settings" element={<ErrorBoundary><Suspense fallback={loader}><SettingsPage /></Suspense></ErrorBoundary>} />
 
-                      {/* Dev-only routes */}
-                      {import.meta.env.DEV && (
-                        <Route path="/dev/components" element={<Suspense fallback={loader}><ComponentShowcase /></Suspense>} />
-                      )}
+                        {/* Admin routes (protected with scope requirements) */}
+                        <Route path="/admin" element={<ProtectedRoute><ErrorBoundary><Suspense fallback={loader}><DashboardPage /></Suspense></ErrorBoundary></ProtectedRoute>} />
+                        <Route path="/admin/users" element={<ProtectedRoute requiredScope="users:read"><ErrorBoundary><Suspense fallback={loader}><UsersPage /></Suspense></ErrorBoundary></ProtectedRoute>} />
+                        <Route path="/admin/organizations" element={<ProtectedRoute requiredScope="organizations:read"><ErrorBoundary><Suspense fallback={loader}><OrganizationsPage /></Suspense></ErrorBoundary></ProtectedRoute>} />
+                        <Route path="/admin/roles" element={<ProtectedRoute requiredScope="users:read"><ErrorBoundary><Suspense fallback={loader}><RolesPage /></Suspense></ErrorBoundary></ProtectedRoute>} />
+                        <Route path="/admin/apikeys" element={<ProtectedRoute><ErrorBoundary><Suspense fallback={loader}><APIKeysPage /></Suspense></ErrorBoundary></ProtectedRoute>} />
+                        <Route path="/admin/upload" element={<Navigate to="/admin/upload/module" replace />} />
+                        <Route path="/admin/upload/module" element={<ProtectedRoute requiredScope="modules:write"><ErrorBoundary><Suspense fallback={loader}><ModuleUploadPage /></Suspense></ErrorBoundary></ProtectedRoute>} />
+                        <Route path="/admin/upload/provider" element={<ProtectedRoute requiredScope="providers:write"><ErrorBoundary><Suspense fallback={loader}><ProviderUploadPage /></Suspense></ErrorBoundary></ProtectedRoute>} />
+                        <Route path="/admin/scm-providers" element={<ProtectedRoute requiredScope="scm:read"><ErrorBoundary><Suspense fallback={loader}><SCMProvidersPage /></Suspense></ErrorBoundary></ProtectedRoute>} />
+                        <Route path="/admin/mirrors" element={<ProtectedRoute requiredScope="mirrors:read"><ErrorBoundary><Suspense fallback={loader}><MirrorsPage /></Suspense></ErrorBoundary></ProtectedRoute>} />
+                        <Route path="/admin/terraform-mirror" element={<ProtectedRoute requiredScope="mirrors:read"><ErrorBoundary><Suspense fallback={loader}><TerraformMirrorPage /></Suspense></ErrorBoundary></ProtectedRoute>} />
+                        <Route path="/admin/storage" element={<ProtectedRoute requiredScope="admin"><ErrorBoundary><Suspense fallback={loader}><StoragePage /></Suspense></ErrorBoundary></ProtectedRoute>} />
+                        <Route path="/admin/approvals" element={<ProtectedRoute requiredScope="mirrors:read"><ErrorBoundary><Suspense fallback={loader}><ApprovalsPage /></Suspense></ErrorBoundary></ProtectedRoute>} />
+                        <Route path="/admin/policies" element={<ProtectedRoute requiredScope="admin"><ErrorBoundary><Suspense fallback={loader}><MirrorPoliciesPage /></Suspense></ErrorBoundary></ProtectedRoute>} />
+                        <Route path="/admin/oidc" element={<ProtectedRoute requiredScope="admin"><ErrorBoundary><Suspense fallback={loader}><OIDCSettingsPage /></Suspense></ErrorBoundary></ProtectedRoute>} />
+                        <Route path="/admin/scim" element={<ProtectedRoute requiredScope="admin"><ErrorBoundary><Suspense fallback={loader}><SCIMProvisioningPage /></Suspense></ErrorBoundary></ProtectedRoute>} />
+                        <Route path="/admin/mtls" element={<ProtectedRoute requiredScope="admin"><ErrorBoundary><Suspense fallback={loader}><MTLSPage /></Suspense></ErrorBoundary></ProtectedRoute>} />
+                        <Route path="/admin/audit-logs" element={<ProtectedRoute requiredScope="audit:read"><ErrorBoundary><Suspense fallback={loader}><AuditLogPage /></Suspense></ErrorBoundary></ProtectedRoute>} />
+                        <Route path="/admin/security-scanning" element={<ProtectedRoute requiredScope="admin"><ErrorBoundary><Suspense fallback={loader}><SecurityScanningPage /></Suspense></ErrorBoundary></ProtectedRoute>} />
 
-                      {/* Catch all */}
-                      <Route path="*" element={<Navigate to="/" replace />} />
-                    </Route>
-                  </Routes>
-                </ErrorBoundary>
-              </Router>
-              <ReactQueryDevtools initialIsOpen={false} />
-            </QueryClientProvider>
-          </AnnouncerProvider>
-        </HelpProvider>
-      </AuthProvider>
+                        {/* Dev-only routes */}
+                        {import.meta.env.DEV && (
+                          <Route path="/dev/components" element={<Suspense fallback={loader}><ComponentShowcase /></Suspense>} />
+                        )}
+
+                        {/* Catch all */}
+                        <Route path="*" element={<Navigate to="/" replace />} />
+                      </Route>
+                    </Routes>
+                  </ErrorBoundary>
+                </Router>
+                <ReactQueryDevtools initialIsOpen={false} />
+              </QueryClientProvider>
+            </AnnouncerProvider>
+          </HelpProvider>
+        </AuthProvider>
+        <ConsentBanner />
+      </ConsentProvider>
     </ThemeProvider>
   );
 }
