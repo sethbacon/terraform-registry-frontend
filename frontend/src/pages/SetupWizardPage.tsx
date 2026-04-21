@@ -24,7 +24,7 @@ const stepComponents: Record<number, React.FC> = {
 const SetupWizardShell: React.FC = () => {
   const { loading, setupStatus, activeStep, error, setError, success, setSuccess } = useSetupWizard();
 
-  if (!loading && setupStatus?.setup_completed) return null;
+  if (!loading && setupStatus?.setup_completed && !setupStatus?.pending_feature_setup) return null;
 
   const StepComponent = stepComponents[activeStep];
 

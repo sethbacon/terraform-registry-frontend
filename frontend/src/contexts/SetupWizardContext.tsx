@@ -153,7 +153,7 @@ export const SetupWizardProvider: React.FC<SetupWizardProviderProps> = ({
       setLoading(true);
       const status = await api.getSetupStatus();
       setSetupStatus(status);
-      if (status.setup_completed) {
+      if (status.setup_completed && !status.pending_feature_setup) {
         onSetupCompleted();
         return;
       }
@@ -163,6 +163,11 @@ export const SetupWizardProvider: React.FC<SetupWizardProviderProps> = ({
       if (status.storage_configured) setStorageSaved(true);
       if (status.scanning_configured) setScanningSaved(true);
       if (status.admin_configured) setAdminSaved(true);
+      // In pending-feature mode, jump directly to the first unconfigured step.
+      // Steps: 0=Token, 1=OIDC, 2=Storage, 3=Scanning, 4=Admin, 5=Complete
+      if (status.pending_feature_setup) {
+        if (!status.scanning_configured) setActiveStep(0);
+      }
       setOidcForm((prev) => {
         if (prev.redirect_url) return prev;
         const baseUrl = window.location.origin;
