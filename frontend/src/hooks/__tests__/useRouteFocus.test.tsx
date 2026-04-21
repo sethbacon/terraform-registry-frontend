@@ -42,9 +42,9 @@ describe('useRouteFocus', () => {
     const h1 = document.createElement('h1')
     h1.textContent = 'Page Title'
     document.body.appendChild(h1)
-    const focusSpy = vi.spyOn(h1, 'focus')
+    vi.spyOn(h1, 'focus')
 
-    const { result } = renderHook(() => useRouteFocus(), {
+    renderHook(() => useRouteFocus(), {
       wrapper: createWrapper(['/page1', '/page2']),
     })
 
