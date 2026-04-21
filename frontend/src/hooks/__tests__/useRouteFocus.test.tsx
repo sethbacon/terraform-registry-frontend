@@ -1,9 +1,16 @@
-import { renderHook } from '@testing-library/react'
-import { MemoryRouter } from 'react-router-dom'
+import { renderHook, act } from '@testing-library/react'
+import { MemoryRouter, useNavigate } from 'react-router-dom'
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { useRouteFocus } from '../useRouteFocus'
 import { AnnouncerProvider } from '../../contexts/AnnouncerContext'
 import type { ReactNode } from 'react'
+
+/** Helper that calls useRouteFocus AND exposes navigate so tests can trigger route changes. */
+let navigateFn: ReturnType<typeof useNavigate>
+function useRouteFocusWithNav() {
+  navigateFn = useNavigate()
+  useRouteFocus()
+}
 
 function createWrapper(initialEntries: string[]) {
   return function Wrapper({ children }: { children: ReactNode }) {
@@ -32,54 +39,121 @@ describe('useRouteFocus', () => {
     document.body.appendChild(h1)
     const focusSpy = vi.spyOn(h1, 'focus')
 
-    renderHook(() => useRouteFocus(), { wrapper: createWrapper(['/']) })
+    renderHook(() => useRouteFocusWithNav(), { wrapper: createWrapper(['/']) })
 
     vi.advanceTimersByTime(200)
     expect(focusSpy).not.toHaveBeenCalled()
   })
 
-  it('focuses h1 on route change', () => {
+  it('focuses h1 and announces on route change', () => {
     const h1 = document.createElement('h1')
     h1.textContent = 'Page Title'
     document.body.appendChild(h1)
-    vi.spyOn(h1, 'focus')
+    const focusSpy = vi.spyOn(h1, 'focus')
 
-    renderHook(() => useRouteFocus(), {
-      wrapper: createWrapper(['/page1', '/page2']),
+    renderHook(() => useRouteFocusWithNav(), {
+      wrapper: createWrapper(['/']),
     })
 
-    // initial render skipped, but MemoryRouter starts at last entry
-    // The hook fires on pathname change - since initialEntries puts us at /page2,
-    // the effect runs once (initial render skipped). We need to trigger a navigation.
+    // Navigate to trigger the effect
+    act(() => { navigateFn('/other') })
     vi.advanceTimersByTime(200)
-    // On first render it's skipped, so focus should not have been called yet for initial
-    // This test validates the hook doesn't crash and handles the h1 case
-    expect(h1).toBeInTheDocument()
+
+    expect(focusSpy).toHaveBeenCalled()
   })
 
-  it('sets tabindex on h1 if not already focusable', () => {
+  it('sets tabindex=-1 on h1 and removes on blur', () => {
     const h1 = document.createElement('h1')
     h1.textContent = 'Heading'
     document.body.appendChild(h1)
 
-    renderHook(() => useRouteFocus(), {
-      wrapper: createWrapper(['/a', '/b']),
+    renderHook(() => useRouteFocusWithNav(), {
+      wrapper: createWrapper(['/']),
     })
 
+    act(() => { navigateFn('/next') })
     vi.advanceTimersByTime(200)
-    // The hook should be stable without errors
-    expect(h1).toBeInTheDocument()
+
+    expect(h1.getAttribute('tabindex')).toBe('-1')
+    // Simulate blur to verify the one-time listener removes tabindex
+    h1.dispatchEvent(new Event('blur'))
+    expect(h1.hasAttribute('tabindex')).toBe(false)
+  })
+
+  it('skips tabindex when element already has one', () => {
+    const h1 = document.createElement('h1')
+    h1.textContent = 'Heading'
+    h1.setAttribute('tabindex', '0')
+    document.body.appendChild(h1)
+
+    renderHook(() => useRouteFocusWithNav(), {
+      wrapper: createWrapper(['/']),
+    })
+
+    act(() => { navigateFn('/page2') })
+    vi.advanceTimersByTime(200)
+
+    expect(h1.getAttribute('tabindex')).toBe('0')
   })
 
   it('falls back to main when no h1 exists', () => {
     const main = document.createElement('main')
     document.body.appendChild(main)
+    const focusSpy = vi.spyOn(main, 'focus')
 
-    renderHook(() => useRouteFocus(), {
-      wrapper: createWrapper(['/x']),
+    renderHook(() => useRouteFocusWithNav(), {
+      wrapper: createWrapper(['/']),
     })
 
+    act(() => { navigateFn('/other') })
     vi.advanceTimersByTime(200)
-    expect(main).toBeInTheDocument()
+
+    expect(focusSpy).toHaveBeenCalled()
+    expect(main.getAttribute('tabindex')).toBe('-1')
+  })
+
+  it('does not focus when neither h1 nor main exists', () => {
+    renderHook(() => useRouteFocusWithNav(), {
+      wrapper: createWrapper(['/']),
+    })
+
+    // Should not throw
+    act(() => { navigateFn('/empty') })
+    vi.advanceTimersByTime(200)
+  })
+
+  it('announces page title from document.title', () => {
+    const h1 = document.createElement('h1')
+    h1.textContent = 'Heading'
+    document.body.appendChild(h1)
+    document.title = 'My Page'
+
+    renderHook(() => useRouteFocusWithNav(), {
+      wrapper: createWrapper(['/']),
+    })
+
+    act(() => { navigateFn('/new') })
+    act(() => { vi.advanceTimersByTime(200) })
+
+    // The announcer live region should contain the announcement
+    const polite = document.querySelector('[aria-live="polite"]')
+    expect(polite?.textContent).toContain('Navigated to My Page')
+  })
+
+  it('announces heading text when document.title is empty', () => {
+    const h1 = document.createElement('h1')
+    h1.textContent = 'Dashboard'
+    document.body.appendChild(h1)
+    document.title = ''
+
+    renderHook(() => useRouteFocusWithNav(), {
+      wrapper: createWrapper(['/']),
+    })
+
+    act(() => { navigateFn('/dash') })
+    act(() => { vi.advanceTimersByTime(200) })
+
+    const polite = document.querySelector('[aria-live="polite"]')
+    expect(polite?.textContent).toContain('Navigated to Dashboard')
   })
 })

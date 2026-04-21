@@ -39,7 +39,7 @@ const TagsSorterPlugin = (): any => ({
 const METHOD_COLORS: Record<string, string> = {
   get: '#5C4EE5',
   post: '#00875a',
-  put: '#b36d00',
+  put: '#995c00',
   delete: '#c0392b',
   patch: '#0a7fa0',
   head: '#5C4EE5',
@@ -203,7 +203,7 @@ const BASE_CSS = `
   .swagger-ui .opblock.opblock-post .opblock-summary .opblock-summary-method,
   .swagger-ui .opblock.opblock-post .opblock-summary-method { background: #00875a !important; color: #fff !important; }
   .swagger-ui .opblock.opblock-put .opblock-summary .opblock-summary-method,
-  .swagger-ui .opblock.opblock-put .opblock-summary-method { background: #b36d00 !important; color: #fff !important; }
+  .swagger-ui .opblock.opblock-put .opblock-summary-method { background: #995c00 !important; color: #fff !important; }
   .swagger-ui .opblock.opblock-delete .opblock-summary .opblock-summary-method,
   .swagger-ui .opblock.opblock-delete .opblock-summary-method { background: #c0392b !important; color: #fff !important; }
   .swagger-ui .opblock.opblock-patch .opblock-summary .opblock-summary-method,
