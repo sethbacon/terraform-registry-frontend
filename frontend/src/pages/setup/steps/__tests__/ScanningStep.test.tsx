@@ -3,6 +3,7 @@ import userEvent from '@testing-library/user-event'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 
 const mockCtx = {
+  setupStatus: null as { pending_feature_setup?: boolean } | null,
   scanningForm: { enabled: false, tool: 'trivy', binary_path: '', severity_threshold: '' },
   setScanningForm: vi.fn(),
   scanningTesting: false,
@@ -25,6 +26,7 @@ import ScanningStep from '../ScanningStep'
 beforeEach(() => {
   vi.clearAllMocks()
   Object.assign(mockCtx, {
+    setupStatus: null,
     scanningForm: { enabled: false, tool: 'trivy', binary_path: '', severity_threshold: '' },
     scanningTesting: false,
     scanningTestResult: null,
@@ -117,5 +119,60 @@ describe('ScanningStep', () => {
     await userEvent.setup().click(screen.getByRole('button', { name: /Skip/i }))
     expect(mockCtx.setScanningSaved).toHaveBeenCalledWith(true)
     expect(mockCtx.goToStep).toHaveBeenCalledWith(4)
+  })
+
+  it('toggles enabled and resets test result', async () => {
+    render(<ScanningStep />)
+    await userEvent.setup().click(screen.getByLabelText('Enable security scanning'))
+    expect(mockCtx.setScanningForm).toHaveBeenCalled()
+    expect(mockCtx.setScanningTestResult).toHaveBeenCalledWith(null)
+    expect(mockCtx.setScanningSaved).toHaveBeenCalledWith(false)
+  })
+
+  it('disables Test button when scanningTesting', () => {
+    mockCtx.scanningForm = { enabled: true, tool: 'trivy', binary_path: '', severity_threshold: '' }
+    mockCtx.scanningTesting = true
+    render(<ScanningStep />)
+    expect(screen.getByRole('button', { name: /Test Configuration/i })).toBeDisabled()
+  })
+
+  it('disables Save button when scanningSaving', () => {
+    mockCtx.scanningForm = { enabled: true, tool: 'trivy', binary_path: '', severity_threshold: '' }
+    mockCtx.scanningSaving = true
+    render(<ScanningStep />)
+    expect(screen.getByRole('button', { name: /Save Scanning/i })).toBeDisabled()
+  })
+})
+
+describe('ScanningStep — pending feature setup', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    Object.assign(mockCtx, {
+      setupStatus: { pending_feature_setup: true },
+      scanningForm: { enabled: false, tool: 'trivy', binary_path: '', severity_threshold: '' },
+      scanningTesting: false,
+      scanningTestResult: null,
+      scanningSaving: false,
+      scanningSaved: false,
+    })
+  })
+
+  it('navigates back to step 0 in pending mode', async () => {
+    render(<ScanningStep />)
+    await userEvent.setup().click(screen.getByRole('button', { name: /Back/i }))
+    expect(mockCtx.goToStep).toHaveBeenCalledWith(0)
+  })
+
+  it('skips to step 5 in pending mode', async () => {
+    render(<ScanningStep />)
+    await userEvent.setup().click(screen.getByRole('button', { name: /Skip/i }))
+    expect(mockCtx.goToStep).toHaveBeenCalledWith(5)
+  })
+
+  it('shows "Next: Review & Complete" label in pending mode', () => {
+    mockCtx.scanningForm = { enabled: true, tool: 'trivy', binary_path: '', severity_threshold: '' }
+    mockCtx.scanningSaved = true
+    render(<ScanningStep />)
+    expect(screen.getByRole('button', { name: /Next: Review & Complete/i })).toBeInTheDocument()
   })
 })

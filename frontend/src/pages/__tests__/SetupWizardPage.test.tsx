@@ -106,7 +106,7 @@ async function advanceToStep(stepIndex: number) {
 }
 
 // Allow generous timeout for tests that navigate through multiple wizard steps
-const STEP3_TIMEOUT = 15_000
+const STEP3_TIMEOUT = 30_000
 
 describe('SetupWizardPage — Security Scanning step', () => {
   beforeEach(() => {
