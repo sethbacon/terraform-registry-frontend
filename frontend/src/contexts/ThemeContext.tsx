@@ -47,8 +47,12 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   };
 
   const theme = useMemo(
-    () =>
-      createTheme({
+    () => {
+      const prefersReducedMotion =
+        typeof window !== 'undefined' &&
+        window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+      return createTheme({
         palette: {
           mode,
           primary: {
@@ -67,6 +71,21 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         typography: {
           fontFamily: '"Inter", "Roboto", "Helvetica", "Arial", sans-serif',
         },
+        transitions: prefersReducedMotion
+          ? {
+            // Disable all MUI transitions when reduced motion is preferred
+            create: () => 'none',
+            duration: {
+              shortest: 0,
+              shorter: 0,
+              short: 0,
+              standard: 0,
+              complex: 0,
+              enteringScreen: 0,
+              leavingScreen: 0,
+            },
+          }
+          : undefined,
         components: {
           MuiCssBaseline: {
             styleOverrides: {
@@ -89,6 +108,7 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
           },
         },
       }),
+    },
     [mode]
   );
 
