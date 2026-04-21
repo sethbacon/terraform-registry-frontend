@@ -39,6 +39,7 @@ import QuickApiKeyDialog from '../components/QuickApiKeyDialog';
 
 interface HomeStats {
   setupRequired: boolean;
+  pendingFeatureSetup: boolean;
   moduleCount: number | null;
   moduleNames: { namespace: string; name: string; system: string }[];
   providerCount: number | null;
@@ -49,6 +50,7 @@ interface HomeStats {
 
 const initialStats: HomeStats = {
   setupRequired: false,
+  pendingFeatureSetup: false,
   moduleCount: null,
   moduleNames: [],
   providerCount: null,
@@ -97,6 +99,7 @@ const HomePage: React.FC = () => {
       setStats({
         loading: false,
         setupRequired: setup.status === 'fulfilled' ? (setup.value.setup_required ?? false) : false,
+        pendingFeatureSetup: setup.status === 'fulfilled' ? (setup.value.pending_feature_setup ?? false) : false,
         moduleCount: mods.status === 'fulfilled' ? (mods.value.meta?.total ?? null) : null,
         moduleNames: mods.status === 'fulfilled' ? (mods.value.modules ?? []).slice(0, 3) : [],
         providerCount: provs.status === 'fulfilled' ? (provs.value.meta?.total ?? null) : null,
@@ -149,14 +152,15 @@ const HomePage: React.FC = () => {
           icon={<WarningAmberIcon />}
           action={
             <Button color="inherit" size="small" onClick={() => navigate('/setup')} sx={{ fontWeight: 600 }}>
-              Start Setup
+              {stats.pendingFeatureSetup ? 'Configure Features' : 'Start Setup'}
             </Button>
           }
           sx={{ borderRadius: 0 }}
         >
-          <AlertTitle>Setup Required</AlertTitle>
-          This registry has not been configured yet. Complete the setup wizard to configure
-          authentication, storage, and the initial admin account.
+          <AlertTitle>{stats.pendingFeatureSetup ? 'Feature Configuration Required' : 'Setup Required'}</AlertTitle>
+          {stats.pendingFeatureSetup
+            ? 'New features have been added that require configuration. Complete the setup wizard to enable them.'
+            : 'This registry has not been configured yet. Complete the setup wizard to configure authentication, storage, and the initial admin account.'}
         </Alert>
       )}
 

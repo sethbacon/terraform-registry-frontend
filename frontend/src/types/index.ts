@@ -309,6 +309,7 @@ export interface SetupStatus {
   oidc_configured?: boolean;
   scanning_configured?: boolean;
   admin_configured?: boolean;
+  pending_feature_setup?: boolean;
 }
 
 // Setup Wizard — Security Scanning configuration
