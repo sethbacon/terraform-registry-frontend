@@ -2,9 +2,20 @@ import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 
+const defaultLdapForm = {
+  host: '', port: 389, use_tls: false, start_tls: true, insecure_skip_verify: false,
+  bind_dn: '', bind_password: '', base_dn: '', user_filter: '(sAMAccountName=%s)',
+  user_attr_email: 'mail', user_attr_name: 'displayName',
+  group_base_dn: '', group_filter: '', group_member_attr: 'member',
+}
+
 const mockCtx = {
-  oidcForm: { oidcSaved: false } as Record<string, unknown>,
+  setupStatus: null as { pending_feature_setup?: boolean } | null,
+  authMethod: 'oidc' as 'oidc' | 'ldap',
+  oidcForm: { provider_type: 'generic_oidc', issuer_url: '' } as Record<string, unknown>,
   oidcSaved: false,
+  ldapForm: { ...defaultLdapForm } as Record<string, unknown>,
+  ldapSaved: false,
   storageForm: { backend_type: 'local', local_base_path: '/data' } as Record<string, unknown>,
   storageSaved: false,
   scanningForm: { enabled: false, tool: 'trivy' } as Record<string, unknown>,
@@ -25,8 +36,12 @@ import ReviewStep from '../ReviewStep'
 
 function allSaved() {
   Object.assign(mockCtx, {
+    setupStatus: null,
+    authMethod: 'oidc',
     oidcForm: { provider_type: 'generic_oidc', issuer_url: 'https://issuer.example.com' },
     oidcSaved: true,
+    ldapForm: { ...defaultLdapForm },
+    ldapSaved: false,
     storageForm: { backend_type: 'local', local_base_path: '/data' },
     storageSaved: true,
     scanningForm: { enabled: false, tool: 'trivy' },
@@ -41,8 +56,12 @@ function allSaved() {
 beforeEach(() => {
   vi.clearAllMocks()
   Object.assign(mockCtx, {
+    setupStatus: null,
+    authMethod: 'oidc',
     oidcForm: { provider_type: 'generic_oidc', issuer_url: '' },
     oidcSaved: false,
+    ldapForm: { ...defaultLdapForm },
+    ldapSaved: false,
     storageForm: { backend_type: 'local', local_base_path: '/data' },
     storageSaved: false,
     scanningForm: { enabled: false, tool: 'trivy' },
@@ -70,7 +89,7 @@ describe('ReviewStep', () => {
     allSaved()
     render(<ReviewStep />)
     const configured = screen.getAllByText('Configured')
-    expect(configured.length).toBe(3) // OIDC, Storage, Admin
+    expect(configured.length).toBe(3) // Identity, Storage, Admin
   })
 
   it('shows "Disabled" chip when scanning is saved but disabled', () => {
@@ -93,7 +112,7 @@ describe('ReviewStep', () => {
     expect(screen.getByRole('button', { name: /Complete Setup/i })).toBeDisabled()
   })
 
-  it('enables Complete button when OIDC, storage, and admin are saved', () => {
+  it('enables Complete button when auth, storage, and admin are saved', () => {
     allSaved()
     render(<ReviewStep />)
     expect(screen.getByRole('button', { name: /Complete Setup/i })).toBeEnabled()

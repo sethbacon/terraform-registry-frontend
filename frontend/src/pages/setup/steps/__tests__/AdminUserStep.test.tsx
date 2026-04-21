@@ -83,4 +83,19 @@ describe('AdminUserStep', () => {
     expect(screen.getByRole('progressbar')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /Configure Admin/i })).toBeDisabled()
   })
+
+  it('calls setAdminEmail on typing', async () => {
+    render(<AdminUserStep />)
+    const input = screen.getByLabelText(/Admin Email/i)
+    await userEvent.setup().type(input, 'a')
+    expect(mockCtx.setAdminEmail).toHaveBeenCalled()
+  })
+
+  it('navigates forward on Next button click', async () => {
+    mockCtx.adminEmail = 'admin@example.com'
+    mockCtx.adminSaved = true
+    render(<AdminUserStep />)
+    await userEvent.setup().click(screen.getByRole('button', { name: /Next: Complete Setup/i }))
+    expect(mockCtx.goToStep).toHaveBeenCalledWith(5)
+  })
 })

@@ -47,6 +47,22 @@ export default defineConfig({
     // written to Playwright's default output directory under playwright-report.
     video: 'on',
     screenshot: 'only-on-failure',
+    // Pre-set consent preferences so the ConsentBanner overlay does not block
+    // pointer events during E2E tests.
+    storageState: {
+      cookies: [],
+      origins: [
+        {
+          origin: process.env.BASE_URL ?? 'https://localhost:3000',
+          localStorage: [
+            {
+              name: 'terraform-registry-consent',
+              value: JSON.stringify({ essential: true, errorReporting: false, performanceReporting: false, analytics: false }),
+            },
+          ],
+        },
+      ],
+    },
   },
 
   projects: [
@@ -57,11 +73,11 @@ export default defineConfig({
     // Firefox is included only in CI to keep local test runs fast.
     ...(process.env.CI
       ? [
-          {
-            name: 'firefox',
-            use: { ...devices['Desktop Firefox'] },
-          },
-        ]
+        {
+          name: 'firefox',
+          use: { ...devices['Desktop Firefox'] },
+        },
+      ]
       : []),
   ],
 });

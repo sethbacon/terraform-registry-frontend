@@ -9,7 +9,17 @@ const AUTH_DIR = path.join(__dirname, '../.auth');
  * This requires the backend to be running with DEV_MODE=true.
  */
 async function devLogin(page: Page): Promise<void> {
+  // Dismiss the consent banner before it can block interactions.
+  // Pre-set localStorage so ConsentProvider sees consent as already given.
   await page.goto('/login');
+  await page.evaluate(() => {
+    localStorage.setItem('terraform-registry-consent', JSON.stringify({
+      essential: true,
+      errorReporting: false,
+      performanceReporting: false,
+      analytics: false,
+    }));
+  });
 
   const devLoginBtn = page.getByRole('button', { name: 'Dev Login (Admin)' });
 

@@ -41,10 +41,10 @@ export default [
       // Disable rules that fire false positives in TSX files
       'no-undef': 'off',         // TypeScript handles undefined checks
       'no-redeclare': 'off',     // TypeScript handles redeclarations
-      // Accessibility (jsx-a11y) — recommended rules as warnings to avoid breaking CI
+      // Accessibility (jsx-a11y) — recommended rules enforced at error level
       ...Object.fromEntries(
         Object.entries(jsxA11y.flatConfigs.recommended.rules ?? {}).map(
-          ([rule, level]) => [rule, level === 'error' ? 'warn' : level],
+          ([rule, level]) => [rule, level],
         ),
       ),
       // autoFocus is intentional in MUI dialog text fields

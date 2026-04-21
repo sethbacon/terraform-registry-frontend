@@ -96,4 +96,36 @@ describe('MarkdownRenderer', () => {
     // Should render without crashing, with minimal content
     expect(container).toBeTruthy()
   })
+
+  it('shifts h1 down to h2', () => {
+    const { container } = renderWithTheme(<MarkdownRenderer>{'# Heading One'}</MarkdownRenderer>)
+    expect(container.querySelector('h2')).not.toBeNull()
+    expect(container.querySelector('h1')).toBeNull()
+  })
+
+  it('shifts h2 down to h3', () => {
+    const { container } = renderWithTheme(<MarkdownRenderer>{'## Heading Two'}</MarkdownRenderer>)
+    expect(container.querySelector('h3')).not.toBeNull()
+  })
+
+  it('shifts h3 down to h4', () => {
+    const { container } = renderWithTheme(<MarkdownRenderer>{'### Heading Three'}</MarkdownRenderer>)
+    expect(container.querySelector('h4')).not.toBeNull()
+  })
+
+  it('shifts h4 down to h5', () => {
+    const { container } = renderWithTheme(<MarkdownRenderer>{'#### Heading Four'}</MarkdownRenderer>)
+    expect(container.querySelector('h5')).not.toBeNull()
+  })
+
+  it('shifts h5 down to h6', () => {
+    const { container } = renderWithTheme(<MarkdownRenderer>{'##### Heading Five'}</MarkdownRenderer>)
+    expect(container.querySelector('h6')).not.toBeNull()
+  })
+
+  it('keeps h6 as h6', () => {
+    const { container } = renderWithTheme(<MarkdownRenderer>{'###### Heading Six'}</MarkdownRenderer>)
+    const h6s = container.querySelectorAll('h6')
+    expect(h6s.length).toBe(1)
+  })
 })

@@ -4,6 +4,7 @@ import { getErrorMessage } from '../utils/errors';
 import type {
   SetupStatus,
   OIDCConfigInput,
+  LDAPConfigInput,
   StorageConfigInput,
   StorageBackendType,
   SetupTestResult,
@@ -32,7 +33,10 @@ export interface SetupWizardContextValue {
   tokenValid: boolean;
   validateToken: () => Promise<void>;
 
-  // step 1: oidc
+  // step 1: auth method + oidc
+  authMethod: 'oidc' | 'ldap';
+  setAuthMethod: (v: 'oidc' | 'ldap') => void;
+
   oidcForm: OIDCConfigInput;
   setOidcForm: (f: OIDCConfigInput) => void;
   oidcTesting: boolean;
@@ -41,6 +45,16 @@ export interface SetupWizardContextValue {
   oidcSaved: boolean;
   testOIDC: () => Promise<void>;
   saveOIDC: () => Promise<void>;
+
+  // step 1: ldap (alternative to oidc)
+  ldapForm: LDAPConfigInput;
+  setLdapForm: (f: LDAPConfigInput) => void;
+  ldapTesting: boolean;
+  ldapTestResult: SetupTestResult | null;
+  ldapSaving: boolean;
+  ldapSaved: boolean;
+  testLDAP: () => Promise<void>;
+  saveLDAP: () => Promise<void>;
 
   // step 2: storage
   storageForm: StorageConfigInput;
@@ -107,6 +121,9 @@ export const SetupWizardProvider: React.FC<SetupWizardProviderProps> = ({
   const [tokenValidating, setTokenValidating] = useState(false);
   const [tokenValid, setTokenValid] = useState(false);
 
+  // Step 1: Auth method
+  const [authMethod, setAuthMethod] = useState<'oidc' | 'ldap'>('oidc');
+
   // Step 1: OIDC
   const [oidcForm, setOidcForm] = useState<OIDCConfigInput>({
     name: 'default',
@@ -121,6 +138,18 @@ export const SetupWizardProvider: React.FC<SetupWizardProviderProps> = ({
   const [oidcTestResult, setOidcTestResult] = useState<SetupTestResult | null>(null);
   const [oidcSaving, setOidcSaving] = useState(false);
   const [oidcSaved, setOidcSaved] = useState(false);
+
+  // Step 1: LDAP (alternative)
+  const [ldapForm, setLdapForm] = useState<LDAPConfigInput>({
+    host: '', port: 389, use_tls: false, start_tls: true, insecure_skip_verify: false,
+    bind_dn: '', bind_password: '', base_dn: '', user_filter: '(sAMAccountName=%s)',
+    user_attr_email: 'mail', user_attr_name: 'displayName',
+    group_base_dn: '', group_filter: '', group_member_attr: 'member',
+  });
+  const [ldapTesting, setLdapTesting] = useState(false);
+  const [ldapTestResult, setLdapTestResult] = useState<SetupTestResult | null>(null);
+  const [ldapSaving, setLdapSaving] = useState(false);
+  const [ldapSaved, setLdapSaved] = useState(false);
 
   // Step 2: storage
   const [storageForm, setStorageForm] = useState<StorageConfigInput>({
@@ -160,6 +189,8 @@ export const SetupWizardProvider: React.FC<SetupWizardProviderProps> = ({
       // Initialize saved-flags from backend status so features configured in
       // a previous session (or before a new feature was added) show as complete.
       if (status.oidc_configured) setOidcSaved(true);
+      if (status.ldap_configured) setLdapSaved(true);
+      if (status.auth_method) setAuthMethod(status.auth_method);
       if (status.storage_configured) setStorageSaved(true);
       if (status.scanning_configured) setScanningSaved(true);
       if (status.admin_configured) setAdminSaved(true);
@@ -196,7 +227,14 @@ export const SetupWizardProvider: React.FC<SetupWizardProviderProps> = ({
       if (result.valid) {
         setTokenValid(true);
         setSuccess('Setup token verified successfully');
-        setActiveStep(1);
+        // In pending-feature mode, skip already-configured steps and jump to
+        // the first unconfigured feature step.
+        if (setupStatus?.pending_feature_setup) {
+          if (!scanningSaved) { setActiveStep(3); }
+          else { setActiveStep(5); }
+        } else {
+          setActiveStep(1);
+        }
       }
     } catch (err: unknown) {
       setError(getErrorMessage(err, 'Invalid setup token'));
@@ -232,6 +270,35 @@ export const SetupWizardProvider: React.FC<SetupWizardProviderProps> = ({
       setError(getErrorMessage(err, 'Failed to save OIDC configuration'));
     } finally {
       setOidcSaving(false);
+    }
+  };
+
+  const testLDAP = async () => {
+    try {
+      setLdapTesting(true);
+      setError(null);
+      setLdapTestResult(null);
+      const result = await api.testLDAPConfig(setupToken, ldapForm);
+      setLdapTestResult(result);
+      if (!result.success) setError(result.message);
+    } catch (err: unknown) {
+      setError(getErrorMessage(err, 'LDAP test failed'));
+    } finally {
+      setLdapTesting(false);
+    }
+  };
+
+  const saveLDAP = async () => {
+    try {
+      setLdapSaving(true);
+      setError(null);
+      await api.saveLDAPConfig(setupToken, ldapForm);
+      setLdapSaved(true);
+      setSuccess('LDAP configuration saved successfully');
+    } catch (err: unknown) {
+      setError(getErrorMessage(err, 'Failed to save LDAP configuration'));
+    } finally {
+      setLdapSaving(false);
     }
   };
 
@@ -359,7 +426,9 @@ export const SetupWizardProvider: React.FC<SetupWizardProviderProps> = ({
     loading, setupStatus, reloadStatus,
     activeStep, goToStep, error, setError, success, setSuccess,
     setupToken, setSetupToken, tokenValidating, tokenValid, validateToken,
+    authMethod, setAuthMethod,
     oidcForm, setOidcForm, oidcTesting, oidcTestResult, oidcSaving, oidcSaved, testOIDC, saveOIDC,
+    ldapForm, setLdapForm, ldapTesting, ldapTestResult, ldapSaving, ldapSaved, testLDAP, saveLDAP,
     storageForm, setStorageForm, changeStorageBackend,
     storageTesting, storageTestResult, storageSaving, storageSaved, testStorage, saveStorage,
     scanningForm, setScanningForm, scanningTesting, scanningTestResult, setScanningTestResult,

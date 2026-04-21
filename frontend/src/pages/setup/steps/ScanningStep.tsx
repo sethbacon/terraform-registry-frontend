@@ -8,9 +8,15 @@ import { useSetupWizard } from '../../../contexts/SetupWizardContext';
 
 const ScanningStep: React.FC = () => {
   const {
+    setupStatus,
     scanningForm, setScanningForm, scanningTesting, scanningTestResult, setScanningTestResult,
     scanningSaving, scanningSaved, setScanningSaved, testScanning, saveScanning, goToStep,
   } = useSetupWizard();
+
+  const isPending = setupStatus?.pending_feature_setup ?? false;
+  const backStep = isPending ? 0 : 2;
+  const nextStep = isPending ? 5 : 4;
+  const nextLabel = isPending ? 'Next: Review & Complete' : 'Next: Configure Admin';
 
   return (
     <Box>
@@ -110,13 +116,13 @@ const ScanningStep: React.FC = () => {
         </Collapse>
 
         <Stack direction="row" spacing={2}>
-          <Button variant="text" onClick={() => goToStep(2)}>&#8592; Back</Button>
+          <Button variant="text" onClick={() => goToStep(backStep)}>&#8592; Back</Button>
           {!scanningForm.enabled && (
             <Button
               variant="outlined"
               onClick={() => {
                 setScanningSaved(true);
-                goToStep(4);
+                goToStep(nextStep);
               }}
             >
               Skip
@@ -126,8 +132,8 @@ const ScanningStep: React.FC = () => {
 
         {scanningSaved && scanningForm.enabled && (
           <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 1 }}>
-            <Button variant="contained" color="primary" onClick={() => goToStep(4)}>
-              Next: Configure Admin &#8594;
+            <Button variant="contained" color="primary" onClick={() => goToStep(nextStep)}>
+              {nextLabel} &#8594;
             </Button>
           </Box>
         )}

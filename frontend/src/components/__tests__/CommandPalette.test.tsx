@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
 import CommandPalette, { filterByScope, defaultCommands } from '../CommandPalette';
 
@@ -20,6 +21,8 @@ vi.mock('../../services/api', () => ({
     searchProviders: vi.fn().mockResolvedValue({ providers: [] }),
   },
 }));
+
+import api from '../../services/api';
 
 function setAuth(overrides: { isAuthenticated?: boolean; allowedScopes?: string[] } = {}) {
   mockUseAuth.mockReturnValue({
@@ -93,5 +96,16 @@ describe('CommandPalette', () => {
       expect(mockNavigate).toHaveBeenCalledWith('/modules');
     });
     expect(onClose).toHaveBeenCalled();
+  });
+
+  it('fetches search results when typing 2+ chars', async () => {
+    renderPalette(true);
+    const input = screen.getByTestId('command-palette-input');
+    await userEvent.type(input, 'myquery');
+    // Wait for debounce (200ms) + API calls to resolve
+    await waitFor(() => {
+      expect(api.searchModules).toHaveBeenCalled();
+    }, { timeout: 3000 });
+    expect(api.searchProviders).toHaveBeenCalled();
   });
 });
