@@ -2,7 +2,16 @@ import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 
+const defaultLdapForm = {
+  host: '', port: 389, use_tls: false, start_tls: true, insecure_skip_verify: false,
+  bind_dn: '', bind_password: '', base_dn: '', user_filter: '(sAMAccountName=%s)',
+  user_attr_email: 'mail', user_attr_name: 'displayName',
+  group_base_dn: '', group_filter: '', group_member_attr: 'member',
+}
+
 const mockCtx = {
+  authMethod: 'oidc' as 'oidc' | 'ldap',
+  setAuthMethod: vi.fn(),
   oidcForm: {
     provider_type: 'generic_oidc',
     issuer_url: '',
@@ -18,6 +27,14 @@ const mockCtx = {
   oidcSaved: false,
   testOIDC: vi.fn(),
   saveOIDC: vi.fn(),
+  ldapForm: { ...defaultLdapForm },
+  setLdapForm: vi.fn(),
+  ldapTesting: false,
+  ldapTestResult: null as { success: boolean; message: string } | null,
+  ldapSaving: false,
+  ldapSaved: false,
+  testLDAP: vi.fn(),
+  saveLDAP: vi.fn(),
   goToStep: vi.fn(),
 }
 
@@ -40,6 +57,7 @@ function filledForm() {
 
 beforeEach(() => {
   vi.clearAllMocks()
+  mockCtx.authMethod = 'oidc'
   mockCtx.oidcForm = {
     provider_type: 'generic_oidc',
     issuer_url: '',
@@ -52,12 +70,23 @@ beforeEach(() => {
   mockCtx.oidcTestResult = null
   mockCtx.oidcSaving = false
   mockCtx.oidcSaved = false
+  mockCtx.ldapForm = { ...defaultLdapForm }
+  mockCtx.ldapTesting = false
+  mockCtx.ldapTestResult = null
+  mockCtx.ldapSaving = false
+  mockCtx.ldapSaved = false
 })
 
 describe('OIDCStep', () => {
-  it('renders heading and form fields', () => {
+  it('renders heading and auth method toggle', () => {
     render(<OIDCStep />)
-    expect(screen.getByText('OIDC Provider Configuration')).toBeInTheDocument()
+    expect(screen.getByText('Identity Provider')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /OpenID Connect/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /LDAP/i })).toBeInTheDocument()
+  })
+
+  it('renders OIDC form fields when authMethod is oidc', () => {
+    render(<OIDCStep />)
     expect(screen.getByLabelText(/Issuer URL/i)).toBeInTheDocument()
     expect(screen.getByLabelText(/Client ID/i)).toBeInTheDocument()
     expect(screen.getByLabelText(/Client Secret/i)).toBeInTheDocument()
@@ -128,7 +157,8 @@ describe('OIDCStep', () => {
     render(<OIDCStep />)
     const secretInput = screen.getByLabelText(/Client Secret/i)
     expect(secretInput).toHaveAttribute('type', 'password')
-    await userEvent.setup().click(screen.getByLabelText(/Toggle password/i))
+    const toggleButtons = screen.getAllByLabelText(/Toggle password/i)
+    await userEvent.setup().click(toggleButtons[0])
     expect(secretInput).toHaveAttribute('type', 'text')
   })
 })
