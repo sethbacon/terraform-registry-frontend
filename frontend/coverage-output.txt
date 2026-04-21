@@ -1,4 +1,0 @@
-
-[1m[30m[46m RUN [49m[39m[22m [36mv4.1.4 [39m[90mC:/dev/gh/terraform-registry-frontend/frontend[39m
-      [2mCoverage enabled with [22m[33mv8[39m
-
