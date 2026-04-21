@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import SwaggerUI from 'swagger-ui-react';
 import 'swagger-ui-react/swagger-ui.css';
-import { Box, Typography, List, ListItemButton, ListItemText, Paper } from '@mui/material';
+import { Box, Typography, List, ListItem, ListItemButton, ListItemText, Paper } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 
 // swagger-ui-react's wrapper only forwards a fixed set of props to the
@@ -119,11 +119,31 @@ const BASE_CSS = `
   .swagger-ui .opblock.opblock-delete { background: rgba(210,50,50,.07); border-color: rgba(190,50,50,.5); }
   .swagger-ui .opblock.opblock-patch  { background: rgba(0,160,200,.07); border-color: rgba(0,140,180,.5); }
 
-  .swagger-ui .opblock.opblock-get    .opblock-summary-method { background: #5C4EE5; }
-  .swagger-ui .opblock.opblock-post   .opblock-summary-method { background: #00875a; }
-  .swagger-ui .opblock.opblock-put    .opblock-summary-method { background: #c47e00; }
-  .swagger-ui .opblock.opblock-delete .opblock-summary-method { background: #c0392b; }
-  .swagger-ui .opblock.opblock-patch  .opblock-summary-method { background: #0a7fa0; }
+  .swagger-ui .opblock.opblock-get    .opblock-summary-method { background: #5C4EE5 !important; color: #fff !important; }
+  .swagger-ui .opblock.opblock-post   .opblock-summary-method { background: #00875a !important; color: #fff !important; }
+  .swagger-ui .opblock.opblock-put    .opblock-summary-method { background: #b36d00 !important; color: #fff !important; }
+  .swagger-ui .opblock.opblock-delete .opblock-summary-method { background: #c0392b !important; color: #fff !important; }
+  .swagger-ui .opblock.opblock-patch  .opblock-summary-method { background: #0a7fa0 !important; color: #fff !important; }
+
+  /* ---------- version stamps — ensure readable contrast ---------- */
+  .swagger-ui .version-stamp .version,
+  .swagger-ui small > .version { color: #555 !important; background: #e8e8e8 !important; }
+
+  /* ---------- url field contrast fix ---------- */
+  .swagger-ui .info .url { color: #3b6fb6 !important; }
+
+  /* ---------- info links contrast fix ---------- */
+  .swagger-ui .info a,
+  .swagger-ui .info .link { color: #3b6fb6 !important; }
+  .swagger-ui .info a:hover,
+  .swagger-ui .info .link:hover { color: #2d5a96 !important; }
+
+  /* ---------- authorize button contrast fix ---------- */
+  .swagger-ui .btn.authorize { border-color: #00875a !important; color: #00875a !important; }
+  .swagger-ui .btn.authorize svg { fill: #00875a !important; }
+
+  /* ---------- nested-interactive fix: remove focusability from links inside summary buttons ---------- */
+  .swagger-ui .opblock-summary-control a { pointer-events: none; }
 
   /* ---------- response code pills ---------- */
   .swagger-ui .response-col_status { font-weight: 600; }
@@ -240,6 +260,10 @@ const DARK_EXTRA = `
 
   .swagger-ui .info p,
   .swagger-ui .info li { color: #ccc; }
+
+  /* dark-mode version stamp override */
+  .swagger-ui .version-stamp .version,
+  .swagger-ui small > .version { color: #ccc !important; background: #333 !important; }
 `;
 
 // ---------------------------------------------------------------------------
@@ -308,6 +332,16 @@ const ApiDocumentation: React.FC = () => {
     } catch {
       // spec not available yet — harmless
     }
+
+    // a11y fix: remove focusability from anchor elements nested inside
+    // summary buttons to resolve the nested-interactive axe violation.
+    setTimeout(() => {
+      document.querySelectorAll<HTMLAnchorElement>(
+        '.swagger-ui .opblock-summary-control a',
+      ).forEach((a) => {
+        a.setAttribute('tabindex', '-1');
+      });
+    }, 300);
   }, []);
 
   // Set up an IntersectionObserver to track which tag section is visible.
@@ -405,7 +439,7 @@ const ApiDocumentation: React.FC = () => {
                   fontWeight: 700,
                   letterSpacing: '0.08em',
                   textTransform: 'uppercase',
-                  color: isDark ? '#888' : '#999',
+                  color: isDark ? '#aaa' : '#666',
                   fontSize: '0.68rem',
                 }}
               >
@@ -415,32 +449,33 @@ const ApiDocumentation: React.FC = () => {
                 {navTags.map(({ id, label }) => {
                   const isActive = activeTag === id;
                   return (
-                    <ListItemButton
-                      key={id}
-                      onClick={() => scrollToTag(id)}
-                      sx={{
-                        py: 0.5,
-                        px: 2,
-                        borderLeft: isActive ? `3px solid ${primaryColor}` : '3px solid transparent',
-                        background: isActive ? activeBg : 'transparent',
-                        borderRadius: 0,
-                        '&:hover': {
-                          background: isDark ? 'rgba(255,255,255,.05)' : 'rgba(0,0,0,.04)',
-                        },
-                      }}
-                    >
-                      <ListItemText
-                        primary={label}
-                        primaryTypographyProps={{
-                          sx: {
-                            fontSize: '0.78rem',
-                            fontWeight: isActive ? 600 : 400,
-                            color: isActive ? activeText : navText,
-                            lineHeight: 1.4,
+                    <ListItem key={id} disablePadding>
+                      <ListItemButton
+                        onClick={() => scrollToTag(id)}
+                        sx={{
+                          py: 0.5,
+                          px: 2,
+                          borderLeft: isActive ? `3px solid ${primaryColor}` : '3px solid transparent',
+                          background: isActive ? activeBg : 'transparent',
+                          borderRadius: 0,
+                          '&:hover': {
+                            background: isDark ? 'rgba(255,255,255,.05)' : 'rgba(0,0,0,.04)',
                           },
                         }}
-                      />
-                    </ListItemButton>
+                      >
+                        <ListItemText
+                          primary={label}
+                          primaryTypographyProps={{
+                            sx: {
+                              fontSize: '0.78rem',
+                              fontWeight: isActive ? 600 : 400,
+                              color: isActive ? activeText : navText,
+                              lineHeight: 1.4,
+                            },
+                          }}
+                        />
+                      </ListItemButton>
+                    </ListItem>
                   );
                 })}
               </List>
