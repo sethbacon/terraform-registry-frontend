@@ -34,6 +34,7 @@ BEGIN
        SET setup_completed = true,
            oidc_configured = true,
            storage_configured = true,
+           scanning_configured = true,
            updated_at = NOW()
      WHERE id = 1;
 
