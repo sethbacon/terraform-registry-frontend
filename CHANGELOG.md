@@ -9,6 +9,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.9.2] - 2026-04-20
+
+### Fixed
+
+- fix(setup): setup wizard now triggers for features added after initial setup — existing registries that completed setup before scanning was added now see a "Feature Configuration Required" banner and can configure scanning via the wizard (#155)
+- fix(setup): `SetupWizardContext` no longer navigates away when `pending_feature_setup` is true
+- fix(setup): `SetupWizardPage` renders the wizard shell in pending-feature mode instead of returning null
+- fix(setup): HomePage banner shows contextual messaging ("Feature Configuration Required" vs "Setup Required") based on setup state
+
 ## [0.9.1] - 2026-04-20
 
 ### Fixed
