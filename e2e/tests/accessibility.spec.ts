@@ -6,6 +6,13 @@ import AxeBuilder from '@axe-core/playwright';
  * Logs full node details for any violation found.
  */
 async function assertNoA11yViolations(page: import('@playwright/test').Page) {
+  // Dismiss consent banner if present (it overlays the page and is tested separately)
+  const acceptBtn = page.getByRole('button', { name: 'Accept all' });
+  if (await acceptBtn.isVisible({ timeout: 1000 }).catch(() => false)) {
+    await acceptBtn.click();
+    await page.waitForTimeout(300);
+  }
+
   const results = await new AxeBuilder({ page }).analyze();
   const violations = results.violations.filter(
     (v) => v.impact === 'critical' || v.impact === 'serious',
