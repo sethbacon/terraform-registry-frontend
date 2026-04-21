@@ -307,6 +307,8 @@ export interface SetupStatus {
   // Enhanced fields from setup wizard
   setup_completed?: boolean;
   oidc_configured?: boolean;
+  ldap_configured?: boolean;
+  auth_method?: 'oidc' | 'ldap';
   scanning_configured?: boolean;
   admin_configured?: boolean;
   pending_feature_setup?: boolean;
@@ -326,6 +328,24 @@ export interface ScanningTestResult {
   message: string;
   tool?: string;
   version?: string;
+}
+
+// Setup Wizard — LDAP configuration
+export interface LDAPConfigInput {
+  host: string;
+  port: number;
+  use_tls: boolean;
+  start_tls: boolean;
+  insecure_skip_verify: boolean;
+  bind_dn: string;
+  bind_password: string;
+  base_dn: string;
+  user_filter: string;
+  user_attr_email: string;
+  user_attr_name: string;
+  group_base_dn: string;
+  group_filter: string;
+  group_member_attr: string;
 }
 
 // Setup Wizard Types

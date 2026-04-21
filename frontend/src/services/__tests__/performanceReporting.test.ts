@@ -99,4 +99,60 @@ describe('performanceReporting', () => {
       // No errors thrown
     })
   })
+
+  describe('flush with DSN', () => {
+    it('sends buffered entries via sendBeacon when DSN configured', async () => {
+      vi.stubEnv('VITE_PERFORMANCE_DSN', 'https://perf.example.com/report')
+      vi.resetModules()
+
+      const mod = await import('../performanceReporting')
+      mod.init()
+
+      mod.reportNavigation('/test', 100)
+
+      const sendBeaconSpy = vi.spyOn(navigator, 'sendBeacon').mockReturnValue(true)
+      mod.flush()
+      expect(sendBeaconSpy).toHaveBeenCalledWith(
+        'https://perf.example.com/report',
+        expect.any(String)
+      )
+
+      mod.destroy()
+    })
+
+    it('falls back to fetch when sendBeacon returns false', async () => {
+      vi.stubEnv('VITE_PERFORMANCE_DSN', 'https://perf.example.com/report')
+      vi.resetModules()
+
+      const mod = await import('../performanceReporting')
+      mod.init()
+
+      mod.reportNavigation('/test', 100)
+
+      vi.spyOn(navigator, 'sendBeacon').mockReturnValue(false)
+      const fetchSpy = vi.spyOn(globalThis, 'fetch').mockResolvedValue(new Response())
+      mod.flush()
+      expect(fetchSpy).toHaveBeenCalled()
+
+      mod.destroy()
+    })
+  })
+
+  describe('web vitals callback', () => {
+    it('init registers all five web vitals', async () => {
+      vi.resetModules()
+      const webVitals = await import('web-vitals')
+      const mod = await import('../performanceReporting')
+      mod.init()
+      await vi.dynamicImportSettled()
+
+      expect(webVitals.onCLS).toHaveBeenCalled()
+      expect(webVitals.onFCP).toHaveBeenCalled()
+      expect(webVitals.onLCP).toHaveBeenCalled()
+      expect(webVitals.onTTFB).toHaveBeenCalled()
+      expect(webVitals.onINP).toHaveBeenCalled()
+
+      mod.destroy()
+    })
+  })
 })

@@ -10,8 +10,9 @@ import { test, expect } from '@playwright/test';
  *  - Redirect when setup is already completed
  *  - Page renders correctly when setup is NOT completed (mocked API)
  *  - Token authentication step form validation
- *  - Stepper navigation and step labels
+ *  - Stepper navigation and step labels (6 steps including Security Scanning)
  *  - Storage backend type switching
+ *  - Accessibility: setup page works without authentication
  */
 
 test.describe('Setup Wizard — redirect when complete', () => {
@@ -45,8 +46,8 @@ test.describe('Setup Wizard — page structure (mocked API)', () => {
       page.getByRole('heading', { name: 'Terraform Registry Setup' }),
     ).toBeVisible({ timeout: 10_000 });
 
-    // All 5 stepper labels should be present
-    const stepLabels = ['Authenticate', 'OIDC Provider', 'Storage Backend', 'Admin User', 'Complete'];
+    // All 6 stepper labels should be present
+    const stepLabels = ['Authenticate', 'Identity Provider', 'Storage Backend', 'Security Scanning', 'Admin User', 'Complete'];
     for (const label of stepLabels) {
       await expect(page.getByText(label, { exact: true }).first()).toBeVisible();
     }
@@ -121,12 +122,12 @@ test.describe('Setup Wizard — page structure (mocked API)', () => {
 
     await page.getByRole('button', { name: 'Verify Token' }).click();
 
-    // Should advance to OIDC step
+    // Should advance to Identity Provider step
     await expect(
-      page.getByRole('heading', { name: 'OIDC Provider Configuration' }),
+      page.getByRole('heading', { name: 'Identity Provider' }),
     ).toBeVisible({ timeout: 10_000 });
 
-    // OIDC form fields should be visible
+    // OIDC form fields should be visible (default auth method)
     await expect(page.getByLabel('Issuer URL')).toBeVisible();
     await expect(page.getByLabel('Client ID')).toBeVisible();
     await expect(page.getByLabel('Client Secret')).toBeVisible();
@@ -164,9 +165,9 @@ test.describe('Setup Wizard — OIDC & Storage steps (mocked API)', () => {
     await tokenInput.fill('tfr_setup_valid_token');
     await page.getByRole('button', { name: 'Verify Token' }).click();
 
-    // Wait for OIDC step
+    // Wait for Identity Provider step
     await expect(
-      page.getByRole('heading', { name: 'OIDC Provider Configuration' }),
+      page.getByRole('heading', { name: 'Identity Provider' }),
     ).toBeVisible({ timeout: 10_000 });
 
     // Save button should be disabled (required fields are empty)
@@ -225,6 +226,13 @@ test.describe('Setup Wizard — accessibility', () => {
     // /setup is a public route — verify no redirect to /login
     const context = await browser.newContext({ storageState: undefined });
     const page = await context.newPage();
+
+    // Dismiss consent banner so it does not block interactions
+    await page.addInitScript(() => {
+      localStorage.setItem('terraform-registry-consent', JSON.stringify({
+        essential: true, errorReporting: false, performanceReporting: false, analytics: false,
+      }));
+    });
 
     // Mock setup as incomplete so we stay on the page
     await page.route('**/api/v1/setup/status', (route) =>

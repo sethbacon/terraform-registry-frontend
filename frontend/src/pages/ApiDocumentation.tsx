@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import SwaggerUI from 'swagger-ui-react';
 import 'swagger-ui-react/swagger-ui.css';
-import { Box, Typography, List, ListItemButton, ListItemText, Paper } from '@mui/material';
+import { Box, Typography, List, ListItem, ListItemButton, ListItemText, Paper } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 
 // swagger-ui-react's wrapper only forwards a fixed set of props to the
@@ -27,6 +27,85 @@ const TagsSorterPlugin = (): any => ({
   },
 });
 /* eslint-enable @typescript-eslint/no-explicit-any */
+
+// ---------------------------------------------------------------------------
+// a11y: Direct DOM style enforcement for Swagger UI elements
+//
+// Swagger UI's JS applies inline styles that override CSS !important in some
+// bundler configurations.  We enforce WCAG AA colours via JS after render and
+// use a MutationObserver to catch re-renders.
+// ---------------------------------------------------------------------------
+
+const METHOD_COLORS: Record<string, string> = {
+  get: '#5C4EE5',
+  post: '#00875a',
+  put: '#995c00',
+  delete: '#c0392b',
+  patch: '#0a7fa0',
+  head: '#5C4EE5',
+  options: '#5C4EE5',
+};
+
+/** Apply WCAG-compliant colours directly to Swagger UI DOM elements. */
+function enforceSwaggerA11yStyles(dark: boolean): void {
+  // Method badges — white text on dark bg
+  for (const [method, bg] of Object.entries(METHOD_COLORS)) {
+    document
+      .querySelectorAll<HTMLElement>(
+        `.swagger-ui .opblock.opblock-${method} .opblock-summary-method`,
+      )
+      .forEach((el) => {
+        el.style.setProperty('background', bg, 'important');
+        el.style.setProperty('color', '#fff', 'important');
+      });
+  }
+
+  // Version stamps — theme-aware contrast
+  const versionColor = dark ? '#ccc' : '#555';
+  const versionBg = dark ? '#333' : '#e8e8e8';
+  document.querySelectorAll<HTMLElement>('.swagger-ui pre.version').forEach((el) => {
+    el.style.setProperty('color', versionColor, 'important');
+    el.style.setProperty('background', versionBg, 'important');
+  });
+
+  // URL field
+  const urlColor = dark ? '#8ab4f8' : '#3b6fb6';
+  document.querySelectorAll<HTMLElement>('.swagger-ui span.url').forEach((el) => {
+    el.style.setProperty('color', urlColor, 'important');
+  });
+
+  // Info links (terms of service, contact, etc.)
+  const linkColor = dark ? '#8ab4f8' : '#3b6fb6';
+  document
+    .querySelectorAll<HTMLElement>('.swagger-ui .info a.link, .swagger-ui .info .link')
+    .forEach((el) => {
+      el.style.setProperty('color', linkColor, 'important');
+    });
+
+  // Authorize button
+  const authColor = dark ? '#2ea77a' : '#00875a';
+  document.querySelectorAll<HTMLElement>('.swagger-ui .btn.authorize').forEach((btn) => {
+    btn.style.setProperty('border-color', authColor, 'important');
+    btn.style.setProperty('color', authColor, 'important');
+    const span = btn.querySelector<HTMLElement>('span');
+    if (span) span.style.setProperty('color', authColor, 'important');
+    const svg = btn.querySelector<SVGElement>('svg');
+    if (svg) svg.style.setProperty('fill', authColor, 'important');
+  });
+
+  // Nested-interactive fix: replace <a> inside summary buttons with <span>
+  document
+    .querySelectorAll<HTMLAnchorElement>('.swagger-ui .opblock-summary-control a')
+    .forEach((a) => {
+      const span = document.createElement('span');
+      span.className = a.className;
+      span.textContent = a.textContent;
+      Array.from(a.attributes).forEach((attr) => {
+        if (attr.name.startsWith('data-')) span.setAttribute(attr.name, attr.value);
+      });
+      a.replaceWith(span);
+    });
+}
 
 // ---------------------------------------------------------------------------
 // Theme-aligned CSS overrides for Swagger UI
@@ -119,11 +198,43 @@ const BASE_CSS = `
   .swagger-ui .opblock.opblock-delete { background: rgba(210,50,50,.07); border-color: rgba(190,50,50,.5); }
   .swagger-ui .opblock.opblock-patch  { background: rgba(0,160,200,.07); border-color: rgba(0,140,180,.5); }
 
-  .swagger-ui .opblock.opblock-get    .opblock-summary-method { background: #5C4EE5; }
-  .swagger-ui .opblock.opblock-post   .opblock-summary-method { background: #00875a; }
-  .swagger-ui .opblock.opblock-put    .opblock-summary-method { background: #c47e00; }
-  .swagger-ui .opblock.opblock-delete .opblock-summary-method { background: #c0392b; }
-  .swagger-ui .opblock.opblock-patch  .opblock-summary-method { background: #0a7fa0; }
+  .swagger-ui .opblock.opblock-get .opblock-summary .opblock-summary-method,
+  .swagger-ui .opblock.opblock-get .opblock-summary-method { background: #5C4EE5 !important; color: #fff !important; }
+  .swagger-ui .opblock.opblock-post .opblock-summary .opblock-summary-method,
+  .swagger-ui .opblock.opblock-post .opblock-summary-method { background: #00875a !important; color: #fff !important; }
+  .swagger-ui .opblock.opblock-put .opblock-summary .opblock-summary-method,
+  .swagger-ui .opblock.opblock-put .opblock-summary-method { background: #995c00 !important; color: #fff !important; }
+  .swagger-ui .opblock.opblock-delete .opblock-summary .opblock-summary-method,
+  .swagger-ui .opblock.opblock-delete .opblock-summary-method { background: #c0392b !important; color: #fff !important; }
+  .swagger-ui .opblock.opblock-patch .opblock-summary .opblock-summary-method,
+  .swagger-ui .opblock.opblock-patch .opblock-summary-method { background: #0a7fa0 !important; color: #fff !important; }
+
+  /* ---------- version stamps — ensure readable contrast ---------- */
+  .swagger-ui .version-stamp .version,
+  .swagger-ui .version-stamp pre.version,
+  .swagger-ui small > .version,
+  .swagger-ui small > pre.version,
+  .swagger-ui pre.version { color: #555 !important; background: #e8e8e8 !important; }
+
+  /* ---------- url field contrast fix ---------- */
+  .swagger-ui .info .url,
+  .swagger-ui span.url { color: #3b6fb6 !important; }
+
+  /* ---------- info links contrast fix ---------- */
+  .swagger-ui .info a,
+  .swagger-ui .info .link,
+  .swagger-ui .info__tos a.link,
+  .swagger-ui .info__contact a.link,
+  .swagger-ui a.link[rel="noopener noreferrer"] { color: #3b6fb6 !important; }
+  .swagger-ui .info a:hover,
+  .swagger-ui .info .link:hover,
+  .swagger-ui a.link[rel="noopener noreferrer"]:hover { color: #2d5a96 !important; }
+
+  /* ---------- authorize button contrast fix ---------- */
+  .swagger-ui .btn.authorize,
+  .swagger-ui .auth-wrapper .btn.authorize { border-color: #00875a !important; color: #00875a !important; }
+  .swagger-ui .btn.authorize span { color: #00875a !important; }
+  .swagger-ui .btn.authorize svg { fill: #00875a !important; }
 
   /* ---------- response code pills ---------- */
   .swagger-ui .response-col_status { font-weight: 600; }
@@ -240,6 +351,13 @@ const DARK_EXTRA = `
 
   .swagger-ui .info p,
   .swagger-ui .info li { color: #ccc; }
+
+  /* dark-mode version stamp override */
+  .swagger-ui .version-stamp .version,
+  .swagger-ui .version-stamp pre.version,
+  .swagger-ui small > .version,
+  .swagger-ui small > pre.version,
+  .swagger-ui pre.version { color: #ccc !important; background: #333 !important; }
 `;
 
 // ---------------------------------------------------------------------------
@@ -286,6 +404,7 @@ const ApiDocumentation: React.FC = () => {
   const specRef = useRef<OpenAPISpec | null>(null);
   const observerRef = useRef<IntersectionObserver | null>(null);
   const contentRef = useRef<HTMLDivElement>(null);
+  const mutationObserverRef = useRef<MutationObserver | null>(null);
 
   // Forward the user's bearer token so "Try it out" works on auth'd endpoints.
   // eslint-disable-next-line @typescript-eslint/no-explicit-any -- swagger-ui-react's Request type lacks headers
@@ -308,7 +427,11 @@ const ApiDocumentation: React.FC = () => {
     } catch {
       // spec not available yet — harmless
     }
-  }, []);
+
+    // a11y fix: enforce WCAG-compliant styles after Swagger UI renders.
+    // Small delay to allow Swagger UI to finish its own DOM mutations.
+    setTimeout(() => enforceSwaggerA11yStyles(isDark), 300);
+  }, [isDark]);
 
   // Set up an IntersectionObserver to track which tag section is visible.
   useEffect(() => {
@@ -343,6 +466,28 @@ const ApiDocumentation: React.FC = () => {
       observer.disconnect();
     };
   }, [navTags]);
+
+  // MutationObserver: re-enforce a11y styles whenever Swagger UI mutates its DOM
+  // (e.g. user expands/collapses an operation, switches tabs, etc.)
+  useEffect(() => {
+    const container = contentRef.current;
+    if (!container) return;
+
+    let debounceTimer: ReturnType<typeof setTimeout>;
+    const mo = new MutationObserver(() => {
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(() => enforceSwaggerA11yStyles(isDark), 100);
+    });
+
+    mo.observe(container, { childList: true, subtree: true });
+    mutationObserverRef.current = mo;
+
+    return () => {
+      clearTimeout(debounceTimer);
+      mo.disconnect();
+      mutationObserverRef.current = null;
+    };
+  }, [isDark]);
 
   const scrollToTag = useCallback((id: string) => {
     const el = document.getElementById(id);
@@ -405,7 +550,7 @@ const ApiDocumentation: React.FC = () => {
                   fontWeight: 700,
                   letterSpacing: '0.08em',
                   textTransform: 'uppercase',
-                  color: isDark ? '#888' : '#999',
+                  color: isDark ? '#aaa' : '#666',
                   fontSize: '0.68rem',
                 }}
               >
@@ -415,32 +560,33 @@ const ApiDocumentation: React.FC = () => {
                 {navTags.map(({ id, label }) => {
                   const isActive = activeTag === id;
                   return (
-                    <ListItemButton
-                      key={id}
-                      onClick={() => scrollToTag(id)}
-                      sx={{
-                        py: 0.5,
-                        px: 2,
-                        borderLeft: isActive ? `3px solid ${primaryColor}` : '3px solid transparent',
-                        background: isActive ? activeBg : 'transparent',
-                        borderRadius: 0,
-                        '&:hover': {
-                          background: isDark ? 'rgba(255,255,255,.05)' : 'rgba(0,0,0,.04)',
-                        },
-                      }}
-                    >
-                      <ListItemText
-                        primary={label}
-                        primaryTypographyProps={{
-                          sx: {
-                            fontSize: '0.78rem',
-                            fontWeight: isActive ? 600 : 400,
-                            color: isActive ? activeText : navText,
-                            lineHeight: 1.4,
+                    <ListItem key={id} disablePadding>
+                      <ListItemButton
+                        onClick={() => scrollToTag(id)}
+                        sx={{
+                          py: 0.5,
+                          px: 2,
+                          borderLeft: isActive ? `3px solid ${primaryColor}` : '3px solid transparent',
+                          background: isActive ? activeBg : 'transparent',
+                          borderRadius: 0,
+                          '&:hover': {
+                            background: isDark ? 'rgba(255,255,255,.05)' : 'rgba(0,0,0,.04)',
                           },
                         }}
-                      />
-                    </ListItemButton>
+                      >
+                        <ListItemText
+                          primary={label}
+                          primaryTypographyProps={{
+                            sx: {
+                              fontSize: '0.78rem',
+                              fontWeight: isActive ? 600 : 400,
+                              color: isActive ? activeText : navText,
+                              lineHeight: 1.4,
+                            },
+                          }}
+                        />
+                      </ListItemButton>
+                    </ListItem>
                   );
                 })}
               </List>
