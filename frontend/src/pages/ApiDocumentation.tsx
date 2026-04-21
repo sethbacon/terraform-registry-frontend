@@ -119,31 +119,43 @@ const BASE_CSS = `
   .swagger-ui .opblock.opblock-delete { background: rgba(210,50,50,.07); border-color: rgba(190,50,50,.5); }
   .swagger-ui .opblock.opblock-patch  { background: rgba(0,160,200,.07); border-color: rgba(0,140,180,.5); }
 
-  .swagger-ui .opblock.opblock-get    .opblock-summary-method { background: #5C4EE5 !important; color: #fff !important; }
-  .swagger-ui .opblock.opblock-post   .opblock-summary-method { background: #00875a !important; color: #fff !important; }
-  .swagger-ui .opblock.opblock-put    .opblock-summary-method { background: #b36d00 !important; color: #fff !important; }
+  .swagger-ui .opblock.opblock-get .opblock-summary .opblock-summary-method,
+  .swagger-ui .opblock.opblock-get .opblock-summary-method { background: #5C4EE5 !important; color: #fff !important; }
+  .swagger-ui .opblock.opblock-post .opblock-summary .opblock-summary-method,
+  .swagger-ui .opblock.opblock-post .opblock-summary-method { background: #00875a !important; color: #fff !important; }
+  .swagger-ui .opblock.opblock-put .opblock-summary .opblock-summary-method,
+  .swagger-ui .opblock.opblock-put .opblock-summary-method { background: #b36d00 !important; color: #fff !important; }
+  .swagger-ui .opblock.opblock-delete .opblock-summary .opblock-summary-method,
   .swagger-ui .opblock.opblock-delete .opblock-summary-method { background: #c0392b !important; color: #fff !important; }
-  .swagger-ui .opblock.opblock-patch  .opblock-summary-method { background: #0a7fa0 !important; color: #fff !important; }
+  .swagger-ui .opblock.opblock-patch .opblock-summary .opblock-summary-method,
+  .swagger-ui .opblock.opblock-patch .opblock-summary-method { background: #0a7fa0 !important; color: #fff !important; }
 
   /* ---------- version stamps — ensure readable contrast ---------- */
   .swagger-ui .version-stamp .version,
-  .swagger-ui small > .version { color: #555 !important; background: #e8e8e8 !important; }
+  .swagger-ui .version-stamp pre.version,
+  .swagger-ui small > .version,
+  .swagger-ui small > pre.version,
+  .swagger-ui pre.version { color: #555 !important; background: #e8e8e8 !important; }
 
   /* ---------- url field contrast fix ---------- */
-  .swagger-ui .info .url { color: #3b6fb6 !important; }
+  .swagger-ui .info .url,
+  .swagger-ui span.url { color: #3b6fb6 !important; }
 
   /* ---------- info links contrast fix ---------- */
   .swagger-ui .info a,
-  .swagger-ui .info .link { color: #3b6fb6 !important; }
+  .swagger-ui .info .link,
+  .swagger-ui .info__tos a.link,
+  .swagger-ui .info__contact a.link,
+  .swagger-ui a.link[rel="noopener noreferrer"] { color: #3b6fb6 !important; }
   .swagger-ui .info a:hover,
-  .swagger-ui .info .link:hover { color: #2d5a96 !important; }
+  .swagger-ui .info .link:hover,
+  .swagger-ui a.link[rel="noopener noreferrer"]:hover { color: #2d5a96 !important; }
 
   /* ---------- authorize button contrast fix ---------- */
-  .swagger-ui .btn.authorize { border-color: #00875a !important; color: #00875a !important; }
+  .swagger-ui .btn.authorize,
+  .swagger-ui .auth-wrapper .btn.authorize { border-color: #00875a !important; color: #00875a !important; }
+  .swagger-ui .btn.authorize span { color: #00875a !important; }
   .swagger-ui .btn.authorize svg { fill: #00875a !important; }
-
-  /* ---------- nested-interactive fix: remove focusability from links inside summary buttons ---------- */
-  .swagger-ui .opblock-summary-control a { pointer-events: none; }
 
   /* ---------- response code pills ---------- */
   .swagger-ui .response-col_status { font-weight: 600; }
@@ -263,7 +275,10 @@ const DARK_EXTRA = `
 
   /* dark-mode version stamp override */
   .swagger-ui .version-stamp .version,
-  .swagger-ui small > .version { color: #ccc !important; background: #333 !important; }
+  .swagger-ui .version-stamp pre.version,
+  .swagger-ui small > .version,
+  .swagger-ui small > pre.version,
+  .swagger-ui pre.version { color: #ccc !important; background: #333 !important; }
 `;
 
 // ---------------------------------------------------------------------------
@@ -333,13 +348,21 @@ const ApiDocumentation: React.FC = () => {
       // spec not available yet — harmless
     }
 
-    // a11y fix: remove focusability from anchor elements nested inside
-    // summary buttons to resolve the nested-interactive axe violation.
+    // a11y fix: replace <a> elements inside summary <button>s with inert <span>s
+    // to fully resolve the nested-interactive axe violation. tabindex="-1" alone
+    // does not prevent assistive technologies from focusing nested links.
     setTimeout(() => {
       document.querySelectorAll<HTMLAnchorElement>(
         '.swagger-ui .opblock-summary-control a',
       ).forEach((a) => {
-        a.setAttribute('tabindex', '-1');
+        const span = document.createElement('span');
+        span.className = a.className;
+        span.textContent = a.textContent;
+        // Copy any data attributes
+        Array.from(a.attributes).forEach((attr) => {
+          if (attr.name.startsWith('data-')) span.setAttribute(attr.name, attr.value);
+        });
+        a.replaceWith(span);
       });
     }, 300);
   }, []);

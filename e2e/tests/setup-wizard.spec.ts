@@ -227,6 +227,13 @@ test.describe('Setup Wizard — accessibility', () => {
     const context = await browser.newContext({ storageState: undefined });
     const page = await context.newPage();
 
+    // Dismiss consent banner so it does not block interactions
+    await page.addInitScript(() => {
+      localStorage.setItem('terraform-registry-consent', JSON.stringify({
+        essential: true, errorReporting: false, performanceReporting: false, analytics: false,
+      }));
+    });
+
     // Mock setup as incomplete so we stay on the page
     await page.route('**/api/v1/setup/status', (route) =>
       route.fulfill({
