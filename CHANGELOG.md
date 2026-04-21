@@ -23,6 +23,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - feat: Phase 2 enterprise identity — SCIM provisioning, mTLS, LDAP, SAML admin pages, identity group mapping, expanded API + test coverage (#E2)
+
 ## [0.8.0] - 2026-04-18
 
 ### Added
