@@ -15,6 +15,17 @@ const mockCtx = {
   testScanning: vi.fn(),
   saveScanning: vi.fn(),
   goToStep: vi.fn(),
+  scanningInstalling: false,
+  scanningInstallResult: null as {
+    success: boolean
+    tool: string
+    version: string
+    binary_path: string
+    sha256: string
+    source_url: string
+    error?: string
+  } | null,
+  installScanner: vi.fn(),
 }
 
 vi.mock('../../../../contexts/SetupWizardContext', () => ({
@@ -32,6 +43,8 @@ beforeEach(() => {
     scanningTestResult: null,
     scanningSaving: false,
     scanningSaved: false,
+    scanningInstalling: false,
+    scanningInstallResult: null,
   })
 })
 
@@ -54,55 +67,103 @@ describe('ScanningStep', () => {
   })
 
   it('shows scanning fields when enabled', () => {
-    mockCtx.scanningForm = { enabled: true, tool: 'trivy', binary_path: '', severity_threshold: '' }
+    mockCtx.scanningForm = {
+      enabled: true,
+      tool: 'trivy',
+      binary_path: '',
+      severity_threshold: '',
+    }
     render(<ScanningStep />)
     expect(screen.getByLabelText('Binary Path')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /Test Configuration/i })).toBeInTheDocument()
   })
 
   it('hides Skip button when enabled', () => {
-    mockCtx.scanningForm = { enabled: true, tool: 'trivy', binary_path: '', severity_threshold: '' }
+    mockCtx.scanningForm = {
+      enabled: true,
+      tool: 'trivy',
+      binary_path: '',
+      severity_threshold: '',
+    }
     render(<ScanningStep />)
     expect(screen.queryByRole('button', { name: /Skip/i })).not.toBeInTheDocument()
   })
 
   it('calls testScanning on Test button click', async () => {
-    mockCtx.scanningForm = { enabled: true, tool: 'trivy', binary_path: '', severity_threshold: '' }
+    mockCtx.scanningForm = {
+      enabled: true,
+      tool: 'trivy',
+      binary_path: '',
+      severity_threshold: '',
+    }
     render(<ScanningStep />)
     await userEvent.setup().click(screen.getByRole('button', { name: /Test Configuration/i }))
     expect(mockCtx.testScanning).toHaveBeenCalledOnce()
   })
 
   it('disables Save button when test has not succeeded', () => {
-    mockCtx.scanningForm = { enabled: true, tool: 'trivy', binary_path: '', severity_threshold: '' }
+    mockCtx.scanningForm = {
+      enabled: true,
+      tool: 'trivy',
+      binary_path: '',
+      severity_threshold: '',
+    }
     render(<ScanningStep />)
     expect(screen.getByRole('button', { name: /Save Scanning/i })).toBeDisabled()
   })
 
   it('enables Save button after successful test', () => {
-    mockCtx.scanningForm = { enabled: true, tool: 'trivy', binary_path: '', severity_threshold: '' }
-    mockCtx.scanningTestResult = { success: true, message: 'Trivy found', version: '0.50.0' }
+    mockCtx.scanningForm = {
+      enabled: true,
+      tool: 'trivy',
+      binary_path: '',
+      severity_threshold: '',
+    }
+    mockCtx.scanningTestResult = {
+      success: true,
+      message: 'Trivy found',
+      version: '0.50.0',
+    }
     render(<ScanningStep />)
     expect(screen.getByRole('button', { name: /Save Scanning/i })).toBeEnabled()
   })
 
   it('shows test result alert on success', () => {
-    mockCtx.scanningForm = { enabled: true, tool: 'trivy', binary_path: '', severity_threshold: '' }
-    mockCtx.scanningTestResult = { success: true, message: 'Trivy found', version: '0.50.0' }
+    mockCtx.scanningForm = {
+      enabled: true,
+      tool: 'trivy',
+      binary_path: '',
+      severity_threshold: '',
+    }
+    mockCtx.scanningTestResult = {
+      success: true,
+      message: 'Trivy found',
+      version: '0.50.0',
+    }
     render(<ScanningStep />)
     expect(screen.getByText(/Trivy found/)).toBeInTheDocument()
     expect(screen.getByText(/0\.50\.0/)).toBeInTheDocument()
   })
 
   it('shows test result alert on error', () => {
-    mockCtx.scanningForm = { enabled: true, tool: 'trivy', binary_path: '', severity_threshold: '' }
+    mockCtx.scanningForm = {
+      enabled: true,
+      tool: 'trivy',
+      binary_path: '',
+      severity_threshold: '',
+    }
     mockCtx.scanningTestResult = { success: false, message: 'Trivy not found' }
     render(<ScanningStep />)
     expect(screen.getByText(/Trivy not found/)).toBeInTheDocument()
   })
 
   it('shows Next button when saved and enabled', () => {
-    mockCtx.scanningForm = { enabled: true, tool: 'trivy', binary_path: '', severity_threshold: '' }
+    mockCtx.scanningForm = {
+      enabled: true,
+      tool: 'trivy',
+      binary_path: '',
+      severity_threshold: '',
+    }
     mockCtx.scanningSaved = true
     render(<ScanningStep />)
     expect(screen.getByRole('button', { name: /Next: Configure Admin/i })).toBeInTheDocument()
@@ -130,17 +191,138 @@ describe('ScanningStep', () => {
   })
 
   it('disables Test button when scanningTesting', () => {
-    mockCtx.scanningForm = { enabled: true, tool: 'trivy', binary_path: '', severity_threshold: '' }
+    mockCtx.scanningForm = {
+      enabled: true,
+      tool: 'trivy',
+      binary_path: '',
+      severity_threshold: '',
+    }
     mockCtx.scanningTesting = true
     render(<ScanningStep />)
     expect(screen.getByRole('button', { name: /Test Configuration/i })).toBeDisabled()
   })
 
   it('disables Save button when scanningSaving', () => {
-    mockCtx.scanningForm = { enabled: true, tool: 'trivy', binary_path: '', severity_threshold: '' }
+    mockCtx.scanningForm = {
+      enabled: true,
+      tool: 'trivy',
+      binary_path: '',
+      severity_threshold: '',
+    }
     mockCtx.scanningSaving = true
     render(<ScanningStep />)
     expect(screen.getByRole('button', { name: /Save Scanning/i })).toBeDisabled()
+  })
+})
+
+describe('ScanningStep — auto-install', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    Object.assign(mockCtx, {
+      setupStatus: null,
+      scanningForm: {
+        enabled: true,
+        tool: 'trivy',
+        binary_path: '',
+        severity_threshold: '',
+      },
+      scanningTesting: false,
+      scanningTestResult: null,
+      scanningSaving: false,
+      scanningSaved: false,
+      scanningInstalling: false,
+      scanningInstallResult: null,
+    })
+  })
+
+  it('shows auto-install panel for installable tools', () => {
+    render(<ScanningStep />)
+    expect(screen.getByText('Auto-Install')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /Install trivy/i })).toBeInTheDocument()
+  })
+
+  it('hides auto-install panel for snyk', () => {
+    mockCtx.scanningForm = {
+      enabled: true,
+      tool: 'snyk',
+      binary_path: '',
+      severity_threshold: '',
+    }
+    render(<ScanningStep />)
+    expect(screen.queryByText('Auto-Install')).not.toBeInTheDocument()
+  })
+
+  it('hides auto-install panel for custom', () => {
+    mockCtx.scanningForm = {
+      enabled: true,
+      tool: 'custom',
+      binary_path: '',
+      severity_threshold: '',
+    }
+    render(<ScanningStep />)
+    expect(screen.queryByText('Auto-Install')).not.toBeInTheDocument()
+  })
+
+  it('calls installScanner on Install button click', async () => {
+    render(<ScanningStep />)
+    await userEvent.setup().click(screen.getByRole('button', { name: /Install trivy/i }))
+    expect(mockCtx.installScanner).toHaveBeenCalledWith(undefined)
+  })
+
+  it('disables Install button when scanningInstalling', () => {
+    mockCtx.scanningInstalling = true
+    render(<ScanningStep />)
+    expect(screen.getByRole('button', { name: /Installing/i })).toBeDisabled()
+  })
+
+  it('shows success alert after install', () => {
+    mockCtx.scanningInstallResult = {
+      success: true,
+      tool: 'trivy',
+      version: '0.58.0',
+      binary_path: '/app/scanners/trivy',
+      sha256: 'abc123def456789012345678',
+      source_url: 'https://github.com/aquasecurity/trivy/releases',
+    }
+    render(<ScanningStep />)
+    expect(screen.getByText(/trivy 0\.58\.0/)).toBeInTheDocument()
+    expect(screen.getByText(/\/app\/scanners\/trivy/)).toBeInTheDocument()
+  })
+
+  it('shows error alert after failed install', () => {
+    mockCtx.scanningInstallResult = {
+      success: false,
+      tool: 'trivy',
+      version: '',
+      binary_path: '',
+      sha256: '',
+      source_url: '',
+      error: 'no matching asset for this OS/arch',
+    }
+    render(<ScanningStep />)
+    expect(screen.getByText(/no matching asset/)).toBeInTheDocument()
+  })
+
+  it('shows auto-install panel for checkov', () => {
+    mockCtx.scanningForm = {
+      enabled: true,
+      tool: 'checkov',
+      binary_path: '',
+      severity_threshold: '',
+    }
+    render(<ScanningStep />)
+    expect(screen.getByRole('button', { name: /Install checkov/i })).toBeInTheDocument()
+  })
+
+  it('shows auto-install panel for terrascan', () => {
+    mockCtx.scanningForm = {
+      enabled: true,
+      tool: 'terrascan',
+      binary_path: '',
+      severity_threshold: '',
+    }
+    render(<ScanningStep />)
+    expect(screen.getByRole('button', { name: /Install terrascan/i })).toBeInTheDocument()
   })
 })
 
@@ -149,11 +331,18 @@ describe('ScanningStep — pending feature setup', () => {
     vi.clearAllMocks()
     Object.assign(mockCtx, {
       setupStatus: { pending_feature_setup: true },
-      scanningForm: { enabled: false, tool: 'trivy', binary_path: '', severity_threshold: '' },
+      scanningForm: {
+        enabled: false,
+        tool: 'trivy',
+        binary_path: '',
+        severity_threshold: '',
+      },
       scanningTesting: false,
       scanningTestResult: null,
       scanningSaving: false,
       scanningSaved: false,
+      scanningInstalling: false,
+      scanningInstallResult: null,
     })
   })
 
@@ -170,7 +359,12 @@ describe('ScanningStep — pending feature setup', () => {
   })
 
   it('shows "Next: Review & Complete" label in pending mode', () => {
-    mockCtx.scanningForm = { enabled: true, tool: 'trivy', binary_path: '', severity_threshold: '' }
+    mockCtx.scanningForm = {
+      enabled: true,
+      tool: 'trivy',
+      binary_path: '',
+      severity_threshold: '',
+    }
     mockCtx.scanningSaved = true
     render(<ScanningStep />)
     expect(screen.getByRole('button', { name: /Next: Review & Complete/i })).toBeInTheDocument()

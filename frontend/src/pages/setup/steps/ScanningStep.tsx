@@ -1,32 +1,69 @@
-import React from 'react';
+import React, { useState } from 'react'
 import {
-  Box, Typography, Stack, FormControlLabel, Switch, Collapse, FormControl, InputLabel,
-  Select, MenuItem, TextField, Alert, Button, CircularProgress,
-} from '@mui/material';
-import ShieldIcon from '@mui/icons-material/Shield';
-import { useSetupWizard } from '../../../contexts/SetupWizardContext';
+  Box,
+  Typography,
+  Stack,
+  FormControlLabel,
+  Switch,
+  Collapse,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  TextField,
+  Alert,
+  Button,
+  CircularProgress,
+  Accordion,
+  AccordionSummary,
+  AccordionDetails,
+} from '@mui/material'
+import ShieldIcon from '@mui/icons-material/Shield'
+import DownloadIcon from '@mui/icons-material/Download'
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
+import { useSetupWizard } from '../../../contexts/SetupWizardContext'
+
+const INSTALLABLE_TOOLS = ['trivy', 'checkov', 'terrascan']
 
 const ScanningStep: React.FC = () => {
   const {
     setupStatus,
-    scanningForm, setScanningForm, scanningTesting, scanningTestResult, setScanningTestResult,
-    scanningSaving, scanningSaved, setScanningSaved, testScanning, saveScanning, goToStep,
-  } = useSetupWizard();
+    scanningForm,
+    setScanningForm,
+    scanningTesting,
+    scanningTestResult,
+    setScanningTestResult,
+    scanningSaving,
+    scanningSaved,
+    setScanningSaved,
+    testScanning,
+    saveScanning,
+    goToStep,
+    scanningInstalling,
+    scanningInstallResult,
+    installScanner,
+  } = useSetupWizard()
 
-  const isPending = setupStatus?.pending_feature_setup ?? false;
-  const backStep = isPending ? 0 : 2;
-  const nextStep = isPending ? 5 : 4;
-  const nextLabel = isPending ? 'Next: Review & Complete' : 'Next: Configure Admin';
+  const [pinnedVersion, setPinnedVersion] = useState('')
+
+  const isPending = setupStatus?.pending_feature_setup ?? false
+  const backStep = isPending ? 0 : 2
+  const nextStep = isPending ? 5 : 4
+  const nextLabel = isPending ? 'Next: Review & Complete' : 'Next: Configure Admin'
+
+  const canAutoInstall = INSTALLABLE_TOOLS.includes(scanningForm.tool)
 
   return (
     <Box>
       <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
         <ShieldIcon sx={{ mr: 1, color: 'primary.main' }} />
-        <Typography variant="h6" component="h2">Security Scanning</Typography>
+        <Typography variant="h6" component="h2">
+          Security Scanning
+        </Typography>
       </Box>
       <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-        Optionally configure a security scanning tool to automatically scan Terraform
-        modules and providers for vulnerabilities when they are published.
+        Optionally configure a security scanning tool to automatically scan Terraform modules and
+        providers for vulnerabilities when they are published.
       </Typography>
 
       <Stack spacing={2}>
@@ -35,9 +72,9 @@ const ScanningStep: React.FC = () => {
             <Switch
               checked={scanningForm.enabled}
               onChange={(e) => {
-                setScanningForm({ ...scanningForm, enabled: e.target.checked });
-                setScanningTestResult(null);
-                setScanningSaved(false);
+                setScanningForm({ ...scanningForm, enabled: e.target.checked })
+                setScanningTestResult(null)
+                setScanningSaved(false)
               }}
             />
           }
@@ -52,9 +89,9 @@ const ScanningStep: React.FC = () => {
                 value={scanningForm.tool}
                 label="Scanning Tool"
                 onChange={(e) => {
-                  setScanningForm({ ...scanningForm, tool: e.target.value });
-                  setScanningTestResult(null);
-                  setScanningSaved(false);
+                  setScanningForm({ ...scanningForm, tool: e.target.value })
+                  setScanningTestResult(null)
+                  setScanningSaved(false)
                 }}
               >
                 <MenuItem value="trivy">Trivy</MenuItem>
@@ -64,6 +101,73 @@ const ScanningStep: React.FC = () => {
                 <MenuItem value="custom">Custom</MenuItem>
               </Select>
             </FormControl>
+
+            {canAutoInstall && (
+              <Box sx={{ border: 1, borderColor: 'divider', borderRadius: 1, p: 2 }}>
+                <Typography variant="subtitle2" sx={{ mb: 1 }}>
+                  <DownloadIcon sx={{ fontSize: 18, mr: 0.5, verticalAlign: 'text-bottom' }} />
+                  Auto-Install
+                </Typography>
+                <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }}>
+                  Download the official release, verify the SHA256 checksum, and install the binary
+                  on the server.
+                </Typography>
+
+                <Accordion
+                  variant="outlined"
+                  disableGutters
+                  sx={{ mb: 1.5, '&:before': { display: 'none' } }}
+                >
+                  <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                    <Typography variant="body2">Advanced: pin a specific version</Typography>
+                  </AccordionSummary>
+                  <AccordionDetails>
+                    <TextField
+                      fullWidth
+                      size="small"
+                      label="Version (optional)"
+                      value={pinnedVersion}
+                      onChange={(e) => setPinnedVersion(e.target.value)}
+                      placeholder="e.g. 0.58.0"
+                      helperText="Leave blank to install the latest release."
+                    />
+                  </AccordionDetails>
+                </Accordion>
+
+                <Button
+                  variant="outlined"
+                  startIcon={scanningInstalling ? <CircularProgress size={18} /> : <DownloadIcon />}
+                  onClick={() => installScanner(pinnedVersion || undefined)}
+                  disabled={scanningInstalling}
+                >
+                  {scanningInstalling ? 'Installing…' : `Install ${scanningForm.tool}`}
+                </Button>
+
+                {scanningInstallResult && (
+                  <Alert
+                    severity={scanningInstallResult.success ? 'success' : 'error'}
+                    sx={{ mt: 1.5 }}
+                  >
+                    {scanningInstallResult.success ? (
+                      <>
+                        Installed{' '}
+                        <strong>
+                          {scanningInstallResult.tool} {scanningInstallResult.version}
+                        </strong>
+                        <Typography variant="body2" sx={{ mt: 0.5 }}>
+                          Path: <code>{scanningInstallResult.binary_path}</code>
+                        </Typography>
+                        <Typography variant="body2">
+                          SHA256: <code>{scanningInstallResult.sha256?.slice(0, 16)}…</code>
+                        </Typography>
+                      </>
+                    ) : (
+                      scanningInstallResult.error || 'Installation failed'
+                    )}
+                  </Alert>
+                )}
+              </Box>
+            )}
 
             <TextField
               fullWidth
@@ -78,7 +182,9 @@ const ScanningStep: React.FC = () => {
               fullWidth
               label="Severity Threshold (optional)"
               value={scanningForm.severity_threshold || ''}
-              onChange={(e) => setScanningForm({ ...scanningForm, severity_threshold: e.target.value })}
+              onChange={(e) =>
+                setScanningForm({ ...scanningForm, severity_threshold: e.target.value })
+              }
               placeholder="HIGH"
               helperText="Minimum severity to report (e.g. LOW, MEDIUM, HIGH, CRITICAL)"
             />
@@ -106,7 +212,7 @@ const ScanningStep: React.FC = () => {
               <Button
                 variant="contained"
                 onClick={saveScanning}
-                disabled={scanningSaving || (!scanningTestResult?.success)}
+                disabled={scanningSaving || !scanningTestResult?.success}
               >
                 {scanningSaving ? <CircularProgress size={20} sx={{ mr: 1 }} /> : null}
                 Save Scanning Configuration
@@ -116,13 +222,15 @@ const ScanningStep: React.FC = () => {
         </Collapse>
 
         <Stack direction="row" spacing={2}>
-          <Button variant="text" onClick={() => goToStep(backStep)}>&#8592; Back</Button>
+          <Button variant="text" onClick={() => goToStep(backStep)}>
+            &#8592; Back
+          </Button>
           {!scanningForm.enabled && (
             <Button
               variant="outlined"
               onClick={() => {
-                setScanningSaved(true);
-                goToStep(nextStep);
+                setScanningSaved(true)
+                goToStep(nextStep)
               }}
             >
               Skip
@@ -139,7 +247,7 @@ const ScanningStep: React.FC = () => {
         )}
       </Stack>
     </Box>
-  );
-};
+  )
+}
 
-export default ScanningStep;
+export default ScanningStep

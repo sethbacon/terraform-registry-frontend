@@ -34,6 +34,7 @@ vi.mock('../../services/api', () => ({
     saveSetupStorageConfig: (...args: unknown[]) => saveSetupStorageConfigMock(...args),
     testScanningConfig: (...args: unknown[]) => testScanningConfigMock(...args),
     saveScanningConfig: (...args: unknown[]) => saveScanningConfigMock(...args),
+    installScanningTool: vi.fn(),
     configureAdmin: vi.fn(),
     completeSetup: vi.fn(),
   },
@@ -48,7 +49,7 @@ function renderPage() {
   return render(
     <MemoryRouter initialEntries={['/setup']}>
       <SetupWizardPage />
-    </MemoryRouter>
+    </MemoryRouter>,
   )
 }
 
@@ -188,256 +189,304 @@ describe('SetupWizardPage — Security Scanning step', () => {
 
   // ── Scanning step navigation ──
 
-  it('navigates from Storage to Security Scanning step', async () => {
-    renderPage()
-    await waitFor(() => {
-      expect(screen.getByRole('heading', { name: /Setup Token/i })).toBeInTheDocument()
-    })
+  it(
+    'navigates from Storage to Security Scanning step',
+    async () => {
+      renderPage()
+      await waitFor(() => {
+        expect(screen.getByRole('heading', { name: /Setup Token/i })).toBeInTheDocument()
+      })
 
-    await advanceToStep(3)
+      await advanceToStep(3)
 
-    expect(screen.getByLabelText(/Enable security scanning/i)).toBeInTheDocument()
-  }, STEP3_TIMEOUT)
+      expect(screen.getByLabelText(/Enable security scanning/i)).toBeInTheDocument()
+    },
+    STEP3_TIMEOUT,
+  )
 
   // ── Scanning skip ──
 
-  it('shows Skip button when scanning is disabled', async () => {
-    renderPage()
-    await waitFor(() => {
-      expect(screen.getByRole('heading', { name: /Setup Token/i })).toBeInTheDocument()
-    })
+  it(
+    'shows Skip button when scanning is disabled',
+    async () => {
+      renderPage()
+      await waitFor(() => {
+        expect(screen.getByRole('heading', { name: /Setup Token/i })).toBeInTheDocument()
+      })
 
-    await advanceToStep(3)
+      await advanceToStep(3)
 
-    expect(screen.getByRole('button', { name: /Skip/i })).toBeInTheDocument()
-  }, STEP3_TIMEOUT)
+      expect(screen.getByRole('button', { name: /Skip/i })).toBeInTheDocument()
+    },
+    STEP3_TIMEOUT,
+  )
 
-  it('skipping scanning advances to Admin step', async () => {
-    renderPage()
-    await waitFor(() => {
-      expect(screen.getByRole('heading', { name: /Setup Token/i })).toBeInTheDocument()
-    })
+  it(
+    'skipping scanning advances to Admin step',
+    async () => {
+      renderPage()
+      await waitFor(() => {
+        expect(screen.getByRole('heading', { name: /Setup Token/i })).toBeInTheDocument()
+      })
 
-    const user = await advanceToStep(3)
+      const user = await advanceToStep(3)
 
-    await user.click(screen.getByRole('button', { name: /Skip/i }))
+      await user.click(screen.getByRole('button', { name: /Skip/i }))
 
-    await waitFor(() => {
-      expect(screen.getByText('Initial Admin User')).toBeInTheDocument()
-    })
-  }, STEP3_TIMEOUT)
+      await waitFor(() => {
+        expect(screen.getByText('Initial Admin User')).toBeInTheDocument()
+      })
+    },
+    STEP3_TIMEOUT,
+  )
 
   // ── Scanning enable/toggle ──
 
-  it('hides Skip button when scanning is enabled', async () => {
-    renderPage()
-    await waitFor(() => {
-      expect(screen.getByRole('heading', { name: /Setup Token/i })).toBeInTheDocument()
-    })
+  it(
+    'hides Skip button when scanning is enabled',
+    async () => {
+      renderPage()
+      await waitFor(() => {
+        expect(screen.getByRole('heading', { name: /Setup Token/i })).toBeInTheDocument()
+      })
 
-    const user = await advanceToStep(3)
+      const user = await advanceToStep(3)
 
-    const toggle = screen.getByLabelText(/Enable security scanning/i)
-    await user.click(toggle)
+      const toggle = screen.getByLabelText(/Enable security scanning/i)
+      await user.click(toggle)
 
-    expect(screen.queryByRole('button', { name: /^Skip$/i })).not.toBeInTheDocument()
-  }, STEP3_TIMEOUT)
+      expect(screen.queryByRole('button', { name: /^Skip$/i })).not.toBeInTheDocument()
+    },
+    STEP3_TIMEOUT,
+  )
 
-  it('shows scanning fields when enabled', async () => {
-    renderPage()
-    await waitFor(() => {
-      expect(screen.getByRole('heading', { name: /Setup Token/i })).toBeInTheDocument()
-    })
+  it(
+    'shows scanning fields when enabled',
+    async () => {
+      renderPage()
+      await waitFor(() => {
+        expect(screen.getByRole('heading', { name: /Setup Token/i })).toBeInTheDocument()
+      })
 
-    const user = await advanceToStep(3)
+      const user = await advanceToStep(3)
 
-    const toggle = screen.getByLabelText(/Enable security scanning/i)
-    await user.click(toggle)
+      const toggle = screen.getByLabelText(/Enable security scanning/i)
+      await user.click(toggle)
 
-    // MUI Select renders label text in multiple places; use getAllByText
-    await waitFor(() => {
-      expect(screen.getAllByText(/Scanning Tool/i).length).toBeGreaterThan(0)
-    })
-    expect(screen.getByLabelText(/Binary Path/i)).toBeInTheDocument()
-    expect(screen.getByLabelText(/Severity Threshold/i)).toBeInTheDocument()
-    // Verify Test and Save buttons are present
-    expect(screen.getByRole('button', { name: /Test Configuration/i })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /Save Scanning Configuration/i })).toBeInTheDocument()
-  }, STEP3_TIMEOUT)
+      // MUI Select renders label text in multiple places; use getAllByText
+      await waitFor(() => {
+        expect(screen.getAllByText(/Scanning Tool/i).length).toBeGreaterThan(0)
+      })
+      expect(screen.getByLabelText(/Binary Path/i)).toBeInTheDocument()
+      expect(screen.getByLabelText(/Severity Threshold/i)).toBeInTheDocument()
+      // Verify Test and Save buttons are present
+      expect(screen.getByRole('button', { name: /Test Configuration/i })).toBeInTheDocument()
+      expect(
+        screen.getByRole('button', { name: /Save Scanning Configuration/i }),
+      ).toBeInTheDocument()
+    },
+    STEP3_TIMEOUT,
+  )
 
   // ── Scanning test ──
 
-  it('calls testScanningConfig when Test Configuration is clicked', async () => {
-    testScanningConfigMock.mockResolvedValue({
-      success: true,
-      message: 'Trivy found and working',
-      tool: 'trivy',
-      version: '0.50.0',
-    })
+  it(
+    'calls testScanningConfig when Test Configuration is clicked',
+    async () => {
+      testScanningConfigMock.mockResolvedValue({
+        success: true,
+        message: 'Trivy found and working',
+        tool: 'trivy',
+        version: '0.50.0',
+      })
 
-    renderPage()
-    await waitFor(() => {
-      expect(screen.getByRole('heading', { name: /Setup Token/i })).toBeInTheDocument()
-    })
+      renderPage()
+      await waitFor(() => {
+        expect(screen.getByRole('heading', { name: /Setup Token/i })).toBeInTheDocument()
+      })
 
-    const user = await advanceToStep(3)
-    await user.click(screen.getByLabelText(/Enable security scanning/i))
+      const user = await advanceToStep(3)
+      await user.click(screen.getByLabelText(/Enable security scanning/i))
 
-    await waitFor(() => {
-      expect(screen.getByRole('button', { name: /Test Configuration/i })).toBeInTheDocument()
-    })
+      await waitFor(() => {
+        expect(screen.getByRole('button', { name: /Test Configuration/i })).toBeInTheDocument()
+      })
 
-    await user.click(screen.getByRole('button', { name: /Test Configuration/i }))
+      await user.click(screen.getByRole('button', { name: /Test Configuration/i }))
 
-    await waitFor(() => {
-      expect(testScanningConfigMock).toHaveBeenCalledTimes(1)
-    })
+      await waitFor(() => {
+        expect(testScanningConfigMock).toHaveBeenCalledTimes(1)
+      })
 
-    await waitFor(() => {
-      expect(screen.getByText(/Trivy found and working/)).toBeInTheDocument()
-    })
-  }, STEP3_TIMEOUT)
+      await waitFor(() => {
+        expect(screen.getByText(/Trivy found and working/)).toBeInTheDocument()
+      })
+    },
+    STEP3_TIMEOUT,
+  )
 
-  it('displays version info on successful test', async () => {
-    testScanningConfigMock.mockResolvedValue({
-      success: true,
-      message: 'Trivy found and working',
-      tool: 'trivy',
-      version: '0.50.0',
-    })
+  it(
+    'displays version info on successful test',
+    async () => {
+      testScanningConfigMock.mockResolvedValue({
+        success: true,
+        message: 'Trivy found and working',
+        tool: 'trivy',
+        version: '0.50.0',
+      })
 
-    renderPage()
-    await waitFor(() => {
-      expect(screen.getByRole('heading', { name: /Setup Token/i })).toBeInTheDocument()
-    })
+      renderPage()
+      await waitFor(() => {
+        expect(screen.getByRole('heading', { name: /Setup Token/i })).toBeInTheDocument()
+      })
 
-    const user = await advanceToStep(3)
-    await user.click(screen.getByLabelText(/Enable security scanning/i))
+      const user = await advanceToStep(3)
+      await user.click(screen.getByLabelText(/Enable security scanning/i))
 
-    await waitFor(() => {
-      expect(screen.getByRole('button', { name: /Test Configuration/i })).toBeInTheDocument()
-    })
-    await user.click(screen.getByRole('button', { name: /Test Configuration/i }))
+      await waitFor(() => {
+        expect(screen.getByRole('button', { name: /Test Configuration/i })).toBeInTheDocument()
+      })
+      await user.click(screen.getByRole('button', { name: /Test Configuration/i }))
 
-    await waitFor(() => {
-      expect(screen.getByText(/Detected version: 0\.50\.0/)).toBeInTheDocument()
-    })
-  }, STEP3_TIMEOUT)
+      await waitFor(() => {
+        expect(screen.getByText(/Detected version: 0\.50\.0/)).toBeInTheDocument()
+      })
+    },
+    STEP3_TIMEOUT,
+  )
 
-  it('shows error when scanning test fails', async () => {
-    testScanningConfigMock.mockResolvedValue({
-      success: false,
-      message: 'trivy binary not found',
-    })
+  it(
+    'shows error when scanning test fails',
+    async () => {
+      testScanningConfigMock.mockResolvedValue({
+        success: false,
+        message: 'trivy binary not found',
+      })
 
-    renderPage()
-    await waitFor(() => {
-      expect(screen.getByRole('heading', { name: /Setup Token/i })).toBeInTheDocument()
-    })
+      renderPage()
+      await waitFor(() => {
+        expect(screen.getByRole('heading', { name: /Setup Token/i })).toBeInTheDocument()
+      })
 
-    const user = await advanceToStep(3)
-    await user.click(screen.getByLabelText(/Enable security scanning/i))
+      const user = await advanceToStep(3)
+      await user.click(screen.getByLabelText(/Enable security scanning/i))
 
-    await waitFor(() => {
-      expect(screen.getByRole('button', { name: /Test Configuration/i })).toBeInTheDocument()
-    })
-    await user.click(screen.getByRole('button', { name: /Test Configuration/i }))
+      await waitFor(() => {
+        expect(screen.getByRole('button', { name: /Test Configuration/i })).toBeInTheDocument()
+      })
+      await user.click(screen.getByRole('button', { name: /Test Configuration/i }))
 
-    // The error message appears in both the scanning result area and the top-level alert
-    await waitFor(() => {
-      expect(screen.getAllByText(/trivy binary not found/).length).toBeGreaterThan(0)
-    })
-  }, STEP3_TIMEOUT)
+      // The error message appears in both the scanning result area and the top-level alert
+      await waitFor(() => {
+        expect(screen.getAllByText(/trivy binary not found/).length).toBeGreaterThan(0)
+      })
+    },
+    STEP3_TIMEOUT,
+  )
 
   // ── Scanning save ──
 
-  it('enables Save button only after successful test', async () => {
-    testScanningConfigMock.mockResolvedValue({
-      success: true,
-      message: 'Scanner OK',
-      tool: 'trivy',
-      version: '0.50.0',
-    })
-    saveScanningConfigMock.mockResolvedValue({ message: 'Scanning configured' })
+  it(
+    'enables Save button only after successful test',
+    async () => {
+      testScanningConfigMock.mockResolvedValue({
+        success: true,
+        message: 'Scanner OK',
+        tool: 'trivy',
+        version: '0.50.0',
+      })
+      saveScanningConfigMock.mockResolvedValue({ message: 'Scanning configured' })
 
-    renderPage()
-    await waitFor(() => {
-      expect(screen.getByRole('heading', { name: /Setup Token/i })).toBeInTheDocument()
-    })
+      renderPage()
+      await waitFor(() => {
+        expect(screen.getByRole('heading', { name: /Setup Token/i })).toBeInTheDocument()
+      })
 
-    const user = await advanceToStep(3)
-    await user.click(screen.getByLabelText(/Enable security scanning/i))
+      const user = await advanceToStep(3)
+      await user.click(screen.getByLabelText(/Enable security scanning/i))
 
-    await waitFor(() => {
-      expect(screen.getByRole('button', { name: /Save Scanning Configuration/i })).toBeInTheDocument()
-    })
+      await waitFor(() => {
+        expect(
+          screen.getByRole('button', { name: /Save Scanning Configuration/i }),
+        ).toBeInTheDocument()
+      })
 
-    // Save should be disabled before test
-    expect(screen.getByRole('button', { name: /Save Scanning Configuration/i })).toBeDisabled()
+      // Save should be disabled before test
+      expect(screen.getByRole('button', { name: /Save Scanning Configuration/i })).toBeDisabled()
 
-    // Run test
-    await user.click(screen.getByRole('button', { name: /Test Configuration/i }))
-    await waitFor(() => {
-      expect(screen.getByText(/Scanner OK/)).toBeInTheDocument()
-    })
+      // Run test
+      await user.click(screen.getByRole('button', { name: /Test Configuration/i }))
+      await waitFor(() => {
+        expect(screen.getByText(/Scanner OK/)).toBeInTheDocument()
+      })
 
-    // Now Save should be enabled
-    expect(screen.getByRole('button', { name: /Save Scanning Configuration/i })).toBeEnabled()
-  }, STEP3_TIMEOUT)
+      // Now Save should be enabled
+      expect(screen.getByRole('button', { name: /Save Scanning Configuration/i })).toBeEnabled()
+    },
+    STEP3_TIMEOUT,
+  )
 
-  it('calls saveScanningConfig and shows Next button after save', async () => {
-    testScanningConfigMock.mockResolvedValue({
-      success: true,
-      message: 'Scanner OK',
-      tool: 'trivy',
-      version: '0.50.0',
-    })
-    saveScanningConfigMock.mockResolvedValue({ message: 'Scanning configured' })
+  it(
+    'calls saveScanningConfig and shows Next button after save',
+    async () => {
+      testScanningConfigMock.mockResolvedValue({
+        success: true,
+        message: 'Scanner OK',
+        tool: 'trivy',
+        version: '0.50.0',
+      })
+      saveScanningConfigMock.mockResolvedValue({ message: 'Scanning configured' })
 
-    renderPage()
-    await waitFor(() => {
-      expect(screen.getByRole('heading', { name: /Setup Token/i })).toBeInTheDocument()
-    })
+      renderPage()
+      await waitFor(() => {
+        expect(screen.getByRole('heading', { name: /Setup Token/i })).toBeInTheDocument()
+      })
 
-    const user = await advanceToStep(3)
-    await user.click(screen.getByLabelText(/Enable security scanning/i))
+      const user = await advanceToStep(3)
+      await user.click(screen.getByLabelText(/Enable security scanning/i))
 
-    await waitFor(() => {
-      expect(screen.getByRole('button', { name: /Test Configuration/i })).toBeInTheDocument()
-    })
-    await user.click(screen.getByRole('button', { name: /Test Configuration/i }))
-    await waitFor(() => {
-      expect(screen.getByText(/Scanner OK/)).toBeInTheDocument()
-    })
+      await waitFor(() => {
+        expect(screen.getByRole('button', { name: /Test Configuration/i })).toBeInTheDocument()
+      })
+      await user.click(screen.getByRole('button', { name: /Test Configuration/i }))
+      await waitFor(() => {
+        expect(screen.getByText(/Scanner OK/)).toBeInTheDocument()
+      })
 
-    await user.click(screen.getByRole('button', { name: /Save Scanning Configuration/i }))
+      await user.click(screen.getByRole('button', { name: /Save Scanning Configuration/i }))
 
-    await waitFor(() => {
-      expect(saveScanningConfigMock).toHaveBeenCalledTimes(1)
-    })
+      await waitFor(() => {
+        expect(saveScanningConfigMock).toHaveBeenCalledTimes(1)
+      })
 
-    await waitFor(() => {
-      expect(screen.getByText(/Next: Configure Admin/)).toBeInTheDocument()
-    })
-  }, STEP3_TIMEOUT)
+      await waitFor(() => {
+        expect(screen.getByText(/Next: Configure Admin/)).toBeInTheDocument()
+      })
+    },
+    STEP3_TIMEOUT,
+  )
 
   // ── Back navigation ──
 
-  it('Back button on scanning step goes to Storage step', async () => {
-    renderPage()
-    await waitFor(() => {
-      expect(screen.getByRole('heading', { name: /Setup Token/i })).toBeInTheDocument()
-    })
+  it(
+    'Back button on scanning step goes to Storage step',
+    async () => {
+      renderPage()
+      await waitFor(() => {
+        expect(screen.getByRole('heading', { name: /Setup Token/i })).toBeInTheDocument()
+      })
 
-    const user = await advanceToStep(3)
+      const user = await advanceToStep(3)
 
-    const backButton = screen.getByRole('button', { name: /Back/i })
-    await user.click(backButton)
+      const backButton = screen.getByRole('button', { name: /Back/i })
+      await user.click(backButton)
 
-    await waitFor(() => {
-      expect(screen.getByText('Storage Backend Configuration')).toBeInTheDocument()
-    })
-  }, STEP3_TIMEOUT)
+      await waitFor(() => {
+        expect(screen.getByText('Storage Backend Configuration')).toBeInTheDocument()
+      })
+    },
+    STEP3_TIMEOUT,
+  )
 
   // ── Setup status with scanning_configured ──
 
