@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react'
+import { render, screen, fireEvent, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 
@@ -212,6 +212,51 @@ describe('ScanningStep', () => {
     mockCtx.scanningSaving = true
     render(<ScanningStep />)
     expect(screen.getByRole('button', { name: /Save Scanning/i })).toBeDisabled()
+  })
+
+  it('calls setScanningForm when binary path changes', async () => {
+    mockCtx.scanningForm = {
+      enabled: true,
+      tool: 'trivy',
+      binary_path: '',
+      severity_threshold: '',
+    }
+    render(<ScanningStep />)
+    const input = screen.getByLabelText('Binary Path')
+    await userEvent.setup().type(input, '/usr/bin/trivy')
+    expect(mockCtx.setScanningForm).toHaveBeenCalled()
+  })
+
+  it('calls setScanningForm when severity threshold changes', async () => {
+    mockCtx.scanningForm = {
+      enabled: true,
+      tool: 'trivy',
+      binary_path: '',
+      severity_threshold: '',
+    }
+    render(<ScanningStep />)
+    const input = screen.getByLabelText(/Severity Threshold/i)
+    await userEvent.setup().type(input, 'HIGH')
+    expect(mockCtx.setScanningForm).toHaveBeenCalled()
+  })
+
+  it('calls setScanningForm when scanning tool is changed', async () => {
+    mockCtx.scanningForm = {
+      enabled: true,
+      tool: 'trivy',
+      binary_path: '',
+      severity_threshold: '',
+    }
+    render(<ScanningStep />)
+    // Open the MUI Select dropdown and pick a different tool
+    // MUI Select requires mouseDown on the element with role=combobox to open
+    const trigger = screen.getByRole('combobox')
+    fireEvent.mouseDown(trigger)
+    const listbox = within(screen.getByRole('listbox'))
+    fireEvent.click(listbox.getByText('Checkov'))
+    expect(mockCtx.setScanningForm).toHaveBeenCalled()
+    expect(mockCtx.setScanningTestResult).toHaveBeenCalledWith(null)
+    expect(mockCtx.setScanningSaved).toHaveBeenCalledWith(false)
   })
 })
 
