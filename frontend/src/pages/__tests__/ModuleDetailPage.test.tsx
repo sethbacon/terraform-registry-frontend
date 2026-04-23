@@ -26,6 +26,8 @@ const mockHookReturn = {
   setDeprecateDialogOpen: vi.fn(),
   deprecationMessage: '',
   setDeprecationMessage: vi.fn(),
+  deprecationReplacementSource: '',
+  setDeprecationReplacementSource: vi.fn(),
   deprecating: false,
   deprecateModuleDialogOpen: false,
   setDeprecateModuleDialogOpen: vi.fn(),
@@ -568,5 +570,50 @@ describe('ModuleDetailPage', () => {
     }
     // Just assert the page rendered without crashing — any click path is fine
     expect(screen.getAllByRole('heading').length).toBeGreaterThan(0)
+  })
+
+  it('shows version deprecation banner when selected version is deprecated', () => {
+    mockHookReturn.module = {
+      id: 'm-1', namespace: 'hashicorp', name: 'consul', system: 'aws',
+      description: '', deprecated: false,
+    }
+    mockHookReturn.versions = [{ version: '1.0.0', deprecated: true, deprecation_message: 'Use version 2.0.0' }]
+    mockHookReturn.selectedVersion = {
+      version: '1.0.0', deprecated: true, deprecation_message: 'Use version 2.0.0',
+    }
+    renderPage()
+    expect(screen.getAllByRole('alert').length).toBeGreaterThan(0)
+    expect(screen.getByText(/Use version 2\.0\.0/)).toBeInTheDocument()
+  })
+
+  it('shows replacement address in version deprecation banner when replacement_source is set', () => {
+    mockHookReturn.module = {
+      id: 'm-1', namespace: 'hashicorp', name: 'consul', system: 'aws',
+      description: '', deprecated: false,
+    }
+    mockHookReturn.versions = [{
+      version: '1.0.0', deprecated: true,
+      deprecation_message: 'Use the new module',
+      replacement_source: 'registry.example.com/acme/vpc-v2/aws',
+    }]
+    mockHookReturn.selectedVersion = {
+      version: '1.0.0', deprecated: true,
+      deprecation_message: 'Use the new module',
+      replacement_source: 'registry.example.com/acme/vpc-v2/aws',
+    }
+    renderPage()
+    expect(screen.getAllByRole('alert').length).toBeGreaterThan(0)
+    expect(screen.getByText(/registry\.example\.com\/acme\/vpc-v2\/aws/)).toBeInTheDocument()
+  })
+
+  it('does not show version deprecation banner when selected version is not deprecated', () => {
+    mockHookReturn.module = {
+      id: 'm-1', namespace: 'hashicorp', name: 'consul', system: 'aws',
+      description: '', deprecated: false,
+    }
+    mockHookReturn.versions = [{ version: '1.0.0', deprecated: false }]
+    mockHookReturn.selectedVersion = { version: '1.0.0', deprecated: false }
+    renderPage()
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument()
   })
 })
