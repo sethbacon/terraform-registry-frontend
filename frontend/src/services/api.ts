@@ -55,7 +55,7 @@ class ApiClient {
         }
 
         // Stamp the request start time for breadcrumb duration tracking
-        ; (config as InternalAxiosRequestConfig & { _startTime?: number })._startTime = Date.now()
+        ;(config as InternalAxiosRequestConfig & { _startTime?: number })._startTime = Date.now()
         return config
       },
       (error) => Promise.reject(error),
@@ -253,11 +253,11 @@ class ApiClient {
       },
       onUploadProgress: options?.onUploadProgress
         ? (event) => {
-          if (event.total && event.total > 0) {
-            const percent = Math.round((event.loaded / event.total) * 100)
-            options.onUploadProgress?.(percent)
+            if (event.total && event.total > 0) {
+              const percent = Math.round((event.loaded / event.total) * 100)
+              options.onUploadProgress?.(percent)
+            }
           }
-        }
         : undefined,
     })
     return response.data
@@ -376,11 +376,11 @@ class ApiClient {
       },
       onUploadProgress: options?.onUploadProgress
         ? (event) => {
-          if (event.total && event.total > 0) {
-            const percent = Math.round((event.loaded / event.total) * 100)
-            options.onUploadProgress?.(percent)
+            if (event.total && event.total > 0) {
+              const percent = Math.round((event.loaded / event.total) * 100)
+              options.onUploadProgress?.(percent)
+            }
           }
-        }
         : undefined,
     })
     return response.data
@@ -869,6 +869,13 @@ class ApiClient {
   async getDashboardStats() {
     const response = await this.client.get('/api/v1/admin/stats/dashboard')
     return response.data
+  }
+
+  // Org Quotas
+  async getOrgQuotas(orgId?: string) {
+    const params = orgId ? { organization_id: orgId } : {}
+    const response = await this.client.get('/api/v1/admin/quotas', { params })
+    return (response.data.quotas ?? []) as import('../types').OrgQuota[]
   }
 
   // Mirror Management
