@@ -9,6 +9,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.10.2] - 2026-04-23
+
+### Added
+
+- feat: default Modules page to Provider view and Name A-Z sort (#163)
+- feat: persist Modules view mode in the URL as `?view=grid|grouped` (#163)
+- feat: default Providers page sort to Name A-Z; explicit Relevance is now persisted as `?sort=relevance` (#163)
+
 ## [0.10.1] - 2026-04-22
 
 ### Added
