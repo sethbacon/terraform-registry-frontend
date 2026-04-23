@@ -136,6 +136,19 @@ const CommandPalette: React.FC<CommandPaletteProps> = ({ open, onClose }) => {
             }}
           />
         </Box>
+        <Box
+          sx={{
+            '& [cmdk-group-heading]': {
+              px: 3,
+              py: 0.75,
+              fontSize: '0.7rem',
+              fontWeight: 600,
+              letterSpacing: '0.08em',
+              textTransform: 'uppercase',
+              color: 'text.disabled',
+            },
+          }}
+        >
         <Command.List
           style={{
             maxHeight: 400,
@@ -213,6 +226,7 @@ const CommandPalette: React.FC<CommandPaletteProps> = ({ open, onClose }) => {
             </Command.Group>
           )}
         </Command.List>
+        </Box>
       </Command>
     </Dialog>
   );
