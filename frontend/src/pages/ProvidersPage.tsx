@@ -45,7 +45,8 @@ function parseSortValue(value: string): { sort?: string; order?: string } {
 
 /** Build a combined sort value from separate sort/order URL params. */
 function buildSortValue(sort?: string | null, order?: string | null): string {
-  if (!sort) return 'relevance';
+  if (!sort) return 'name:asc';
+  if (sort === 'relevance') return 'relevance';
   return order ? `${sort}:${order}` : sort;
 }
 
@@ -137,18 +138,16 @@ const ProvidersPage: React.FC = () => {
 
   const handleSortChange = useCallback((event: SelectChangeEvent<string>) => {
     const newValue = event.target.value;
-    const { sort, order } = parseSortValue(newValue);
     setSearchParams((prev) => {
       const next = new URLSearchParams(prev);
-      if (sort) {
-        next.set('sort', sort);
-      } else {
-        next.delete('sort');
-      }
-      if (order) {
-        next.set('order', order);
-      } else {
+      if (newValue === 'relevance') {
+        // Default is name:asc, so Relevance must be persisted explicitly.
+        next.set('sort', 'relevance');
         next.delete('order');
+      } else {
+        const { sort, order } = parseSortValue(newValue);
+        if (sort) next.set('sort', sort); else next.delete('sort');
+        if (order) next.set('order', order); else next.delete('order');
       }
       next.delete('page');
       return next;
@@ -243,11 +242,11 @@ const ProvidersPage: React.FC = () => {
             No providers found
           </Typography>
           <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-            {urlQuery || apiSort
+            {urlQuery || urlSort
               ? 'Try a different search query or sort option'
               : 'Upload your first provider to get started'}
           </Typography>
-          {(urlQuery || apiSort) && (
+          {(urlQuery || urlSort) && (
             <Button
               variant="outlined"
               sx={{ mt: 2 }}
