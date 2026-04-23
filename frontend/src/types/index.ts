@@ -499,6 +499,19 @@ export interface VersionInfo {
   }
 }
 
+// ---- Policy Engine ----
+
+export interface PolicyViolation {
+  rule: string
+  message: string
+}
+
+export interface PolicyResult {
+  allowed: boolean
+  mode: string
+  violations: PolicyViolation[]
+}
+
 // ---- Module Security Scan ----
 
 export type ModuleScanStatus = 'pending' | 'scanning' | 'clean' | 'findings' | 'error'
