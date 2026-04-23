@@ -497,6 +497,7 @@ export interface VersionInfo {
     providers: string
     mirror: string
   }
+  oci?: boolean
 }
 
 // ---- Module Security Scan ----

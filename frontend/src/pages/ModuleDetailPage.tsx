@@ -1,6 +1,6 @@
-import React from 'react';
-import { useNavigate, Link as RouterLink } from 'react-router-dom';
-import MarkdownRenderer from '../components/MarkdownRenderer';
+import React from 'react'
+import { useNavigate, Link as RouterLink } from 'react-router-dom'
+import MarkdownRenderer from '../components/MarkdownRenderer'
 import {
   Container,
   Typography,
@@ -21,32 +21,32 @@ import {
   TextField,
   Tabs,
   Tab,
-} from '@mui/material';
-import ArrowBack from '@mui/icons-material/ArrowBack';
-import Add from '@mui/icons-material/Add';
-import Warning from '@mui/icons-material/Warning';
-import EditIcon from '@mui/icons-material/Edit';
-import Check from '@mui/icons-material/Check';
-import Close from '@mui/icons-material/Close';
-import PublishFromSCMWizard from '../components/PublishFromSCMWizard';
-import ModuleDocumentation from '../components/ModuleDocumentation';
-import SecurityScanPanel from '../components/SecurityScanPanel';
-import SCMRepositoryPanel from '../components/SCMRepositoryPanel';
-import WebhookEventsPanel from '../components/WebhookEventsPanel';
-import VersionDetailsPanel from '../components/VersionDetailsPanel';
-import ConfirmDialog from '../components/ConfirmDialog';
-import VersionSelector from '../components/VersionSelector';
-import ModuleActionsMenu from '../components/ModuleActionsMenu';
-import DetailPageSkeleton from '../components/skeletons/DetailPageSkeleton';
-import UsageExample from '../components/UsageExample';
-import { REGISTRY_HOST } from '../config';
-import { useModuleDetail } from '../hooks/useModuleDetail';
+} from '@mui/material'
+import ArrowBack from '@mui/icons-material/ArrowBack'
+import Add from '@mui/icons-material/Add'
+import Warning from '@mui/icons-material/Warning'
+import EditIcon from '@mui/icons-material/Edit'
+import Check from '@mui/icons-material/Check'
+import Close from '@mui/icons-material/Close'
+import PublishFromSCMWizard from '../components/PublishFromSCMWizard'
+import ModuleDocumentation from '../components/ModuleDocumentation'
+import SecurityScanPanel from '../components/SecurityScanPanel'
+import SCMRepositoryPanel from '../components/SCMRepositoryPanel'
+import WebhookEventsPanel from '../components/WebhookEventsPanel'
+import VersionDetailsPanel from '../components/VersionDetailsPanel'
+import ConfirmDialog from '../components/ConfirmDialog'
+import VersionSelector from '../components/VersionSelector'
+import ModuleActionsMenu from '../components/ModuleActionsMenu'
+import DetailPageSkeleton from '../components/skeletons/DetailPageSkeleton'
+import UsageExample from '../components/UsageExample'
+import { REGISTRY_HOST } from '../config'
+import { useModuleDetail } from '../hooks/useModuleDetail'
 
 const ModuleDetailPage: React.FC = () => {
-  const navigate = useNavigate();
-  const [editingDescription, setEditingDescription] = React.useState(false);
-  const [editDescription, setEditDescription] = React.useState('');
-  const [docTab, setDocTab] = React.useState(0);
+  const navigate = useNavigate()
+  const [editingDescription, setEditingDescription] = React.useState(false)
+  const [editDescription, setEditDescription] = React.useState('')
+  const [docTab, setDocTab] = React.useState(0)
   const {
     namespace,
     name,
@@ -114,7 +114,8 @@ const ModuleDetailPage: React.FC = () => {
     handleDeprecateModule,
     handleUndeprecateModule,
     handleUpdateDescription,
-  } = useModuleDetail();
+    ociEnabled,
+  } = useModuleDetail()
 
   return (
     <Box aria-busy={loading} aria-live="polite">
@@ -123,11 +124,7 @@ const ModuleDetailPage: React.FC = () => {
       ) : error || !module ? (
         <Container maxWidth="lg" sx={{ py: 4 }}>
           <Alert severity="error">{error || 'Module not found'}</Alert>
-          <Button
-            startIcon={<ArrowBack />}
-            onClick={() => navigate('/modules')}
-            sx={{ mt: 2 }}
-          >
+          <Button startIcon={<ArrowBack />} onClick={() => navigate('/modules')} sx={{ mt: 2 }}>
             Back to Modules
           </Button>
         </Container>
@@ -156,19 +153,30 @@ const ModuleDetailPage: React.FC = () => {
             <Alert severity="warning" sx={{ mb: 2 }}>
               This module is deprecated. {module.deprecation_message}
               {module.successor_module && (
-                <> Consider using <Link
-                  component={RouterLink}
-                  to={`/modules/${module.successor_module.namespace}/${module.successor_module.name}/${module.successor_module.system}`}
-                >
-                  {module.successor_module.namespace}/{module.successor_module.name}/{module.successor_module.system}
-                </Link> instead.</>
+                <>
+                  {' '}
+                  Consider using{' '}
+                  <Link
+                    component={RouterLink}
+                    to={`/modules/${module.successor_module.namespace}/${module.successor_module.name}/${module.successor_module.system}`}
+                  >
+                    {module.successor_module.namespace}/{module.successor_module.name}/
+                    {module.successor_module.system}
+                  </Link>{' '}
+                  instead.
+                </>
               )}
             </Alert>
           )}
 
           {/* Header */}
           <Box sx={{ mb: 4 }}>
-            <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 2 }}>
+            <Stack
+              direction="row"
+              alignItems="center"
+              justifyContent="space-between"
+              sx={{ mb: 2 }}
+            >
               <Stack direction="row" alignItems="center" spacing={2}>
                 <IconButton aria-label="Back to modules" onClick={() => navigate('/modules')}>
                   <ArrowBack />
@@ -178,11 +186,7 @@ const ModuleDetailPage: React.FC = () => {
                 </Typography>
               </Stack>
               {canManage && (
-                <Button
-                  variant="contained"
-                  startIcon={<Add />}
-                  onClick={handlePublishNewVersion}
-                >
+                <Button variant="contained" startIcon={<Add />} onClick={handlePublishNewVersion}>
                   Publish New Version
                 </Button>
               )}
@@ -199,10 +203,10 @@ const ModuleDetailPage: React.FC = () => {
                     autoFocus
                     onKeyDown={(e) => {
                       if (e.key === 'Enter') {
-                        handleUpdateDescription(editDescription);
-                        setEditingDescription(false);
+                        handleUpdateDescription(editDescription)
+                        setEditingDescription(false)
                       } else if (e.key === 'Escape') {
-                        setEditingDescription(false);
+                        setEditingDescription(false)
                       }
                     }}
                   />
@@ -210,8 +214,8 @@ const ModuleDetailPage: React.FC = () => {
                     size="small"
                     color="primary"
                     onClick={() => {
-                      handleUpdateDescription(editDescription);
-                      setEditingDescription(false);
+                      handleUpdateDescription(editDescription)
+                      setEditingDescription(false)
                     }}
                     aria-label="Save description"
                   >
@@ -235,8 +239,8 @@ const ModuleDetailPage: React.FC = () => {
                       <IconButton
                         size="small"
                         onClick={() => {
-                          setEditDescription(module.description || '');
-                          setEditingDescription(true);
+                          setEditDescription(module.description || '')
+                          setEditingDescription(true)
                         }}
                         aria-label="Edit description"
                       >
@@ -256,20 +260,15 @@ const ModuleDetailPage: React.FC = () => {
                 data-testid="module-version-selector"
               />
               {selectedVersion?.deprecated && (
-                <Chip
-                  label="Deprecated"
-                  color="warning"
-                  size="small"
-                  icon={<Warning />}
-                />
+                <Chip label="Deprecated" color="warning" size="small" icon={<Warning />} />
               )}
               <Chip label={`${module.download_count ?? 0} downloads`} />
               <ModuleActionsMenu
                 canManage={canManage}
                 deprecated={!!module.deprecated}
                 onEditDescription={() => {
-                  setEditDescription(module.description || '');
-                  setEditingDescription(true);
+                  setEditDescription(module.description || '')
+                  setEditingDescription(true)
                 }}
                 onDeprecateModule={() => setDeprecateModuleDialogOpen(true)}
                 onUndeprecateModule={() => setUndeprecateModuleDialogOpen(true)}
@@ -290,28 +289,24 @@ const ModuleDetailPage: React.FC = () => {
                 version={selectedVersion?.version || ''}
                 inputs={moduleDocs?.inputs ?? null}
                 onCopied={handleCopySource}
+                ociEnabled={ociEnabled}
               />
 
               {/* Documentation Tabs */}
               <Paper sx={{ p: 3 }}>
-                <Tabs
-                  value={docTab}
-                  onChange={(_, newValue) => setDocTab(newValue)}
-                  sx={{ mb: 2 }}
-                >
+                <Tabs value={docTab} onChange={(_, newValue) => setDocTab(newValue)} sx={{ mb: 2 }}>
                   <Tab label="README" />
                   <Tab label="Inputs / Outputs" />
                 </Tabs>
                 <Divider sx={{ mb: 2 }} />
-                {docTab === 0 && (
-                  selectedVersion && selectedVersion.readme ? (
+                {docTab === 0 &&
+                  (selectedVersion && selectedVersion.readme ? (
                     <MarkdownRenderer>{selectedVersion.readme}</MarkdownRenderer>
                   ) : (
                     <Typography variant="body2" color="text.secondary">
                       No README provided for this module version.
                     </Typography>
-                  )
-                )}
+                  ))}
                 {docTab === 1 && (
                   <ModuleDocumentation moduleDocs={moduleDocs} docsLoading={docsLoading} />
                 )}
@@ -337,7 +332,10 @@ const ModuleDetailPage: React.FC = () => {
                     <strong>Provider:</strong> {system}
                   </Typography>
                   <Typography variant="body2">
-                    <strong>Latest Version:</strong> {versions.length > 0 ? (versions.find(v => !v.deprecated) ?? versions[0]).version : 'N/A'}
+                    <strong>Latest Version:</strong>{' '}
+                    {versions.length > 0
+                      ? (versions.find((v) => !v.deprecated) ?? versions[0]).version
+                      : 'N/A'}
                   </Typography>
                   <Typography variant="body2">
                     <strong>Total Downloads:</strong> {module.download_count ?? 0}
@@ -405,9 +403,12 @@ const ModuleDetailPage: React.FC = () => {
             title="Delete Module"
             description={
               <>
-                Are you sure you want to delete the module <strong>{namespace}/{name}/{system}</strong>?
-                This will permanently delete all versions and associated files.
-                This action cannot be undone.
+                Are you sure you want to delete the module{' '}
+                <strong>
+                  {namespace}/{name}/{system}
+                </strong>
+                ? This will permanently delete all versions and associated files. This action cannot
+                be undone.
               </>
             }
             confirmLabel={deleting ? 'Deleting...' : 'Delete Module'}
@@ -426,9 +427,11 @@ const ModuleDetailPage: React.FC = () => {
             description={
               <>
                 Are you sure you want to delete version <strong>{versionToDelete}</strong> of{' '}
-                <strong>{namespace}/{name}/{system}</strong>?
-                This will permanently delete the version and its associated files.
-                This action cannot be undone.
+                <strong>
+                  {namespace}/{name}/{system}
+                </strong>
+                ? This will permanently delete the version and its associated files. This action
+                cannot be undone.
               </>
             }
             confirmLabel={deleting ? 'Deleting...' : 'Delete Version'}
@@ -452,11 +455,11 @@ const ModuleDetailPage: React.FC = () => {
                   moduleId={module.id}
                   moduleSystem={system}
                   onComplete={() => {
-                    setScmWizardOpen(false);
+                    setScmWizardOpen(false)
                     // Reload SCM link immediately, then poll for versions the
                     // background sync will create over the next several seconds.
-                    if (module?.id) loadSCMLink(module.id);
-                    pollForVersions();
+                    if (module?.id) loadSCMLink(module.id)
+                    pollForVersions()
                   }}
                   onCancel={() => setScmWizardOpen(false)}
                 />
@@ -468,23 +471,26 @@ const ModuleDetailPage: React.FC = () => {
           <ConfirmDialog
             open={deprecateDialogOpen}
             onClose={() => {
-              setDeprecateDialogOpen(false);
-              setDeprecationMessage('');
-              setDeprecationReplacementSource('');
+              setDeprecateDialogOpen(false)
+              setDeprecationMessage('')
+              setDeprecationReplacementSource('')
             }}
             onSubmit={async (values) => {
-              setDeprecationMessage(values.message ?? '');
-              setDeprecationReplacementSource(values.replacement_source ?? '');
+              setDeprecationMessage(values.message ?? '')
+              setDeprecationReplacementSource(values.replacement_source ?? '')
               // Defer one tick so the message state is applied before the handler reads it.
-              await Promise.resolve();
-              handleDeprecateVersion();
+              await Promise.resolve()
+              handleDeprecateVersion()
             }}
             title="Deprecate Version"
             description={
               <>
-                Are you sure you want to deprecate version <strong>{selectedVersion?.version}</strong> of{' '}
-                <strong>{namespace}/{name}/{system}</strong>?
-                This will mark the version as deprecated, warning users not to use it.
+                Are you sure you want to deprecate version{' '}
+                <strong>{selectedVersion?.version}</strong> of{' '}
+                <strong>
+                  {namespace}/{name}/{system}
+                </strong>
+                ? This will mark the version as deprecated, warning users not to use it.
               </>
             }
             severity="warning"
@@ -514,21 +520,24 @@ const ModuleDetailPage: React.FC = () => {
           <ConfirmDialog
             open={deprecateModuleDialogOpen}
             onClose={() => {
-              setDeprecateModuleDialogOpen(false);
-              setModuleDeprecationMessage('');
-              setSuccessorModuleId('');
+              setDeprecateModuleDialogOpen(false)
+              setModuleDeprecationMessage('')
+              setSuccessorModuleId('')
             }}
             onSubmit={async (values) => {
-              setModuleDeprecationMessage(values.message ?? '');
-              setSuccessorModuleId(values.successor ?? '');
-              await Promise.resolve();
-              handleDeprecateModule();
+              setModuleDeprecationMessage(values.message ?? '')
+              setSuccessorModuleId(values.successor ?? '')
+              await Promise.resolve()
+              handleDeprecateModule()
             }}
             title="Deprecate Module"
             description={
               <>
-                Are you sure you want to deprecate the module <strong>{namespace}/{name}/{system}</strong>?
-                This will mark the entire module as deprecated, warning users not to use it.
+                Are you sure you want to deprecate the module{' '}
+                <strong>
+                  {namespace}/{name}/{system}
+                </strong>
+                ? This will mark the entire module as deprecated, warning users not to use it.
               </>
             }
             severity="warning"
@@ -563,8 +572,11 @@ const ModuleDetailPage: React.FC = () => {
             title="Undeprecate Module"
             description={
               <>
-                Are you sure you want to remove the deprecation from <strong>{namespace}/{name}/{system}</strong>?
-                This will make the module available for normal use again.
+                Are you sure you want to remove the deprecation from{' '}
+                <strong>
+                  {namespace}/{name}/{system}
+                </strong>
+                ? This will make the module available for normal use again.
               </>
             }
             severity="info"
@@ -575,7 +587,7 @@ const ModuleDetailPage: React.FC = () => {
         </Container>
       )}
     </Box>
-  );
-};
+  )
+}
 
-export default ModuleDetailPage;
+export default ModuleDetailPage
