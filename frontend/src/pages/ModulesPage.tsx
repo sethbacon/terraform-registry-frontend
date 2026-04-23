@@ -55,8 +55,14 @@ function parseSortValue(value: string): { sort?: string; order?: string } {
 
 /** Build a combined sort value from separate sort/order URL params. */
 function buildSortValue(sort?: string | null, order?: string | null): string {
-  if (!sort) return 'relevance';
+  if (!sort) return 'name:asc';
+  if (sort === 'relevance') return 'relevance';
   return order ? `${sort}:${order}` : sort;
+}
+
+/** Parse a URL ?view= value into a validated ViewMode (grouped is the default). */
+function parseViewMode(value: string | null): ViewMode {
+  return value === 'grid' ? 'grid' : 'grouped';
 }
 
 /** Group an array of modules by their system (provider) field, alphabetically. */
@@ -118,7 +124,9 @@ const ModulesPage: React.FC = () => {
     setInputValue(urlQuery);
   }, [urlQuery]);
 
-  const [viewMode, setViewMode] = useState<ViewMode>('grid');
+  // View mode is URL-backed (?view=grid|grouped) so it survives reload and is shareable.
+  // Grouped is the default — only grid is persisted as a query param to keep URLs tidy.
+  const viewMode: ViewMode = parseViewMode(searchParams.get('view'));
   const limit = viewMode === 'grouped' ? 100 : 12;
 
   const { sort: apiSort, order: apiOrder } = parseSortValue(sortValue);
@@ -164,18 +172,16 @@ const ModulesPage: React.FC = () => {
 
   const handleSortChange = useCallback((event: SelectChangeEvent<string>) => {
     const newValue = event.target.value;
-    const { sort, order } = parseSortValue(newValue);
     setSearchParams((prev) => {
       const next = new URLSearchParams(prev);
-      if (sort) {
-        next.set('sort', sort);
-      } else {
-        next.delete('sort');
-      }
-      if (order) {
-        next.set('order', order);
-      } else {
+      if (newValue === 'relevance') {
+        // Default is name:asc, so Relevance must be persisted explicitly.
+        next.set('sort', 'relevance');
         next.delete('order');
+      } else {
+        const { sort, order } = parseSortValue(newValue);
+        if (sort) next.set('sort', sort); else next.delete('sort');
+        if (order) next.set('order', order); else next.delete('order');
       }
       // Reset to page 1 when sort changes
       next.delete('page');
@@ -185,10 +191,14 @@ const ModulesPage: React.FC = () => {
 
   const handleViewModeChange = useCallback((_event: React.MouseEvent<HTMLElement>, newMode: ViewMode | null) => {
     if (newMode) {
-      setViewMode(newMode);
-      // Reset to page 1 when view mode changes
       setSearchParams((prev) => {
         const next = new URLSearchParams(prev);
+        if (newMode === 'grouped') {
+          next.delete('view');
+        } else {
+          next.set('view', newMode);
+        }
+        // Reset to page 1 when view mode changes
         next.delete('page');
         return next;
       }, { replace: true });
@@ -329,11 +339,11 @@ const ModulesPage: React.FC = () => {
             No modules found
           </Typography>
           <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-            {urlQuery || apiSort
+            {urlQuery || urlSort
               ? 'Try a different search query or sort option'
               : 'Upload your first module to get started'}
           </Typography>
-          {(urlQuery || apiSort) && (
+          {(urlQuery || urlSort) && (
             <Button
               variant="outlined"
               sx={{ mt: 2 }}

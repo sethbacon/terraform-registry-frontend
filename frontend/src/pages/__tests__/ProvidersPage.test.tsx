@@ -227,14 +227,35 @@ describe('ProvidersPage', () => {
   it('changes the sort field via the dropdown', async () => {
     searchProvidersMock.mockResolvedValue({ providers: fakeProviders, meta: { total: 2 } })
     renderPage()
+    // Default is Name A-Z, so pick a different option to actually exercise the change.
     const sortSelect = screen.getByLabelText('Sort By')
     fireEvent.mouseDown(sortSelect)
-    const opt = await screen.findByRole('option', { name: /name a-z/i })
+    const opt = await screen.findByRole('option', { name: /newest/i })
     fireEvent.click(opt)
     await waitFor(() => {
       expect(searchProvidersMock).toHaveBeenCalledWith(
-        expect.objectContaining({ sort: 'name', order: 'asc' }),
+        expect.objectContaining({ sort: 'created_at', order: 'desc' }),
       )
+    })
+  })
+
+  it('defaults to Name A-Z sort when no ?sort= is present', async () => {
+    searchProvidersMock.mockResolvedValue({ providers: fakeProviders, meta: { total: 2 } })
+    renderPage()
+    await waitFor(() => {
+      const lastCall = searchProvidersMock.mock.calls[searchProvidersMock.mock.calls.length - 1][0]
+      expect(lastCall.sort).toBe('name')
+      expect(lastCall.order).toBe('asc')
+    })
+  })
+
+  it('treats explicit ?sort=relevance as no sort/order to the API', async () => {
+    searchProvidersMock.mockResolvedValue({ providers: fakeProviders, meta: { total: 2 } })
+    renderPage('/providers?sort=relevance')
+    await waitFor(() => {
+      const lastCall = searchProvidersMock.mock.calls[searchProvidersMock.mock.calls.length - 1][0]
+      expect(lastCall.sort).toBeUndefined()
+      expect(lastCall.order).toBeUndefined()
     })
   })
 

@@ -131,7 +131,8 @@ describe('ModulesPage', () => {
       modules: fakeModules,
       meta: { total: 50, limit: 12, offset: 12 },
     })
-    renderWithRoute('/modules?page=2')
+    // Force grid view so the paginated limit is 12 (grouped uses limit=100).
+    renderWithRoute('/modules?page=2&view=grid')
     // The API should be called with offset 12 (page 2, limit 12)
     await screen.findByText('Terraform Modules')
     expect(searchModulesMock).toHaveBeenCalledWith(
@@ -230,9 +231,66 @@ describe('ModulesPage', () => {
     expect(screen.getByRole('button', { name: /grouped by provider/i })).toBeInTheDocument()
   })
 
-  // -- Sort dropdown renders --
+  // -- View mode URL persistence --
 
-  it('renders the sort dropdown with correct default', async () => {
+  it('defaults to grouped view when no ?view= param is present', async () => {
+    renderWithRoute()
+    await screen.findByText('consul')
+    // Grouped view renders provider section headers (e.g. "Aws", "Azure")
+    expect(screen.getByText('Aws')).toBeInTheDocument()
+    expect(screen.getByText('Azure')).toBeInTheDocument()
+  })
+
+  it('reads initial view mode from URL ?view=grid param', async () => {
+    renderWithRoute('/modules?view=grid')
+    await screen.findByText('consul')
+    // Grid view does NOT render provider section headers
+    expect(screen.queryByText('Aws')).not.toBeInTheDocument()
+    expect(screen.queryByText('Azure')).not.toBeInTheDocument()
+  })
+
+  it('switching to grid view calls the API with the grid limit', async () => {
+    const user = userEvent.setup()
+    renderWithRoute()
+    await screen.findByText('consul')
+    await user.click(screen.getByRole('button', { name: /grid view/i }))
+    // Grid view uses limit=12; grouped uses limit=100.
+    await waitFor(() => {
+      const lastCall = searchModulesMock.mock.calls[searchModulesMock.mock.calls.length - 1][0]
+      expect(lastCall.limit).toBe(12)
+    })
+  })
+
+  it('switching from grid back to grouped uses the grouped limit', async () => {
+    const user = userEvent.setup()
+    renderWithRoute('/modules?view=grid')
+    await screen.findByText('consul')
+    await user.click(screen.getByRole('button', { name: /grouped by provider/i }))
+    await waitFor(() => {
+      const lastCall = searchModulesMock.mock.calls[searchModulesMock.mock.calls.length - 1][0]
+      expect(lastCall.limit).toBe(100)
+    })
+  })
+
+  // -- Sort default + persistence --
+
+  it('defaults to Name A-Z sort when no ?sort= is present', async () => {
+    renderWithRoute()
+    await screen.findByText('Terraform Modules')
+    const lastCall = searchModulesMock.mock.calls[searchModulesMock.mock.calls.length - 1][0]
+    expect(lastCall.sort).toBe('name')
+    expect(lastCall.order).toBe('asc')
+  })
+
+  it('treats explicit ?sort=relevance as no sort/order to the API', async () => {
+    renderWithRoute('/modules?sort=relevance')
+    await screen.findByText('Terraform Modules')
+    const lastCall = searchModulesMock.mock.calls[searchModulesMock.mock.calls.length - 1][0]
+    expect(lastCall.sort).toBeUndefined()
+    expect(lastCall.order).toBeUndefined()
+  })
+
+  it('renders the sort dropdown', async () => {
     renderWithRoute()
     await screen.findByText('consul')
     expect(screen.getByLabelText('Sort By')).toBeInTheDocument()
