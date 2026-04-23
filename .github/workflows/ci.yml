@@ -230,7 +230,7 @@ jobs:
           path: e2e/playwright-report
 
       - name: Dump container logs
-        if: always()
+        if: failure()
         run: |
           for svc in backend seed-db frontend postgres; do
             echo "===== $svc ====="
