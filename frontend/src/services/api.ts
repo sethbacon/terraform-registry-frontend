@@ -55,7 +55,7 @@ class ApiClient {
         }
 
         // Stamp the request start time for breadcrumb duration tracking
-        ;(config as InternalAxiosRequestConfig & { _startTime?: number })._startTime = Date.now()
+        ; (config as InternalAxiosRequestConfig & { _startTime?: number })._startTime = Date.now()
         return config
       },
       (error) => Promise.reject(error),
@@ -253,11 +253,11 @@ class ApiClient {
       },
       onUploadProgress: options?.onUploadProgress
         ? (event) => {
-            if (event.total && event.total > 0) {
-              const percent = Math.round((event.loaded / event.total) * 100)
-              options.onUploadProgress?.(percent)
-            }
+          if (event.total && event.total > 0) {
+            const percent = Math.round((event.loaded / event.total) * 100)
+            options.onUploadProgress?.(percent)
           }
+        }
         : undefined,
     })
     return response.data
@@ -286,10 +286,14 @@ class ApiClient {
     system: string,
     version: string,
     message?: string,
+    replacementSource?: string,
   ) {
+    const body: Record<string, string> = {}
+    if (message) body.message = message
+    if (replacementSource) body.replacement_source = replacementSource
     const response = await this.client.post(
       `/api/v1/modules/${namespace}/${name}/${system}/versions/${version}/deprecate`,
-      message ? { message } : {},
+      body,
     )
     return response.data
   }
@@ -360,11 +364,11 @@ class ApiClient {
       },
       onUploadProgress: options?.onUploadProgress
         ? (event) => {
-            if (event.total && event.total > 0) {
-              const percent = Math.round((event.loaded / event.total) * 100)
-              options.onUploadProgress?.(percent)
-            }
+          if (event.total && event.total > 0) {
+            const percent = Math.round((event.loaded / event.total) * 100)
+            options.onUploadProgress?.(percent)
           }
+        }
         : undefined,
     })
     return response.data

@@ -69,6 +69,8 @@ const ModuleDetailPage: React.FC = () => {
     setDeprecateDialogOpen,
     deprecationMessage,
     setDeprecationMessage,
+    deprecationReplacementSource,
+    setDeprecationReplacementSource,
     deprecating,
     deprecateModuleDialogOpen,
     setDeprecateModuleDialogOpen,
@@ -464,9 +466,11 @@ const ModuleDetailPage: React.FC = () => {
             onClose={() => {
               setDeprecateDialogOpen(false);
               setDeprecationMessage('');
+              setDeprecationReplacementSource('');
             }}
             onSubmit={async (values) => {
               setDeprecationMessage(values.message ?? '');
+              setDeprecationReplacementSource(values.replacement_source ?? '');
               // Defer one tick so the message state is applied before the handler reads it.
               await Promise.resolve();
               handleDeprecateVersion();
@@ -490,6 +494,13 @@ const ModuleDetailPage: React.FC = () => {
                 multiline: true,
                 rows: 3,
                 initialValue: deprecationMessage,
+              },
+              {
+                id: 'replacement_source',
+                label: 'Replacement Module Address (optional)',
+                placeholder: 'e.g., registry.example.com/namespace/module/provider',
+                helperText: 'Full registry address of the replacement module (Terraform CLI ≥1.10)',
+                initialValue: deprecationReplacementSource,
               },
             ]}
             data-testid="deprecate-version-dialog"
