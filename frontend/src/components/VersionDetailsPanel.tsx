@@ -61,9 +61,15 @@ const VersionDetailsPanel: React.FC<VersionDetailsPanelProps> = ({
               <> on {new Date(selectedVersion.deprecated_at).toLocaleDateString()}</>
             )}
           </Typography>
-          {selectedVersion.deprecation_message && (
+          {(selectedVersion.deprecation_message || selectedVersion.deprecation?.reason) && (
             <Typography variant="body2" sx={{ mt: 1 }}>
-              {selectedVersion.deprecation_message}
+              {selectedVersion.deprecation?.reason ?? selectedVersion.deprecation_message}
+            </Typography>
+          )}
+          {(selectedVersion.replacement_source || selectedVersion.deprecation?.link) && (
+            <Typography variant="body2" sx={{ mt: 1 }}>
+              <strong>Replacement:</strong>{' '}
+              {selectedVersion.deprecation?.link ?? selectedVersion.replacement_source}
             </Typography>
           )}
         </Alert>

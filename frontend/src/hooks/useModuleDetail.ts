@@ -45,6 +45,7 @@ export function useModuleDetail() {
   const [versionToDelete, setVersionToDelete] = useState<string | null>(null);
   const [deprecateDialogOpen, setDeprecateDialogOpen] = useState(false);
   const [deprecationMessage, setDeprecationMessage] = useState('');
+  const [deprecationReplacementSource, setDeprecationReplacementSource] = useState('');
 
   // Module-level deprecation UI state
   const [deprecateModuleDialogOpen, setDeprecateModuleDialogOpen] = useState(false);
@@ -229,13 +230,14 @@ export function useModuleDetail() {
   });
 
   const deprecateVersionMutation = useMutation({
-    mutationFn: (args: { version: string; message?: string }) =>
-      api.deprecateModuleVersion(namespace!, name!, system!, args.version, args.message),
+    mutationFn: (args: { version: string; message?: string; replacementSource?: string }) =>
+      api.deprecateModuleVersion(namespace!, name!, system!, args.version, args.message, args.replacementSource),
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: queryKeys.modules.detail(namespace ?? '', name ?? '', system ?? ''),
       });
       setDeprecationMessage('');
+      setDeprecationReplacementSource('');
     },
     onError: (err: unknown) => {
       setError(getErrorMessage(err, 'Failed to deprecate version. Please try again.'));
@@ -412,6 +414,7 @@ export function useModuleDetail() {
     deprecateVersionMutation.mutate({
       version: selectedVersion.version,
       message: deprecationMessage || undefined,
+      replacementSource: deprecationReplacementSource || undefined,
     });
   };
 
@@ -479,6 +482,8 @@ export function useModuleDetail() {
     setDeprecateDialogOpen,
     deprecationMessage,
     setDeprecationMessage,
+    deprecationReplacementSource,
+    setDeprecationReplacementSource,
     deprecating: deprecateVersionMutation.isPending || undeprecateVersionMutation.isPending,
     // Module-level deprecation
     deprecateModuleDialogOpen,
