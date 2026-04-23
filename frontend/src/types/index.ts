@@ -124,6 +124,8 @@ export interface ModuleVersion {
   deprecated?: boolean
   deprecated_at?: string
   deprecation_message?: string
+  replacement_source?: string
+  deprecation?: { reason?: string; link?: string }
   published_by?: string // User ID who published this version
   published_by_name?: string // User name who published this version
   published_at?: string

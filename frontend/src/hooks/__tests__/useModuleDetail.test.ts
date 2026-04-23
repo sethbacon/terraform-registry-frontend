@@ -88,7 +88,7 @@ describe('useModuleDetail', () => {
     vi.mocked(useAuth).mockReturnValue({
       isAuthenticated: true,
       allowedScopes: ['admin'],
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } as any)
     mockApi.getModule.mockResolvedValue(moduleData)
     mockApi.getModuleVersions.mockResolvedValue(versionsData)
@@ -203,7 +203,7 @@ describe('useModuleDetail', () => {
     vi.mocked(useAuth).mockReturnValue({
       isAuthenticated: true,
       allowedScopes: ['modules:read'],
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } as any)
 
     mockApi.getModuleSCMInfo.mockRejectedValue(new Error('404'))
@@ -249,8 +249,8 @@ describe('useModuleDetail', () => {
 
   it('sets error with "Module not found" on 404', async () => {
     const err = new AxiosError('Not Found', 'ERR_BAD_REQUEST')
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    ;(err as any).response = { status: 404, data: {} }
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      ; (err as any).response = { status: 404, data: {} }
     mockApi.getModule.mockRejectedValue(err)
 
     const { result } = renderHook(() => useModuleDetail(), { wrapper: createWrapper() })
@@ -372,7 +372,7 @@ describe('useModuleDetail', () => {
 
     await waitFor(() => {
       expect(mockApi.deprecateModuleVersion).toHaveBeenCalledWith(
-        'hashicorp', 'consul', 'aws', '2.0.0', 'use 3.0.0 instead',
+        'hashicorp', 'consul', 'aws', '2.0.0', 'use 3.0.0 instead', undefined,
       )
     })
   })
@@ -499,9 +499,9 @@ describe('useModuleDetail', () => {
 
   it('handleUpdateDescription calls api.updateModule when module.id is available', async () => {
     const updateModule = vi.fn().mockResolvedValue(undefined)
-    // Extend api mock ad-hoc so updateModule is callable via the hook.
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    ;(mockApi as any).updateModule = updateModule
+      // Extend api mock ad-hoc so updateModule is callable via the hook.
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      ; (mockApi as any).updateModule = updateModule
     const { result } = renderHook(() => useModuleDetail(), { wrapper: createWrapper() })
     await waitFor(() => expect(result.current.module?.id).toBe('mod-123'))
 
