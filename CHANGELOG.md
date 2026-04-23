@@ -9,6 +9,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.10.3] - 2026-04-23
+
+### Added
+
+- feat: show replacement_source in version deprecation banner (Terraform CLI >=1.10 protocol)
+- feat: add Replacement Module Address field to Deprecate Version dialog
+
 ## [0.10.2] - 2026-04-23
 
 ### Added
