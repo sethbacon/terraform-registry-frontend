@@ -276,6 +276,39 @@ const AUDIT_LOGS_HELP: HelpContent = {
   ],
 };
 
+const SECURITY_SCANNING_HELP: HelpContent = {
+  title: 'Security Scanning',
+  overview:
+    'Displays the current configuration and results of the module vulnerability scanner. The scanner analyses uploaded module archives for known security issues using an external scanning tool configured by the server administrator.',
+  actions: [
+    { heading: 'View Configuration', text: 'The top section shows whether scanning is enabled, the scanner tool and version, severity threshold, timeout, and worker/interval settings.' },
+    { heading: 'Summary Statistics', text: 'Aggregate counts show total scans, pending, clean, findings, and errors at a glance.' },
+    { heading: 'Review Scan Results', text: 'The recent scans table lists each module with its scan status and vulnerability counts broken down by severity (critical, high, medium, low).' },
+  ],
+};
+
+const MTLS_HELP: HelpContent = {
+  title: 'mTLS Certificates',
+  overview:
+    'Shows the current mutual TLS (mTLS) configuration, including whether client certificate authentication is enabled and which certificate subjects are mapped to authorization scopes. All mTLS settings are read-only in the UI — configuration is managed through the server config file.',
+  actions: [
+    { heading: 'View Status', text: 'The status indicator shows whether mTLS is enabled or disabled, along with the CA certificate file path used to verify client certificates.' },
+    { heading: 'Certificate Mappings', text: 'The mappings table lists each certificate subject and the scopes it is authorized to use. Clients presenting a matching certificate receive these scopes automatically.' },
+    { heading: 'Configuration Source', text: 'All mTLS settings are sourced from the server configuration file. To modify mappings, update the config file and restart the backend.' },
+  ],
+};
+
+const SCIM_HELP: HelpContent = {
+  title: 'SCIM Provisioning',
+  overview:
+    'SCIM 2.0 enables automatic user and group provisioning from your identity provider (e.g. Azure AD, Okta). This page shows the SCIM endpoint URLs and authentication requirements needed to configure your IdP.',
+  actions: [
+    { heading: 'Endpoint URLs', text: 'Copy the SCIM base URL, Users endpoint, and Groups endpoint into your identity provider\'s SCIM configuration.' },
+    { heading: 'Authentication', text: 'SCIM requests require a Bearer token with the scim:provision scope. Create one on the API Keys page and paste it into your IdP\'s SCIM token field.' },
+    { heading: 'Supported Operations', text: 'Users support full CRUD and soft-delete. Groups are read-only and map to registry organizations. Filtering and pagination are supported.' },
+  ],
+};
+
 const DEFAULT_HELP: HelpContent = {
   title: 'Help',
   overview: 'Navigate to a page using the sidebar to see context-sensitive help for that section.',
@@ -311,6 +344,9 @@ function getHelpContent(pathname: string): HelpContent {
     case '/admin/terraform-mirror': return TERRAFORM_MIRROR_HELP;
     case '/admin/approvals': return APPROVALS_HELP;
     case '/admin/policies': return MIRROR_POLICIES_HELP;
+    case '/admin/security-scanning': return SECURITY_SCANNING_HELP;
+    case '/admin/mtls': return MTLS_HELP;
+    case '/admin/scim': return SCIM_HELP;
     default: return DEFAULT_HELP;
   }
 }
