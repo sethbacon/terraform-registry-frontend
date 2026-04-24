@@ -220,7 +220,7 @@ jobs:
       - name: Run Playwright tests
         working-directory: e2e
         run: >-
-          npx playwright test --max-failures=1 --retries=1 --reporter=list
+          npx playwright test --workers=2 --max-failures=1 --retries=1 --reporter=list
 
       - name: Upload Playwright artifacts
         # v7
