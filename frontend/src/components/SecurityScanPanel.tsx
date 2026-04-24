@@ -20,6 +20,7 @@ interface SecurityScanPanelProps {
   moduleScan: ModuleScan | null
   scanLoading: boolean
   scanNotFound: boolean
+  scanNotConfigured?: boolean
   onRescan?: () => void
   rescanPending?: boolean
 }
@@ -30,6 +31,7 @@ const SecurityScanPanel: React.FC<SecurityScanPanelProps> = ({
   moduleScan,
   scanLoading,
   scanNotFound,
+  scanNotConfigured = false,
   onRescan,
   rescanPending = false,
 }) => {
@@ -62,6 +64,11 @@ const SecurityScanPanel: React.FC<SecurityScanPanelProps> = ({
         <Box display="flex" justifyContent="center" py={2}>
           <CircularProgress size={24} />
         </Box>
+      ) : scanNotConfigured ? (
+        <Alert severity="warning" sx={{ mt: 1 }}>
+          Security scanning is not configured on this registry. Set up a scanner binary path in the
+          backend configuration to enable scanning.
+        </Alert>
       ) : scanNotFound ? (
         <Typography variant="body2" color="text.secondary">
           No scan available for this version.

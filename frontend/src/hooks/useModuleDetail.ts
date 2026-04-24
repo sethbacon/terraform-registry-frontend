@@ -53,6 +53,7 @@ export function useModuleDetail() {
   const [moduleDeprecationMessage, setModuleDeprecationMessage] = useState('')
   const [successorModuleId, setSuccessorModuleId] = useState('')
   const [undeprecateModuleDialogOpen, setUndeprecateModuleDialogOpen] = useState(false)
+  const [scanNotConfigured, setScanNotConfigured] = useState(false)
   // SCM linking UI state
   const [scmWizardOpen, setScmWizardOpen] = useState(false)
 
@@ -148,6 +149,10 @@ export function useModuleDetail() {
       }
     },
     enabled: moduleQueryEnabled && !!scanVersion && canManage,
+    refetchInterval: (query) => {
+      const status = query.state.data?.scan?.status
+      return status === 'pending' || status === 'scanning' ? 3000 : false
+    },
   })
 
   const moduleScan: ModuleScan | null = scanData?.scan ?? null
@@ -332,9 +337,14 @@ export function useModuleDetail() {
   })
 
   const rescanMutation = useMutation({
-    mutationFn: () =>
-      api.reanalyzeModuleVersion(namespace!, name!, system!, selectedVersion!.version),
-    onSuccess: () => {
+    mutationFn: () => {
+      setScanNotConfigured(false)
+      return api.reanalyzeModuleVersion(namespace!, name!, system!, selectedVersion!.version)
+    },
+    onSuccess: (data: { scan?: string }) => {
+      if (data?.scan === 'not_configured') {
+        setScanNotConfigured(true)
+      }
       queryClient.invalidateQueries({
         queryKey: queryKeys.modules.scan(
           namespace ?? '',
@@ -546,6 +556,7 @@ export function useModuleDetail() {
     moduleScan,
     scanLoading,
     scanNotFound,
+    scanNotConfigured,
     rescanPending: rescanMutation.isPending,
     handleRescan,
     // Module docs
