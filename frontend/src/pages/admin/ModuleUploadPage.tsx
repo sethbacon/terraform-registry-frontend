@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import React, { useState } from 'react'
+import { useLocation, useNavigate } from 'react-router-dom'
 import {
   Container,
   Typography,
@@ -14,108 +14,122 @@ import {
   CardActionArea,
   CardContent,
   LinearProgress,
-} from '@mui/material';
-import CloudUpload from '@mui/icons-material/CloudUpload';
-import SCMIcon from '@mui/icons-material/AccountTree';
-import ArrowBack from '@mui/icons-material/ArrowBack';
-import api from '../../services/api';
-import { getErrorMessage } from '../../utils/errors';
-import PublishFromSCMWizard from '../../components/PublishFromSCMWizard';
-import FileDropZone from '../../components/FileDropZone';
+} from '@mui/material'
+import CloudUpload from '@mui/icons-material/CloudUpload'
+import SCMIcon from '@mui/icons-material/AccountTree'
+import ArrowBack from '@mui/icons-material/ArrowBack'
+import api from '../../services/api'
+import { getErrorMessage } from '../../utils/errors'
+import PublishFromSCMWizard from '../../components/PublishFromSCMWizard'
+import FileDropZone from '../../components/FileDropZone'
+import PolicyResultsPanel from '../../components/PolicyResultsPanel'
+import { PolicyResult } from '../../types'
 
-type ModuleMethod = 'choose' | 'upload' | 'scm';
+type ModuleMethod = 'choose' | 'upload' | 'scm'
 
 const ModuleUploadPage: React.FC = () => {
-  const location = useLocation();
-  const navigate = useNavigate();
+  const location = useLocation()
+  const navigate = useNavigate()
   const state = location.state as {
-    moduleData?: { namespace: string; name: string; provider: string };
-    method?: ModuleMethod;
-  };
-  const prefilledModule = state?.moduleData;
+    moduleData?: { namespace: string; name: string; provider: string }
+    method?: ModuleMethod
+  }
+  const prefilledModule = state?.moduleData
 
-  const [moduleMethod, setModuleMethod] = useState<ModuleMethod>(state?.method ?? 'choose');
+  const [moduleMethod, setModuleMethod] = useState<ModuleMethod>(state?.method ?? 'choose')
 
   // SCM new-module metadata (before wizard)
-  const [scmNamespace, setScmNamespace] = useState(prefilledModule?.namespace || '');
-  const [scmName, setScmName] = useState(prefilledModule?.name || '');
-  const [scmSystem, setScmSystem] = useState(prefilledModule?.provider || '');
-  const [scmDescription, setScmDescription] = useState('');
-  const [scmModuleId, setScmModuleId] = useState<string | null>(null);
-  const [scmCreating, setScmCreating] = useState(false);
-  const [scmError, setScmError] = useState<string | null>(null);
+  const [scmNamespace, setScmNamespace] = useState(prefilledModule?.namespace || '')
+  const [scmName, setScmName] = useState(prefilledModule?.name || '')
+  const [scmSystem, setScmSystem] = useState(prefilledModule?.provider || '')
+  const [scmDescription, setScmDescription] = useState('')
+  const [scmModuleId, setScmModuleId] = useState<string | null>(null)
+  const [scmCreating, setScmCreating] = useState(false)
+  const [scmError, setScmError] = useState<string | null>(null)
 
-  const [uploading, setUploading] = useState(false);
-  const [uploadPercent, setUploadPercent] = useState<number | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<string | null>(null);
+  const [uploading, setUploading] = useState(false)
+  const [uploadPercent, setUploadPercent] = useState<number | null>(null)
+  const [error, setError] = useState<string | null>(null)
+  const [success, setSuccess] = useState<string | null>(null)
+  const [policyResult, setPolicyResult] = useState<PolicyResult | null>(null)
 
   // Module upload state
-  const [moduleFile, setModuleFile] = useState<File | null>(null);
-  const [moduleNamespace, setModuleNamespace] = useState(prefilledModule?.namespace || '');
-  const [moduleName, setModuleName] = useState(prefilledModule?.name || '');
-  const [moduleProvider, setModuleProvider] = useState(prefilledModule?.provider || '');
-  const [moduleVersion, setModuleVersion] = useState('');
-  const [moduleDescription, setModuleDescription] = useState('');
+  const [moduleFile, setModuleFile] = useState<File | null>(null)
+  const [moduleNamespace, setModuleNamespace] = useState(prefilledModule?.namespace || '')
+  const [moduleName, setModuleName] = useState(prefilledModule?.name || '')
+  const [moduleProvider, setModuleProvider] = useState(prefilledModule?.provider || '')
+  const [moduleVersion, setModuleVersion] = useState('')
+  const [moduleDescription, setModuleDescription] = useState('')
 
   const handleModuleFileSelected = (file: File) => {
-    setModuleFile(file);
-    setError(null);
-  };
+    setModuleFile(file)
+    setError(null)
+  }
 
   const handleModuleUpload = async () => {
     if (!moduleFile || !moduleNamespace || !moduleName || !moduleProvider || !moduleVersion) {
-      setError('Please fill in all required fields');
-      return;
+      setError('Please fill in all required fields')
+      return
     }
 
     try {
-      setUploading(true);
-      setUploadPercent(0);
-      setError(null);
-      setSuccess(null);
+      setUploading(true)
+      setUploadPercent(0)
+      setError(null)
+      setSuccess(null)
+      setPolicyResult(null)
 
-      const formData = new FormData();
-      formData.append('namespace', moduleNamespace);
-      formData.append('name', moduleName);
-      formData.append('system', moduleProvider);
-      formData.append('version', moduleVersion);
-      if (moduleDescription) formData.append('description', moduleDescription);
-      formData.append('file', moduleFile);
+      const formData = new FormData()
+      formData.append('namespace', moduleNamespace)
+      formData.append('name', moduleName)
+      formData.append('system', moduleProvider)
+      formData.append('version', moduleVersion)
+      if (moduleDescription) formData.append('description', moduleDescription)
+      formData.append('file', moduleFile)
 
-      await api.uploadModule(formData, {
+      const result = await api.uploadModule(formData, {
         onUploadProgress: (percent) => setUploadPercent(percent),
-      });
+      })
 
-      navigate(`/modules/${moduleNamespace}/${moduleName}/${moduleProvider}`);
+      const pr: PolicyResult | undefined = result?.policy_result
+      if (pr) {
+        setPolicyResult(pr)
+        setUploading(false)
+        setUploadPercent(null)
+        if (pr.allowed) {
+          setSuccess('Module uploaded successfully.')
+        }
+      } else {
+        navigate(`/modules/${moduleNamespace}/${moduleName}/${moduleProvider}`)
+      }
     } catch (err: unknown) {
-      setError(getErrorMessage(err, 'Failed to upload module. Please try again.'));
-      setUploading(false);
-      setUploadPercent(null);
+      setError(getErrorMessage(err, 'Failed to upload module. Please try again.'))
+      setUploading(false)
+      setUploadPercent(null)
     }
-  };
+  }
 
   const handleScmProceed = async () => {
     if (!scmNamespace || !scmName || !scmSystem) {
-      setScmError('Namespace, name, and provider are required');
-      return;
+      setScmError('Namespace, name, and provider are required')
+      return
     }
     try {
-      setScmCreating(true);
-      setScmError(null);
+      setScmCreating(true)
+      setScmError(null)
       const module = await api.createModuleRecord({
         namespace: scmNamespace,
         name: scmName,
         system: scmSystem,
         description: scmDescription || undefined,
-      });
-      setScmModuleId(module.id);
+      })
+      setScmModuleId(module.id)
     } catch (err: unknown) {
-      setScmError(getErrorMessage(err, 'Failed to create module record'));
+      setScmError(getErrorMessage(err, 'Failed to create module record'))
     } finally {
-      setScmCreating(false);
+      setScmCreating(false)
     }
-  };
+  }
 
   const renderModuleMethodChooser = () => (
     <Box sx={{ p: 3 }}>
@@ -123,7 +137,8 @@ const ModuleUploadPage: React.FC = () => {
         How would you like to publish this module?
       </Typography>
       <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-        Upload a packaged archive directly, or connect a git repository for automated publishing via webhooks.
+        Upload a packaged archive directly, or connect a git repository for automated publishing via
+        webhooks.
       </Typography>
       <Box sx={{ display: 'flex', gap: 3, flexDirection: { xs: 'column', sm: 'row' } }}>
         <Card
@@ -137,7 +152,8 @@ const ModuleUploadPage: React.FC = () => {
                 Upload from File
               </Typography>
               <Typography variant="body2" color="text.secondary">
-                Package your module as a <strong>.tar.gz</strong> archive and upload it directly. Best for one-off or manual releases.
+                Package your module as a <strong>.tar.gz</strong> archive and upload it directly.
+                Best for one-off or manual releases.
               </Typography>
             </CardContent>
           </CardActionArea>
@@ -154,20 +170,25 @@ const ModuleUploadPage: React.FC = () => {
                 Link from SCM Repository
               </Typography>
               <Typography variant="body2" color="text.secondary">
-                Connect a GitHub, Azure DevOps, GitLab, or Bitbucket repository. New versions publish automatically when tags are pushed.
+                Connect a GitHub, Azure DevOps, GitLab, or Bitbucket repository. New versions
+                publish automatically when tags are pushed.
               </Typography>
             </CardContent>
           </CardActionArea>
         </Card>
       </Box>
     </Box>
-  );
+  )
 
   const renderScmMetadataForm = () => (
     <Box sx={{ p: 3 }}>
       <Button
         startIcon={<ArrowBack />}
-        onClick={() => { setModuleMethod('choose'); setScmError(null); setScmModuleId(null); }}
+        onClick={() => {
+          setModuleMethod('choose')
+          setScmError(null)
+          setScmModuleId(null)
+        }}
         sx={{ mb: 2 }}
       >
         Back
@@ -181,17 +202,18 @@ const ModuleUploadPage: React.FC = () => {
           moduleId={scmModuleId}
           moduleSystem={scmSystem}
           onComplete={() => {
-            navigate(`/modules/${scmNamespace}/${scmName}/${scmSystem}`);
+            navigate(`/modules/${scmNamespace}/${scmName}/${scmSystem}`)
           }}
           onCancel={() => {
-            setModuleMethod('choose');
-            setScmModuleId(null);
+            setModuleMethod('choose')
+            setScmModuleId(null)
           }}
         />
       ) : (
         <>
           <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-            First, define the module identity. Then you'll choose a repository and configure publishing settings.
+            First, define the module identity. Then you'll choose a repository and configure
+            publishing settings.
           </Typography>
           <Stack spacing={3} sx={{ maxWidth: 500 }}>
             <TextField
@@ -244,13 +266,17 @@ const ModuleUploadPage: React.FC = () => {
         </>
       )}
     </Box>
-  );
+  )
 
   const renderFileUploadForm = () => (
     <Box sx={{ p: 3 }}>
       <Button
         startIcon={<ArrowBack />}
-        onClick={() => { setModuleMethod('choose'); setError(null); setSuccess(null); }}
+        onClick={() => {
+          setModuleMethod('choose')
+          setError(null)
+          setSuccess(null)
+        }}
         sx={{ mb: 2 }}
       >
         Back
@@ -258,16 +284,24 @@ const ModuleUploadPage: React.FC = () => {
       <Typography variant="h6" gutterBottom>
         Upload Terraform Module
       </Typography>
-      <Box sx={{ mb: 3, p: 2, bgcolor: (theme) => theme.palette.mode === 'dark' ? 'grey.800' : 'grey.50', borderRadius: 1 }}>
+      <Box
+        sx={{
+          mb: 3,
+          p: 2,
+          bgcolor: (theme) => (theme.palette.mode === 'dark' ? 'grey.800' : 'grey.50'),
+          borderRadius: 1,
+        }}
+      >
         <Typography variant="body2" color="text.secondary" gutterBottom>
           <strong>Requirements:</strong>
         </Typography>
         <Typography variant="body2" color="text.secondary" component="div">
-          • Package your module as a <strong>.tar.gz</strong> or <strong>.tgz</strong> file<br />
-          • Include all <strong>.tf</strong> files (main.tf, variables.tf, outputs.tf)<br />
-          • Add a <strong>README.md</strong> with usage documentation<br />
-          • Use semantic versioning (1.0.0, 2.1.3, etc.)<br />
-          • Module address format: <strong>namespace/name/provider</strong>
+          • Package your module as a <strong>.tar.gz</strong> or <strong>.tgz</strong> file
+          <br />• Include all <strong>.tf</strong> files (main.tf, variables.tf, outputs.tf)
+          <br />• Add a <strong>README.md</strong> with usage documentation
+          <br />
+          • Use semantic versioning (1.0.0, 2.1.3, etc.)
+          <br />• Module address format: <strong>namespace/name/provider</strong>
         </Typography>
       </Box>
 
@@ -348,18 +382,31 @@ const ModuleUploadPage: React.FC = () => {
         {error && <Alert severity="error">{error}</Alert>}
         {success && <Alert severity="success">{success}</Alert>}
 
-        <Button
-          variant="contained"
-          onClick={handleModuleUpload}
-          disabled={uploading || !moduleFile}
-          startIcon={uploading ? <CircularProgress size={20} /> : <CloudUpload />}
-          size="large"
-        >
-          {uploading ? 'Uploading...' : 'Upload Module'}
-        </Button>
+        {policyResult && <PolicyResultsPanel policyResult={policyResult} />}
+
+        <Stack direction="row" spacing={2}>
+          <Button
+            variant="contained"
+            onClick={handleModuleUpload}
+            disabled={uploading || !moduleFile || (policyResult?.mode === 'block' && !policyResult?.allowed)}
+            startIcon={uploading ? <CircularProgress size={20} /> : <CloudUpload />}
+            size="large"
+          >
+            {uploading ? 'Uploading...' : 'Upload Module'}
+          </Button>
+          {policyResult?.allowed && (
+            <Button
+              variant="outlined"
+              size="large"
+              onClick={() => navigate(`/modules/${moduleNamespace}/${moduleName}/${moduleProvider}`)}
+            >
+              View Module
+            </Button>
+          )}
+        </Stack>
       </Stack>
     </Box>
-  );
+  )
 
   return (
     <Container maxWidth="md" sx={{ py: 4 }}>
@@ -376,7 +423,7 @@ const ModuleUploadPage: React.FC = () => {
         {moduleMethod === 'scm' && renderScmMetadataForm()}
       </Paper>
     </Container>
-  );
-};
+  )
+}
 
-export default ModuleUploadPage;
+export default ModuleUploadPage
