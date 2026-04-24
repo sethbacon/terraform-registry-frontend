@@ -9,6 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.10.5] - 2026-04-24
+
+### Fixed
+
+- fix: limit gated E2E to 2 parallel workers to prevent Firefox networkidle timeout on Providers page
+
 ## [0.10.4] - 2026-04-24
 
 ### Added

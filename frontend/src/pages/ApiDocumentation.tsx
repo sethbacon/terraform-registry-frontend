@@ -1,8 +1,8 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
-import SwaggerUI from 'swagger-ui-react';
-import 'swagger-ui-react/swagger-ui.css';
-import { Box, Typography, List, ListItem, ListItemButton, ListItemText, Paper } from '@mui/material';
-import { useTheme } from '@mui/material/styles';
+import React, { useCallback, useEffect, useRef, useState } from 'react'
+import SwaggerUI from 'swagger-ui-react'
+import 'swagger-ui-react/swagger-ui.css'
+import { Box, Typography, List, ListItem, ListItemButton, ListItemText, Paper } from '@mui/material'
+import { useTheme } from '@mui/material/styles'
 
 // swagger-ui-react's wrapper only forwards a fixed set of props to the
 // underlying SwaggerUIBundle.  tagsSorter is not one of them, so we inject
@@ -12,20 +12,22 @@ const TagsSorterPlugin = (): any => ({
   statePlugins: {
     spec: {
       wrapSelectors: {
-        taggedOperations: (origSelector: any) => (...args: any[]) => {
-          const taggedOps = origSelector(...args);
-          if (taggedOps && typeof taggedOps.sortBy === 'function') {
-            return taggedOps.sortBy(
-              (_val: any, key: string) => key,
-              (a: string, b: string) => a.localeCompare(b),
-            );
-          }
-          return taggedOps;
-        },
+        taggedOperations:
+          (origSelector: any) =>
+          (...args: any[]) => {
+            const taggedOps = origSelector(...args)
+            if (taggedOps && typeof taggedOps.sortBy === 'function') {
+              return taggedOps.sortBy(
+                (_val: any, key: string) => key,
+                (a: string, b: string) => a.localeCompare(b),
+              )
+            }
+            return taggedOps
+          },
       },
     },
   },
-});
+})
 /* eslint-enable @typescript-eslint/no-explicit-any */
 
 // ---------------------------------------------------------------------------
@@ -44,7 +46,7 @@ const METHOD_COLORS: Record<string, string> = {
   patch: '#0a7fa0',
   head: '#5C4EE5',
   options: '#5C4EE5',
-};
+}
 
 /** Apply WCAG-compliant colours directly to Swagger UI DOM elements. */
 function enforceSwaggerA11yStyles(dark: boolean): void {
@@ -55,56 +57,56 @@ function enforceSwaggerA11yStyles(dark: boolean): void {
         `.swagger-ui .opblock.opblock-${method} .opblock-summary-method`,
       )
       .forEach((el) => {
-        el.style.setProperty('background', bg, 'important');
-        el.style.setProperty('color', '#fff', 'important');
-      });
+        el.style.setProperty('background', bg, 'important')
+        el.style.setProperty('color', '#fff', 'important')
+      })
   }
 
   // Version stamps — theme-aware contrast
-  const versionColor = dark ? '#ccc' : '#555';
-  const versionBg = dark ? '#333' : '#e8e8e8';
+  const versionColor = dark ? '#ccc' : '#555'
+  const versionBg = dark ? '#333' : '#e8e8e8'
   document.querySelectorAll<HTMLElement>('.swagger-ui pre.version').forEach((el) => {
-    el.style.setProperty('color', versionColor, 'important');
-    el.style.setProperty('background', versionBg, 'important');
-  });
+    el.style.setProperty('color', versionColor, 'important')
+    el.style.setProperty('background', versionBg, 'important')
+  })
 
   // URL field
-  const urlColor = dark ? '#8ab4f8' : '#3b6fb6';
+  const urlColor = dark ? '#8ab4f8' : '#3b6fb6'
   document.querySelectorAll<HTMLElement>('.swagger-ui span.url').forEach((el) => {
-    el.style.setProperty('color', urlColor, 'important');
-  });
+    el.style.setProperty('color', urlColor, 'important')
+  })
 
   // Info links (terms of service, contact, etc.)
-  const linkColor = dark ? '#8ab4f8' : '#3b6fb6';
+  const linkColor = dark ? '#8ab4f8' : '#3b6fb6'
   document
     .querySelectorAll<HTMLElement>('.swagger-ui .info a.link, .swagger-ui .info .link')
     .forEach((el) => {
-      el.style.setProperty('color', linkColor, 'important');
-    });
+      el.style.setProperty('color', linkColor, 'important')
+    })
 
   // Authorize button
-  const authColor = dark ? '#2ea77a' : '#00875a';
+  const authColor = dark ? '#2ea77a' : '#00875a'
   document.querySelectorAll<HTMLElement>('.swagger-ui .btn.authorize').forEach((btn) => {
-    btn.style.setProperty('border-color', authColor, 'important');
-    btn.style.setProperty('color', authColor, 'important');
-    const span = btn.querySelector<HTMLElement>('span');
-    if (span) span.style.setProperty('color', authColor, 'important');
-    const svg = btn.querySelector<SVGElement>('svg');
-    if (svg) svg.style.setProperty('fill', authColor, 'important');
-  });
+    btn.style.setProperty('border-color', authColor, 'important')
+    btn.style.setProperty('color', authColor, 'important')
+    const span = btn.querySelector<HTMLElement>('span')
+    if (span) span.style.setProperty('color', authColor, 'important')
+    const svg = btn.querySelector<SVGElement>('svg')
+    if (svg) svg.style.setProperty('fill', authColor, 'important')
+  })
 
   // Nested-interactive fix: replace <a> inside summary buttons with <span>
   document
     .querySelectorAll<HTMLAnchorElement>('.swagger-ui .opblock-summary-control a')
     .forEach((a) => {
-      const span = document.createElement('span');
-      span.className = a.className;
-      span.textContent = a.textContent;
+      const span = document.createElement('span')
+      span.className = a.className
+      span.textContent = a.textContent
       Array.from(a.attributes).forEach((attr) => {
-        if (attr.name.startsWith('data-')) span.setAttribute(attr.name, attr.value);
-      });
-      a.replaceWith(span);
-    });
+        if (attr.name.startsWith('data-')) span.setAttribute(attr.name, attr.value)
+      })
+      a.replaceWith(span)
+    })
 }
 
 // ---------------------------------------------------------------------------
@@ -241,7 +243,7 @@ const BASE_CSS = `
 
   /* remove the very wide left margin swagger-ui adds by default */
   .swagger-ui .wrapper { padding: 0; }
-`;
+`
 
 const LIGHT_EXTRA = `
   .swagger-ui .scheme-container { background: #fafafa; border-bottom: 1px solid #e0e0e0; }
@@ -283,7 +285,7 @@ const LIGHT_EXTRA = `
   .swagger-ui .tab li { color: #666; }
   .swagger-ui .markdown p,
   .swagger-ui .markdown li { color: #444; }
-`;
+`
 
 const DARK_EXTRA = `
   .swagger-ui,
@@ -358,152 +360,155 @@ const DARK_EXTRA = `
   .swagger-ui small > .version,
   .swagger-ui small > pre.version,
   .swagger-ui pre.version { color: #ccc !important; background: #333 !important; }
-`;
+`
 
 // ---------------------------------------------------------------------------
 // Left nav — reads tags from the rendered DOM and tracks active section
 // ---------------------------------------------------------------------------
 
 interface NavTag {
-  id: string;   // the CSS id Swagger UI assigns, e.g. "operations-tag-Providers"
-  label: string;
+  id: string // the CSS id Swagger UI assigns, e.g. "operations-tag-Providers"
+  label: string
 }
 
 interface OpenAPISpec {
-  paths?: Record<string, Record<string, { tags?: string[] }>>;
+  paths?: Record<string, Record<string, { tags?: string[] }>>
 }
 
 function buildNavTags(spec: OpenAPISpec): NavTag[] {
-  if (!spec?.paths) return [];
-  const seen = new Set<string>();
-  const tags: NavTag[] = [];
+  if (!spec?.paths) return []
+  const seen = new Set<string>()
+  const tags: NavTag[] = []
   for (const methods of Object.values(spec.paths)) {
     for (const op of Object.values(methods)) {
-      if (!op?.tags) continue;
+      if (!op?.tags) continue
       for (const tag of op.tags) {
         if (!seen.has(tag)) {
-          seen.add(tag);
+          seen.add(tag)
           // Swagger UI encodes spaces as underscores in tag section ids
-          tags.push({ id: `operations-tag-${tag.replace(/\s+/g, '_')}`, label: tag });
+          tags.push({ id: `operations-tag-${tag.replace(/\s+/g, '_')}`, label: tag })
         }
       }
     }
   }
-  tags.sort((a, b) => a.label.localeCompare(b.label));
-  return tags;
+  tags.sort((a, b) => a.label.localeCompare(b.label))
+  return tags
 }
 
-const NAV_WIDTH = 200;
+const NAV_WIDTH = 200
 
 const ApiDocumentation: React.FC = () => {
-  const theme = useTheme();
-  const isDark = theme.palette.mode === 'dark';
+  const theme = useTheme()
+  const isDark = theme.palette.mode === 'dark'
 
-  const [navTags, setNavTags] = useState<NavTag[]>([]);
-  const [activeTag, setActiveTag] = useState<string>('');
-  const specRef = useRef<OpenAPISpec | null>(null);
-  const observerRef = useRef<IntersectionObserver | null>(null);
-  const contentRef = useRef<HTMLDivElement>(null);
-  const mutationObserverRef = useRef<MutationObserver | null>(null);
+  const [navTags, setNavTags] = useState<NavTag[]>([])
+  const [activeTag, setActiveTag] = useState<string>('')
+  const specRef = useRef<OpenAPISpec | null>(null)
+  const observerRef = useRef<IntersectionObserver | null>(null)
+  const contentRef = useRef<HTMLDivElement>(null)
+  const mutationObserverRef = useRef<MutationObserver | null>(null)
 
   // Forward the user's bearer token so "Try it out" works on auth'd endpoints.
   // eslint-disable-next-line @typescript-eslint/no-explicit-any -- swagger-ui-react's Request type lacks headers
   const requestInterceptor = useCallback((req: any) => {
-    const token = localStorage.getItem('auth_token');
-    if (token) req.headers['Authorization'] = `Bearer ${token}`;
-    return req;
-  }, []);
+    const token = localStorage.getItem('auth_token')
+    if (token) req.headers['Authorization'] = `Bearer ${token}`
+    return req
+  }, [])
 
   // onComplete fires when SwaggerUI finishes rendering.
   // We extract tags from the loaded spec at that point.
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- swagger-ui-react system type is not exported
-  const onComplete = useCallback((system: any) => {
-    try {
-      const spec = system.getState().toJS().spec?.json;
-      if (spec) {
-        specRef.current = spec;
-        setNavTags(buildNavTags(spec));
+  const onComplete = useCallback(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- swagger-ui-react system type is not exported
+    (system: any) => {
+      try {
+        const spec = system.getState().toJS().spec?.json
+        if (spec) {
+          specRef.current = spec
+          setNavTags(buildNavTags(spec))
+        }
+      } catch {
+        // spec not available yet — harmless
       }
-    } catch {
-      // spec not available yet — harmless
-    }
 
-    // a11y fix: enforce WCAG-compliant styles after Swagger UI renders.
-    // Small delay to allow Swagger UI to finish its own DOM mutations.
-    setTimeout(() => enforceSwaggerA11yStyles(isDark), 300);
-  }, [isDark]);
+      // a11y fix: enforce WCAG-compliant styles after Swagger UI renders.
+      // Small delay to allow Swagger UI to finish its own DOM mutations.
+      setTimeout(() => enforceSwaggerA11yStyles(isDark), 300)
+    },
+    [isDark],
+  )
 
   // Set up an IntersectionObserver to track which tag section is visible.
   useEffect(() => {
-    if (!navTags.length) return;
+    if (!navTags.length) return
 
-    observerRef.current?.disconnect();
+    observerRef.current?.disconnect()
 
     const observer = new IntersectionObserver(
       (entries) => {
         // Find the topmost visible section
         const visible = entries
           .filter((e) => e.isIntersecting)
-          .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
+          .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top)
         if (visible.length > 0) {
-          setActiveTag(visible[0].target.id);
+          setActiveTag(visible[0].target.id)
         }
       },
-      { rootMargin: '-10% 0px -70% 0px', threshold: 0 }
-    );
+      { rootMargin: '-10% 0px -70% 0px', threshold: 0 },
+    )
 
     // Small delay to allow Swagger UI to finish rendering its DOM
     const timer = setTimeout(() => {
       navTags.forEach(({ id }) => {
-        const el = document.getElementById(id);
-        if (el) observer.observe(el);
-      });
-    }, 300);
+        const el = document.getElementById(id)
+        if (el) observer.observe(el)
+      })
+    }, 300)
 
-    observerRef.current = observer;
+    observerRef.current = observer
     return () => {
-      clearTimeout(timer);
-      observer.disconnect();
-    };
-  }, [navTags]);
+      clearTimeout(timer)
+      observer.disconnect()
+    }
+  }, [navTags])
 
   // MutationObserver: re-enforce a11y styles whenever Swagger UI mutates its DOM
   // (e.g. user expands/collapses an operation, switches tabs, etc.)
   useEffect(() => {
-    const container = contentRef.current;
-    if (!container) return;
+    const container = contentRef.current
+    if (!container) return
 
-    let debounceTimer: ReturnType<typeof setTimeout>;
+    let debounceTimer: ReturnType<typeof setTimeout>
     const mo = new MutationObserver(() => {
-      clearTimeout(debounceTimer);
-      debounceTimer = setTimeout(() => enforceSwaggerA11yStyles(isDark), 100);
-    });
+      clearTimeout(debounceTimer)
+      debounceTimer = setTimeout(() => enforceSwaggerA11yStyles(isDark), 100)
+    })
 
-    mo.observe(container, { childList: true, subtree: true });
-    mutationObserverRef.current = mo;
+    mo.observe(container, { childList: true, subtree: true })
+    mutationObserverRef.current = mo
 
     return () => {
-      clearTimeout(debounceTimer);
-      mo.disconnect();
-      mutationObserverRef.current = null;
-    };
-  }, [isDark]);
+      clearTimeout(debounceTimer)
+      mo.disconnect()
+      mutationObserverRef.current = null
+    }
+  }, [isDark])
 
   const scrollToTag = useCallback((id: string) => {
-    const el = document.getElementById(id);
-    if (!el) return;
+    const el = document.getElementById(id)
+    if (!el) return
     // Offset for the fixed AppBar (~64px) plus a little breathing room
-    const y = el.getBoundingClientRect().top + window.scrollY - 80;
-    window.scrollTo({ top: y, behavior: 'smooth' });
-    setActiveTag(id);
-  }, []);
+    const y = el.getBoundingClientRect().top + window.scrollY - 80
+    window.scrollTo({ top: y, behavior: 'smooth' })
+    setActiveTag(id)
+  }, [])
 
-  const primaryColor = theme.palette.primary.main;
-  const navBg = isDark ? '#1e1e1e' : '#fafafa';
-  const navBorder = isDark ? '#333' : '#e0e0e0';
-  const navText = isDark ? '#ccc' : '#555';
-  const activeText = primaryColor;
-  const activeBg = isDark ? `${primaryColor}26` : `${primaryColor}14`;
+  const primaryColor = theme.palette.primary.main
+  const navBg = isDark ? '#1e1e1e' : '#fafafa'
+  const navBorder = isDark ? '#333' : '#e0e0e0'
+  const navText = isDark ? '#ccc' : '#555'
+  const activeText = primaryColor
+  const activeBg = isDark ? `${primaryColor}26` : `${primaryColor}14`
 
   return (
     <Box>
@@ -517,7 +522,6 @@ const ApiDocumentation: React.FC = () => {
 
       {/* Layout: sticky left nav + Swagger UI content */}
       <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 0 }}>
-
         {/* ---- Left navigation panel ---- */}
         {navTags.length > 0 && (
           <Box
@@ -525,7 +529,7 @@ const ApiDocumentation: React.FC = () => {
               width: NAV_WIDTH,
               flexShrink: 0,
               position: 'sticky',
-              top: 80,           // below the fixed AppBar
+              top: 80, // below the fixed AppBar
               maxHeight: 'calc(100vh - 100px)',
               overflowY: 'auto',
               mr: 2,
@@ -558,7 +562,7 @@ const ApiDocumentation: React.FC = () => {
               </Typography>
               <List dense disablePadding>
                 {navTags.map(({ id, label }) => {
-                  const isActive = activeTag === id;
+                  const isActive = activeTag === id
                   return (
                     <ListItem key={id} disablePadding>
                       <ListItemButton
@@ -566,7 +570,9 @@ const ApiDocumentation: React.FC = () => {
                         sx={{
                           py: 0.5,
                           px: 2,
-                          borderLeft: isActive ? `3px solid ${primaryColor}` : '3px solid transparent',
+                          borderLeft: isActive
+                            ? `3px solid ${primaryColor}`
+                            : '3px solid transparent',
                           background: isActive ? activeBg : 'transparent',
                           borderRadius: 0,
                           '&:hover': {
@@ -587,7 +593,7 @@ const ApiDocumentation: React.FC = () => {
                         />
                       </ListItemButton>
                     </ListItem>
-                  );
+                  )
                 })}
               </List>
             </Paper>
@@ -611,7 +617,7 @@ const ApiDocumentation: React.FC = () => {
         </Box>
       </Box>
     </Box>
-  );
-};
+  )
+}
 
-export default ApiDocumentation;
+export default ApiDocumentation
