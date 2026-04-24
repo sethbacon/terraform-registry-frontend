@@ -20,6 +20,8 @@ import { defineConfig, devices } from '@playwright/test';
  */
 export default defineConfig({
   testDir: './tests',
+  snapshotDir: './screenshots',
+  snapshotPathTemplate: '{snapshotDir}/{arg}{ext}',
   // 60 s per test — covers the full lifecycle including the loggedInPage fixture
   // which performs a complete dev-login round-trip (goto /login → click → waitForURL)
   // before the test body even starts.  30 s was too tight on slower machines.
@@ -70,12 +72,16 @@ export default defineConfig({
       name: 'chromium',
       use: { ...devices['Desktop Chrome'] },
     },
-    // Firefox is included only in CI to keep local test runs fast.
+    // Firefox and WebKit are included only in CI to keep local test runs fast.
     ...(process.env.CI
       ? [
         {
           name: 'firefox',
           use: { ...devices['Desktop Firefox'] },
+        },
+        {
+          name: 'webkit',
+          use: { ...devices['Desktop Safari'] },
         },
       ]
       : []),
