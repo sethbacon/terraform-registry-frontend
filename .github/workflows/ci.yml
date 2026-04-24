@@ -258,7 +258,7 @@ jobs:
         working-directory: e2e
         run: |
           npm ci
-          npx playwright install --with-deps chromium firefox
+          npx playwright install --with-deps chromium firefox webkit
 
       - name: Run Playwright tests
         working-directory: e2e
