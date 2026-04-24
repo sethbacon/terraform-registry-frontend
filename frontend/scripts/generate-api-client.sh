@@ -23,7 +23,12 @@ if [[ ! -f "${SWAGGER_JSON}" ]]; then
   exit 1
 fi
 
-echo "Generating TypeScript types from ${SWAGGER_JSON}..."
-npx --yes openapi-typescript "${SWAGGER_JSON}" --output "${OUTPUT_FILE}"
+OPENAPI3_JSON="${FRONTEND_DIR}/openapi/openapi3.json"
+
+echo "Converting Swagger 2.0 → OpenAPI 3.0..."
+npx --yes swagger2openapi "${SWAGGER_JSON}" -o "${OPENAPI3_JSON}" -p
+
+echo "Generating TypeScript types from ${OPENAPI3_JSON}..."
+npx --yes openapi-typescript "${OPENAPI3_JSON}" --output "${OUTPUT_FILE}"
 
 echo "Generated: ${OUTPUT_FILE}"
