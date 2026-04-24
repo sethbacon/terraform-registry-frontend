@@ -4,6 +4,7 @@ import createCache from '@emotion/cache'
 import { CacheProvider } from '@emotion/react'
 import App from './App'
 import './index.css'
+import './i18n'
 import { init as initErrorReporting, captureError } from './services/errorReporting'
 import { init as initPerformanceReporting } from './services/performanceReporting'
 

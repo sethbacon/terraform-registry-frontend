@@ -500,6 +500,29 @@ export interface VersionInfo {
   oci?: boolean
 }
 
+// ---- Whitelabel / UI theme ----
+
+/**
+ * Runtime theme configuration returned by GET /api/v1/ui/theme.
+ * All fields are optional; the frontend falls back to built-in defaults when
+ * the endpoint is absent or a field is missing.
+ */
+export interface UIThemeConfig {
+  /** Display name for the product, e.g. "Acme Terraform Registry" */
+  product_name?: string
+  /** Primary brand colour as a hex string, e.g. "#5C4EE5" */
+  primary_color?: string
+  /** Secondary brand colour as a hex string */
+  secondary_color_light?: string
+  secondary_color_dark?: string
+  /** URL to the logo image shown in the sidebar header and login page */
+  logo_url?: string
+  /** URL to a custom favicon (overrides the default) */
+  favicon_url?: string
+  /** URL to the hero background image on the login page */
+  login_hero_url?: string
+}
+
 // ---- Policy Engine ----
 
 export interface PolicyViolation {

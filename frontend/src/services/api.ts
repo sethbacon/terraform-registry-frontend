@@ -55,7 +55,7 @@ class ApiClient {
         }
 
         // Stamp the request start time for breadcrumb duration tracking
-        ;(config as InternalAxiosRequestConfig & { _startTime?: number })._startTime = Date.now()
+        ; (config as InternalAxiosRequestConfig & { _startTime?: number })._startTime = Date.now()
         return config
       },
       (error) => Promise.reject(error),
@@ -253,11 +253,11 @@ class ApiClient {
       },
       onUploadProgress: options?.onUploadProgress
         ? (event) => {
-            if (event.total && event.total > 0) {
-              const percent = Math.round((event.loaded / event.total) * 100)
-              options.onUploadProgress?.(percent)
-            }
+          if (event.total && event.total > 0) {
+            const percent = Math.round((event.loaded / event.total) * 100)
+            options.onUploadProgress?.(percent)
           }
+        }
         : undefined,
     })
     return response.data
@@ -376,11 +376,11 @@ class ApiClient {
       },
       onUploadProgress: options?.onUploadProgress
         ? (event) => {
-            if (event.total && event.total > 0) {
-              const percent = Math.round((event.loaded / event.total) * 100)
-              options.onUploadProgress?.(percent)
-            }
+          if (event.total && event.total > 0) {
+            const percent = Math.round((event.loaded / event.total) * 100)
+            options.onUploadProgress?.(percent)
           }
+        }
         : undefined,
     })
     return response.data
@@ -1641,6 +1641,25 @@ class ApiClient {
   async getVersionInfo(): Promise<import('../types').VersionInfo> {
     const response = await this.client.get('/version')
     return response.data
+  }
+
+  // ============================================================================
+  // UI Theme (whitelabel)
+  // ============================================================================
+
+  /**
+   * Fetch the runtime whitelabel theme config from the backend.
+   * Returns null if the endpoint does not exist (pre-phase-5 backends) so
+   * callers can gracefully fall back to built-in defaults.
+   */
+  async getUITheme(): Promise<import('../types').UIThemeConfig | null> {
+    try {
+      const response = await this.client.get('/api/v1/ui/theme')
+      return response.data as import('../types').UIThemeConfig
+    } catch {
+      // 404 means the backend hasn't implemented the endpoint yet; treat as no override.
+      return null
+    }
   }
 }
 
