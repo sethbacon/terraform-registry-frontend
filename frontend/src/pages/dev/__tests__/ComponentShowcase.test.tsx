@@ -28,6 +28,17 @@ vi.mock('../../../services/api', () => ({
   },
 }))
 
+vi.mock('../../../contexts/ThemeContext', () => ({
+  useThemeMode: () => ({
+    mode: 'light',
+    toggleTheme: vi.fn(),
+    productName: 'Terraform Registry',
+    logoUrl: null,
+    loginHeroUrl: null,
+    direction: 'ltr' as const,
+  }),
+}))
+
 // ProviderIcon uses FontAwesome and simple-icons; they render fine in happy-dom
 // but mock them to keep the test lightweight
 vi.mock('../../../components/ProviderIcon', () => ({

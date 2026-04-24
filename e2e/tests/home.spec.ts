@@ -30,7 +30,7 @@ test.describe('Home page', () => {
   test('renders feature cards section', async ({ page }) => {
     await page.goto('/');
 
-    await expect(page.getByRole('heading', { name: "What's Available" })).toBeVisible();
+    await expect(page.getByRole('heading', { name: /What.s Available/ })).toBeVisible();
 
     // Feature cards should be rendered
     const cards = page.locator('[class*="MuiCard"]');
