@@ -40,7 +40,8 @@ import Brightness7 from '@mui/icons-material/Brightness7';
 import HelpOutline from '@mui/icons-material/HelpOutline';
 import InfoOutlined from '@mui/icons-material/InfoOutlined';
 import SearchIcon from '@mui/icons-material/Search';
-import Shield from '@mui/icons-material/Shield';
+import AdminPanelSettings from '@mui/icons-material/AdminPanelSettings';
+import VerifiedUser from '@mui/icons-material/VerifiedUser';
 import Security from '@mui/icons-material/Security';
 import Storage from '@mui/icons-material/Storage';
 import HourglassEmpty from '@mui/icons-material/HourglassEmpty';
@@ -138,11 +139,11 @@ const Layout = () => {
       label: t('nav.admin.identity'),
       items: [
         { text: t('nav.admin.organizations'), icon: <Business />, path: '/admin/organizations', tooltip: t('nav.admin.organizationsTooltip'), scope: 'organizations:read' },
-        { text: t('nav.admin.roles'), icon: <Shield />, path: '/admin/roles', tooltip: t('nav.admin.rolesTooltip'), scope: 'users:read' },
+        { text: t('nav.admin.roles'), icon: <AdminPanelSettings />, path: '/admin/roles', tooltip: t('nav.admin.rolesTooltip'), scope: 'users:read' },
         { text: t('nav.admin.users'), icon: <People />, path: '/admin/users', tooltip: t('nav.admin.usersTooltip'), scope: 'users:read' },
         { text: t('nav.admin.oidcGroups'), icon: <ManageAccounts />, path: '/admin/oidc', tooltip: t('nav.admin.oidcGroupsTooltip'), scope: 'admin' },
         { text: t('nav.admin.scim'), icon: <SyncAlt />, path: '/admin/scim', tooltip: t('nav.admin.scimTooltip'), scope: 'admin' },
-        { text: t('nav.admin.mtlsCerts'), icon: <Shield />, path: '/admin/mtls', tooltip: t('nav.admin.mtlsCertsTooltip'), scope: 'admin' },
+        { text: t('nav.admin.mtlsCerts'), icon: <VerifiedUser />, path: '/admin/mtls', tooltip: t('nav.admin.mtlsCertsTooltip'), scope: 'admin' },
         { text: t('nav.admin.apiKeys'), icon: <Key />, path: '/admin/apikeys', tooltip: t('nav.admin.apiKeysTooltip'), scope: null },
       ],
     },
