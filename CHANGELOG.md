@@ -9,6 +9,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.12.0] - 2026-04-24
+
+### Added
+
+- feat: internationalization (i18n) with i18next — English, Spanish, French, German, Japanese
+- feat: whitelabel theming — configurable product name, logo, favicon, login hero, and brand colors via backend API
+- feat: language picker in the header with automatic RTL text direction support
+- feat: About modal shows product name from whitelabel config
+- feat: Crowdin integration workflow for community translation contributions
+
 ## [0.11.1] - 2026-04-24
 
 ### Fixed
