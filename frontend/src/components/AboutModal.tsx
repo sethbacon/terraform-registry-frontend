@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   Dialog,
   DialogTitle,
@@ -14,6 +15,8 @@ import {
 } from '@mui/material';
 import { VersionInfo } from '../types';
 import apiClient from '../services/api';
+import { useThemeMode } from '../contexts/ThemeContext';
+import i18n from '../i18n';
 
 interface AboutModalProps {
   open: boolean;
@@ -21,8 +24,10 @@ interface AboutModalProps {
 }
 
 const AboutModal = ({ open, onClose }: AboutModalProps) => {
+  const { t } = useTranslation();
   const [backendVersion, setBackendVersion] = useState<VersionInfo | null>(null);
   const [loading, setLoading] = useState(false);
+  const { productName } = useThemeMode();
 
   useEffect(() => {
     if (!open) return;
@@ -35,22 +40,20 @@ const AboutModal = ({ open, onClose }: AboutModalProps) => {
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
-      <DialogTitle>About Terraform Registry</DialogTitle>
+      <DialogTitle>{t('about.title', { productName })}</DialogTitle>
       <DialogContent dividers>
         <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-          A self-hosted Terraform module and provider registry with support for SCM
-          integration, provider mirroring, Terraform binary distribution, and
-          multi-tenancy.
+          {t('about.description')}
         </Typography>
 
         <Divider sx={{ my: 2 }} />
 
         <Typography variant="subtitle2" gutterBottom>
-          Versions
+          {t('about.versions')}
         </Typography>
         <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mb: 2 }}>
           <Chip
-            label={`Frontend v${__APP_VERSION__}`}
+            label={t('about.frontendVersion', { version: __APP_VERSION__ })}
             size="small"
             color="primary"
             variant="outlined"
@@ -59,19 +62,19 @@ const AboutModal = ({ open, onClose }: AboutModalProps) => {
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
               <CircularProgress size={14} />
               <Typography variant="caption" color="text.secondary">
-                Loading backend version…
+                {t('about.loadingBackendVersion')}
               </Typography>
             </Box>
           ) : backendVersion ? (
             <Chip
-              label={`Backend v${backendVersion.version}`}
+              label={t('about.backendVersion', { version: backendVersion.version })}
               size="small"
               color="secondary"
               variant="outlined"
             />
           ) : (
             <Chip
-              label="Backend unavailable"
+              label={t('about.backendUnavailable')}
               size="small"
               variant="outlined"
               color="default"
@@ -82,11 +85,15 @@ const AboutModal = ({ open, onClose }: AboutModalProps) => {
         {backendVersion && (
           <Box sx={{ mb: 2 }}>
             <Typography variant="body2" color="text.secondary">
-              API version: {backendVersion.api_version}
+              {t('about.apiVersion', { version: backendVersion.api_version })}
             </Typography>
             {backendVersion.build_date && backendVersion.build_date !== 'unknown' && (
               <Typography variant="body2" color="text.secondary">
-                Built: {new Date(backendVersion.build_date).toLocaleString()}
+                {t('about.built', {
+                  date: new Intl.DateTimeFormat(i18n.language).format(
+                    new Date(backendVersion.build_date),
+                  ),
+                })}
               </Typography>
             )}
           </Box>
@@ -95,16 +102,16 @@ const AboutModal = ({ open, onClose }: AboutModalProps) => {
         <Divider sx={{ my: 2 }} />
 
         <Typography variant="subtitle2" gutterBottom>
-          License
+          {t('about.license')}
         </Typography>
         <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-          Released under the{' '}
+          {t('about.licenseIntro')}{' '}
           <Link
             href="https://www.apache.org/licenses/LICENSE-2.0"
             target="_blank"
             rel="noopener noreferrer"
           >
-            Apache License 2.0
+            {t('about.apacheLicense')}
           </Link>
           .
         </Typography>
@@ -112,7 +119,7 @@ const AboutModal = ({ open, onClose }: AboutModalProps) => {
         <Divider sx={{ my: 2 }} />
 
         <Typography variant="subtitle2" gutterBottom>
-          Source
+          {t('about.source')}
         </Typography>
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
           <Link
@@ -121,7 +128,7 @@ const AboutModal = ({ open, onClose }: AboutModalProps) => {
             rel="noopener noreferrer"
             variant="body2"
           >
-            GitHub — Backend
+            {t('about.githubBackend')}
           </Link>
           <Link
             href="https://github.com/sethbacon/terraform-registry-frontend"
@@ -129,12 +136,12 @@ const AboutModal = ({ open, onClose }: AboutModalProps) => {
             rel="noopener noreferrer"
             variant="body2"
           >
-            GitHub — Frontend
+            {t('about.githubFrontend')}
           </Link>
         </Box>
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose}>Close</Button>
+        <Button onClick={onClose}>{t('about.close')}</Button>
       </DialogActions>
     </Dialog>
   );

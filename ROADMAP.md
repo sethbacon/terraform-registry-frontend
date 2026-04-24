@@ -416,7 +416,7 @@ Items are ordered by coverage-per-effort; each raises the ratchet floor in `vite
 - **Files:** `frontend/src/pages/ModuleDetailPage.tsx`, `frontend/src/pages/admin/ModuleUploadPage.tsx`, `frontend/src/types/index.ts`
 - **AC:** E2E: deprecated version shows banner; non-deprecated does not.
 
-#### E4.2 · Policy evaluation results in upload flow · [P1/M]
+#### E4.2 · Policy evaluation results in upload flow · [P1/M] ✅
 
 - **↔ Backend E4.3:** Consume policy evaluation response from upload API.
 - Upload page displays policy check results; blocks submit on `deny`.
@@ -424,21 +424,21 @@ Items are ordered by coverage-per-effort; each raises the ratchet floor in `vite
 - **Files:** `frontend/src/pages/admin/ModuleUploadPage.tsx`, `frontend/src/components/PolicyResultsPanel.tsx`
 - **AC:** E2E: upload violating policy fails with clear error surface.
 
-#### E4.3 · Module test results UI · [P1/M]
+#### E4.3 · Module test results UI · [P1/M] ⏳ _Deferred to post-phase 5 (depends on backend E4.4)_
 
 - **↔ Backend E4.4:** Consume test results from version metadata.
 - Version detail panel shows pass/fail per declared example; logs expandable.
 - **Files:** `frontend/src/components/VersionDetailsPanel.tsx`, `frontend/src/components/TestResultsPanel.tsx`
 - **AC:** Module with failing example shows red status.
 
-#### E4.4 · Per-org quota dashboard · [P2/M]
+#### E4.4 · Per-org quota dashboard · [P2/M] ✅
 
 - **↔ Backend D3.4:** Consume quota + usage API.
 - Extend admin dashboard with quota usage charts (bar/gauge).
 - **Files:** `frontend/src/pages/admin/DashboardPage.tsx`, `frontend/src/components/QuotaUsageChart.tsx`
 - **AC:** Real-time usage renders from dedicated API endpoint.
 
-#### E4.5 · OCI distribution affordances · [P2/M]
+#### E4.5 · OCI distribution affordances · [P2/M] ✅
 
 - **↔ Backend E4.2:** Detect OCI support from backend capabilities endpoint.
 - Module detail page adds "Pull via OCI" snippet alongside Terraform snippet.
@@ -451,7 +451,7 @@ Items are ordered by coverage-per-effort; each raises the ratchet floor in `vite
 
 ### Track G — Whitelabel / theming
 
-#### G5.1 · Whitelabel theme system · [P0/L]
+#### G5.1 · Whitelabel theme system · [P0/L] ✅
 
 - **↔ Backend:** New config-driven `/api/v1/ui/theme` endpoint returning theme tokens.
 - Extract theme tokens into JSON consumed at runtime.
@@ -461,7 +461,7 @@ Items are ordered by coverage-per-effort; each raises the ratchet floor in `vite
 - **Files:** `frontend/src/contexts/ThemeContext.tsx`, `frontend/src/services/api.ts`, `frontend/src/components/Layout.tsx`, `frontend/src/components/AboutModal.tsx`
 - **AC:** Deploy-time env var or backend config changes branding without rebuild.
 
-#### G5.2 · Custom logo + product name · [P1/M]
+#### G5.2 · Custom logo + product name · [P1/M] ✅
 
 - Subset of G5.1 if phased.
 - **Files:** `frontend/src/components/Layout.tsx`, `frontend/src/components/AboutModal.tsx`
@@ -469,7 +469,7 @@ Items are ordered by coverage-per-effort; each raises the ratchet floor in `vite
 
 ### Track I — Internationalization
 
-#### I5.1 · Introduce `react-i18next` · [P1/L]
+#### I5.1 · Introduce `react-i18next` · [P1/L] ✅
 
 - Wrap app with `I18nextProvider`; extract all user-visible strings into translation keys.
 - Language detector (browser preference + user setting).
@@ -479,13 +479,13 @@ Items are ordered by coverage-per-effort; each raises the ratchet floor in `vite
 - **Files:** `frontend/package.json`, `frontend/src/i18n.ts`, `frontend/src/locales/<lang>/*.json`, `frontend/src/App.tsx`, `frontend/src/components/Layout.tsx`, all page/component files (string extraction)
 - **AC:** E2E passes in at least two locales; strings externalized.
 
-#### I5.2 · RTL support · [P2/M]
+#### I5.2 · RTL support · [P2/M] ✅
 
 - Configure MUI RTL; verify on `ar`/`he` pseudo-locale.
 - **Files:** `frontend/src/contexts/ThemeContext.tsx`
 - **AC:** Smoke test in RTL mode.
 
-#### I5.3 · Translation contribution workflow · [P3/M]
+#### I5.3 · Translation contribution workflow · [P3/M] ✅
 
 - Integrate with Crowdin or similar; document in CONTRIBUTING.md.
 - **Files:** `CONTRIBUTING.md`, `.github/workflows/crowdin.yml`

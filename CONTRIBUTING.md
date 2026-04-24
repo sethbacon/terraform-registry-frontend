@@ -125,15 +125,15 @@ npm run build
 
 ### What needs tests
 
-| Change type | Required tests |
-| ----------- | -------------- |
-| New component | Unit test in `components/__tests__/ComponentName.test.tsx` |
-| New hook | Unit test in `hooks/__tests__/hookName.test.ts` with `renderHook` + `QueryClientProvider` wrapper |
-| New context | Unit test in `contexts/__tests__/ContextName.test.tsx` |
-| New service function | Unit test in `services/__tests__/serviceName.test.ts` |
-| New utility | Unit test in `utils/__tests__/utilName.test.ts` |
-| New page / user flow | E2E spec in `e2e/tests/feature-name.spec.ts` |
-| Bug fix | Regression test covering the fixed behavior |
+| Change type          | Required tests                                                                                    |
+| -------------------- | ------------------------------------------------------------------------------------------------- |
+| New component        | Unit test in `components/__tests__/ComponentName.test.tsx`                                        |
+| New hook             | Unit test in `hooks/__tests__/hookName.test.ts` with `renderHook` + `QueryClientProvider` wrapper |
+| New context          | Unit test in `contexts/__tests__/ContextName.test.tsx`                                            |
+| New service function | Unit test in `services/__tests__/serviceName.test.ts`                                             |
+| New utility          | Unit test in `utils/__tests__/utilName.test.ts`                                                   |
+| New page / user flow | E2E spec in `e2e/tests/feature-name.spec.ts`                                                      |
+| Bug fix              | Regression test covering the fixed behavior                                                       |
 
 Tests must pass with `npm test`. Coverage thresholds are enforced at 40% (statements, branches, functions, lines) via `vitest.config.ts` and will increase over time.
 
@@ -240,9 +240,66 @@ frontend/src/
 
 ---
 
-## Pull Request Process
+## Translation Workflow
 
-1. **Open an issue first** for substantial changes.
+The UI is internationalized using [react-i18next](https://react.i18next.com/). Translation source files live in:
+
+```
+frontend/src/locales/
+  en/translation.json   ← Reference locale (English) — edit this directly in PRs
+  es/translation.json   ← Spanish (machine-translated baseline; flagged for human review)
+  fr/translation.json   ← French  (machine-translated baseline)
+  de/translation.json   ← German  (machine-translated baseline)
+  ja/translation.json   ← Japanese (machine-translated baseline)
+```
+
+### Adding or updating English strings
+
+1. Edit `frontend/src/locales/en/translation.json` and add your new key(s).
+2. Add `useTranslation()` in the component and replace any hardcoded string with `t('your.key')`.
+3. The CI workflow (`.github/workflows/crowdin.yml`) will automatically upload the updated
+   source file to Crowdin and open a follow-up PR when translations are ready.
+
+### Marking machine-translated strings for review
+
+Non-English files contain a mix of verified human translations and unreviewed machine-generated
+baselines. All machine-translated strings are tracked via Crowdin's string approval workflow.
+Do **not** consider a non-English PR merge-ready until its strings are approved by a native speaker.
+
+### Adding a new language
+
+1. Create `frontend/src/locales/<lang>/translation.json` with a copy of the English file.
+2. Add the locale to `SUPPORTED_LANGUAGES` in `frontend/src/components/Layout.tsx` and to the
+   `supportedLngs` array in `frontend/src/i18n.ts`.
+3. Add an entry to the `language.*` key in all existing locale JSON files.
+4. Open a PR — Crowdin will detect the new language and surface it to translators.
+
+### RTL languages
+
+Languages with right-to-left scripts (Arabic `ar`, Hebrew `he`, Persian `fa`, Urdu `ur`,
+Yiddish `yi`) are automatically detected by `ThemeContext`. When active:
+- The `<html dir="rtl">` attribute is set.
+- The MUI theme `direction` is set to `'rtl'`, enabling MUI's built-in mirroring.
+
+For correct property flipping of custom CSS, install and configure `stylis-plugin-rtl` in
+`main.tsx` when adding the first RTL language to the supported list.
+
+### Crowdin setup
+
+The `.github/workflows/crowdin.yml` workflow requires the following repository secrets:
+
+| Secret                   | Description                                  |
+| ------------------------ | -------------------------------------------- |
+| `CROWDIN_PROJECT_ID`     | Your Crowdin project ID (numeric)            |
+| `CROWDIN_PERSONAL_TOKEN` | Personal API token with project write access |
+
+Once configured, the workflow:
+- Uploads `en/translation.json` to Crowdin on every push to `main`.
+- Downloads completed translation files daily and opens a PR if they have changed.
+
+---
+
+## Pull Request Process
 2. Write a clear PR description:
    - What changed and why
    - How you tested it

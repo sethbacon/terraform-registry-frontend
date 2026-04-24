@@ -9,6 +9,17 @@ vi.mock('../../services/api', () => ({
   },
 }))
 
+vi.mock('../../contexts/ThemeContext', () => ({
+  useThemeMode: () => ({
+    mode: 'light',
+    toggleTheme: vi.fn(),
+    productName: 'Terraform Registry',
+    logoUrl: null,
+    loginHeroUrl: null,
+    direction: 'ltr' as const,
+  }),
+}))
+
 import AboutModal from '../AboutModal'
 
 describe('AboutModal', () => {

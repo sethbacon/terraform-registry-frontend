@@ -1,5 +1,9 @@
 import '@testing-library/jest-dom'
 
+// Initialise i18next so that useTranslation() returns English translations in
+// every unit test — prevents react-i18next from suspending the render.
+import './i18n'
+
 // Node.js 22+/25+ provides a built-in globalThis.localStorage that has a different
 // API from the Web Storage spec (no .getItem/.setItem/.removeItem/.clear methods).
 // Vitest DOM environments (jsdom/happy-dom) set up a proper Web Storage on `window`,
