@@ -61,23 +61,23 @@ const ModuleDocumentation: React.FC<ModuleDocumentationProps> = ({ moduleDocs, d
         <Box mb={3}>
           <Typography variant="subtitle2" gutterBottom>Inputs</Typography>
           <TableContainer>
-            <Table size="small">
+            <Table size="small" sx={{ tableLayout: 'fixed', width: '100%' }}>
               <TableHead>
                 <TableRow>
-                  <TableCell><strong>Name</strong></TableCell>
-                  <TableCell><strong>Type</strong></TableCell>
-                  <TableCell><strong>Description</strong></TableCell>
-                  <TableCell><strong>Default</strong></TableCell>
-                  <TableCell><strong>Required</strong></TableCell>
+                  <TableCell sx={{ width: '22%' }}><strong>Name</strong></TableCell>
+                  <TableCell sx={{ width: '14%' }}><strong>Type</strong></TableCell>
+                  <TableCell sx={{ width: '34%' }}><strong>Description</strong></TableCell>
+                  <TableCell sx={{ width: '20%' }}><strong>Default</strong></TableCell>
+                  <TableCell sx={{ width: '10%' }}><strong>Required</strong></TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
                 {inputs.map((inp) => (
                   <TableRow key={inp.name}>
-                    <TableCell sx={{ fontFamily: 'monospace', whiteSpace: 'nowrap' }}>{inp.name}</TableCell>
-                    <TableCell sx={{ fontFamily: 'monospace' }}>{inp.type}</TableCell>
+                    <TableCell sx={{ fontFamily: 'monospace', wordBreak: 'break-word' }}>{inp.name}</TableCell>
+                    <TableCell sx={{ fontFamily: 'monospace', wordBreak: 'break-word' }}>{inp.type}</TableCell>
                     <TableCell>{inp.description}</TableCell>
-                    <TableCell sx={{ fontFamily: 'monospace' }}>
+                    <TableCell sx={{ fontFamily: 'monospace', wordBreak: 'break-word' }}>
                       {inp.required ? '—' : JSON.stringify(inp.default)}
                     </TableCell>
                     <TableCell>
@@ -100,18 +100,18 @@ const ModuleDocumentation: React.FC<ModuleDocumentationProps> = ({ moduleDocs, d
         <Box mb={3}>
           <Typography variant="subtitle2" gutterBottom>Outputs</Typography>
           <TableContainer>
-            <Table size="small">
+            <Table size="small" sx={{ tableLayout: 'fixed', width: '100%' }}>
               <TableHead>
                 <TableRow>
-                  <TableCell><strong>Name</strong></TableCell>
-                  <TableCell><strong>Description</strong></TableCell>
-                  <TableCell><strong>Sensitive</strong></TableCell>
+                  <TableCell sx={{ width: '25%' }}><strong>Name</strong></TableCell>
+                  <TableCell sx={{ width: '65%' }}><strong>Description</strong></TableCell>
+                  <TableCell sx={{ width: '10%' }}><strong>Sensitive</strong></TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
                 {outputs.map((out) => (
                   <TableRow key={out.name}>
-                    <TableCell sx={{ fontFamily: 'monospace' }}>{out.name}</TableCell>
+                    <TableCell sx={{ fontFamily: 'monospace', wordBreak: 'break-word' }}>{out.name}</TableCell>
                     <TableCell>{out.description}</TableCell>
                     <TableCell>
                       {out.sensitive
@@ -131,20 +131,20 @@ const ModuleDocumentation: React.FC<ModuleDocumentationProps> = ({ moduleDocs, d
         <Box>
           <Typography variant="subtitle2" gutterBottom>Provider Requirements</Typography>
           <TableContainer>
-            <Table size="small">
+            <Table size="small" sx={{ tableLayout: 'fixed', width: '100%' }}>
               <TableHead>
                 <TableRow>
-                  <TableCell><strong>Name</strong></TableCell>
-                  <TableCell><strong>Source</strong></TableCell>
-                  <TableCell><strong>Version Constraints</strong></TableCell>
+                  <TableCell sx={{ width: '20%' }}><strong>Name</strong></TableCell>
+                  <TableCell sx={{ width: '50%' }}><strong>Source</strong></TableCell>
+                  <TableCell sx={{ width: '30%' }}><strong>Version Constraints</strong></TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
                 {providers.map((prov) => (
                   <TableRow key={prov.name}>
-                    <TableCell sx={{ fontFamily: 'monospace' }}>{prov.name}</TableCell>
-                    <TableCell sx={{ fontFamily: 'monospace' }}>{prov.source}</TableCell>
-                    <TableCell sx={{ fontFamily: 'monospace' }}>{prov.version_constraints}</TableCell>
+                    <TableCell sx={{ fontFamily: 'monospace', wordBreak: 'break-word' }}>{prov.name}</TableCell>
+                    <TableCell sx={{ fontFamily: 'monospace', wordBreak: 'break-word' }}>{prov.source}</TableCell>
+                    <TableCell sx={{ fontFamily: 'monospace', wordBreak: 'break-word' }}>{prov.version_constraints}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>
