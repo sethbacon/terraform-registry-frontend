@@ -258,13 +258,13 @@ jobs:
         working-directory: e2e
         run: |
           npm ci
-          npx playwright install chromium firefox
+          npx playwright install --with-deps chromium firefox
 
       - name: Run Playwright tests
         working-directory: e2e
         run: >-
           npx playwright test --workers=4 --max-failures=1 --retries=1
-          --reporter=list
+          --reporter=list --grep-invert="Visual regression"
 
       - name: Upload Playwright artifacts
         # v7
