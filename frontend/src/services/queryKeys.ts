@@ -108,6 +108,10 @@ export const queryKeys = {
     _def: ['oidcConfig'] as const,
     get: () => [...queryKeys.oidcConfig._def, 'get'] as const,
   },
+  versionInfo: {
+    _def: ['versionInfo'] as const,
+    get: () => [...queryKeys.versionInfo._def, 'get'] as const,
+  },
   terraformMirrors: {
     _def: ['terraformMirrors'] as const,
     list: () => [...queryKeys.terraformMirrors._def, 'list'] as const,

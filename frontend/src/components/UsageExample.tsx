@@ -1,4 +1,4 @@
-import React from 'react';
+import React from 'react'
 import {
   Box,
   IconButton,
@@ -10,47 +10,49 @@ import {
   ToggleButtonGroup,
   Tooltip,
   Typography,
-} from '@mui/material';
-import ContentCopy from '@mui/icons-material/ContentCopy';
-import type { ModuleInputVar } from '../types';
+} from '@mui/material'
+import ContentCopy from '@mui/icons-material/ContentCopy'
+import type { ModuleInputVar } from '../types'
 import {
   buildRequiredInputsExample,
   buildSourceExample,
   hasRequiredInputs,
-} from '../utils/terraformExample';
+} from '../utils/terraformExample'
 
-export type UsageTool = 'terraform' | 'opentofu';
+export type UsageTool = 'terraform' | 'opentofu' | 'oci'
 
-const STORAGE_KEY = 'preferredTool';
+const STORAGE_KEY = 'preferredTool'
 
 function readPreferredTool(): UsageTool {
   try {
-    const v = localStorage.getItem(STORAGE_KEY);
-    if (v === 'opentofu' || v === 'terraform') return v;
+    const v = localStorage.getItem(STORAGE_KEY)
+    if (v === 'opentofu' || v === 'terraform') return v
   } catch {
     // ignore
   }
-  return 'terraform';
+  return 'terraform'
 }
 
 function writePreferredTool(tool: UsageTool): void {
   try {
-    localStorage.setItem(STORAGE_KEY, tool);
+    localStorage.setItem(STORAGE_KEY, tool)
   } catch {
     // ignore
   }
 }
 
 export interface UsageExampleProps {
-  registryHost: string;
-  namespace: string;
-  name: string;
-  system: string;
-  version: string;
-  inputs?: ModuleInputVar[] | null;
+  registryHost: string
+  namespace: string
+  name: string
+  system: string
+  version: string
+  inputs?: ModuleInputVar[] | null
+  /** Show the OCI distribution tab (requires backend OCI support). */
+  ociEnabled?: boolean
   /** Called after a successful clipboard write (used for aria-live announce / toast). */
-  onCopied?: () => void;
-  'data-testid'?: string;
+  onCopied?: () => void
+  'data-testid'?: string
 }
 
 const UsageExample: React.FC<UsageExampleProps> = ({
@@ -60,37 +62,46 @@ const UsageExample: React.FC<UsageExampleProps> = ({
   system,
   version,
   inputs,
+  ociEnabled = false,
   onCopied,
   'data-testid': testId = 'usage-example',
 }) => {
-  const [tool, setTool] = React.useState<UsageTool>(() => readPreferredTool());
-  const [tab, setTab] = React.useState(0);
-  const [copied, setCopied] = React.useState(false);
+  const [tool, setTool] = React.useState<UsageTool>(() => readPreferredTool())
+  const [tab, setTab] = React.useState(0)
+  const [copied, setCopied] = React.useState(false)
 
-  const showInputsTab = hasRequiredInputs(inputs);
-  const activeTab = showInputsTab ? tab : 0;
+  const isOci = tool === 'oci'
+  const showInputsTab = !isOci && hasRequiredInputs(inputs)
+  const activeTab = showInputsTab ? tab : 0
 
-  const opts = { registryHost, namespace, name, system, version, inputs, tool };
-  const sourceBlock = buildSourceExample(opts);
-  const inputsBlock = buildRequiredInputsExample(opts);
-  const visible = activeTab === 1 ? inputsBlock : sourceBlock;
+  // When switching to OCI, reset tab to avoid stale state
+  React.useEffect(() => {
+    if (isOci) setTab(0)
+  }, [isOci])
+
+  const opts = { registryHost, namespace, name, system, version, inputs, tool: isOci ? 'terraform' as const : tool }
+  const sourceBlock = buildSourceExample(opts)
+  const inputsBlock = buildRequiredInputsExample(opts)
+  const ociBlock = `oras pull ${registryHost}/modules/${namespace}/${name}/${system}:${version}`
+  const visible = isOci ? ociBlock : (activeTab === 1 ? inputsBlock : sourceBlock)
 
   const handleToolChange = (_: unknown, next: UsageTool | null) => {
-    if (!next) return;
-    setTool(next);
-    writePreferredTool(next);
-  };
+    if (!next) return
+    setTool(next)
+    // Only persist terraform/opentofu preference; OCI is ephemeral
+    if (next !== 'oci') writePreferredTool(next)
+  }
 
   const handleCopy = async () => {
     try {
-      await navigator.clipboard.writeText(visible);
-      setCopied(true);
-      onCopied?.();
-      window.setTimeout(() => setCopied(false), 2000);
+      await navigator.clipboard.writeText(visible)
+      setCopied(true)
+      onCopied?.()
+      window.setTimeout(() => setCopied(false), 2000)
     } catch {
       // clipboard may be unavailable (e.g. insecure context) — no-op
     }
-  };
+  }
 
   return (
     <Paper sx={{ p: 3, mb: 3 }} data-testid={testId}>
@@ -117,6 +128,11 @@ const UsageExample: React.FC<UsageExampleProps> = ({
             <ToggleButton value="opentofu" aria-label="OpenTofu">
               OpenTofu
             </ToggleButton>
+            {ociEnabled && (
+              <ToggleButton value="oci" aria-label="OCI">
+                OCI
+              </ToggleButton>
+            )}
           </ToggleButtonGroup>
           <Tooltip title={copied ? 'Copied!' : 'Copy example'}>
             <IconButton
@@ -149,8 +165,7 @@ const UsageExample: React.FC<UsageExampleProps> = ({
         sx={{
           p: 2,
           m: 0,
-          backgroundColor: (theme) =>
-            theme.palette.mode === 'dark' ? '#2d2d2d' : '#f5f5f5',
+          backgroundColor: (theme) => (theme.palette.mode === 'dark' ? '#2d2d2d' : '#f5f5f5'),
           color: (theme) => (theme.palette.mode === 'dark' ? '#e6e6e6' : '#1e1e1e'),
           borderRadius: 1,
           overflow: 'auto',
@@ -163,11 +178,20 @@ const UsageExample: React.FC<UsageExampleProps> = ({
       {showInputsTab && activeTab === 1 && (
         <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 1 }}>
           Placeholders are the zero-value for each type — fill them before running
-          <code style={{ marginLeft: 4 }}>{tool === 'opentofu' ? 'tofu apply' : 'terraform apply'}</code>.
+          <code style={{ marginLeft: 4 }}>
+            {tool === 'opentofu' ? 'tofu apply' : 'terraform apply'}
+          </code>
+          .
+        </Typography>
+      )}
+      {isOci && (
+        <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 1 }}>
+          Requires{' '}
+          <code>oras</code> CLI. Pull the module archive directly from the OCI registry.
         </Typography>
       )}
     </Paper>
-  );
-};
+  )
+}
 
-export default UsageExample;
+export default UsageExample
