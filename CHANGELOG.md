@@ -9,6 +9,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.10.4] - 2026-04-24
+
+### Added
+
+- feat: add Re-scan button to SecurityScanPanel so admins can trigger a security rescan from the module detail page
+
+### Fixed
+
+- fix: add horizontal padding to command palette group headings
+
 ## [0.10.3] - 2026-04-23
 
 ### Added

@@ -112,7 +112,7 @@ The following items require coordinated work with `terraform-registry-backend`:
 - **AC:** Modal content has ≥24px left/right padding at all breakpoints; visual regression screenshot updated.
 - **Source:** UAT
 
-### U0.2 · Setup wizard: prompt to configure newly added features · [P1/M]
+### U0.2 · Setup wizard: prompt to configure newly added features · [P1/M] ✅
 
 - **Problem (from UAT):** When new features are added to the setup wizard (e.g., security scanning), there is no way to know whether a feature has been configured at least once. Existing deployments that completed the wizard before a feature was added never see its configuration step.
 - Add a `feature_flags` / `setup_features_completed` tracking mechanism:
@@ -338,7 +338,7 @@ Items are ordered by coverage-per-effort; each raises the ratchet floor in `vite
 
 ### Track C — Accessibility (WCAG 2.1 AA)
 
-#### C3.1 · Full WCAG 2.1 AA audit + remediation · [P0/L]
+#### C3.1 · Full WCAG 2.1 AA audit + remediation · [P0/L] ✅
 
 - Automated pass (axe on every page in E2E).
 - Manual pass: screen reader (NVDA + VoiceOver), keyboard-only, high-contrast, 200% zoom.
@@ -347,27 +347,27 @@ Items are ordered by coverage-per-effort; each raises the ratchet floor in `vite
 - **Files:** `e2e/tests/accessibility.spec.ts`, `ACCESSIBILITY.md`
 - **AC:** `ACCESSIBILITY.md` updated with conformance report.
 
-#### C3.2 · jsx-a11y: warn → error · [P1/M]
+#### C3.2 · jsx-a11y: warn → error · [P1/M] ✅
 
 - Flip eslint severity from `warn` to `error`; fix all violations.
 - Add `eslint-plugin-jsx-a11y/recommended` fully.
 - **Files:** `frontend/eslint.config.js`, affected component files
 - **AC:** CI lint passes with zero jsx-a11y warnings.
 
-#### C3.3 · Focus management in SPA routes · [P1/M]
+#### C3.3 · Focus management in SPA routes · [P1/M] ✅
 
 - On route change, move focus to main heading; announce page title via `AnnouncerContext`.
 - **Files:** `frontend/src/App.tsx`, `frontend/src/contexts/AnnouncerContext.tsx`
 - **AC:** Manual screen-reader test verified; E2E assertion added.
 
-#### C3.4 · Reduced-motion support · [P1/M]
+#### C3.4 · Reduced-motion support · [P1/M] ✅
 
 - `prefers-reduced-motion` media query disables transitions.
 - MUI theme transitions conditional.
 - **Files:** `frontend/src/contexts/ThemeContext.tsx`
 - **AC:** Verified in DevTools emulation.
 
-#### C3.5 · Color-contrast audit of theme tokens · [P2/M]
+#### C3.5 · Color-contrast audit of theme tokens · [P2/M] ✅
 
 - All text/background pairs ≥ 4.5:1 (normal) / 3:1 (large).
 - Fix or document exceptions for dark theme secondary color.
@@ -376,7 +376,7 @@ Items are ordered by coverage-per-effort; each raises the ratchet floor in `vite
 
 ### Track D — Telemetry / privacy
 
-#### D3.1 · User-facing telemetry opt-out · [P0/M]
+#### D3.1 · User-facing telemetry opt-out · [P0/M] ✅
 
 - New user settings page `pages/SettingsPage.tsx` with toggles:
   - Error reporting
@@ -388,14 +388,14 @@ Items are ordered by coverage-per-effort; each raises the ratchet floor in `vite
 - **Files:** `frontend/src/pages/SettingsPage.tsx`, `frontend/src/App.tsx`, `frontend/src/components/ConsentBanner.tsx`, `frontend/src/services/api.ts`
 - **AC:** Opt-out disables Sentry + performance + anonymous reporting globally; E2E verified.
 
-#### D3.2 · Cookie banner + preference center · [P1/M]
+#### D3.2 · Cookie banner + preference center · [P1/M] ✅
 
 - Only required if analytics cookies introduced; currently minimal.
 - If telemetry DSNs set, show banner.
 - **Files:** `frontend/src/components/ConsentBanner.tsx`
 - **AC:** Banner conforms to ePrivacy/GDPR.
 
-#### D3.3 · Privacy policy + data handling doc · [P2/S]
+#### D3.3 · Privacy policy + data handling doc · [P2/S] ✅
 
 - `PRIVACY.md` describing what's collected, retention, opt-out.
 - Linked from footer.
@@ -408,7 +408,7 @@ Items are ordered by coverage-per-effort; each raises the ratchet floor in `vite
 
 ### Track E — Feature UX
 
-#### E4.1 · Module deprecation banner + admin toggle · [P0/M]
+#### E4.1 · Module deprecation banner + admin toggle · [P0/M] ✅
 
 - **↔ Backend E4.1:** Consume `deprecation` block from module metadata.
 - On `ModuleDetailPage`, render `<Alert severity="warning">` with deprecation reason + replacement link.

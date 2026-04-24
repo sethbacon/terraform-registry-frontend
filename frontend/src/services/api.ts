@@ -280,6 +280,18 @@ class ApiClient {
     return response.data
   }
 
+  async reanalyzeModuleVersion(
+    namespace: string,
+    name: string,
+    system: string,
+    version: string,
+  ) {
+    const response = await this.client.post(
+      `/api/v1/modules/${namespace}/${name}/${system}/versions/${version}/reanalyze`,
+    )
+    return response.data
+  }
+
   async deprecateModuleVersion(
     namespace: string,
     name: string,
