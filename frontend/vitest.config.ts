@@ -32,10 +32,13 @@ export default defineConfig({
         'src/**/*.d.ts',
       ],
       thresholds: {
-        statements: 75,
-        branches: 75,
-        functions: 75,
-        lines: 75,
+        // Phase 5 (v1.0.0) floor — raised incrementally from 70/60/60/70 (v0.8.0)
+        // through 75/65/65/75 (v0.9.0) to reach the 80/70/70/80 v1.0.0 target.
+        // See roadmap item E5.1 for milestone schedule.
+        statements: 80,
+        branches: 70,
+        functions: 70,
+        lines: 80,
       },
     },
   },

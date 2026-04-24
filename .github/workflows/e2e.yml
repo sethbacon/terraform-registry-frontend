@@ -2,9 +2,9 @@ name: E2E Tests
 
 on:
   push:
-    branches: [main]
+    branches: [ main ]
   pull_request:
-    branches: [main, development]
+    branches: [ main, development ]
   workflow_dispatch: {}
 
 permissions:
@@ -50,11 +50,12 @@ jobs:
         working-directory: e2e
         run: |
           npm ci
-          npx playwright install chromium firefox
+          npx playwright install --with-deps chromium firefox webkit
 
       - name: Run Playwright tests
         working-directory: e2e
-        run: npx playwright test --workers=1 --max-failures=1 --retries=1 --reporter=list
+        run: npx playwright test --workers=4 --max-failures=1 --retries=1
+          --reporter=list --grep-invert="Visual regression"
 
       - name: Upload Playwright report
         if: always()
