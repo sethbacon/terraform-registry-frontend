@@ -495,7 +495,7 @@ Items are ordered by coverage-per-effort; each raises the ratchet floor in `vite
 
 ## Cross-cutting: test quality
 
-### E5.1 · Raise coverage floor to 80% by v1.0.0 · [P1/M]
+### E5.1 · Raise coverage floor to 80% by v1.0.0 · [P1/M] ✅
 
 - Phase 0.5 (T-track) reaches 70/60/60/70 for v0.8.0.
 - Incremental 70 → 75 → 80 across 0.8 → 0.9 → 1.0:
@@ -505,19 +505,20 @@ Items are ordered by coverage-per-effort; each raises the ratchet floor in `vite
 - **Files:** `frontend/vitest.config.ts`
 - **AC:** Each milestone release meets its threshold; CHANGELOG tracks ratchet bumps.
 
-### E5.2 · E2E matrix: Chromium + Firefox + WebKit on main · [P1/M]
+### E5.2 · E2E matrix: Chromium + Firefox + WebKit on main · [P1/M] ✅
 
 - Currently Chromium local, Firefox CI. Add WebKit to CI.
 - **Files:** `e2e/playwright.config.ts`, `.github/workflows/e2e.yml`
 - **AC:** Playwright project `webkit` included in CI pipeline.
 
-### E5.3 · Visual regression tests · [P2/M]
+### E5.3 · Visual regression tests · [P2/M] ⏳
 
 - Playwright screenshot diffs on key pages (home, module detail, admin dashboard, login).
 - **Files:** `e2e/tests/visual-regression.spec.ts`, `e2e/screenshots/` (baselines)
 - **AC:** Baseline committed; diffs flagged in PR.
+- **Status:** Test scaffold and CI integration complete. Baselines deferred — generate with `npx playwright test visual-regression --update-snapshots` against a running stack.
 
-### E5.4 · Contract tests against backend Swagger · [P2/M]
+### E5.4 · Contract tests against backend Swagger · [P2/M] ✅
 
 - Generate TypeScript client from `swagger.json`; type-check API usage at build time.
 - **Files:** `frontend/scripts/generate-api-client.sh`, `frontend/src/services/generated/`, `frontend/tsconfig.json`
