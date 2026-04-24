@@ -64,7 +64,7 @@ function renderLayout(route = '/') {
 beforeEach(() => {
   vi.clearAllMocks()
   localStorage.clear()
-  mockUseThemeMode.mockReturnValue({ mode: 'light', toggleTheme: mockToggleTheme })
+  mockUseThemeMode.mockReturnValue({ mode: 'light', toggleTheme: mockToggleTheme, productName: 'Terraform Registry', logoUrl: null, loginHeroUrl: null, direction: 'ltr' })
   mockUseHelp.mockReturnValue({ helpOpen: false, openHelp: mockOpenHelp, closeHelp: vi.fn() })
   setAuth()
 })
@@ -235,7 +235,7 @@ describe('Layout', () => {
     const user = userEvent.setup()
     renderLayout()
 
-    await user.click(screen.getByLabelText('Context help'))
+    await user.click(screen.getByLabelText('Context Help'))
     expect(mockOpenHelp).toHaveBeenCalledOnce()
   })
 

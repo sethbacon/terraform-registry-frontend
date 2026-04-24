@@ -1,4 +1,6 @@
 import { Outlet, Link as RouterLink, useLocation } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
+import i18n from '../i18n';
 import {
   AppBar,
   Box,
@@ -50,6 +52,7 @@ import ExpandMore from '@mui/icons-material/ExpandMore';
 import History from '@mui/icons-material/History';
 import ExpandLess from '@mui/icons-material/ExpandLess';
 import Palette from '@mui/icons-material/Palette';
+import Translate from '@mui/icons-material/Translate';
 import { useState, useMemo, useCallback, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useThemeMode } from '../contexts/ThemeContext';
@@ -64,9 +67,12 @@ import SessionExpiryWarning from './SessionExpiryWarning';
 
 const drawerWidth = 240;
 
+const SUPPORTED_LANGUAGES = ['en', 'es', 'fr', 'de', 'ja'] as const;
+
 const Layout = () => {
+  const { t } = useTranslation();
   const { user, isAuthenticated, logout, allowedScopes } = useAuth();
-  const { mode, toggleTheme } = useThemeMode();
+  const { mode, toggleTheme, productName, logoUrl } = useThemeMode();
   const { helpOpen, openHelp } = useHelp();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
@@ -76,6 +82,7 @@ const Layout = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [aboutOpen, setAboutOpen] = useState(false);
   const [paletteOpen, setPaletteOpen] = useState(false);
+  const [langAnchorEl, setLangAnchorEl] = useState<null | HTMLElement>(null);
   useHotkey('mod+k', useCallback(() => setPaletteOpen((v) => !v), []));
 
   // Helper to check if user has a specific scope (or admin which grants all)
@@ -103,56 +110,69 @@ const Layout = () => {
     setMobileOpen(prev => !prev);
   }, []);
 
+  const handleLangMenuOpen = useCallback((event: React.MouseEvent<HTMLElement>) => {
+    setLangAnchorEl(event.currentTarget);
+  }, []);
+
+  const handleLangMenuClose = useCallback(() => {
+    setLangAnchorEl(null);
+  }, []);
+
+  const handleChangeLanguage = useCallback((lang: string) => {
+    i18n.changeLanguage(lang);
+    setLangAnchorEl(null);
+  }, []);
+
   const navigationItems = useMemo(() => [
-    { text: 'Home', icon: <Home />, path: '/', tooltip: 'Home Page' },
-    { text: 'Modules', icon: <ViewModule />, path: '/modules', tooltip: 'View Terraform Modules' },
-    { text: 'Providers', icon: <Extension />, path: '/providers', tooltip: 'View Terraform Providers' },
-    { text: 'Terraform Binaries', icon: <GetApp />, path: '/terraform-binaries', tooltip: 'View Terraform Binaries' },
-    { text: 'API Docs', icon: <Description />, path: '/api-docs', tooltip: 'API Documentation' },
-  ], []);
+    { text: t('nav.home'), icon: <Home />, path: '/', tooltip: t('nav.homeTooltip') },
+    { text: t('nav.modules'), icon: <ViewModule />, path: '/modules', tooltip: t('nav.modulesTooltip') },
+    { text: t('nav.providers'), icon: <Extension />, path: '/providers', tooltip: t('nav.providersTooltip') },
+    { text: t('nav.terraformBinaries'), icon: <GetApp />, path: '/terraform-binaries', tooltip: t('nav.terraformBinariesTooltip') },
+    { text: t('nav.apiDocs'), icon: <Description />, path: '/api-docs', tooltip: t('nav.apiDocsTooltip') },
+  ], [t]);
 
   // Admin nav groups — each group is collapsible. Items are filtered by scope.
   const adminNavGroups = useMemo(() => [
     {
       key: 'identity',
-      label: 'Identity',
+      label: t('nav.admin.identity'),
       items: [
-        { text: 'Organizations', icon: <Business />, path: '/admin/organizations', tooltip: 'Manage registry organizations and members', scope: 'organizations:read' },
-        { text: 'Roles', icon: <Shield />, path: '/admin/roles', tooltip: 'Configure role templates and permissions', scope: 'users:read' },
-        { text: 'Users', icon: <People />, path: '/admin/users', tooltip: 'View and manage registry users', scope: 'users:read' },
-        { text: 'OIDC Groups', icon: <ManageAccounts />, path: '/admin/oidc', tooltip: 'Map identity provider groups to registry roles', scope: 'admin' },
-        { text: 'SCIM', icon: <SyncAlt />, path: '/admin/scim', tooltip: 'SCIM 2.0 user and group provisioning configuration', scope: 'admin' },
-        { text: 'mTLS Certs', icon: <Shield />, path: '/admin/mtls', tooltip: 'View mTLS client certificate-to-scope mappings', scope: 'admin' },
-        { text: 'API Keys', icon: <Key />, path: '/admin/apikeys', tooltip: 'Create and manage personal API keys', scope: null },
+        { text: t('nav.admin.organizations'), icon: <Business />, path: '/admin/organizations', tooltip: t('nav.admin.organizationsTooltip'), scope: 'organizations:read' },
+        { text: t('nav.admin.roles'), icon: <Shield />, path: '/admin/roles', tooltip: t('nav.admin.rolesTooltip'), scope: 'users:read' },
+        { text: t('nav.admin.users'), icon: <People />, path: '/admin/users', tooltip: t('nav.admin.usersTooltip'), scope: 'users:read' },
+        { text: t('nav.admin.oidcGroups'), icon: <ManageAccounts />, path: '/admin/oidc', tooltip: t('nav.admin.oidcGroupsTooltip'), scope: 'admin' },
+        { text: t('nav.admin.scim'), icon: <SyncAlt />, path: '/admin/scim', tooltip: t('nav.admin.scimTooltip'), scope: 'admin' },
+        { text: t('nav.admin.mtlsCerts'), icon: <Shield />, path: '/admin/mtls', tooltip: t('nav.admin.mtlsCertsTooltip'), scope: 'admin' },
+        { text: t('nav.admin.apiKeys'), icon: <Key />, path: '/admin/apikeys', tooltip: t('nav.admin.apiKeysTooltip'), scope: null },
       ],
     },
     {
       key: 'source-control',
-      label: 'Source Control',
+      label: t('nav.admin.sourceControl'),
       items: [
-        { text: 'Source Control', icon: <GitHub />, path: '/admin/scm-providers', tooltip: 'Configure SCM providers for module and provider publishing', scope: 'scm:read' },
+        { text: t('nav.admin.sourceControl'), icon: <GitHub />, path: '/admin/scm-providers', tooltip: t('nav.admin.sourceControlTooltip'), scope: 'scm:read' },
       ],
     },
     {
       key: 'mirroring',
-      label: 'Mirroring',
+      label: t('nav.admin.mirroring'),
       items: [
-        { text: 'Provider Config', icon: <CloudDownload />, path: '/admin/mirrors', tooltip: 'Configure provider mirror sources and sync schedules', scope: 'mirrors:read' },
-        { text: 'Binaries Config', icon: <GetApp />, path: '/admin/terraform-mirror', tooltip: 'Configure Terraform and OpenTofu binary mirror sources', scope: 'mirrors:read' },
-        { text: 'Approvals', icon: <HourglassEmpty />, path: '/admin/approvals', tooltip: 'Review and approve pending mirror sync requests', scope: 'mirrors:read' },
-        { text: 'Mirror Policies', icon: <Policy />, path: '/admin/policies', tooltip: 'Define policies that control what gets mirrored', scope: 'admin' },
+        { text: t('nav.admin.providerConfig'), icon: <CloudDownload />, path: '/admin/mirrors', tooltip: t('nav.admin.providerConfigTooltip'), scope: 'mirrors:read' },
+        { text: t('nav.admin.binariesConfig'), icon: <GetApp />, path: '/admin/terraform-mirror', tooltip: t('nav.admin.binariesConfigTooltip'), scope: 'mirrors:read' },
+        { text: t('nav.admin.approvals'), icon: <HourglassEmpty />, path: '/admin/approvals', tooltip: t('nav.admin.approvalsTooltip'), scope: 'mirrors:read' },
+        { text: t('nav.admin.mirrorPolicies'), icon: <Policy />, path: '/admin/policies', tooltip: t('nav.admin.mirrorPoliciesTooltip'), scope: 'admin' },
       ],
     },
     {
       key: 'system',
-      label: 'System',
+      label: t('nav.admin.system'),
       items: [
-        { text: 'Storage', icon: <Storage />, path: '/admin/storage', tooltip: 'Configure backend storage for binaries and providers', scope: 'admin' },
-        { text: 'Security Scanning', icon: <Security />, path: '/admin/security-scanning', tooltip: 'View security scanning configuration and status', scope: 'admin' },
-        { text: 'Audit Logs', icon: <History />, path: '/admin/audit-logs', tooltip: 'View system audit logs', scope: 'audit:read' },
+        { text: t('nav.admin.storage'), icon: <Storage />, path: '/admin/storage', tooltip: t('nav.admin.storageTooltip'), scope: 'admin' },
+        { text: t('nav.admin.securityScanning'), icon: <Security />, path: '/admin/security-scanning', tooltip: t('nav.admin.securityScanningTooltip'), scope: 'admin' },
+        { text: t('nav.admin.auditLogs'), icon: <History />, path: '/admin/audit-logs', tooltip: t('nav.admin.auditLogsTooltip'), scope: 'audit:read' },
       ],
     },
-  ], []);
+  ], [t]);
 
   // Determine which group contains the current route (for mobile auto-open).
   const activeGroupKey = useMemo(() => {
@@ -235,12 +255,24 @@ const Layout = () => {
     setAboutOpen(false);
   }, []);
 
+  // Current language code for the switcher button label (e.g. "EN")
+  const currentLangCode = (i18n.language ?? 'en').substring(0, 2).toUpperCase();
+
   const drawer = (
     <Box component="nav" aria-label="Main navigation">
       <Toolbar>
-        <Typography variant="h6" noWrap component="div">
-          Terraform Registry
-        </Typography>
+        {logoUrl ? (
+          <Box
+            component="img"
+            src={logoUrl}
+            alt={productName}
+            sx={{ maxHeight: 32, maxWidth: 160, objectFit: 'contain', mr: 1 }}
+          />
+        ) : (
+          <Typography variant="h6" noWrap component="div">
+            {productName}
+          </Typography>
+        )}
       </Toolbar>
       <Divider />
       <List>
@@ -249,7 +281,7 @@ const Layout = () => {
             ? location.pathname === '/'
             : location.pathname.startsWith(item.path);
           return (
-            <ListItem key={item.text} disablePadding>
+            <ListItem key={item.path} disablePadding>
               <Tooltip title={item.tooltip} placement="right" arrow>
                 <ListItemButton
                   component={RouterLink}
@@ -279,7 +311,7 @@ const Layout = () => {
           <Divider />
           <List>
             <ListItem disablePadding>
-              <Tooltip title="Component Showcase (dev only)" placement="right" arrow>
+              <Tooltip title={t('nav.admin.componentsDevTooltip')} placement="right" arrow>
                 <ListItemButton
                   component={RouterLink}
                   to="/dev/components"
@@ -298,7 +330,7 @@ const Layout = () => {
                     <Palette />
                   </ListItemIcon>
                   <ListItemText
-                    primary="Components"
+                    primary={t('nav.admin.componentsDev')}
                     primaryTypographyProps={{
                       fontWeight: location.pathname === '/dev/components' ? 600 : 400,
                       fontSize: '0.875rem',
@@ -320,7 +352,7 @@ const Layout = () => {
               {(() => {
                 const isActive = location.pathname === '/admin';
                 return (
-                  <Tooltip title="Admin Dashboard" placement="right" arrow>
+                  <Tooltip title={t('nav.admin.dashboardTooltip')} placement="right" arrow>
                     <ListItemButton
                       component={RouterLink}
                       to="/admin"
@@ -334,7 +366,7 @@ const Layout = () => {
                       <ListItemIcon sx={{ color: isActive ? theme.palette.primary.main : 'inherit' }}>
                         <Dashboard />
                       </ListItemIcon>
-                      <ListItemText primary="Dashboard" primaryTypographyProps={{ fontWeight: isActive ? 600 : 400 }} />
+                      <ListItemText primary={t('nav.admin.dashboard')} primaryTypographyProps={{ fontWeight: isActive ? 600 : 400 }} />
                     </ListItemButton>
                   </Tooltip>
                 );
@@ -369,7 +401,7 @@ const Layout = () => {
                     {group.items.map((item) => {
                       const isActive = location.pathname.startsWith(item.path);
                       return (
-                        <ListItem key={item.text} disablePadding>
+                        <ListItem key={item.path} disablePadding>
                           <Tooltip title={item.tooltip ?? item.text} placement="right" arrow>
                             <ListItemButton
                               component={RouterLink}
@@ -405,7 +437,7 @@ const Layout = () => {
 
   return (
     <Box sx={{ display: 'flex' }}>
-      <a href="#main-content" className="skip-link">Skip to main content</a>
+      <a href="#main-content" className="skip-link">{t('header.skipToContent')}</a>
       <AppBar
         position="fixed"
         sx={{
@@ -416,7 +448,7 @@ const Layout = () => {
           {isMobile && (
             <IconButton
               color="inherit"
-              aria-label="open drawer"
+              aria-label={t('header.openDrawer')}
               edge="start"
               onClick={handleDrawerToggle}
               sx={{ mr: 2 }}
@@ -425,45 +457,79 @@ const Layout = () => {
             </IconButton>
           )}
           <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-            Terraform Registry
+            {productName}
           </Typography>
           {isAuthenticated && <DevUserSwitcher />}
-          <Tooltip title="Quick navigation (Ctrl/⌘K)">
+          <Tooltip title={t('header.quickNav')}>
             <IconButton
               color="inherit"
               onClick={() => setPaletteOpen(true)}
-              aria-label="Open command palette"
+              aria-label={t('header.openCommandPalette')}
               data-testid="command-palette-trigger"
               sx={{ mr: 1 }}
             >
               <SearchIcon />
             </IconButton>
           </Tooltip>
-          <Tooltip title={mode === 'dark' ? 'Light mode' : 'Dark mode'}>
+          <Tooltip title={mode === 'dark' ? t('header.lightMode') : t('header.darkMode')}>
             <IconButton
               color="inherit"
               onClick={toggleTheme}
-              aria-label="toggle dark mode"
+              aria-label={t('header.toggleDarkMode')}
               sx={{ mr: 1 }}
             >
               {mode === 'dark' ? <Brightness7 /> : <Brightness4 />}
             </IconButton>
           </Tooltip>
-          <Tooltip title="Context Help">
+          {/* Language switcher */}
+          <Tooltip title={t('header.language')}>
+            <IconButton
+              color="inherit"
+              onClick={handleLangMenuOpen}
+              aria-label={t('header.language')}
+              aria-haspopup="true"
+              aria-controls={langAnchorEl ? 'language-menu' : undefined}
+              sx={{ mr: 1 }}
+            >
+              <Translate fontSize="small" />
+              <Typography variant="caption" sx={{ ml: 0.5, fontSize: '0.7rem', fontWeight: 600 }}>
+                {currentLangCode}
+              </Typography>
+            </IconButton>
+          </Tooltip>
+          <Menu
+            id="language-menu"
+            anchorEl={langAnchorEl}
+            open={Boolean(langAnchorEl)}
+            onClose={handleLangMenuClose}
+            anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+            transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+          >
+            {SUPPORTED_LANGUAGES.map((lang) => (
+              <MenuItem
+                key={lang}
+                selected={i18n.language.startsWith(lang)}
+                onClick={() => handleChangeLanguage(lang)}
+              >
+                {t(`language.${lang}`)}
+              </MenuItem>
+            ))}
+          </Menu>
+          <Tooltip title={t('header.contextHelp')}>
             <IconButton
               color="inherit"
               onClick={openHelp}
-              aria-label="Context help"
+              aria-label={t('header.contextHelp')}
               sx={{ mr: 1 }}
             >
               <HelpOutline />
             </IconButton>
           </Tooltip>
-          <Tooltip title="About">
+          <Tooltip title={t('header.about')}>
             <IconButton
               color="inherit"
               onClick={handleOpenAbout}
-              aria-label="About"
+              aria-label={t('header.about')}
               sx={{ mr: 1 }}
             >
               <InfoOutlined />
@@ -473,7 +539,7 @@ const Layout = () => {
             <div>
               <IconButton
                 size="large"
-                aria-label="account of current user"
+                aria-label={t('header.accountMenu')}
                 aria-controls="menu-appbar"
                 aria-haspopup="true"
                 onClick={handleMenu}
@@ -500,12 +566,12 @@ const Layout = () => {
                   <Typography variant="body2">{user?.email}</Typography>
                 </MenuItem>
                 <Divider />
-                <MenuItem onClick={handleLogout}>Logout</MenuItem>
+                <MenuItem onClick={handleLogout}>{t('header.logout')}</MenuItem>
               </Menu>
             </div>
           ) : (
             <Button color="inherit" component={RouterLink} to="/login">
-              Login
+              {t('header.login')}
             </Button>
           )}
         </Toolbar>

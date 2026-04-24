@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   Container,
   Typography,
@@ -60,6 +61,7 @@ const initialStats: HomeStats = {
 };
 
 const HomePage: React.FC = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const theme = useTheme();
   const isXs = useMediaQuery(theme.breakpoints.down('sm'));
@@ -128,7 +130,7 @@ const HomePage: React.FC = () => {
     const snippet = `credentials "${window.location.hostname}" {\n  token = "<your-api-key>"\n}`;
     navigator.clipboard.writeText(snippet).then(() => {
       setCopied(true);
-      announce('Credentials snippet copied to clipboard');
+      announce(t('home.credentialsCopied'));
       setTimeout(() => setCopied(false), 2000);
     });
   };
@@ -138,7 +140,7 @@ const HomePage: React.FC = () => {
   if (stats.moduleCount !== null) summaryParts.push(`${stats.moduleCount} module${stats.moduleCount !== 1 ? 's' : ''}`);
   if (stats.providerCount !== null) summaryParts.push(`${stats.providerCount} provider${stats.providerCount !== 1 ? 's' : ''}`);
   if (stats.binaryTools.length > 0) {
-    const toolLabel = stats.binaryTools.map((t) => t.charAt(0).toUpperCase() + t.slice(1)).join(' & ');
+    const toolLabel = stats.binaryTools.map((tool) => tool.charAt(0).toUpperCase() + tool.slice(1)).join(' & ');
     summaryParts.push(`${toolLabel} binaries`);
   }
 
@@ -152,15 +154,15 @@ const HomePage: React.FC = () => {
           icon={<WarningAmberIcon />}
           action={
             <Button color="inherit" size="small" onClick={() => navigate('/setup')} sx={{ fontWeight: 600 }}>
-              {stats.pendingFeatureSetup ? 'Configure Features' : 'Start Setup'}
+              {stats.pendingFeatureSetup ? t('home.configureFeatures') : t('home.startSetup')}
             </Button>
           }
           sx={{ borderRadius: 0 }}
         >
-          <AlertTitle>{stats.pendingFeatureSetup ? 'Feature Configuration Required' : 'Setup Required'}</AlertTitle>
+          <AlertTitle>{stats.pendingFeatureSetup ? t('home.featureSetupRequired') : t('home.setupRequired')}</AlertTitle>
           {stats.pendingFeatureSetup
-            ? 'New features have been added that require configuration. Complete the setup wizard to enable them.'
-            : 'This registry has not been configured yet. Complete the setup wizard to configure authentication, storage, and the initial admin account.'}
+            ? t('home.featureSetupDesc')
+            : t('home.setupRequiredDesc')}
         </Alert>
       )}
 
@@ -175,10 +177,10 @@ const HomePage: React.FC = () => {
       >
         <Container maxWidth="lg">
           <Typography variant="h2" component="h1" gutterBottom fontWeight="bold">
-            Private Terraform Registry
+            {t('home.heroTitle')}
           </Typography>
           <Typography variant="h5" sx={{ mb: 4, opacity: 0.9 }}>
-            Host and manage your custom Terraform modules, providers, and binaries
+            {t('home.heroSubtitle')}
           </Typography>
           <Stack direction="row" spacing={2} flexWrap="wrap" useFlexGap sx={{ mb: 3 }}>
             <Button
@@ -191,7 +193,7 @@ const HomePage: React.FC = () => {
                 '&:hover': { backgroundColor: 'rgba(255,255,255,0.9)' },
               }}
             >
-              Browse Modules
+              {t('home.browseModules')}
             </Button>
             <Button
               variant="contained"
@@ -203,7 +205,7 @@ const HomePage: React.FC = () => {
                 '&:hover': { backgroundColor: 'rgba(255,255,255,0.9)' },
               }}
             >
-              Browse Providers
+              {t('home.browseProviders')}
             </Button>
             <Button
               variant="outlined"
@@ -215,7 +217,7 @@ const HomePage: React.FC = () => {
                 '&:hover': { borderColor: 'white', backgroundColor: 'rgba(255,255,255,0.1)' },
               }}
             >
-              Terraform Binaries
+              {t('home.terraformBinaries')}
             </Button>
           </Stack>
 
@@ -224,7 +226,7 @@ const HomePage: React.FC = () => {
             <Skeleton variant="text" width={320} sx={{ bgcolor: 'rgba(255,255,255,0.2)' }} />
           ) : summaryParts.length > 0 ? (
             <Typography variant="body2" sx={{ opacity: 0.75 }}>
-              {summaryParts.join(' · ')} available
+              {summaryParts.join(' · ')} {t('home.available')}
             </Typography>
           ) : null}
         </Container>
@@ -233,10 +235,10 @@ const HomePage: React.FC = () => {
       {/* Quick Search */}
       <Container maxWidth="sm" sx={{ mb: 8, textAlign: 'center' }}>
         <Typography variant="h5" fontWeight={600} gutterBottom>
-          Find What You Need
+          {t('home.findWhatYouNeed')}
         </Typography>
         <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-          Search across modules and providers in this registry
+          {t('home.searchAcross')}
         </Typography>
         <Stack
           data-testid="quick-search-stack"
@@ -253,12 +255,12 @@ const HomePage: React.FC = () => {
             data-testid="quick-search-toggle"
             sx={{ alignSelf: isXs ? 'center' : 'auto', flexShrink: 0 }}
           >
-            <ToggleButton value="modules">Modules</ToggleButton>
-            <ToggleButton value="providers">Providers</ToggleButton>
+            <ToggleButton value="modules">{t('nav.modules')}</ToggleButton>
+            <ToggleButton value="providers">{t('nav.providers')}</ToggleButton>
           </ToggleButtonGroup>
           <TextField
             fullWidth
-            placeholder={`Search ${searchType}…`}
+            placeholder={t('home.searchPlaceholder', { type: searchType })}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             onKeyDown={handleSearchKeyDown}
@@ -272,7 +274,7 @@ const HomePage: React.FC = () => {
               endAdornment: (
                 <InputAdornment position="end">
                   <Button size="small" onClick={handleSearch} variant="contained" disableElevation>
-                    Search
+                    {t('home.search')}
                   </Button>
                 </InputAdornment>
               ),
@@ -284,7 +286,7 @@ const HomePage: React.FC = () => {
       {/* What's Available */}
       <Container maxWidth="lg" sx={{ mb: 8 }}>
         <Typography variant="h4" fontWeight={600} gutterBottom sx={{ mb: 4 }}>
-          What's Available
+          {t('home.whatsAvailable')}
         </Typography>
         <Grid container spacing={3}>
 
@@ -296,7 +298,7 @@ const HomePage: React.FC = () => {
                   <ExtensionIcon sx={{ fontSize: 40 }} />
                 </Box>
                 <Typography variant="h6" gutterBottom>
-                  Modules
+                  {t('nav.modules')}
                   {stats.moduleCount !== null && (
                     <Typography component="span" variant="body2" color="text.secondary" sx={{ ml: 1 }}>
                       ({stats.moduleCount})
@@ -304,7 +306,7 @@ const HomePage: React.FC = () => {
                   )}
                 </Typography>
                 <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                  Browse and use private Terraform modules for your infrastructure.
+                  {t('home.modulesDescription')}
                 </Typography>
                 <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.75, minHeight: 32 }}>
                   {stats.loading ? (
@@ -325,7 +327,7 @@ const HomePage: React.FC = () => {
               </CardContent>
               <CardActions>
                 <Button size="small" onClick={() => navigate('/modules')} sx={{ color: '#5C4EE5' }}>
-                  Browse All Modules →
+                  {t('home.browseAllModules')}
                 </Button>
               </CardActions>
             </Card>
@@ -339,7 +341,7 @@ const HomePage: React.FC = () => {
                   <CloudUploadIcon sx={{ fontSize: 40 }} />
                 </Box>
                 <Typography variant="h6" gutterBottom>
-                  Providers
+                  {t('nav.providers')}
                   {stats.providerCount !== null && (
                     <Typography component="span" variant="body2" color="text.secondary" sx={{ ml: 1 }}>
                       ({stats.providerCount})
@@ -347,7 +349,7 @@ const HomePage: React.FC = () => {
                   )}
                 </Typography>
                 <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                  Access custom and mirrored Terraform providers for your cloud resources.
+                  {t('home.providersDescription')}
                 </Typography>
                 <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.75, minHeight: 32 }}>
                   {stats.loading ? (
@@ -368,7 +370,7 @@ const HomePage: React.FC = () => {
               </CardContent>
               <CardActions>
                 <Button size="small" onClick={() => navigate('/providers')} color="secondary">
-                  Browse All Providers →
+                  {t('home.browseAllProviders')}
                 </Button>
               </CardActions>
             </Card>
@@ -382,10 +384,10 @@ const HomePage: React.FC = () => {
                   <GetAppIcon sx={{ fontSize: 40 }} />
                 </Box>
                 <Typography variant="h6" gutterBottom>
-                  Terraform Binaries
+                  {t('nav.terraformBinaries')}
                 </Typography>
                 <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                  Download Terraform and OpenTofu binaries from internal mirrors.
+                  {t('home.terraformBinariesDescription')}
                 </Typography>
                 <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.75, minHeight: 32 }}>
                   {stats.loading ? (
@@ -402,14 +404,14 @@ const HomePage: React.FC = () => {
                     ))
                   ) : (
                     <Typography variant="body2" color="text.secondary">
-                      No binary mirrors configured
+                      {t('home.noBinaryMirrors')}
                     </Typography>
                   )}
                 </Box>
               </CardContent>
               <CardActions>
                 <Button size="small" onClick={() => navigate('/terraform-binaries')} color="error">
-                  View Binaries →
+                  {t('home.viewBinaries')}
                 </Button>
               </CardActions>
             </Card>
@@ -422,18 +424,17 @@ const HomePage: React.FC = () => {
       <Box sx={{ backgroundColor: (theme) => theme.palette.mode === 'dark' ? '#1a1a1a' : '#f5f5f5', py: 6 }}>
         <Container maxWidth="lg">
           <Typography variant="h4" fontWeight={600} gutterBottom sx={{ mb: 4 }}>
-            Getting Started
+            {t('home.gettingStarted')}
           </Typography>
           <Grid container spacing={3}>
             <Grid size={{ xs: 12, md: 4 }}>
               <Card sx={{ height: '100%' }}>
                 <CardContent>
                   <Typography variant="h6" gutterBottom color="primary">
-                    1. Sign In
+                    {t('home.step1Title')}
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
-                    Authenticate with your organization's OIDC or Azure AD credentials to access
-                    the registry.
+                    {t('home.step1Desc')}
                   </Typography>
                 </CardContent>
               </Card>
@@ -442,12 +443,12 @@ const HomePage: React.FC = () => {
               <Card sx={{ height: '100%' }}>
                 <CardContent>
                   <Typography variant="h6" gutterBottom color="primary">
-                    2. Get an API Key
+                    {t('home.step2Title')}
                   </Typography>
                   <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }}>
                     {isAuthenticated
-                      ? 'Generate an API key and add it to your Terraform CLI credentials file:'
-                      : 'Sign in to generate an API key, then add it to your Terraform CLI credentials file:'}
+                      ? t('home.step2DescAuth')
+                      : t('home.step2DescUnauth')}
                   </Typography>
 
                   {!isAuthenticated ? (
@@ -460,7 +461,7 @@ const HomePage: React.FC = () => {
                         to="/login"
                         data-testid="getting-started-signin"
                       >
-                        Sign in to generate a key
+                        {t('home.signInToGenerate')}
                       </Button>
                       <Box
                         sx={{
@@ -487,7 +488,7 @@ const HomePage: React.FC = () => {
                           onClick={() => setQuickKeyOpen(true)}
                           data-testid="getting-started-create-key"
                         >
-                          Create API key
+                          {t('home.createApiKey')}
                         </Button>
                         <Button
                           variant="text"
@@ -496,7 +497,7 @@ const HomePage: React.FC = () => {
                           to="/admin/apikeys"
                           data-testid="getting-started-manage-keys"
                         >
-                          Manage all keys →
+                          {t('home.manageAllKeys')}
                         </Button>
                       </Stack>
                       <Box
@@ -520,10 +521,10 @@ const HomePage: React.FC = () => {
                         >
                           {`credentials "${window.location.hostname}" {\n  token = "<your-api-key>"\n}`}
                         </Box>
-                        <Tooltip title={copied ? 'Copied!' : 'Copy to clipboard'} placement="top">
+                        <Tooltip title={copied ? t('home.copied') : t('home.copyToClipboard')} placement="top">
                           <IconButton
                             size="small"
-                            aria-label="Copy usage example"
+                            aria-label={t('home.copyUsageExample')}
                             onClick={handleCopyCredentials}
                             sx={{ position: 'absolute', top: 4, right: 4, opacity: 0.6, '&:hover': { opacity: 1 } }}
                           >
@@ -540,11 +541,10 @@ const HomePage: React.FC = () => {
               <Card sx={{ height: '100%' }}>
                 <CardContent>
                   <Typography variant="h6" gutterBottom color="primary">
-                    3. Start Using
+                    {t('home.step3Title')}
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
-                    Browse modules and providers, then reference them directly in your Terraform
-                    configuration using this registry's hostname.
+                    {t('home.step3Desc')}
                   </Typography>
                 </CardContent>
               </Card>
@@ -556,11 +556,10 @@ const HomePage: React.FC = () => {
       {/* Protocol Support & API Docs */}
       <Container maxWidth="lg" sx={{ py: 6 }}>
         <Typography variant="h4" fontWeight={600} gutterBottom sx={{ mb: 2 }}>
-          Registry Protocol Support
+          {t('home.protocolSupport')}
         </Typography>
         <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
-          Full compatibility with Terraform Registry Protocol v1 — use this registry directly in
-          Terraform CLI and provider configurations without any plugins or proxies.
+          {t('home.protocolDesc')}
         </Typography>
         <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap sx={{ mb: 3 }}>
           <Chip label="Module Registry API" color="primary" />
@@ -573,7 +572,7 @@ const HomePage: React.FC = () => {
           startIcon={<MenuBookIcon />}
           onClick={() => navigate('/api-docs')}
         >
-          View API Documentation
+          {t('home.viewApiDocs')}
         </Button>
       </Container>
 

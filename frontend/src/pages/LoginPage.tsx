@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   Container,
   Paper,
@@ -14,6 +15,7 @@ import {
 } from '@mui/material';
 import LoginIcon from '@mui/icons-material/Login';
 import { useAuth } from '../contexts/AuthContext';
+import { useThemeMode } from '../contexts/ThemeContext';
 import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import type { User } from '../types';
@@ -24,16 +26,16 @@ interface AuthProvider {
   id?: string;
 }
 
-function providerLabel(p: AuthProvider): string {
+function providerLabel(p: AuthProvider, t: ReturnType<typeof useTranslation>['t']): string {
   switch (p.type) {
     case 'oidc':
-      return 'Sign in with SSO';
+      return t('auth.signInWithSSO');
     case 'azuread':
-      return 'Sign in with Azure AD';
+      return t('auth.signInWithAzureAD');
     case 'saml':
-      return `Sign in with ${p.name}`;
+      return t('auth.signInWith', { name: p.name });
     default:
-      return `Sign in with ${p.name}`;
+      return t('auth.signInWith', { name: p.name });
   }
 }
 
@@ -45,7 +47,9 @@ function providerSx(p: AuthProvider): Record<string, unknown> | undefined {
 }
 
 const LoginPage: React.FC = () => {
+  const { t } = useTranslation();
   const { login } = useAuth();
+  const { productName } = useThemeMode();
   const navigate = useNavigate();
   const [loginError, setLoginError] = React.useState<string | null>(null);
   const isDev = import.meta.env.MODE === 'development';
@@ -86,7 +90,7 @@ const LoginPage: React.FC = () => {
       await login({} as User);
       navigate('/');
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'Dev login failed. Check server logs.';
+      const message = err instanceof Error ? err.message : t('auth.devLoginFailed');
       setLoginError(message);
     }
   };
@@ -111,7 +115,7 @@ const LoginPage: React.FC = () => {
       navigate('/');
     } catch (err) {
       const message =
-        err instanceof Error ? err.message : 'LDAP login failed. Check your credentials.';
+        err instanceof Error ? err.message : t('auth.ldapLoginFailed');
       setLoginError(message);
     } finally {
       setLdapLoading(false);
@@ -136,10 +140,10 @@ const LoginPage: React.FC = () => {
           <Box sx={{ textAlign: 'center', mb: 4 }}>
             <LoginIcon sx={{ fontSize: 60, color: 'primary.main', mb: 2 }} />
             <Typography variant="h4" component="h1" gutterBottom>
-              Terraform Registry
+              {productName}
             </Typography>
             <Typography variant="body1" color="text.secondary">
-              Sign in to continue
+              {t('auth.signInToContinue')}
             </Typography>
           </Box>
 
@@ -152,14 +156,14 @@ const LoginPage: React.FC = () => {
 
             {showNoProvidersAlert && (
               <Alert severity="info" data-testid="no-providers-alert">
-                No SSO providers configured. Contact your administrator.
+                {t('auth.noProviders')}
               </Alert>
             )}
 
             {isDev && (
               <>
                 <Alert severity="info">
-                  Development mode - Click below to login without OAuth
+                  {t('auth.devModeNotice')}
                 </Alert>
                 <Button
                   variant="contained"
@@ -169,12 +173,12 @@ const LoginPage: React.FC = () => {
                   color="success"
                   sx={{ py: 1.5 }}
                 >
-                  Dev Login (Admin)
+                  {t('auth.devLogin')}
                 </Button>
                 {(loading || providers.length > 0) && (
                   <Divider>
                     <Typography variant="body2" color="text.secondary">
-                      OR USE PRODUCTION AUTH
+                      {t('auth.orUseProductionAuth')}
                     </Typography>
                   </Divider>
                 )}
@@ -200,12 +204,12 @@ const LoginPage: React.FC = () => {
                       onClick={() => handleProviderLogin(p)}
                       sx={{ py: 1.5, ...(providerSx(p) ?? {}) }}
                     >
-                      {providerLabel(p)}
+                      {providerLabel(p, t)}
                     </Button>
                     {idx < visible.length - 1 && (
                       <Divider>
                         <Typography variant="body2" color="text.secondary">
-                          OR
+                          {t('auth.or')}
                         </Typography>
                       </Divider>
                     )}
@@ -215,7 +219,7 @@ const LoginPage: React.FC = () => {
                 {hasLdap && ssoProviders.length > 0 && (
                   <Divider>
                     <Typography variant="body2" color="text.secondary">
-                      OR SIGN IN WITH LDAP
+                      {t('auth.orSignInWithLdap')}
                     </Typography>
                   </Divider>
                 )}
@@ -225,11 +229,11 @@ const LoginPage: React.FC = () => {
                     <Stack spacing={2}>
                       {ssoProviders.length === 0 && (
                         <Typography variant="subtitle2" color="text.secondary" textAlign="center">
-                          Sign in with LDAP
+                          {t('auth.signInWithLdap')}
                         </Typography>
                       )}
                       <TextField
-                        label="Username"
+                        label={t('auth.username')}
                         value={ldapUsername}
                         onChange={(e) => setLdapUsername(e.target.value)}
                         required
@@ -238,7 +242,7 @@ const LoginPage: React.FC = () => {
                         size="small"
                       />
                       <TextField
-                        label="Password"
+                        label={t('auth.password')}
                         type="password"
                         value={ldapPassword}
                         onChange={(e) => setLdapPassword(e.target.value)}
@@ -255,7 +259,7 @@ const LoginPage: React.FC = () => {
                         disabled={ldapLoading || !ldapUsername || !ldapPassword}
                         sx={{ py: 1.5 }}
                       >
-                        {ldapLoading ? <CircularProgress size={24} /> : 'Sign In'}
+                        {ldapLoading ? <CircularProgress size={24} /> : t('auth.signIn')}
                       </Button>
                     </Stack>
                   </Box>
@@ -266,9 +270,9 @@ const LoginPage: React.FC = () => {
 
           <Box sx={{ mt: 3, textAlign: 'center' }}>
             <Typography variant="body2" color="text.secondary">
-              This application uses single sign-on for authentication.
+              {t('auth.ssoInfo')}
               <br />
-              Contact your administrator if you need access.
+              {t('auth.ssoContact')}
             </Typography>
           </Box>
         </Paper>
