@@ -594,6 +594,21 @@ export interface ModuleDoc {
   requirements: ModuleRequirements | null
 }
 
+// ---- Org Quota ----
+
+export interface OrgQuota {
+  organization_id: string
+  storage_bytes_limit: number
+  storage_bytes_used: number
+  storage_utilization_ratio: number
+  publishes_per_day_limit: number
+  publishes_today: number
+  publish_utilization_ratio: number
+  downloads_per_day_limit: number
+  downloads_today: number
+  download_utilization_ratio: number
+}
+
 // ---- Storage Migration ----
 
 export interface MigrationPlan {
