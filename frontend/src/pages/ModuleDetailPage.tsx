@@ -95,6 +95,8 @@ const ModuleDetailPage: React.FC = () => {
     moduleScan,
     scanLoading,
     scanNotFound,
+    rescanPending,
+    handleRescan,
     moduleDocs,
     docsLoading,
     loadSCMLink,
@@ -389,6 +391,8 @@ const ModuleDetailPage: React.FC = () => {
                 moduleScan={moduleScan}
                 scanLoading={scanLoading}
                 scanNotFound={scanNotFound}
+                onRescan={handleRescan}
+                rescanPending={rescanPending}
               />
             </Box>
           </Box>
