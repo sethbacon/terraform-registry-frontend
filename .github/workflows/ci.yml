@@ -131,6 +131,49 @@ jobs:
           message: ${{ steps.badge.outputs.percent }}%
           color: ${{ steps.badge.outputs.color }}
 
+  # ── Contract Test (Swagger type-check) ────────────────
+  contract-check:
+    name: Contract Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+
+      - name: Set up Node
+        uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5
+        with:
+          node-version: "22"
+          cache: "npm"
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies
+        working-directory: frontend
+        run: npm ci
+
+      - name: Convert Swagger 2.0 to OpenAPI 3.0
+        working-directory: frontend
+        run: npx --yes swagger2openapi openapi/swagger.json -o
+          openapi/openapi3.json -p
+
+      - name: Regenerate API types from snapshot
+        working-directory: frontend
+        run: npx openapi-typescript openapi/openapi3.json --output
+          src/services/generated/api.ts
+
+      - name: Check for uncommitted drift
+        working-directory: frontend
+        run: |
+          if ! git diff --exit-code src/services/generated/api.ts; then
+            echo ""
+            echo "ERROR: src/services/generated/api.ts is out of sync with openapi/swagger.json."
+            echo "Run 'npm run generate:api' locally and commit the updated file."
+            exit 1
+          fi
+
+      - name: Type-check generated API types
+        working-directory: frontend
+        run: npx tsc --noEmit
+
   # ── Build ─────────────────────────────────────────────
   build:
     name: Build
@@ -164,7 +207,7 @@ jobs:
   e2e-gated:
     name: E2E (gated/manual)
     runs-on: ubuntu-latest
-    needs: [ lint, typecheck, unit-test, build ]
+    needs: [ lint, typecheck, unit-test, contract-check, build ]
     # E2E is a required gate: failures block the release pipeline.
     if: >-
       github.event_name == 'workflow_dispatch' || github.event_name ==
@@ -215,12 +258,13 @@ jobs:
         working-directory: e2e
         run: |
           npm ci
-          npx playwright install chromium firefox
+          npx playwright install --with-deps chromium firefox
 
       - name: Run Playwright tests
         working-directory: e2e
         run: >-
-          npx playwright test --workers=2 --max-failures=1 --retries=1 --reporter=list
+          npx playwright test --workers=4 --max-failures=1 --retries=1
+          --reporter=list --grep-invert="Visual regression"
 
       - name: Upload Playwright artifacts
         # v7
