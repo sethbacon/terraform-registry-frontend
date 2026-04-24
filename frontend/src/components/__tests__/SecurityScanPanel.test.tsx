@@ -1,5 +1,6 @@
 import { render, screen } from '@testing-library/react'
-import { describe, it, expect } from 'vitest'
+import userEvent from '@testing-library/user-event'
+import { describe, it, expect, vi } from 'vitest'
 import type { ModuleVersion, ModuleScan } from '../../types'
 import SecurityScanPanel from '../SecurityScanPanel'
 
@@ -99,7 +100,14 @@ describe('SecurityScanPanel', () => {
       <SecurityScanPanel
         canManage={true}
         selectedVersion={fakeVersion}
-        moduleScan={{ ...baseScan, status: 'findings', critical_count: 1, high_count: 2, medium_count: 3, low_count: 4 }}
+        moduleScan={{
+          ...baseScan,
+          status: 'findings',
+          critical_count: 1,
+          high_count: 2,
+          medium_count: 3,
+          low_count: 4,
+        }}
         scanLoading={false}
         scanNotFound={false}
       />,
@@ -118,5 +126,68 @@ describe('SecurityScanPanel', () => {
       />,
     )
     expect(screen.getByText('error')).toBeInTheDocument()
+  })
+
+  it('shows Re-scan button when onRescan is provided and scan is not in progress', () => {
+    const onRescan = vi.fn()
+    render(
+      <SecurityScanPanel
+        canManage={true}
+        selectedVersion={fakeVersion}
+        moduleScan={{ ...baseScan, status: 'clean' }}
+        scanLoading={false}
+        scanNotFound={false}
+        onRescan={onRescan}
+        rescanPending={false}
+      />,
+    )
+    expect(screen.getByTestId('rescan-button')).toBeInTheDocument()
+  })
+
+  it('calls onRescan when Re-scan button is clicked', async () => {
+    const onRescan = vi.fn()
+    render(
+      <SecurityScanPanel
+        canManage={true}
+        selectedVersion={fakeVersion}
+        moduleScan={{ ...baseScan, status: 'clean' }}
+        scanLoading={false}
+        scanNotFound={false}
+        onRescan={onRescan}
+        rescanPending={false}
+      />,
+    )
+    await userEvent.click(screen.getByTestId('rescan-button'))
+    expect(onRescan).toHaveBeenCalledOnce()
+  })
+
+  it('hides Re-scan button while scan is in progress', () => {
+    render(
+      <SecurityScanPanel
+        canManage={true}
+        selectedVersion={fakeVersion}
+        moduleScan={{ ...baseScan, status: 'scanning' }}
+        scanLoading={false}
+        scanNotFound={false}
+        onRescan={vi.fn()}
+        rescanPending={false}
+      />,
+    )
+    expect(screen.queryByTestId('rescan-button')).not.toBeInTheDocument()
+  })
+
+  it('hides Re-scan button while rescanPending is true', () => {
+    render(
+      <SecurityScanPanel
+        canManage={true}
+        selectedVersion={fakeVersion}
+        moduleScan={{ ...baseScan, status: 'clean' }}
+        scanLoading={false}
+        scanNotFound={false}
+        onRescan={vi.fn()}
+        rescanPending={true}
+      />,
+    )
+    expect(screen.queryByTestId('rescan-button')).not.toBeInTheDocument()
   })
 })

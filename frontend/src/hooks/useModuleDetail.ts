@@ -320,6 +320,24 @@ export function useModuleDetail() {
     },
   });
 
+  const rescanMutation = useMutation({
+    mutationFn: () =>
+      api.reanalyzeModuleVersion(namespace!, name!, system!, selectedVersion!.version),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.modules.scan(
+          namespace ?? '',
+          name ?? '',
+          system ?? '',
+          selectedVersion?.version ?? '',
+        ),
+      });
+    },
+    onError: (err: unknown) => {
+      setError(getErrorMessage(err, 'Failed to queue re-scan. Please try again.'));
+    },
+  });
+
   const scmSyncMutation = useMutation({
     mutationFn: () => api.triggerManualSync(module!.id),
     onSuccess: () => {
@@ -360,6 +378,11 @@ export function useModuleDetail() {
       }, delay);
     });
   }, [queryClient, namespace, name, system]);
+
+  const handleRescan = () => {
+    if (!namespace || !name || !system || !selectedVersion) return;
+    rescanMutation.mutate();
+  };
 
   const handleSCMSync = () => {
     if (!module?.id) {
@@ -512,6 +535,8 @@ export function useModuleDetail() {
     moduleScan,
     scanLoading,
     scanNotFound,
+    rescanPending: rescanMutation.isPending,
+    handleRescan,
     // Module docs
     moduleDocs,
     docsLoading,

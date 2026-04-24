@@ -1,4 +1,4 @@
-import React from 'react';
+import React from 'react'
 import {
   Box,
   Paper,
@@ -8,16 +8,20 @@ import {
   CircularProgress,
   Alert,
   Stack,
-} from '@mui/material';
-import SecurityIcon from '@mui/icons-material/Security';
-import { ModuleVersion, ModuleScan } from '../types';
+  Button,
+} from '@mui/material'
+import SecurityIcon from '@mui/icons-material/Security'
+import RefreshIcon from '@mui/icons-material/Refresh'
+import { ModuleVersion, ModuleScan } from '../types'
 
 interface SecurityScanPanelProps {
-  canManage: boolean;
-  selectedVersion: ModuleVersion | null;
-  moduleScan: ModuleScan | null;
-  scanLoading: boolean;
-  scanNotFound: boolean;
+  canManage: boolean
+  selectedVersion: ModuleVersion | null
+  moduleScan: ModuleScan | null
+  scanLoading: boolean
+  scanNotFound: boolean
+  onRescan?: () => void
+  rescanPending?: boolean
 }
 
 const SecurityScanPanel: React.FC<SecurityScanPanelProps> = ({
@@ -26,16 +30,31 @@ const SecurityScanPanel: React.FC<SecurityScanPanelProps> = ({
   moduleScan,
   scanLoading,
   scanNotFound,
+  onRescan,
+  rescanPending = false,
 }) => {
-  if (!canManage || !selectedVersion) return null;
+  if (!canManage || !selectedVersion) return null
+
+  const scanInProgress =
+    moduleScan?.status === 'pending' || moduleScan?.status === 'scanning' || rescanPending
 
   return (
     <Paper sx={{ p: 3, mb: 3 }}>
       <Box display="flex" alignItems="center" gap={1} mb={1}>
         <SecurityIcon fontSize="small" color="action" />
         <Typography variant="h6">Security Scan</Typography>
-        {(moduleScan?.status === 'pending' || moduleScan?.status === 'scanning') && (
-          <CircularProgress size={16} sx={{ ml: 'auto' }} />
+        {scanInProgress && <CircularProgress size={16} sx={{ ml: 'auto' }} />}
+        {onRescan && !scanInProgress && (
+          <Button
+            size="small"
+            variant="outlined"
+            startIcon={<RefreshIcon />}
+            onClick={onRescan}
+            sx={{ ml: 'auto' }}
+            data-testid="rescan-button"
+          >
+            Re-scan
+          </Button>
         )}
       </Box>
       <Divider sx={{ mb: 2 }} />
@@ -54,9 +73,13 @@ const SecurityScanPanel: React.FC<SecurityScanPanelProps> = ({
               label={moduleScan.status}
               size="small"
               color={
-                moduleScan.status === 'clean' ? 'success' :
-                  moduleScan.status === 'findings' ? 'warning' :
-                    moduleScan.status === 'error' ? 'error' : 'info'
+                moduleScan.status === 'clean'
+                  ? 'success'
+                  : moduleScan.status === 'findings'
+                    ? 'warning'
+                    : moduleScan.status === 'error'
+                      ? 'error'
+                      : 'info'
               }
             />
           </Box>
@@ -79,14 +102,19 @@ const SecurityScanPanel: React.FC<SecurityScanPanelProps> = ({
               {moduleScan.low_count > 0 && (
                 <Chip label={`Low: ${moduleScan.low_count}`} size="small" />
               )}
-              {moduleScan.critical_count === 0 && moduleScan.high_count === 0 &&
-                moduleScan.medium_count === 0 && moduleScan.low_count === 0 && (
-                  <Typography variant="body2" color="success.main">No findings</Typography>
+              {moduleScan.critical_count === 0 &&
+                moduleScan.high_count === 0 &&
+                moduleScan.medium_count === 0 &&
+                moduleScan.low_count === 0 && (
+                  <Typography variant="body2" color="success.main">
+                    No findings
+                  </Typography>
                 )}
             </Stack>
           )}
           <Typography variant="caption" color="text.secondary" display="block">
-            Scanner: {moduleScan.scanner}{moduleScan.scanner_version ? ` ${moduleScan.scanner_version}` : ''}
+            Scanner: {moduleScan.scanner}
+            {moduleScan.scanner_version ? ` ${moduleScan.scanner_version}` : ''}
           </Typography>
           {moduleScan.scanned_at && (
             <Typography variant="caption" color="text.secondary" display="block">
@@ -96,7 +124,7 @@ const SecurityScanPanel: React.FC<SecurityScanPanelProps> = ({
         </Box>
       ) : null}
     </Paper>
-  );
-};
+  )
+}
 
-export default SecurityScanPanel;
+export default SecurityScanPanel
