@@ -9,6 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.11.1] - 2026-04-24
+
+### Fixed
+
+- fix: re-scan button now shows a warning when scanning is not configured on the registry; scan status updates automatically every 3 s while pending/scanning
+
 ## [0.11.0] - 2026-04-24
 
 ## [0.10.5] - 2026-04-24
