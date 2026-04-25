@@ -36,7 +36,7 @@ const AdminUserStep: React.FC = () => {
         />
 
         <Stack direction="row" spacing={2}>
-          <Button variant="text" onClick={() => goToStep(3)}>← Back</Button>
+          <Button variant="text" onClick={() => goToStep(4)}>← Back</Button>
           <Button
             variant="contained"
             onClick={saveAdmin}
@@ -49,7 +49,7 @@ const AdminUserStep: React.FC = () => {
 
         {adminSaved && (
           <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 1 }}>
-            <Button variant="contained" color="primary" onClick={() => goToStep(5)}>
+            <Button variant="contained" color="primary" onClick={() => goToStep(6)}>
               Next: Complete Setup →
             </Button>
           </Box>

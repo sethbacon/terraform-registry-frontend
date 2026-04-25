@@ -7,18 +7,20 @@ import AuthenticateStep from './setup/steps/AuthenticateStep';
 import OIDCStep from './setup/steps/OIDCStep';
 import StorageStep from './setup/steps/StorageStep';
 import ScanningStep from './setup/steps/ScanningStep';
+import BrandingStep from './setup/steps/BrandingStep';
 import AdminUserStep from './setup/steps/AdminUserStep';
 import ReviewStep from './setup/steps/ReviewStep';
 
-const steps = ['Authenticate', 'Identity Provider', 'Storage Backend', 'Security Scanning', 'Admin User', 'Complete'];
+const steps = ['Authenticate', 'Identity Provider', 'Storage Backend', 'Security Scanning', 'Branding', 'Admin User', 'Complete'];
 
 const stepComponents: Record<number, React.FC> = {
   0: AuthenticateStep,
   1: OIDCStep,
   2: StorageStep,
   3: ScanningStep,
-  4: AdminUserStep,
-  5: ReviewStep,
+  4: BrandingStep,
+  5: AdminUserStep,
+  6: ReviewStep,
 };
 
 const SetupWizardShell: React.FC = () => {
@@ -34,7 +36,7 @@ const SetupWizardShell: React.FC = () => {
     ? [
       { label: 'Authenticate', index: 0 },
       ...(!setupStatus?.scanning_configured ? [{ label: 'Security Scanning', index: 3 }] : []),
-      { label: 'Complete', index: 5 },
+      { label: 'Complete', index: 6 },
     ]
     : steps.map((label, index) => ({ label, index }));
 

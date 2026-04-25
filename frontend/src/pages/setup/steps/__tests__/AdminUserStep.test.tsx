@@ -73,7 +73,7 @@ describe('AdminUserStep', () => {
   it('navigates back on Back button click', async () => {
     render(<AdminUserStep />)
     await userEvent.setup().click(screen.getByRole('button', { name: /Back/i }))
-    expect(mockCtx.goToStep).toHaveBeenCalledWith(3)
+    expect(mockCtx.goToStep).toHaveBeenCalledWith(4)
   })
 
   it('shows spinner when saving', () => {
@@ -96,6 +96,6 @@ describe('AdminUserStep', () => {
     mockCtx.adminSaved = true
     render(<AdminUserStep />)
     await userEvent.setup().click(screen.getByRole('button', { name: /Next: Complete Setup/i }))
-    expect(mockCtx.goToStep).toHaveBeenCalledWith(5)
+    expect(mockCtx.goToStep).toHaveBeenCalledWith(6)
   })
 })

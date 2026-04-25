@@ -48,8 +48,8 @@ const ScanningStep: React.FC = () => {
 
   const isPending = setupStatus?.pending_feature_setup ?? false
   const backStep = isPending ? 0 : 2
-  const nextStep = isPending ? 5 : 4
-  const nextLabel = isPending ? 'Next: Review & Complete' : 'Next: Configure Admin'
+  const nextStep = isPending ? 6 : 4
+  const nextLabel = isPending ? 'Next: Review & Complete' : 'Next: Branding'
 
   const canAutoInstall = INSTALLABLE_TOOLS.includes(scanningForm.tool)
 
