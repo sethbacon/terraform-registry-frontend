@@ -1,18 +1,18 @@
 {
   "nav": {
     "home": "Inicio",
-    "homeTooltip": "P\u00e1gina de inicio",
-    "modules": "M\u00f3dulos",
-    "modulesTooltip": "Ver m\u00f3dulos de Terraform",
+    "homeTooltip": "Página de inicio",
+    "modules": "Módulos",
+    "modulesTooltip": "Ver módulos de Terraform",
     "providers": "Proveedores",
     "providersTooltip": "Ver proveedores de Terraform",
     "terraformBinaries": "Binarios de Terraform",
     "terraformBinariesTooltip": "Ver binarios de Terraform",
-    "apiDocs": "Documentaci\u00f3n API",
-    "apiDocsTooltip": "Documentaci\u00f3n de la API",
+    "apiDocs": "Documentación API",
+    "apiDocsTooltip": "Documentación de la API",
     "admin": {
       "dashboard": "Panel de control",
-      "dashboardTooltip": "Panel de administraci\u00f3n",
+      "dashboardTooltip": "Panel de administración",
       "identity": "Identidad",
       "organizations": "Organizaciones",
       "organizationsTooltip": "Gestionar organizaciones y miembros del registro",
@@ -23,37 +23,37 @@
       "oidcGroups": "Grupos OIDC",
       "oidcGroupsTooltip": "Mapear grupos del proveedor de identidad a roles del registro",
       "scim": "SCIM",
-      "scimTooltip": "Configuraci\u00f3n de aprovisionamiento de usuarios y grupos SCIM 2.0",
+      "scimTooltip": "Configuración de aprovisionamiento de usuarios y grupos SCIM 2.0",
       "mtlsCerts": "Certificados mTLS",
       "mtlsCertsTooltip": "Ver mapeos de certificados de cliente mTLS",
       "apiKeys": "Claves API",
       "apiKeysTooltip": "Crear y gestionar claves API personales",
       "sourceControl": "Control de fuentes",
-      "sourceControlTooltip": "Configurar proveedores SCM para publicaci\u00f3n de m\u00f3dulos y proveedores",
+      "sourceControlTooltip": "Configurar proveedores SCM para publicación de módulos y proveedores",
       "mirroring": "Espejado",
-      "providerConfig": "Configuraci\u00f3n de proveedores",
-      "providerConfigTooltip": "Configurar fuentes de espejo de proveedores y horarios de sincronizaci\u00f3n",
-      "binariesConfig": "Configuraci\u00f3n de binarios",
+      "providerConfig": "Configuración de proveedores",
+      "providerConfigTooltip": "Configurar fuentes de espejo de proveedores y horarios de sincronización",
+      "binariesConfig": "Configuración de binarios",
       "binariesConfigTooltip": "Configurar fuentes de espejo de binarios de Terraform y OpenTofu",
       "approvals": "Aprobaciones",
-      "approvalsTooltip": "Revisar y aprobar solicitudes de sincronizaci\u00f3n pendientes",
-      "mirrorPolicies": "Pol\u00edticas de espejo",
-      "mirrorPoliciesTooltip": "Definir pol\u00edticas que controlan qu\u00e9 se espeja",
+      "approvalsTooltip": "Revisar y aprobar solicitudes de sincronización pendientes",
+      "mirrorPolicies": "Políticas de espejo",
+      "mirrorPoliciesTooltip": "Definir políticas que controlan qué se espeja",
       "system": "Sistema",
       "storage": "Almacenamiento",
       "storageTooltip": "Configurar almacenamiento backend para binarios y proveedores",
-      "securityScanning": "An\u00e1lisis de seguridad",
-      "securityScanningTooltip": "Ver configuraci\u00f3n y estado del an\u00e1lisis de seguridad",
-      "auditLogs": "Registros de auditor\u00eda",
-      "auditLogsTooltip": "Ver registros de auditor\u00eda del sistema",
+      "securityScanning": "Análisis de seguridad",
+      "securityScanningTooltip": "Ver configuración y estado del análisis de seguridad",
+      "auditLogs": "Registros de auditoría",
+      "auditLogsTooltip": "Ver registros de auditoría del sistema",
       "componentsDev": "Componentes",
       "componentsDevTooltip": "Muestra de componentes (solo desarrollo)"
     }
   },
   "header": {
     "skipToContent": "Saltar al contenido principal",
-    "openDrawer": "abrir men\u00fa",
-    "quickNav": "Navegaci\u00f3n r\u00e1pida (Ctrl/\u2318K)",
+    "openDrawer": "abrir menú",
+    "quickNav": "Navegación rápida (Ctrl/⌘K)",
     "openCommandPalette": "Abrir paleta de comandos",
     "lightMode": "Modo claro",
     "darkMode": "Modo oscuro",
@@ -63,90 +63,90 @@
     "settings": "Configuración",
     "support": "Soporte",
     "accountMenu": "cuenta del usuario actual",
-    "logout": "Cerrar sesi\u00f3n",
-    "login": "Iniciar sesi\u00f3n",
+    "logout": "Cerrar sesión",
+    "login": "Iniciar sesión",
     "language": "Idioma"
   },
   "about": {
     "title": "Acerca de {{productName}}",
-    "description": "Un registro privado de m\u00f3dulos y proveedores de Terraform con soporte para integraci\u00f3n SCM, espejado de proveedores, distribuci\u00f3n de binarios de Terraform y multi-tenancy.",
+    "description": "Un registro privado de módulos y proveedores de Terraform con soporte para integración SCM, espejado de proveedores, distribución de binarios de Terraform y multi-tenancy.",
     "versions": "Versiones",
     "frontendVersion": "Frontend v{{version}}",
     "backendVersion": "Backend v{{version}}",
-    "loadingBackendVersion": "Cargando versi\u00f3n del backend\u2026",
+    "loadingBackendVersion": "Cargando versión del backend…",
     "backendUnavailable": "Backend no disponible",
-    "apiVersion": "Versi\u00f3n API: {{version}}",
+    "apiVersion": "Versión API: {{version}}",
     "built": "Construido: {{date}}",
     "license": "Licencia",
     "licenseIntro": "Publicado bajo la",
     "apacheLicense": "Licencia Apache 2.0",
     "source": "Fuente",
-    "githubBackend": "GitHub \u2014 Backend",
-    "githubFrontend": "GitHub \u2014 Frontend",
+    "githubBackend": "GitHub — Backend",
+    "githubFrontend": "GitHub — Frontend",
     "close": "Cerrar"
   },
   "auth": {
-    "signInToContinue": "Inicia sesi\u00f3n para continuar",
-    "signInWithSSO": "Iniciar sesi\u00f3n con SSO",
-    "signInWithAzureAD": "Iniciar sesi\u00f3n con Azure AD",
-    "signInWith": "Iniciar sesi\u00f3n con {{name}}",
-    "devLogin": "Inicio de sesi\u00f3n de desarrollo (Admin)",
-    "devModeNotice": "Modo de desarrollo - Haga clic abajo para iniciar sesi\u00f3n sin OAuth",
-    "orUseProductionAuth": "O USA AUTENTICACI\u00d3N DE PRODUCCI\u00d3N",
-    "orSignInWithLdap": "O INICIA SESI\u00d3N CON LDAP",
+    "signInToContinue": "Inicia sesión para continuar",
+    "signInWithSSO": "Iniciar sesión con SSO",
+    "signInWithAzureAD": "Iniciar sesión con Azure AD",
+    "signInWith": "Iniciar sesión con {{name}}",
+    "devLogin": "Inicio de sesión de desarrollo (Admin)",
+    "devModeNotice": "Modo de desarrollo - Haga clic abajo para iniciar sesión sin OAuth",
+    "orUseProductionAuth": "O USA AUTENTICACIÓN DE PRODUCCIÓN",
+    "orSignInWithLdap": "O INICIA SESIÓN CON LDAP",
     "or": "O",
-    "signInWithLdap": "Iniciar sesi\u00f3n con LDAP",
+    "signInWithLdap": "Iniciar sesión con LDAP",
     "username": "Nombre de usuario",
-    "password": "Contrase\u00f1a",
-    "signIn": "Iniciar sesi\u00f3n",
+    "password": "Contraseña",
+    "signIn": "Iniciar sesión",
     "noProviders": "No hay proveedores SSO configurados. Contacta a tu administrador.",
-    "ssoInfo": "Esta aplicaci\u00f3n utiliza inicio de sesi\u00f3n \u00fanico para la autenticaci\u00f3n.",
+    "ssoInfo": "Esta aplicación utiliza inicio de sesión único para la autenticación.",
     "ssoContact": "Contacta a tu administrador si necesitas acceso.",
-    "devLoginFailed": "Inicio de sesi\u00f3n de desarrollo fallido. Revisa los registros del servidor.",
-    "ldapLoginFailed": "Inicio de sesi\u00f3n LDAP fallido. Verifica tus credenciales."
+    "devLoginFailed": "Inicio de sesión de desarrollo fallido. Revisa los registros del servidor.",
+    "ldapLoginFailed": "Inicio de sesión LDAP fallido. Verifica tus credenciales."
   },
   "home": {
     "heroTitle": "Registro Privado de Terraform",
-    "heroSubtitle": "Aloja y gestiona tus m\u00f3dulos, proveedores y binarios personalizados de Terraform",
-    "browseModules": "Explorar m\u00f3dulos",
+    "heroSubtitle": "Aloja y gestiona tus módulos, proveedores y binarios personalizados de Terraform",
+    "browseModules": "Explorar módulos",
     "browseProviders": "Explorar proveedores",
     "terraformBinaries": "Binarios de Terraform",
     "available": "disponibles",
     "findWhatYouNeed": "Encuentra lo que necesitas",
-    "searchAcross": "Busca en m\u00f3dulos y proveedores de este registro",
+    "searchAcross": "Busca en módulos y proveedores de este registro",
     "search": "Buscar",
-    "searchPlaceholder": "Buscar {{type}}\u2026",
-    "whatsAvailable": "Qu\u00e9 est\u00e1 disponible",
-    "modulesDescription": "Explora y usa m\u00f3dulos privados de Terraform para tu infraestructura.",
-    "browseAllModules": "Ver todos los m\u00f3dulos \u2192",
+    "searchPlaceholder": "Buscar {{type}}…",
+    "whatsAvailable": "Qué está disponible",
+    "modulesDescription": "Explora y usa módulos privados de Terraform para tu infraestructura.",
+    "browseAllModules": "Ver todos los módulos →",
     "providersDescription": "Accede a proveedores de Terraform personalizados y en espejo para tus recursos en la nube.",
-    "browseAllProviders": "Ver todos los proveedores \u2192",
+    "browseAllProviders": "Ver todos los proveedores →",
     "terraformBinariesDescription": "Descarga binarios de Terraform y OpenTofu desde espejos internos.",
     "noBinaryMirrors": "No hay espejos de binarios configurados",
-    "viewBinaries": "Ver binarios \u2192",
+    "viewBinaries": "Ver binarios →",
     "gettingStarted": "Primeros pasos",
-    "step1Title": "1. Iniciar sesi\u00f3n",
-    "step1Desc": "Aut\u00eanticate con las credenciales OIDC o Azure AD de tu organizaci\u00f3n para acceder al registro.",
+    "step1Title": "1. Iniciar sesión",
+    "step1Desc": "Autênticate con las credenciales OIDC o Azure AD de tu organización para acceder al registro.",
     "step2Title": "2. Obtener una clave API",
-    "step2DescAuth": "Genera una clave API y a\u00f1\u00e1dela a tu archivo de credenciales de CLI de Terraform:",
-    "step2DescUnauth": "Inicia sesi\u00f3n para generar una clave API, luego a\u00f1\u00e1dela a tu archivo de credenciales de CLI de Terraform:",
-    "signInToGenerate": "Iniciar sesi\u00f3n para generar una clave",
+    "step2DescAuth": "Genera una clave API y añádela a tu archivo de credenciales de CLI de Terraform:",
+    "step2DescUnauth": "Inicia sesión para generar una clave API, luego añádela a tu archivo de credenciales de CLI de Terraform:",
+    "signInToGenerate": "Iniciar sesión para generar una clave",
     "createApiKey": "Crear clave API",
-    "manageAllKeys": "Gestionar todas las claves \u2192",
-    "copied": "\u00a1Copiado!",
+    "manageAllKeys": "Gestionar todas las claves →",
+    "copied": "¡Copiado!",
     "copyToClipboard": "Copiar al portapapeles",
     "copyUsageExample": "Copiar ejemplo de uso",
     "credentialsCopied": "Fragmento de credenciales copiado al portapapeles",
     "step3Title": "3. Empezar a usar",
-    "step3Desc": "Explora m\u00f3dulos y proveedores, luego ref\u00e9rencialos directamente en tu configuraci\u00f3n de Terraform usando el nombre de host de este registro.",
+    "step3Desc": "Explora módulos y proveedores, luego reférencialos directamente en tu configuración de Terraform usando el nombre de host de este registro.",
     "protocolSupport": "Soporte de protocolo del registro",
-    "protocolDesc": "Compatibilidad total con el protocolo de registro de Terraform v1 \u2014 usa este registro directamente en las configuraciones de CLI y proveedores de Terraform sin plugins ni proxies.",
-    "viewApiDocs": "Ver documentaci\u00f3n API",
-    "setupRequired": "Configuraci\u00f3n requerida",
-    "featureSetupRequired": "Configuraci\u00f3n de funciones requerida",
-    "setupRequiredDesc": "Este registro a\u00fan no ha sido configurado. Completa el asistente de configuraci\u00f3n para configurar la autenticaci\u00f3n, el almacenamiento y la cuenta de administrador inicial.",
-    "featureSetupDesc": "Se han a\u00f1adido nuevas funciones que requieren configuraci\u00f3n. Completa el asistente de configuraci\u00f3n para habilitarlas.",
-    "startSetup": "Iniciar configuraci\u00f3n",
+    "protocolDesc": "Compatibilidad total con el protocolo de registro de Terraform v1 — usa este registro directamente en las configuraciones de CLI y proveedores de Terraform sin plugins ni proxies.",
+    "viewApiDocs": "Ver documentación API",
+    "setupRequired": "Configuración requerida",
+    "featureSetupRequired": "Configuración de funciones requerida",
+    "setupRequiredDesc": "Este registro aún no ha sido configurado. Completa el asistente de configuración para configurar la autenticación, el almacenamiento y la cuenta de administrador inicial.",
+    "featureSetupDesc": "Se han añadido nuevas funciones que requieren configuración. Completa el asistente de configuración para habilitarlas.",
+    "startSetup": "Iniciar configuración",
     "configureFeatures": "Configurar funciones"
   },
   "common": {
@@ -159,14 +159,524 @@
     "create": "Crear",
     "search": "Buscar",
     "error": "Error",
-    "success": "\u00c9xito",
+    "success": "Éxito",
     "warning": "Advertencia"
   },
   "language": {
     "en": "English",
-    "es": "Espa\u00f1ol",
-    "fr": "Fran\u00e7ais",
+    "es": "Español",
+    "fr": "Français",
     "de": "Deutsch",
-    "ja": "\u65e5\u672c\u8a9e"
+    "ja": "日本語"
+  },
+  "help": {
+    "default": {
+      "title": "Help",
+      "overview": "Navigate to a page using the sidebar to see context-sensitive help for that section.",
+      "actions": {
+        "apiReference": {
+          "heading": "API Reference",
+          "text": "Visit the API Docs page for a full interactive reference of all registry endpoints."
+        }
+      }
+    },
+    "home": {
+      "title": "Home",
+      "overview": "The home page provides a quick-start overview of the registry, including live status of available modules, providers, and mirrors. Use it as a jumping-off point to browse published content or access the admin area.",
+      "actions": {
+        "browseModules": {
+          "heading": "Browse Modules",
+          "text": "Click \"Modules\" in the sidebar to search and explore published Terraform modules."
+        },
+        "browseProviders": {
+          "heading": "Browse Providers",
+          "text": "Click \"Providers\" to find provider binaries available in this registry."
+        },
+        "adminAccess": {
+          "heading": "Admin Access",
+          "text": "If you have admin privileges, use the sidebar links to manage users, upload content, or configure storage."
+        }
+      }
+    },
+    "modules": {
+      "title": "Modules",
+      "overview": "Lists all Terraform modules published in this registry. Modules are searchable by name and filterable by namespace. Click any module card to view versions, documentation, and usage instructions.",
+      "actions": {
+        "search": {
+          "heading": "Search",
+          "text": "Use the search field to filter modules by name or namespace in real time."
+        },
+        "viewModule": {
+          "heading": "View Module",
+          "text": "Click a module card to open the detail page with version history and README."
+        },
+        "uploadModule": {
+          "heading": "Upload a Module",
+          "text": "Go to Admin → Upload to publish a new module archive."
+        }
+      }
+    },
+    "moduleDetail": {
+      "title": "Module Detail",
+      "overview": "Shows all published versions of a specific module, its README documentation, and the Terraform source block needed to reference it. The latest stable version is highlighted.",
+      "actions": {
+        "copySourceBlock": {
+          "heading": "Copy Source Block",
+          "text": "Use the copy button next to the source field to get the Terraform module block."
+        },
+        "selectVersion": {
+          "heading": "Select Version",
+          "text": "Use the version selector to view documentation and inputs/outputs for a specific version."
+        },
+        "deprecateDelete": {
+          "heading": "Deprecate / Delete",
+          "text": "Admins can deprecate or remove a version using the action buttons on each version row."
+        }
+      }
+    },
+    "providers": {
+      "title": "Providers",
+      "overview": "Lists all Terraform providers published or mirrored in this registry. Providers are searchable by type and namespace. Click a provider card to view versions and platform binaries.",
+      "actions": {
+        "search": {
+          "heading": "Search",
+          "text": "Filter providers by name or namespace using the search field."
+        },
+        "viewProvider": {
+          "heading": "View Provider",
+          "text": "Click a card to open the provider detail page showing versions and platform downloads."
+        },
+        "uploadProvider": {
+          "heading": "Upload a Provider",
+          "text": "Go to Admin → Upload to publish a new provider binary with its checksums."
+        }
+      }
+    },
+    "providerDetail": {
+      "title": "Provider Detail",
+      "overview": "Shows all published versions of a specific provider and the platform binaries available for each version. Includes the Terraform required_providers block for easy copy-paste.",
+      "actions": {
+        "copyRequiredProviders": {
+          "heading": "Copy Required Providers Block",
+          "text": "Use the copy button to get the required_providers configuration."
+        },
+        "selectVersion": {
+          "heading": "Select Version",
+          "text": "Browse platform binaries (OS/arch combinations) per version."
+        },
+        "deprecateDelete": {
+          "heading": "Deprecate / Delete",
+          "text": "Admins can deprecate or remove individual provider versions."
+        }
+      }
+    },
+    "apiDocs": {
+      "title": "API Reference",
+      "overview": "API documentation for all registry endpoints, powered by ReDoc. Browse endpoint groups and view request/response schemas.",
+      "actions": {
+        "authenticate": {
+          "heading": "Authenticate",
+          "text": "Paste your API key as a Bearer token using the Authorize button at the top."
+        },
+        "browseEndpoints": {
+          "heading": "Browse Endpoints",
+          "text": "Use the left-hand endpoint tree to navigate by resource group."
+        }
+      }
+    },
+    "dashboard": {
+      "title": "Dashboard",
+      "overview": "A live health snapshot of your registry. The top bar shows mirror health at a glance. The stat cards below break down modules (with per-system counts), providers (manual vs mirrored), Terraform binary mirrors, and total downloads.",
+      "actions": {
+        "healthBar": {
+          "heading": "Health Bar",
+          "text": "Binary Mirrors, Provider Mirrors, and Storage pills turn red when something is failing. Click any pill to jump to that section."
+        },
+        "statCards": {
+          "heading": "Stat Cards",
+          "text": "Each card is a shortcut — click to navigate. The aside panels on Modules and Providers show the breakdown by system or mirror type."
+        },
+        "recentSyncActivity": {
+          "heading": "Recent Sync Activity",
+          "text": "The table shows the last 8 sync events across binary and provider mirrors, with status, versions synced, and elapsed time."
+        },
+        "quickLinks": {
+          "heading": "Quick Links",
+          "text": "Common admin actions — upload, manage users, configure mirrors — are one click away from the Quick Links panel."
+        }
+      }
+    },
+    "users": {
+      "title": "Users",
+      "overview": "Manage registry user accounts. Users can be created manually for local/API-key auth, or created automatically on first OIDC login. Assign users to organizations and grant them role templates here.",
+      "actions": {
+        "createUser": {
+          "heading": "Create User",
+          "text": "Click \"Add User\" to create a new account with an email and display name."
+        },
+        "editUser": {
+          "heading": "Edit User",
+          "text": "Click the edit icon on any row to update the user's name, organization, or role."
+        },
+        "deleteUser": {
+          "heading": "Delete User",
+          "text": "Removes the user account. Any API keys they hold will also be invalidated."
+        }
+      }
+    },
+    "organizations": {
+      "title": "Organizations",
+      "overview": "Organizations are namespace containers — modules and providers are published under an organization's namespace. Members of an organization inherit its role template's permissions.",
+      "actions": {
+        "createOrganization": {
+          "heading": "Create Organization",
+          "text": "Click \"Add Organization\" to define a new namespace with a URL-safe name."
+        },
+        "manageMembers": {
+          "heading": "Manage Members",
+          "text": "Expand an organization row to view and modify its member list."
+        },
+        "deleteOrganization": {
+          "heading": "Delete Organization",
+          "text": "Only possible when the organization has no published content."
+        }
+      }
+    },
+    "roles": {
+      "title": "Roles & Permissions",
+      "overview": "This page shows the fixed role templates available in the registry. Role templates define the permission scopes granted to users within an organization. Templates are system-defined and read-only.",
+      "actions": {
+        "viewScopes": {
+          "heading": "View Scopes",
+          "text": "Expand a role template to see the full list of permission scopes it grants."
+        },
+        "assignToUser": {
+          "heading": "Assign to User",
+          "text": "Go to Admin → Users to assign a role template to a user's organization membership."
+        }
+      }
+    },
+    "oidcGroups": {
+      "title": "OIDC Groups",
+      "overview": "Maps identity provider group claims to registry organizations and roles. When a user logs in via OIDC, their group memberships are read from the ID token and used to automatically provision or update their organization membership. Changes take effect on the next login without requiring a server restart.",
+      "actions": {
+        "groupClaimName": {
+          "heading": "Group Claim Name",
+          "text": "Set this to the claim key in your OIDC ID token that carries the user's group list (e.g. \"groups\"). This must match the protocol mapper configured in your identity provider."
+        },
+        "defaultRole": {
+          "heading": "Default Role",
+          "text": "Optionally assign a fallback role to users whose groups do not match any mapping. Leave blank to grant no automatic membership to unmatched users."
+        },
+        "addMapping": {
+          "heading": "Add a Mapping",
+          "text": "Click \"Add Mapping\" to link an IdP group name to a registry organization and role template. The group name must exactly match the value as it appears in the ID token claim."
+        },
+        "roleTemplates": {
+          "heading": "Role Templates",
+          "text": "Roles correspond to system role templates (viewer, publisher, mirror_manager, admin). Go to Admin → Roles to review what each template permits."
+        },
+        "saveChanges": {
+          "heading": "Save Changes",
+          "text": "Click \"Save Changes\" to persist your group claim and mapping configuration. Existing sessions are not affected until the user logs in again."
+        }
+      }
+    },
+    "apiKeys": {
+      "title": "API Keys",
+      "overview": "API keys allow programmatic access to authenticated registry endpoints. Each key is shown once at creation and stored only as a bcrypt hash — it cannot be retrieved after creation.",
+      "actions": {
+        "createKey": {
+          "heading": "Create Key",
+          "text": "Click \"Create API Key\" to generate a new key. Copy it immediately — it will not be shown again."
+        },
+        "revokeKey": {
+          "heading": "Revoke Key",
+          "text": "Delete a key to immediately invalidate all requests using it."
+        },
+        "useKey": {
+          "heading": "Use the Key",
+          "text": "Include the key as Authorization: Bearer <key> in HTTP requests."
+        }
+      }
+    },
+    "upload": {
+      "title": "Upload",
+      "overview": "Upload module archives (.tar.gz) or provider binaries to publish them in the registry. The upload wizard validates archive structure, checksums, and GPG signatures before publishing.",
+      "actions": {
+        "uploadModule": {
+          "heading": "Upload Module",
+          "text": "Select the \"Module\" tab, provide namespace/name/system/version, and attach the .tar.gz archive."
+        },
+        "uploadProvider": {
+          "heading": "Upload Provider",
+          "text": "Select the \"Provider\" tab, fill in namespace/type/version/platform details, and attach the binary plus checksum files."
+        },
+        "scmLinking": {
+          "heading": "SCM Linking",
+          "text": "Alternatively, link a module to an SCM repository so it publishes automatically from git tags."
+        }
+      }
+    },
+    "scmProviders": {
+      "title": "SCM Providers",
+      "overview": "SCM provider configurations connect the registry to GitHub, GitLab, Bitbucket, or Azure DevOps for automated module publishing via git tag webhooks. Each connection uses OAuth credentials.",
+      "actions": {
+        "addProvider": {
+          "heading": "Add Provider",
+          "text": "Click \"Add SCM Provider\", select the platform, enter the OAuth App Client ID and Secret, then complete the OAuth authorization flow."
+        },
+        "reconnect": {
+          "heading": "Reconnect",
+          "text": "If OAuth tokens expire, use the reconnect button to re-authorize."
+        },
+        "linkModule": {
+          "heading": "Link a Module",
+          "text": "After adding an SCM provider, go to Admin → Upload → SCM to link a repository to a module."
+        }
+      }
+    },
+    "mirrors": {
+      "title": "Provider Mirrors",
+      "overview": "Provider mirrors synchronize provider binaries from the official Terraform registry (or any compatible upstream) into this registry. Once mirrored, providers are available without internet access.",
+      "actions": {
+        "createMirror": {
+          "heading": "Create Mirror",
+          "text": "Click \"Add Mirror\" to define an upstream registry URL and filter rules for which providers to sync."
+        },
+        "triggerSync": {
+          "heading": "Trigger Sync",
+          "text": "Use the sync button on a mirror to immediately fetch the latest versions from upstream."
+        },
+        "viewSyncHistory": {
+          "heading": "View Sync History",
+          "text": "Expand a mirror row to see the log of recent sync runs and any errors."
+        }
+      }
+    },
+    "storage": {
+      "title": "Storage",
+      "overview": "Configures the backend storage used for module and provider artifacts. Supported backends are local filesystem, AWS S3, Azure Blob Storage, and Google Cloud Storage. Only one backend can be active at a time.",
+      "actions": {
+        "switchBackend": {
+          "heading": "Switch Backend",
+          "text": "Select a backend type, fill in credentials, and click \"Activate\" to migrate to the new storage."
+        },
+        "testConnection": {
+          "heading": "Test Connection",
+          "text": "Use the \"Test\" button to validate credentials before activating."
+        },
+        "localStorage": {
+          "heading": "Local Storage",
+          "text": "For development, the local filesystem backend requires no credentials."
+        }
+      }
+    },
+    "terraformBinaries": {
+      "title": "Terraform Binary Mirrors",
+      "overview": "Lists the available Terraform and OpenTofu binary mirrors hosted by this registry. Each mirror caches a set of binary versions from an upstream source so your CI pipelines and developer machines can download them without direct internet access.",
+      "actions": {
+        "viewVersions": {
+          "heading": "View Versions",
+          "text": "Click a mirror card to open its detail page, which shows all available versions and the platform binaries (OS/arch) synced for each."
+        },
+        "downloadUrl": {
+          "heading": "Download URL",
+          "text": "The detail page shows the full download URL pattern. Point your Terraform CLI or CI toolchain at this URL instead of the upstream registry."
+        },
+        "adminConfiguration": {
+          "heading": "Admin Configuration",
+          "text": "To add or manage mirror configurations, go to Admin → Terraform Binaries."
+        }
+      }
+    },
+    "terraformBinaryDetail": {
+      "title": "Binary Mirror Detail",
+      "overview": "Shows all versions synced for this binary mirror and the platform binaries available for each version. Expand a version row to inspect individual OS/architecture combinations, checksum verification status, and GPG signature status.",
+      "actions": {
+        "expandPlatforms": {
+          "heading": "Expand Platforms",
+          "text": "Click the expand arrow on a version row to see per-platform details including OS, architecture, filename, and whether checksum and GPG verification passed."
+        },
+        "downloadUrl": {
+          "heading": "Download URL",
+          "text": "Use the URL pattern shown in the info banner to download a specific version and platform: /terraform/binaries/{name}/versions/{version}/{os}/{arch}."
+        },
+        "deprecateVersion": {
+          "heading": "Deprecate a Version",
+          "text": "Admins can click the warning icon to deprecate a version. Deprecated versions remain available for download but will not be re-synced in future sync runs."
+        },
+        "deleteVersion": {
+          "heading": "Delete a Version",
+          "text": "Admins can permanently remove a version record and its binaries from storage. Consider deprecating instead if you want to retain the files but prevent re-syncing."
+        },
+        "restoreDeprecatedVersion": {
+          "heading": "Restore a Deprecated Version",
+          "text": "Click the restore icon on a deprecated version to remove the deprecation flag and allow it to be re-synced."
+        }
+      }
+    },
+    "terraformMirror": {
+      "title": "Terraform Binary Mirror",
+      "overview": "Manages mirror configurations that cache Terraform and OpenTofu binary distributions from upstream sources. Once mirrored, binaries can be served to engineers without direct internet access, enabling air-gapped or bandwidth-constrained environments.",
+      "actions": {
+        "createMirrorConfig": {
+          "heading": "Create a Mirror Config",
+          "text": "Click \"Add Mirror\" to define a new mirror. Give it a name, select the tool type (terraform, opentofu, or custom), and specify the upstream URL to sync from."
+        },
+        "syncVersions": {
+          "heading": "Sync Versions",
+          "text": "Expand a mirror config and click the sync button to immediately fetch the latest binary index from upstream. Sync history shows the result of each run."
+        },
+        "inspectPlatforms": {
+          "heading": "Inspect Platforms",
+          "text": "Drill into a version to see which OS/architecture combinations have been downloaded and are available locally."
+        },
+        "enableDisable": {
+          "heading": "Enable / Disable",
+          "text": "Toggle a mirror config off to pause scheduled syncs without deleting the configuration or cached binaries."
+        },
+        "deleteConfig": {
+          "heading": "Delete a Config",
+          "text": "Removes the mirror configuration. Previously synced binaries in storage are not automatically removed."
+        }
+      }
+    },
+    "approvals": {
+      "title": "Approval Requests",
+      "overview": "Approval requests are raised when a mirror policy requires human sign-off before a provider namespace or binary is mirrored. An admin must approve or reject each request. Approved requests allow the mirror sync to proceed; rejected requests block it.",
+      "actions": {
+        "reviewRequest": {
+          "heading": "Review a Request",
+          "text": "Click the \"Approve\" or \"Reject\" button on a pending request card to open the review dialog. Add reviewer notes to explain the decision, then confirm."
+        },
+        "createRequest": {
+          "heading": "Create a Request",
+          "text": "Click \"Create Request\" to manually raise an approval for a provider namespace. Useful for pre-approving content before configuring a mirror policy."
+        },
+        "filterByStatus": {
+          "heading": "Filter by Status",
+          "text": "Pending, approved, and rejected requests are all shown together. Look at the status chip on each card to distinguish them at a glance."
+        },
+        "mirrorPolicyLink": {
+          "heading": "Mirror Policy Link",
+          "text": "Each request references the mirror config that triggered it. Navigate to Admin → Provider Mirrors to view or edit the associated mirror configuration."
+        }
+      }
+    },
+    "mirrorPolicies": {
+      "title": "Mirror Policies",
+      "overview": "Mirror policies control which providers are allowed or denied from being mirrored, and whether mirroring them requires an approval request. Policies are matched by upstream registry URL, namespace pattern, and provider name pattern. Higher-priority policies take precedence when multiple rules match.",
+      "actions": {
+        "createPolicy": {
+          "heading": "Create a Policy",
+          "text": "Click \"Create Policy\" and fill in the name, type (allow or deny), and pattern fields. Use glob-style wildcards (e.g. hashicorp/* ) in the namespace and provider fields to match multiple providers at once."
+        },
+        "allowVsDeny": {
+          "heading": "Allow vs Deny",
+          "text": "An \"allow\" policy permits matched providers to be mirrored. A \"deny\" policy blocks them. Deny policies override allow policies at the same priority level."
+        },
+        "requireApproval": {
+          "heading": "Require Approval",
+          "text": "Enable \"Requires Approval\" on an allow policy to route matched providers through the approval workflow before syncing. Approved requests appear in Admin → Approval Requests."
+        },
+        "priority": {
+          "heading": "Priority",
+          "text": "Policies are evaluated in ascending priority order (lower number = higher priority). Set priority carefully when allow and deny rules overlap."
+        },
+        "evaluatePolicy": {
+          "heading": "Evaluate a Policy",
+          "text": "Use the \"Evaluate\" button to test how a specific provider namespace/name would be matched against the current policy set without triggering a real sync."
+        },
+        "enableDisable": {
+          "heading": "Enable / Disable",
+          "text": "Toggle a policy off to suspend it temporarily without deleting it. Disabled policies are skipped during evaluation."
+        }
+      }
+    },
+    "auditLogs": {
+      "title": "Audit Logs",
+      "overview": "A tamper-evident record of every significant action taken in the registry — uploads, deletes, configuration changes, login events, and mirror syncs. Use it for compliance reviews, incident investigation, or general activity monitoring.",
+      "actions": {
+        "filterByResourceType": {
+          "heading": "Filter by Resource Type",
+          "text": "Use the Resource Type dropdown to narrow results to a specific entity class (e.g. module, provider, user, mirror)."
+        },
+        "filterByAction": {
+          "heading": "Filter by Action",
+          "text": "Type an action name (e.g. \"create\", \"delete\", \"login\") in the Action field to show only matching events."
+        },
+        "filterByUser": {
+          "heading": "Filter by User",
+          "text": "Enter a user email to see all actions performed by that account."
+        },
+        "dateRange": {
+          "heading": "Date Range",
+          "text": "Set Start and End date pickers to restrict results to a specific time window."
+        },
+        "viewDetail": {
+          "heading": "View Detail",
+          "text": "Click any row to open a detail panel showing the full log entry, including resource ID, actor, and metadata."
+        },
+        "export": {
+          "heading": "Export",
+          "text": "Use the Export button to download the current filtered result set as CSV or JSON."
+        }
+      }
+    },
+    "securityScanning": {
+      "title": "Security Scanning",
+      "overview": "Displays the current configuration and results of the module vulnerability scanner. The scanner analyses uploaded module archives for known security issues using an external scanning tool configured by the server administrator.",
+      "actions": {
+        "viewConfiguration": {
+          "heading": "View Configuration",
+          "text": "The top section shows whether scanning is enabled, the scanner tool and version, severity threshold, timeout, and worker/interval settings."
+        },
+        "summaryStatistics": {
+          "heading": "Summary Statistics",
+          "text": "Aggregate counts show total scans, pending, clean, findings, and errors at a glance."
+        },
+        "reviewScanResults": {
+          "heading": "Review Scan Results",
+          "text": "The recent scans table lists each module with its scan status and vulnerability counts broken down by severity (critical, high, medium, low)."
+        }
+      }
+    },
+    "mtls": {
+      "title": "mTLS Certificates",
+      "overview": "Shows the current mutual TLS (mTLS) configuration, including whether client certificate authentication is enabled and which certificate subjects are mapped to authorization scopes. All mTLS settings are read-only in the UI — configuration is managed through the server config file.",
+      "actions": {
+        "viewStatus": {
+          "heading": "View Status",
+          "text": "The status indicator shows whether mTLS is enabled or disabled, along with the CA certificate file path used to verify client certificates."
+        },
+        "certificateMappings": {
+          "heading": "Certificate Mappings",
+          "text": "The mappings table lists each certificate subject and the scopes it is authorized to use. Clients presenting a matching certificate receive these scopes automatically."
+        },
+        "configurationSource": {
+          "heading": "Configuration Source",
+          "text": "All mTLS settings are sourced from the server configuration file. To modify mappings, update the config file and restart the backend."
+        }
+      }
+    },
+    "scim": {
+      "title": "SCIM Provisioning",
+      "overview": "SCIM 2.0 enables automatic user and group provisioning from your identity provider (e.g. Azure AD, Okta). This page shows the SCIM endpoint URLs and authentication requirements needed to configure your IdP.",
+      "actions": {
+        "endpointUrls": {
+          "heading": "Endpoint URLs",
+          "text": "Copy the SCIM base URL, Users endpoint, and Groups endpoint into your identity provider's SCIM configuration."
+        },
+        "authentication": {
+          "heading": "Authentication",
+          "text": "SCIM requests require a Bearer token with the scim:provision scope. Create one on the API Keys page and paste it into your IdP's SCIM token field."
+        },
+        "supportedOperations": {
+          "heading": "Supported Operations",
+          "text": "Users support full CRUD and soft-delete. Groups are read-only and map to registry organizations. Filtering and pagination are supported."
+        }
+      }
+    }
   }
 }

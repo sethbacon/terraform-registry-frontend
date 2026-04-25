@@ -26,7 +26,10 @@ interface AuthProvider {
   id?: string;
 }
 
-function providerLabel(p: AuthProvider, t: ReturnType<typeof useTranslation>['t']): string {
+// Simple t type avoids excessively-deep instantiation from the large i18next key union
+type SimpleTFunc = (key: string, options?: Record<string, unknown>) => string
+
+function providerLabel(p: AuthProvider, t: SimpleTFunc): string {
   switch (p.type) {
     case 'oidc':
       return t('auth.signInWithSSO');
