@@ -6,9 +6,9 @@ All changes follow this workflow. Do not deviate from it.
 
 ### Branches
 
-- `main` — production-ready, tagged releases only. **Must always exist — never delete.**
-- `development` — integration branch; all feature/fix branches merge here first. **Must always exist — never delete.**
-- Feature/fix branches are created from `development`, never from `main`. Delete them from remote after their PR is merged; clean up locally with `git branch -d`.
+- `main` — the single long-lived branch. All work branches off `main`; all PRs target `main`.
+  **Must always exist — never delete.**
+- Feature/fix branches are created from `main` and deleted after their PR is squash-merged.
 
 ```bash
 # After a feature/fix PR is merged:
@@ -17,21 +17,44 @@ git branch -d fix/short-description              # remove local branch
 git remote prune origin                          # prune stale remote-tracking refs
 ```
 
+### Conventional Commits
+
+PR titles (and ideally commit messages) must follow [Conventional Commits](https://www.conventionalcommits.org/):
+
+```text
+<type>(<optional scope>): <description>
+```
+
+| Type | When to use | Version bump |
+| ---- | ----------- | ------------ |
+| `feat` | New user-facing feature | minor |
+| `fix` | Bug fix | patch |
+| `perf` | Performance improvement | patch |
+| `refactor` | Code restructure (no behavior change) | none |
+| `docs` | Documentation only | none |
+| `test` | Adding or fixing tests | none |
+| `ci` | CI/CD workflow changes | none |
+| `chore` | Maintenance, deps, tooling | none |
+| `deps` | Dependency updates | none |
+| `security` | Security fix | patch |
+| `revert` | Reverts a previous commit | patch |
+
+Breaking changes: append `!` to the type (`feat!:`) **or** add a `BREAKING CHANGE:` footer.
+These trigger a **major** version bump.
+
 ### Step-by-step
 
 1. **Open a GitHub issue** describing the bug or feature before writing any code.
 
-2. **Create a branch from `development`**:
+2. **Create a branch from `main`**:
 
    ```bash
    git fetch origin
-   git checkout -b fix/short-description origin/development
-   # or: feature/short-description
+   git checkout -b fix/short-description origin/main
+   # or: feat/short-description, docs/topic, etc.
    ```
 
 3. **Implement the change.**
-
-   Include a `## Changelog` section in the PR body (step 6) with entries for this change. **Do not edit `CHANGELOG.md` directly** — entries are collected automatically at release time.
 
 4. **Commit — no co-author attribution**:
 
@@ -42,7 +65,8 @@ git remote prune origin                          # prune stale remote-tracking r
    Closes #<issue-number>"
    ```
 
-   Do not add `Co-Authored-By:` trailers or `🤖 Generated with [Claude Code]` footers to commit messages or PR bodies.
+   Do not add `Co-Authored-By:` trailers or `🤖 Generated with [Claude Code]` footers to
+   commit messages or PR bodies.
 
 5. **Push to origin**:
 
@@ -50,80 +74,36 @@ git remote prune origin                          # prune stale remote-tracking r
    git push -u origin fix/short-description
    ```
 
-6. **Open a PR from the feature branch → `development`**:
+6. **Open a PR targeting `main`**:
 
    ```bash
-   gh pr create --base development --title "fix: short description" --body "Closes #<issue>"
+   gh pr create --base main --title "fix: short description" --body "Closes #<issue>"
    ```
 
-   - Include a `## Changelog` section in the PR body with the entry for this change (format: `- type: description`). **Do not edit `CHANGELOG.md` in the branch** — changelog entries are collected from merged PR bodies at release time by the `prepare-release.yml` workflow.
-   - Squash-merge into `development` when approved.
-
-7. **Open a PR from `development` → `main`** when the integration branch is ready to ship:
-
-   ```bash
-   gh pr create --base main --title "chore: release vX.Y.Z" --body "..."
-   ```
+   - PR title must follow Conventional Commits — enforced by `pr-checks.yml`.
+   - Squash-merge into `main` when approved.
 
 ### Releasing a version
 
-Releases are largely automated via two workflows: `prepare-release.yml` and `auto-tag.yml`.
+Releases are fully automated via `release-please.yml`.
 
-#### Automated flow (preferred)
+1. **Merge feature/fix PRs to `main`** as usual.
 
-1. **Dispatch `prepare-release.yml`** from the GitHub Actions UI or CLI:
+2. **release-please maintains an open release PR** titled
+   `chore(main): release X.Y.Z`. It auto-updates `CHANGELOG.md` and
+   `frontend/package.json` as commits accumulate. Review it at any time
+   to see what will ship.
 
-   ```bash
-   gh workflow run prepare-release.yml -f version=X.Y.Z --ref development
-   ```
+3. **When ready to release**, review and merge the release-please PR using a
+   **squash merge** (GitHub default). release-please pushes the tag using the
+   `terraform-registry-release-bot` GitHub App token.
 
-   This will:
-   - Collect `## Changelog` entries from merged PR bodies since the last tag
-   - Update `CHANGELOG.md`
-   - Bump `frontend/package.json` version to match
-   - Create a `release/vX.Y.Z` branch, commit, and push
-   - Open a release PR (`release/vX.Y.Z` → `main`) titled `chore: release vX.Y.Z`
+4. **`release.yml` fires automatically** from the tag push (App token bypasses
+   the `GITHUB_TOKEN` downstream-trigger limitation). It runs CI, builds and
+   signs the Docker image, attests SLSA provenance, creates the GitHub Release,
+   and updates the wiki version badge.
 
-2. **UAT — local build validation** before merging to `main`:
-
-   ```bash
-   cd deployments
-   docker compose -f docker-compose.yml -f docker-compose.oidc.yml build --no-cache frontend
-   docker compose -f docker-compose.yml -f docker-compose.oidc.yml up -d
-   ```
-
-   Open the frontend in a browser and verify it loads, pages render, and usage examples
-   display correctly. If the full stack is running, run a quick `terraform init` against a
-   mirrored provider and a module to confirm downloads work end-to-end. **Do not merge to
-   `main` until the local build passes.**
-
-3. **Merge the release PR using a merge commit** (not squash). This preserves shared commit
-   ancestry between `development` and `main`, preventing CHANGELOG merge conflicts.
-
-   > **Important:** Release PRs (`development` → `main`) must use merge commits. Feature PRs
-   > (`feature/*` → `development`) continue to use squash merges. GitHub allows both when
-   > "Allow merge commits" and "Allow squash merging" are both enabled.
-
-4. **`auto-tag.yml` fires automatically** after the release PR merges. It extracts the
-   version from the PR title (`chore: release vX.Y.Z`) and creates + pushes the tag.
-
-5. **Manually dispatch `release.yml`** to build and publish release artifacts:
-
-   ```bash
-   gh workflow run release.yml -f tag=vX.Y.Z --ref vX.Y.Z
-   ```
-
-   > **Why manual?** Tags pushed by `GITHUB_TOKEN` (from `auto-tag.yml`) cannot trigger
-   > downstream workflows — this is a GitHub security limitation to prevent infinite loops.
-   > A GitHub App token or PAT with `workflow` scope would allow fully automatic triggering.
-
-   `release.yml` runs CI, builds the Docker image, pushes to ghcr.io, attests SLSA
-   provenance, signs with cosign, and creates the GitHub Release.
-
-6. **Update deployment configs in the backend repo** to reference the new frontend version.
-   The backend repository (`terraform-registry-backend`) hosts all Kubernetes, Helm, and
-   cloud deployment configs that include frontend image tags. After a frontend release,
-   update these files in the backend repo:
+5. **Update deployment configs in the backend repo** to reference the new tag:
 
    **Helm chart** (in `deployments/helm/`):
    - `values.yaml` — update `frontend.image.tag`
@@ -133,18 +113,14 @@ Releases are largely automated via two workflows: `prepare-release.yml` and `aut
    - `eks/kustomization.yaml` — update frontend `newTag`
    - `gke/kustomization.yaml` — update frontend `newTag`
 
-   > The frontend repo's own `deployments/` directory uses Docker Compose with
-   > `${REGISTRY_TAG:-latest}` — no hardcoded tags to update here.
+#### Hotfix flow
+
+For urgent fixes, create a `fix/` branch from `main`, open a PR, merge. release-please
+will bump the patch version in the open release PR. Merge the release PR to ship.
 
 #### Manual fallback
 
-If the automated workflow fails, you can perform the steps manually:
-
-1. Run `.github/scripts/collect-changelog.sh` to gather entries.
-2. Update `CHANGELOG.md` and `frontend/package.json` version on `development`.
-3. Commit `chore: release vX.Y.Z`, push, and open the release PR to `main`.
-4. After merge, tag manually: `git tag -a vX.Y.Z origin/main -m "Release vX.Y.Z" && git push origin vX.Y.Z`.
-5. Dispatch release: `gh workflow run release.yml -f tag=vX.Y.Z --ref vX.Y.Z`.
+If `release-please.yml` fails, see [RELEASING.md](RELEASING.md) for the manual procedure.
 
 ---
 
@@ -301,32 +277,24 @@ docker compose -f docker-compose.test.yml up -d --build
 ### Branch Protection
 
 **`main` branch:**
-- Required status checks (strict — branch must be up-to-date): `Frontend Lint & Build`
+
+- Required status checks (strict — branch must be up-to-date): `Lint`, `Typecheck`, `Unit Tests`, `Contract Check`, `Build`, `Conventional PR Title`
 - Required pull request reviews: 1 approving review, dismiss stale reviews, require code owner review
 - Enforce admins: no (admin/owner can bypass review requirements as sole maintainer)
 - Required conversation resolution: yes
 - Force pushes: blocked
 - Branch deletion: blocked
 
-**`development` branch:**
-- Required status checks (non-strict): `Frontend Lint & Build`
-- Required linear history: yes
-- Required conversation resolution: yes
-- Force pushes: blocked
-- Branch deletion: blocked
-- Admin bypass: allowed (owner can push directly for admin tasks)
-
 ### Merge Strategy
 
-- **Squash merge** — default for feature/fix branches → `development`
-- **Merge commits** — used for release PRs (`development` → `main`) to preserve commit ancestry and prevent CHANGELOG conflicts
+- **Squash merge** — all feature/fix branches → `main`
 - **Rebase merges** — disabled
 - **Delete branch on merge** — enabled; feature/fix branches are cleaned up automatically
 - **Allow update branch** — enabled; PRs can pull in base branch changes via GitHub UI
 - **Web commit signoff required** — enabled; all web-based commits require DCO signoff
 
-> **GitHub repo settings required:** Both "Allow merge commits" and "Allow squash merging"
-> must be enabled. "Allow rebase merging" remains disabled.
+> **GitHub repo settings required:** "Allow squash merging" must be enabled.
+> "Allow merge commits" and "Allow rebase merging" remain disabled.
 
 ### Dependency Management
 

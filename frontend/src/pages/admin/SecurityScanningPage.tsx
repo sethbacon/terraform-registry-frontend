@@ -21,6 +21,7 @@ import {
 import CheckCircle from '@mui/icons-material/CheckCircle';
 import Error from '@mui/icons-material/Error';
 import HourglassEmpty from '@mui/icons-material/HourglassEmpty';
+import WarningAmber from '@mui/icons-material/WarningAmber';
 import api from '../../services/api';
 
 function statusChip(status: string) {
@@ -112,6 +113,35 @@ const SecurityScanningPage: React.FC = () => {
                 <Typography variant="body1" fontFamily="monospace">
                   {config?.worker_count ?? '—'} workers, every {config?.scan_interval_mins ?? '—'}m
                 </Typography>
+              </Grid>
+              <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+                <Typography variant="caption" color="text.secondary">Binary Path</Typography>
+                {config?.binary_path ? (
+                  <Typography variant="body1" fontFamily="monospace" sx={{ wordBreak: 'break-all' }}>
+                    {config.binary_path}
+                  </Typography>
+                ) : (
+                  <Typography variant="body2" color="text.disabled">
+                    Not reported by backend
+                  </Typography>
+                )}
+              </Grid>
+              <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+                <Typography variant="caption" color="text.secondary">Detected Version</Typography>
+                {config?.detected_version ? (
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mt: 0.5 }}>
+                    <Typography variant="body1" fontFamily="monospace">{config.detected_version}</Typography>
+                    {config.expected_version && config.detected_version !== config.expected_version && (
+                      <Tooltip title={`Expected ${config.expected_version}`}>
+                        <WarningAmber fontSize="small" color="warning" />
+                      </Tooltip>
+                    )}
+                  </Box>
+                ) : (
+                  <Typography variant="body2" color="text.disabled">
+                    Not reported by backend
+                  </Typography>
+                )}
               </Grid>
             </Grid>
           </Paper>

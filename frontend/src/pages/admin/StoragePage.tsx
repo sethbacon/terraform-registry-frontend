@@ -40,6 +40,7 @@ import {
 import StorageIcon from '@mui/icons-material/Storage';
 import CloudIcon from '@mui/icons-material/Cloud';
 import FolderIcon from '@mui/icons-material/Folder';
+import AddIcon from '@mui/icons-material/Add';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import InfoIcon from '@mui/icons-material/Info';
@@ -61,6 +62,7 @@ const StoragePage: React.FC = () => {
   const [saving, setSaving] = useState(false);
   const [testing, setTesting] = useState(false);
   const [migrationWizardOpen, setMigrationWizardOpen] = useState(false);
+  const [showAddWizard, setShowAddWizard] = useState(false);
 
   // Wizard state
   const [activeStep, setActiveStep] = useState(0);
@@ -206,6 +208,7 @@ const StoragePage: React.FC = () => {
       setSuccess('Storage configuration saved successfully!');
       queryClient.invalidateQueries({ queryKey: queryKeys.storageConfigs._def });
       setActiveStep(0);
+      setShowAddWizard(false);
     } catch (err: unknown) {
       setError(getErrorMessage(err, 'Failed to save configuration'));
     } finally {
@@ -619,10 +622,12 @@ const StoragePage: React.FC = () => {
   const renderSetupWizard = () => (
     <Container maxWidth="lg" sx={{ py: 4 }}>
       <Typography variant="h4" gutterBottom>
-        Storage Configuration
+        {showAddWizard ? 'Add Storage Configuration' : 'Storage Configuration'}
       </Typography>
       <Typography variant="body1" color="text.secondary" paragraph>
-        Configure where the registry will store module and provider files. This is required before you can upload artifacts.
+        {showAddWizard
+          ? 'Add a second storage configuration. Once added, you can migrate data from the active backend to this one.'
+          : 'Configure where the registry will store module and provider files. This is required before you can upload artifacts.'}
       </Typography>
 
       <Stepper activeStep={activeStep} sx={{ mb: 4 }}>
@@ -652,12 +657,19 @@ const StoragePage: React.FC = () => {
       </Paper>
 
       <Box display="flex" justifyContent="space-between">
-        <Button
-          disabled={activeStep === 0}
-          onClick={() => setActiveStep((prev) => prev - 1)}
-        >
-          Back
-        </Button>
+        <Box sx={{ display: 'flex', gap: 1 }}>
+          <Button
+            disabled={activeStep === 0}
+            onClick={() => setActiveStep((prev) => prev - 1)}
+          >
+            Back
+          </Button>
+          {showAddWizard && (
+            <Button onClick={() => { setShowAddWizard(false); setActiveStep(0); }}>
+              Cancel
+            </Button>
+          )}
+        </Box>
         <Box>
           {activeStep === steps.length - 1 ? (
             <Button
@@ -688,13 +700,21 @@ const StoragePage: React.FC = () => {
           <Typography variant="h4">Storage Settings</Typography>
         </Box>
         <Box sx={{ display: 'flex', gap: 1 }}>
-          {configs.length >= 2 && (
+          {configs.length >= 2 ? (
             <Button
               variant="outlined"
               startIcon={<SyncIcon />}
               onClick={() => setMigrationWizardOpen(true)}
             >
               Migrate Data
+            </Button>
+          ) : (
+            <Button
+              variant="outlined"
+              startIcon={<AddIcon />}
+              onClick={() => { setActiveStep(0); setShowAddWizard(true); }}
+            >
+              Add Configuration
             </Button>
           )}
           <Button
@@ -726,6 +746,13 @@ const StoragePage: React.FC = () => {
           Create a new configuration and activate it only after migrating existing data.
         </Box>
       </Alert>
+
+      {configs.length === 1 && (
+        <Alert severity="info" sx={{ mb: 3 }} icon={<SyncIcon />}>
+          To migrate data to a different storage backend, click <strong>Add Configuration</strong> above
+          to configure a second backend. A migration option will appear once a second configuration exists.
+        </Alert>
+      )}
 
       <Grid container spacing={3}>
         {configs.map((config) => (
@@ -925,7 +952,7 @@ const StoragePage: React.FC = () => {
           <CircularProgress />
         </Box>
       ) : (
-        setupStatus?.setup_required ? renderSetupWizard() : renderExistingConfigs()
+        setupStatus?.setup_required || showAddWizard ? renderSetupWizard() : renderExistingConfigs()
       )}
     </Box>
   );

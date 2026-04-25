@@ -1,0 +1,49 @@
+---
+name: Update Wiki (manual)
+
+# Fallback for manually updating the wiki version badge when the
+# automatic update in release.yml fails or needs to be re-run.
+"on":
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version tag to set (e.g., v0.13.0)"
+        required: true
+        type: string
+
+jobs:
+  update-wiki:
+    name: Update wiki version badge
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Clone wiki
+        run: |
+          git clone \
+            "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.wiki.git" \
+            wiki
+
+      - name: Update version in Home.md
+        working-directory: wiki
+        run: |
+          TAG="${{ inputs.version }}"
+          sed -i \
+            "s|\*\*Current:\*\* v[0-9]*\.[0-9]*\.[0-9]*[^ ]*|\*\*Current:\*\* ${TAG}|" \
+            Home.md
+          echo "Updated Home.md to ${TAG}"
+          grep "Current:" Home.md
+
+      - name: Commit and push
+        working-directory: wiki
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if git diff --quiet; then
+            echo "No changes to commit"
+            exit 0
+          fi
+          git add Home.md
+          git commit -m "docs: update version to ${{ inputs.version }}"
+          git push

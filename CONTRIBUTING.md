@@ -13,7 +13,7 @@ Thank you for your interest in contributing to the frontend UI and E2E test suit
     - [Local Setup](#local-setup)
   - [Development Workflow](#development-workflow)
     - [Branch Naming](#branch-naming)
-    - [Commit Messages](#commit-messages)
+    - [Conventional Commits](#conventional-commits)
   - [Frontend (TypeScript) Standards](#frontend-(typescript)-standards)
     - [Linting](#linting)
     - [Conventions](#conventions)
@@ -70,6 +70,8 @@ Alternatively, set up the backend manually — see [terraform-registry-backend](
 
 ## Development Workflow
 
+All work branches from `main` and is merged back to `main` via squash merge.
+
 ### Branch Naming
 
 | Type          | Pattern                  | Example                      |
@@ -79,12 +81,25 @@ Alternatively, set up the backend manually — see [terraform-registry-backend](
 | Documentation | `docs/topic`             | `docs/e2e-setup`             |
 | Refactor      | `refactor/area`          | `refactor/auth-context`      |
 
-### Commit Messages
+### Conventional Commits
 
-- Use the **imperative mood**: "Add feature" not "Added feature"
-- Keep the subject line under **72 characters**
-- Leave a blank line, then explain **why** the change is needed in the body
-- Reference issues with `Fixes #123` or `Closes #123`
+PR titles **must** follow [Conventional Commits](https://www.conventionalcommits.org/) — enforced by CI:
+
+```text
+<type>(<optional scope>): <description>
+```
+
+Common types: `feat`, `fix`, `docs`, `refactor`, `perf`, `test`, `ci`, `chore`, `deps`, `security`, `revert`.
+
+Breaking changes use `feat!:` or include a `BREAKING CHANGE:` footer.
+
+Examples:
+
+- `feat: add module scan status badge to version detail page`
+- `fix: prevent null reference on missing scan result`
+- `docs: update e2e setup instructions`
+- `chore: bump postcss to 8.5.10`
+- `feat!: remove legacy v1 module endpoint`
 
 ---
 
@@ -300,15 +315,16 @@ Once configured, the workflow:
 ---
 
 ## Pull Request Process
-2. Write a clear PR description:
-   - What changed and why
-   - How you tested it
-   - Screenshots for UI changes
-   - Link to the issue being resolved
-3. All CI checks must pass.
-4. At least one reviewer approval is required before merging.
-5. **Squash merge** is preferred to keep the main branch history clean.
-6. The PR author is responsible for resolving merge conflicts.
+
+1. Branch from `main` (`feat/`, `fix/`, `docs/`, `refactor/`, etc.).
+2. Write a clear PR description — what changed and why, how you tested it,
+   screenshots for UI changes, and a link to the issue.
+3. **PR title must follow Conventional Commits** (enforced by CI):
+   `feat: add login page` / `fix: null ref on missing scan` / `docs: update e2e setup`.
+4. All CI checks must pass.
+5. At least one reviewer approval is required before merging.
+6. **Squash-merge** into `main`.
+7. The PR author is responsible for resolving merge conflicts.
 
 ---
 
