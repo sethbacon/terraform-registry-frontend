@@ -1661,6 +1661,11 @@ class ApiClient {
       return null
     }
   }
+
+  async updateAdminUITheme(config: import('../types').UIThemeConfig): Promise<import('../types').UIThemeConfig> {
+    const response = await this.client.put('/api/v1/admin/ui-theme', config)
+    return response.data as import('../types').UIThemeConfig
+  }
 }
 
 const apiClient = new ApiClient()
