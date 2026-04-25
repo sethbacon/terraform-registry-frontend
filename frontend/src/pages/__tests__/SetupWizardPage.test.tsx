@@ -222,7 +222,7 @@ describe('SetupWizardPage — Security Scanning step', () => {
   )
 
   it(
-    'skipping scanning advances to Admin step',
+    'skipping scanning advances to Branding step',
     async () => {
       renderPage()
       await waitFor(() => {
@@ -234,7 +234,7 @@ describe('SetupWizardPage — Security Scanning step', () => {
       await user.click(screen.getByRole('button', { name: /Skip/i }))
 
       await waitFor(() => {
-        expect(screen.getByText('Initial Admin User')).toBeInTheDocument()
+        expect(screen.getByText('White-Label Branding')).toBeInTheDocument()
       })
     },
     STEP3_TIMEOUT,
@@ -460,7 +460,7 @@ describe('SetupWizardPage — Security Scanning step', () => {
       })
 
       await waitFor(() => {
-        expect(screen.getByText(/Next: Configure Admin/)).toBeInTheDocument()
+        expect(screen.getByText(/Next: Branding/)).toBeInTheDocument()
       })
     },
     STEP3_TIMEOUT,

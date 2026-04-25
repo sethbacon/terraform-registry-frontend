@@ -166,7 +166,7 @@ describe('ScanningStep', () => {
     }
     mockCtx.scanningSaved = true
     render(<ScanningStep />)
-    expect(screen.getByRole('button', { name: /Next: Configure Admin/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /Next: Branding/i })).toBeInTheDocument()
   })
 
   it('navigates back on Back click', async () => {
@@ -400,7 +400,7 @@ describe('ScanningStep — pending feature setup', () => {
   it('skips to step 5 in pending mode', async () => {
     render(<ScanningStep />)
     await userEvent.setup().click(screen.getByRole('button', { name: /Skip/i }))
-    expect(mockCtx.goToStep).toHaveBeenCalledWith(5)
+    expect(mockCtx.goToStep).toHaveBeenCalledWith(6)
   })
 
   it('shows "Next: Review & Complete" label in pending mode', () => {

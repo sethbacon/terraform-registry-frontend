@@ -224,7 +224,7 @@ export const SetupWizardProvider: React.FC<SetupWizardProviderProps> = ({
       if (status.scanning_configured) setScanningSaved(true)
       if (status.admin_configured) setAdminSaved(true)
       // In pending-feature mode, jump directly to the first unconfigured step.
-      // Steps: 0=Token, 1=OIDC, 2=Storage, 3=Scanning, 4=Admin, 5=Complete
+      // Steps: 0=Token, 1=OIDC, 2=Storage, 3=Scanning, 4=Branding, 5=Admin, 6=Complete
       if (status.pending_feature_setup) {
         if (!status.scanning_configured) setActiveStep(0)
       }
@@ -264,7 +264,7 @@ export const SetupWizardProvider: React.FC<SetupWizardProviderProps> = ({
           if (!scanningSaved) {
             setActiveStep(3)
           } else {
-            setActiveStep(5)
+            setActiveStep(6)
           }
         } else {
           setActiveStep(1)
