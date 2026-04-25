@@ -570,6 +570,9 @@ export interface ScanningConfig {
   timeout: string
   worker_count: number
   scan_interval_mins: number
+  // Added in backend #263 — optional until backend is updated
+  binary_path?: string
+  detected_version?: string
 }
 
 export interface RecentScanEntry {
