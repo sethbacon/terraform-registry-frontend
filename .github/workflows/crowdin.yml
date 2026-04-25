@@ -37,7 +37,7 @@ jobs:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
       - name: Upload source file to Crowdin
-        uses: crowdin/github-action@8971b3565d2e40cd0c8a5ed6df4aec73a75bac67 # v2.5.2
+        uses: crowdin/github-action@8868a33591d21088edfc398968173a3b98d51706 # v2.16.2
         with:
           upload_sources: true
           upload_translations: false
@@ -59,7 +59,7 @@ jobs:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
       - name: Download translations from Crowdin
-        uses: crowdin/github-action@8971b3565d2e40cd0c8a5ed6df4aec73a75bac67 # v2.5.2
+        uses: crowdin/github-action@8868a33591d21088edfc398968173a3b98d51706 # v2.16.2
         with:
           upload_sources: false
           upload_translations: false
