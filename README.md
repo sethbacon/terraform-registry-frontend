@@ -193,7 +193,7 @@ For test patterns, conventions, and coverage details, see [TESTING.md](TESTING.m
 
 ### CI Pipeline
 
-The CI pipeline is defined in `.github/workflows/ci.yml` and runs on pushes to `main` and PRs to `main`/`development`. Jobs run in parallel:
+The CI pipeline is defined in `.github/workflows/ci.yml` and runs on pushes to `main` and PRs to `main`. Jobs run in parallel:
 
 | Job           | What it does                                                                                |
 | ------------- | ------------------------------------------------------------------------------------------- |
@@ -203,7 +203,7 @@ The CI pipeline is defined in `.github/workflows/ci.yml` and runs on pushes to `
 | **build**     | Production build, uploads `dist/` artifact                                                  |
 | **e2e-gated** | Playwright against the Docker Compose test stack (main branch, manual dispatch, or release) |
 
-Additional workflows: `e2e.yml`, `release.yml` (tag-triggered image build + GHCR push), `scheduled-build.yml` (weekly drift check), `auto-tag.yml`, `pr-checks.yml`.
+Additional workflows: `release-please.yml` (automated versioning + release PR), `release.yml` (tag-triggered image build + GHCR push), `weekly-security.yml` (weekly security checks), `crowdin.yml` (translation sync), `dependabot-automerge.yml`, `pr-checks.yml`, `update-wiki-manual.yml`.
 
 ## Documentation
 
