@@ -110,10 +110,6 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add -A
           git commit -m "chore: release v${VERSION}"
-          # Rebase onto latest main to avoid merge conflicts from concurrent
-          # feature merges landing between branch creation and PR merge.
-          git fetch origin main
-          git rebase origin/main
           git push origin "$BRANCH"
 
       - name: Open release PR
