@@ -38,12 +38,17 @@ i18n
 
 export default i18n;
 
-// Type augmentation for type-safe translation keys.
+// Type augmentation for i18next. We intentionally use Record<string, unknown>
+// rather than `typeof enTranslation` to avoid a TypeScript compiler crash
+// ("Debug Failure. No error for last overload signature") that occurs when the
+// key union grows large enough (140+ keys) to overflow TS overload resolution.
+// Translation completeness is enforced via Crowdin rather than compile-time key
+// checking.
 declare module 'i18next' {
   interface CustomTypeOptions {
     defaultNS: 'translation';
     resources: {
-      translation: typeof enTranslation;
+      translation: Record<string, unknown>;
     };
   }
 }
