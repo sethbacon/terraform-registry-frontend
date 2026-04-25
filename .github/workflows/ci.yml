@@ -3,11 +3,19 @@ name: CI
 
 "on":
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
-    branches: [ main, development ]
+    branches: [main]
   workflow_dispatch: {}
-  workflow_call: {} # allows release.yml to call this
+  workflow_call: # allows release.yml and weekly-security.yml to call this
+    inputs:
+      run-security-deep:
+        description: >-
+          Run extended security scans (npm audit, OSV-Scanner, CodeQL).
+          Enabled by weekly-security.yml; skipped on every PR/push.
+        type: boolean
+        required: false
+        default: false
 
 concurrency:
   group: ci-${{ github.event_name }}-${{ github.head_ref || github.ref }}
@@ -22,19 +30,8 @@ jobs:
     name: Lint
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
-
-      - name: Set up Node
-        uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5
-        with:
-          node-version: "22"
-          cache: "npm"
-          cache-dependency-path: frontend/package-lock.json
-
-      - name: Install dependencies
-        working-directory: frontend
-        run: npm ci
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+      - uses: ./.github/actions/setup-frontend
 
       - name: Lint
         working-directory: frontend
@@ -45,19 +42,8 @@ jobs:
     name: Typecheck
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
-
-      - name: Set up Node
-        uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5
-        with:
-          node-version: "22"
-          cache: "npm"
-          cache-dependency-path: frontend/package-lock.json
-
-      - name: Install dependencies
-        working-directory: frontend
-        run: npm ci
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+      - uses: ./.github/actions/setup-frontend
 
       - name: Typecheck
         working-directory: frontend
@@ -68,19 +54,8 @@ jobs:
     name: Unit Tests
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
-
-      - name: Set up Node
-        uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5
-        with:
-          node-version: "22"
-          cache: "npm"
-          cache-dependency-path: frontend/package-lock.json
-
-      - name: Install dependencies
-        working-directory: frontend
-        run: npm ci
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+      - uses: ./.github/actions/setup-frontend
 
       - name: Run tests with coverage
         working-directory: frontend
@@ -95,7 +70,7 @@ jobs:
           path: frontend/coverage/
 
       - name: Compute coverage badge inputs
-        # Only update the badge on pushes to main/development or manual dispatch — not on PRs.
+        # Only update the badge on pushes to main or manual dispatch — not on PRs or workflow_call.
         if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
         id: badge
         working-directory: frontend
@@ -136,19 +111,8 @@ jobs:
     name: Contract Check
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
-
-      - name: Set up Node
-        uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5
-        with:
-          node-version: "22"
-          cache: "npm"
-          cache-dependency-path: frontend/package-lock.json
-
-      - name: Install dependencies
-        working-directory: frontend
-        run: npm ci
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+      - uses: ./.github/actions/setup-frontend
 
       - name: Convert Swagger 2.0 to OpenAPI 3.0
         working-directory: frontend
@@ -179,19 +143,8 @@ jobs:
     name: Build
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
-
-      - name: Set up Node
-        uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5
-        with:
-          node-version: "22"
-          cache: "npm"
-          cache-dependency-path: frontend/package-lock.json
-
-      - name: Install dependencies
-        working-directory: frontend
-        run: npm ci
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+      - uses: ./.github/actions/setup-frontend
 
       - name: Build
         working-directory: frontend
@@ -204,18 +157,24 @@ jobs:
           name: frontend-dist
           path: frontend/dist
 
+  # ── E2E (gated) ───────────────────────────────────────
   e2e-gated:
     name: E2E (gated/manual)
     runs-on: ubuntu-latest
-    needs: [ lint, typecheck, unit-test, contract-check, build ]
+    needs: [lint, typecheck, unit-test, contract-check, build]
     # E2E is a required gate: failures block the release pipeline.
     if: >-
       github.event_name == 'workflow_dispatch' || github.event_name ==
       'workflow_call' || github.ref == 'refs/heads/main'
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+      - uses: ./.github/actions/setup-frontend
+        with:
+          install-deps: "false"
+          install-e2e-deps: "true"
+          install-playwright: "true"
+          playwright-browsers: "chromium firefox webkit"
 
       - name: Log in to GHCR
         uses: docker/login-action@b45d80f862d83dbcd57f89517bcf500b2ab88fb2 # v4
@@ -223,11 +182,6 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Set up Node
-        uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5
-        with:
-          node-version: "22"
 
       - name: Start test compose
         # Pulls backend from ghcr.io; builds frontend locally
@@ -253,12 +207,6 @@ jobs:
             echo "ERROR: frontend never became ready"
             exit 1
           fi
-
-      - name: Install e2e deps & Playwright
-        working-directory: e2e
-        run: |
-          npm ci
-          npx playwright install --with-deps chromium firefox webkit
 
       - name: Run Playwright tests
         working-directory: e2e
@@ -287,3 +235,70 @@ jobs:
         if: always()
         run: >-
           docker compose -f deployments/docker-compose.test.yml down --volumes
+
+  # ── Dependency Audit ──────────────────────────────────
+  # Runs only when called with run-security-deep=true (weekly-security.yml).
+  npm-audit:
+    name: Dependency Audit
+    runs-on: ubuntu-latest
+    if: inputs.run-security-deep
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+      - uses: ./.github/actions/setup-frontend
+        with:
+          install-e2e-deps: "true"
+
+      - name: Audit frontend dependencies
+        working-directory: frontend
+        run: npm audit --audit-level=high
+
+      - name: Audit e2e dependencies
+        working-directory: e2e
+        run: npm audit --audit-level=high
+
+  # ── OSV Scan ──────────────────────────────────────────
+  osv-scan:
+    name: OSV Scan
+    runs-on: ubuntu-latest
+    if: inputs.run-security-deep
+    permissions:
+      security-events: write
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+
+      - name: Run OSV Scanner
+        # v2.3.5
+        uses: google/osv-scanner-action/osv-scanner-action@c51854704019a247608d928f370c98740469d4b5
+        with:
+          scan-args: |-
+            --lockfile=frontend/package-lock.json
+            --lockfile=e2e/package-lock.json
+
+  # ── CodeQL ────────────────────────────────────────────
+  codeql:
+    name: CodeQL (JavaScript/TypeScript)
+    runs-on: ubuntu-latest
+    if: inputs.run-security-deep
+    permissions:
+      security-events: write
+      actions: read
+      contents: read
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+
+      - name: Initialize CodeQL
+        # v3
+        uses: github/codeql-action/init@ce64ddcb0d8d890d2df4a9d1c04ff297367dea2a
+        with:
+          languages: javascript-typescript
+          queries: security-and-quality
+
+      - name: Autobuild
+        # v3
+        uses: github/codeql-action/autobuild@ce64ddcb0d8d890d2df4a9d1c04ff297367dea2a
+
+      - name: Analyze
+        # v3
+        uses: github/codeql-action/analyze@ce64ddcb0d8d890d2df4a9d1c04ff297367dea2a
+        with:
+          category: /language:javascript-typescript
