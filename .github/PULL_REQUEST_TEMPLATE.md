@@ -11,5 +11,5 @@ Closes #<!-- issue number -->
 ## Checklist
 - [ ] `npm run lint` passes
 - [ ] `npm run build` succeeds
-- [ ] PR targets `development` (for feature/fix) or `main` (release only)
+- [ ] PR targets `main`
 - [ ] Remote branch will be deleted after merge

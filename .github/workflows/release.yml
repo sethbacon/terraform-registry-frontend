@@ -34,19 +34,26 @@ jobs:
   guard:
     name: Verify tag is on main
     runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.tag.outputs.value }}
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
         with:
           fetch-depth: 0 # need full history to walk ancestry
 
+      - name: Resolve release tag
+        id: tag
+        run: |
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            echo "value=${{ github.event.inputs.tag }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "value=${GITHUB_REF_NAME}" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Verify package.json version matches release tag
         working-directory: frontend
         run: |
-          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
-            TAG="${{ github.event.inputs.tag }}"
-          else
-            TAG="${{ github.ref_name }}"
-          fi
+          TAG="${{ steps.tag.outputs.value }}"
           PKG_VERSION="v$(node -p "require('./package.json').version")"
           if [ "${PKG_VERSION}" != "${TAG}" ]; then
             echo "::error::package.json version (${PKG_VERSION}) does not match release tag (${TAG}). Bump frontend/package.json 'version' before pushing the tag."
@@ -74,7 +81,7 @@ jobs:
   docker:
     name: Publish Docker image
     runs-on: ubuntu-latest
-    needs: ci
+    needs: [ guard, ci ]
     permissions:
       contents: read
       packages: write # required to push to ghcr.io
@@ -86,15 +93,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
-
-      - name: Resolve release tag
-        id: tag
-        run: |
-          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
-            echo "value=${{ github.event.inputs.tag }}" >> "$GITHUB_OUTPUT"
-          else
-            echo "value=${GITHUB_REF_NAME}" >> "$GITHUB_OUTPUT"
-          fi
 
       - name: Log in to GitHub Container Registry
         uses: docker/login-action@b45d80f862d83dbcd57f89517bcf500b2ab88fb2 # v4
@@ -109,10 +107,10 @@ jobs:
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           tags: |
-            type=semver,pattern={{version}},value=${{ steps.tag.outputs.value }}
-            type=semver,pattern={{major}}.{{minor}},value=${{ steps.tag.outputs.value }}
-            type=semver,pattern={{major}},value=${{ steps.tag.outputs.value }}
-            type=raw,value=latest,enable=${{ github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch' }}
+            type=semver,pattern={{version}},value=${{ needs.guard.outputs.version }}
+            type=semver,pattern={{major}}.{{minor}},value=${{ needs.guard.outputs.version }}
+            type=semver,pattern={{major}},value=${{ needs.guard.outputs.version }}
+            type=raw,value=latest,enable={{is_default_branch}}
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@4d04d5d9486b7bd6fa91e7baf45bbb4f8b9deedd # v4
@@ -140,36 +138,28 @@ jobs:
         uses: sigstore/cosign-installer@3454372f43399081ed03b604cb2d021dabca52bb # v3.8.2
 
       - name: Sign image with cosign (keyless)
-        run: cosign sign --yes "${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}@${{ steps.build.outputs.digest }}"
+        run: cosign sign --yes "${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}@${{
+          steps.build.outputs.digest }}"
 
   # ── Create GitHub Release ────────────────────────────────────────────────
   release:
     name: Publish GitHub Release
     runs-on: ubuntu-latest
-    needs: docker
+    needs: [ guard, docker ]
     permissions:
       contents: write # required to create releases
 
     steps:
-      - name: Extract version from tag
-        id: version
-        run: |
-          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
-            echo "version=${{ github.event.inputs.tag }}" >> "$GITHUB_OUTPUT"
-          else
-            echo "version=${GITHUB_REF_NAME}" >> "$GITHUB_OUTPUT"
-          fi
-
       - name: Create GitHub Release
         uses: softprops/action-gh-release@153bb8e04406b158c6c84fc1615b65b24149a1fe # v2
         with:
-          name: Release ${{ steps.version.outputs.version }}
-          tag_name: ${{ steps.version.outputs.version }}
+          name: Release ${{ needs.guard.outputs.version }}
+          tag_name: ${{ needs.guard.outputs.version }}
           body: |
             ## Docker Image
 
             ```bash
-            docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.version.outputs.version }}
+            docker pull ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ needs.guard.outputs.version }}
             ```
           generate_release_notes: true
 
@@ -177,22 +167,13 @@ jobs:
   update-wiki:
     name: Update wiki version badge
     runs-on: ubuntu-latest
-    needs: release
+    needs: [ guard, release ]
     continue-on-error: true # wiki update failure must not block the release
     permissions:
       contents: write
       issues: write
 
     steps:
-      - name: Extract version from tag
-        id: version
-        run: |
-          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
-            echo "version=${{ github.event.inputs.tag }}" >> "$GITHUB_OUTPUT"
-          else
-            echo "version=${GITHUB_REF_NAME}" >> "$GITHUB_OUTPUT"
-          fi
-
       - name: Clone wiki
         run: |
           git clone \
@@ -202,7 +183,7 @@ jobs:
       - name: Update version in Home.md
         working-directory: wiki
         run: |
-          TAG="${{ steps.version.outputs.version }}"
+          TAG="${{ needs.guard.outputs.version }}"
           sed -i \
             "s|\*\*Current:\*\* v[0-9]*\.[0-9]*\.[0-9]*[^ ]*|\*\*Current:\*\* ${TAG}|" \
             Home.md
@@ -219,7 +200,7 @@ jobs:
             exit 0
           fi
           git add Home.md
-          git commit -m "docs: update version to ${{ steps.version.outputs.version }}"
+          git commit -m "docs: update version to ${{ needs.guard.outputs.version }}"
           git push
 
       - name: Open issue on wiki update failure
@@ -231,11 +212,11 @@ jobs:
             await github.rest.issues.create({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              title: `Wiki version badge not updated for ${{ steps.version.outputs.version }}`,
+              title: `Wiki version badge not updated for ${{ needs.guard.outputs.version }}`,
               body: [
                 '## Wiki update failed',
                 '',
-                `**Release:** ${{ steps.version.outputs.version }}`,
+                `**Release:** ${{ needs.guard.outputs.version }}`,
                 `**Run:** ${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`,
                 '',
                 'The automatic wiki badge update failed. Run the **Update Wiki (manual)** workflow dispatch to fix it.',
