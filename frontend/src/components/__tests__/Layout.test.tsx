@@ -226,7 +226,8 @@ describe('Layout', () => {
     const user = userEvent.setup()
     renderLayout()
 
-    await user.click(screen.getByLabelText('toggle dark mode'))
+    await user.click(screen.getByLabelText('Settings'))
+    await user.click(screen.getByText('Dark mode'))
     expect(mockToggleTheme).toHaveBeenCalledOnce()
   })
 
@@ -235,7 +236,8 @@ describe('Layout', () => {
     const user = userEvent.setup()
     renderLayout()
 
-    await user.click(screen.getByLabelText('Context Help'))
+    await user.click(screen.getByLabelText('Support'))
+    await user.click(screen.getByText('Context Help'))
     expect(mockOpenHelp).toHaveBeenCalledOnce()
   })
 
@@ -246,7 +248,8 @@ describe('Layout', () => {
 
     expect(screen.queryByTestId('about-modal')).not.toBeInTheDocument()
 
-    await user.click(screen.getByLabelText('About'))
+    await user.click(screen.getByLabelText('Support'))
+    await user.click(screen.getByText('About'))
     expect(screen.getByTestId('about-modal')).toBeInTheDocument()
   })
 
@@ -290,7 +293,8 @@ describe('Layout', () => {
     const user = userEvent.setup()
     renderLayout()
 
-    await user.click(screen.getByLabelText('About'))
+    await user.click(screen.getByLabelText('Support'))
+    await user.click(screen.getByText('About'))
     expect(screen.getByTestId('about-modal')).toBeInTheDocument()
 
     await user.click(within(screen.getByTestId('about-modal')).getByText('Close'))

@@ -60,6 +60,8 @@
     "toggleDarkMode": "toggle dark mode",
     "contextHelp": "Context Help",
     "about": "About",
+    "settings": "Settings",
+    "support": "Support",
     "accountMenu": "account of current user",
     "logout": "Logout",
     "login": "Login",
