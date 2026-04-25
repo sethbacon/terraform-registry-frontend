@@ -19,12 +19,7 @@ jobs:
     uses: ./.github/workflows/ci.yml
     secrets: inherit
     with:
-      run-security-deep: true
-    permissions:
-      contents: read
-      packages: read
-      security-events: write
-      actions: read
+      run-security-deep: "true"
 
   # ── Flag stale Dependabot PRs ──────────────────────────
   stale-dependabot:

@@ -12,10 +12,11 @@ name: CI
       run-security-deep:
         description: >-
           Run extended security scans (npm audit, OSV-Scanner, CodeQL).
+          Pass "true" to enable; omit or pass "false" to skip.
           Enabled by weekly-security.yml; skipped on every PR/push.
-        type: boolean
+        type: string
         required: false
-        default: false
+        default: "false"
 
 concurrency:
   group: ci-${{ github.event_name }}-${{ github.head_ref || github.ref }}
@@ -241,7 +242,7 @@ jobs:
   npm-audit:
     name: Dependency Audit
     runs-on: ubuntu-latest
-    if: inputs.run-security-deep
+    if: inputs.run-security-deep == 'true'
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
       - uses: ./.github/actions/setup-frontend
@@ -260,7 +261,7 @@ jobs:
   osv-scan:
     name: OSV Scan
     runs-on: ubuntu-latest
-    if: inputs.run-security-deep
+    if: inputs.run-security-deep == 'true'
     permissions:
       security-events: write
     steps:
@@ -278,7 +279,7 @@ jobs:
   codeql:
     name: CodeQL (JavaScript/TypeScript)
     runs-on: ubuntu-latest
-    if: inputs.run-security-deep
+    if: inputs.run-security-deep == 'true'
     permissions:
       security-events: write
       actions: read
