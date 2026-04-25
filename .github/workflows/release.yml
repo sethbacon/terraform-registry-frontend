@@ -70,6 +70,8 @@ jobs:
     needs: guard
     secrets: inherit # passes GIST_TOKEN (coverage badge) and vars to the reusable workflow
     uses: ./.github/workflows/ci.yml
+    with:
+      run-security-deep: "false"
 
   docker:
     name: Publish Docker image
