@@ -53,7 +53,7 @@ import ExpandMore from '@mui/icons-material/ExpandMore';
 import History from '@mui/icons-material/History';
 import ExpandLess from '@mui/icons-material/ExpandLess';
 import Palette from '@mui/icons-material/Palette';
-import Translate from '@mui/icons-material/Translate';
+import SettingsIcon from '@mui/icons-material/Settings';
 import { useState, useMemo, useCallback, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useThemeMode } from '../contexts/ThemeContext';
@@ -83,7 +83,8 @@ const Layout = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [aboutOpen, setAboutOpen] = useState(false);
   const [paletteOpen, setPaletteOpen] = useState(false);
-  const [langAnchorEl, setLangAnchorEl] = useState<null | HTMLElement>(null);
+  const [settingsAnchorEl, setSettingsAnchorEl] = useState<null | HTMLElement>(null);
+  const [supportAnchorEl, setSupportAnchorEl] = useState<null | HTMLElement>(null);
   useHotkey('mod+k', useCallback(() => setPaletteOpen((v) => !v), []));
 
   // Helper to check if user has a specific scope (or admin which grants all)
@@ -111,17 +112,40 @@ const Layout = () => {
     setMobileOpen(prev => !prev);
   }, []);
 
-  const handleLangMenuOpen = useCallback((event: React.MouseEvent<HTMLElement>) => {
-    setLangAnchorEl(event.currentTarget);
+  const handleSettingsMenuOpen = useCallback((event: React.MouseEvent<HTMLElement>) => {
+    setSettingsAnchorEl(event.currentTarget);
   }, []);
 
-  const handleLangMenuClose = useCallback(() => {
-    setLangAnchorEl(null);
+  const handleSettingsMenuClose = useCallback(() => {
+    setSettingsAnchorEl(null);
   }, []);
+
+  const handleSupportMenuOpen = useCallback((event: React.MouseEvent<HTMLElement>) => {
+    setSupportAnchorEl(event.currentTarget);
+  }, []);
+
+  const handleSupportMenuClose = useCallback(() => {
+    setSupportAnchorEl(null);
+  }, []);
+
+  const handleDarkModeToggle = useCallback(() => {
+    toggleTheme();
+    setSettingsAnchorEl(null);
+  }, [toggleTheme]);
 
   const handleChangeLanguage = useCallback((lang: string) => {
     i18n.changeLanguage(lang);
-    setLangAnchorEl(null);
+    setSettingsAnchorEl(null);
+  }, []);
+
+  const handleOpenContextHelp = useCallback(() => {
+    setSupportAnchorEl(null);
+    openHelp();
+  }, [openHelp]);
+
+  const handleOpenAbout = useCallback(() => {
+    setSupportAnchorEl(null);
+    setAboutOpen(true);
   }, []);
 
   const navigationItems = useMemo(() => [
@@ -248,16 +272,9 @@ const Layout = () => {
     setMobileOpen(false);
   }, []);
 
-  const handleOpenAbout = useCallback(() => {
-    setAboutOpen(true);
-  }, []);
-
   const handleCloseAbout = useCallback(() => {
     setAboutOpen(false);
   }, []);
-
-  // Current language code for the switcher button label (e.g. "EN")
-  const currentLangCode = (i18n.language ?? 'en').substring(0, 2).toUpperCase();
 
   const drawer = (
     <Box component="nav" aria-label="Main navigation">
@@ -472,40 +489,34 @@ const Layout = () => {
               <SearchIcon />
             </IconButton>
           </Tooltip>
-          <Tooltip title={mode === 'dark' ? t('header.lightMode') : t('header.darkMode')}>
+          {/* Settings dropdown: dark mode + language */}
+          <Tooltip title={t('header.settings')}>
             <IconButton
               color="inherit"
-              onClick={toggleTheme}
-              aria-label={t('header.toggleDarkMode')}
-              sx={{ mr: 1 }}
-            >
-              {mode === 'dark' ? <Brightness7 /> : <Brightness4 />}
-            </IconButton>
-          </Tooltip>
-          {/* Language switcher */}
-          <Tooltip title={t('header.language')}>
-            <IconButton
-              color="inherit"
-              onClick={handleLangMenuOpen}
-              aria-label={t('header.language')}
+              onClick={handleSettingsMenuOpen}
+              aria-label={t('header.settings')}
               aria-haspopup="true"
-              aria-controls={langAnchorEl ? 'language-menu' : undefined}
+              aria-controls={settingsAnchorEl ? 'settings-menu' : undefined}
               sx={{ mr: 1 }}
             >
-              <Translate fontSize="small" />
-              <Typography variant="caption" sx={{ ml: 0.5, fontSize: '0.7rem', fontWeight: 600 }}>
-                {currentLangCode}
-              </Typography>
+              <SettingsIcon />
             </IconButton>
           </Tooltip>
           <Menu
-            id="language-menu"
-            anchorEl={langAnchorEl}
-            open={Boolean(langAnchorEl)}
-            onClose={handleLangMenuClose}
+            id="settings-menu"
+            anchorEl={settingsAnchorEl}
+            open={Boolean(settingsAnchorEl)}
+            onClose={handleSettingsMenuClose}
             anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
             transformOrigin={{ vertical: 'top', horizontal: 'right' }}
           >
+            <MenuItem onClick={handleDarkModeToggle}>
+              {mode === 'dark'
+                ? <Brightness7 sx={{ mr: 1.5 }} fontSize="small" />
+                : <Brightness4 sx={{ mr: 1.5 }} fontSize="small" />}
+              {mode === 'dark' ? t('header.lightMode') : t('header.darkMode')}
+            </MenuItem>
+            <Divider />
             {SUPPORTED_LANGUAGES.map((lang) => (
               <MenuItem
                 key={lang}
@@ -516,26 +527,36 @@ const Layout = () => {
               </MenuItem>
             ))}
           </Menu>
-          <Tooltip title={t('header.contextHelp')}>
+          {/* Support dropdown: context help + about */}
+          <Tooltip title={t('header.support')}>
             <IconButton
               color="inherit"
-              onClick={openHelp}
-              aria-label={t('header.contextHelp')}
+              onClick={handleSupportMenuOpen}
+              aria-label={t('header.support')}
+              aria-haspopup="true"
+              aria-controls={supportAnchorEl ? 'support-menu' : undefined}
               sx={{ mr: 1 }}
             >
               <HelpOutline />
             </IconButton>
           </Tooltip>
-          <Tooltip title={t('header.about')}>
-            <IconButton
-              color="inherit"
-              onClick={handleOpenAbout}
-              aria-label={t('header.about')}
-              sx={{ mr: 1 }}
-            >
-              <InfoOutlined />
-            </IconButton>
-          </Tooltip>
+          <Menu
+            id="support-menu"
+            anchorEl={supportAnchorEl}
+            open={Boolean(supportAnchorEl)}
+            onClose={handleSupportMenuClose}
+            anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+            transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+          >
+            <MenuItem onClick={handleOpenContextHelp}>
+              <HelpOutline sx={{ mr: 1.5 }} fontSize="small" />
+              {t('header.contextHelp')}
+            </MenuItem>
+            <MenuItem onClick={handleOpenAbout}>
+              <InfoOutlined sx={{ mr: 1.5 }} fontSize="small" />
+              {t('header.about')}
+            </MenuItem>
+          </Menu>
           {isAuthenticated ? (
             <div>
               <IconButton
