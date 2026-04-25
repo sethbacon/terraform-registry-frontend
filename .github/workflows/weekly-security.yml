@@ -13,13 +13,74 @@ permissions:
   contents: read
 
 jobs:
-  # ── Full CI + security scans ───────────────────────────
+  # ── Full CI ────────────────────────────────────────────
   ci:
-    name: CI (full + security)
+    name: CI
     uses: ./.github/workflows/ci.yml
     secrets: inherit
-    with:
-      run-security-deep: "true"
+
+  # ── Dependency Audit ──────────────────────────────────
+  npm-audit:
+    name: Dependency Audit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+      - uses: ./.github/actions/setup-frontend
+        with:
+          install-e2e-deps: "true"
+
+      - name: Audit frontend dependencies
+        working-directory: frontend
+        run: npm audit --audit-level=high
+
+      - name: Audit e2e dependencies
+        working-directory: e2e
+        run: npm audit --audit-level=high
+
+  # ── OSV Scan ──────────────────────────────────────────
+  osv-scan:
+    name: OSV Scan
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: write
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+
+      - name: Run OSV Scanner
+        # v2.3.5
+        uses: google/osv-scanner-action/osv-scanner-action@c51854704019a247608d928f370c98740469d4b5
+        with:
+          scan-args: |-
+            --lockfile=frontend/package-lock.json
+            --lockfile=e2e/package-lock.json
+
+  # ── CodeQL ────────────────────────────────────────────
+  codeql:
+    name: CodeQL (JavaScript/TypeScript)
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: write
+      actions: read
+      contents: read
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+
+      - name: Initialize CodeQL
+        # v3
+        uses: github/codeql-action/init@ce64ddcb0d8d890d2df4a9d1c04ff297367dea2a
+        with:
+          languages: javascript-typescript
+          queries: security-and-quality
+
+      - name: Autobuild
+        # v3
+        uses: github/codeql-action/autobuild@ce64ddcb0d8d890d2df4a9d1c04ff297367dea2a
+
+      - name: Analyze
+        # v3
+        uses: github/codeql-action/analyze@ce64ddcb0d8d890d2df4a9d1c04ff297367dea2a
+        with:
+          category: /language:javascript-typescript
 
   # ── Flag stale Dependabot PRs ──────────────────────────
   stale-dependabot:
@@ -65,7 +126,7 @@ jobs:
   notify-on-failure:
     name: Create issue on failure
     runs-on: ubuntu-latest
-    needs: [ci, stale-dependabot]
+    needs: [ci, npm-audit, osv-scan, codeql, stale-dependabot]
     if: failure() && github.event_name == 'schedule'
     permissions:
       issues: write
