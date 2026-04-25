@@ -1,0 +1,105 @@
+---
+name: Weekly Security Scan
+
+# Runs the full CI suite plus extended security checks every Monday.
+# Uses ci.yml via workflow_call so all logic lives in one place; no
+# duplicated steps.  Failures open a GitHub issue (visible without
+# digging through the Actions log).
+"on":
+  schedule:
+    - cron: "0 8 * * 1" # Every Monday 08:00 UTC
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+jobs:
+  # ── Full CI + security scans ───────────────────────────
+  ci:
+    name: CI (full + security)
+    uses: ./.github/workflows/ci.yml
+    secrets: inherit
+    with:
+      run-security-deep: true
+    permissions:
+      contents: read
+      packages: read
+      security-events: write
+      actions: read
+
+  # ── Flag stale Dependabot PRs ──────────────────────────
+  stale-dependabot:
+    name: Flag stale Dependabot PRs
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+    steps:
+      - name: Label Dependabot PRs open >14 days (lockfile changes)
+        # v8
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd
+        with:
+          script: |
+            const cutoff = new Date();
+            cutoff.setDate(cutoff.getDate() - 14);
+            const prs = await github.rest.pulls.list({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+            });
+            for (const pr of prs.data) {
+              if (pr.user.login !== 'dependabot[bot]') continue;
+              if (new Date(pr.created_at) > cutoff) continue;
+              const files = await github.rest.pulls.listFiles({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: pr.number,
+              });
+              const touchesLockfile = files.data.some(f =>
+                f.filename === 'frontend/package-lock.json' ||
+                f.filename === 'e2e/package-lock.json'
+              );
+              if (!touchesLockfile) continue;
+              await github.rest.issues.addLabels({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: pr.number,
+                labels: ['stale-security-patch'],
+              });
+            }
+
+  # ── Notify on schedule failures ───────────────────────
+  notify-on-failure:
+    name: Create issue on failure
+    runs-on: ubuntu-latest
+    needs: [ci, stale-dependabot]
+    if: failure() && github.event_name == 'schedule'
+    permissions:
+      issues: write
+    steps:
+      - name: Create failure issue
+        # v8
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd
+        with:
+          script: |
+            const title = `Weekly security scan failed — ${new Date().toISOString().slice(0,10)}`;
+            const body = [
+              '## Weekly Security Scan Failure',
+              '',
+              `**Workflow run:** ${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`,
+              '',
+              'The weekly security scan failed. Please investigate before the next release.',
+              '',
+              'Common causes:',
+              '- A new high/critical CVE in a transitive npm dependency',
+              '- OSV Scanner flagged a known-vulnerable package version',
+              '- CodeQL found a security-and-quality issue in new code',
+              '- A Dependabot security PR has been open for more than 14 days',
+              '- The Node.js 22 base image changed in a breaking way',
+            ].join('\n');
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title,
+              body,
+              labels: ['bug', 'ci'],
+            });

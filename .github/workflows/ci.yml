@@ -7,7 +7,15 @@ name: CI
   pull_request:
     branches: [ main, development ]
   workflow_dispatch: {}
-  workflow_call: {} # allows release.yml to call this
+  workflow_call: # allows release.yml and weekly-security.yml to call this
+    inputs:
+      run-security-deep:
+        description: >-
+          Run extended security scans (npm audit, OSV-Scanner, CodeQL).
+          Enabled by weekly-security.yml; skipped on every PR/push.
+        type: boolean
+        required: false
+        default: false
 
 concurrency:
   group: ci-${{ github.event_name }}-${{ github.head_ref || github.ref }}
@@ -287,3 +295,82 @@ jobs:
         if: always()
         run: >-
           docker compose -f deployments/docker-compose.test.yml down --volumes
+
+  # ── Dependency Audit ──────────────────────────────────
+  # Runs only when called with run-security-deep=true (weekly-security.yml).
+  npm-audit:
+    name: Dependency Audit
+    runs-on: ubuntu-latest
+    if: inputs.run-security-deep
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+
+      - name: Set up Node
+        uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5
+        with:
+          node-version: "22"
+          cache: "npm"
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install frontend dependencies
+        working-directory: frontend
+        run: npm ci
+
+      - name: Install e2e dependencies
+        working-directory: e2e
+        run: npm ci
+
+      - name: Audit frontend dependencies
+        working-directory: frontend
+        run: npm audit --audit-level=high
+
+      - name: Audit e2e dependencies
+        working-directory: e2e
+        run: npm audit --audit-level=high
+
+  # ── OSV Scan ──────────────────────────────────────────
+  osv-scan:
+    name: OSV Scan
+    runs-on: ubuntu-latest
+    if: inputs.run-security-deep
+    permissions:
+      security-events: write
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+
+      - name: Run OSV Scanner
+        # v2.3.5
+        uses: google/osv-scanner-action/osv-scanner-action@c51854704019a247608d928f370c98740469d4b5
+        with:
+          scan-args: |-
+            --lockfile=frontend/package-lock.json
+            --lockfile=e2e/package-lock.json
+
+  # ── CodeQL ────────────────────────────────────────────
+  codeql:
+    name: CodeQL (JavaScript/TypeScript)
+    runs-on: ubuntu-latest
+    if: inputs.run-security-deep
+    permissions:
+      security-events: write
+      actions: read
+      contents: read
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+
+      - name: Initialize CodeQL
+        # v3
+        uses: github/codeql-action/init@ce64ddcb0d8d890d2df4a9d1c04ff297367dea2a
+        with:
+          languages: javascript-typescript
+          queries: security-and-quality
+
+      - name: Autobuild
+        # v3
+        uses: github/codeql-action/autobuild@ce64ddcb0d8d890d2df4a9d1c04ff297367dea2a
+
+      - name: Analyze
+        # v3
+        uses: github/codeql-action/analyze@ce64ddcb0d8d890d2df4a9d1c04ff297367dea2a
+        with:
+          category: /language:javascript-typescript
