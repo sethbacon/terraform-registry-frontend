@@ -278,33 +278,23 @@ docker compose -f docker-compose.test.yml up -d --build
 
 **`main` branch:**
 
-- Required status checks (strict — branch must be up-to-date): `Frontend Lint & Build`
+- Required status checks (strict — branch must be up-to-date): `Lint`, `Typecheck`, `Unit Tests`, `Contract Check`, `Build`, `Conventional PR Title`
 - Required pull request reviews: 1 approving review, dismiss stale reviews, require code owner review
 - Enforce admins: no (admin/owner can bypass review requirements as sole maintainer)
 - Required conversation resolution: yes
 - Force pushes: blocked
 - Branch deletion: blocked
 
-**`development` branch (historical — now deleted):**
-
-- Required status checks (non-strict): `Frontend Lint & Build`
-- Required linear history: yes
-- Required conversation resolution: yes
-- Force pushes: blocked
-- Branch deletion: blocked
-- Admin bypass: allowed (owner can push directly for admin tasks)
-
 ### Merge Strategy
 
-- **Squash merge** — default for feature/fix branches → `development`
-- **Merge commits** — used for release PRs (`development` → `main`) to preserve commit ancestry and prevent CHANGELOG conflicts
+- **Squash merge** — all feature/fix branches → `main`
 - **Rebase merges** — disabled
 - **Delete branch on merge** — enabled; feature/fix branches are cleaned up automatically
 - **Allow update branch** — enabled; PRs can pull in base branch changes via GitHub UI
 - **Web commit signoff required** — enabled; all web-based commits require DCO signoff
 
-> **GitHub repo settings required:** Both "Allow merge commits" and "Allow squash merging"
-> must be enabled. "Allow rebase merging" remains disabled.
+> **GitHub repo settings required:** "Allow squash merging" must be enabled.
+> "Allow merge commits" and "Allow rebase merging" remain disabled.
 
 ### Dependency Management
 
