@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.14.0](https://github.com/sethbacon/terraform-registry-frontend/compare/v0.13.0...v0.14.0) (2026-04-26)
+
+
+### Features
+
+* replace Crowdin with DeepL + Google Translate for i18n ([#222](https://github.com/sethbacon/terraform-registry-frontend/issues/222)) ([93285d5](https://github.com/sethbacon/terraform-registry-frontend/commit/93285d501f20a1bbc890cc3843f1da5c4e327d5d))
+
 ## [0.13.0](https://github.com/sethbacon/terraform-registry-frontend/compare/v0.12.3...v0.13.0) (2026-04-25)
 
 
