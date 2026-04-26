@@ -1,18 +1,17 @@
 #!/usr/bin/env node
 
 /**
- * translate.mjs — Translate English source strings via DeepL or Google Translate.
+ * translate.mjs — Translate English source strings via DeepL (all languages).
  *
  * Usage:
  *   node scripts/translate.mjs --dry-run                              # character estimate
- *   node scripts/translate.mjs --provider deepl --langs es,fr,de      # DeepL for European
- *   node scripts/translate.mjs --provider google --langs ja           # Google for Japanese
- *   node scripts/translate.mjs --all                                  # default mapping
+ *   node scripts/translate.mjs --provider deepl --langs es,fr,de      # specific languages
+ *   node scripts/translate.mjs --all                                  # all 9 locales
  *   node scripts/translate.mjs --all --force                          # re-translate everything
  *
  * Environment variables:
  *   DEEPL_API_KEY             — DeepL API key (free or pro)
- *   GOOGLE_TRANSLATE_API_KEY  — Google Cloud Translation API key
+ *   GOOGLE_TRANSLATE_API_KEY  — Google Cloud Translation API key (optional fallback)
  */
 
 import { readFileSync, writeFileSync, existsSync } from 'node:fs';
