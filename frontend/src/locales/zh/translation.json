@@ -1,422 +1,686 @@
 {
   "nav": {
-    "home": "Home",
-    "homeTooltip": "Home Page",
-    "modules": "Modules",
-    "modulesTooltip": "View Terraform Modules",
-    "providers": "Providers",
-    "providersTooltip": "View Terraform Providers",
-    "terraformBinaries": "Terraform Binaries",
-    "terraformBinariesTooltip": "View Terraform Binaries",
-    "apiDocs": "API Docs",
-    "apiDocsTooltip": "API Documentation",
+    "home": "首页",
+    "homeTooltip": "首页",
+    "modules": "模块",
+    "modulesTooltip": "查看 Terraform 模块",
+    "providers": "服务提供商",
+    "providersTooltip": "查看 Terraform 提供程序",
+    "terraformBinaries": "Terraform 二进制文件",
+    "terraformBinariesTooltip": "查看 Terraform 二进制文件",
+    "apiDocs": "API 文档",
+    "apiDocsTooltip": "API 文档",
     "admin": {
-      "dashboard": "Dashboard",
-      "dashboardTooltip": "Admin Dashboard",
-      "identity": "Identity",
-      "organizations": "Organizations",
-      "organizationsTooltip": "Manage registry organizations and members",
-      "roles": "Roles",
-      "rolesTooltip": "Configure role templates and permissions",
-      "users": "Users",
-      "usersTooltip": "View and manage registry users",
-      "oidcGroups": "OIDC Groups",
-      "oidcGroupsTooltip": "Map identity provider groups to registry roles",
+      "dashboard": "仪表盘",
+      "dashboardTooltip": "管理员仪表盘",
+      "identity": "身份",
+      "organizations": "组织",
+      "organizationsTooltip": "管理注册机构及其成员",
+      "roles": "角色",
+      "rolesTooltip": "配置角色模板和权限",
+      "users": "用户",
+      "usersTooltip": "查看和管理注册表用户",
+      "oidcGroups": "OIDC 组",
+      "oidcGroupsTooltip": "将身份提供商组映射到注册表角色",
       "scim": "SCIM",
-      "scimTooltip": "SCIM 2.0 user and group provisioning configuration",
-      "mtlsCerts": "mTLS Certs",
-      "mtlsCertsTooltip": "View mTLS client certificate-to-scope mappings",
-      "apiKeys": "API Keys",
-      "apiKeysTooltip": "Create and manage personal API keys",
-      "sourceControl": "Source Control",
-      "sourceControlTooltip": "Configure SCM providers for module and provider publishing",
-      "mirroring": "Mirroring",
-      "providerConfig": "Provider Config",
-      "providerConfigTooltip": "Configure provider mirror sources and sync schedules",
-      "binariesConfig": "Binaries Config",
-      "binariesConfigTooltip": "Configure Terraform and OpenTofu binary mirror sources",
-      "approvals": "Approvals",
-      "approvalsTooltip": "Review and approve pending mirror sync requests",
-      "mirrorPolicies": "Mirror Policies",
-      "mirrorPoliciesTooltip": "Define policies that control what gets mirrored",
-      "system": "System",
-      "storage": "Storage",
-      "storageTooltip": "Configure backend storage for binaries and providers",
-      "securityScanning": "Security Scanning",
-      "securityScanningTooltip": "View security scanning configuration and status",
-      "auditLogs": "Audit Logs",
-      "auditLogsTooltip": "View system audit logs",
-      "componentsDev": "Components",
-      "componentsDevTooltip": "Component Showcase (dev only)"
+      "scimTooltip": "SCIM 2.0 用户和组配置",
+      "mtlsCerts": "mTLS 证书",
+      "mtlsCertsTooltip": "查看 mTLS 客户端证书与作用域的映射关系",
+      "apiKeys": "API密钥",
+      "apiKeysTooltip": "创建和管理个人 API 密钥",
+      "sourceControl": "版本控制",
+      "sourceControlTooltip": "配置模块和提供程序发布的 SCM 提供程序",
+      "mirroring": "镜像",
+      "providerConfig": "提供商配置",
+      "providerConfigTooltip": "配置提供商的镜像源和同步计划",
+      "binariesConfig": "二进制文件配置",
+      "binariesConfigTooltip": "配置 Terraform 和 OpenTofu 二进制镜像源",
+      "approvals": "批准",
+      "approvalsTooltip": "审核并批准待处理的镜像同步请求",
+      "mirrorPolicies": "镜像策略",
+      "mirrorPoliciesTooltip": "定义控制镜像内容的策略",
+      "system": "系统",
+      "storage": "存储",
+      "storageTooltip": "配置二进制文件和提供程序的后端存储",
+      "securityScanning": "安全扫描",
+      "securityScanningTooltip": "查看安全扫描配置和状态",
+      "auditLogs": "审计日志",
+      "auditLogsTooltip": "查看系统审计日志",
+      "componentsDev": "组件",
+      "componentsDevTooltip": "组件展示（仅限开发者）"
     }
   },
   "header": {
-    "skipToContent": "Skip to main content",
-    "openDrawer": "open drawer",
-    "quickNav": "Quick navigation (Ctrl/⌘K)",
-    "openCommandPalette": "Open command palette",
-    "lightMode": "Light mode",
-    "darkMode": "Dark mode",
-    "toggleDarkMode": "toggle dark mode",
-    "contextHelp": "Context Help",
-    "about": "About",
-    "settings": "Settings",
-    "support": "Support",
-    "accountMenu": "account of current user",
-    "logout": "Logout",
-    "login": "Login",
-    "language": "Language"
+    "skipToContent": "跳至主要内容",
+    "openDrawer": "拉开抽屉",
+    "quickNav": "快速导航 (Ctrl/⌘K)",
+    "openCommandPalette": "打开命令面板",
+    "lightMode": "浅色模式",
+    "darkMode": "深色模式",
+    "toggleDarkMode": "切换深色模式",
+    "contextHelp": "上下文帮助",
+    "about": "关于",
+    "settings": "设置",
+    "support": "支持",
+    "accountMenu": "当前用户的账户",
+    "logout": "退出",
+    "login": "登录",
+    "language": "语言"
   },
   "about": {
-    "title": "About {{productName}}",
-    "description": "A self-hosted Terraform module and provider registry with support for SCM integration, provider mirroring, Terraform binary distribution, and multi-tenancy.",
-    "versions": "Versions",
-    "frontendVersion": "Frontend v{{version}}",
-    "backendVersion": "Backend v{{version}}",
-    "loadingBackendVersion": "Loading backend version\u2026",
-    "backendUnavailable": "Backend unavailable",
-    "apiVersion": "API version: {{version}}",
-    "built": "Built: {{date}}",
-    "license": "License",
-    "licenseIntro": "Released under the",
-    "apacheLicense": "Apache License 2.0",
-    "source": "Source",
-    "githubBackend": "GitHub \u2014 Backend",
-    "githubFrontend": "GitHub \u2014 Frontend",
-    "close": "Close"
+    "title": "关于{{productName}}",
+    "description": "一个支持 SCM 集成、提供程序镜像、Terraform 二进制分发以及多租户功能的自托管 Terraform 模块和提供程序注册表。",
+    "versions": "版本",
+    "frontendVersion": "前端 v{{version}}",
+    "backendVersion": "后端 v {{version}}",
+    "loadingBackendVersion": "正在加载后端版本……",
+    "backendUnavailable": "后端不可用",
+    "apiVersion": "API 版本：{{version}}",
+    "built": "创建于：{{date}}",
+    "license": "许可",
+    "licenseIntro": "根据以下许可发布：",
+    "apacheLicense": "Apache 2.0 许可协议",
+    "source": "来源",
+    "githubBackend": "GitHub — 后端",
+    "githubFrontend": "GitHub — 前端",
+    "close": "关闭"
   },
   "auth": {
-    "signInToContinue": "Sign in to continue",
-    "signInWithSSO": "Sign in with SSO",
-    "signInWithAzureAD": "Sign in with Azure AD",
-    "signInWith": "Sign in with {{name}}",
-    "devLogin": "Dev Login (Admin)",
-    "devModeNotice": "Development mode - Click below to login without OAuth",
-    "orUseProductionAuth": "OR USE PRODUCTION AUTH",
-    "orSignInWithLdap": "OR SIGN IN WITH LDAP",
-    "or": "OR",
-    "signInWithLdap": "Sign in with LDAP",
-    "username": "Username",
-    "password": "Password",
-    "signIn": "Sign In",
-    "noProviders": "No SSO providers configured. Contact your administrator.",
-    "ssoInfo": "This application uses single sign-on for authentication.",
-    "ssoContact": "Contact your administrator if you need access.",
-    "devLoginFailed": "Dev login failed. Check server logs.",
-    "ldapLoginFailed": "LDAP login failed. Check your credentials."
+    "signInToContinue": "请登录以继续",
+    "signInWithSSO": "使用单点登录（SSO）登录",
+    "signInWithAzureAD": "使用 Azure AD 登录",
+    "signInWith": "使用 {{name}} 登录",
+    "devLogin": "开发者登录（管理员）",
+    "devModeNotice": "开发模式 - 点击下方跳过 OAuth 直接登录",
+    "orUseProductionAuth": "或使用生产授权",
+    "orSignInWithLdap": "或使用 LDAP 登录",
+    "or": "或",
+    "signInWithLdap": "使用 LDAP 登录",
+    "username": "用户名",
+    "password": "密码",
+    "signIn": "登录",
+    "noProviders": "未配置任何 SSO 提供商。请联系您的管理员。",
+    "ssoInfo": "该应用程序采用单点登录进行身份验证。",
+    "ssoContact": "如需访问权限，请联系您的管理员。",
+    "devLoginFailed": "开发者登录失败。请检查服务器日志。",
+    "ldapLoginFailed": "LDAP 登录失败。请检查您的凭据。"
   },
   "home": {
-    "heroTitle": "Private Terraform Registry",
-    "heroSubtitle": "Host and manage your custom Terraform modules, providers, and binaries",
-    "browseModules": "Browse Modules",
-    "browseProviders": "Browse Providers",
-    "terraformBinaries": "Terraform Binaries",
-    "available": "available",
-    "findWhatYouNeed": "Find What You Need",
-    "searchAcross": "Search across modules and providers in this registry",
-    "search": "Search",
-    "searchPlaceholder": "Search {{type}}\u2026",
-    "whatsAvailable": "What\u2019s Available",
-    "modulesDescription": "Browse and use private Terraform modules for your infrastructure.",
-    "browseAllModules": "Browse All Modules \u2192",
-    "providersDescription": "Access custom and mirrored Terraform providers for your cloud resources.",
-    "browseAllProviders": "Browse All Providers \u2192",
-    "terraformBinariesDescription": "Download Terraform and OpenTofu binaries from internal mirrors.",
-    "noBinaryMirrors": "No binary mirrors configured",
-    "viewBinaries": "View Binaries \u2192",
-    "gettingStarted": "Getting Started",
-    "step1Title": "1. Sign In",
-    "step1Desc": "Authenticate with your organization\u2019s OIDC or Azure AD credentials to access the registry.",
-    "step2Title": "2. Get an API Key",
-    "step2DescAuth": "Generate an API key and add it to your Terraform CLI credentials file:",
-    "step2DescUnauth": "Sign in to generate an API key, then add it to your Terraform CLI credentials file:",
-    "signInToGenerate": "Sign in to generate a key",
-    "createApiKey": "Create API key",
-    "manageAllKeys": "Manage all keys \u2192",
-    "copied": "Copied!",
-    "copyToClipboard": "Copy to clipboard",
-    "copyUsageExample": "Copy usage example",
-    "credentialsCopied": "Credentials snippet copied to clipboard",
-    "step3Title": "3. Start Using",
-    "step3Desc": "Browse modules and providers, then reference them directly in your Terraform configuration using this registry\u2019s hostname.",
-    "protocolSupport": "Registry Protocol Support",
-    "protocolDesc": "Full compatibility with Terraform Registry Protocol v1 \u2014 use this registry directly in Terraform CLI and provider configurations without any plugins or proxies.",
-    "viewApiDocs": "View API Documentation",
-    "setupRequired": "Setup Required",
-    "featureSetupRequired": "Feature Configuration Required",
-    "setupRequiredDesc": "This registry has not been configured yet. Complete the setup wizard to configure authentication, storage, and the initial admin account.",
-    "featureSetupDesc": "New features have been added that require configuration. Complete the setup wizard to enable them.",
-    "startSetup": "Start Setup",
-    "configureFeatures": "Configure Features"
+    "heroTitle": "私有 Terraform 注册表",
+    "heroSubtitle": "托管和管理您的自定义 Terraform 模块、提供程序和二进制文件",
+    "browseModules": "浏览模块",
+    "browseProviders": "浏览服务提供商",
+    "terraformBinaries": "Terraform 二进制文件",
+    "available": "可用",
+    "findWhatYouNeed": "找到您需要的内容",
+    "searchAcross": "在此注册库中跨模块和提供商进行搜索",
+    "search": "搜索",
+    "searchPlaceholder": "搜索 {{type}}…",
+    "whatsAvailable": "有哪些可用选项",
+    "modulesDescription": "浏览并使用私有 Terraform 模块来管理您的基础设施。",
+    "browseAllModules": "浏览所有模块 →",
+    "providersDescription": "访问针对您的云资源的自定义和镜像 Terraform 提供程序。",
+    "browseAllProviders": "浏览所有服务提供商 →",
+    "terraformBinariesDescription": "从内部镜像下载 Terraform 和 OpenTofu 的二进制文件。",
+    "noBinaryMirrors": "未配置二进制镜像",
+    "viewBinaries": "查看二进制文件 →",
+    "gettingStarted": "入门指南",
+    "step1Title": "1. 登录",
+    "step1Desc": "请使用您所在组织的 OIDC 或 Azure AD 凭据进行身份验证，以访问注册表。",
+    "step2Title": "2. 获取 API 密钥",
+    "step2DescAuth": "生成一个 API 密钥，并将其添加到 Terraform CLI 凭据文件中：",
+    "step2DescUnauth": "登录以生成 API 密钥，然后将其添加到 Terraform CLI 凭据文件中：",
+    "signInToGenerate": "登录以生成密钥",
+    "createApiKey": "创建 API 密钥",
+    "manageAllKeys": "管理所有密钥 →",
+    "copied": "已复制！",
+    "copyToClipboard": "复制到剪贴板",
+    "copyUsageExample": "复制使用示例",
+    "credentialsCopied": "凭据片段已复制到剪贴板",
+    "step3Title": "3. 开始使用",
+    "step3Desc": "浏览模块和提供商，然后在 Terraform 配置中直接引用它们，并使用该注册表的主机名。",
+    "protocolSupport": "注册表协议支持",
+    "protocolDesc": "完全兼容 Terraform Registry Protocol v1 — 无需任何插件或代理，即可在 Terraform CLI 和提供程序配置中直接使用此注册表。",
+    "viewApiDocs": "查看 API 文档",
+    "setupRequired": "需要进行设置",
+    "featureSetupRequired": "所需功能配置",
+    "setupRequiredDesc": "该注册表尚未配置。请完成设置向导，以配置身份验证、存储以及初始管理员帐户。",
+    "featureSetupDesc": "已添加需要配置的新功能。请完成设置向导以启用这些功能。",
+    "startSetup": "开始设置",
+    "configureFeatures": "配置功能"
   },
   "common": {
-    "loading": "Loading...",
-    "save": "Save",
-    "cancel": "Cancel",
-    "close": "Close",
-    "delete": "Delete",
-    "edit": "Edit",
-    "create": "Create",
-    "search": "Search",
-    "error": "Error",
-    "success": "Success",
-    "warning": "Warning"
+    "loading": "正在加载...",
+    "save": "保存",
+    "cancel": "取消",
+    "close": "关闭",
+    "delete": "删除",
+    "edit": "编辑",
+    "create": "创建",
+    "search": "搜索",
+    "error": "错误",
+    "success": "成功",
+    "warning": "警告"
   },
   "language": {
-    "en": "English",
-    "es": "Español",
-    "fr": "Français",
-    "de": "Deutsch",
-    "ja": "日本語",
-    "pt": "Português",
-    "nl": "Nederlands",
-    "nb": "Norsk bokmål",
+    "en": "英语",
+    "es": "西班牙语",
+    "fr": "法语",
+    "de": "德语",
+    "ja": "日语",
+    "pt": "葡萄牙语",
+    "nl": "荷兰语",
+    "nb": "挪威语（书面语）",
     "zh": "简体中文",
-    "it": "Italiano"
+    "it": "意大利语"
   },
   "help": {
     "default": {
-      "title": "Help",
-      "overview": "Navigate to a page using the sidebar to see context-sensitive help for that section.",
+      "title": "帮助",
+      "overview": "通过侧边栏导航至某个页面，即可查看该部分的上下文相关帮助。",
       "actions": {
-        "apiReference": { "heading": "API Reference", "text": "Visit the API Docs page for a full interactive reference of all registry endpoints." }
+        "apiReference": {
+          "heading": "API 参考",
+          "text": "请访问 API 文档页面，查看所有注册表端点的完整交互式参考指南。"
+        }
       }
     },
     "home": {
-      "title": "Home",
-      "overview": "The home page provides a quick-start overview of the registry, including live status of available modules, providers, and mirrors. Use it as a jumping-off point to browse published content or access the admin area.",
+      "title": "首页",
+      "overview": "首页提供了注册库的快速入门指南，包括可用模块、提供商和镜像站点的实时状态。您可以将其作为起点，浏览已发布的内容或访问管理后台。",
       "actions": {
-        "browseModules": { "heading": "Browse Modules", "text": "Click \"Modules\" in the sidebar to search and explore published Terraform modules." },
-        "browseProviders": { "heading": "Browse Providers", "text": "Click \"Providers\" to find provider binaries available in this registry." },
-        "adminAccess": { "heading": "Admin Access", "text": "If you have admin privileges, use the sidebar links to manage users, upload content, or configure storage." }
+        "browseModules": {
+          "heading": "浏览模块",
+          "text": "点击侧边栏中的“模块”以搜索和浏览已发布的 Terraform 模块。"
+        },
+        "browseProviders": {
+          "heading": "浏览服务提供商",
+          "text": "点击“提供程序”以查找该注册表中可用的提供程序二进制文件。"
+        },
+        "adminAccess": {
+          "heading": "管理员权限",
+          "text": "如果您拥有管理员权限，请使用侧边栏中的链接来管理用户、上传内容或配置存储空间。"
+        }
       }
     },
     "modules": {
-      "title": "Modules",
-      "overview": "Lists all Terraform modules published in this registry. Modules are searchable by name and filterable by namespace. Click any module card to view versions, documentation, and usage instructions.",
+      "title": "模块",
+      "overview": "列出了该注册表中发布的所有 Terraform 模块。您可以按名称搜索模块，并按命名空间进行筛选。点击任意模块卡片，即可查看版本、文档和使用说明。",
       "actions": {
-        "search": { "heading": "Search", "text": "Use the search field to filter modules by name or namespace in real time." },
-        "viewModule": { "heading": "View Module", "text": "Click a module card to open the detail page with version history and README." },
-        "uploadModule": { "heading": "Upload a Module", "text": "Go to Admin → Upload to publish a new module archive." }
+        "search": {
+          "heading": "搜索",
+          "text": "使用搜索框，可实时按名称或命名空间筛选模块。"
+        },
+        "viewModule": {
+          "heading": "查看模块",
+          "text": "点击模块卡片，即可打开包含版本历史和 README 的详情页。"
+        },
+        "uploadModule": {
+          "heading": "上传模块",
+          "text": "转到“管理”→“上传”以发布新的模块存档。"
+        }
       }
     },
     "moduleDetail": {
-      "title": "Module Detail",
-      "overview": "Shows all published versions of a specific module, its README documentation, and the Terraform source block needed to reference it. The latest stable version is highlighted.",
+      "title": "模块详情",
+      "overview": "显示特定模块的所有已发布版本、其 README 文档以及引用该模块所需的 Terraform 源代码块。最新稳定版本会以高亮显示。",
       "actions": {
-        "copySourceBlock": { "heading": "Copy Source Block", "text": "Use the copy button next to the source field to get the Terraform module block." },
-        "selectVersion": { "heading": "Select Version", "text": "Use the version selector to view documentation and inputs/outputs for a specific version." },
-        "deprecateDelete": { "heading": "Deprecate / Delete", "text": "Admins can deprecate or remove a version using the action buttons on each version row." }
+        "copySourceBlock": {
+          "heading": "复制源代码块",
+          "text": "使用源字段旁边的“复制”按钮，即可获取 Terraform 模块代码块。"
+        },
+        "selectVersion": {
+          "heading": "选择版本",
+          "text": "使用版本选择器查看特定版本的文档及输入/输出信息。"
+        },
+        "deprecateDelete": {
+          "heading": "弃用 / 删除",
+          "text": "管理员可以使用每个版本行上的操作按钮来标记版本为过时或删除该版本。"
+        }
       }
     },
     "providers": {
-      "title": "Providers",
-      "overview": "Lists all Terraform providers published or mirrored in this registry. Providers are searchable by type and namespace. Click a provider card to view versions and platform binaries.",
+      "title": "服务提供商",
+      "overview": "列出了在此注册表中发布或镜像的所有 Terraform 提供程序。您可以按类型和命名空间搜索提供程序。点击提供程序卡片可查看版本和平台二进制文件。",
       "actions": {
-        "search": { "heading": "Search", "text": "Filter providers by name or namespace using the search field." },
-        "viewProvider": { "heading": "View Provider", "text": "Click a card to open the provider detail page showing versions and platform downloads." },
-        "uploadProvider": { "heading": "Upload a Provider", "text": "Go to Admin → Upload to publish a new provider binary with its checksums." }
+        "search": {
+          "heading": "搜索",
+          "text": "使用搜索框按名称或命名空间筛选提供商。"
+        },
+        "viewProvider": {
+          "heading": "查看服务提供商",
+          "text": "点击卡片可打开服务提供商详情页，查看版本信息及平台下载链接。"
+        },
+        "uploadProvider": {
+          "heading": "上传服务提供商",
+          "text": "转到“管理”→“上传”，以发布包含校验和的新提供商二进制文件。"
+        }
       }
     },
     "providerDetail": {
-      "title": "Provider Detail",
-      "overview": "Shows all published versions of a specific provider and the platform binaries available for each version. Includes the Terraform required_providers block for easy copy-paste.",
+      "title": "服务商详情",
+      "overview": "显示特定提供商的所有已发布版本，以及每个版本可用的平台二进制文件。包含 Terraform 的 required_providers 代码块，便于直接复制粘贴。",
       "actions": {
-        "copyRequiredProviders": { "heading": "Copy Required Providers Block", "text": "Use the copy button to get the required_providers configuration." },
-        "selectVersion": { "heading": "Select Version", "text": "Browse platform binaries (OS/arch combinations) per version." },
-        "deprecateDelete": { "heading": "Deprecate / Delete", "text": "Admins can deprecate or remove individual provider versions." }
+        "copyRequiredProviders": {
+          "heading": "复制“所需提供商”块",
+          "text": "使用“复制”按钮获取 required_providers 配置。"
+        },
+        "selectVersion": {
+          "heading": "选择版本",
+          "text": "按版本浏览平台二进制文件（操作系统/架构组合）。"
+        },
+        "deprecateDelete": {
+          "heading": "弃用 / 删除",
+          "text": "管理员可以标记特定提供商版本为过时或将其移除。"
+        }
       }
     },
     "apiDocs": {
-      "title": "API Reference",
-      "overview": "API documentation for all registry endpoints, powered by ReDoc. Browse endpoint groups and view request/response schemas.",
+      "title": "API 参考",
+      "overview": "由 ReDoc 提供支持的所有注册表端点的 API 文档。浏览端点组并查看请求/响应模式。",
       "actions": {
-        "authenticate": { "heading": "Authenticate", "text": "Paste your API key as a Bearer token using the Authorize button at the top." },
-        "browseEndpoints": { "heading": "Browse Endpoints", "text": "Use the left-hand endpoint tree to navigate by resource group." }
+        "authenticate": {
+          "heading": "验证",
+          "text": "请使用顶部的“授权”按钮，将您的 API 密钥粘贴为 Bearer 令牌。"
+        },
+        "browseEndpoints": {
+          "heading": "浏览端点",
+          "text": "使用左侧的端点树按资源组进行导航。"
+        }
       }
     },
     "dashboard": {
-      "title": "Dashboard",
-      "overview": "A live health snapshot of your registry. The top bar shows mirror health at a glance. The stat cards below break down modules (with per-system counts), providers (manual vs mirrored), Terraform binary mirrors, and total downloads.",
+      "title": "仪表盘",
+      "overview": "您注册表的实时健康状况概览。顶部栏可一目了然地查看镜像健康状况。下方的统计卡片详细列出了各模块（按系统分类的数量）、提供商（手动与镜像）、Terraform 二进制镜像以及总下载量。",
       "actions": {
-        "healthBar": { "heading": "Health Bar", "text": "Binary Mirrors, Provider Mirrors, and Storage pills turn red when something is failing. Click any pill to jump to that section." },
-        "statCards": { "heading": "Stat Cards", "text": "Each card is a shortcut — click to navigate. The aside panels on Modules and Providers show the breakdown by system or mirror type." },
-        "recentSyncActivity": { "heading": "Recent Sync Activity", "text": "The table shows the last 8 sync events across binary and provider mirrors, with status, versions synced, and elapsed time." },
-        "quickLinks": { "heading": "Quick Links", "text": "Common admin actions — upload, manage users, configure mirrors — are one click away from the Quick Links panel." }
+        "healthBar": {
+          "heading": "生命值条",
+          "text": "当出现故障时，二进制镜像、提供商镜像和存储药丸会变为红色。点击任意一个药丸即可跳转至该部分。"
+        },
+        "statCards": {
+          "heading": "数据卡",
+          "text": "每张卡片都是一个快捷方式——点击即可导航。在“模块”和“提供商”旁边的侧边栏中，显示了按系统或镜像类型分类的详细信息。"
+        },
+        "recentSyncActivity": {
+          "heading": "最近的同步活动",
+          "text": "该表显示了二进制镜像和提供商镜像之间最近的 8 次同步事件，包括状态、已同步的版本以及耗时。"
+        },
+        "quickLinks": {
+          "heading": "快速链接",
+          "text": "常见的管理操作——上传、管理用户、配置镜像——只需在“快速链接”面板中点击一下即可完成。"
+        }
       }
     },
     "users": {
-      "title": "Users",
-      "overview": "Manage registry user accounts. Users can be created manually for local/API-key auth, or created automatically on first OIDC login. Assign users to organizations and grant them role templates here.",
+      "title": "用户",
+      "overview": "管理注册表用户账户。用户可通过手动创建（用于本地/API密钥认证），或在首次 OIDC 登录时自动创建。在此处将用户分配到组织并为其授予角色模板。",
       "actions": {
-        "createUser": { "heading": "Create User", "text": "Click \"Add User\" to create a new account with an email and display name." },
-        "editUser": { "heading": "Edit User", "text": "Click the edit icon on any row to update the user's name, organization, or role." },
-        "deleteUser": { "heading": "Delete User", "text": "Removes the user account. Any API keys they hold will also be invalidated." }
+        "createUser": {
+          "heading": "创建用户",
+          "text": "点击“添加用户”，使用电子邮件地址和显示名称创建新账户。"
+        },
+        "editUser": {
+          "heading": "编辑用户",
+          "text": "点击任意一行上的编辑图标，即可更新用户的姓名、所属机构或角色。"
+        },
+        "deleteUser": {
+          "heading": "删除用户",
+          "text": "删除该用户账户。该用户持有的所有 API 密钥也将失效。"
+        }
       }
     },
     "organizations": {
-      "title": "Organizations",
-      "overview": "Organizations are namespace containers — modules and providers are published under an organization's namespace. Members of an organization inherit its role template's permissions.",
+      "title": "组织",
+      "overview": "组织是命名空间容器——模块和提供程序均发布在组织的命名空间下。组织的成员将继承其角色模板的权限。",
       "actions": {
-        "createOrganization": { "heading": "Create Organization", "text": "Click \"Add Organization\" to define a new namespace with a URL-safe name." },
-        "manageMembers": { "heading": "Manage Members", "text": "Expand an organization row to view and modify its member list." },
-        "deleteOrganization": { "heading": "Delete Organization", "text": "Only possible when the organization has no published content." }
+        "createOrganization": {
+          "heading": "创建组织",
+          "text": "点击“添加组织”以使用一个URL安全的名称定义一个新的命名空间。"
+        },
+        "manageMembers": {
+          "heading": "管理成员",
+          "text": "展开组织行以查看和修改其成员列表。"
+        },
+        "deleteOrganization": {
+          "heading": "删除组织",
+          "text": "仅当该组织没有发布过任何内容时才适用。"
+        }
       }
     },
     "roles": {
-      "title": "Roles & Permissions",
-      "overview": "This page shows the fixed role templates available in the registry. Role templates define the permission scopes granted to users within an organization. Templates are system-defined and read-only.",
+      "title": "角色与权限",
+      "overview": "本页面显示了注册表中可用的固定角色模板。角色模板定义了授予组织内用户的权限范围。这些模板由系统预先定义，且为只读。",
       "actions": {
-        "viewScopes": { "heading": "View Scopes", "text": "Expand a role template to see the full list of permission scopes it grants." },
-        "assignToUser": { "heading": "Assign to User", "text": "Go to Admin → Users to assign a role template to a user's organization membership." }
+        "viewScopes": {
+          "heading": "查看范围",
+          "text": "展开角色模板，查看其授予的权限范围完整列表。"
+        },
+        "assignToUser": {
+          "heading": "分配给用户",
+          "text": "转到“管理”→“用户”，将角色模板分配给用户的组织成员身份。"
+        }
       }
     },
     "oidcGroups": {
-      "title": "OIDC Groups",
-      "overview": "Maps identity provider group claims to registry organizations and roles. When a user logs in via OIDC, their group memberships are read from the ID token and used to automatically provision or update their organization membership. Changes take effect on the next login without requiring a server restart.",
+      "title": "OIDC 组",
+      "overview": "Maps 将身份提供商的组声明映射到注册表中的组织和角色。当用户通过 OIDC 登录时，系统会从身份令牌中读取其组成员身份，并据此自动配置或更新其组织成员身份。更改将在下次登录时生效，无需重启服务器。",
       "actions": {
-        "groupClaimName": { "heading": "Group Claim Name", "text": "Set this to the claim key in your OIDC ID token that carries the user's group list (e.g. \"groups\"). This must match the protocol mapper configured in your identity provider." },
-        "defaultRole": { "heading": "Default Role", "text": "Optionally assign a fallback role to users whose groups do not match any mapping. Leave blank to grant no automatic membership to unmatched users." },
-        "addMapping": { "heading": "Add a Mapping", "text": "Click \"Add Mapping\" to link an IdP group name to a registry organization and role template. The group name must exactly match the value as it appears in the ID token claim." },
-        "roleTemplates": { "heading": "Role Templates", "text": "Roles correspond to system role templates (viewer, publisher, mirror_manager, admin). Go to Admin → Roles to review what each template permits." },
-        "saveChanges": { "heading": "Save Changes", "text": "Click \"Save Changes\" to persist your group claim and mapping configuration. Existing sessions are not affected until the user logs in again." }
+        "groupClaimName": {
+          "heading": "团体索赔名称",
+          "text": "请将此字段设置为 OIDC 身份令牌中包含用户组列表（例如“groups”）的声明键。该键必须与身份提供商中配置的协议映射器相匹配。"
+        },
+        "defaultRole": {
+          "heading": "默认角色",
+          "text": "可选地，为所属组与任何映射均不匹配的用户分配一个备用角色。若留空，则不向未匹配的用户授予自动成员资格。"
+        },
+        "addMapping": {
+          "heading": "添加映射",
+          "text": "点击“添加映射”将 IdP 组名与注册表组织及角色模板建立关联。该组名必须与 ID 令牌声明中显示的值完全一致。"
+        },
+        "roleTemplates": {
+          "heading": "角色模板",
+          "text": "角色对应系统角色模板（查看者、发布者、镜像管理员、管理员）。请转至“管理”→“角色”以查看每个模板的权限范围。"
+        },
+        "saveChanges": {
+          "heading": "保存更改",
+          "text": "点击“保存更改”以保存您的组声明和映射配置。现有会话在用户再次登录之前不会受到影响。"
+        }
       }
     },
     "apiKeys": {
-      "title": "API Keys",
-      "overview": "API keys allow programmatic access to authenticated registry endpoints. Each key is shown once at creation and stored only as a bcrypt hash — it cannot be retrieved after creation.",
+      "title": "API密钥",
+      "overview": "API 密钥允许通过编程方式访问经过身份验证的注册表端点。每个密钥在创建时仅显示一次，且仅以 bcrypt 哈希值的形式存储——创建后无法检索。",
       "actions": {
-        "createKey": { "heading": "Create Key", "text": "Click \"Create API Key\" to generate a new key. Copy it immediately — it will not be shown again." },
-        "revokeKey": { "heading": "Revoke Key", "text": "Delete a key to immediately invalidate all requests using it." },
-        "useKey": { "heading": "Use the Key", "text": "Include the key as Authorization: Bearer <key> in HTTP requests." }
+        "createKey": {
+          "heading": "创建密钥",
+          "text": "点击“创建 API 密钥”以生成一个新密钥。请立即复制该密钥——它之后将不再显示。"
+        },
+        "revokeKey": {
+          "heading": "撤销密钥",
+          "text": "删除一个键，将立即使所有使用该键的请求失效。"
+        },
+        "useKey": {
+          "heading": "使用密钥",
+          "text": "<key>在 HTTP 请求中</key>将该密钥作为 Authorization: Bearer 包含进去<key>。</key>"
+        }
       }
     },
     "upload": {
-      "title": "Upload",
-      "overview": "Upload module archives (.tar.gz) or provider binaries to publish them in the registry. The upload wizard validates archive structure, checksums, and GPG signatures before publishing.",
+      "title": "上传",
+      "overview": "上传模块归档文件（.tar.gz）或提供商二进制文件，以便将其发布到注册表中。上传向导会在发布前验证归档结构、校验和及 GPG 签名。",
       "actions": {
-        "uploadModule": { "heading": "Upload Module", "text": "Select the \"Module\" tab, provide namespace/name/system/version, and attach the .tar.gz archive." },
-        "uploadProvider": { "heading": "Upload Provider", "text": "Select the \"Provider\" tab, fill in namespace/type/version/platform details, and attach the binary plus checksum files." },
-        "scmLinking": { "heading": "SCM Linking", "text": "Alternatively, link a module to an SCM repository so it publishes automatically from git tags." }
+        "uploadModule": {
+          "heading": "上传模块",
+          "text": "选择“模块”选项卡，填写命名空间/名称/系统/版本，并上传 .tar.gz 压缩包。"
+        },
+        "uploadProvider": {
+          "heading": "上传服务商",
+          "text": "选择“提供商”选项卡，填写命名空间/类型/版本/平台信息，并附加二进制文件及校验和文件。"
+        },
+        "scmLinking": {
+          "heading": "SCM 关联",
+          "text": "或者，将模块与 SCM 仓库关联，使其能够根据 Git 标签自动发布。"
+        }
       }
     },
     "scmProviders": {
-      "title": "SCM Providers",
-      "overview": "SCM provider configurations connect the registry to GitHub, GitLab, Bitbucket, or Azure DevOps for automated module publishing via git tag webhooks. Each connection uses OAuth credentials.",
+      "title": "供应链管理服务提供商",
+      "overview": "SCM 提供商的配置可将注册表连接到 GitHub、GitLab、Bitbucket 或 Azure DevOps，以便通过 Git 标签 Webhook 实现模块的自动发布。每次连接均使用 OAuth 凭据。",
       "actions": {
-        "addProvider": { "heading": "Add Provider", "text": "Click \"Add SCM Provider\", select the platform, enter the OAuth App Client ID and Secret, then complete the OAuth authorization flow." },
-        "reconnect": { "heading": "Reconnect", "text": "If OAuth tokens expire, use the reconnect button to re-authorize." },
-        "linkModule": { "heading": "Link a Module", "text": "After adding an SCM provider, go to Admin → Upload → SCM to link a repository to a module." }
+        "addProvider": {
+          "heading": "添加服务提供商",
+          "text": "点击“添加 SCM 提供商”，选择平台，输入 OAuth 应用客户端 ID 和密钥，然后完成 OAuth 授权流程。"
+        },
+        "reconnect": {
+          "heading": "重新连接",
+          "text": "如果 OAuth 令牌过期，请点击“重新连接”按钮重新授权。"
+        },
+        "linkModule": {
+          "heading": "链接模块",
+          "text": "添加 SCM 提供商后，请转至“管理”→“上传”→“SCM”，将仓库与模块关联。"
+        }
       }
     },
     "mirrors": {
-      "title": "Provider Mirrors",
-      "overview": "Provider mirrors synchronize provider binaries from the official Terraform registry (or any compatible upstream) into this registry. Once mirrored, providers are available without internet access.",
+      "title": "提供商镜像",
+      "overview": "提供程序镜像会将官方 Terraform 注册表（或任何兼容的上游注册表）中的提供程序二进制文件同步到此注册表中。镜像完成后，即使没有互联网连接，也可以使用这些提供程序。",
       "actions": {
-        "createMirror": { "heading": "Create Mirror", "text": "Click \"Add Mirror\" to define an upstream registry URL and filter rules for which providers to sync." },
-        "triggerSync": { "heading": "Trigger Sync", "text": "Use the sync button on a mirror to immediately fetch the latest versions from upstream." },
-        "viewSyncHistory": { "heading": "View Sync History", "text": "Expand a mirror row to see the log of recent sync runs and any errors." }
+        "createMirror": {
+          "heading": "创建镜像",
+          "text": "点击“添加镜像”，以指定上游注册表 URL 以及用于筛选要同步的提供商的过滤规则。"
+        },
+        "triggerSync": {
+          "heading": "触发同步",
+          "text": "使用镜像上的同步按钮，即可立即从上游获取最新版本。"
+        },
+        "viewSyncHistory": {
+          "heading": "查看同步历史记录",
+          "text": "展开镜像行，查看最近同步运行的日志及任何错误。"
+        }
       }
     },
     "storage": {
-      "title": "Storage",
-      "overview": "Configures the backend storage used for module and provider artifacts. Supported backends are local filesystem, AWS S3, Azure Blob Storage, and Google Cloud Storage. Only one backend can be active at a time.",
+      "title": "存储",
+      "overview": "配置用于模块和提供程序工件的后端存储。支持的后端包括本地文件系统、AWS S3、Azure Blob Storage 和 Google Cloud Storage。每次只能有一个后端处于活动状态。",
       "actions": {
-        "switchBackend": { "heading": "Switch Backend", "text": "Select a backend type, fill in credentials, and click \"Activate\" to migrate to the new storage." },
-        "testConnection": { "heading": "Test Connection", "text": "Use the \"Test\" button to validate credentials before activating." },
-        "localStorage": { "heading": "Local Storage", "text": "For development, the local filesystem backend requires no credentials." }
+        "switchBackend": {
+          "heading": "切换后端",
+          "text": "选择后端类型，填写凭据，然后点击“激活”以迁移至新存储。"
+        },
+        "testConnection": {
+          "heading": "测试连接",
+          "text": "在激活之前，请使用“测试”按钮验证凭据。"
+        },
+        "localStorage": {
+          "heading": "本地存储",
+          "text": "在开发过程中，本地文件系统后端无需凭据。"
+        }
       }
     },
     "terraformBinaries": {
-      "title": "Terraform Binary Mirrors",
-      "overview": "Lists the available Terraform and OpenTofu binary mirrors hosted by this registry. Each mirror caches a set of binary versions from an upstream source so your CI pipelines and developer machines can download them without direct internet access.",
+      "title": "Terraform 二进制镜像",
+      "overview": "列出了由该注册表托管的可用 Terraform 和 OpenTofu 二进制镜像。每个镜像都会缓存来自上游源的一组二进制版本，因此您的持续集成管道和开发机器无需直接访问互联网即可下载这些版本。",
       "actions": {
-        "viewVersions": { "heading": "View Versions", "text": "Click a mirror card to open its detail page, which shows all available versions and the platform binaries (OS/arch) synced for each." },
-        "downloadUrl": { "heading": "Download URL", "text": "The detail page shows the full download URL pattern. Point your Terraform CLI or CI toolchain at this URL instead of the upstream registry." },
-        "adminConfiguration": { "heading": "Admin Configuration", "text": "To add or manage mirror configurations, go to Admin → Terraform Binaries." }
+        "viewVersions": {
+          "heading": "查看版本",
+          "text": "点击一张镜像卡片即可打开其详情页面，该页面会显示所有可用版本以及与每个版本同步的平台二进制文件（操作系统/架构）。"
+        },
+        "downloadUrl": {
+          "heading": "下载链接",
+          "text": "详情页面显示了完整的下载 URL 模式。请将您的 Terraform CLI 或 CI 工具链指向此 URL，而非上游注册表。"
+        },
+        "adminConfiguration": {
+          "heading": "管理员配置",
+          "text": "要添加或管理镜像配置，请转至“管理”→“Terraform 二进制文件”。"
+        }
       }
     },
     "terraformBinaryDetail": {
-      "title": "Binary Mirror Detail",
-      "overview": "Shows all versions synced for this binary mirror and the platform binaries available for each version. Expand a version row to inspect individual OS/architecture combinations, checksum verification status, and GPG signature status.",
+      "title": "二进制镜像详情",
+      "overview": "显示此二进制镜像已同步的所有版本，以及每个版本可用的平台二进制文件。展开某个版本的行，即可查看具体的操作系统/架构组合、校验和验证状态以及 GPG 签名状态。",
       "actions": {
-        "expandPlatforms": { "heading": "Expand Platforms", "text": "Click the expand arrow on a version row to see per-platform details including OS, architecture, filename, and whether checksum and GPG verification passed." },
-        "downloadUrl": { "heading": "Download URL", "text": "Use the URL pattern shown in the info banner to download a specific version and platform: /terraform/binaries/{name}/versions/{version}/{os}/{arch}." },
-        "deprecateVersion": { "heading": "Deprecate a Version", "text": "Admins can click the warning icon to deprecate a version. Deprecated versions remain available for download but will not be re-synced in future sync runs." },
-        "deleteVersion": { "heading": "Delete a Version", "text": "Admins can permanently remove a version record and its binaries from storage. Consider deprecating instead if you want to retain the files but prevent re-syncing." },
-        "restoreDeprecatedVersion": { "heading": "Restore a Deprecated Version", "text": "Click the restore icon on a deprecated version to remove the deprecation flag and allow it to be re-synced." }
+        "expandPlatforms": {
+          "heading": "展开平台",
+          "text": "点击版本行上的展开箭头，即可查看各平台的详细信息，包括操作系统、架构、文件名，以及校验和与 GPG 验证是否通过。"
+        },
+        "downloadUrl": {
+          "heading": "下载链接",
+          "text": "请使用信息横幅中显示的 URL 模式下载特定版本和平台的软件：/terraform/binaries/{name}/versions/{version}/{os}/{arch}。"
+        },
+        "deprecateVersion": {
+          "heading": "废弃某个版本",
+          "text": "管理员可以点击警告图标将某个版本标记为已弃用。已弃用的版本仍可供下载，但在未来的同步过程中将不再被重新同步。"
+        },
+        "deleteVersion": {
+          "heading": "删除版本",
+          "text": "管理员可以永久删除存储中的版本记录及其二进制文件。如果您希望保留文件但阻止其重新同步，建议改用“弃用”操作。"
+        },
+        "restoreDeprecatedVersion": {
+          "heading": "恢复已弃用的版本",
+          "text": "点击已弃用的版本上的恢复图标，即可移除弃用标记，并允许其重新同步。"
+        }
       }
     },
     "terraformMirror": {
-      "title": "Terraform Binary Mirror",
-      "overview": "Manages mirror configurations that cache Terraform and OpenTofu binary distributions from upstream sources. Once mirrored, binaries can be served to engineers without direct internet access, enabling air-gapped or bandwidth-constrained environments.",
+      "title": "Terraform 二进制镜像",
+      "overview": "管理镜像配置，用于从上游源缓存 Terraform 和 OpenTofu 的二进制发行版。镜像完成后，即可向无法直接访问互联网的工程师提供二进制文件，从而支持物理隔离或带宽受限的环境。",
       "actions": {
-        "createMirrorConfig": { "heading": "Create a Mirror Config", "text": "Click \"Add Mirror\" to define a new mirror. Give it a name, select the tool type (terraform, opentofu, or custom), and specify the upstream URL to sync from." },
-        "syncVersions": { "heading": "Sync Versions", "text": "Expand a mirror config and click the sync button to immediately fetch the latest binary index from upstream. Sync history shows the result of each run." },
-        "inspectPlatforms": { "heading": "Inspect Platforms", "text": "Drill into a version to see which OS/architecture combinations have been downloaded and are available locally." },
-        "enableDisable": { "heading": "Enable / Disable", "text": "Toggle a mirror config off to pause scheduled syncs without deleting the configuration or cached binaries." },
-        "deleteConfig": { "heading": "Delete a Config", "text": "Removes the mirror configuration. Previously synced binaries in storage are not automatically removed." }
+        "createMirrorConfig": {
+          "heading": "创建镜像配置",
+          "text": "点击“添加镜像”以定义一个新的镜像。为其命名，选择工具类型（Terraform、OpenTofu 或自定义），并指定要同步的上游 URL。"
+        },
+        "syncVersions": {
+          "heading": "同步版本",
+          "text": "展开镜像配置，然后点击“同步”按钮，即可立即从上游获取最新的二进制索引。同步历史记录会显示每次运行的结果。"
+        },
+        "inspectPlatforms": {
+          "heading": "检查平台",
+          "text": "点击某个版本，查看哪些操作系统/架构组合已被下载且可在本地使用。"
+        },
+        "enableDisable": {
+          "heading": "启用 / 禁用",
+          "text": "关闭镜像配置以暂停计划的同步，同时不删除配置或缓存的二进制文件。"
+        },
+        "deleteConfig": {
+          "heading": "删除配置",
+          "text": "删除镜像配置。存储中先前同步的二进制文件不会被自动删除。"
+        }
       }
     },
     "approvals": {
-      "title": "Approval Requests",
-      "overview": "Approval requests are raised when a mirror policy requires human sign-off before a provider namespace or binary is mirrored. An admin must approve or reject each request. Approved requests allow the mirror sync to proceed; rejected requests block it.",
+      "title": "审批请求",
+      "overview": "当镜像策略要求在镜像提供商命名空间或二进制文件之前必须经过人工审批时，系统会生成审批请求。管理员必须对每个请求进行批准或拒绝。已批准的请求允许镜像同步继续进行；被拒绝的请求则会阻止同步。",
       "actions": {
-        "reviewRequest": { "heading": "Review a Request", "text": "Click the \"Approve\" or \"Reject\" button on a pending request card to open the review dialog. Add reviewer notes to explain the decision, then confirm." },
-        "createRequest": { "heading": "Create a Request", "text": "Click \"Create Request\" to manually raise an approval for a provider namespace. Useful for pre-approving content before configuring a mirror policy." },
-        "filterByStatus": { "heading": "Filter by Status", "text": "Pending, approved, and rejected requests are all shown together. Look at the status chip on each card to distinguish them at a glance." },
-        "mirrorPolicyLink": { "heading": "Mirror Policy Link", "text": "Each request references the mirror config that triggered it. Navigate to Admin → Provider Mirrors to view or edit the associated mirror configuration." }
+        "reviewRequest": {
+          "heading": "审核请求",
+          "text": "点击待处理请求卡片上的“批准”或“拒绝”按钮，即可打开审核对话框。添加审核员备注以说明决定理由，然后确认。"
+        },
+        "createRequest": {
+          "heading": "创建请求",
+          "text": "点击“创建请求”以手动发起对提供商命名空间的审批。这在配置镜像策略之前预先审批内容时非常有用。"
+        },
+        "filterByStatus": {
+          "heading": "按状态筛选",
+          "text": "待处理、已批准和已拒绝的请求会一并显示。查看每张卡片上的状态图标，即可一目了然地区分它们。"
+        },
+        "mirrorPolicyLink": {
+          "heading": "镜像策略链接",
+          "text": "每个请求都会引用触发该请求的镜像配置。请转至“管理”→“提供商镜像”以查看或编辑相关的镜像配置。"
+        }
       }
     },
     "mirrorPolicies": {
-      "title": "Mirror Policies",
-      "overview": "Mirror policies control which providers are allowed or denied from being mirrored, and whether mirroring them requires an approval request. Policies are matched by upstream registry URL, namespace pattern, and provider name pattern. Higher-priority policies take precedence when multiple rules match.",
+      "title": "镜像策略",
+      "overview": "镜像策略用于控制允许或拒绝哪些提供商进行镜像，以及镜像这些提供商是否需要提交审批请求。策略通过上游注册表 URL、命名空间模式和提供商名称模式进行匹配。当多条规则均匹配时，优先级更高的策略将优先生效。",
       "actions": {
-        "createPolicy": { "heading": "Create a Policy", "text": "Click \"Create Policy\" and fill in the name, type (allow or deny), and pattern fields. Use glob-style wildcards (e.g. hashicorp/* ) in the namespace and provider fields to match multiple providers at once." },
-        "allowVsDeny": { "heading": "Allow vs Deny", "text": "An \"allow\" policy permits matched providers to be mirrored. A \"deny\" policy blocks them. Deny policies override allow policies at the same priority level." },
-        "requireApproval": { "heading": "Require Approval", "text": "Enable \"Requires Approval\" on an allow policy to route matched providers through the approval workflow before syncing. Approved requests appear in Admin → Approval Requests." },
-        "priority": { "heading": "Priority", "text": "Policies are evaluated in ascending priority order (lower number = higher priority). Set priority carefully when allow and deny rules overlap." },
-        "evaluatePolicy": { "heading": "Evaluate a Policy", "text": "Use the \"Evaluate\" button to test how a specific provider namespace/name would be matched against the current policy set without triggering a real sync." },
-        "enableDisable": { "heading": "Enable / Disable", "text": "Toggle a policy off to suspend it temporarily without deleting it. Disabled policies are skipped during evaluation." }
+        "createPolicy": {
+          "heading": "创建策略",
+          "text": "点击“创建策略”，并填写名称、类型（允许或拒绝）和模式字段。在命名空间和提供商字段中使用通配符（例如 hashicorp/*），以便同时匹配多个提供商。"
+        },
+        "allowVsDeny": {
+          "heading": "允许 vs 拒绝",
+          "text": "“允许”策略允许匹配的提供者被镜像。“拒绝”策略则会阻止它们。在相同优先级下，“拒绝”策略优先于“允许”策略。"
+        },
+        "requireApproval": {
+          "heading": "需经批准",
+          "text": "在允许策略中启用“需要审批”选项，以便在同步前将匹配的提供商纳入审批工作流。已批准的请求将显示在“管理 → 审批请求”中。"
+        },
+        "priority": {
+          "heading": "优先级",
+          "text": "策略按优先级由低到高的顺序进行评估（数字越小，优先级越高）。当允许规则和拒绝规则发生冲突时，请谨慎设置优先级。"
+        },
+        "evaluatePolicy": {
+          "heading": "评估一项政策",
+          "text": "使用“评估”按钮，可在不触发实际同步的情况下，测试特定提供商命名空间/名称与当前策略集的匹配情况。"
+        },
+        "enableDisable": {
+          "heading": "启用 / 禁用",
+          "text": "关闭策略可将其暂时暂停，而不会将其删除。在评估过程中，已禁用的策略将被跳过。"
+        }
       }
     },
     "auditLogs": {
-      "title": "Audit Logs",
-      "overview": "A tamper-evident record of every significant action taken in the registry — uploads, deletes, configuration changes, login events, and mirror syncs. Use it for compliance reviews, incident investigation, or general activity monitoring.",
+      "title": "审计日志",
+      "overview": "注册表中每项重要操作（包括上传、删除、配置更改、登录事件和镜像同步）都会生成一份防篡改记录。可用于合规审查、事件调查或常规活动监控。",
       "actions": {
-        "filterByResourceType": { "heading": "Filter by Resource Type", "text": "Use the Resource Type dropdown to narrow results to a specific entity class (e.g. module, provider, user, mirror)." },
-        "filterByAction": { "heading": "Filter by Action", "text": "Type an action name (e.g. \"create\", \"delete\", \"login\") in the Action field to show only matching events." },
-        "filterByUser": { "heading": "Filter by User", "text": "Enter a user email to see all actions performed by that account." },
-        "dateRange": { "heading": "Date Range", "text": "Set Start and End date pickers to restrict results to a specific time window." },
-        "viewDetail": { "heading": "View Detail", "text": "Click any row to open a detail panel showing the full log entry, including resource ID, actor, and metadata." },
-        "export": { "heading": "Export", "text": "Use the Export button to download the current filtered result set as CSV or JSON." }
+        "filterByResourceType": {
+          "heading": "按资源类型筛选",
+          "text": "使用“资源类型”下拉菜单，将结果范围缩小到特定的实体类（例如：模块、提供者、用户、镜像）。"
+        },
+        "filterByAction": {
+          "heading": "按操作筛选",
+          "text": "在“操作”字段中输入操作名称（例如“创建”、“删除”、“登录”），仅显示匹配的事件。"
+        },
+        "filterByUser": {
+          "heading": "按用户筛选",
+          "text": "输入用户邮箱，即可查看该账户执行的所有操作。"
+        },
+        "dateRange": {
+          "heading": "日期范围",
+          "text": "设置“开始”和“结束”日期选择器，将结果限定在特定的时间范围内。"
+        },
+        "viewDetail": {
+          "heading": "查看详情",
+          "text": "点击任意一行即可打开详细信息面板，查看完整的日志条目，包括资源 ID、操作主体和元数据。"
+        },
+        "export": {
+          "heading": "导出",
+          "text": "点击“导出”按钮，将当前筛选后的结果集下载为 CSV 或 JSON 格式。"
+        }
       }
     },
     "securityScanning": {
-      "title": "Security Scanning",
-      "overview": "Displays the current configuration and results of the module vulnerability scanner. The scanner analyses uploaded module archives for known security issues using an external scanning tool configured by the server administrator.",
+      "title": "安全扫描",
+      "overview": "显示模块漏洞扫描器的当前配置和扫描结果。该扫描器使用由服务器管理员配置的外部扫描工具，对上传的模块压缩包进行分析，以检测已知的安全问题。",
       "actions": {
-        "viewConfiguration": { "heading": "View Configuration", "text": "The top section shows whether scanning is enabled, the scanner tool and version, severity threshold, timeout, and worker/interval settings." },
-        "summaryStatistics": { "heading": "Summary Statistics", "text": "Aggregate counts show total scans, pending, clean, findings, and errors at a glance." },
-        "reviewScanResults": { "heading": "Review Scan Results", "text": "The recent scans table lists each module with its scan status and vulnerability counts broken down by severity (critical, high, medium, low)." }
+        "viewConfiguration": {
+          "heading": "查看配置",
+          "text": "顶部区域显示了扫描是否已启用、扫描工具及版本、严重性阈值、超时设置以及工作进程/间隔设置。"
+        },
+        "summaryStatistics": {
+          "heading": "描述性统计",
+          "text": "汇总计数可一目了然地显示总扫描次数、待处理项、已清理项、发现项和错误项。"
+        },
+        "reviewScanResults": {
+          "heading": "查看扫描结果",
+          "text": "“最近的扫描”表格列出了每个模块，并按严重程度（严重、高、中、低）分别显示了其扫描状态和漏洞数量。"
+        }
       }
     },
     "mtls": {
-      "title": "mTLS Certificates",
-      "overview": "Shows the current mutual TLS (mTLS) configuration, including whether client certificate authentication is enabled and which certificate subjects are mapped to authorization scopes. All mTLS settings are read-only in the UI — configuration is managed through the server config file.",
+      "title": "mTLS 证书",
+      "overview": "显示当前的双向 TLS（mTLS）配置，包括客户端证书认证是否已启用，以及哪些证书主体映射到了授权范围。所有 mTLS 设置在用户界面中均为只读——配置通过服务器配置文件进行管理。",
       "actions": {
-        "viewStatus": { "heading": "View Status", "text": "The status indicator shows whether mTLS is enabled or disabled, along with the CA certificate file path used to verify client certificates." },
-        "certificateMappings": { "heading": "Certificate Mappings", "text": "The mappings table lists each certificate subject and the scopes it is authorized to use. Clients presenting a matching certificate receive these scopes automatically." },
-        "configurationSource": { "heading": "Configuration Source", "text": "All mTLS settings are sourced from the server configuration file. To modify mappings, update the config file and restart the backend." }
+        "viewStatus": {
+          "heading": "查看状态",
+          "text": "状态指示器显示 mTLS 是否已启用或禁用，并显示用于验证客户端证书的 CA 证书文件路径。"
+        },
+        "certificateMappings": {
+          "heading": "证书映射",
+          "text": "映射表列出了每个证书的主体及其被授权使用的范围。出示匹配证书的客户端将自动获得这些范围。"
+        },
+        "configurationSource": {
+          "heading": "配置来源",
+          "text": "所有 mTLS 设置均来自服务器配置文件。若要修改映射关系，请更新配置文件并重启后端。"
+        }
       }
     },
     "scim": {
-      "title": "SCIM Provisioning",
-      "overview": "SCIM 2.0 enables automatic user and group provisioning from your identity provider (e.g. Azure AD, Okta). This page shows the SCIM endpoint URLs and authentication requirements needed to configure your IdP.",
+      "title": "SCIM 配置",
+      "overview": "SCIM 2.0 支持从您的身份提供商（例如 Azure AD、Okta）自动进行用户和组的配置。本页面列出了配置您的身份提供商所需的 SCIM 端点 URL 及身份验证要求。",
       "actions": {
-        "endpointUrls": { "heading": "Endpoint URLs", "text": "Copy the SCIM base URL, Users endpoint, and Groups endpoint into your identity provider's SCIM configuration." },
-        "authentication": { "heading": "Authentication", "text": "SCIM requests require a Bearer token with the scim:provision scope. Create one on the API Keys page and paste it into your IdP's SCIM token field." },
-        "supportedOperations": { "heading": "Supported Operations", "text": "Users support full CRUD and soft-delete. Groups are read-only and map to registry organizations. Filtering and pagination are supported." }
+        "endpointUrls": {
+          "heading": "端点 URL",
+          "text": "将 SCIM 基础 URL、用户端点和组端点复制到您的身份提供商的 SCIM 配置中。"
+        },
+        "authentication": {
+          "heading": "身份验证",
+          "text": "SCIM 请求需要一个具有 scim:provision 作用域的 Bearer 令牌。请在“API 密钥”页面上创建一个，然后将其粘贴到您的 IdP 的 SCIM 令牌字段中。"
+        },
+        "supportedOperations": {
+          "heading": "支持的操作",
+          "text": "用户支持完整的CRUD操作和软删除。组为只读，并与注册表中的组织相对应。支持筛选和分页功能。"
+        }
       }
     }
   }

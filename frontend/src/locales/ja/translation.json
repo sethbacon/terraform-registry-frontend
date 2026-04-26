@@ -1,13 +1,13 @@
 {
   "nav": {
     "home": "ホーム",
-    "homeTooltip": "ホームページ",
+    "homeTooltip": "トップページ",
     "modules": "モジュール",
     "modulesTooltip": "Terraformモジュールを表示",
     "providers": "プロバイダー",
     "providersTooltip": "Terraformプロバイダーを表示",
-    "terraformBinaries": "Terraformバイナリ",
-    "terraformBinariesTooltip": "Terraformバイナリを表示",
+    "terraformBinaries": "Terraform バイナリ",
+    "terraformBinariesTooltip": "Terraformのバイナリを表示",
     "apiDocs": "APIドキュメント",
     "apiDocsTooltip": "APIドキュメント",
     "admin": {
@@ -15,51 +15,51 @@
       "dashboardTooltip": "管理ダッシュボード",
       "identity": "アイデンティティ",
       "organizations": "組織",
-      "organizationsTooltip": "レジストリの組織とメンバーを管理",
-      "roles": "ロール",
-      "rolesTooltip": "ロールテンプレートと権限を設定",
+      "organizationsTooltip": "レジストリ組織とメンバーの管理",
+      "roles": "役割",
+      "rolesTooltip": "ロールテンプレートと権限の設定",
       "users": "ユーザー",
-      "usersTooltip": "レジストリユーザーを表示・管理",
+      "usersTooltip": "レジストリのユーザーを表示および管理する",
       "oidcGroups": "OIDCグループ",
-      "oidcGroupsTooltip": "IDプロバイダーグループをレジストリロールにマッピング",
+      "oidcGroupsTooltip": "IDプロバイダーのグループをレジストリのロールにマッピングする",
       "scim": "SCIM",
-      "scimTooltip": "SCIM 2.0ユーザー・グループプロビジョニング設定",
+      "scimTooltip": "SCIM 2.0 のユーザーおよびグループのプロビジョニング設定",
       "mtlsCerts": "mTLS証明書",
-      "mtlsCertsTooltip": "mTLSクライアント証明書スコープマッピングを表示",
+      "mtlsCertsTooltip": "mTLSクライアント証明書とスコープのマッピングを表示する",
       "apiKeys": "APIキー",
-      "apiKeysTooltip": "個人用APIキーを作成・管理",
-      "sourceControl": "ソースコントロール",
-      "sourceControlTooltip": "モジュール・プロバイダー公間用SCMプロバイダーを設定",
+      "apiKeysTooltip": "個人用APIキーの作成と管理",
+      "sourceControl": "バージョン管理",
+      "sourceControlTooltip": "モジュールおよびプロバイダーの公開用にSCMプロバイダーを設定する",
       "mirroring": "ミラーリング",
       "providerConfig": "プロバイダー設定",
-      "providerConfigTooltip": "プロバイダーミラーソースと同期スケジュールを設定",
+      "providerConfigTooltip": "プロバイダーのミラーソースと同期スケジュールを設定する",
       "binariesConfig": "バイナリ設定",
-      "binariesConfigTooltip": "TerraformおOopenTofuバイナリミラーソースを設定",
+      "binariesConfigTooltip": "Terraform および OpenTofu のバイナリミラーソースを設定する",
       "approvals": "承認",
-      "approvalsTooltip": "保留中のミラー同期リクエストを確認・承認",
+      "approvalsTooltip": "保留中のミラー同期リクエストを確認し、承認する",
       "mirrorPolicies": "ミラーポリシー",
-      "mirrorPoliciesTooltip": "ミラーリング対象を制御するポリシーを定義",
+      "mirrorPoliciesTooltip": "ミラーリングの対象を制御するポリシーを定義する",
       "system": "システム",
       "storage": "ストレージ",
-      "storageTooltip": "バイナリ・プロバイダー用バックエンドストレージを設定",
+      "storageTooltip": "バイナリおよびプロバイダー用のバックエンドストレージを設定する",
       "securityScanning": "セキュリティスキャン",
-      "securityScanningTooltip": "セキュリティスキャン設定とステータスを表示",
+      "securityScanningTooltip": "セキュリティスキャンの設定とステータスを確認する",
       "auditLogs": "監査ログ",
-      "auditLogsTooltip": "システム監査ログを表示",
-      "componentsDev": "コンポーネント",
-      "componentsDevTooltip": "コンポーネントショーケース（開発のみ）"
+      "auditLogsTooltip": "システム監査ログを表示する",
+      "componentsDev": "構成要素",
+      "componentsDevTooltip": "コンポーネント紹介（開発者向け）"
     }
   },
   "header": {
-    "skipToContent": "メインコンテンツにスキップ",
-    "openDrawer": "ドロワーを開く",
-    "quickNav": "クイックナビゲーション（Ctrl/⌘K）",
+    "skipToContent": "メインコンテンツへ移動",
+    "openDrawer": "引き出しを開ける",
+    "quickNav": "クイックナビゲーション (Ctrl/⌘K)",
     "openCommandPalette": "コマンドパレットを開く",
     "lightMode": "ライトモード",
     "darkMode": "ダークモード",
-    "toggleDarkMode": "ダークモード切り替え",
+    "toggleDarkMode": "ダークモードを切り替える",
     "contextHelp": "コンテキストヘルプ",
-    "about": "詳細",
+    "about": "概要",
     "settings": "設定",
     "support": "サポート",
     "accountMenu": "現在のユーザーのアカウント",
@@ -69,85 +69,85 @@
   },
   "about": {
     "title": "{{productName}}について",
-    "description": "SCM連携、プロバイダーミラーリング、Terraformバイナリ配信、マルチテナンシーをサポートするセルフホスティングTerraformモジュール・プロバイダーレジストリ。",
+    "description": "SCM統合、プロバイダーのミラーリング、Terraformバイナリの配布、およびマルチテナント機能をサポートする、セルフホスト型のTerraformモジュールおよびプロバイダーレジストリ。",
     "versions": "バージョン",
-    "frontendVersion": "フロントエンド v{{version}}",
-    "backendVersion": "バックエンド v{{version}}",
-    "loadingBackendVersion": "バックエンドバージョンを読み込み中…",
-    "backendUnavailable": "バックエンド利用不可",
-    "apiVersion": "APIバージョン: {{version}}",
-    "built": "ビルド日時: {{date}}",
+    "frontendVersion": "Frontend v{{version}}",
+    "backendVersion": "バックエンド対{{version}}",
+    "loadingBackendVersion": "バックエンドのバージョンを読み込んでいます…",
+    "backendUnavailable": "バックエンドが利用できません",
+    "apiVersion": "APIバージョン：{{version}}",
+    "built": "作成日：{{date}}",
     "license": "ライセンス",
-    "licenseIntro": "下記のライセンスで公開",
-    "apacheLicense": "Apacheライセンス 2.0",
-    "source": "ソースコード",
+    "licenseIntro": "以下のライセンスの下で公開されています",
+    "apacheLicense": "Apache License 2.0",
+    "source": "出典",
     "githubBackend": "GitHub — バックエンド",
     "githubFrontend": "GitHub — フロントエンド",
     "close": "閉じる"
   },
   "auth": {
-    "signInToContinue": "続けるにはサインインしてください",
-    "signInWithSSO": "SSOでサインイン",
-    "signInWithAzureAD": "Azure ADでサインイン",
-    "signInWith": "{{name}}でサインイン",
+    "signInToContinue": "続行するにはログインしてください",
+    "signInWithSSO": "SSOでログイン",
+    "signInWithAzureAD": "Azure AD でサインイン",
+    "signInWith": "{{name}}でログイン",
     "devLogin": "開発者ログイン（管理者）",
-    "devModeNotice": "開発モード - OAuthなしでログインするには以下をクリック",
-    "orUseProductionAuth": "または本番認証を使用",
-    "orSignInWithLdap": "またはLDAPでサインイン",
+    "devModeNotice": "開発モード - 以下をクリックして、OAuthを使用せずにログインしてください",
+    "orUseProductionAuth": "または、プロダクション認証を使用する",
+    "orSignInWithLdap": "またはLDAPでログイン",
     "or": "または",
     "signInWithLdap": "LDAPでサインイン",
     "username": "ユーザー名",
     "password": "パスワード",
-    "signIn": "サインイン",
-    "noProviders": "SSOプロバイダーが設定されていません。管理者に連絡してください。",
-    "ssoInfo": "このアプリケーションは認証にシングルサインオンを使用します。",
-    "ssoContact": "アクセスが必要な場合は管理者に連絡してください。",
-    "devLoginFailed": "開発者ログインに失敗しました。サーバーログを確認してください。",
-    "ldapLoginFailed": "LDAPログインに失敗しました。資格情報を確認してください。"
+    "signIn": "ログイン",
+    "noProviders": "SSOプロバイダーが設定されていません。管理者にお問い合わせください。",
+    "ssoInfo": "このアプリケーションでは、認証にシングルサインオンを採用しています。",
+    "ssoContact": "アクセスが必要な場合は、管理者にお問い合わせください。",
+    "devLoginFailed": "開発者ログインに失敗しました。サーバーのログを確認してください。",
+    "ldapLoginFailed": "LDAPログインに失敗しました。認証情報を確認してください。"
   },
   "home": {
-    "heroTitle": "プライベートTerraformレジストリ",
-    "heroSubtitle": "カスタムTerraformモジュール、プロバイダー、バイナリをホスト・管理",
-    "browseModules": "モジュールを閲覧",
-    "browseProviders": "プロバイダーを閲覧",
-    "terraformBinaries": "Terraformバイナリ",
+    "heroTitle": "プライベートなTerraformレジストリ",
+    "heroSubtitle": "独自のTerraformモジュール、プロバイダー、バイナリをホストおよび管理する",
+    "browseModules": "モジュールを閲覧する",
+    "browseProviders": "プロバイダーを閲覧する",
+    "terraformBinaries": "Terraform バイナリ",
     "available": "利用可能",
-    "findWhatYouNeed": "必要なものを見つける",
-    "searchAcross": "このレジストリのモジュールとプロバイダーを検索",
+    "findWhatYouNeed": "お探しのものを見つける",
+    "searchAcross": "この登録簿内のモジュールおよびプロバイダーを横断検索する",
     "search": "検索",
     "searchPlaceholder": "{{type}}を検索…",
-    "whatsAvailable": "利用可能なもの",
-    "modulesDescription": "インフラストラクチャ用のプライベートTerraformモジュールを閲覧・使用。",
+    "whatsAvailable": "取り扱い商品",
+    "modulesDescription": "インフラストラクチャ用に、非公開のTerraformモジュールを閲覧・利用できます。",
     "browseAllModules": "すべてのモジュールを閲覧 →",
-    "providersDescription": "クラウドリソース用のカスタムおよびミラーリングされたTerraformプロバイダーにアクセス。",
-    "browseAllProviders": "すべてのプロバイダーを閲覧 →",
-    "terraformBinariesDescription": "内部ミラーからTerraformおOpenTofuバイナリをダウンロード。",
+    "providersDescription": "クラウドリソース向けに、カスタムおよびミラーリングされたTerraformプロバイダーを利用できます。",
+    "browseAllProviders": "すべてのプロバイダーを見る →",
+    "terraformBinariesDescription": "社内ミラーからTerraformとOpenTofuのバイナリをダウンロードしてください。",
     "noBinaryMirrors": "バイナリミラーが設定されていません",
     "viewBinaries": "バイナリを表示 →",
     "gettingStarted": "はじめに",
-    "step1Title": "1. サインイン",
-    "step1Desc": "組織のOIDCまたはAzure AD資格情報で認証してレジストリにアクセス。",
-    "step2Title": "2. APIキーを取得",
-    "step2DescAuth": "APIキーを生成してTerraform CLI資格情報ファイルに追加してください：",
-    "step2DescUnauth": "サインインしてAPIキーを生成し、Terraform CLI資格情報ファイルに追加してください：",
-    "signInToGenerate": "キーを生成するためにサインイン",
-    "createApiKey": "APIキーを作成",
+    "step1Title": "1. ログイン",
+    "step1Desc": "レジストリにアクセスするには、所属組織のOIDCまたはAzure ADの認証情報を使用して認証を行ってください。",
+    "step2Title": "2. APIキーを取得する",
+    "step2DescAuth": "APIキーを生成し、Terraform CLIの認証情報ファイルに追加します：",
+    "step2DescUnauth": "ログインしてAPIキーを生成し、それをTerraform CLIの認証情報ファイルに追加してください：",
+    "signInToGenerate": "ログインしてキーを生成してください",
+    "createApiKey": "APIキーを作成する",
     "manageAllKeys": "すべてのキーを管理 →",
     "copied": "コピーしました！",
     "copyToClipboard": "クリップボードにコピー",
     "copyUsageExample": "使用例をコピー",
-    "credentialsCopied": "資格情報スニペットをクリップボードにコピーしました",
-    "step3Title": "3. 使用開始",
-    "step3Desc": "モジュールとプロバイダーを閲覧し、このレジストリのホスト名を使用してTerraform設定で直接参照。",
-    "protocolSupport": "レジストリプロトコルサポート",
-    "protocolDesc": "Terraformレジストリプロトコルv1との完全互换性 — プラグインやプロキシなしでTerraform CLIとプロバイダー設定で直接使用可能。",
+    "credentialsCopied": "認証情報のスニペットがクリップボードにコピーされました",
+    "step3Title": "3. 使い始める",
+    "step3Desc": "モジュールやプロバイダーを閲覧し、このレジストリのホスト名を使用して、Terraformの設定ファイル内でそれらを直接参照してください。",
+    "protocolSupport": "レジストリプロトコルのサポート",
+    "protocolDesc": "Terraform Registry Protocol v1 と完全に互換性があります。プラグインやプロキシを一切使用せずに、Terraform CLI やプロバイダーの設定でこのレジストリを直接利用できます。",
     "viewApiDocs": "APIドキュメントを表示",
-    "setupRequired": "セットアップが必要",
-    "featureSetupRequired": "機能設定が必要",
-    "setupRequiredDesc": "このレジストリはまだ設定されていません。セットアップウィザードを完了して認証、ストレージ、初期管理者アカウントを設定してください。",
-    "featureSetupDesc": "設定が必要な新機能が追加されました。セットアップウィザードを完了して機能を有効にしてください。",
-    "startSetup": "セットアップ開始",
-    "configureFeatures": "機能を設定"
+    "setupRequired": "セットアップが必要です",
+    "featureSetupRequired": "必要な機能設定",
+    "setupRequiredDesc": "このレジストリはまだ設定されていません。セットアップウィザードを完了して、認証、ストレージ、および初期管理者アカウントを設定してください。",
+    "featureSetupDesc": "設定が必要な新機能が追加されました。セットアップウィザードを完了させて、これらの機能を有効にしてください。",
+    "startSetup": "セットアップを開始",
+    "configureFeatures": "機能の設定"
   },
   "common": {
     "loading": "読み込み中...",
@@ -163,523 +163,523 @@
     "warning": "警告"
   },
   "language": {
-    "en": "English",
-    "es": "Español",
-    "fr": "Français",
-    "de": "Deutsch",
+    "en": "英語",
+    "es": "スペイン語",
+    "fr": "フランス語",
+    "de": "ドイツ語",
     "ja": "日本語",
-    "pt": "Português",
-    "nl": "Nederlands",
-    "nb": "Norsk bokmål",
-    "zh": "简体中文",
-    "it": "Italiano"
+    "pt": "ポルトガル語",
+    "nl": "オランダ語",
+    "nb": "ノルウェー語（ブークモール）",
+    "zh": "簡体字中国語",
+    "it": "イタリア語"
   },
   "help": {
     "default": {
-      "title": "Help",
-      "overview": "Navigate to a page using the sidebar to see context-sensitive help for that section.",
+      "title": "ヘルプ",
+      "overview": "サイドバーからページに移動すると、そのセクションのコンテキストに応じたヘルプが表示されます。",
       "actions": {
         "apiReference": {
-          "heading": "API Reference",
-          "text": "Visit the API Docs page for a full interactive reference of all registry endpoints."
+          "heading": "APIリファレンス",
+          "text": "すべてのレジストリエンドポイントに関する完全なインタラクティブリファレンスについては、APIドキュメントページをご覧ください。"
         }
       }
     },
     "home": {
-      "title": "Home",
-      "overview": "The home page provides a quick-start overview of the registry, including live status of available modules, providers, and mirrors. Use it as a jumping-off point to browse published content or access the admin area.",
+      "title": "ホーム",
+      "overview": "ホームページでは、利用可能なモジュール、プロバイダー、ミラーサイトのリアルタイムなステータスを含む、レジストリの概要を簡単に確認できます。公開されているコンテンツを閲覧したり、管理画面にアクセスしたりする際の出発点としてご利用ください。",
       "actions": {
         "browseModules": {
-          "heading": "Browse Modules",
-          "text": "Click \"Modules\" in the sidebar to search and explore published Terraform modules."
+          "heading": "モジュールを閲覧する",
+          "text": "サイドバーの「モジュール」をクリックして、公開されているTerraformモジュールを検索・閲覧してください。"
         },
         "browseProviders": {
-          "heading": "Browse Providers",
-          "text": "Click \"Providers\" to find provider binaries available in this registry."
+          "heading": "プロバイダーを閲覧する",
+          "text": "「プロバイダー」をクリックして、このレジストリで利用可能なプロバイダーのバイナリを検索してください。"
         },
         "adminAccess": {
-          "heading": "Admin Access",
-          "text": "If you have admin privileges, use the sidebar links to manage users, upload content, or configure storage."
+          "heading": "管理者権限",
+          "text": "管理者権限をお持ちの場合は、サイドバーのリンクを使用して、ユーザーの管理、コンテンツのアップロード、またはストレージの設定を行ってください。"
         }
       }
     },
     "modules": {
-      "title": "Modules",
-      "overview": "Lists all Terraform modules published in this registry. Modules are searchable by name and filterable by namespace. Click any module card to view versions, documentation, and usage instructions.",
+      "title": "モジュール",
+      "overview": "このレジストリで公開されているすべてのTerraformモジュールの一覧を表示します。モジュールは名前で検索でき、名前空間で絞り込むことができます。モジュールのカードをクリックすると、バージョン、ドキュメント、および使用方法を確認できます。",
       "actions": {
         "search": {
-          "heading": "Search",
-          "text": "Use the search field to filter modules by name or namespace in real time."
+          "heading": "検索",
+          "text": "検索フィールドを使用して、モジュール名を名前または名前空間でリアルタイムに絞り込むことができます。"
         },
         "viewModule": {
-          "heading": "View Module",
-          "text": "Click a module card to open the detail page with version history and README."
+          "heading": "モジュールを表示",
+          "text": "モジュールカードをクリックすると、バージョン履歴とREADMEが掲載された詳細ページが開きます。"
         },
         "uploadModule": {
-          "heading": "Upload a Module",
-          "text": "Go to Admin → Upload to publish a new module archive."
+          "heading": "モジュールをアップロードする",
+          "text": "「管理」→「アップロード」に移動し、新しいモジュールアーカイブを公開してください。"
         }
       }
     },
     "moduleDetail": {
-      "title": "Module Detail",
-      "overview": "Shows all published versions of a specific module, its README documentation, and the Terraform source block needed to reference it. The latest stable version is highlighted.",
+      "title": "モジュールの詳細",
+      "overview": "特定のモジュールのすべての公開バージョン、そのREADMEドキュメント、およびモジュールを参照するために必要なTerraformソースブロックを表示します。最新の安定版はハイライト表示されます。",
       "actions": {
         "copySourceBlock": {
-          "heading": "Copy Source Block",
-          "text": "Use the copy button next to the source field to get the Terraform module block."
+          "heading": "ソースブロックをコピー",
+          "text": "ソースフィールドの横にあるコピーボタンをクリックして、Terraformモジュールブロックを取得してください。"
         },
         "selectVersion": {
-          "heading": "Select Version",
-          "text": "Use the version selector to view documentation and inputs/outputs for a specific version."
+          "heading": "バージョンを選択",
+          "text": "バージョンセレクターを使用して、特定のバージョンのドキュメントや入出力情報を確認してください。"
         },
         "deprecateDelete": {
-          "heading": "Deprecate / Delete",
-          "text": "Admins can deprecate or remove a version using the action buttons on each version row."
+          "heading": "非推奨 / 削除",
+          "text": "管理者は、各バージョンの行にあるアクションボタンを使用して、バージョンを非推奨にしたり削除したりできます。"
         }
       }
     },
     "providers": {
-      "title": "Providers",
-      "overview": "Lists all Terraform providers published or mirrored in this registry. Providers are searchable by type and namespace. Click a provider card to view versions and platform binaries.",
+      "title": "プロバイダー",
+      "overview": "このレジストリで公開またはミラーリングされているすべてのTerraformプロバイダーを一覧表示します。プロバイダーはタイプやネームスペースで検索できます。プロバイダーのカードをクリックすると、バージョンやプラットフォーム別のバイナリを確認できます。",
       "actions": {
         "search": {
-          "heading": "Search",
-          "text": "Filter providers by name or namespace using the search field."
+          "heading": "検索",
+          "text": "検索フィールドを使用して、プロバイダーを名前または名前空間で絞り込んでください。"
         },
         "viewProvider": {
-          "heading": "View Provider",
-          "text": "Click a card to open the provider detail page showing versions and platform downloads."
+          "heading": "プロバイダーを表示",
+          "text": "カードをクリックすると、バージョンやプラットフォームごとのダウンロード情報が表示されたプロバイダーの詳細ページが開きます。"
         },
         "uploadProvider": {
-          "heading": "Upload a Provider",
-          "text": "Go to Admin → Upload to publish a new provider binary with its checksums."
+          "heading": "プロバイダーをアップロードする",
+          "text": "「管理」→「アップロード」に移動し、チェックサム付きの新しいプロバイダーバイナリを公開してください。"
         }
       }
     },
     "providerDetail": {
-      "title": "Provider Detail",
-      "overview": "Shows all published versions of a specific provider and the platform binaries available for each version. Includes the Terraform required_providers block for easy copy-paste.",
+      "title": "プロバイダー詳細",
+      "overview": "特定のプロバイダーのすべての公開バージョンと、各バージョンで利用可能なプラットフォーム用バイナリを表示します。簡単にコピー＆ペーストできるよう、Terraformの`required_providers`ブロックも含まれています。",
       "actions": {
         "copyRequiredProviders": {
-          "heading": "Copy Required Providers Block",
-          "text": "Use the copy button to get the required_providers configuration."
+          "heading": "「必須プロバイダー」ブロックをコピー",
+          "text": "「コピー」ボタンをクリックして、required_providers の設定を取得してください。"
         },
         "selectVersion": {
-          "heading": "Select Version",
-          "text": "Browse platform binaries (OS/arch combinations) per version."
+          "heading": "バージョンを選択",
+          "text": "バージョンごとのプラットフォームバイナリ（OSとアーキテクチャの組み合わせ）を閲覧する。"
         },
         "deprecateDelete": {
-          "heading": "Deprecate / Delete",
-          "text": "Admins can deprecate or remove individual provider versions."
+          "heading": "非推奨 / 削除",
+          "text": "管理者は、個々のプロバイダーのバージョンを非推奨にしたり、削除したりできます。"
         }
       }
     },
     "apiDocs": {
-      "title": "API Reference",
-      "overview": "API documentation for all registry endpoints, powered by ReDoc. Browse endpoint groups and view request/response schemas.",
+      "title": "APIリファレンス",
+      "overview": "ReDoc による、すべてのレジストリエンドポイントの API ドキュメント。エンドポイントグループを閲覧し、リクエスト/レスポンスのスキーマを確認できます。",
       "actions": {
         "authenticate": {
-          "heading": "Authenticate",
-          "text": "Paste your API key as a Bearer token using the Authorize button at the top."
+          "heading": "認証する",
+          "text": "上部の「認証」ボタンを使用して、APIキーをBearerトークンとして貼り付けてください。"
         },
         "browseEndpoints": {
-          "heading": "Browse Endpoints",
-          "text": "Use the left-hand endpoint tree to navigate by resource group."
+          "heading": "エンドポイントを閲覧する",
+          "text": "左側のエンドポイントツリーを使用して、リソースグループごとに移動します。"
         }
       }
     },
     "dashboard": {
-      "title": "Dashboard",
-      "overview": "A live health snapshot of your registry. The top bar shows mirror health at a glance. The stat cards below break down modules (with per-system counts), providers (manual vs mirrored), Terraform binary mirrors, and total downloads.",
+      "title": "ダッシュボード",
+      "overview": "レジストリの現在の状態を一目で確認できます。上部のバーには、ミラーの状態が一覧表示されます。その下のステータスカードには、モジュール（システムごとの件数）、プロバイダー（手動 vs ミラー）、Terraformバイナリのミラー、および総ダウンロード数が詳細に表示されます。",
       "actions": {
         "healthBar": {
-          "heading": "Health Bar",
-          "text": "Binary Mirrors, Provider Mirrors, and Storage pills turn red when something is failing. Click any pill to jump to that section."
+          "heading": "体力ゲージ",
+          "text": "バイナリミラー、プロバイダーミラー、およびストレージピルは、何らかの障害が発生すると赤く表示されます。任意のピルをクリックすると、そのセクションに移動します。"
         },
         "statCards": {
-          "heading": "Stat Cards",
-          "text": "Each card is a shortcut — click to navigate. The aside panels on Modules and Providers show the breakdown by system or mirror type."
+          "heading": "ステータスカード",
+          "text": "各カードはショートカットです。クリックして移動してください。「モジュール」および「プロバイダー」のサイドパネルには、システム別またはミラータイプ別の内訳が表示されます。"
         },
         "recentSyncActivity": {
-          "heading": "Recent Sync Activity",
-          "text": "The table shows the last 8 sync events across binary and provider mirrors, with status, versions synced, and elapsed time."
+          "heading": "最近の同期履歴",
+          "text": "この表は、バイナリミラーとプロバイダーミラーにおける直近の8件の同期イベントについて、ステータス、同期されたバージョン、および経過時間を示しています。"
         },
         "quickLinks": {
-          "heading": "Quick Links",
-          "text": "Common admin actions — upload, manage users, configure mirrors — are one click away from the Quick Links panel."
+          "heading": "よく使うリンク",
+          "text": "アップロード、ユーザー管理、ミラーの設定といった一般的な管理操作は、「クイックリンク」パネルからワンクリックで実行できます。"
         }
       }
     },
     "users": {
-      "title": "Users",
-      "overview": "Manage registry user accounts. Users can be created manually for local/API-key auth, or created automatically on first OIDC login. Assign users to organizations and grant them role templates here.",
+      "title": "ユーザー",
+      "overview": "レジストリのユーザーアカウントを管理します。ユーザーは、ローカル認証やAPIキー認証用に手動で作成することも、最初のOIDCログイン時に自動的に作成することもできます。ここでユーザーを組織に割り当て、ロールテンプレートを付与します。",
       "actions": {
         "createUser": {
-          "heading": "Create User",
-          "text": "Click \"Add User\" to create a new account with an email and display name."
+          "heading": "ユーザーの作成",
+          "text": "「ユーザーを追加」をクリックして、メールアドレスと表示名を入力し、新しいアカウントを作成してください。"
         },
         "editUser": {
-          "heading": "Edit User",
-          "text": "Click the edit icon on any row to update the user's name, organization, or role."
+          "heading": "ユーザーを編集",
+          "text": "任意の行にある編集アイコンをクリックして、ユーザー名、所属組織、または役割を更新してください。"
         },
         "deleteUser": {
-          "heading": "Delete User",
-          "text": "Removes the user account. Any API keys they hold will also be invalidated."
+          "heading": "ユーザーを削除",
+          "text": "ユーザーアカウントを削除します。そのユーザーが保有するすべてのAPIキーも無効化されます。"
         }
       }
     },
     "organizations": {
-      "title": "Organizations",
-      "overview": "Organizations are namespace containers — modules and providers are published under an organization's namespace. Members of an organization inherit its role template's permissions.",
+      "title": "組織",
+      "overview": "組織はネームスペースのコンテナであり、モジュールやプロバイダーは組織のネームスペースの下で公開されます。組織のメンバーは、その組織のロールテンプレートの権限を継承します。",
       "actions": {
         "createOrganization": {
-          "heading": "Create Organization",
-          "text": "Click \"Add Organization\" to define a new namespace with a URL-safe name."
+          "heading": "組織を作成する",
+          "text": "「組織を追加」をクリックして、URLで安全に使用できる名前で新しい名前空間を定義してください。"
         },
         "manageMembers": {
-          "heading": "Manage Members",
-          "text": "Expand an organization row to view and modify its member list."
+          "heading": "メンバーの管理",
+          "text": "組織の行を展開して、そのメンバー一覧を表示・編集します。"
         },
         "deleteOrganization": {
-          "heading": "Delete Organization",
-          "text": "Only possible when the organization has no published content."
+          "heading": "組織を削除する",
+          "text": "組織が公開済みのコンテンツを一切持っていない場合にのみ可能です。"
         }
       }
     },
     "roles": {
-      "title": "Roles & Permissions",
-      "overview": "This page shows the fixed role templates available in the registry. Role templates define the permission scopes granted to users within an organization. Templates are system-defined and read-only.",
+      "title": "役割と権限",
+      "overview": "このページには、レジストリで利用可能な固定ロールテンプレートが表示されます。ロールテンプレートは、組織内のユーザーに付与される権限の範囲を定義します。テンプレートはシステムによって定義されており、読み取り専用です。",
       "actions": {
         "viewScopes": {
-          "heading": "View Scopes",
-          "text": "Expand a role template to see the full list of permission scopes it grants."
+          "heading": "スコープを表示",
+          "text": "ロールテンプレートを展開すると、そのロールが付与する権限スコープの完全な一覧が表示されます。"
         },
         "assignToUser": {
-          "heading": "Assign to User",
-          "text": "Go to Admin → Users to assign a role template to a user's organization membership."
+          "heading": "ユーザーに割り当てる",
+          "text": "「管理」→「ユーザー」に移動し、ユーザーの組織メンバーシップにロールテンプレートを割り当てます。"
         }
       }
     },
     "oidcGroups": {
-      "title": "OIDC Groups",
-      "overview": "Maps identity provider group claims to registry organizations and roles. When a user logs in via OIDC, their group memberships are read from the ID token and used to automatically provision or update their organization membership. Changes take effect on the next login without requiring a server restart.",
+      "title": "OIDCグループ",
+      "overview": "Mapsは、IDプロバイダーのグループ情報をレジストリの組織およびロールに紐付けます。ユーザーがOIDC経由でログインすると、IDトークンからグループの所属情報が読み取られ、それに基づいて組織の所属情報が自動的に設定または更新されます。変更は、サーバーの再起動を必要とせず、次回のログイン時に反映されます。",
       "actions": {
         "groupClaimName": {
-          "heading": "Group Claim Name",
-          "text": "Set this to the claim key in your OIDC ID token that carries the user's group list (e.g. \"groups\"). This must match the protocol mapper configured in your identity provider."
+          "heading": "グループ名",
+          "text": "ここには、ユーザーのグループ一覧（例：「groups」）を含むOIDC IDトークンのクレームキーを設定してください。これは、IDプロバイダーで設定されたプロトコルマッパーと一致している必要があります。"
         },
         "defaultRole": {
-          "heading": "Default Role",
-          "text": "Optionally assign a fallback role to users whose groups do not match any mapping. Leave blank to grant no automatic membership to unmatched users."
+          "heading": "デフォルトの役割",
+          "text": "必要に応じて、どのマッピングにも一致しないグループに所属するユーザーに、代替ロールを割り当てることができます。一致しないユーザーに自動的なメンバーシップを付与しない場合は、空欄のままにしてください。"
         },
         "addMapping": {
-          "heading": "Add a Mapping",
-          "text": "Click \"Add Mapping\" to link an IdP group name to a registry organization and role template. The group name must exactly match the value as it appears in the ID token claim."
+          "heading": "マッピングを追加する",
+          "text": "「マッピングを追加」をクリックして、IdPのグループ名をレジストリの組織およびロールテンプレートに関連付けます。グループ名は、IDトークンのクレームに表示される値と完全に一致している必要があります。"
         },
         "roleTemplates": {
-          "heading": "Role Templates",
-          "text": "Roles correspond to system role templates (viewer, publisher, mirror_manager, admin). Go to Admin → Roles to review what each template permits."
+          "heading": "役割テンプレート",
+          "text": "ロールは、システムのロールテンプレート（viewer、publisher、mirror_manager、admin）に対応しています。「管理」→「ロール」に移動して、各テンプレートで許可されている権限を確認してください。"
         },
         "saveChanges": {
-          "heading": "Save Changes",
-          "text": "Click \"Save Changes\" to persist your group claim and mapping configuration. Existing sessions are not affected until the user logs in again."
+          "heading": "変更を保存",
+          "text": "「変更を保存」をクリックして、グループのクレームおよびマッピング設定を確定してください。ユーザーが再度ログインするまでは、既存のセッションには影響しません。"
         }
       }
     },
     "apiKeys": {
-      "title": "API Keys",
-      "overview": "API keys allow programmatic access to authenticated registry endpoints. Each key is shown once at creation and stored only as a bcrypt hash — it cannot be retrieved after creation.",
+      "title": "APIキー",
+      "overview": "APIキーを使用すると、認証済みのレジストリエンドポイントにプログラムからアクセスできます。各キーは作成時に一度だけ表示され、bcryptハッシュとしてのみ保存されます。作成後は復元することができません。",
       "actions": {
         "createKey": {
-          "heading": "Create Key",
-          "text": "Click \"Create API Key\" to generate a new key. Copy it immediately — it will not be shown again."
+          "heading": "キーを作成する",
+          "text": "「APIキーを作成」をクリックして、新しいキーを生成してください。すぐにコピーしてください。このキーは二度と表示されません。"
         },
         "revokeKey": {
-          "heading": "Revoke Key",
-          "text": "Delete a key to immediately invalidate all requests using it."
+          "heading": "鍵の無効化",
+          "text": "キーを削除すると、そのキーを使用しているすべてのリクエストが直ちに無効になります。"
         },
         "useKey": {
-          "heading": "Use the Key",
-          "text": "Include the key as Authorization: Bearer <key> in HTTP requests."
+          "heading": "キーを使用する",
+          "text": "<key>HTTPリクエストに、</key>キーを「Authorization: Bearer」として含めてください<key>。</key>"
         }
       }
     },
     "upload": {
-      "title": "Upload",
-      "overview": "Upload module archives (.tar.gz) or provider binaries to publish them in the registry. The upload wizard validates archive structure, checksums, and GPG signatures before publishing.",
+      "title": "アップロード",
+      "overview": "モジュールアーカイブ（.tar.gz）またはプロバイダーのバイナリをアップロードして、レジストリに公開します。アップロードウィザードは、公開前にアーカイブの構造、チェックサム、およびGPG署名を検証します。",
       "actions": {
         "uploadModule": {
-          "heading": "Upload Module",
-          "text": "Select the \"Module\" tab, provide namespace/name/system/version, and attach the .tar.gz archive."
+          "heading": "アップロードモジュール",
+          "text": "「モジュール」タブを選択し、名前空間、名前、システム、バージョンを入力して、.tar.gz アーカイブを添付してください。"
         },
         "uploadProvider": {
-          "heading": "Upload Provider",
-          "text": "Select the \"Provider\" tab, fill in namespace/type/version/platform details, and attach the binary plus checksum files."
+          "heading": "アップロードプロバイダー",
+          "text": "「プロバイダー」タブを選択し、名前空間、タイプ、バージョン、プラットフォームの詳細を入力し、バイナリファイルとチェックサムファイルを添付してください。"
         },
         "scmLinking": {
-          "heading": "SCM Linking",
-          "text": "Alternatively, link a module to an SCM repository so it publishes automatically from git tags."
+          "heading": "SCM連携",
+          "text": "あるいは、モジュールをSCMリポジトリにリンクして、Gitのタグから自動的に公開するように設定することもできます。"
         }
       }
     },
     "scmProviders": {
-      "title": "SCM Providers",
-      "overview": "SCM provider configurations connect the registry to GitHub, GitLab, Bitbucket, or Azure DevOps for automated module publishing via git tag webhooks. Each connection uses OAuth credentials.",
+      "title": "SCMプロバイダー",
+      "overview": "SCMプロバイダーの設定では、レジストリをGitHub、GitLab、Bitbucket、またはAzure DevOpsに接続し、gitタグのWebhookを介してモジュールの自動公開を行います。各接続にはOAuth認証情報を使用します。",
       "actions": {
         "addProvider": {
-          "heading": "Add Provider",
-          "text": "Click \"Add SCM Provider\", select the platform, enter the OAuth App Client ID and Secret, then complete the OAuth authorization flow."
+          "heading": "プロバイダーを追加",
+          "text": "「SCMプロバイダーを追加」をクリックし、プラットフォームを選択して、OAuthアプリクライアントIDとシークレットを入力し、OAuth認証フローを完了させてください。"
         },
         "reconnect": {
-          "heading": "Reconnect",
-          "text": "If OAuth tokens expire, use the reconnect button to re-authorize."
+          "heading": "再接続",
+          "text": "OAuthトークンの有効期限が切れた場合は、「再接続」ボタンをクリックして、再度認証を行ってください。"
         },
         "linkModule": {
-          "heading": "Link a Module",
-          "text": "After adding an SCM provider, go to Admin → Upload → SCM to link a repository to a module."
+          "heading": "モジュールをリンクする",
+          "text": "SCMプロバイダを追加したら、[管理] → [アップロード] → [SCM] に移動し、リポジトリをモジュールに関連付けます。"
         }
       }
     },
     "mirrors": {
-      "title": "Provider Mirrors",
-      "overview": "Provider mirrors synchronize provider binaries from the official Terraform registry (or any compatible upstream) into this registry. Once mirrored, providers are available without internet access.",
+      "title": "プロバイダーのミラーサイト",
+      "overview": "プロバイダーミラーは、公式のTerraformレジストリ（または互換性のあるアップストリーム）からこのレジストリへプロバイダーのバイナリを同期します。ミラー化されると、インターネットに接続していなくてもプロバイダーを利用できるようになります。",
       "actions": {
         "createMirror": {
-          "heading": "Create Mirror",
-          "text": "Click \"Add Mirror\" to define an upstream registry URL and filter rules for which providers to sync."
+          "heading": "ミラーを作成する",
+          "text": "「ミラーを追加」をクリックして、アップストリームレジストリのURLと、同期するプロバイダーを指定するフィルタリングルールを設定します。"
         },
         "triggerSync": {
-          "heading": "Trigger Sync",
-          "text": "Use the sync button on a mirror to immediately fetch the latest versions from upstream."
+          "heading": "トリガー同期",
+          "text": "ミラー上の「同期」ボタンを使用すると、アップストリームから最新のバージョンを即座に取得できます。"
         },
         "viewSyncHistory": {
-          "heading": "View Sync History",
-          "text": "Expand a mirror row to see the log of recent sync runs and any errors."
+          "heading": "同期履歴を表示",
+          "text": "ミラー行を展開すると、直近の同期実行のログやエラーを確認できます。"
         }
       }
     },
     "storage": {
-      "title": "Storage",
-      "overview": "Configures the backend storage used for module and provider artifacts. Supported backends are local filesystem, AWS S3, Azure Blob Storage, and Google Cloud Storage. Only one backend can be active at a time.",
+      "title": "ストレージ",
+      "overview": "モジュールおよびプロバイダーのアートファクトに使用されるバックエンドストレージを設定します。サポートされているバックエンドは、ローカルファイルシステム、AWS S3、Azure Blob Storage、およびGoogle Cloud Storageです。一度に有効にできるバックエンドは1つだけです。",
       "actions": {
         "switchBackend": {
-          "heading": "Switch Backend",
-          "text": "Select a backend type, fill in credentials, and click \"Activate\" to migrate to the new storage."
+          "heading": "バックエンドを切り替える",
+          "text": "バックエンドの種類を選択し、認証情報を入力して、「有効化」をクリックすると、新しいストレージへ移行されます。"
         },
         "testConnection": {
-          "heading": "Test Connection",
-          "text": "Use the \"Test\" button to validate credentials before activating."
+          "heading": "接続を確認",
+          "text": "有効化する前に、「テスト」ボタンを使用して認証情報を確認してください。"
         },
         "localStorage": {
-          "heading": "Local Storage",
-          "text": "For development, the local filesystem backend requires no credentials."
+          "heading": "ローカルストレージ",
+          "text": "開発環境では、ローカルファイルシステムバックエンドに認証情報は必要ありません。"
         }
       }
     },
     "terraformBinaries": {
-      "title": "Terraform Binary Mirrors",
-      "overview": "Lists the available Terraform and OpenTofu binary mirrors hosted by this registry. Each mirror caches a set of binary versions from an upstream source so your CI pipelines and developer machines can download them without direct internet access.",
+      "title": "Terraform バイナリミラー",
+      "overview": "このレジストリがホストする、利用可能なTerraformおよびOpenTofuのバイナリミラーを一覧表示します。各ミラーは、アップストリームソースからのバイナリバージョンのセットをキャッシュしているため、CIパイプラインや開発者のマシンは、インターネットに直接接続していなくてもそれらをダウンロードできます。",
       "actions": {
         "viewVersions": {
-          "heading": "View Versions",
-          "text": "Click a mirror card to open its detail page, which shows all available versions and the platform binaries (OS/arch) synced for each."
+          "heading": "バージョンを表示",
+          "text": "ミラーカードをクリックすると詳細ページが開き、利用可能なすべてのバージョンと、各バージョンに同期されているプラットフォーム用バイナリ（OS/アーキテクチャ）が表示されます。"
         },
         "downloadUrl": {
-          "heading": "Download URL",
-          "text": "The detail page shows the full download URL pattern. Point your Terraform CLI or CI toolchain at this URL instead of the upstream registry."
+          "heading": "ダウンロードURL",
+          "text": "詳細ページには、完全なダウンロードURLのパターンが表示されています。アップストリームのレジストリではなく、このURLをTerraform CLIまたはCIツールチェーンで指定してください。"
         },
         "adminConfiguration": {
-          "heading": "Admin Configuration",
-          "text": "To add or manage mirror configurations, go to Admin → Terraform Binaries."
+          "heading": "管理設定",
+          "text": "ミラー設定を追加または管理するには、[管理] → [Terraform バイナリ] に移動してください。"
         }
       }
     },
     "terraformBinaryDetail": {
-      "title": "Binary Mirror Detail",
-      "overview": "Shows all versions synced for this binary mirror and the platform binaries available for each version. Expand a version row to inspect individual OS/architecture combinations, checksum verification status, and GPG signature status.",
+      "title": "バイナリミラーの詳細",
+      "overview": "このバイナリミラーに同期されているすべてのバージョンと、各バージョンで利用可能なプラットフォーム用バイナリを表示します。バージョンの行を展開すると、個々のOS/アーキテクチャの組み合わせ、チェックサムの検証状況、およびGPG署名の状況を確認できます。",
       "actions": {
         "expandPlatforms": {
-          "heading": "Expand Platforms",
-          "text": "Click the expand arrow on a version row to see per-platform details including OS, architecture, filename, and whether checksum and GPG verification passed."
+          "heading": "対応プラットフォームを表示",
+          "text": "バージョン行の展開矢印をクリックすると、OS、アーキテクチャ、ファイル名、チェックサムおよびGPG検証の可否など、プラットフォームごとの詳細が表示されます。"
         },
         "downloadUrl": {
-          "heading": "Download URL",
-          "text": "Use the URL pattern shown in the info banner to download a specific version and platform: /terraform/binaries/{name}/versions/{version}/{os}/{arch}."
+          "heading": "ダウンロードURL",
+          "text": "特定のバージョンとプラットフォームをダウンロードするには、情報バナーに表示されているURLパターンをご利用ください：/terraform/binaries/{name}/versions/{version}/{os}/{arch}。"
         },
         "deprecateVersion": {
-          "heading": "Deprecate a Version",
-          "text": "Admins can click the warning icon to deprecate a version. Deprecated versions remain available for download but will not be re-synced in future sync runs."
+          "heading": "バージョンのサポート終了",
+          "text": "管理者は警告アイコンをクリックして、バージョンを非推奨に設定できます。非推奨となったバージョンは引き続きダウンロード可能ですが、今後の同期実行では再同期されなくなります。"
         },
         "deleteVersion": {
-          "heading": "Delete a Version",
-          "text": "Admins can permanently remove a version record and its binaries from storage. Consider deprecating instead if you want to retain the files but prevent re-syncing."
+          "heading": "バージョンを削除する",
+          "text": "管理者は、バージョンレコードとそのバイナリをストレージから完全に削除できます。ファイルを保持したまま再同期を防止したい場合は、代わりに「非推奨」設定にすることを検討してください。"
         },
         "restoreDeprecatedVersion": {
-          "heading": "Restore a Deprecated Version",
-          "text": "Click the restore icon on a deprecated version to remove the deprecation flag and allow it to be re-synced."
+          "heading": "非推奨バージョンを復元する",
+          "text": "非推奨となっているバージョンの「復元」アイコンをクリックすると、非推奨フラグが解除され、再同期が可能になります。"
         }
       }
     },
     "terraformMirror": {
-      "title": "Terraform Binary Mirror",
-      "overview": "Manages mirror configurations that cache Terraform and OpenTofu binary distributions from upstream sources. Once mirrored, binaries can be served to engineers without direct internet access, enabling air-gapped or bandwidth-constrained environments.",
+      "title": "Terraform バイナリミラー",
+      "overview": "アップストリームソースからTerraformおよびOpenTofuのバイナリ配布版をキャッシュするミラー構成を管理します。ミラー化されたバイナリは、インターネットに直接接続できないエンジニアにも提供できるため、エアギャップ環境や帯域幅に制約のある環境での利用が可能になります。",
       "actions": {
         "createMirrorConfig": {
-          "heading": "Create a Mirror Config",
-          "text": "Click \"Add Mirror\" to define a new mirror. Give it a name, select the tool type (terraform, opentofu, or custom), and specify the upstream URL to sync from."
+          "heading": "ミラー設定を作成する",
+          "text": "「ミラーを追加」をクリックして、新しいミラーを定義します。名前を付け、ツールの種類（terraform、opentofu、またはカスタム）を選択し、同期元となるアップストリームのURLを指定します。"
         },
         "syncVersions": {
-          "heading": "Sync Versions",
-          "text": "Expand a mirror config and click the sync button to immediately fetch the latest binary index from upstream. Sync history shows the result of each run."
+          "heading": "バージョンの同期",
+          "text": "ミラー設定を展開し、同期ボタンをクリックすると、アップストリームから最新のバイナリインデックスが即座に取得されます。同期履歴には、各実行の結果が表示されます。"
         },
         "inspectPlatforms": {
-          "heading": "Inspect Platforms",
-          "text": "Drill into a version to see which OS/architecture combinations have been downloaded and are available locally."
+          "heading": "プラットフォームの点検",
+          "text": "特定のバージョンを詳しく確認して、どのOSとアーキテクチャの組み合わせがダウンロードされ、ローカルに利用可能かを確認します。"
         },
         "enableDisable": {
-          "heading": "Enable / Disable",
-          "text": "Toggle a mirror config off to pause scheduled syncs without deleting the configuration or cached binaries."
+          "heading": "有効にする / 無効にする",
+          "text": "ミラー設定を無効にすると、設定やキャッシュされたバイナリを削除することなく、スケジュールされた同期を一時停止できます。"
         },
         "deleteConfig": {
-          "heading": "Delete a Config",
-          "text": "Removes the mirror configuration. Previously synced binaries in storage are not automatically removed."
+          "heading": "設定を削除する",
+          "text": "ミラー設定を削除します。ストレージに保存されている以前に同期されたバイナリは、自動的に削除されません。"
         }
       }
     },
     "approvals": {
-      "title": "Approval Requests",
-      "overview": "Approval requests are raised when a mirror policy requires human sign-off before a provider namespace or binary is mirrored. An admin must approve or reject each request. Approved requests allow the mirror sync to proceed; rejected requests block it.",
+      "title": "承認依頼",
+      "overview": "ミラーポリシーにより、プロバイダーのネームスペースまたはバイナリをミラーリングする前に人的承認が必要とされる場合、承認リクエストが発行されます。管理者は各リクエストを承認または却下する必要があります。承認されたリクエストはミラー同期を続行させ、却下されたリクエストは同期をブロックします。",
       "actions": {
         "reviewRequest": {
-          "heading": "Review a Request",
-          "text": "Click the \"Approve\" or \"Reject\" button on a pending request card to open the review dialog. Add reviewer notes to explain the decision, then confirm."
+          "heading": "リクエストを確認する",
+          "text": "保留中のリクエストカードにある「承認」または「却下」ボタンをクリックして、審査ダイアログを開きます。決定理由を説明する審査コメントを追加し、確認してください。"
         },
         "createRequest": {
-          "heading": "Create a Request",
-          "text": "Click \"Create Request\" to manually raise an approval for a provider namespace. Useful for pre-approving content before configuring a mirror policy."
+          "heading": "リクエストを作成する",
+          "text": "「リクエストを作成」をクリックして、プロバイダーネームスペースの承認を手動で申請します。ミラーポリシーを設定する前にコンテンツを事前承認する場合に便利です。"
         },
         "filterByStatus": {
-          "heading": "Filter by Status",
-          "text": "Pending, approved, and rejected requests are all shown together. Look at the status chip on each card to distinguish them at a glance."
+          "heading": "ステータスで絞り込む",
+          "text": "保留中、承認済み、却下されたリクエストがすべて一緒に表示されます。各カードのステータスチップを確認すれば、一目で区別できます。"
         },
         "mirrorPolicyLink": {
-          "heading": "Mirror Policy Link",
-          "text": "Each request references the mirror config that triggered it. Navigate to Admin → Provider Mirrors to view or edit the associated mirror configuration."
+          "heading": "ミラーポリシーへのリンク",
+          "text": "各リクエストには、そのリクエストをトリガーしたミラー設定が参照されています。「管理」→「プロバイダーミラー」に移動して、関連するミラー設定を表示または編集してください。"
         }
       }
     },
     "mirrorPolicies": {
-      "title": "Mirror Policies",
-      "overview": "Mirror policies control which providers are allowed or denied from being mirrored, and whether mirroring them requires an approval request. Policies are matched by upstream registry URL, namespace pattern, and provider name pattern. Higher-priority policies take precedence when multiple rules match.",
+      "title": "ミラーポリシー",
+      "overview": "ミラーポリシーは、どのプロバイダーのミラーリングを許可または拒否するか、およびミラーリングに承認リクエストが必要かどうかを制御します。ポリシーは、アップストリームレジストリのURL、ネームスペースのパターン、およびプロバイダー名のパターンに基づいて照合されます。複数のルールが一致する場合、優先順位の高いポリシーが優先されます。",
       "actions": {
         "createPolicy": {
-          "heading": "Create a Policy",
-          "text": "Click \"Create Policy\" and fill in the name, type (allow or deny), and pattern fields. Use glob-style wildcards (e.g. hashicorp/* ) in the namespace and provider fields to match multiple providers at once."
+          "heading": "ポリシーを作成する",
+          "text": "「ポリシーの作成」をクリックし、名前、タイプ（許可または拒否）、およびパターンの各フィールドに入力します。ネームスペースおよびプロバイダーのフィールドでは、glob形式のワイルドカード（例：hashicorp/*）を使用して、複数のプロバイダーを一度に指定できます。"
         },
         "allowVsDeny": {
-          "heading": "Allow vs Deny",
-          "text": "An \"allow\" policy permits matched providers to be mirrored. A \"deny\" policy blocks them. Deny policies override allow policies at the same priority level."
+          "heading": "許可 vs 拒否",
+          "text": "「許可」ポリシーは、条件に一致したプロバイダーのミラーリングを許可します。「拒否」ポリシーは、それらをブロックします。同じ優先度レベルでは、拒否ポリシーが許可ポリシーよりも優先されます。"
         },
         "requireApproval": {
-          "heading": "Require Approval",
-          "text": "Enable \"Requires Approval\" on an allow policy to route matched providers through the approval workflow before syncing. Approved requests appear in Admin → Approval Requests."
+          "heading": "承認が必要",
+          "text": "許可ポリシーで「承認が必要」を有効にすると、一致したプロバイダーは同期前に承認ワークフローを経由するようになります。承認されたリクエストは、「管理」→「承認リクエスト」に表示されます。"
         },
         "priority": {
-          "heading": "Priority",
-          "text": "Policies are evaluated in ascending priority order (lower number = higher priority). Set priority carefully when allow and deny rules overlap."
+          "heading": "優先順位",
+          "text": "ポリシーは優先順位の低いものから順に評価されます（数値が小さいほど優先順位が高い）。許可ルールと拒否ルールが重複する場合は、優先順位を慎重に設定してください。"
         },
         "evaluatePolicy": {
-          "heading": "Evaluate a Policy",
-          "text": "Use the \"Evaluate\" button to test how a specific provider namespace/name would be matched against the current policy set without triggering a real sync."
+          "heading": "政策を評価する",
+          "text": "「評価」ボタンを使用すると、実際の同期を実行することなく、特定のプロバイダー名空間や名前が現在のポリシーセットとどのように照合されるかを確認できます。"
         },
         "enableDisable": {
-          "heading": "Enable / Disable",
-          "text": "Toggle a policy off to suspend it temporarily without deleting it. Disabled policies are skipped during evaluation."
+          "heading": "有効にする / 無効にする",
+          "text": "ポリシーを無効にすると、削除することなく一時的に停止できます。無効化されたポリシーは、評価時にスキップされます。"
         }
       }
     },
     "auditLogs": {
-      "title": "Audit Logs",
-      "overview": "A tamper-evident record of every significant action taken in the registry — uploads, deletes, configuration changes, login events, and mirror syncs. Use it for compliance reviews, incident investigation, or general activity monitoring.",
+      "title": "監査ログ",
+      "overview": "レジストリで行われたすべての重要な操作（アップロード、削除、設定変更、ログインイベント、ミラー同期など）について、改ざん防止機能を備えた記録が作成されます。コンプライアンス審査、インシデント調査、または一般的なアクティビティの監視にご活用ください。",
       "actions": {
         "filterByResourceType": {
-          "heading": "Filter by Resource Type",
-          "text": "Use the Resource Type dropdown to narrow results to a specific entity class (e.g. module, provider, user, mirror)."
+          "heading": "リソースの種類で絞り込む",
+          "text": "「リソースタイプ」ドロップダウンを使用して、結果を特定のエンティティクラス（例：モジュール、プロバイダー、ユーザー、ミラー）に絞り込むことができます。"
         },
         "filterByAction": {
-          "heading": "Filter by Action",
-          "text": "Type an action name (e.g. \"create\", \"delete\", \"login\") in the Action field to show only matching events."
+          "heading": "アクションで絞り込む",
+          "text": "「アクション」フィールドにアクション名（例：「create」、「delete」、「login」）を入力すると、一致するイベントのみが表示されます。"
         },
         "filterByUser": {
-          "heading": "Filter by User",
-          "text": "Enter a user email to see all actions performed by that account."
+          "heading": "ユーザーで絞り込む",
+          "text": "そのアカウントが行ったすべての操作を確認するには、ユーザーのメールアドレスを入力してください。"
         },
         "dateRange": {
-          "heading": "Date Range",
-          "text": "Set Start and End date pickers to restrict results to a specific time window."
+          "heading": "期間",
+          "text": "開始日と終了日の日付選択ツールを設定して、結果を特定の期間に絞り込みます。"
         },
         "viewDetail": {
-          "heading": "View Detail",
-          "text": "Click any row to open a detail panel showing the full log entry, including resource ID, actor, and metadata."
+          "heading": "詳細を見る",
+          "text": "任意の行をクリックすると、リソースID、アクター、メタデータなど、ログエントリの全内容を表示する詳細パネルが開きます。"
         },
         "export": {
-          "heading": "Export",
-          "text": "Use the Export button to download the current filtered result set as CSV or JSON."
+          "heading": "エクスポート",
+          "text": "「エクスポート」ボタンをクリックして、現在フィルタリングされた結果セットをCSVまたはJSON形式でダウンロードしてください。"
         }
       }
     },
     "securityScanning": {
-      "title": "Security Scanning",
-      "overview": "Displays the current configuration and results of the module vulnerability scanner. The scanner analyses uploaded module archives for known security issues using an external scanning tool configured by the server administrator.",
+      "title": "セキュリティスキャン",
+      "overview": "モジュール脆弱性スキャナの現在の設定と結果を表示します。このスキャナは、サーバー管理者が設定した外部スキャンツールを使用して、アップロードされたモジュールアーカイブを分析し、既知のセキュリティ上の問題がないかを確認します。",
       "actions": {
         "viewConfiguration": {
-          "heading": "View Configuration",
-          "text": "The top section shows whether scanning is enabled, the scanner tool and version, severity threshold, timeout, and worker/interval settings."
+          "heading": "設定を表示",
+          "text": "上部には、スキャンが有効かどうか、スキャナツールとそのバージョン、重大度しきい値、タイムアウト、およびワーカー／間隔の設定が表示されます。"
         },
         "summaryStatistics": {
-          "heading": "Summary Statistics",
-          "text": "Aggregate counts show total scans, pending, clean, findings, and errors at a glance."
+          "heading": "要約統計量",
+          "text": "集計値により、総スキャン数、保留中、正常、検出結果、エラーが一目で確認できます。"
         },
         "reviewScanResults": {
-          "heading": "Review Scan Results",
-          "text": "The recent scans table lists each module with its scan status and vulnerability counts broken down by severity (critical, high, medium, low)."
+          "heading": "スキャン結果を確認する",
+          "text": "「最近のスキャン」テーブルには、各モジュールとそのスキャン状況、および深刻度別（重大、高、中、低）に分類された脆弱性の件数が一覧表示されています。"
         }
       }
     },
     "mtls": {
-      "title": "mTLS Certificates",
-      "overview": "Shows the current mutual TLS (mTLS) configuration, including whether client certificate authentication is enabled and which certificate subjects are mapped to authorization scopes. All mTLS settings are read-only in the UI — configuration is managed through the server config file.",
+      "title": "mTLS証明書",
+      "overview": "現在の相互TLS（mTLS）の設定を表示します。これには、クライアント証明書認証が有効かどうか、およびどの証明書サブジェクトが認証スコープにマッピングされているかなどが含まれます。UI上のすべてのmTLS設定は読み取り専用です。設定はサーバーの設定ファイルを通じて管理されます。",
       "actions": {
         "viewStatus": {
-          "heading": "View Status",
-          "text": "The status indicator shows whether mTLS is enabled or disabled, along with the CA certificate file path used to verify client certificates."
+          "heading": "ステータスを確認",
+          "text": "ステータスインジケーターには、mTLSが有効か無効か、およびクライアント証明書の検証に使用されるCA証明書ファイルのパスが表示されます。"
         },
         "certificateMappings": {
-          "heading": "Certificate Mappings",
-          "text": "The mappings table lists each certificate subject and the scopes it is authorized to use. Clients presenting a matching certificate receive these scopes automatically."
+          "heading": "証明書のマッピング",
+          "text": "マッピングテーブルには、各証明書のサブジェクトと、その証明書が使用を許可されているスコープが一覧表示されています。一致する証明書を提示したクライアントには、これらのスコープが自動的に付与されます。"
         },
         "configurationSource": {
-          "heading": "Configuration Source",
-          "text": "All mTLS settings are sourced from the server configuration file. To modify mappings, update the config file and restart the backend."
+          "heading": "設定ソース",
+          "text": "mTLSの設定はすべてサーバーの設定ファイルから読み込まれます。マッピングを変更するには、設定ファイルを更新し、バックエンドを再起動してください。"
         }
       }
     },
     "scim": {
-      "title": "SCIM Provisioning",
-      "overview": "SCIM 2.0 enables automatic user and group provisioning from your identity provider (e.g. Azure AD, Okta). This page shows the SCIM endpoint URLs and authentication requirements needed to configure your IdP.",
+      "title": "SCIMのプロビジョニング",
+      "overview": "SCIM 2.0 を使用すると、ID プロバイダー（Azure AD や Okta など）からのユーザーおよびグループの自動プロビジョニングが可能になります。このページでは、ID プロバイダーを設定するために必要な SCIM エンドポイントの URL と認証要件について説明します。",
       "actions": {
         "endpointUrls": {
-          "heading": "Endpoint URLs",
-          "text": "Copy the SCIM base URL, Users endpoint, and Groups endpoint into your identity provider's SCIM configuration."
+          "heading": "エンドポイントURL",
+          "text": "SCIMのベースURL、Usersエンドポイント、およびGroupsエンドポイントを、IDプロバイダーのSCIM設定にコピーしてください。"
         },
         "authentication": {
-          "heading": "Authentication",
-          "text": "SCIM requests require a Bearer token with the scim:provision scope. Create one on the API Keys page and paste it into your IdP's SCIM token field."
+          "heading": "認証",
+          "text": "SCIMリクエストには、スコープが「scim:provision」のBearerトークンが必要です。「APIキー」ページでトークンを作成し、IdPのSCIMトークン入力欄に貼り付けてください。"
         },
         "supportedOperations": {
-          "heading": "Supported Operations",
-          "text": "Users support full CRUD and soft-delete. Groups are read-only and map to registry organizations. Filtering and pagination are supported."
+          "heading": "対応機能",
+          "text": "ユーザーに対して、完全なCRUD操作とソフト削除がサポートされています。グループは読み取り専用であり、レジストリ上の組織に対応付けられています。フィルタリングとページネーションもサポートされています。"
         }
       }
     }
