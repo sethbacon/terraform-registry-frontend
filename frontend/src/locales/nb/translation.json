@@ -1,422 +1,686 @@
 {
   "nav": {
-    "home": "Home",
-    "homeTooltip": "Home Page",
-    "modules": "Modules",
-    "modulesTooltip": "View Terraform Modules",
-    "providers": "Providers",
-    "providersTooltip": "View Terraform Providers",
-    "terraformBinaries": "Terraform Binaries",
-    "terraformBinariesTooltip": "View Terraform Binaries",
-    "apiDocs": "API Docs",
-    "apiDocsTooltip": "API Documentation",
+    "home": "Hjem",
+    "homeTooltip": "Hjemmeside",
+    "modules": "Moduler",
+    "modulesTooltip": "Vis Terraform-moduler",
+    "providers": "Leverandører",
+    "providersTooltip": "Vis Terraform-leverandører",
+    "terraformBinaries": "Terraform-binærfiler",
+    "terraformBinariesTooltip": "Vis Terraform-binærfiler",
+    "apiDocs": "API-dokumentasjon",
+    "apiDocsTooltip": "API-dokumentasjon",
     "admin": {
-      "dashboard": "Dashboard",
-      "dashboardTooltip": "Admin Dashboard",
-      "identity": "Identity",
-      "organizations": "Organizations",
-      "organizationsTooltip": "Manage registry organizations and members",
-      "roles": "Roles",
-      "rolesTooltip": "Configure role templates and permissions",
-      "users": "Users",
-      "usersTooltip": "View and manage registry users",
-      "oidcGroups": "OIDC Groups",
-      "oidcGroupsTooltip": "Map identity provider groups to registry roles",
+      "dashboard": "Dashbord",
+      "dashboardTooltip": "Administratorpanel",
+      "identity": "Identitet",
+      "organizations": "Organisasjoner",
+      "organizationsTooltip": "Administrer registerorganisasjoner og medlemmer",
+      "roles": "Roller",
+      "rolesTooltip": "Konfigurer rollemaler og tillatelser",
+      "users": "Brukere",
+      "usersTooltip": "Vis og administrer brukere i registeret",
+      "oidcGroups": "OIDC-grupper",
+      "oidcGroupsTooltip": "Tilordne identitetsleverandørgrupper til registerroller",
       "scim": "SCIM",
-      "scimTooltip": "SCIM 2.0 user and group provisioning configuration",
-      "mtlsCerts": "mTLS Certs",
-      "mtlsCertsTooltip": "View mTLS client certificate-to-scope mappings",
-      "apiKeys": "API Keys",
-      "apiKeysTooltip": "Create and manage personal API keys",
-      "sourceControl": "Source Control",
-      "sourceControlTooltip": "Configure SCM providers for module and provider publishing",
-      "mirroring": "Mirroring",
-      "providerConfig": "Provider Config",
-      "providerConfigTooltip": "Configure provider mirror sources and sync schedules",
-      "binariesConfig": "Binaries Config",
-      "binariesConfigTooltip": "Configure Terraform and OpenTofu binary mirror sources",
-      "approvals": "Approvals",
-      "approvalsTooltip": "Review and approve pending mirror sync requests",
-      "mirrorPolicies": "Mirror Policies",
-      "mirrorPoliciesTooltip": "Define policies that control what gets mirrored",
+      "scimTooltip": "Konfigurasjon av bruker- og gruppetildeling i SCIM 2.0",
+      "mtlsCerts": "mTLS-sertifikater",
+      "mtlsCertsTooltip": "Vis tilordninger mellom mTLS-klientsertifikater og omfang",
+      "apiKeys": "API-nøkler",
+      "apiKeysTooltip": "Opprett og administrer personlige API-nøkler",
+      "sourceControl": "Kildekontroll",
+      "sourceControlTooltip": "Konfigurer SCM-leverandører for publisering av moduler og leverandører",
+      "mirroring": "Speiling",
+      "providerConfig": "Leverandørkonfigurasjon",
+      "providerConfigTooltip": "Konfigurer leverandørens speilkilder og synkroniseringsplaner",
+      "binariesConfig": "Konfigurasjon av binærfiler",
+      "binariesConfigTooltip": "Konfigurer Terraform og OpenTofu-kildene for binære speil",
+      "approvals": "Godkjenninger",
+      "approvalsTooltip": "Gjennomgå og godkjenn ventende forespørsler om speilsynkronisering",
+      "mirrorPolicies": "Retningslinjer for speil",
+      "mirrorPoliciesTooltip": "Definer retningslinjer som styrer hva som skal speiles",
       "system": "System",
-      "storage": "Storage",
-      "storageTooltip": "Configure backend storage for binaries and providers",
-      "securityScanning": "Security Scanning",
-      "securityScanningTooltip": "View security scanning configuration and status",
-      "auditLogs": "Audit Logs",
-      "auditLogsTooltip": "View system audit logs",
-      "componentsDev": "Components",
-      "componentsDevTooltip": "Component Showcase (dev only)"
+      "storage": "Lagring",
+      "storageTooltip": "Konfigurer backend-lagring for binærfiler og leverandører",
+      "securityScanning": "Sikkerhetsskanning",
+      "securityScanningTooltip": "Vis konfigurasjon og status for sikkerhetsskanning",
+      "auditLogs": "Revisjonslogger",
+      "auditLogsTooltip": "Vis systemrevisjonslogger",
+      "componentsDev": "Komponenter",
+      "componentsDevTooltip": "Komponentutstilling (kun for utviklere)"
     }
   },
   "header": {
-    "skipToContent": "Skip to main content",
-    "openDrawer": "open drawer",
-    "quickNav": "Quick navigation (Ctrl/⌘K)",
-    "openCommandPalette": "Open command palette",
-    "lightMode": "Light mode",
-    "darkMode": "Dark mode",
-    "toggleDarkMode": "toggle dark mode",
-    "contextHelp": "Context Help",
-    "about": "About",
-    "settings": "Settings",
-    "support": "Support",
-    "accountMenu": "account of current user",
-    "logout": "Logout",
-    "login": "Login",
-    "language": "Language"
+    "skipToContent": "Gå til hovedinnholdet",
+    "openDrawer": "åpne skuffen",
+    "quickNav": "Hurtignavigering (Ctrl/⌘K)",
+    "openCommandPalette": "Åpne kommandopaletten",
+    "lightMode": "Lysmodus",
+    "darkMode": "Mørk modus",
+    "toggleDarkMode": "Slå på mørk modus",
+    "contextHelp": "Konteksthjelp",
+    "about": "Om",
+    "settings": "Innstillinger",
+    "support": "Støtte",
+    "accountMenu": "kontoen til den nåværende brukeren",
+    "logout": "Logg ut",
+    "login": "Logg inn",
+    "language": "Språk"
   },
   "about": {
-    "title": "About {{productName}}",
-    "description": "A self-hosted Terraform module and provider registry with support for SCM integration, provider mirroring, Terraform binary distribution, and multi-tenancy.",
-    "versions": "Versions",
-    "frontendVersion": "Frontend v{{version}}",
-    "backendVersion": "Backend v{{version}}",
-    "loadingBackendVersion": "Loading backend version\u2026",
-    "backendUnavailable": "Backend unavailable",
-    "apiVersion": "API version: {{version}}",
-    "built": "Built: {{date}}",
-    "license": "License",
-    "licenseIntro": "Released under the",
-    "apacheLicense": "Apache License 2.0",
-    "source": "Source",
-    "githubBackend": "GitHub \u2014 Backend",
-    "githubFrontend": "GitHub \u2014 Frontend",
-    "close": "Close"
+    "title": "Om {{productName}}",
+    "description": "Et selvhostet register for Terraform-moduler og -leverandører med støtte for SCM-integrasjon, speiling av leverandører, distribusjon av Terraform-binærfiler og flerbrukerfunksjonalitet.",
+    "versions": "Versjoner",
+    "frontendVersion": "Frontend mot {{version}}",
+    "backendVersion": "Backend mot {{version}}",
+    "loadingBackendVersion": "Laster inn backend-versjon…",
+    "backendUnavailable": "Backend er utilgjengelig",
+    "apiVersion": "API-versjon: {{version}}",
+    "built": "Opprettet: {{date}}",
+    "license": "Lisens",
+    "licenseIntro": "Utgitt under",
+    "apacheLicense": "Apache-lisens 2.0",
+    "source": "Kilde",
+    "githubBackend": "GitHub — Backend",
+    "githubFrontend": "GitHub — Frontend",
+    "close": "Lukk"
   },
   "auth": {
-    "signInToContinue": "Sign in to continue",
-    "signInWithSSO": "Sign in with SSO",
-    "signInWithAzureAD": "Sign in with Azure AD",
-    "signInWith": "Sign in with {{name}}",
-    "devLogin": "Dev Login (Admin)",
-    "devModeNotice": "Development mode - Click below to login without OAuth",
-    "orUseProductionAuth": "OR USE PRODUCTION AUTH",
-    "orSignInWithLdap": "OR SIGN IN WITH LDAP",
-    "or": "OR",
-    "signInWithLdap": "Sign in with LDAP",
-    "username": "Username",
-    "password": "Password",
-    "signIn": "Sign In",
-    "noProviders": "No SSO providers configured. Contact your administrator.",
-    "ssoInfo": "This application uses single sign-on for authentication.",
-    "ssoContact": "Contact your administrator if you need access.",
-    "devLoginFailed": "Dev login failed. Check server logs.",
-    "ldapLoginFailed": "LDAP login failed. Check your credentials."
+    "signInToContinue": "Logg inn for å fortsette",
+    "signInWithSSO": "Logg inn med SSO",
+    "signInWithAzureAD": "Logg på med Azure AD",
+    "signInWith": "Logg inn med {{name}}",
+    "devLogin": "Pålogging for utviklere (Admin)",
+    "devModeNotice": "Utviklingsmodus – Klikk nedenfor for å logge inn uten OAuth",
+    "orUseProductionAuth": "ELLER BRUK PRODUKSJONSAUTENTISERING",
+    "orSignInWithLdap": "ELLER LOGG INN MED LDAP",
+    "or": "ELLER",
+    "signInWithLdap": "Logg inn med LDAP",
+    "username": "Brukernavn",
+    "password": "Passord",
+    "signIn": "Logg inn",
+    "noProviders": "Det er ikke konfigurert noen SSO-leverandører. Kontakt administratoren din.",
+    "ssoInfo": "Denne applikasjonen bruker enkel pålogging for autentisering.",
+    "ssoContact": "Kontakt administratoren din hvis du trenger tilgang.",
+    "devLoginFailed": "Innloggingen mislyktes. Sjekk serverloggene.",
+    "ldapLoginFailed": "LDAP-påloggingen mislyktes. Kontroller påloggingsopplysningene dine."
   },
   "home": {
-    "heroTitle": "Private Terraform Registry",
-    "heroSubtitle": "Host and manage your custom Terraform modules, providers, and binaries",
-    "browseModules": "Browse Modules",
-    "browseProviders": "Browse Providers",
-    "terraformBinaries": "Terraform Binaries",
-    "available": "available",
-    "findWhatYouNeed": "Find What You Need",
-    "searchAcross": "Search across modules and providers in this registry",
-    "search": "Search",
-    "searchPlaceholder": "Search {{type}}\u2026",
-    "whatsAvailable": "What\u2019s Available",
-    "modulesDescription": "Browse and use private Terraform modules for your infrastructure.",
-    "browseAllModules": "Browse All Modules \u2192",
-    "providersDescription": "Access custom and mirrored Terraform providers for your cloud resources.",
-    "browseAllProviders": "Browse All Providers \u2192",
-    "terraformBinariesDescription": "Download Terraform and OpenTofu binaries from internal mirrors.",
-    "noBinaryMirrors": "No binary mirrors configured",
-    "viewBinaries": "View Binaries \u2192",
-    "gettingStarted": "Getting Started",
-    "step1Title": "1. Sign In",
-    "step1Desc": "Authenticate with your organization\u2019s OIDC or Azure AD credentials to access the registry.",
-    "step2Title": "2. Get an API Key",
-    "step2DescAuth": "Generate an API key and add it to your Terraform CLI credentials file:",
-    "step2DescUnauth": "Sign in to generate an API key, then add it to your Terraform CLI credentials file:",
-    "signInToGenerate": "Sign in to generate a key",
-    "createApiKey": "Create API key",
-    "manageAllKeys": "Manage all keys \u2192",
-    "copied": "Copied!",
-    "copyToClipboard": "Copy to clipboard",
-    "copyUsageExample": "Copy usage example",
-    "credentialsCopied": "Credentials snippet copied to clipboard",
-    "step3Title": "3. Start Using",
-    "step3Desc": "Browse modules and providers, then reference them directly in your Terraform configuration using this registry\u2019s hostname.",
-    "protocolSupport": "Registry Protocol Support",
-    "protocolDesc": "Full compatibility with Terraform Registry Protocol v1 \u2014 use this registry directly in Terraform CLI and provider configurations without any plugins or proxies.",
-    "viewApiDocs": "View API Documentation",
-    "setupRequired": "Setup Required",
-    "featureSetupRequired": "Feature Configuration Required",
-    "setupRequiredDesc": "This registry has not been configured yet. Complete the setup wizard to configure authentication, storage, and the initial admin account.",
-    "featureSetupDesc": "New features have been added that require configuration. Complete the setup wizard to enable them.",
-    "startSetup": "Start Setup",
-    "configureFeatures": "Configure Features"
+    "heroTitle": "Privat Terraform-register",
+    "heroSubtitle": "Lagre og administrer dine egne Terraform-moduler, -leverandører og -binærfiler",
+    "browseModules": "Bla gjennom moduler",
+    "browseProviders": "Se leverandører",
+    "terraformBinaries": "Terraform-binærfiler",
+    "available": "tilgjengelig",
+    "findWhatYouNeed": "Finn det du trenger",
+    "searchAcross": "Søk på tvers av moduler og tilbydere i dette registeret",
+    "search": "Søk",
+    "searchPlaceholder": "Søk på {{type}}…",
+    "whatsAvailable": "Hva finnes tilgjengelig",
+    "modulesDescription": "Bla gjennom og bruk private Terraform-moduler til infrastrukturen din.",
+    "browseAllModules": "Se alle moduler →",
+    "providersDescription": "Få tilgang til tilpassede og speilede Terraform-leverandører for skyressursene dine.",
+    "browseAllProviders": "Se alle leverandører →",
+    "terraformBinariesDescription": "Last ned Terraform- og OpenTofu-binærfilene fra interne speil.",
+    "noBinaryMirrors": "Det er ikke konfigurert noen binære speil",
+    "viewBinaries": "Vis binærfiler →",
+    "gettingStarted": "Kom i gang",
+    "step1Title": "1. Logg inn",
+    "step1Desc": "Logg inn med organisasjonens OIDC- eller Azure AD-påloggingsopplysninger for å få tilgang til registeret.",
+    "step2Title": "2. Skaff deg en API-nøkkel",
+    "step2DescAuth": "Opprett en API-nøkkel og legg den til i Terraform CLI-påloggingsfilen din:",
+    "step2DescUnauth": "Logg inn for å opprette en API-nøkkel, og legg den deretter til i Terraform CLI-påloggingsfilen din:",
+    "signInToGenerate": "Logg inn for å generere en nøkkel",
+    "createApiKey": "Opprett API-nøkkel",
+    "manageAllKeys": "Administrer alle nøkler →",
+    "copied": "Kopiert!",
+    "copyToClipboard": "Kopier til utklippstavlen",
+    "copyUsageExample": "Eksempel på bruk",
+    "credentialsCopied": "Utdrag av påloggingsopplysningene er kopiert til utklippstavlen",
+    "step3Title": "3. Kom i gang",
+    "step3Desc": "Bla gjennom moduler og leverandører, og referer deretter direkte til dem i Terraform-konfigurasjonen din ved å bruke vertsnavnet til dette registeret.",
+    "protocolSupport": "Støtte for registerprotokoller",
+    "protocolDesc": "Full kompatibilitet med Terraform Registry Protocol v1 – bruk dette registeret direkte i Terraform CLI og leverandørkonfigurasjoner uten behov for plugins eller proxyer.",
+    "viewApiDocs": "Vis API-dokumentasjon",
+    "setupRequired": "Krav til oppsett",
+    "featureSetupRequired": "Konfigurasjon av funksjoner kreves",
+    "setupRequiredDesc": "Dette registeret er ikke konfigurert ennå. Fullfør konfigurasjonsveiviseren for å konfigurere autentisering, lagring og den første administratorkontoen.",
+    "featureSetupDesc": "Det er lagt til nye funksjoner som må konfigureres. Fullfør installasjonsveiviseren for å aktivere dem.",
+    "startSetup": "Start installasjonen",
+    "configureFeatures": "Konfigurer funksjoner"
   },
   "common": {
-    "loading": "Loading...",
-    "save": "Save",
-    "cancel": "Cancel",
-    "close": "Close",
-    "delete": "Delete",
-    "edit": "Edit",
-    "create": "Create",
-    "search": "Search",
-    "error": "Error",
-    "success": "Success",
-    "warning": "Warning"
+    "loading": "Laster...",
+    "save": "Lagre",
+    "cancel": "Avbryt",
+    "close": "Lukk",
+    "delete": "Slett",
+    "edit": "Rediger",
+    "create": "Opprett",
+    "search": "Søk",
+    "error": "Feil",
+    "success": "Suksess",
+    "warning": "Advarsel"
   },
   "language": {
-    "en": "English",
-    "es": "Español",
-    "fr": "Français",
-    "de": "Deutsch",
-    "ja": "日本語",
-    "pt": "Português",
-    "nl": "Nederlands",
+    "en": "engelsk",
+    "es": "Spansk",
+    "fr": "Fransk",
+    "de": "Tysk",
+    "ja": "Japansk",
+    "pt": "Portugisisk",
+    "nl": "Nederlandsk",
     "nb": "Norsk bokmål",
-    "zh": "简体中文",
-    "it": "Italiano"
+    "zh": "Forenklet kinesisk",
+    "it": "Italiensk"
   },
   "help": {
     "default": {
-      "title": "Help",
-      "overview": "Navigate to a page using the sidebar to see context-sensitive help for that section.",
+      "title": "Hjelp",
+      "overview": "Gå til en side ved hjelp av sidepanelet for å se kontekstavhengig hjelp for den aktuelle delen.",
       "actions": {
-        "apiReference": { "heading": "API Reference", "text": "Visit the API Docs page for a full interactive reference of all registry endpoints." }
+        "apiReference": {
+          "heading": "API-referanse",
+          "text": "Gå til siden med API-dokumentasjon for å få en fullstendig, interaktiv oversikt over alle registerets endepunkter."
+        }
       }
     },
     "home": {
-      "title": "Home",
-      "overview": "The home page provides a quick-start overview of the registry, including live status of available modules, providers, and mirrors. Use it as a jumping-off point to browse published content or access the admin area.",
+      "title": "Hjem",
+      "overview": "Hjemmesiden gir en rask oversikt over registeret, inkludert sanntidsstatus for tilgjengelige moduler, leverandører og speilserverne. Bruk den som utgangspunkt for å bla gjennom publisert innhold eller få tilgang til administratorområdet.",
       "actions": {
-        "browseModules": { "heading": "Browse Modules", "text": "Click \"Modules\" in the sidebar to search and explore published Terraform modules." },
-        "browseProviders": { "heading": "Browse Providers", "text": "Click \"Providers\" to find provider binaries available in this registry." },
-        "adminAccess": { "heading": "Admin Access", "text": "If you have admin privileges, use the sidebar links to manage users, upload content, or configure storage." }
+        "browseModules": {
+          "heading": "Bla gjennom moduler",
+          "text": "Klikk på «Moduler» i sidefeltet for å søke etter og utforske publiserte Terraform-moduler."
+        },
+        "browseProviders": {
+          "heading": "Se leverandører",
+          "text": "Klikk på «Leverandører» for å finne leverandørbinærfiler som er tilgjengelige i dette registeret."
+        },
+        "adminAccess": {
+          "heading": "Administratortilgang",
+          "text": "Hvis du har administratorrettigheter, kan du bruke lenkene i sidefeltet til å administrere brukere, laste opp innhold eller konfigurere lagringsplass."
+        }
       }
     },
     "modules": {
-      "title": "Modules",
-      "overview": "Lists all Terraform modules published in this registry. Modules are searchable by name and filterable by namespace. Click any module card to view versions, documentation, and usage instructions.",
+      "title": "Moduler",
+      "overview": "Viser alle Terraform-moduler som er publisert i dette registeret. Modulene kan søkes opp etter navn og filtreres etter navnerom. Klikk på et hvilket som helst modulkort for å se versjoner, dokumentasjon og bruksanvisninger.",
       "actions": {
-        "search": { "heading": "Search", "text": "Use the search field to filter modules by name or namespace in real time." },
-        "viewModule": { "heading": "View Module", "text": "Click a module card to open the detail page with version history and README." },
-        "uploadModule": { "heading": "Upload a Module", "text": "Go to Admin → Upload to publish a new module archive." }
+        "search": {
+          "heading": "Søk",
+          "text": "Bruk søkefeltet til å filtrere moduler etter navn eller navnerom i sanntid."
+        },
+        "viewModule": {
+          "heading": "Vis modul",
+          "text": "Klikk på et modulkort for å åpne detaljsiden med versjonshistorikk og README."
+        },
+        "uploadModule": {
+          "heading": "Last opp en modul",
+          "text": "Gå til Admin → Last opp for å publisere et nytt modularkiv."
+        }
       }
     },
     "moduleDetail": {
-      "title": "Module Detail",
-      "overview": "Shows all published versions of a specific module, its README documentation, and the Terraform source block needed to reference it. The latest stable version is highlighted.",
+      "title": "Moduldetaljer",
+      "overview": "Viser alle publiserte versjoner av en bestemt modul, README-dokumentasjonen og Terraform-kildekoden som trengs for å referere til den. Den nyeste stabile versjonen er uthevet.",
       "actions": {
-        "copySourceBlock": { "heading": "Copy Source Block", "text": "Use the copy button next to the source field to get the Terraform module block." },
-        "selectVersion": { "heading": "Select Version", "text": "Use the version selector to view documentation and inputs/outputs for a specific version." },
-        "deprecateDelete": { "heading": "Deprecate / Delete", "text": "Admins can deprecate or remove a version using the action buttons on each version row." }
+        "copySourceBlock": {
+          "heading": "Kopier kildeblokk",
+          "text": "Bruk kopieringsknappen ved siden av kildefeltet for å hente Terraform-modulblokken."
+        },
+        "selectVersion": {
+          "heading": "Velg versjon",
+          "text": "Bruk versjonsvelgeren for å se dokumentasjon og innganger/utganger for en bestemt versjon."
+        },
+        "deprecateDelete": {
+          "heading": "Avvikle / Slett",
+          "text": "Administratorer kan merke en versjon som utgått eller fjerne den ved å bruke handlingsknappene i hver versjonsrad."
+        }
       }
     },
     "providers": {
-      "title": "Providers",
-      "overview": "Lists all Terraform providers published or mirrored in this registry. Providers are searchable by type and namespace. Click a provider card to view versions and platform binaries.",
+      "title": "Leverandører",
+      "overview": "Viser en liste over alle Terraform-leverandører som er publisert eller speilet i dette registeret. Du kan søke etter leverandører etter type og navnerom. Klikk på et leverandørkort for å se versjoner og plattformbinærfiler.",
       "actions": {
-        "search": { "heading": "Search", "text": "Filter providers by name or namespace using the search field." },
-        "viewProvider": { "heading": "View Provider", "text": "Click a card to open the provider detail page showing versions and platform downloads." },
-        "uploadProvider": { "heading": "Upload a Provider", "text": "Go to Admin → Upload to publish a new provider binary with its checksums." }
+        "search": {
+          "heading": "Søk",
+          "text": "Filtrer leverandører etter navn eller navnerom ved hjelp av søkefeltet."
+        },
+        "viewProvider": {
+          "heading": "Vis leverandør",
+          "text": "Klikk på et kort for å åpne detaljsiden for leverandøren, der du finner versjoner og nedlastinger for ulike plattformer."
+        },
+        "uploadProvider": {
+          "heading": "Last opp en leverandør",
+          "text": "Gå til Admin → Last opp for å publisere en ny leverandørfil med tilhørende kontrollsummer."
+        }
       }
     },
     "providerDetail": {
-      "title": "Provider Detail",
-      "overview": "Shows all published versions of a specific provider and the platform binaries available for each version. Includes the Terraform required_providers block for easy copy-paste.",
+      "title": "Leverandørinformasjon",
+      "overview": "Viser alle publiserte versjoner av en bestemt leverandør og plattformbinærfilene som er tilgjengelige for hver versjon. Inkluderer Terraform-blokken `required_providers` for enkel kopiering og innliming.",
       "actions": {
-        "copyRequiredProviders": { "heading": "Copy Required Providers Block", "text": "Use the copy button to get the required_providers configuration." },
-        "selectVersion": { "heading": "Select Version", "text": "Browse platform binaries (OS/arch combinations) per version." },
-        "deprecateDelete": { "heading": "Deprecate / Delete", "text": "Admins can deprecate or remove individual provider versions." }
+        "copyRequiredProviders": {
+          "heading": "Kopier blokken «Nødvendige leverandører»",
+          "text": "Bruk kopier-knappen for å hente konfigurasjonen for required_providers."
+        },
+        "selectVersion": {
+          "heading": "Velg versjon",
+          "text": "Bla gjennom plattformbinærfiler (kombinasjoner av operativsystem og arkitektur) etter versjon."
+        },
+        "deprecateDelete": {
+          "heading": "Avvikle / Slett",
+          "text": "Administratorer kan merke enkelte leverandørversjoner som utdaterte eller fjerne dem."
+        }
       }
     },
     "apiDocs": {
-      "title": "API Reference",
-      "overview": "API documentation for all registry endpoints, powered by ReDoc. Browse endpoint groups and view request/response schemas.",
+      "title": "API-referanse",
+      "overview": "API-dokumentasjon for alle registerendepunkter, levert av ReDoc. Bla gjennom endepunktgrupper og se forespørsels- og svarskjemaer.",
       "actions": {
-        "authenticate": { "heading": "Authenticate", "text": "Paste your API key as a Bearer token using the Authorize button at the top." },
-        "browseEndpoints": { "heading": "Browse Endpoints", "text": "Use the left-hand endpoint tree to navigate by resource group." }
+        "authenticate": {
+          "heading": "Logg inn",
+          "text": "Lim inn API-nøkkelen din som et «Bearer»-token ved å bruke «Autoriser»-knappen øverst."
+        },
+        "browseEndpoints": {
+          "heading": "Bla gjennom endepunkter",
+          "text": "Bruk treet til venstre for å navigere etter ressursgruppe."
+        }
       }
     },
     "dashboard": {
-      "title": "Dashboard",
-      "overview": "A live health snapshot of your registry. The top bar shows mirror health at a glance. The stat cards below break down modules (with per-system counts), providers (manual vs mirrored), Terraform binary mirrors, and total downloads.",
+      "title": "Dashbord",
+      "overview": "Et øyeblikksbilde av tilstanden til registeret ditt. Den øverste linjen gir et raskt overblikk over speilets tilstand. Statistikkene nedenfor viser en oversikt over moduler (med antall per system), leverandører (manuelle vs. speilede), Terraform-binærspeil og totalt antall nedlastinger.",
       "actions": {
-        "healthBar": { "heading": "Health Bar", "text": "Binary Mirrors, Provider Mirrors, and Storage pills turn red when something is failing. Click any pill to jump to that section." },
-        "statCards": { "heading": "Stat Cards", "text": "Each card is a shortcut — click to navigate. The aside panels on Modules and Providers show the breakdown by system or mirror type." },
-        "recentSyncActivity": { "heading": "Recent Sync Activity", "text": "The table shows the last 8 sync events across binary and provider mirrors, with status, versions synced, and elapsed time." },
-        "quickLinks": { "heading": "Quick Links", "text": "Common admin actions — upload, manage users, configure mirrors — are one click away from the Quick Links panel." }
+        "healthBar": {
+          "heading": "Helsebar",
+          "text": "Binære speil, leverandørspeil og lagringspiller blir røde når det oppstår feil. Klikk på en hvilken som helst pille for å gå til den aktuelle delen."
+        },
+        "statCards": {
+          "heading": "Statistikkort",
+          "text": "Hvert kort er en snarvei – klikk for å navigere. Sidepanelene under «Moduler» og «Leverandører» viser fordelingen etter system- eller speiltype."
+        },
+        "recentSyncActivity": {
+          "heading": "Nylig synkroniseringsaktivitet",
+          "text": "Tabellen viser de siste 8 synkroniseringshendelsene på binære speil og leverandørspeil, med status, synkroniserte versjoner og forløpt tid."
+        },
+        "quickLinks": {
+          "heading": "Hurtiglenker",
+          "text": "Vanlige administratoroppgaver – opplasting, brukeradministrasjon, konfigurering av speilserverne – er bare ett klikk unna i panelet «Hurtiglenker»."
+        }
       }
     },
     "users": {
-      "title": "Users",
-      "overview": "Manage registry user accounts. Users can be created manually for local/API-key auth, or created automatically on first OIDC login. Assign users to organizations and grant them role templates here.",
+      "title": "Brukere",
+      "overview": "Administrer brukerkontoer i registeret. Brukere kan opprettes manuelt for lokal pålogging eller pålogging med API-nøkkel, eller opprettes automatisk ved første OIDC-pålogging. Her kan du tilordne brukere til organisasjoner og tildele dem rollemaler.",
       "actions": {
-        "createUser": { "heading": "Create User", "text": "Click \"Add User\" to create a new account with an email and display name." },
-        "editUser": { "heading": "Edit User", "text": "Click the edit icon on any row to update the user's name, organization, or role." },
-        "deleteUser": { "heading": "Delete User", "text": "Removes the user account. Any API keys they hold will also be invalidated." }
+        "createUser": {
+          "heading": "Opprett bruker",
+          "text": "Klikk på «Legg til bruker» for å opprette en ny konto med e-postadresse og visningsnavn."
+        },
+        "editUser": {
+          "heading": "Rediger bruker",
+          "text": "Klikk på redigeringsikonet i en hvilken som helst rad for å oppdatere brukerens navn, organisasjon eller rolle."
+        },
+        "deleteUser": {
+          "heading": "Slett bruker",
+          "text": "Sletter brukerkontoen. Alle API-nøkler som er knyttet til kontoen, blir også ugyldiggjort."
+        }
       }
     },
     "organizations": {
-      "title": "Organizations",
-      "overview": "Organizations are namespace containers — modules and providers are published under an organization's namespace. Members of an organization inherit its role template's permissions.",
+      "title": "Organisasjoner",
+      "overview": "Organisasjoner er navneromskontainere – moduler og leverandører publiseres under en organisasjons navnerom. Medlemmer av en organisasjon arver tillatelsene i organisasjonens rollemal.",
       "actions": {
-        "createOrganization": { "heading": "Create Organization", "text": "Click \"Add Organization\" to define a new namespace with a URL-safe name." },
-        "manageMembers": { "heading": "Manage Members", "text": "Expand an organization row to view and modify its member list." },
-        "deleteOrganization": { "heading": "Delete Organization", "text": "Only possible when the organization has no published content." }
+        "createOrganization": {
+          "heading": "Opprett organisasjon",
+          "text": "Klikk på «Legg til organisasjon» for å opprette et nytt navnerom med et URL-kompatibelt navn."
+        },
+        "manageMembers": {
+          "heading": "Administrer medlemmer",
+          "text": "Utvid en organisasjonsrad for å se og endre medlemslisten."
+        },
+        "deleteOrganization": {
+          "heading": "Slett organisasjon",
+          "text": "Dette er kun mulig hvis organisasjonen ikke har publisert noe innhold."
+        }
       }
     },
     "roles": {
-      "title": "Roles & Permissions",
-      "overview": "This page shows the fixed role templates available in the registry. Role templates define the permission scopes granted to users within an organization. Templates are system-defined and read-only.",
+      "title": "Roller og tillatelser",
+      "overview": "Denne siden viser de faste rollemalene som er tilgjengelige i registeret. Rollemaler definerer hvilke tillatelsesområder som tildeles brukere i en organisasjon. Malene er systemdefinerte og skrivebeskyttede.",
       "actions": {
-        "viewScopes": { "heading": "View Scopes", "text": "Expand a role template to see the full list of permission scopes it grants." },
-        "assignToUser": { "heading": "Assign to User", "text": "Go to Admin → Users to assign a role template to a user's organization membership." }
+        "viewScopes": {
+          "heading": "Vis omfang",
+          "text": "Utvid en rollemal for å se hele listen over tillatelsesområder den gir."
+        },
+        "assignToUser": {
+          "heading": "Tilordne til bruker",
+          "text": "Gå til Admin → Brukere for å tilordne en rollemal til en brukers organisasjonsmedlemskap."
+        }
       }
     },
     "oidcGroups": {
-      "title": "OIDC Groups",
-      "overview": "Maps identity provider group claims to registry organizations and roles. When a user logs in via OIDC, their group memberships are read from the ID token and used to automatically provision or update their organization membership. Changes take effect on the next login without requiring a server restart.",
+      "title": "OIDC-grupper",
+      "overview": "Knytter identitetsleverandørens gruppetilhørighet til organisasjoner og roller i registeret. Når en bruker logger seg på via OIDC, hentes gruppetilhørighetene fra ID-tokenet og brukes til automatisk å opprette eller oppdatere brukerens organisasjonstilhørighet. Endringene trer i kraft ved neste pålogging uten at serveren må startes på nytt.",
       "actions": {
-        "groupClaimName": { "heading": "Group Claim Name", "text": "Set this to the claim key in your OIDC ID token that carries the user's group list (e.g. \"groups\"). This must match the protocol mapper configured in your identity provider." },
-        "defaultRole": { "heading": "Default Role", "text": "Optionally assign a fallback role to users whose groups do not match any mapping. Leave blank to grant no automatic membership to unmatched users." },
-        "addMapping": { "heading": "Add a Mapping", "text": "Click \"Add Mapping\" to link an IdP group name to a registry organization and role template. The group name must exactly match the value as it appears in the ID token claim." },
-        "roleTemplates": { "heading": "Role Templates", "text": "Roles correspond to system role templates (viewer, publisher, mirror_manager, admin). Go to Admin → Roles to review what each template permits." },
-        "saveChanges": { "heading": "Save Changes", "text": "Click \"Save Changes\" to persist your group claim and mapping configuration. Existing sessions are not affected until the user logs in again." }
+        "groupClaimName": {
+          "heading": "Navn på gruppesøksmål",
+          "text": "Angi dette til nøkkelen i OIDC-ID-tokenet ditt som inneholder brukerens gruppeliste (f.eks. «groups»). Dette må samsvare med protokollmapperen som er konfigurert hos identitetsleverandøren din."
+        },
+        "defaultRole": {
+          "heading": "Standardrolle",
+          "text": "Du kan eventuelt tildele en reserve-rolle til brukere hvis grupper ikke samsvarer med noen tilordning. La feltet stå tomt for å ikke gi automatisk medlemskap til brukere som ikke samsvarer."
+        },
+        "addMapping": {
+          "heading": "Legg til en tilordning",
+          "text": "Klikk på «Legg til tilordning» for å knytte et IdP-gruppenavn til en registerorganisasjon og en rollemal. Gruppenavnet må stemme nøyaktig overens med verdien slik den fremgår av ID-tokenets krav."
+        },
+        "roleTemplates": {
+          "heading": "Rollemaler",
+          "text": "Rollene tilsvarer systemrollemaler (viewer, publisher, mirror_manager, admin). Gå til Admin → Roller for å se hva hver mal gir tilgang til."
+        },
+        "saveChanges": {
+          "heading": "Lagre endringer",
+          "text": "Klikk på «Lagre endringer» for å lagre konfigurasjonen for gruppetilgang og tilordning. Eksisterende økter påvirkes ikke før brukeren logger seg på igjen."
+        }
       }
     },
     "apiKeys": {
-      "title": "API Keys",
-      "overview": "API keys allow programmatic access to authenticated registry endpoints. Each key is shown once at creation and stored only as a bcrypt hash — it cannot be retrieved after creation.",
+      "title": "API-nøkler",
+      "overview": "API-nøkler gir programmatisk tilgang til autentiserte registerendepunkter. Hver nøkkel vises én gang ved opprettelsen og lagres kun som en bcrypt-hash – den kan ikke hentes frem etter at den er opprettet.",
       "actions": {
-        "createKey": { "heading": "Create Key", "text": "Click \"Create API Key\" to generate a new key. Copy it immediately — it will not be shown again." },
-        "revokeKey": { "heading": "Revoke Key", "text": "Delete a key to immediately invalidate all requests using it." },
-        "useKey": { "heading": "Use the Key", "text": "Include the key as Authorization: Bearer <key> in HTTP requests." }
+        "createKey": {
+          "heading": "Opprett nøkkel",
+          "text": "Klikk på «Opprett API-nøkkel» for å generere en ny nøkkel. Kopier den med en gang – den vises ikke igjen."
+        },
+        "revokeKey": {
+          "heading": "Tilbakekall nøkkel",
+          "text": "Slett en nøkkel for å umiddelbart ugyldiggjøre alle forespørsler som bruker den."
+        },
+        "useKey": {
+          "heading": "Bruk nøkkelen",
+          "text": "Inkluder nøkkelen som «Authorization: Bearer<key>» i HTTP-forespørsler.</key>"
+        }
       }
     },
     "upload": {
-      "title": "Upload",
-      "overview": "Upload module archives (.tar.gz) or provider binaries to publish them in the registry. The upload wizard validates archive structure, checksums, and GPG signatures before publishing.",
+      "title": "Last opp",
+      "overview": "Last opp modularkiver (.tar.gz) eller leverandørens binærfiler for å publisere dem i registeret. Opplastingsveiviseren validerer arkivstrukturen, sjekksummer og GPG-signaturer før publisering.",
       "actions": {
-        "uploadModule": { "heading": "Upload Module", "text": "Select the \"Module\" tab, provide namespace/name/system/version, and attach the .tar.gz archive." },
-        "uploadProvider": { "heading": "Upload Provider", "text": "Select the \"Provider\" tab, fill in namespace/type/version/platform details, and attach the binary plus checksum files." },
-        "scmLinking": { "heading": "SCM Linking", "text": "Alternatively, link a module to an SCM repository so it publishes automatically from git tags." }
+        "uploadModule": {
+          "heading": "Last opp-modul",
+          "text": "Velg fanen «Modul», oppgi navnerom/navn/system/versjon, og legg ved .tar.gz-arkivet."
+        },
+        "uploadProvider": {
+          "heading": "Last opp-leverandør",
+          "text": "Velg fanen «Leverandør», fyll ut opplysningene om navnerom, type, versjon og plattform, og legg ved binærfilen samt sjekksumfilene."
+        },
+        "scmLinking": {
+          "heading": "SCM-kobling",
+          "text": "Alternativt kan du koble en modul til et SCM-lager, slik at den publiseres automatisk fra Git-tagger."
+        }
       }
     },
     "scmProviders": {
-      "title": "SCM Providers",
-      "overview": "SCM provider configurations connect the registry to GitHub, GitLab, Bitbucket, or Azure DevOps for automated module publishing via git tag webhooks. Each connection uses OAuth credentials.",
+      "title": "SCM-leverandører",
+      "overview": "Konfigurasjonene for SCM-leverandører kobler registeret til GitHub, GitLab, Bitbucket eller Azure DevOps for automatisk publisering av moduler via git-tag-webhooks. Hver tilkobling bruker OAuth-påloggingsopplysninger.",
       "actions": {
-        "addProvider": { "heading": "Add Provider", "text": "Click \"Add SCM Provider\", select the platform, enter the OAuth App Client ID and Secret, then complete the OAuth authorization flow." },
-        "reconnect": { "heading": "Reconnect", "text": "If OAuth tokens expire, use the reconnect button to re-authorize." },
-        "linkModule": { "heading": "Link a Module", "text": "After adding an SCM provider, go to Admin → Upload → SCM to link a repository to a module." }
+        "addProvider": {
+          "heading": "Legg til leverandør",
+          "text": "Klikk på «Legg til SCM-leverandør», velg plattformen, skriv inn OAuth-appens klient-ID og hemmelige nøkkel, og fullfør deretter OAuth-autorisasjonsprosessen."
+        },
+        "reconnect": {
+          "heading": "Koble til igjen",
+          "text": "Hvis OAuth-tokener utløper, kan du bruke knappen for å koble til på nytt for å autorisere på nytt."
+        },
+        "linkModule": {
+          "heading": "Koble til en modul",
+          "text": "Når du har lagt til en SCM-leverandør, går du til Admin → Last opp → SCM for å knytte et arkiv til en modul."
+        }
       }
     },
     "mirrors": {
-      "title": "Provider Mirrors",
-      "overview": "Provider mirrors synchronize provider binaries from the official Terraform registry (or any compatible upstream) into this registry. Once mirrored, providers are available without internet access.",
+      "title": "Speil-tjenester",
+      "overview": "Leverandørspeil synkroniserer leverandørens binærfiler fra det offisielle Terraform-registeret (eller en hvilken som helst kompatibel oppstrømsleverandør) til dette registeret. Når de er speilet, er leverandørene tilgjengelige uten internettilgang.",
       "actions": {
-        "createMirror": { "heading": "Create Mirror", "text": "Click \"Add Mirror\" to define an upstream registry URL and filter rules for which providers to sync." },
-        "triggerSync": { "heading": "Trigger Sync", "text": "Use the sync button on a mirror to immediately fetch the latest versions from upstream." },
-        "viewSyncHistory": { "heading": "View Sync History", "text": "Expand a mirror row to see the log of recent sync runs and any errors." }
+        "createMirror": {
+          "heading": "Opprett speil",
+          "text": "Klikk på «Legg til speil» for å angi en oppstrøms register-URL og filterregler for hvilke leverandører som skal synkroniseres."
+        },
+        "triggerSync": {
+          "heading": "Trigger-synkronisering",
+          "text": "Bruk synkroniseringsknappen på et speil for å hente de nyeste versjonene fra oppstrøms umiddelbart."
+        },
+        "viewSyncHistory": {
+          "heading": "Vis synkroniseringshistorikk",
+          "text": "Utvid en speilrad for å se loggen over de siste synkroniseringene og eventuelle feil."
+        }
       }
     },
     "storage": {
-      "title": "Storage",
-      "overview": "Configures the backend storage used for module and provider artifacts. Supported backends are local filesystem, AWS S3, Azure Blob Storage, and Google Cloud Storage. Only one backend can be active at a time.",
+      "title": "Lagring",
+      "overview": "Konfigurerer lagringsplassen som brukes til modul- og leverandørartefakter. Støttede lagringsplasser er det lokale filsystemet, AWS S3, Azure Blob Storage og Google Cloud Storage. Det kan kun være én lagringsplass aktiv om gangen.",
       "actions": {
-        "switchBackend": { "heading": "Switch Backend", "text": "Select a backend type, fill in credentials, and click \"Activate\" to migrate to the new storage." },
-        "testConnection": { "heading": "Test Connection", "text": "Use the \"Test\" button to validate credentials before activating." },
-        "localStorage": { "heading": "Local Storage", "text": "For development, the local filesystem backend requires no credentials." }
+        "switchBackend": {
+          "heading": "Bytt backend",
+          "text": "Velg en backend-type, fyll inn påloggingsopplysningene og klikk på «Aktiver» for å migrere til den nye lagringsløsningen."
+        },
+        "testConnection": {
+          "heading": "Test tilkoblingen",
+          "text": "Bruk «Test»-knappen for å bekrefte påloggingsopplysningene før du aktiverer."
+        },
+        "localStorage": {
+          "heading": "Lokal lagring",
+          "text": "I utviklingsøyemed krever det lokale filsystemet ingen påloggingsopplysninger."
+        }
       }
     },
     "terraformBinaries": {
-      "title": "Terraform Binary Mirrors",
-      "overview": "Lists the available Terraform and OpenTofu binary mirrors hosted by this registry. Each mirror caches a set of binary versions from an upstream source so your CI pipelines and developer machines can download them without direct internet access.",
+      "title": "Terraform-speilserverne",
+      "overview": "Viser en liste over tilgjengelige binære speil for Terraform og OpenTofu som driftes av dette registeret. Hvert speil lagrer et sett med binære versjoner fra en oppstrøms kilde i hurtigbufferen, slik at CI-rørledningene og utviklermaskinene dine kan laste dem ned uten direkte internettilgang.",
       "actions": {
-        "viewVersions": { "heading": "View Versions", "text": "Click a mirror card to open its detail page, which shows all available versions and the platform binaries (OS/arch) synced for each." },
-        "downloadUrl": { "heading": "Download URL", "text": "The detail page shows the full download URL pattern. Point your Terraform CLI or CI toolchain at this URL instead of the upstream registry." },
-        "adminConfiguration": { "heading": "Admin Configuration", "text": "To add or manage mirror configurations, go to Admin → Terraform Binaries." }
+        "viewVersions": {
+          "heading": "Vis versjoner",
+          "text": "Klikk på et speilkort for å åpne detaljsiden, som viser alle tilgjengelige versjoner og plattformbinærfilene (OS/arkitektur) som er synkronisert for hver av dem."
+        },
+        "downloadUrl": {
+          "heading": "Nedlastingsadresse",
+          "text": "Detaljsiden viser den fullstendige URL-strukturen for nedlasting. Pek Terraform CLI eller CI-verktøykjeden mot denne URL-en i stedet for oppstrømsregisteret."
+        },
+        "adminConfiguration": {
+          "heading": "Administrasjonsinnstillinger",
+          "text": "For å legge til eller administrere speilkonfigurasjoner, gå til Admin → Terraform-binærfiler."
+        }
       }
     },
     "terraformBinaryDetail": {
-      "title": "Binary Mirror Detail",
-      "overview": "Shows all versions synced for this binary mirror and the platform binaries available for each version. Expand a version row to inspect individual OS/architecture combinations, checksum verification status, and GPG signature status.",
+      "title": "Detaljer om binærspeil",
+      "overview": "Viser alle versjoner som er synkronisert for dette binære speilet, samt hvilke binærfiler som er tilgjengelige for hver versjon. Utvid en versjonsrad for å se nærmere på de enkelte kombinasjonene av operativsystem og arkitektur, status for kontrollsumverifisering og status for GPG-signatur.",
       "actions": {
-        "expandPlatforms": { "heading": "Expand Platforms", "text": "Click the expand arrow on a version row to see per-platform details including OS, architecture, filename, and whether checksum and GPG verification passed." },
-        "downloadUrl": { "heading": "Download URL", "text": "Use the URL pattern shown in the info banner to download a specific version and platform: /terraform/binaries/{name}/versions/{version}/{os}/{arch}." },
-        "deprecateVersion": { "heading": "Deprecate a Version", "text": "Admins can click the warning icon to deprecate a version. Deprecated versions remain available for download but will not be re-synced in future sync runs." },
-        "deleteVersion": { "heading": "Delete a Version", "text": "Admins can permanently remove a version record and its binaries from storage. Consider deprecating instead if you want to retain the files but prevent re-syncing." },
-        "restoreDeprecatedVersion": { "heading": "Restore a Deprecated Version", "text": "Click the restore icon on a deprecated version to remove the deprecation flag and allow it to be re-synced." }
+        "expandPlatforms": {
+          "heading": "Vis flere plattformer",
+          "text": "Klikk på utvidelsespilen i en versjonsrad for å se detaljer for hver plattform, inkludert operativsystem, arkitektur, filnavn og om kontrollsummen og GPG-verifiseringen er godkjent."
+        },
+        "downloadUrl": {
+          "heading": "Nedlastingsadresse",
+          "text": "Bruk URL-mønsteret som vises i informasjonsbanneret for å laste ned en bestemt versjon og plattform: /terraform/binaries/{name}/versions/{version}/{os}/{arch}."
+        },
+        "deprecateVersion": {
+          "heading": "Fjerne en versjon",
+          "text": "Administratorer kan klikke på advarselsikonet for å merke en versjon som utgått. Utgåtte versjoner vil fortsatt være tilgjengelige for nedlasting, men vil ikke bli synkronisert på nytt i fremtidige synkroniseringsrunder."
+        },
+        "deleteVersion": {
+          "heading": "Slett en versjon",
+          "text": "Administratorer kan slette en versjonsoppføring og tilhørende binærfiler permanent fra lagringsplassen. Vurder i stedet å merke den som utdatert hvis du ønsker å beholde filene, men forhindre at de synkroniseres på nytt."
+        },
+        "restoreDeprecatedVersion": {
+          "heading": "Gjenopprett en utgått versjon",
+          "text": "Klikk på gjenopprettingsikonet for en utfaset versjon for å fjerne markeringen for utfasing og gjøre det mulig å synkronisere den på nytt."
+        }
       }
     },
     "terraformMirror": {
-      "title": "Terraform Binary Mirror",
-      "overview": "Manages mirror configurations that cache Terraform and OpenTofu binary distributions from upstream sources. Once mirrored, binaries can be served to engineers without direct internet access, enabling air-gapped or bandwidth-constrained environments.",
+      "title": "Terraform-binærspeil",
+      "overview": "Administrerer speilkonfigurasjoner som lagrer Terraform- og OpenTofu-binærfiler fra oppstrøms kilder i hurtigbuffer. Når filene er speilet, kan de gjøres tilgjengelige for utviklere uten direkte internettilgang, noe som muliggjør bruk i miljøer uten internettilgang eller med begrenset båndbredde.",
       "actions": {
-        "createMirrorConfig": { "heading": "Create a Mirror Config", "text": "Click \"Add Mirror\" to define a new mirror. Give it a name, select the tool type (terraform, opentofu, or custom), and specify the upstream URL to sync from." },
-        "syncVersions": { "heading": "Sync Versions", "text": "Expand a mirror config and click the sync button to immediately fetch the latest binary index from upstream. Sync history shows the result of each run." },
-        "inspectPlatforms": { "heading": "Inspect Platforms", "text": "Drill into a version to see which OS/architecture combinations have been downloaded and are available locally." },
-        "enableDisable": { "heading": "Enable / Disable", "text": "Toggle a mirror config off to pause scheduled syncs without deleting the configuration or cached binaries." },
-        "deleteConfig": { "heading": "Delete a Config", "text": "Removes the mirror configuration. Previously synced binaries in storage are not automatically removed." }
+        "createMirrorConfig": {
+          "heading": "Opprett en speilkonfigurasjon",
+          "text": "Klikk på «Legg til speil» for å opprette et nytt speil. Gi det et navn, velg verktøytype (terraform, opentofu eller tilpasset) og angi oppstrøms-URL-en som skal synkroniseres fra."
+        },
+        "syncVersions": {
+          "heading": "Synkroniseringsversjoner",
+          "text": "Utvid en speilkonfigurasjon og klikk på synkroniseringsknappen for å hente den nyeste binære indeksen fra oppstrøms umiddelbart. Synkroniseringsloggen viser resultatet av hver kjøring."
+        },
+        "inspectPlatforms": {
+          "heading": "Inspisere plattformer",
+          "text": "Gå inn på en versjon for å se hvilke kombinasjoner av operativsystem og arkitektur som er lastet ned og er tilgjengelige lokalt."
+        },
+        "enableDisable": {
+          "heading": "Aktiver / Deaktiver",
+          "text": "Deaktiver en speilkonfigurasjon for å sette planlagte synkroniseringer på pause uten å slette konfigurasjonen eller binærfilene i hurtigbufferen."
+        },
+        "deleteConfig": {
+          "heading": "Slett en konfigurasjon",
+          "text": "Fjerner speilkonfigurasjonen. Binærfiler som tidligere er synkronisert til lagringsplassen, blir ikke automatisk fjernet."
+        }
       }
     },
     "approvals": {
-      "title": "Approval Requests",
-      "overview": "Approval requests are raised when a mirror policy requires human sign-off before a provider namespace or binary is mirrored. An admin must approve or reject each request. Approved requests allow the mirror sync to proceed; rejected requests block it.",
+      "title": "Godkjenningsforespørsler",
+      "overview": "Godkjenningsforespørsler opprettes når en speilingspolicy krever manuell godkjenning før et leverandørnavnerom eller en binærfil speiles. En administrator må godkjenne eller avvise hver enkelt forespørsel. Godkjente forespørsler gjør at speilingssynkroniseringen kan fortsette, mens avviste forespørsler blokkerer den.",
       "actions": {
-        "reviewRequest": { "heading": "Review a Request", "text": "Click the \"Approve\" or \"Reject\" button on a pending request card to open the review dialog. Add reviewer notes to explain the decision, then confirm." },
-        "createRequest": { "heading": "Create a Request", "text": "Click \"Create Request\" to manually raise an approval for a provider namespace. Useful for pre-approving content before configuring a mirror policy." },
-        "filterByStatus": { "heading": "Filter by Status", "text": "Pending, approved, and rejected requests are all shown together. Look at the status chip on each card to distinguish them at a glance." },
-        "mirrorPolicyLink": { "heading": "Mirror Policy Link", "text": "Each request references the mirror config that triggered it. Navigate to Admin → Provider Mirrors to view or edit the associated mirror configuration." }
+        "reviewRequest": {
+          "heading": "Gjennomgå en forespørsel",
+          "text": "Klikk på «Godkjenn»- eller «Avvis»-knappen på et kort for en ventende forespørsel for å åpne gjennomgangsdialogen. Legg til kommentarer for å forklare avgjørelsen, og bekreft deretter."
+        },
+        "createRequest": {
+          "heading": "Opprett en forespørsel",
+          "text": "Klikk på «Opprett forespørsel» for å sende inn en godkjenningsforespørsel for et leverandørnavnerom manuelt. Dette er nyttig for å forhåndsgodkjenne innhold før du konfigurerer en speilingspolicy."
+        },
+        "filterByStatus": {
+          "heading": "Filtrer etter status",
+          "text": "Venter på behandling, godkjente og avviste forespørsler vises alle sammen. Se på statusbrikken på hvert kort for å skille dem fra hverandre med et øyekast."
+        },
+        "mirrorPolicyLink": {
+          "heading": "Lenke til retningslinjer for speilinger",
+          "text": "Hver forespørsel viser til speilkonfigurasjonen som utløste den. Gå til Admin → Leverandørspeil for å se eller redigere den tilknyttede speilkonfigurasjonen."
+        }
       }
     },
     "mirrorPolicies": {
-      "title": "Mirror Policies",
-      "overview": "Mirror policies control which providers are allowed or denied from being mirrored, and whether mirroring them requires an approval request. Policies are matched by upstream registry URL, namespace pattern, and provider name pattern. Higher-priority policies take precedence when multiple rules match.",
+      "title": "Retningslinjer for speil",
+      "overview": "Speilingsregler styrer hvilke leverandører som tillates eller nektes å bli speilet, og om det kreves en godkjenningsforespørsel for å speile dem. Reglene samsvarer med oppstrømsregisterets URL, navnerommønster og leverandørnavnmønster. Regler med høyere prioritet har forrang når flere regler samsvarer.",
       "actions": {
-        "createPolicy": { "heading": "Create a Policy", "text": "Click \"Create Policy\" and fill in the name, type (allow or deny), and pattern fields. Use glob-style wildcards (e.g. hashicorp/* ) in the namespace and provider fields to match multiple providers at once." },
-        "allowVsDeny": { "heading": "Allow vs Deny", "text": "An \"allow\" policy permits matched providers to be mirrored. A \"deny\" policy blocks them. Deny policies override allow policies at the same priority level." },
-        "requireApproval": { "heading": "Require Approval", "text": "Enable \"Requires Approval\" on an allow policy to route matched providers through the approval workflow before syncing. Approved requests appear in Admin → Approval Requests." },
-        "priority": { "heading": "Priority", "text": "Policies are evaluated in ascending priority order (lower number = higher priority). Set priority carefully when allow and deny rules overlap." },
-        "evaluatePolicy": { "heading": "Evaluate a Policy", "text": "Use the \"Evaluate\" button to test how a specific provider namespace/name would be matched against the current policy set without triggering a real sync." },
-        "enableDisable": { "heading": "Enable / Disable", "text": "Toggle a policy off to suspend it temporarily without deleting it. Disabled policies are skipped during evaluation." }
+        "createPolicy": {
+          "heading": "Opprett en policy",
+          "text": "Klikk på «Opprett policy» og fyll ut feltene for navn, type (tillat eller avvis) og mønster. Bruk jokertegn i glob-format (f.eks. hashicorp/* ) i feltene for navnerom og leverandør for å matche flere leverandører samtidig."
+        },
+        "allowVsDeny": {
+          "heading": "Tillat vs. Avslå",
+          "text": "En «tillat»-policy tillater at samsvarende leverandører speiles. En «avvis»-policy blokkerer dem. Avvis-policyer har forrang fremfor tillat-policyer på samme prioritetsnivå."
+        },
+        "requireApproval": {
+          "heading": "Krever godkjenning",
+          "text": "Aktiver «Krever godkjenning» i en tillatelsespolicy for å sende samsvarende leverandører gjennom godkjenningsprosessen før synkronisering. Godkjente forespørsler vises under Admin → Godkjenningsforespørsler."
+        },
+        "priority": {
+          "heading": "Prioritet",
+          "text": "Reglene vurderes i stigende prioritetsrekkefølge (lavere tall = høyere prioritet). Vurder prioriteten nøye når tillatelses- og avvisningsregler overlapper hverandre."
+        },
+        "evaluatePolicy": {
+          "heading": "Vurdere en policy",
+          "text": "Bruk «Evaluer»-knappen for å teste hvordan et bestemt leverandørnavnerom/navn vil bli sammenlignet med det gjeldende regelsettet uten at det utløser en faktisk synkronisering."
+        },
+        "enableDisable": {
+          "heading": "Aktiver / Deaktiver",
+          "text": "Deaktiver en policy for å sette den midlertidig på pause uten å slette den. Deaktiverte policyer hoppes over under evalueringen."
+        }
       }
     },
     "auditLogs": {
-      "title": "Audit Logs",
-      "overview": "A tamper-evident record of every significant action taken in the registry — uploads, deletes, configuration changes, login events, and mirror syncs. Use it for compliance reviews, incident investigation, or general activity monitoring.",
+      "title": "Revisjonslogger",
+      "overview": "En logg med sporbarhetsbeskyttelse over alle viktige handlinger som utføres i registeret – opplastinger, slettinger, konfigurasjonsendringer, pålogginger og speilsynkroniseringer. Bruk den til samsvarsvurderinger, granskning av hendelser eller generell overvåking av aktivitet.",
       "actions": {
-        "filterByResourceType": { "heading": "Filter by Resource Type", "text": "Use the Resource Type dropdown to narrow results to a specific entity class (e.g. module, provider, user, mirror)." },
-        "filterByAction": { "heading": "Filter by Action", "text": "Type an action name (e.g. \"create\", \"delete\", \"login\") in the Action field to show only matching events." },
-        "filterByUser": { "heading": "Filter by User", "text": "Enter a user email to see all actions performed by that account." },
-        "dateRange": { "heading": "Date Range", "text": "Set Start and End date pickers to restrict results to a specific time window." },
-        "viewDetail": { "heading": "View Detail", "text": "Click any row to open a detail panel showing the full log entry, including resource ID, actor, and metadata." },
-        "export": { "heading": "Export", "text": "Use the Export button to download the current filtered result set as CSV or JSON." }
+        "filterByResourceType": {
+          "heading": "Filtrer etter ressurstype",
+          "text": "Bruk rullegardinmenyen «Ressurstype» for å begrense resultatene til en bestemt enhetsklasse (f.eks. modul, leverandør, bruker, speil)."
+        },
+        "filterByAction": {
+          "heading": "Filtrer etter handling",
+          "text": "Skriv inn navnet på en handling (f.eks. «opprett», «slett», «logg inn») i feltet «Handling» for å vise kun treffende hendelser."
+        },
+        "filterByUser": {
+          "heading": "Filtrer etter bruker",
+          "text": "Skriv inn en brukers e-postadresse for å se alle handlinger som er utført av den kontoen."
+        },
+        "dateRange": {
+          "heading": "Datointervall",
+          "text": "Angi start- og sluttdato for å begrense resultatene til et bestemt tidsvindu."
+        },
+        "viewDetail": {
+          "heading": "Vis detaljer",
+          "text": "Klikk på en hvilken som helst rad for å åpne et detaljvindu som viser hele loggoppføringen, inkludert ressurs-ID, aktør og metadata."
+        },
+        "export": {
+          "heading": "Eksport",
+          "text": "Bruk «Eksporter»-knappen for å laste ned det aktuelle filtrerte resultatet som CSV- eller JSON-fil."
+        }
       }
     },
     "securityScanning": {
-      "title": "Security Scanning",
-      "overview": "Displays the current configuration and results of the module vulnerability scanner. The scanner analyses uploaded module archives for known security issues using an external scanning tool configured by the server administrator.",
+      "title": "Sikkerhetsskanning",
+      "overview": "Viser gjeldende konfigurasjon og resultater fra modulens sårbarhetsskanner. Skanneren analyserer opplastede modularkiver for kjente sikkerhetsproblemer ved hjelp av et eksternt skanningsverktøy som er konfigurert av serveradministratoren.",
       "actions": {
-        "viewConfiguration": { "heading": "View Configuration", "text": "The top section shows whether scanning is enabled, the scanner tool and version, severity threshold, timeout, and worker/interval settings." },
-        "summaryStatistics": { "heading": "Summary Statistics", "text": "Aggregate counts show total scans, pending, clean, findings, and errors at a glance." },
-        "reviewScanResults": { "heading": "Review Scan Results", "text": "The recent scans table lists each module with its scan status and vulnerability counts broken down by severity (critical, high, medium, low)." }
+        "viewConfiguration": {
+          "heading": "Vis konfigurasjon",
+          "text": "Den øverste delen viser om skanning er aktivert, skannerverktøyet og versjonen, alvorlighetsgraden, tidsavbrudd samt innstillinger for arbeider og intervall."
+        },
+        "summaryStatistics": {
+          "heading": "Sammendrag av statistikk",
+          "text": "Samlet statistikk gir et raskt overblikk over antall skanninger, ventende skanninger, feilfrie skanninger, funn og feil."
+        },
+        "reviewScanResults": {
+          "heading": "Gjennomgå skanneresultatene",
+          "text": "Tabellen over nylige skanninger viser hver modul med skanningsstatus og antall sårbarheter fordelt etter alvorlighetsgrad (kritisk, høy, middels, lav)."
+        }
       }
     },
     "mtls": {
-      "title": "mTLS Certificates",
-      "overview": "Shows the current mutual TLS (mTLS) configuration, including whether client certificate authentication is enabled and which certificate subjects are mapped to authorization scopes. All mTLS settings are read-only in the UI — configuration is managed through the server config file.",
+      "title": "mTLS-sertifikater",
+      "overview": "Viser den gjeldende konfigurasjonen for gjensidig TLS (mTLS), inkludert om autentisering med klientsertifikat er aktivert og hvilke sertifikatobjekter som er tilordnet autorisasjonsområder. Alle mTLS-innstillinger er skrivebeskyttet i brukergrensesnittet – konfigurasjonen administreres via serverens konfigurasjonsfil.",
       "actions": {
-        "viewStatus": { "heading": "View Status", "text": "The status indicator shows whether mTLS is enabled or disabled, along with the CA certificate file path used to verify client certificates." },
-        "certificateMappings": { "heading": "Certificate Mappings", "text": "The mappings table lists each certificate subject and the scopes it is authorized to use. Clients presenting a matching certificate receive these scopes automatically." },
-        "configurationSource": { "heading": "Configuration Source", "text": "All mTLS settings are sourced from the server configuration file. To modify mappings, update the config file and restart the backend." }
+        "viewStatus": {
+          "heading": "Vis status",
+          "text": "Statusindikatoren viser om mTLS er aktivert eller deaktivert, samt stien til CA-sertifikatfilen som brukes til å verifisere klientsertifikater."
+        },
+        "certificateMappings": {
+          "heading": "Sertifikattilknytninger",
+          "text": "I tilordningstabellen er hvert sertifikatobjekt oppført sammen med de områdene det har tillatelse til å bruke. Klienter som fremviser et sertifikat som samsvarer, tildeles disse områdene automatisk."
+        },
+        "configurationSource": {
+          "heading": "Konfigurasjonskilde",
+          "text": "Alle mTLS-innstillinger hentes fra serverens konfigurasjonsfil. For å endre tilordningene må du oppdatere konfigurasjonsfilen og starte backenden på nytt."
+        }
       }
     },
     "scim": {
-      "title": "SCIM Provisioning",
-      "overview": "SCIM 2.0 enables automatic user and group provisioning from your identity provider (e.g. Azure AD, Okta). This page shows the SCIM endpoint URLs and authentication requirements needed to configure your IdP.",
+      "title": "SCIM-konfigurering",
+      "overview": "SCIM 2.0 muliggjør automatisk opprettelse av brukere og grupper fra identitetsleverandøren din (f.eks. Azure AD, Okta). Denne siden viser URL-adressene til SCIM-endepunktene og autentiseringskravene som kreves for å konfigurere identitetsleverandøren din.",
       "actions": {
-        "endpointUrls": { "heading": "Endpoint URLs", "text": "Copy the SCIM base URL, Users endpoint, and Groups endpoint into your identity provider's SCIM configuration." },
-        "authentication": { "heading": "Authentication", "text": "SCIM requests require a Bearer token with the scim:provision scope. Create one on the API Keys page and paste it into your IdP's SCIM token field." },
-        "supportedOperations": { "heading": "Supported Operations", "text": "Users support full CRUD and soft-delete. Groups are read-only and map to registry organizations. Filtering and pagination are supported." }
+        "endpointUrls": {
+          "heading": "URL-adresser til sluttpunkter",
+          "text": "Kopier SCIM-basis-URL-en, bruker-endepunktet og gruppe-endepunktet inn i identitetsleverandørens SCIM-konfigurasjon."
+        },
+        "authentication": {
+          "heading": "Autentisering",
+          "text": "SCIM-forespørsler krever et Bearer-token med omfanget scim:provision. Opprett et på siden «API-nøkler» og lim det inn i SCIM-token-feltet hos din identitetsleverandør."
+        },
+        "supportedOperations": {
+          "heading": "Støttede operasjoner",
+          "text": "Brukerne har tilgang til full CRUD-funksjonalitet og midlertidig sletting. Grupper er skrivebeskyttet og tilordnes organisasjoner i registeret. Filtrering og paginering støttes."
+        }
       }
     }
   }

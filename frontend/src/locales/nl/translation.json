@@ -1,422 +1,686 @@
 {
   "nav": {
     "home": "Home",
-    "homeTooltip": "Home Page",
+    "homeTooltip": "Startpagina",
     "modules": "Modules",
-    "modulesTooltip": "View Terraform Modules",
-    "providers": "Providers",
-    "providersTooltip": "View Terraform Providers",
-    "terraformBinaries": "Terraform Binaries",
-    "terraformBinariesTooltip": "View Terraform Binaries",
-    "apiDocs": "API Docs",
-    "apiDocsTooltip": "API Documentation",
+    "modulesTooltip": "Terraform-modules bekijken",
+    "providers": "Aanbieders",
+    "providersTooltip": "Terraform-providers bekijken",
+    "terraformBinaries": "Terraform-binaire bestanden",
+    "terraformBinariesTooltip": "Terraform-binaire bestanden bekijken",
+    "apiDocs": "API-documentatie",
+    "apiDocsTooltip": "API-documentatie",
     "admin": {
       "dashboard": "Dashboard",
-      "dashboardTooltip": "Admin Dashboard",
-      "identity": "Identity",
-      "organizations": "Organizations",
-      "organizationsTooltip": "Manage registry organizations and members",
-      "roles": "Roles",
-      "rolesTooltip": "Configure role templates and permissions",
-      "users": "Users",
-      "usersTooltip": "View and manage registry users",
-      "oidcGroups": "OIDC Groups",
-      "oidcGroupsTooltip": "Map identity provider groups to registry roles",
+      "dashboardTooltip": "Beheerdersdashboard",
+      "identity": "Identiteit",
+      "organizations": "Organisaties",
+      "organizationsTooltip": "Registratieorganisaties en leden beheren",
+      "roles": "Functies",
+      "rolesTooltip": "Rol-sjablonen en machtigingen configureren",
+      "users": "Gebruikers",
+      "usersTooltip": "Registry-gebruikers bekijken en beheren",
+      "oidcGroups": "OIDC-groepen",
+      "oidcGroupsTooltip": "Identiteitsprovidergroepen toewijzen aan registerrollen",
       "scim": "SCIM",
-      "scimTooltip": "SCIM 2.0 user and group provisioning configuration",
-      "mtlsCerts": "mTLS Certs",
-      "mtlsCertsTooltip": "View mTLS client certificate-to-scope mappings",
-      "apiKeys": "API Keys",
-      "apiKeysTooltip": "Create and manage personal API keys",
-      "sourceControl": "Source Control",
-      "sourceControlTooltip": "Configure SCM providers for module and provider publishing",
-      "mirroring": "Mirroring",
-      "providerConfig": "Provider Config",
-      "providerConfigTooltip": "Configure provider mirror sources and sync schedules",
-      "binariesConfig": "Binaries Config",
-      "binariesConfigTooltip": "Configure Terraform and OpenTofu binary mirror sources",
-      "approvals": "Approvals",
-      "approvalsTooltip": "Review and approve pending mirror sync requests",
-      "mirrorPolicies": "Mirror Policies",
-      "mirrorPoliciesTooltip": "Define policies that control what gets mirrored",
-      "system": "System",
-      "storage": "Storage",
-      "storageTooltip": "Configure backend storage for binaries and providers",
-      "securityScanning": "Security Scanning",
-      "securityScanningTooltip": "View security scanning configuration and status",
-      "auditLogs": "Audit Logs",
-      "auditLogsTooltip": "View system audit logs",
-      "componentsDev": "Components",
-      "componentsDevTooltip": "Component Showcase (dev only)"
+      "scimTooltip": "Configuratie van gebruikers- en groepsbeheer in SCIM 2.0",
+      "mtlsCerts": "mTLS-certificaten",
+      "mtlsCertsTooltip": "Toewijzingen van mTLS-clientcertificaten aan scopes bekijken",
+      "apiKeys": "API-sleutels",
+      "apiKeysTooltip": "Persoonlijke API-sleutels aanmaken en beheren",
+      "sourceControl": "Versiebeheer",
+      "sourceControlTooltip": "SCM-providers configureren voor het publiceren van modules en providers",
+      "mirroring": "Spiegelen",
+      "providerConfig": "Configuratie van de provider",
+      "providerConfigTooltip": "De bronnen van de provider-mirrors en de synchronisatieschema’s configureren",
+      "binariesConfig": "Configuratie van binaire bestanden",
+      "binariesConfigTooltip": "Configureer de bronnen voor de binaire mirrors van Terraform en OpenTofu",
+      "approvals": "Goedkeuringen",
+      "approvalsTooltip": "In behandeling zijnde verzoeken voor spiegelsynchronisatie controleren en goedkeuren",
+      "mirrorPolicies": "Beleid inzake spiegels",
+      "mirrorPoliciesTooltip": "Stel beleidsregels op die bepalen wat er wordt gespiegeld",
+      "system": "Systeem",
+      "storage": "Opslag",
+      "storageTooltip": "Configureer de backend-opslag voor binaire bestanden en providers",
+      "securityScanning": "Beveiligingsscan",
+      "securityScanningTooltip": "De configuratie en status van beveiligingsscans bekijken",
+      "auditLogs": "Controledagboeken",
+      "auditLogsTooltip": "Systeemlogboeken bekijken",
+      "componentsDev": "Onderdelen",
+      "componentsDevTooltip": "Component-overzicht (alleen voor ontwikkelaars)"
     }
   },
   "header": {
-    "skipToContent": "Skip to main content",
-    "openDrawer": "open drawer",
-    "quickNav": "Quick navigation (Ctrl/⌘K)",
-    "openCommandPalette": "Open command palette",
-    "lightMode": "Light mode",
-    "darkMode": "Dark mode",
-    "toggleDarkMode": "toggle dark mode",
-    "contextHelp": "Context Help",
-    "about": "About",
-    "settings": "Settings",
-    "support": "Support",
-    "accountMenu": "account of current user",
-    "logout": "Logout",
-    "login": "Login",
-    "language": "Language"
+    "skipToContent": "Ga naar de hoofdinhoud",
+    "openDrawer": "lade openen",
+    "quickNav": "Snelle navigatie (Ctrl/⌘K)",
+    "openCommandPalette": "Open het opdrachtpalet",
+    "lightMode": "Lichte modus",
+    "darkMode": "Donkere modus",
+    "toggleDarkMode": "donkere modus inschakelen",
+    "contextHelp": "Contextuele hulp",
+    "about": "Over",
+    "settings": "Instellingen",
+    "support": "Ondersteuning",
+    "accountMenu": "profiel van de huidige gebruiker",
+    "logout": "Uitloggen",
+    "login": "Inloggen",
+    "language": "Taal"
   },
   "about": {
-    "title": "About {{productName}}",
-    "description": "A self-hosted Terraform module and provider registry with support for SCM integration, provider mirroring, Terraform binary distribution, and multi-tenancy.",
-    "versions": "Versions",
-    "frontendVersion": "Frontend v{{version}}",
-    "backendVersion": "Backend v{{version}}",
-    "loadingBackendVersion": "Loading backend version\u2026",
-    "backendUnavailable": "Backend unavailable",
-    "apiVersion": "API version: {{version}}",
-    "built": "Built: {{date}}",
-    "license": "License",
-    "licenseIntro": "Released under the",
-    "apacheLicense": "Apache License 2.0",
-    "source": "Source",
-    "githubBackend": "GitHub \u2014 Backend",
-    "githubFrontend": "GitHub \u2014 Frontend",
-    "close": "Close"
+    "title": "Over {{productName}}",
+    "description": "Een zelfgehost Terraform-register voor modules en providers, met ondersteuning voor SCM-integratie, het spiegelen van providers, de distributie van Terraform-binaire bestanden en multi-tenancy.",
+    "versions": "Versies",
+    "frontendVersion": "Frontend versus {{version}}",
+    "backendVersion": "Backend versus {{version}}",
+    "loadingBackendVersion": "Backend-versie wordt geladen…",
+    "backendUnavailable": "Backend niet beschikbaar",
+    "apiVersion": "API-versie: {{version}}",
+    "built": "Gebouwd: {{date}}",
+    "license": "Licentie",
+    "licenseIntro": "Uitgebracht onder de",
+    "apacheLicense": "Apache-licentie 2.0",
+    "source": "Bron",
+    "githubBackend": "GitHub — Backend",
+    "githubFrontend": "GitHub — Frontend",
+    "close": "Sluiten"
   },
   "auth": {
-    "signInToContinue": "Sign in to continue",
-    "signInWithSSO": "Sign in with SSO",
-    "signInWithAzureAD": "Sign in with Azure AD",
-    "signInWith": "Sign in with {{name}}",
-    "devLogin": "Dev Login (Admin)",
-    "devModeNotice": "Development mode - Click below to login without OAuth",
-    "orUseProductionAuth": "OR USE PRODUCTION AUTH",
-    "orSignInWithLdap": "OR SIGN IN WITH LDAP",
-    "or": "OR",
-    "signInWithLdap": "Sign in with LDAP",
-    "username": "Username",
-    "password": "Password",
-    "signIn": "Sign In",
-    "noProviders": "No SSO providers configured. Contact your administrator.",
-    "ssoInfo": "This application uses single sign-on for authentication.",
-    "ssoContact": "Contact your administrator if you need access.",
-    "devLoginFailed": "Dev login failed. Check server logs.",
-    "ldapLoginFailed": "LDAP login failed. Check your credentials."
+    "signInToContinue": "Log in om verder te gaan",
+    "signInWithSSO": "Aanmelden met SSO",
+    "signInWithAzureAD": "Aanmelden met Azure AD",
+    "signInWith": "Log in met {{name}}",
+    "devLogin": "Beheerderslogin",
+    "devModeNotice": "Ontwikkelingsmodus - Klik hieronder om in te loggen zonder OAuth",
+    "orUseProductionAuth": "OF GEBRUIK PRODUCTIE-AUTH",
+    "orSignInWithLdap": "OF LOG IN MET LDAP",
+    "or": "OF",
+    "signInWithLdap": "Aanmelden met LDAP",
+    "username": "Gebruikersnaam",
+    "password": "Wachtwoord",
+    "signIn": "Inloggen",
+    "noProviders": "Er zijn geen SSO-providers geconfigureerd. Neem contact op met uw beheerder.",
+    "ssoInfo": "Deze applicatie maakt gebruik van single sign-on voor authenticatie.",
+    "ssoContact": "Neem contact op met uw beheerder als u toegang nodig hebt.",
+    "devLoginFailed": "Het inloggen als ontwikkelaar is mislukt. Controleer de serverlogboeken.",
+    "ldapLoginFailed": "LDAP-aanmelding mislukt. Controleer uw inloggegevens."
   },
   "home": {
-    "heroTitle": "Private Terraform Registry",
-    "heroSubtitle": "Host and manage your custom Terraform modules, providers, and binaries",
-    "browseModules": "Browse Modules",
-    "browseProviders": "Browse Providers",
-    "terraformBinaries": "Terraform Binaries",
-    "available": "available",
-    "findWhatYouNeed": "Find What You Need",
-    "searchAcross": "Search across modules and providers in this registry",
-    "search": "Search",
-    "searchPlaceholder": "Search {{type}}\u2026",
-    "whatsAvailable": "What\u2019s Available",
-    "modulesDescription": "Browse and use private Terraform modules for your infrastructure.",
-    "browseAllModules": "Browse All Modules \u2192",
-    "providersDescription": "Access custom and mirrored Terraform providers for your cloud resources.",
-    "browseAllProviders": "Browse All Providers \u2192",
-    "terraformBinariesDescription": "Download Terraform and OpenTofu binaries from internal mirrors.",
-    "noBinaryMirrors": "No binary mirrors configured",
-    "viewBinaries": "View Binaries \u2192",
-    "gettingStarted": "Getting Started",
-    "step1Title": "1. Sign In",
-    "step1Desc": "Authenticate with your organization\u2019s OIDC or Azure AD credentials to access the registry.",
-    "step2Title": "2. Get an API Key",
-    "step2DescAuth": "Generate an API key and add it to your Terraform CLI credentials file:",
-    "step2DescUnauth": "Sign in to generate an API key, then add it to your Terraform CLI credentials file:",
-    "signInToGenerate": "Sign in to generate a key",
-    "createApiKey": "Create API key",
-    "manageAllKeys": "Manage all keys \u2192",
-    "copied": "Copied!",
-    "copyToClipboard": "Copy to clipboard",
-    "copyUsageExample": "Copy usage example",
-    "credentialsCopied": "Credentials snippet copied to clipboard",
-    "step3Title": "3. Start Using",
-    "step3Desc": "Browse modules and providers, then reference them directly in your Terraform configuration using this registry\u2019s hostname.",
-    "protocolSupport": "Registry Protocol Support",
-    "protocolDesc": "Full compatibility with Terraform Registry Protocol v1 \u2014 use this registry directly in Terraform CLI and provider configurations without any plugins or proxies.",
-    "viewApiDocs": "View API Documentation",
-    "setupRequired": "Setup Required",
-    "featureSetupRequired": "Feature Configuration Required",
-    "setupRequiredDesc": "This registry has not been configured yet. Complete the setup wizard to configure authentication, storage, and the initial admin account.",
-    "featureSetupDesc": "New features have been added that require configuration. Complete the setup wizard to enable them.",
-    "startSetup": "Start Setup",
-    "configureFeatures": "Configure Features"
+    "heroTitle": "Privé-register voor Terraform",
+    "heroSubtitle": "Host en beheer uw eigen Terraform-modules, providers en binaire bestanden",
+    "browseModules": "Modules bekijken",
+    "browseProviders": "Bekijk aanbieders",
+    "terraformBinaries": "Terraform-binaire bestanden",
+    "available": "beschikbaar",
+    "findWhatYouNeed": "Vind wat je zoekt",
+    "searchAcross": "Zoek in alle modules en aanbieders in dit register",
+    "search": "Zoeken",
+    "searchPlaceholder": "Zoek op {{type}}…",
+    "whatsAvailable": "Wat is er beschikbaar?",
+    "modulesDescription": "Bekijk en gebruik privé-Terraform-modules voor je infrastructuur.",
+    "browseAllModules": "Bekijk alle modules →",
+    "providersDescription": "Krijg toegang tot aangepaste en gespiegelde Terraform-providers voor uw cloudbronnen.",
+    "browseAllProviders": "Bekijk alle aanbieders →",
+    "terraformBinariesDescription": "Download de Terraform- en OpenTofu-binaries van interne mirrors.",
+    "noBinaryMirrors": "Er zijn geen binaire mirrors geconfigureerd",
+    "viewBinaries": "Binaire bestanden bekijken →",
+    "gettingStarted": "Aan de slag",
+    "step1Title": "1. Inloggen",
+    "step1Desc": "Meld u aan met de OIDC- of Azure AD-inloggegevens van uw organisatie om toegang te krijgen tot het register.",
+    "step2Title": "2. Vraag een API-sleutel aan",
+    "step2DescAuth": "Genereer een API-sleutel en voeg deze toe aan je Terraform CLI-inloggegevensbestand:",
+    "step2DescUnauth": "Meld je aan om een API-sleutel aan te maken en voeg deze vervolgens toe aan je Terraform CLI-inloggegevensbestand:",
+    "signInToGenerate": "Log in om een sleutel te genereren",
+    "createApiKey": "API-sleutel aanmaken",
+    "manageAllKeys": "Alle sleutels beheren →",
+    "copied": "Gekopieerd!",
+    "copyToClipboard": "Naar klembord kopiëren",
+    "copyUsageExample": "Voorbeeld van gebruik kopiëren",
+    "credentialsCopied": "Fragment met inloggegevens naar het klembord gekopieerd",
+    "step3Title": "3. Aan de slag",
+    "step3Desc": "Bekijk modules en aanbieders en verwijs er vervolgens rechtstreeks naar in je Terraform-configuratie met behulp van de hostnaam van dit register.",
+    "protocolSupport": "Ondersteuning voor het registerprotocol",
+    "protocolDesc": "Volledig compatibel met het Terraform Registry Protocol v1 — gebruik dit register rechtstreeks in de Terraform CLI en providerconfiguraties, zonder plug-ins of proxyservers.",
+    "viewApiDocs": "API-documentatie bekijken",
+    "setupRequired": "Installatie vereist",
+    "featureSetupRequired": "Vereiste configuratie van functies",
+    "setupRequiredDesc": "Dit register is nog niet geconfigureerd. Voltooi de installatiewizard om de authenticatie, de opslag en het eerste beheerdersaccount in te stellen.",
+    "featureSetupDesc": "Er zijn nieuwe functies toegevoegd die moeten worden geconfigureerd. Doorloop de installatiewizard om ze in te schakelen.",
+    "startSetup": "Start installatie",
+    "configureFeatures": "Functies configureren"
   },
   "common": {
-    "loading": "Loading...",
-    "save": "Save",
-    "cancel": "Cancel",
-    "close": "Close",
-    "delete": "Delete",
-    "edit": "Edit",
-    "create": "Create",
-    "search": "Search",
-    "error": "Error",
-    "success": "Success",
-    "warning": "Warning"
+    "loading": "Bezig met laden...",
+    "save": "Opslaan",
+    "cancel": "Annuleren",
+    "close": "Sluiten",
+    "delete": "Verwijderen",
+    "edit": "Bewerken",
+    "create": "Aanmaken",
+    "search": "Zoeken",
+    "error": "Fout",
+    "success": "Succes",
+    "warning": "Waarschuwing"
   },
   "language": {
-    "en": "English",
-    "es": "Español",
-    "fr": "Français",
-    "de": "Deutsch",
-    "ja": "日本語",
-    "pt": "Português",
+    "en": "Nederlands",
+    "es": "Spaans",
+    "fr": "Frans",
+    "de": "Duits",
+    "ja": "Japans",
+    "pt": "Portugees",
     "nl": "Nederlands",
-    "nb": "Norsk bokmål",
-    "zh": "简体中文",
-    "it": "Italiano"
+    "nb": "Noors (Bokmål)",
+    "zh": "Vereenvoudigd Chinees",
+    "it": "Italiaans"
   },
   "help": {
     "default": {
-      "title": "Help",
-      "overview": "Navigate to a page using the sidebar to see context-sensitive help for that section.",
+      "title": "Hulp",
+      "overview": "Ga via de zijbalk naar een pagina om contextgebonden hulp voor dat gedeelte te bekijken.",
       "actions": {
-        "apiReference": { "heading": "API Reference", "text": "Visit the API Docs page for a full interactive reference of all registry endpoints." }
+        "apiReference": {
+          "heading": "API-referentie",
+          "text": "Ga naar de pagina met API-documentatie voor een volledige interactieve overzicht van alle eindpunten van het register."
+        }
       }
     },
     "home": {
       "title": "Home",
-      "overview": "The home page provides a quick-start overview of the registry, including live status of available modules, providers, and mirrors. Use it as a jumping-off point to browse published content or access the admin area.",
+      "overview": "De startpagina biedt een snel overzicht van het register, inclusief de actuele status van beschikbare modules, aanbieders en mirrors. Gebruik deze pagina als uitgangspunt om door de gepubliceerde inhoud te bladeren of toegang te krijgen tot het beheerdersgedeelte.",
       "actions": {
-        "browseModules": { "heading": "Browse Modules", "text": "Click \"Modules\" in the sidebar to search and explore published Terraform modules." },
-        "browseProviders": { "heading": "Browse Providers", "text": "Click \"Providers\" to find provider binaries available in this registry." },
-        "adminAccess": { "heading": "Admin Access", "text": "If you have admin privileges, use the sidebar links to manage users, upload content, or configure storage." }
+        "browseModules": {
+          "heading": "Modules bekijken",
+          "text": "Klik op &#x27;Modules&#x27; in de zijbalk om gepubliceerde Terraform-modules te zoeken en te bekijken."
+        },
+        "browseProviders": {
+          "heading": "Bekijk aanbieders",
+          "text": "Klik op &quot;Providers&quot; om de beschikbare provider-binaire bestanden in dit register te bekijken."
+        },
+        "adminAccess": {
+          "heading": "Beheerdersrechten",
+          "text": "Als u beheerdersrechten hebt, kunt u de links in de zijbalk gebruiken om gebruikers te beheren, inhoud te uploaden of de opslagruimte in te stellen."
+        }
       }
     },
     "modules": {
       "title": "Modules",
-      "overview": "Lists all Terraform modules published in this registry. Modules are searchable by name and filterable by namespace. Click any module card to view versions, documentation, and usage instructions.",
+      "overview": "Geeft een overzicht van alle Terraform-modules die in dit register zijn gepubliceerd. Modules kunnen op naam worden gezocht en op naamruimte worden gefilterd. Klik op een modulekaart om de versies, documentatie en gebruiksinstructies te bekijken.",
       "actions": {
-        "search": { "heading": "Search", "text": "Use the search field to filter modules by name or namespace in real time." },
-        "viewModule": { "heading": "View Module", "text": "Click a module card to open the detail page with version history and README." },
-        "uploadModule": { "heading": "Upload a Module", "text": "Go to Admin → Upload to publish a new module archive." }
+        "search": {
+          "heading": "Zoeken",
+          "text": "Gebruik het zoekveld om modules in realtime te filteren op naam of naamruimte."
+        },
+        "viewModule": {
+          "heading": "Module bekijken",
+          "text": "Klik op een modulekaart om de detailpagina met de versiegeschiedenis en de README te openen."
+        },
+        "uploadModule": {
+          "heading": "Een module uploaden",
+          "text": "Ga naar Beheer → Uploaden om een nieuw modulearchief te publiceren."
+        }
       }
     },
     "moduleDetail": {
-      "title": "Module Detail",
-      "overview": "Shows all published versions of a specific module, its README documentation, and the Terraform source block needed to reference it. The latest stable version is highlighted.",
+      "title": "Modulegegevens",
+      "overview": "Toont alle gepubliceerde versies van een specifieke module, de bijbehorende README-documentatie en het Terraform-bronblok dat nodig is om ernaar te verwijzen. De nieuwste stabiele versie is gemarkeerd.",
       "actions": {
-        "copySourceBlock": { "heading": "Copy Source Block", "text": "Use the copy button next to the source field to get the Terraform module block." },
-        "selectVersion": { "heading": "Select Version", "text": "Use the version selector to view documentation and inputs/outputs for a specific version." },
-        "deprecateDelete": { "heading": "Deprecate / Delete", "text": "Admins can deprecate or remove a version using the action buttons on each version row." }
+        "copySourceBlock": {
+          "heading": "Bronblok kopiëren",
+          "text": "Gebruik de knop ‘Kopiëren’ naast het bronveld om het Terraform-moduleblok te kopiëren."
+        },
+        "selectVersion": {
+          "heading": "Kies een versie",
+          "text": "Gebruik de versieselector om de documentatie en de invoer- en uitvoergegevens voor een specifieke versie te bekijken."
+        },
+        "deprecateDelete": {
+          "heading": "Verouderd / Verwijderen",
+          "text": "Beheerders kunnen een versie als verouderd markeren of verwijderen via de actieknoppen in de rij van elke versie."
+        }
       }
     },
     "providers": {
-      "title": "Providers",
-      "overview": "Lists all Terraform providers published or mirrored in this registry. Providers are searchable by type and namespace. Click a provider card to view versions and platform binaries.",
+      "title": "Aanbieders",
+      "overview": "Geeft een overzicht van alle Terraform-providers die in dit register zijn gepubliceerd of gespiegeld. Providers kunnen worden doorzocht op type en naamruimte. Klik op een providerkaart om de versies en platformbinaries te bekijken.",
       "actions": {
-        "search": { "heading": "Search", "text": "Filter providers by name or namespace using the search field." },
-        "viewProvider": { "heading": "View Provider", "text": "Click a card to open the provider detail page showing versions and platform downloads." },
-        "uploadProvider": { "heading": "Upload a Provider", "text": "Go to Admin → Upload to publish a new provider binary with its checksums." }
+        "search": {
+          "heading": "Zoeken",
+          "text": "Filter aanbieders op naam of naamruimte via het zoekveld."
+        },
+        "viewProvider": {
+          "heading": "Zorgverlener bekijken",
+          "text": "Klik op een kaart om de pagina met informatie over de aanbieder te openen, waarop de versies en downloads voor verschillende platforms worden weergegeven."
+        },
+        "uploadProvider": {
+          "heading": "Een aanbieder toevoegen",
+          "text": "Ga naar Beheer → Uploaden om een nieuw binair bestand van de provider samen met de checksums te publiceren."
+        }
       }
     },
     "providerDetail": {
-      "title": "Provider Detail",
-      "overview": "Shows all published versions of a specific provider and the platform binaries available for each version. Includes the Terraform required_providers block for easy copy-paste.",
+      "title": "Gegevens van de aanbieder",
+      "overview": "Toont alle gepubliceerde versies van een specifieke provider en de platform-binaries die voor elke versie beschikbaar zijn. Bevat het Terraform-blok `required_providers` zodat je dit eenvoudig kunt kopiëren en plakken.",
       "actions": {
-        "copyRequiredProviders": { "heading": "Copy Required Providers Block", "text": "Use the copy button to get the required_providers configuration." },
-        "selectVersion": { "heading": "Select Version", "text": "Browse platform binaries (OS/arch combinations) per version." },
-        "deprecateDelete": { "heading": "Deprecate / Delete", "text": "Admins can deprecate or remove individual provider versions." }
+        "copyRequiredProviders": {
+          "heading": "Blok ‘Vereiste leveranciers’ kopiëren",
+          "text": "Gebruik de knop ‘Kopiëren’ om de configuratie van `required_providers` op te halen."
+        },
+        "selectVersion": {
+          "heading": "Kies een versie",
+          "text": "Bekijk de binaire bestanden van het platform (combinaties van besturingssysteem en architectuur) per versie."
+        },
+        "deprecateDelete": {
+          "heading": "Verouderd / Verwijderen",
+          "text": "Beheerders kunnen afzonderlijke versies van providers als verouderd markeren of verwijderen."
+        }
       }
     },
     "apiDocs": {
-      "title": "API Reference",
-      "overview": "API documentation for all registry endpoints, powered by ReDoc. Browse endpoint groups and view request/response schemas.",
+      "title": "API-referentie",
+      "overview": "API-documentatie voor alle registry-eindpunten, mogelijk gemaakt door ReDoc. Blader door groepen van eindpunten en bekijk de schema’s voor verzoeken en antwoorden.",
       "actions": {
-        "authenticate": { "heading": "Authenticate", "text": "Paste your API key as a Bearer token using the Authorize button at the top." },
-        "browseEndpoints": { "heading": "Browse Endpoints", "text": "Use the left-hand endpoint tree to navigate by resource group." }
+        "authenticate": {
+          "heading": "Inloggen",
+          "text": "Plak je API-sleutel als een Bearer-token via de knop ‘Autoriseren’ bovenaan."
+        },
+        "browseEndpoints": {
+          "heading": "Door eindpunten bladeren",
+          "text": "Gebruik de boomstructuur aan de linkerkant om per resourcegroep te navigeren."
+        }
       }
     },
     "dashboard": {
       "title": "Dashboard",
-      "overview": "A live health snapshot of your registry. The top bar shows mirror health at a glance. The stat cards below break down modules (with per-system counts), providers (manual vs mirrored), Terraform binary mirrors, and total downloads.",
+      "overview": "Een realtime overzicht van de status van uw register. De bovenste balk geeft in één oogopslag de status van de mirrors weer. De statistiekenkaarten daaronder geven een overzicht van de modules (met aantallen per systeem), providers (handmatig versus via mirrors), Terraform-binaire mirrors en het totale aantal downloads.",
       "actions": {
-        "healthBar": { "heading": "Health Bar", "text": "Binary Mirrors, Provider Mirrors, and Storage pills turn red when something is failing. Click any pill to jump to that section." },
-        "statCards": { "heading": "Stat Cards", "text": "Each card is a shortcut — click to navigate. The aside panels on Modules and Providers show the breakdown by system or mirror type." },
-        "recentSyncActivity": { "heading": "Recent Sync Activity", "text": "The table shows the last 8 sync events across binary and provider mirrors, with status, versions synced, and elapsed time." },
-        "quickLinks": { "heading": "Quick Links", "text": "Common admin actions — upload, manage users, configure mirrors — are one click away from the Quick Links panel." }
+        "healthBar": {
+          "heading": "Gezondheidsbalk",
+          "text": "Binaire mirrors, provider-mirrors en opslagpillen worden rood wanneer er een storing optreedt. Klik op een willekeurige pil om naar dat gedeelte te gaan."
+        },
+        "statCards": {
+          "heading": "Statistieken",
+          "text": "Elke kaart is een snelkoppeling — klik erop om verder te gaan. In de zijpanelen bij ‘Modules’ en ‘Providers’ wordt de indeling per systeem of spiegelserver weergegeven."
+        },
+        "recentSyncActivity": {
+          "heading": "Recente synchronisatieactiviteit",
+          "text": "De tabel toont de laatste 8 synchronisatiegebeurtenissen voor zowel binaire als provider-mirrors, met de status, de gesynchroniseerde versies en de verstreken tijd."
+        },
+        "quickLinks": {
+          "heading": "Snelle links",
+          "text": "Veelvoorkomende beheertaken — bestanden uploaden, gebruikers beheren, mirrors configureren — zijn met één klik te openen vanuit het paneel ‘Snelkoppelingen’."
+        }
       }
     },
     "users": {
-      "title": "Users",
-      "overview": "Manage registry user accounts. Users can be created manually for local/API-key auth, or created automatically on first OIDC login. Assign users to organizations and grant them role templates here.",
+      "title": "Gebruikers",
+      "overview": "Gebruikersaccounts in het register beheren. Gebruikers kunnen handmatig worden aangemaakt voor lokale authenticatie of authenticatie via een API-sleutel, of automatisch worden aangemaakt bij de eerste OIDC-aanmelding. Wijs hier gebruikers toe aan organisaties en wijs hen rol-sjablonen toe.",
       "actions": {
-        "createUser": { "heading": "Create User", "text": "Click \"Add User\" to create a new account with an email and display name." },
-        "editUser": { "heading": "Edit User", "text": "Click the edit icon on any row to update the user's name, organization, or role." },
-        "deleteUser": { "heading": "Delete User", "text": "Removes the user account. Any API keys they hold will also be invalidated." }
+        "createUser": {
+          "heading": "Gebruiker aanmaken",
+          "text": "Klik op &quot;Gebruiker toevoegen&quot; om een nieuw account aan te maken met een e-mailadres en een weergavenaam."
+        },
+        "editUser": {
+          "heading": "Gebruiker bewerken",
+          "text": "Klik op het bewerkingspictogram in een willekeurige rij om de naam, organisatie of functie van de gebruiker bij te werken."
+        },
+        "deleteUser": {
+          "heading": "Gebruiker verwijderen",
+          "text": "Hiermee wordt het gebruikersaccount verwijderd. Alle API-sleutels die bij dit account horen, worden ook ongeldig gemaakt."
+        }
       }
     },
     "organizations": {
-      "title": "Organizations",
-      "overview": "Organizations are namespace containers — modules and providers are published under an organization's namespace. Members of an organization inherit its role template's permissions.",
+      "title": "Organisaties",
+      "overview": "Organisaties zijn naamruimtecontainers — modules en providers worden gepubliceerd onder de naamruimte van een organisatie. Leden van een organisatie nemen de machtigingen van de rol-sjabloon van die organisatie over.",
       "actions": {
-        "createOrganization": { "heading": "Create Organization", "text": "Click \"Add Organization\" to define a new namespace with a URL-safe name." },
-        "manageMembers": { "heading": "Manage Members", "text": "Expand an organization row to view and modify its member list." },
-        "deleteOrganization": { "heading": "Delete Organization", "text": "Only possible when the organization has no published content." }
+        "createOrganization": {
+          "heading": "Organisatie aanmaken",
+          "text": "Klik op &quot;Organisatie toevoegen&quot; om een nieuwe naamruimte aan te maken met een URL-veilige naam."
+        },
+        "manageMembers": {
+          "heading": "Leden beheren",
+          "text": "Vouw een organisatierij uit om de ledenlijst te bekijken en te wijzigen."
+        },
+        "deleteOrganization": {
+          "heading": "Organisatie verwijderen",
+          "text": "Dit is alleen mogelijk als de organisatie geen gepubliceerde inhoud heeft."
+        }
       }
     },
     "roles": {
-      "title": "Roles & Permissions",
-      "overview": "This page shows the fixed role templates available in the registry. Role templates define the permission scopes granted to users within an organization. Templates are system-defined and read-only.",
+      "title": "Rollen en rechten",
+      "overview": "Op deze pagina worden de vaste rol-sjablonen weergegeven die in het register beschikbaar zijn. Rol-sjablonen bepalen welke machtigingen aan gebruikers binnen een organisatie worden toegekend. Sjablonen worden door het systeem gedefinieerd en zijn alleen-lezen.",
       "actions": {
-        "viewScopes": { "heading": "View Scopes", "text": "Expand a role template to see the full list of permission scopes it grants." },
-        "assignToUser": { "heading": "Assign to User", "text": "Go to Admin → Users to assign a role template to a user's organization membership." }
+        "viewScopes": {
+          "heading": "Bekijk de toepassingsgebieden",
+          "text": "Vouw een rolsjabloon uit om de volledige lijst met toegangsrechten te bekijken die het toekent."
+        },
+        "assignToUser": {
+          "heading": "Toewijzen aan gebruiker",
+          "text": "Ga naar Beheer → Gebruikers om een rol-sjabloon toe te wijzen aan het lidmaatschap van een gebruiker bij een organisatie."
+        }
       }
     },
     "oidcGroups": {
-      "title": "OIDC Groups",
-      "overview": "Maps identity provider group claims to registry organizations and roles. When a user logs in via OIDC, their group memberships are read from the ID token and used to automatically provision or update their organization membership. Changes take effect on the next login without requiring a server restart.",
+      "title": "OIDC-groepen",
+      "overview": "De identiteitsprovider koppelt groepsclaims aan registratieorganisaties en rollen. Wanneer een gebruiker zich aanmeldt via OIDC, worden zijn of haar groepslidmaatschappen uit het ID-token gelezen en gebruikt om het lidmaatschap van de organisatie automatisch in te stellen of bij te werken. Wijzigingen worden bij de volgende aanmelding van kracht, zonder dat de server opnieuw hoeft te worden opgestart.",
       "actions": {
-        "groupClaimName": { "heading": "Group Claim Name", "text": "Set this to the claim key in your OIDC ID token that carries the user's group list (e.g. \"groups\"). This must match the protocol mapper configured in your identity provider." },
-        "defaultRole": { "heading": "Default Role", "text": "Optionally assign a fallback role to users whose groups do not match any mapping. Leave blank to grant no automatic membership to unmatched users." },
-        "addMapping": { "heading": "Add a Mapping", "text": "Click \"Add Mapping\" to link an IdP group name to a registry organization and role template. The group name must exactly match the value as it appears in the ID token claim." },
-        "roleTemplates": { "heading": "Role Templates", "text": "Roles correspond to system role templates (viewer, publisher, mirror_manager, admin). Go to Admin → Roles to review what each template permits." },
-        "saveChanges": { "heading": "Save Changes", "text": "Click \"Save Changes\" to persist your group claim and mapping configuration. Existing sessions are not affected until the user logs in again." }
+        "groupClaimName": {
+          "heading": "Naam van de collectieve vordering",
+          "text": "Stel dit in op de claim-sleutel in uw OIDC-ID-token die de groepslijst van de gebruiker bevat (bijvoorbeeld &quot;groups&quot;). Dit moet overeenkomen met de protocolmapper die in uw identiteitsprovider is geconfigureerd."
+        },
+        "defaultRole": {
+          "heading": "Standaardrol",
+          "text": "Wijs eventueel een reservefunctie toe aan gebruikers van wie de groepen niet bij een toewijzing passen. Laat dit veld leeg om gebruikers die niet bij een toewijzing passen geen automatisch lidmaatschap te verlenen."
+        },
+        "addMapping": {
+          "heading": "Een koppeling toevoegen",
+          "text": "Klik op &quot;Toewijzing toevoegen&quot; om een IdP-groepsnaam te koppelen aan een registratieorganisatie en een rol-sjabloon. De groepsnaam moet exact overeenkomen met de waarde zoals deze in de claim van het ID-token staat vermeld."
+        },
+        "roleTemplates": {
+          "heading": "Rolmodellen",
+          "text": "Rollen komen overeen met sjablonen voor systeemrollen (viewer, publisher, mirror_manager, admin). Ga naar Beheer → Rollen om te bekijken wat elke sjabloon toestaat."
+        },
+        "saveChanges": {
+          "heading": "Wijzigingen opslaan",
+          "text": "Klik op &quot;Wijzigingen opslaan&quot; om je groepsclaim en toewijzingsconfiguratie op te slaan. Bestaande sessies worden pas beïnvloed wanneer de gebruiker zich opnieuw aanmeldt."
+        }
       }
     },
     "apiKeys": {
-      "title": "API Keys",
-      "overview": "API keys allow programmatic access to authenticated registry endpoints. Each key is shown once at creation and stored only as a bcrypt hash — it cannot be retrieved after creation.",
+      "title": "API-sleutels",
+      "overview": "Met API-sleutels is programmatische toegang tot geauthenticeerde registry-eindpunten mogelijk. Elke sleutel wordt bij het aanmaken één keer weergegeven en uitsluitend als een bcrypt-hash opgeslagen — deze kan na het aanmaken niet meer worden opgehaald.",
       "actions": {
-        "createKey": { "heading": "Create Key", "text": "Click \"Create API Key\" to generate a new key. Copy it immediately — it will not be shown again." },
-        "revokeKey": { "heading": "Revoke Key", "text": "Delete a key to immediately invalidate all requests using it." },
-        "useKey": { "heading": "Use the Key", "text": "Include the key as Authorization: Bearer <key> in HTTP requests." }
+        "createKey": {
+          "heading": "Sleutel aanmaken",
+          "text": "Klik op &quot;API-sleutel aanmaken&quot; om een nieuwe sleutel te genereren. Kopieer deze meteen — hij wordt niet nogmaals weergegeven."
+        },
+        "revokeKey": {
+          "heading": "Sleutel intrekken",
+          "text": "Verwijder een sleutel om alle verzoeken waarin deze wordt gebruikt onmiddellijk ongeldig te maken."
+        },
+        "useKey": {
+          "heading": "Gebruik de sleutel",
+          "text": "Vermeld de sleutel als `Authorization: Bearer<key>` in HTTP-verzoeken.</key>"
+        }
       }
     },
     "upload": {
-      "title": "Upload",
-      "overview": "Upload module archives (.tar.gz) or provider binaries to publish them in the registry. The upload wizard validates archive structure, checksums, and GPG signatures before publishing.",
+      "title": "Uploaden",
+      "overview": "Upload archiefbestanden (.tar.gz) of binaire bestanden van providers om deze in het register te publiceren. De uploadwizard controleert de structuur van het archief, de checksums en de GPG-handtekeningen voordat de bestanden worden gepubliceerd.",
       "actions": {
-        "uploadModule": { "heading": "Upload Module", "text": "Select the \"Module\" tab, provide namespace/name/system/version, and attach the .tar.gz archive." },
-        "uploadProvider": { "heading": "Upload Provider", "text": "Select the \"Provider\" tab, fill in namespace/type/version/platform details, and attach the binary plus checksum files." },
-        "scmLinking": { "heading": "SCM Linking", "text": "Alternatively, link a module to an SCM repository so it publishes automatically from git tags." }
+        "uploadModule": {
+          "heading": "Uploadmodule",
+          "text": "Selecteer het tabblad &quot;Module&quot;, voer de naamruimte, naam, systeem en versie in en voeg het .tar.gz-archief toe."
+        },
+        "uploadProvider": {
+          "heading": "Upload-provider",
+          "text": "Selecteer het tabblad &quot;Provider&quot;, vul de gegevens voor naamruimte/type/versie/platform in en voeg de binaire bestanden en de checksum-bestanden toe."
+        },
+        "scmLinking": {
+          "heading": "SCM-koppeling",
+          "text": "Je kunt ook een module koppelen aan een SCM-repository, zodat deze automatisch wordt gepubliceerd op basis van Git-tags."
+        }
       }
     },
     "scmProviders": {
-      "title": "SCM Providers",
-      "overview": "SCM provider configurations connect the registry to GitHub, GitLab, Bitbucket, or Azure DevOps for automated module publishing via git tag webhooks. Each connection uses OAuth credentials.",
+      "title": "SCM-dienstverleners",
+      "overview": "De configuraties van SCM-providers koppelen het register aan GitHub, GitLab, Bitbucket of Azure DevOps voor het automatisch publiceren van modules via git-tag-webhooks. Voor elke verbinding worden OAuth-inloggegevens gebruikt.",
       "actions": {
-        "addProvider": { "heading": "Add Provider", "text": "Click \"Add SCM Provider\", select the platform, enter the OAuth App Client ID and Secret, then complete the OAuth authorization flow." },
-        "reconnect": { "heading": "Reconnect", "text": "If OAuth tokens expire, use the reconnect button to re-authorize." },
-        "linkModule": { "heading": "Link a Module", "text": "After adding an SCM provider, go to Admin → Upload → SCM to link a repository to a module." }
+        "addProvider": {
+          "heading": "Aanbieder toevoegen",
+          "text": "Klik op &quot;SCM-provider toevoegen&quot;, selecteer het platform, voer de OAuth-app-client-ID en het geheim in en voltooi vervolgens de OAuth-autorisatieprocedure."
+        },
+        "reconnect": {
+          "heading": "Opnieuw verbinden",
+          "text": "Als OAuth-tokens verlopen, gebruik dan de knop &#x27;Opnieuw verbinden&#x27; om opnieuw toestemming te verlenen."
+        },
+        "linkModule": {
+          "heading": "Een module koppelen",
+          "text": "Nadat je een SCM-provider hebt toegevoegd, ga je naar Beheer → Uploaden → SCM om een repository aan een module te koppelen."
+        }
       }
     },
     "mirrors": {
-      "title": "Provider Mirrors",
-      "overview": "Provider mirrors synchronize provider binaries from the official Terraform registry (or any compatible upstream) into this registry. Once mirrored, providers are available without internet access.",
+      "title": "Provider-spiegels",
+      "overview": "Provider-mirrors synchroniseren provider-binaire bestanden vanuit het officiële Terraform-register (of een andere compatibele upstream) naar dit register. Zodra ze zijn gesynchroniseerd, zijn de providers beschikbaar zonder internetverbinding.",
       "actions": {
-        "createMirror": { "heading": "Create Mirror", "text": "Click \"Add Mirror\" to define an upstream registry URL and filter rules for which providers to sync." },
-        "triggerSync": { "heading": "Trigger Sync", "text": "Use the sync button on a mirror to immediately fetch the latest versions from upstream." },
-        "viewSyncHistory": { "heading": "View Sync History", "text": "Expand a mirror row to see the log of recent sync runs and any errors." }
+        "createMirror": {
+          "heading": "Spiegel aanmaken",
+          "text": "Klik op &quot;Spiegel toevoegen&quot; om een upstream-register-URL en filterregels in te stellen voor de providers die moeten worden gesynchroniseerd."
+        },
+        "triggerSync": {
+          "heading": "Trigger Sync",
+          "text": "Gebruik de synchronisatieknop op een mirror om direct de nieuwste versies van de upstream op te halen."
+        },
+        "viewSyncHistory": {
+          "heading": "Synchronisatiegeschiedenis bekijken",
+          "text": "Vouw een spiegelrij uit om het logboek van recente synchronisaties en eventuele fouten te bekijken."
+        }
       }
     },
     "storage": {
-      "title": "Storage",
-      "overview": "Configures the backend storage used for module and provider artifacts. Supported backends are local filesystem, AWS S3, Azure Blob Storage, and Google Cloud Storage. Only one backend can be active at a time.",
+      "title": "Opslag",
+      "overview": "Hiermee wordt de backend-opslag geconfigureerd die wordt gebruikt voor module- en provider-artefacten. Ondersteunde backends zijn het lokale bestandssysteem, AWS S3, Azure Blob Storage en Google Cloud Storage. Er kan slechts één backend tegelijk actief zijn.",
       "actions": {
-        "switchBackend": { "heading": "Switch Backend", "text": "Select a backend type, fill in credentials, and click \"Activate\" to migrate to the new storage." },
-        "testConnection": { "heading": "Test Connection", "text": "Use the \"Test\" button to validate credentials before activating." },
-        "localStorage": { "heading": "Local Storage", "text": "For development, the local filesystem backend requires no credentials." }
+        "switchBackend": {
+          "heading": "Backend wisselen",
+          "text": "Kies een backend-type, vul de inloggegevens in en klik op &quot;Activeren&quot; om naar de nieuwe opslag te migreren."
+        },
+        "testConnection": {
+          "heading": "Verbinding testen",
+          "text": "Gebruik de knop &quot;Test&quot; om de inloggegevens te controleren voordat u ze activeert."
+        },
+        "localStorage": {
+          "heading": "Lokale opslag",
+          "text": "Voor de ontwikkeling zijn voor de lokale bestandssysteem-backend geen inloggegevens nodig."
+        }
       }
     },
     "terraformBinaries": {
-      "title": "Terraform Binary Mirrors",
-      "overview": "Lists the available Terraform and OpenTofu binary mirrors hosted by this registry. Each mirror caches a set of binary versions from an upstream source so your CI pipelines and developer machines can download them without direct internet access.",
+      "title": "Terraform-binaire mirrors",
+      "overview": "Geeft een overzicht van de beschikbare Terraform- en OpenTofu-binaire mirrors die door dit register worden gehost. Elke mirror slaat een reeks binaire versies van een upstream-bron op in de cache, zodat je CI-pijplijnen en ontwikkelaarscomputers deze kunnen downloaden zonder directe internettoegang.",
       "actions": {
-        "viewVersions": { "heading": "View Versions", "text": "Click a mirror card to open its detail page, which shows all available versions and the platform binaries (OS/arch) synced for each." },
-        "downloadUrl": { "heading": "Download URL", "text": "The detail page shows the full download URL pattern. Point your Terraform CLI or CI toolchain at this URL instead of the upstream registry." },
-        "adminConfiguration": { "heading": "Admin Configuration", "text": "To add or manage mirror configurations, go to Admin → Terraform Binaries." }
+        "viewVersions": {
+          "heading": "Versies bekijken",
+          "text": "Klik op een mirrorkaart om de detailpagina te openen, waarop alle beschikbare versies en de bijbehorende platformbinaries (OS/arch) worden weergegeven."
+        },
+        "downloadUrl": {
+          "heading": "Download-URL",
+          "text": "Op de detailpagina wordt het volledige URL-patroon voor het downloaden weergegeven. Richt je Terraform CLI of CI-toolchain op deze URL in plaats van op het upstream-register."
+        },
+        "adminConfiguration": {
+          "heading": "Beheerinstellingen",
+          "text": "Ga naar Beheer → Terraform-binaire bestanden om spiegelconfiguraties toe te voegen of te beheren."
+        }
       }
     },
     "terraformBinaryDetail": {
-      "title": "Binary Mirror Detail",
-      "overview": "Shows all versions synced for this binary mirror and the platform binaries available for each version. Expand a version row to inspect individual OS/architecture combinations, checksum verification status, and GPG signature status.",
+      "title": "Details binaire spiegel",
+      "overview": "Toont alle versies die voor deze binaire mirror zijn gesynchroniseerd en de binaire bestanden die voor elk platform beschikbaar zijn. Vouw een versierij uit om de afzonderlijke combinaties van besturingssysteem en architectuur, de status van de checksumcontrole en de status van de GPG-handtekening te bekijken.",
       "actions": {
-        "expandPlatforms": { "heading": "Expand Platforms", "text": "Click the expand arrow on a version row to see per-platform details including OS, architecture, filename, and whether checksum and GPG verification passed." },
-        "downloadUrl": { "heading": "Download URL", "text": "Use the URL pattern shown in the info banner to download a specific version and platform: /terraform/binaries/{name}/versions/{version}/{os}/{arch}." },
-        "deprecateVersion": { "heading": "Deprecate a Version", "text": "Admins can click the warning icon to deprecate a version. Deprecated versions remain available for download but will not be re-synced in future sync runs." },
-        "deleteVersion": { "heading": "Delete a Version", "text": "Admins can permanently remove a version record and its binaries from storage. Consider deprecating instead if you want to retain the files but prevent re-syncing." },
-        "restoreDeprecatedVersion": { "heading": "Restore a Deprecated Version", "text": "Click the restore icon on a deprecated version to remove the deprecation flag and allow it to be re-synced." }
+        "expandPlatforms": {
+          "heading": "Platforms uitbreiden",
+          "text": "Klik op het pijltje naast een versierij om per platform details te bekijken, zoals het besturingssysteem, de architectuur, de bestandsnaam en of de checksum- en GPG-controle zijn geslaagd."
+        },
+        "downloadUrl": {
+          "heading": "Download-URL",
+          "text": "Gebruik het URL-patroon dat in de infobanner wordt weergegeven om een specifieke versie en een specifiek platform te downloaden: /terraform/binaries/{name}/versions/{version}/{os}/{arch}."
+        },
+        "deprecateVersion": {
+          "heading": "Een versie als verouderd markeren",
+          "text": "Beheerders kunnen op het waarschuwingspictogram klikken om een versie als verouderd te markeren. Verouderde versies blijven beschikbaar om te downloaden, maar worden bij toekomstige synchronisaties niet meer gesynchroniseerd."
+        },
+        "deleteVersion": {
+          "heading": "Een versie verwijderen",
+          "text": "Beheerders kunnen een versierecord en de bijbehorende binaire bestanden definitief uit de opslag verwijderen. Overweeg in plaats daarvan om het record als verouderd te markeren als je de bestanden wilt behouden maar wilt voorkomen dat ze opnieuw worden gesynchroniseerd."
+        },
+        "restoreDeprecatedVersion": {
+          "heading": "Een verouderde versie herstellen",
+          "text": "Klik op het pictogram voor herstellen bij een verouderde versie om de markering als verouderd te verwijderen, zodat deze opnieuw kan worden gesynchroniseerd."
+        }
       }
     },
     "terraformMirror": {
-      "title": "Terraform Binary Mirror",
-      "overview": "Manages mirror configurations that cache Terraform and OpenTofu binary distributions from upstream sources. Once mirrored, binaries can be served to engineers without direct internet access, enabling air-gapped or bandwidth-constrained environments.",
+      "title": "Terraform-binaire mirror",
+      "overview": "Beheert mirrorconfiguraties die binaire distributies van Terraform en OpenTofu uit upstream-bronnen in de cache opslaan. Zodra de bestanden zijn gespiegeld, kunnen ze worden aangeboden aan ontwikkelaars zonder directe internettoegang, waardoor omgevingen met een air-gap of beperkte bandbreedte mogelijk worden.",
       "actions": {
-        "createMirrorConfig": { "heading": "Create a Mirror Config", "text": "Click \"Add Mirror\" to define a new mirror. Give it a name, select the tool type (terraform, opentofu, or custom), and specify the upstream URL to sync from." },
-        "syncVersions": { "heading": "Sync Versions", "text": "Expand a mirror config and click the sync button to immediately fetch the latest binary index from upstream. Sync history shows the result of each run." },
-        "inspectPlatforms": { "heading": "Inspect Platforms", "text": "Drill into a version to see which OS/architecture combinations have been downloaded and are available locally." },
-        "enableDisable": { "heading": "Enable / Disable", "text": "Toggle a mirror config off to pause scheduled syncs without deleting the configuration or cached binaries." },
-        "deleteConfig": { "heading": "Delete a Config", "text": "Removes the mirror configuration. Previously synced binaries in storage are not automatically removed." }
+        "createMirrorConfig": {
+          "heading": "Een spiegelconfiguratie aanmaken",
+          "text": "Klik op &quot;Spiegel toevoegen&quot; om een nieuwe spiegel aan te maken. Geef deze een naam, selecteer het type tool (terraform, opentofu of aangepast) en geef de upstream-URL op waarvan je wilt synchroniseren."
+        },
+        "syncVersions": {
+          "heading": "Versies synchroniseren",
+          "text": "Vouw een mirrorconfiguratie uit en klik op de synchronisatieknop om direct de nieuwste binaire index van de upstream op te halen. In de synchronisatiegeschiedenis wordt het resultaat van elke synchronisatie weergegeven."
+        },
+        "inspectPlatforms": {
+          "heading": "Platforms inspecteren",
+          "text": "Klik op een versie om te zien welke combinaties van besturingssysteem en architectuur zijn gedownload en lokaal beschikbaar zijn."
+        },
+        "enableDisable": {
+          "heading": "Inschakelen / Uitschakelen",
+          "text": "Schakel een spiegelconfiguratie uit om geplande synchronisaties te pauzeren zonder de configuratie of de in de cache opgeslagen binaire bestanden te verwijderen."
+        },
+        "deleteConfig": {
+          "heading": "Een configuratie verwijderen",
+          "text": "Hiermee wordt de spiegelconfiguratie verwijderd. Eerder gesynchroniseerde bestanden in de opslag worden niet automatisch verwijderd."
+        }
       }
     },
     "approvals": {
-      "title": "Approval Requests",
-      "overview": "Approval requests are raised when a mirror policy requires human sign-off before a provider namespace or binary is mirrored. An admin must approve or reject each request. Approved requests allow the mirror sync to proceed; rejected requests block it.",
+      "title": "Goedkeuringsverzoeken",
+      "overview": "Er worden goedkeuringsverzoeken gegenereerd wanneer een mirrorbeleid vereist dat er handmatig toestemming wordt gegeven voordat een provider-naamruimte of een binair bestand wordt gespiegeld. Een beheerder moet elk verzoek goedkeuren of afwijzen. Goedgekeurde verzoeken zorgen ervoor dat de mirrorsynchronisatie kan doorgaan; afgewezen verzoeken blokkeren deze.",
       "actions": {
-        "reviewRequest": { "heading": "Review a Request", "text": "Click the \"Approve\" or \"Reject\" button on a pending request card to open the review dialog. Add reviewer notes to explain the decision, then confirm." },
-        "createRequest": { "heading": "Create a Request", "text": "Click \"Create Request\" to manually raise an approval for a provider namespace. Useful for pre-approving content before configuring a mirror policy." },
-        "filterByStatus": { "heading": "Filter by Status", "text": "Pending, approved, and rejected requests are all shown together. Look at the status chip on each card to distinguish them at a glance." },
-        "mirrorPolicyLink": { "heading": "Mirror Policy Link", "text": "Each request references the mirror config that triggered it. Navigate to Admin → Provider Mirrors to view or edit the associated mirror configuration." }
+        "reviewRequest": {
+          "heading": "Een verzoek bekijken",
+          "text": "Klik op de knop &#x27;Goedkeuren&#x27; of &#x27;Afwijzen&#x27; op een kaart met een verzoek in behandeling om het beoordelingsvenster te openen. Voeg opmerkingen toe om de beslissing toe te lichten en bevestig vervolgens."
+        },
+        "createRequest": {
+          "heading": "Een verzoek indienen",
+          "text": "Klik op &quot;Verzoek aanmaken&quot; om handmatig een goedkeuring aan te vragen voor een provider-naamruimte. Dit is handig om inhoud vooraf goed te keuren voordat je een mirrorbeleid configureert."
+        },
+        "filterByStatus": {
+          "heading": "Filter op status",
+          "text": "Aanvragen die in behandeling zijn, zijn goedgekeurd of zijn afgewezen, worden allemaal samen weergegeven. Kijk naar het statuspictogram op elke kaart om ze in één oogopslag van elkaar te onderscheiden."
+        },
+        "mirrorPolicyLink": {
+          "heading": "Link naar het beleid inzake spiegels",
+          "text": "Elk verzoek verwijst naar de mirrorconfiguratie die aanleiding gaf tot het verzoek. Ga naar Beheer → Provider-mirrors om de bijbehorende mirrorconfiguratie te bekijken of te bewerken."
+        }
       }
     },
     "mirrorPolicies": {
-      "title": "Mirror Policies",
-      "overview": "Mirror policies control which providers are allowed or denied from being mirrored, and whether mirroring them requires an approval request. Policies are matched by upstream registry URL, namespace pattern, and provider name pattern. Higher-priority policies take precedence when multiple rules match.",
+      "title": "Beleid inzake spiegels",
+      "overview": "Spiegelbeleidsregels bepalen welke providers wel of niet mogen worden gespiegeld, en of er voor het spiegelen een goedkeuringsverzoek nodig is. Beleidsregels worden vergeleken op basis van de URL van het upstream-register, het naamruimtepatroon en het patroon van de providernaam. Wanneer meerdere regels van toepassing zijn, krijgen beleidsregels met een hogere prioriteit voorrang.",
       "actions": {
-        "createPolicy": { "heading": "Create a Policy", "text": "Click \"Create Policy\" and fill in the name, type (allow or deny), and pattern fields. Use glob-style wildcards (e.g. hashicorp/* ) in the namespace and provider fields to match multiple providers at once." },
-        "allowVsDeny": { "heading": "Allow vs Deny", "text": "An \"allow\" policy permits matched providers to be mirrored. A \"deny\" policy blocks them. Deny policies override allow policies at the same priority level." },
-        "requireApproval": { "heading": "Require Approval", "text": "Enable \"Requires Approval\" on an allow policy to route matched providers through the approval workflow before syncing. Approved requests appear in Admin → Approval Requests." },
-        "priority": { "heading": "Priority", "text": "Policies are evaluated in ascending priority order (lower number = higher priority). Set priority carefully when allow and deny rules overlap." },
-        "evaluatePolicy": { "heading": "Evaluate a Policy", "text": "Use the \"Evaluate\" button to test how a specific provider namespace/name would be matched against the current policy set without triggering a real sync." },
-        "enableDisable": { "heading": "Enable / Disable", "text": "Toggle a policy off to suspend it temporarily without deleting it. Disabled policies are skipped during evaluation." }
+        "createPolicy": {
+          "heading": "Een beleid opstellen",
+          "text": "Klik op &quot;Beleid aanmaken&quot; en vul de velden voor naam, type (toestaan of weigeren) en patroon in. Gebruik glob-achtige jokertekens (bijv. hashicorp/* ) in de velden voor naamruimte en provider om meerdere providers tegelijk te selecteren."
+        },
+        "allowVsDeny": {
+          "heading": "Toestaan vs. Weigeren",
+          "text": "Een &quot;toestaan&quot;-beleid staat toe dat overeenkomende providers worden gespiegeld. Een &quot;weigeren&quot;-beleid blokkeert ze. Weigeren-beleidsregels hebben voorrang op toestaan-beleidsregels met hetzelfde prioriteitsniveau."
+        },
+        "requireApproval": {
+          "heading": "Goedkeuring vereist",
+          "text": "Schakel &quot;Goedkeuring vereist&quot; in bij een toelatingsbeleid om aan de criteria beantwoordende providers vóór de synchronisatie door de goedkeuringsworkflow te leiden. Goedgekeurde verzoeken worden weergegeven in Beheer → Goedkeuringsverzoeken."
+        },
+        "priority": {
+          "heading": "Prioriteit",
+          "text": "Regels worden beoordeeld in oplopende volgorde van prioriteit (een lager nummer betekent een hogere prioriteit). Stel de prioriteit zorgvuldig in wanneer er overlap is tussen toelatings- en weigeringsregels."
+        },
+        "evaluatePolicy": {
+          "heading": "Een beleid evalueren",
+          "text": "Gebruik de knop &quot;Evaluate&quot; om te testen hoe een specifieke naamruimte/naam van een provider zou worden vergeleken met de huidige beleidsregels, zonder dat er een daadwerkelijke synchronisatie wordt gestart."
+        },
+        "enableDisable": {
+          "heading": "Inschakelen / Uitschakelen",
+          "text": "Schakel een beleid uit om het tijdelijk op te schorten zonder het te verwijderen. Uitgeschakelde beleidsregels worden tijdens de evaluatie overgeslagen."
+        }
       }
     },
     "auditLogs": {
-      "title": "Audit Logs",
-      "overview": "A tamper-evident record of every significant action taken in the registry — uploads, deletes, configuration changes, login events, and mirror syncs. Use it for compliance reviews, incident investigation, or general activity monitoring.",
+      "title": "Controledagboeken",
+      "overview": "Een fraudebestendig overzicht van alle belangrijke handelingen in het register — uploads, verwijderingen, configuratiewijzigingen, inloggebeurtenissen en synchronisaties met de mirror. Gebruik dit voor nalevingscontroles, incidentonderzoek of algemene activiteitsmonitoring.",
       "actions": {
-        "filterByResourceType": { "heading": "Filter by Resource Type", "text": "Use the Resource Type dropdown to narrow results to a specific entity class (e.g. module, provider, user, mirror)." },
-        "filterByAction": { "heading": "Filter by Action", "text": "Type an action name (e.g. \"create\", \"delete\", \"login\") in the Action field to show only matching events." },
-        "filterByUser": { "heading": "Filter by User", "text": "Enter a user email to see all actions performed by that account." },
-        "dateRange": { "heading": "Date Range", "text": "Set Start and End date pickers to restrict results to a specific time window." },
-        "viewDetail": { "heading": "View Detail", "text": "Click any row to open a detail panel showing the full log entry, including resource ID, actor, and metadata." },
-        "export": { "heading": "Export", "text": "Use the Export button to download the current filtered result set as CSV or JSON." }
+        "filterByResourceType": {
+          "heading": "Filter op type bron",
+          "text": "Gebruik het keuzemenu ‘Resourcetype’ om de resultaten te beperken tot een specifieke entiteitsklasse (bijv. module, provider, gebruiker, mirror)."
+        },
+        "filterByAction": {
+          "heading": "Filter op actie",
+          "text": "Typ een actienaam (bijv. &quot;aanmaken&quot;, &quot;verwijderen&quot;, &quot;inloggen&quot;) in het veld Actie om alleen de overeenkomende gebeurtenissen weer te geven."
+        },
+        "filterByUser": {
+          "heading": "Filteren op gebruiker",
+          "text": "Voer het e-mailadres van een gebruiker in om alle acties te bekijken die door dat account zijn uitgevoerd."
+        },
+        "dateRange": {
+          "heading": "Datumperiode",
+          "text": "Stel de datumkiezers voor begin- en einddatum in om de resultaten te beperken tot een bepaald tijdsbestek."
+        },
+        "viewDetail": {
+          "heading": "Bekijk details",
+          "text": "Klik op een willekeurige rij om een detailvenster te openen met de volledige logboekvermelding, inclusief resource-ID, actor en metagegevens."
+        },
+        "export": {
+          "heading": "Exporteren",
+          "text": "Gebruik de knop &#x27;Exporteren&#x27; om de huidige gefilterde resultaten te downloaden als CSV- of JSON-bestand."
+        }
       }
     },
     "securityScanning": {
-      "title": "Security Scanning",
-      "overview": "Displays the current configuration and results of the module vulnerability scanner. The scanner analyses uploaded module archives for known security issues using an external scanning tool configured by the server administrator.",
+      "title": "Beveiligingsscan",
+      "overview": "Geeft de huidige configuratie en resultaten van de kwetsbaarheidsscanner voor modules weer. De scanner analyseert geüploade modulearchieven op bekende beveiligingsproblemen met behulp van een externe scantool die door de serverbeheerder is geconfigureerd.",
       "actions": {
-        "viewConfiguration": { "heading": "View Configuration", "text": "The top section shows whether scanning is enabled, the scanner tool and version, severity threshold, timeout, and worker/interval settings." },
-        "summaryStatistics": { "heading": "Summary Statistics", "text": "Aggregate counts show total scans, pending, clean, findings, and errors at a glance." },
-        "reviewScanResults": { "heading": "Review Scan Results", "text": "The recent scans table lists each module with its scan status and vulnerability counts broken down by severity (critical, high, medium, low)." }
+        "viewConfiguration": {
+          "heading": "Configuratie bekijken",
+          "text": "In het bovenste gedeelte wordt weergegeven of scannen is ingeschakeld, evenals het scanningsprogramma en de versie, de ernstdrempel, de time-out en de instellingen voor workers en intervallen."
+        },
+        "summaryStatistics": {
+          "heading": "Samenvattende statistieken",
+          "text": "De geaggregeerde tellingen geven in één oogopslag het totaal aantal scans, het aantal in behandeling zijnde scans, het aantal foutloze scans, het aantal bevindingen en het aantal fouten weer."
+        },
+        "reviewScanResults": {
+          "heading": "Bekijk de scanresultaten",
+          "text": "In de tabel met recente scans staan alle modules vermeld, met hun scanstatus en het aantal kwetsbaarheden, uitgesplitst naar ernst (kritiek, hoog, gemiddeld, laag)."
+        }
       }
     },
     "mtls": {
-      "title": "mTLS Certificates",
-      "overview": "Shows the current mutual TLS (mTLS) configuration, including whether client certificate authentication is enabled and which certificate subjects are mapped to authorization scopes. All mTLS settings are read-only in the UI — configuration is managed through the server config file.",
+      "title": "mTLS-certificaten",
+      "overview": "Geeft de huidige configuratie voor wederzijdse TLS (mTLS) weer, inclusief of authenticatie via een clientcertificaat is ingeschakeld en welke certificaatonderwerpen aan autorisatiescopes zijn gekoppeld. Alle mTLS-instellingen zijn alleen-lezen in de gebruikersinterface — de configuratie wordt beheerd via het configuratiebestand van de server.",
       "actions": {
-        "viewStatus": { "heading": "View Status", "text": "The status indicator shows whether mTLS is enabled or disabled, along with the CA certificate file path used to verify client certificates." },
-        "certificateMappings": { "heading": "Certificate Mappings", "text": "The mappings table lists each certificate subject and the scopes it is authorized to use. Clients presenting a matching certificate receive these scopes automatically." },
-        "configurationSource": { "heading": "Configuration Source", "text": "All mTLS settings are sourced from the server configuration file. To modify mappings, update the config file and restart the backend." }
+        "viewStatus": {
+          "heading": "Status bekijken",
+          "text": "De statusindicator geeft aan of mTLS is ingeschakeld of uitgeschakeld, samen met het pad naar het CA-certificaatbestand dat wordt gebruikt om clientcertificaten te verifiëren."
+        },
+        "certificateMappings": {
+          "heading": "Certificaat-toewijzingen",
+          "text": "In de toewijzingstabel staan alle certificaatonderwerpen vermeld, samen met de toepassingsgebieden waarvoor ze zijn geautoriseerd. Cliënten die een overeenkomend certificaat overleggen, krijgen deze toepassingsgebieden automatisch toegewezen."
+        },
+        "configurationSource": {
+          "heading": "Configuratiebron",
+          "text": "Alle mTLS-instellingen worden opgehaald uit het configuratiebestand van de server. Als je de toewijzingen wilt wijzigen, moet je het configuratiebestand aanpassen en de backend opnieuw opstarten."
+        }
       }
     },
     "scim": {
-      "title": "SCIM Provisioning",
-      "overview": "SCIM 2.0 enables automatic user and group provisioning from your identity provider (e.g. Azure AD, Okta). This page shows the SCIM endpoint URLs and authentication requirements needed to configure your IdP.",
+      "title": "SCIM-provisioning",
+      "overview": "Met SCIM 2.0 kunt u gebruikers en groepen automatisch aanmaken vanuit uw identiteitsprovider (bijvoorbeeld Azure AD of Okta). Op deze pagina vindt u de URL’s van de SCIM-eindpunten en de authenticatievereisten die nodig zijn om uw identiteitsprovider te configureren.",
       "actions": {
-        "endpointUrls": { "heading": "Endpoint URLs", "text": "Copy the SCIM base URL, Users endpoint, and Groups endpoint into your identity provider's SCIM configuration." },
-        "authentication": { "heading": "Authentication", "text": "SCIM requests require a Bearer token with the scim:provision scope. Create one on the API Keys page and paste it into your IdP's SCIM token field." },
-        "supportedOperations": { "heading": "Supported Operations", "text": "Users support full CRUD and soft-delete. Groups are read-only and map to registry organizations. Filtering and pagination are supported." }
+        "endpointUrls": {
+          "heading": "URL&#x27;s van eindpunten",
+          "text": "Kopieer de SCIM-basis-URL, het eindpunt voor gebruikers en het eindpunt voor groepen naar de SCIM-configuratie van uw identiteitsprovider."
+        },
+        "authentication": {
+          "heading": "Authenticatie",
+          "text": "Voor SCIM-verzoeken is een Bearer-token met het bereik scim:provision vereist. Maak er een aan op de pagina API-sleutels en plak deze in het veld voor het SCIM-token van je IdP."
+        },
+        "supportedOperations": {
+          "heading": "Ondersteunde activiteiten",
+          "text": "Gebruikers ondersteunen volledige CRUD-functionaliteit en soft-delete. Groepen zijn alleen-lezen en zijn gekoppeld aan organisaties in het register. Filteren en paginering worden ondersteund."
+        }
       }
     }
   }

@@ -31,12 +31,12 @@ const GOOGLE_API_URL = 'https://translation.googleapis.com/language/translate/v2
 
 // DeepL uses uppercase target codes; Google uses lowercase.
 const LANG_MAP = {
-  deepl: { es: 'ES', fr: 'FR', de: 'DE', ja: 'JA', pt: 'PT', nl: 'NL', nb: 'NB', it: 'IT' },
+  deepl: { es: 'ES', fr: 'FR', de: 'DE', ja: 'JA', pt: 'PT', nl: 'NL', nb: 'NB', zh: 'ZH', it: 'IT' },
   google: { es: 'es', fr: 'fr', de: 'de', ja: 'ja', pt: 'pt', nl: 'nl', nb: 'no', zh: 'zh-CN', it: 'it' },
 };
 
 // Default provider assignment per language.
-const DEFAULT_PROVIDER = { es: 'deepl', fr: 'deepl', de: 'deepl', ja: 'google', pt: 'deepl', nl: 'deepl', nb: 'deepl', zh: 'google', it: 'deepl' };
+const DEFAULT_PROVIDER = { es: 'deepl', fr: 'deepl', de: 'deepl', ja: 'deepl', pt: 'deepl', nl: 'deepl', nb: 'deepl', zh: 'deepl', it: 'deepl' };
 
 const BATCH_SIZE = 50; // strings per API request
 
