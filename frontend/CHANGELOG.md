@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.14.1](https://github.com/sethbacon/terraform-registry-frontend/compare/v0.14.0...v0.14.1) (2026-04-26)
+
+
+### Bug Fixes
+
+* **i18n:** correct stale comment referencing nonexistent CONTRIBUTING.md section ([#227](https://github.com/sethbacon/terraform-registry-frontend/issues/227)) ([124eb50](https://github.com/sethbacon/terraform-registry-frontend/commit/124eb5085075d174f47ca6a5c40b512c0e85012f))
+
 ## [0.14.0](https://github.com/sethbacon/terraform-registry-frontend/compare/v0.13.0...v0.14.0) (2026-04-26)
 
 
