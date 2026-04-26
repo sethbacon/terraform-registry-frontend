@@ -1,0 +1,8 @@
+{
+  "private": true,
+  "name": "terraform-registry-frontend-scripts",
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  }
+}

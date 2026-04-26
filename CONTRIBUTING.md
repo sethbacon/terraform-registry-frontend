@@ -272,14 +272,30 @@ frontend/src/locales/
 
 1. Edit `frontend/src/locales/en/translation.json` and add your new key(s).
 2. Add `useTranslation()` in the component and replace any hardcoded string with `t('your.key')`.
-3. The CI workflow (`.github/workflows/crowdin.yml`) will automatically upload the updated
-   source file to Crowdin and open a follow-up PR when translations are ready.
+3. When your PR merges, the CI workflow (`.github/workflows/translate.yml`) will automatically
+   translate new strings via DeepL (es/fr/de) and Google Translate (ja) and open a follow-up PR.
 
-### Marking machine-translated strings for review
+### Running translations locally
 
-Non-English files contain a mix of verified human translations and unreviewed machine-generated
-baselines. All machine-translated strings are tracked via Crowdin's string approval workflow.
-Do **not** consider a non-English PR merge-ready until its strings are approved by a native speaker.
+```bash
+# Dry run — estimate character usage without calling any API
+node scripts/translate.mjs --dry-run
+
+# Translate European languages via DeepL
+DEEPL_API_KEY=<key> node scripts/translate.mjs --provider deepl --langs es,fr,de
+
+# Translate Japanese via Google Translate
+GOOGLE_TRANSLATE_API_KEY=<key> node scripts/translate.mjs --provider google --langs ja
+
+# Translate all languages with default provider mapping
+DEEPL_API_KEY=<key> GOOGLE_TRANSLATE_API_KEY=<key> node scripts/translate.mjs --all
+
+# Force re-translate everything (ignore change detection)
+DEEPL_API_KEY=<key> node scripts/translate.mjs --provider deepl --langs es --force
+```
+
+The script only translates new or changed keys by default. It tracks English source hashes
+in `scripts/.translation-hashes.json` to detect changes.
 
 ### Adding a new language
 
@@ -287,7 +303,8 @@ Do **not** consider a non-English PR merge-ready until its strings are approved 
 2. Add the locale to `SUPPORTED_LANGUAGES` in `frontend/src/components/Layout.tsx` and to the
    `supportedLngs` array in `frontend/src/i18n.ts`.
 3. Add an entry to the `language.*` key in all existing locale JSON files.
-4. Open a PR — Crowdin will detect the new language and surface it to translators.
+4. Add the language code to `LANG_MAP` and `DEFAULT_PROVIDER` in `scripts/translate.mjs`.
+5. Run the translate script to generate translations: `node scripts/translate.mjs --all --force`.
 
 ### RTL languages
 
@@ -299,18 +316,18 @@ Yiddish `yi`) are automatically detected by `ThemeContext`. When active:
 For correct property flipping of custom CSS, install and configure `stylis-plugin-rtl` in
 `main.tsx` when adding the first RTL language to the supported list.
 
-### Crowdin setup
+### Translation API setup
 
-The `.github/workflows/crowdin.yml` workflow requires the following repository secrets:
+The `.github/workflows/translate.yml` workflow requires the following repository secrets:
 
-| Secret                   | Description                                  |
-| ------------------------ | -------------------------------------------- |
-| `CROWDIN_PROJECT_ID`     | Your Crowdin project ID (numeric)            |
-| `CROWDIN_PERSONAL_TOKEN` | Personal API token with project write access |
+| Secret                     | Description                               |
+| -------------------------- | ----------------------------------------- |
+| `DEEPL_API_KEY`            | DeepL API key (free or pro tier)          |
+| `GOOGLE_TRANSLATE_API_KEY` | Google Cloud Translation API key          |
 
 Once configured, the workflow:
-- Uploads `en/translation.json` to Crowdin on every push to `main`.
-- Downloads completed translation files daily and opens a PR if they have changed.
+- Translates new/changed keys whenever `en/translation.json` changes on `main`.
+- Opens a PR with the updated translation files for review.
 
 ---
 
