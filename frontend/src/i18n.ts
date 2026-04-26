@@ -13,9 +13,9 @@ import nbTranslation from './locales/nb/translation.json';
 import zhTranslation from './locales/zh/translation.json';
 import itTranslation from './locales/it/translation.json';
 
-// Machine-translated locales are baseline placeholders flagged for human review.
-// All non-English strings carry a // MACHINE_TRANSLATED marker in the contributing
-// notes — see CONTRIBUTING.md §Translation workflow.
+// Non-English locales are machine-translated via DeepL. The translation
+// script (scripts/translate.mjs) tracks source hashes to detect stale
+// translations when English strings change.
 
 i18n
   .use(LanguageDetector)
