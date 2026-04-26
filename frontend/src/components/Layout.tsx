@@ -68,7 +68,7 @@ import SessionExpiryWarning from './SessionExpiryWarning';
 
 const drawerWidth = 240;
 
-const SUPPORTED_LANGUAGES = ['en', 'es', 'fr', 'de', 'ja'] as const;
+const SUPPORTED_LANGUAGES = ['en', 'es', 'fr', 'de', 'ja', 'pt', 'nl', 'nb', 'zh', 'it'] as const;
 
 const Layout = () => {
   const { t } = useTranslation();

@@ -7,6 +7,11 @@ import esTranslation from './locales/es/translation.json';
 import frTranslation from './locales/fr/translation.json';
 import deTranslation from './locales/de/translation.json';
 import jaTranslation from './locales/ja/translation.json';
+import ptTranslation from './locales/pt/translation.json';
+import nlTranslation from './locales/nl/translation.json';
+import nbTranslation from './locales/nb/translation.json';
+import zhTranslation from './locales/zh/translation.json';
+import itTranslation from './locales/it/translation.json';
 
 // Machine-translated locales are baseline placeholders flagged for human review.
 // All non-English strings carry a // MACHINE_TRANSLATED marker in the contributing
@@ -22,9 +27,14 @@ i18n
       fr: { translation: frTranslation },
       de: { translation: deTranslation },
       ja: { translation: jaTranslation },
+      pt: { translation: ptTranslation },
+      nl: { translation: nlTranslation },
+      nb: { translation: nbTranslation },
+      zh: { translation: zhTranslation },
+      it: { translation: itTranslation },
     },
     fallbackLng: 'en',
-    supportedLngs: ['en', 'es', 'fr', 'de', 'ja'],
+    supportedLngs: ['en', 'es', 'fr', 'de', 'ja', 'pt', 'nl', 'nb', 'zh', 'it'],
     detection: {
       order: ['localStorage', 'navigator'],
       caches: ['localStorage'],
@@ -42,8 +52,8 @@ export default i18n;
 // rather than `typeof enTranslation` to avoid a TypeScript compiler crash
 // ("Debug Failure. No error for last overload signature") that occurs when the
 // key union grows large enough (140+ keys) to overflow TS overload resolution.
-// Translation completeness is enforced via Crowdin rather than compile-time key
-// checking.
+// Translation completeness is enforced by the translation script rather than
+// compile-time key checking.
 declare module 'i18next' {
   interface CustomTypeOptions {
     defaultNS: 'translation';
