@@ -1,5 +1,5 @@
-import React, { useState, useRef } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import React, { useState, useRef } from 'react'
+import { useQuery } from '@tanstack/react-query'
 import {
   Container,
   Typography,
@@ -26,13 +26,13 @@ import {
   MenuItem,
   Menu,
   SelectChangeEvent,
-} from '@mui/material';
-import DownloadIcon from '@mui/icons-material/Download';
-import HistoryIcon from '@mui/icons-material/History';
-import EmptyState from '../../components/EmptyState';
-import api from '../../services/api';
-import { AuditLog } from '../../types';
-import { queryKeys } from '../../services/queryKeys';
+} from '@mui/material'
+import DownloadIcon from '@mui/icons-material/Download'
+import HistoryIcon from '@mui/icons-material/History'
+import EmptyState from '../../components/EmptyState'
+import api from '../../services/api'
+import { AuditLog } from '../../types'
+import { queryKeys } from '../../services/queryKeys'
 
 const RESOURCE_TYPES = [
   { value: '', label: 'All Resource Types' },
@@ -44,33 +44,33 @@ const RESOURCE_TYPES = [
   { value: 'mirror', label: 'Mirror' },
   { value: 'api_key', label: 'API Key' },
   { value: 'organization', label: 'Organization' },
-];
+]
 
 const AuditLogPage: React.FC = () => {
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null)
 
   // Pagination (MUI TablePagination uses 0-based page)
-  const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(25);
+  const [page, setPage] = useState(0)
+  const [rowsPerPage, setRowsPerPage] = useState(25)
 
   // Filters
-  const [resourceType, setResourceType] = useState('');
-  const [actionFilter, setActionFilter] = useState('');
-  const [userEmailFilter, setUserEmailFilter] = useState('');
-  const [startDate, setStartDate] = useState('');
-  const [endDate, setEndDate] = useState('');
+  const [resourceType, setResourceType] = useState('')
+  const [actionFilter, setActionFilter] = useState('')
+  const [userEmailFilter, setUserEmailFilter] = useState('')
+  const [startDate, setStartDate] = useState('')
+  const [endDate, setEndDate] = useState('')
 
   // Debounced values for text inputs
-  const [debouncedAction, setDebouncedAction] = useState('');
-  const [debouncedUserEmail, setDebouncedUserEmail] = useState('');
-  const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [debouncedAction, setDebouncedAction] = useState('')
+  const [debouncedUserEmail, setDebouncedUserEmail] = useState('')
+  const debounceTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   // Detail dialog
-  const [selectedLog, setSelectedLog] = useState<AuditLog | null>(null);
-  const [detailOpen, setDetailOpen] = useState(false);
+  const [selectedLog, setSelectedLog] = useState<AuditLog | null>(null)
+  const [detailOpen, setDetailOpen] = useState(false)
 
   // Export menu
-  const [exportAnchor, setExportAnchor] = useState<null | HTMLElement>(null);
+  const [exportAnchor, setExportAnchor] = useState<null | HTMLElement>(null)
 
   const queryParams = {
     page: page + 1,
@@ -80,7 +80,7 @@ const AuditLogPage: React.FC = () => {
     ...(debouncedUserEmail ? { user_email: debouncedUserEmail } : {}),
     ...(startDate ? { start_date: new Date(startDate).toISOString() } : {}),
     ...(endDate ? { end_date: new Date(endDate).toISOString() } : {}),
-  };
+  }
 
   const {
     data,
@@ -89,67 +89,67 @@ const AuditLogPage: React.FC = () => {
   } = useQuery({
     queryKey: queryKeys.auditLogs.list(queryParams),
     queryFn: () => api.listAuditLogs(queryParams),
-  });
+  })
 
-  const logs = data?.logs ?? [];
-  const total = data?.pagination?.total ?? 0;
+  const logs = data?.logs ?? []
+  const total = data?.pagination?.total ?? 0
 
   if (queryError && !error) {
-    setError(queryError instanceof Error ? queryError.message : 'Failed to load audit logs');
+    setError(queryError instanceof Error ? queryError.message : 'Failed to load audit logs')
   }
 
   // Debounce text filter changes
   const handleActionChange = (value: string) => {
-    setActionFilter(value);
-    if (debounceTimer.current) clearTimeout(debounceTimer.current);
+    setActionFilter(value)
+    if (debounceTimer.current) clearTimeout(debounceTimer.current)
     debounceTimer.current = setTimeout(() => {
-      setDebouncedAction(value);
-      setPage(0);
-    }, 400);
-  };
+      setDebouncedAction(value)
+      setPage(0)
+    }, 400)
+  }
 
   const handleUserEmailChange = (value: string) => {
-    setUserEmailFilter(value);
-    if (debounceTimer.current) clearTimeout(debounceTimer.current);
+    setUserEmailFilter(value)
+    if (debounceTimer.current) clearTimeout(debounceTimer.current)
     debounceTimer.current = setTimeout(() => {
-      setDebouncedUserEmail(value);
-      setPage(0);
-    }, 400);
-  };
+      setDebouncedUserEmail(value)
+      setPage(0)
+    }, 400)
+  }
 
   const handleResourceTypeChange = (e: SelectChangeEvent) => {
-    setResourceType(e.target.value);
-    setPage(0);
-  };
+    setResourceType(e.target.value)
+    setPage(0)
+  }
 
   const handleStartDateChange = (value: string) => {
-    setStartDate(value);
-    setPage(0);
-  };
+    setStartDate(value)
+    setPage(0)
+  }
 
   const handleEndDateChange = (value: string) => {
-    setEndDate(value);
-    setPage(0);
-  };
+    setEndDate(value)
+    setPage(0)
+  }
 
   const handleResetFilters = () => {
-    setResourceType('');
-    setActionFilter('');
-    setDebouncedAction('');
-    setUserEmailFilter('');
-    setDebouncedUserEmail('');
-    setStartDate('');
-    setEndDate('');
-    setPage(0);
-  };
+    setResourceType('')
+    setActionFilter('')
+    setDebouncedAction('')
+    setUserEmailFilter('')
+    setDebouncedUserEmail('')
+    setStartDate('')
+    setEndDate('')
+    setPage(0)
+  }
 
   const handleRowClick = (log: AuditLog) => {
-    setSelectedLog(log);
-    setDetailOpen(true);
-  };
+    setSelectedLog(log)
+    setDetailOpen(true)
+  }
 
   const handleExportCSV = async () => {
-    setExportAnchor(null);
+    setExportAnchor(null)
     try {
       const result = await api.listAuditLogs({
         per_page: 1000,
@@ -158,15 +158,15 @@ const AuditLogPage: React.FC = () => {
         ...(debouncedUserEmail ? { user_email: debouncedUserEmail } : {}),
         ...(startDate ? { start_date: new Date(startDate).toISOString() } : {}),
         ...(endDate ? { end_date: new Date(endDate).toISOString() } : {}),
-      });
-      api.exportAuditLogsCSV(result.logs ?? []);
+      })
+      api.exportAuditLogsCSV(result.logs ?? [])
     } catch {
-      setError('Failed to export audit logs');
+      setError('Failed to export audit logs')
     }
-  };
+  }
 
   const handleExportJSON = async () => {
-    setExportAnchor(null);
+    setExportAnchor(null)
     try {
       const result = await api.listAuditLogs({
         per_page: 1000,
@@ -175,25 +175,27 @@ const AuditLogPage: React.FC = () => {
         ...(debouncedUserEmail ? { user_email: debouncedUserEmail } : {}),
         ...(startDate ? { start_date: new Date(startDate).toISOString() } : {}),
         ...(endDate ? { end_date: new Date(endDate).toISOString() } : {}),
-      });
-      api.exportAuditLogsJSON(result.logs ?? []);
+      })
+      api.exportAuditLogsJSON(result.logs ?? [])
     } catch {
-      setError('Failed to export audit logs');
+      setError('Failed to export audit logs')
     }
-  };
+  }
 
   const formatTimestamp = (ts: string) => {
     try {
-      return new Date(ts).toLocaleString();
+      return new Date(ts).toLocaleString()
     } catch {
-      return ts;
+      return ts
     }
-  };
+  }
 
   return (
     <Container maxWidth="lg" sx={{ py: 4 }} aria-busy={loading} aria-live="polite">
       {/* Header */}
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 3 }}>
+      <Box
+        sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 3 }}
+      >
         <Box>
           <Typography variant="h4" component="h1" gutterBottom>
             Audit Logs
@@ -329,7 +331,14 @@ const AuditLogPage: React.FC = () => {
                         <TableCell sx={{ whiteSpace: 'nowrap' }}>
                           {formatTimestamp(log.created_at)}
                         </TableCell>
-                        <TableCell sx={{ maxWidth: 300, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        <TableCell
+                          sx={{
+                            maxWidth: 300,
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                            whiteSpace: 'nowrap',
+                          }}
+                        >
                           {log.action}
                         </TableCell>
                         <TableCell>{log.resource_type ?? '—'}</TableCell>
@@ -350,8 +359,8 @@ const AuditLogPage: React.FC = () => {
               onPageChange={(_e, newPage) => setPage(newPage)}
               rowsPerPage={rowsPerPage}
               onRowsPerPageChange={(e) => {
-                setRowsPerPage(parseInt(e.target.value, 10));
-                setPage(0);
+                setRowsPerPage(parseInt(e.target.value, 10))
+                setPage(0)
               }}
               rowsPerPageOptions={[10, 25, 50, 100]}
             />
@@ -367,43 +376,67 @@ const AuditLogPage: React.FC = () => {
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
               <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2 }}>
                 <Box>
-                  <Typography variant="caption" color="text.secondary">ID</Typography>
-                  <Typography variant="body2" sx={{ fontFamily: 'monospace', wordBreak: 'break-all' }}>
+                  <Typography variant="caption" color="text.secondary">
+                    ID
+                  </Typography>
+                  <Typography
+                    variant="body2"
+                    sx={{ fontFamily: 'monospace', wordBreak: 'break-all' }}
+                  >
                     {selectedLog.id}
                   </Typography>
                 </Box>
                 <Box>
-                  <Typography variant="caption" color="text.secondary">Timestamp</Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    Timestamp
+                  </Typography>
                   <Typography variant="body2">{formatTimestamp(selectedLog.created_at)}</Typography>
                 </Box>
                 <Box>
-                  <Typography variant="caption" color="text.secondary">Action</Typography>
-                  <Typography variant="body2" sx={{ fontFamily: 'monospace' }}>{selectedLog.action}</Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    Action
+                  </Typography>
+                  <Typography variant="body2" sx={{ fontFamily: 'monospace' }}>
+                    {selectedLog.action}
+                  </Typography>
                 </Box>
                 <Box>
-                  <Typography variant="caption" color="text.secondary">Resource Type</Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    Resource Type
+                  </Typography>
                   <Typography variant="body2">{selectedLog.resource_type ?? '—'}</Typography>
                 </Box>
                 <Box>
-                  <Typography variant="caption" color="text.secondary">Resource ID</Typography>
-                  <Typography variant="body2" sx={{ fontFamily: 'monospace', wordBreak: 'break-all' }}>
+                  <Typography variant="caption" color="text.secondary">
+                    Resource ID
+                  </Typography>
+                  <Typography
+                    variant="body2"
+                    sx={{ fontFamily: 'monospace', wordBreak: 'break-all' }}
+                  >
                     {selectedLog.resource_id ?? '—'}
                   </Typography>
                 </Box>
                 <Box>
-                  <Typography variant="caption" color="text.secondary">IP Address</Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    IP Address
+                  </Typography>
                   <Typography variant="body2">{selectedLog.ip_address ?? '—'}</Typography>
                 </Box>
                 <Box>
-                  <Typography variant="caption" color="text.secondary">User</Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    User
+                  </Typography>
                   <Typography variant="body2">
                     {selectedLog.user_email
                       ? `${selectedLog.user_email}${selectedLog.user_name ? ` (${selectedLog.user_name})` : ''}`
-                      : selectedLog.user_id ?? '—'}
+                      : (selectedLog.user_id ?? '—')}
                   </Typography>
                 </Box>
                 <Box>
-                  <Typography variant="caption" color="text.secondary">Organization ID</Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    Organization ID
+                  </Typography>
                   <Typography variant="body2" sx={{ wordBreak: 'break-all' }}>
                     {selectedLog.organization_id ?? '—'}
                   </Typography>
@@ -411,9 +444,18 @@ const AuditLogPage: React.FC = () => {
               </Box>
               {selectedLog.metadata && Object.keys(selectedLog.metadata).length > 0 && (
                 <Box>
-                  <Typography variant="caption" color="text.secondary">Metadata</Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    Metadata
+                  </Typography>
                   <Paper variant="outlined" sx={{ mt: 0.5, p: 1.5, bgcolor: 'grey.50' }}>
-                    <pre style={{ margin: 0, fontSize: '0.8rem', whiteSpace: 'pre-wrap', wordBreak: 'break-all' }}>
+                    <pre
+                      style={{
+                        margin: 0,
+                        fontSize: '0.8rem',
+                        whiteSpace: 'pre-wrap',
+                        wordBreak: 'break-all',
+                      }}
+                    >
                       {JSON.stringify(selectedLog.metadata, null, 2)}
                     </pre>
                   </Paper>
@@ -427,7 +469,7 @@ const AuditLogPage: React.FC = () => {
         </DialogActions>
       </Dialog>
     </Container>
-  );
-};
+  )
+}
 
-export default AuditLogPage;
+export default AuditLogPage

@@ -34,21 +34,23 @@ describe('ThemeContext', () => {
   })
 
   it('throws when useThemeMode is used outside ThemeProvider', () => {
-    vi.spyOn(console, 'error').mockImplementation(() => { })
+    vi.spyOn(console, 'error').mockImplementation(() => {})
 
     function BadConsumer() {
       useThemeMode()
       return null
     }
 
-    expect(() => render(<BadConsumer />)).toThrow('useThemeMode must be used within a ThemeProvider')
+    expect(() => render(<BadConsumer />)).toThrow(
+      'useThemeMode must be used within a ThemeProvider',
+    )
   })
 
   it('defaults to light mode when no preference is stored', () => {
     render(
       <ThemeProvider>
         <ThemeConsumer />
-      </ThemeProvider>
+      </ThemeProvider>,
     )
 
     expect(screen.getByTestId('mode').textContent).toBe('light')
@@ -72,7 +74,7 @@ describe('ThemeContext', () => {
     render(
       <ThemeProvider>
         <ThemeConsumer />
-      </ThemeProvider>
+      </ThemeProvider>,
     )
 
     expect(screen.getByTestId('mode').textContent).toBe('dark')
@@ -84,7 +86,7 @@ describe('ThemeContext', () => {
     render(
       <ThemeProvider>
         <ThemeConsumer />
-      </ThemeProvider>
+      </ThemeProvider>,
     )
 
     expect(screen.getByTestId('mode').textContent).toBe('dark')
@@ -94,7 +96,7 @@ describe('ThemeContext', () => {
     render(
       <ThemeProvider>
         <ThemeConsumer />
-      </ThemeProvider>
+      </ThemeProvider>,
     )
 
     expect(screen.getByTestId('mode').textContent).toBe('light')
@@ -112,7 +114,7 @@ describe('ThemeContext', () => {
     render(
       <ThemeProvider>
         <ThemeConsumer />
-      </ThemeProvider>
+      </ThemeProvider>,
     )
 
     expect(screen.getByTestId('mode').textContent).toBe('dark')
@@ -128,7 +130,7 @@ describe('ThemeContext', () => {
     render(
       <ThemeProvider>
         <ThemeConsumer />
-      </ThemeProvider>
+      </ThemeProvider>,
     )
 
     act(() => {

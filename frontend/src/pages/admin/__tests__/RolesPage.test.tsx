@@ -106,7 +106,7 @@ describe('RolesPage', () => {
     renderPage()
     await waitFor(() => {
       expect(screen.getByText('2 scopes')).toBeInTheDocument() // viewer
-      expect(screen.getByText('1 scope')).toBeInTheDocument()  // admin
+      expect(screen.getByText('1 scope')).toBeInTheDocument() // admin
       expect(screen.getByText('4 scopes')).toBeInTheDocument() // publisher
     })
   })

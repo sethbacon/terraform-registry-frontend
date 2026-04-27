@@ -55,7 +55,7 @@ class ApiClient {
         }
 
         // Stamp the request start time for breadcrumb duration tracking
-        ; (config as InternalAxiosRequestConfig & { _startTime?: number })._startTime = Date.now()
+        ;(config as InternalAxiosRequestConfig & { _startTime?: number })._startTime = Date.now()
         return config
       },
       (error) => Promise.reject(error),
@@ -253,11 +253,11 @@ class ApiClient {
       },
       onUploadProgress: options?.onUploadProgress
         ? (event) => {
-          if (event.total && event.total > 0) {
-            const percent = Math.round((event.loaded / event.total) * 100)
-            options.onUploadProgress?.(percent)
+            if (event.total && event.total > 0) {
+              const percent = Math.round((event.loaded / event.total) * 100)
+              options.onUploadProgress?.(percent)
+            }
           }
-        }
         : undefined,
     })
     return response.data
@@ -280,12 +280,7 @@ class ApiClient {
     return response.data
   }
 
-  async reanalyzeModuleVersion(
-    namespace: string,
-    name: string,
-    system: string,
-    version: string,
-  ) {
+  async reanalyzeModuleVersion(namespace: string, name: string, system: string, version: string) {
     const response = await this.client.post(
       `/api/v1/modules/${namespace}/${name}/${system}/versions/${version}/reanalyze`,
     )
@@ -376,11 +371,11 @@ class ApiClient {
       },
       onUploadProgress: options?.onUploadProgress
         ? (event) => {
-          if (event.total && event.total > 0) {
-            const percent = Math.round((event.loaded / event.total) * 100)
-            options.onUploadProgress?.(percent)
+            if (event.total && event.total > 0) {
+              const percent = Math.round((event.loaded / event.total) * 100)
+              options.onUploadProgress?.(percent)
+            }
           }
-        }
         : undefined,
     })
     return response.data
@@ -1662,7 +1657,9 @@ class ApiClient {
     }
   }
 
-  async updateAdminUITheme(config: import('../types').UIThemeConfig): Promise<import('../types').UIThemeConfig> {
+  async updateAdminUITheme(
+    config: import('../types').UIThemeConfig,
+  ): Promise<import('../types').UIThemeConfig> {
     const response = await this.client.put('/api/v1/admin/ui-theme', config)
     return response.data as import('../types').UIThemeConfig
   }

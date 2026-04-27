@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import React, { useState, useEffect } from 'react'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import {
   Autocomplete,
   Container,
@@ -29,45 +29,51 @@ import {
   Chip,
   Divider,
   SelectChangeEvent,
-} from '@mui/material';
-import AddIcon from '@mui/icons-material/Add';
-import EditIcon from '@mui/icons-material/Edit';
-import DeleteIcon from '@mui/icons-material/Delete';
-import ManageAccountsIcon from '@mui/icons-material/ManageAccounts';
-import SaveIcon from '@mui/icons-material/Save';
-import api from '../../services/api';
-import type { OIDCConfigResponse, OIDCGroupMapping, OIDCGroupMappingInput, Organization, IdentityGroupMappings } from '../../types';
-import { queryKeys } from '../../services/queryKeys';
+} from '@mui/material'
+import AddIcon from '@mui/icons-material/Add'
+import EditIcon from '@mui/icons-material/Edit'
+import DeleteIcon from '@mui/icons-material/Delete'
+import ManageAccountsIcon from '@mui/icons-material/ManageAccounts'
+import SaveIcon from '@mui/icons-material/Save'
+import api from '../../services/api'
+import type {
+  OIDCConfigResponse,
+  OIDCGroupMapping,
+  OIDCGroupMappingInput,
+  Organization,
+  IdentityGroupMappings,
+} from '../../types'
+import { queryKeys } from '../../services/queryKeys'
 
 // Available roles that can be assigned to mapped groups — must match system role template names
-const AVAILABLE_ROLES = ['viewer', 'publisher', 'devops', 'user_manager', 'auditor', 'admin'];
+const AVAILABLE_ROLES = ['viewer', 'publisher', 'devops', 'user_manager', 'auditor', 'admin']
 
-const emptyMapping: OIDCGroupMapping = { group: '', organization: '', role: 'viewer' };
+const emptyMapping: OIDCGroupMapping = { group: '', organization: '', role: 'viewer' }
 
 const OIDCSettingsPage: React.FC = () => {
-  const queryClient = useQueryClient();
-  const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<string | null>(null);
+  const queryClient = useQueryClient()
+  const [error, setError] = useState<string | null>(null)
+  const [success, setSuccess] = useState<string | null>(null)
 
   // Group claim name + default role (top-level form fields)
-  const [groupClaimName, setGroupClaimName] = useState('');
-  const [defaultRole, setDefaultRole] = useState('');
+  const [groupClaimName, setGroupClaimName] = useState('')
+  const [defaultRole, setDefaultRole] = useState('')
 
   // Group mapping rows
-  const [mappings, setMappings] = useState<OIDCGroupMapping[]>([]);
+  const [mappings, setMappings] = useState<OIDCGroupMapping[]>([])
 
   // Dialog state for add/edit mapping
-  const [dialogOpen, setDialogOpen] = useState(false);
-  const [editingIndex, setEditingIndex] = useState<number | null>(null);
-  const [mappingForm, setMappingForm] = useState<OIDCGroupMapping>(emptyMapping);
+  const [dialogOpen, setDialogOpen] = useState(false)
+  const [editingIndex, setEditingIndex] = useState<number | null>(null)
+  const [mappingForm, setMappingForm] = useState<OIDCGroupMapping>(emptyMapping)
 
   // Delete confirm dialog
-  const [deleteIndex, setDeleteIndex] = useState<number | null>(null);
+  const [deleteIndex, setDeleteIndex] = useState<number | null>(null)
 
   // Org autocomplete state
-  const [orgOptions, setOrgOptions] = useState<string[]>([]);
-  const [orgLoading, setOrgLoading] = useState(false);
-  const [orgInputValue, setOrgInputValue] = useState('');
+  const [orgOptions, setOrgOptions] = useState<string[]>([])
+  const [orgLoading, setOrgLoading] = useState(false)
+  const [orgInputValue, setOrgInputValue] = useState('')
 
   const {
     data: config = null,
@@ -76,101 +82,101 @@ const OIDCSettingsPage: React.FC = () => {
   } = useQuery<OIDCConfigResponse>({
     queryKey: queryKeys.oidcConfig.get(),
     queryFn: () => api.getAdminOIDCConfig(),
-  });
+  })
 
   // Fetch SAML + LDAP group mappings (read-only)
   const { data: identityMappings } = useQuery<IdentityGroupMappings>({
     queryKey: ['identity', 'group-mappings'],
     queryFn: () => api.getIdentityGroupMappings(),
-  });
+  })
 
   // Sync local form state when config loads
   useEffect(() => {
     if (config) {
-      setGroupClaimName(config.group_claim_name ?? '');
-      setDefaultRole(config.default_role ?? '');
-      setMappings(config.group_mappings ?? []);
+      setGroupClaimName(config.group_claim_name ?? '')
+      setDefaultRole(config.default_role ?? '')
+      setMappings(config.group_mappings ?? [])
     }
-  }, [config]);
+  }, [config])
 
   if (queryError && !error) {
-    const e = queryError as { response?: { data?: { error?: string } } };
-    setError(e.response?.data?.error ?? 'Failed to load OIDC configuration');
+    const e = queryError as { response?: { data?: { error?: string } } }
+    setError(e.response?.data?.error ?? 'Failed to load OIDC configuration')
   }
 
   const saveMutation = useMutation({
     mutationFn: (input: OIDCGroupMappingInput) => api.updateOIDCGroupMapping(input),
     onSuccess: (updated) => {
-      setGroupClaimName(updated.group_claim_name ?? '');
-      setDefaultRole(updated.default_role ?? '');
-      setMappings(updated.group_mappings ?? []);
-      setSuccess('Group mapping settings saved successfully.');
-      setError(null);
-      queryClient.invalidateQueries({ queryKey: queryKeys.oidcConfig._def });
+      setGroupClaimName(updated.group_claim_name ?? '')
+      setDefaultRole(updated.default_role ?? '')
+      setMappings(updated.group_mappings ?? [])
+      setSuccess('Group mapping settings saved successfully.')
+      setError(null)
+      queryClient.invalidateQueries({ queryKey: queryKeys.oidcConfig._def })
     },
     onError: (err: unknown) => {
-      const e = err as { response?: { data?: { error?: string } } };
-      setError(e.response?.data?.error ?? 'Failed to save group mapping settings');
+      const e = err as { response?: { data?: { error?: string } } }
+      setError(e.response?.data?.error ?? 'Failed to save group mapping settings')
     },
-  });
+  })
 
-  const saving = saveMutation.isPending;
+  const saving = saveMutation.isPending
 
   const handleSave = () => {
-    setError(null);
-    setSuccess(null);
+    setError(null)
+    setSuccess(null)
     saveMutation.mutate({
       group_claim_name: groupClaimName,
       group_mappings: mappings,
       default_role: defaultRole,
-    });
-  };
+    })
+  }
 
   // Dialog helpers
   const loadOrgs = async () => {
-    setOrgLoading(true);
+    setOrgLoading(true)
     try {
-      const orgs: Organization[] = await api.listOrganizations(1, 200);
-      setOrgOptions(orgs.map(o => o.name));
+      const orgs: Organization[] = await api.listOrganizations(1, 200)
+      setOrgOptions(orgs.map((o) => o.name))
     } catch {
-      setOrgOptions([]);
+      setOrgOptions([])
     } finally {
-      setOrgLoading(false);
+      setOrgLoading(false)
     }
-  };
+  }
 
   const openAddDialog = () => {
-    setEditingIndex(null);
-    setMappingForm(emptyMapping);
-    setOrgInputValue('');
-    setDialogOpen(true);
-    loadOrgs();
-  };
+    setEditingIndex(null)
+    setMappingForm(emptyMapping)
+    setOrgInputValue('')
+    setDialogOpen(true)
+    loadOrgs()
+  }
 
   const openEditDialog = (index: number) => {
-    setEditingIndex(index);
-    setMappingForm({ ...mappings[index] });
-    setOrgInputValue(mappings[index].organization);
-    setDialogOpen(true);
-    loadOrgs();
-  };
+    setEditingIndex(index)
+    setMappingForm({ ...mappings[index] })
+    setOrgInputValue(mappings[index].organization)
+    setDialogOpen(true)
+    loadOrgs()
+  }
 
   const handleDialogSave = () => {
-    if (!mappingForm.group || !mappingForm.organization || !mappingForm.role) return;
+    if (!mappingForm.group || !mappingForm.organization || !mappingForm.role) return
     if (editingIndex !== null) {
-      setMappings(prev => prev.map((m, i) => (i === editingIndex ? mappingForm : m)));
+      setMappings((prev) => prev.map((m, i) => (i === editingIndex ? mappingForm : m)))
     } else {
-      setMappings(prev => [...prev, mappingForm]);
+      setMappings((prev) => [...prev, mappingForm])
     }
-    setDialogOpen(false);
-  };
+    setDialogOpen(false)
+  }
 
   const handleDeleteConfirm = () => {
     if (deleteIndex !== null) {
-      setMappings(prev => prev.filter((_, i) => i !== deleteIndex));
+      setMappings((prev) => prev.filter((_, i) => i !== deleteIndex))
     }
-    setDeleteIndex(null);
-  };
+    setDeleteIndex(null)
+  }
 
   return (
     <Container maxWidth="lg" aria-busy={loading} aria-live="polite">
@@ -187,36 +193,54 @@ const OIDCSettingsPage: React.FC = () => {
               <Typography variant="h4">OIDC Groups</Typography>
             </Stack>
             <Typography variant="body1" color="text.secondary">
-              Configure group claim mapping from your identity provider to registry organizations and roles.
-              Changes take effect on the next login without requiring a server restart.
+              Configure group claim mapping from your identity provider to registry organizations
+              and roles. Changes take effect on the next login without requiring a server restart.
             </Typography>
           </Box>
 
-          {error && <Alert severity="error" sx={{ mb: 3 }} onClose={() => setError(null)}>{error}</Alert>}
-          {success && <Alert severity="success" sx={{ mb: 3 }} onClose={() => setSuccess(null)}>{success}</Alert>}
+          {error && (
+            <Alert severity="error" sx={{ mb: 3 }} onClose={() => setError(null)}>
+              {error}
+            </Alert>
+          )}
+          {success && (
+            <Alert severity="success" sx={{ mb: 3 }} onClose={() => setSuccess(null)}>
+              {success}
+            </Alert>
+          )}
 
           {/* Active config summary */}
           {config && (
             <Paper sx={{ p: 3, mb: 3 }}>
-              <Typography variant="h6" gutterBottom>Active OIDC Provider</Typography>
+              <Typography variant="h6" gutterBottom>
+                Active OIDC Provider
+              </Typography>
               <Stack direction="row" spacing={2} flexWrap="wrap" useFlexGap>
                 <Box>
-                  <Typography variant="caption" color="text.secondary">Provider</Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    Provider
+                  </Typography>
                   <Typography variant="body2">{config.provider_type}</Typography>
                 </Box>
                 <Divider orientation="vertical" flexItem />
                 <Box>
-                  <Typography variant="caption" color="text.secondary">Issuer</Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    Issuer
+                  </Typography>
                   <Typography variant="body2">{config.issuer_url}</Typography>
                 </Box>
                 <Divider orientation="vertical" flexItem />
                 <Box>
-                  <Typography variant="caption" color="text.secondary">Client ID</Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    Client ID
+                  </Typography>
                   <Typography variant="body2">{config.client_id}</Typography>
                 </Box>
                 <Divider orientation="vertical" flexItem />
                 <Box>
-                  <Typography variant="caption" color="text.secondary">Status</Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    Status
+                  </Typography>
                   <Box>
                     <Chip
                       label={config.is_active ? 'Active' : 'Inactive'}
@@ -231,10 +255,12 @@ const OIDCSettingsPage: React.FC = () => {
 
           {/* Group mapping settings */}
           <Paper sx={{ p: 3 }}>
-            <Typography variant="h6" gutterBottom>Group Claim Mapping</Typography>
+            <Typography variant="h6" gutterBottom>
+              Group Claim Mapping
+            </Typography>
             <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-              Map IdP group claims to registry organizations and roles. The group claim name must match
-              the claim key in your OIDC ID token (e.g. <code>groups</code>).
+              Map IdP group claims to registry organizations and roles. The group claim name must
+              match the claim key in your OIDC ID token (e.g. <code>groups</code>).
             </Typography>
 
             <Stack spacing={3}>
@@ -243,7 +269,7 @@ const OIDCSettingsPage: React.FC = () => {
                 <TextField
                   label="Group Claim Name"
                   value={groupClaimName}
-                  onChange={e => setGroupClaimName(e.target.value)}
+                  onChange={(e) => setGroupClaimName(e.target.value)}
                   placeholder="groups"
                   helperText="The ID token claim that contains the user's group list"
                   sx={{ flex: 1 }}
@@ -255,9 +281,13 @@ const OIDCSettingsPage: React.FC = () => {
                     label="Default Role"
                     onChange={(e: SelectChangeEvent) => setDefaultRole(e.target.value)}
                   >
-                    <MenuItem value=""><em>None</em></MenuItem>
-                    {AVAILABLE_ROLES.map(r => (
-                      <MenuItem key={r} value={r}>{r}</MenuItem>
+                    <MenuItem value="">
+                      <em>None</em>
+                    </MenuItem>
+                    {AVAILABLE_ROLES.map((r) => (
+                      <MenuItem key={r} value={r}>
+                        {r}
+                      </MenuItem>
                     ))}
                   </Select>
                 </FormControl>
@@ -265,7 +295,12 @@ const OIDCSettingsPage: React.FC = () => {
 
               {/* Mappings table */}
               <Box>
-                <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 1 }}>
+                <Stack
+                  direction="row"
+                  justifyContent="space-between"
+                  alignItems="center"
+                  sx={{ mb: 1 }}
+                >
                   <Typography variant="subtitle1">Group Mappings</Typography>
                   <Button
                     startIcon={<AddIcon />}
@@ -300,13 +335,27 @@ const OIDCSettingsPage: React.FC = () => {
                             </TableCell>
                             <TableCell>{m.organization}</TableCell>
                             <TableCell>
-                              <Chip label={m.role} size="small" color="primary" variant="outlined" />
+                              <Chip
+                                label={m.role}
+                                size="small"
+                                color="primary"
+                                variant="outlined"
+                              />
                             </TableCell>
                             <TableCell align="right">
-                              <IconButton size="small" aria-label="Edit claim mapping" onClick={() => openEditDialog(i)}>
+                              <IconButton
+                                size="small"
+                                aria-label="Edit claim mapping"
+                                onClick={() => openEditDialog(i)}
+                              >
                                 <EditIcon fontSize="small" />
                               </IconButton>
-                              <IconButton size="small" aria-label="Delete claim mapping" color="error" onClick={() => setDeleteIndex(i)}>
+                              <IconButton
+                                size="small"
+                                aria-label="Delete claim mapping"
+                                color="error"
+                                onClick={() => setDeleteIndex(i)}
+                              >
                                 <DeleteIcon fontSize="small" />
                               </IconButton>
                             </TableCell>
@@ -334,13 +383,15 @@ const OIDCSettingsPage: React.FC = () => {
 
           {/* Add / Edit mapping dialog */}
           <Dialog open={dialogOpen} onClose={() => setDialogOpen(false)} maxWidth="sm" fullWidth>
-            <DialogTitle>{editingIndex !== null ? 'Edit Group Mapping' : 'Add Group Mapping'}</DialogTitle>
+            <DialogTitle>
+              {editingIndex !== null ? 'Edit Group Mapping' : 'Add Group Mapping'}
+            </DialogTitle>
             <DialogContent sx={{ pt: 2 }}>
               <Stack spacing={2} sx={{ mt: 1 }}>
                 <TextField
                   label="IdP Group"
                   value={mappingForm.group}
-                  onChange={e => setMappingForm(f => ({ ...f, group: e.target.value }))}
+                  onChange={(e) => setMappingForm((f) => ({ ...f, group: e.target.value }))}
                   placeholder="e.g. platform-admins"
                   helperText="The exact group name as it appears in the ID token claim"
                   fullWidth
@@ -353,15 +404,15 @@ const OIDCSettingsPage: React.FC = () => {
                   value={mappingForm.organization}
                   inputValue={orgInputValue}
                   onInputChange={(_, v) => {
-                    setOrgInputValue(v);
-                    setMappingForm(f => ({ ...f, organization: v }));
+                    setOrgInputValue(v)
+                    setMappingForm((f) => ({ ...f, organization: v }))
                   }}
                   onChange={(_, v) => {
-                    const val = (v as string) ?? '';
-                    setOrgInputValue(val);
-                    setMappingForm(f => ({ ...f, organization: val }));
+                    const val = (v as string) ?? ''
+                    setOrgInputValue(val)
+                    setMappingForm((f) => ({ ...f, organization: val }))
                   }}
-                  renderInput={params => (
+                  renderInput={(params) => (
                     <TextField
                       {...params}
                       label="Organization"
@@ -386,11 +437,13 @@ const OIDCSettingsPage: React.FC = () => {
                     value={mappingForm.role}
                     label="Role"
                     onChange={(e: SelectChangeEvent) =>
-                      setMappingForm(f => ({ ...f, role: e.target.value }))
+                      setMappingForm((f) => ({ ...f, role: e.target.value }))
                     }
                   >
-                    {AVAILABLE_ROLES.map(r => (
-                      <MenuItem key={r} value={r}>{r}</MenuItem>
+                    {AVAILABLE_ROLES.map((r) => (
+                      <MenuItem key={r} value={r}>
+                        {r}
+                      </MenuItem>
                     ))}
                   </Select>
                 </FormControl>
@@ -414,9 +467,9 @@ const OIDCSettingsPage: React.FC = () => {
             <DialogContent>
               <Typography>
                 Remove the mapping for group{' '}
-                <strong>{deleteIndex !== null ? mappings[deleteIndex]?.group : ''}</strong>?
-                This will not affect existing memberships — it only stops new logins from
-                automatically setting this membership.
+                <strong>{deleteIndex !== null ? mappings[deleteIndex]?.group : ''}</strong>? This
+                will not affect existing memberships — it only stops new logins from automatically
+                setting this membership.
               </Typography>
             </DialogContent>
             <DialogActions>
@@ -439,8 +492,13 @@ const OIDCSettingsPage: React.FC = () => {
             SAML group mappings are configured in the server configuration file and are read-only.
           </Alert>
           <Stack direction="row" spacing={2} sx={{ mb: 2 }}>
-            <Chip label={`Group attribute: ${identityMappings.saml.group_attribute_name || '(not set)'}`} />
-            <Chip label={`Default role: ${identityMappings.saml.default_role || '(none)'}`} color="secondary" />
+            <Chip
+              label={`Group attribute: ${identityMappings.saml.group_attribute_name || '(not set)'}`}
+            />
+            <Chip
+              label={`Default role: ${identityMappings.saml.default_role || '(none)'}`}
+              color="secondary"
+            />
           </Stack>
           {identityMappings.saml.group_mappings.length > 0 ? (
             <TableContainer>
@@ -481,7 +539,10 @@ const OIDCSettingsPage: React.FC = () => {
             LDAP group mappings are configured in the server configuration file and are read-only.
           </Alert>
           <Stack direction="row" spacing={2} sx={{ mb: 2 }}>
-            <Chip label={`Default role: ${identityMappings.ldap.default_role || '(none)'}`} color="secondary" />
+            <Chip
+              label={`Default role: ${identityMappings.ldap.default_role || '(none)'}`}
+              color="secondary"
+            />
           </Stack>
           {identityMappings.ldap.group_mappings.length > 0 ? (
             <TableContainer>
@@ -512,7 +573,7 @@ const OIDCSettingsPage: React.FC = () => {
         </Paper>
       )}
     </Container>
-  );
-};
+  )
+}
 
-export default OIDCSettingsPage;
+export default OIDCSettingsPage

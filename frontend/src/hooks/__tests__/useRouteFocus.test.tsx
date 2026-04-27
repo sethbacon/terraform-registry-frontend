@@ -56,7 +56,9 @@ describe('useRouteFocus', () => {
     })
 
     // Navigate to trigger the effect
-    act(() => { navigateFn('/other') })
+    act(() => {
+      navigateFn('/other')
+    })
     vi.advanceTimersByTime(200)
 
     expect(focusSpy).toHaveBeenCalled()
@@ -71,7 +73,9 @@ describe('useRouteFocus', () => {
       wrapper: createWrapper(['/']),
     })
 
-    act(() => { navigateFn('/next') })
+    act(() => {
+      navigateFn('/next')
+    })
     vi.advanceTimersByTime(200)
 
     expect(h1.getAttribute('tabindex')).toBe('-1')
@@ -90,7 +94,9 @@ describe('useRouteFocus', () => {
       wrapper: createWrapper(['/']),
     })
 
-    act(() => { navigateFn('/page2') })
+    act(() => {
+      navigateFn('/page2')
+    })
     vi.advanceTimersByTime(200)
 
     expect(h1.getAttribute('tabindex')).toBe('0')
@@ -105,7 +111,9 @@ describe('useRouteFocus', () => {
       wrapper: createWrapper(['/']),
     })
 
-    act(() => { navigateFn('/other') })
+    act(() => {
+      navigateFn('/other')
+    })
     vi.advanceTimersByTime(200)
 
     expect(focusSpy).toHaveBeenCalled()
@@ -118,7 +126,9 @@ describe('useRouteFocus', () => {
     })
 
     // Should not throw
-    act(() => { navigateFn('/empty') })
+    act(() => {
+      navigateFn('/empty')
+    })
     vi.advanceTimersByTime(200)
   })
 
@@ -132,8 +142,12 @@ describe('useRouteFocus', () => {
       wrapper: createWrapper(['/']),
     })
 
-    act(() => { navigateFn('/new') })
-    act(() => { vi.advanceTimersByTime(200) })
+    act(() => {
+      navigateFn('/new')
+    })
+    act(() => {
+      vi.advanceTimersByTime(200)
+    })
 
     // The announcer live region should contain the announcement
     const polite = document.querySelector('[aria-live="polite"]')
@@ -150,8 +164,12 @@ describe('useRouteFocus', () => {
       wrapper: createWrapper(['/']),
     })
 
-    act(() => { navigateFn('/dash') })
-    act(() => { vi.advanceTimersByTime(200) })
+    act(() => {
+      navigateFn('/dash')
+    })
+    act(() => {
+      vi.advanceTimersByTime(200)
+    })
 
     const polite = document.querySelector('[aria-live="polite"]')
     expect(polite?.textContent).toContain('Navigated to Dashboard')

@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import React, { useState } from 'react'
+import { useNavigate, useLocation } from 'react-router-dom'
 import {
   Container,
   Typography,
@@ -19,78 +19,85 @@ import {
   CardActionArea,
   CardContent,
   LinearProgress,
-} from '@mui/material';
-import CloudUpload from '@mui/icons-material/CloudUpload';
-import CloudDownload from '@mui/icons-material/CloudDownload';
-import ArrowBack from '@mui/icons-material/ArrowBack';
-import api from '../../services/api';
-import { getErrorMessage } from '../../utils/errors';
-import FileDropZone from '../../components/FileDropZone';
+} from '@mui/material'
+import CloudUpload from '@mui/icons-material/CloudUpload'
+import CloudDownload from '@mui/icons-material/CloudDownload'
+import ArrowBack from '@mui/icons-material/ArrowBack'
+import api from '../../services/api'
+import { getErrorMessage } from '../../utils/errors'
+import FileDropZone from '../../components/FileDropZone'
 
-type ProviderMethod = 'choose' | 'upload' | 'mirror';
+type ProviderMethod = 'choose' | 'upload' | 'mirror'
 
 const ProviderUploadPage: React.FC = () => {
-  const navigate = useNavigate();
-  const location = useLocation();
+  const navigate = useNavigate()
+  const location = useLocation()
   const state = location.state as {
-    providerData?: { namespace: string; type: string };
-    method?: ProviderMethod;
-  };
-  const prefilledProvider = state?.providerData;
+    providerData?: { namespace: string; type: string }
+    method?: ProviderMethod
+  }
+  const prefilledProvider = state?.providerData
 
   const [providerMethod, setProviderMethod] = useState<ProviderMethod>(
-    state?.method ?? (prefilledProvider ? 'upload' : 'choose')
-  );
+    state?.method ?? (prefilledProvider ? 'upload' : 'choose'),
+  )
 
-  const [uploading, setUploading] = useState(false);
-  const [uploadPercent, setUploadPercent] = useState<number | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<string | null>(null);
+  const [uploading, setUploading] = useState(false)
+  const [uploadPercent, setUploadPercent] = useState<number | null>(null)
+  const [error, setError] = useState<string | null>(null)
+  const [success, setSuccess] = useState<string | null>(null)
 
   // Provider upload state
-  const [providerFile, setProviderFile] = useState<File | null>(null);
-  const [providerNamespace, setProviderNamespace] = useState(prefilledProvider?.namespace || '');
-  const [providerName, setProviderName] = useState(prefilledProvider?.type || '');
-  const [providerVersion, setProviderVersion] = useState('');
-  const [providerOS, setProviderOS] = useState('');
-  const [providerArch, setProviderArch] = useState('');
+  const [providerFile, setProviderFile] = useState<File | null>(null)
+  const [providerNamespace, setProviderNamespace] = useState(prefilledProvider?.namespace || '')
+  const [providerName, setProviderName] = useState(prefilledProvider?.type || '')
+  const [providerVersion, setProviderVersion] = useState('')
+  const [providerOS, setProviderOS] = useState('')
+  const [providerArch, setProviderArch] = useState('')
 
   const handleProviderFileSelected = (file: File) => {
-    setProviderFile(file);
-    setError(null);
-  };
+    setProviderFile(file)
+    setError(null)
+  }
 
   const handleProviderUpload = async () => {
-    if (!providerFile || !providerNamespace || !providerName || !providerVersion || !providerOS || !providerArch) {
-      setError('Please fill in all required fields');
-      return;
+    if (
+      !providerFile ||
+      !providerNamespace ||
+      !providerName ||
+      !providerVersion ||
+      !providerOS ||
+      !providerArch
+    ) {
+      setError('Please fill in all required fields')
+      return
     }
 
     try {
-      setUploading(true);
-      setError(null);
-      setSuccess(null);
+      setUploading(true)
+      setError(null)
+      setSuccess(null)
 
-      const formData = new FormData();
-      formData.append('namespace', providerNamespace);
-      formData.append('type', providerName);
-      formData.append('version', providerVersion);
-      formData.append('os', providerOS);
-      formData.append('arch', providerArch);
-      formData.append('file', providerFile);
+      const formData = new FormData()
+      formData.append('namespace', providerNamespace)
+      formData.append('type', providerName)
+      formData.append('version', providerVersion)
+      formData.append('os', providerOS)
+      formData.append('arch', providerArch)
+      formData.append('file', providerFile)
 
-      setUploadPercent(0);
+      setUploadPercent(0)
       await api.uploadProvider(formData, {
         onUploadProgress: (percent) => setUploadPercent(percent),
-      });
+      })
 
-      navigate(`/providers/${providerNamespace}/${providerName}`);
+      navigate(`/providers/${providerNamespace}/${providerName}`)
     } catch (err: unknown) {
-      setError(getErrorMessage(err, 'Failed to upload provider. Please try again.'));
-      setUploading(false);
-      setUploadPercent(null);
+      setError(getErrorMessage(err, 'Failed to upload provider. Please try again.'))
+      setUploading(false)
+      setUploadPercent(null)
     }
-  };
+  }
 
   const renderProviderMethodChooser = () => (
     <Box sx={{ p: 3 }}>
@@ -98,7 +105,8 @@ const ProviderUploadPage: React.FC = () => {
         How would you like to add this provider?
       </Typography>
       <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-        Upload a provider binary directly, or configure a mirror to automatically sync providers from the public Terraform Registry.
+        Upload a provider binary directly, or configure a mirror to automatically sync providers
+        from the public Terraform Registry.
       </Typography>
       <Box sx={{ display: 'flex', gap: 3, flexDirection: { xs: 'column', sm: 'row' } }}>
         <Card
@@ -112,7 +120,8 @@ const ProviderUploadPage: React.FC = () => {
                 Manual Upload
               </Typography>
               <Typography variant="body2" color="text.secondary">
-                Package a provider binary as a <strong>.zip</strong> file and upload it directly. Best for private or custom providers.
+                Package a provider binary as a <strong>.zip</strong> file and upload it directly.
+                Best for private or custom providers.
               </Typography>
             </CardContent>
           </CardActionArea>
@@ -132,20 +141,25 @@ const ProviderUploadPage: React.FC = () => {
                 Provider Mirror
               </Typography>
               <Typography variant="body2" color="text.secondary">
-                Configure a mirror to automatically sync one or more providers from the public Terraform Registry on a schedule.
+                Configure a mirror to automatically sync one or more providers from the public
+                Terraform Registry on a schedule.
               </Typography>
             </CardContent>
           </CardActionArea>
         </Card>
       </Box>
     </Box>
-  );
+  )
 
   const renderFileUploadForm = () => (
     <Box sx={{ p: 3 }}>
       <Button
         startIcon={<ArrowBack />}
-        onClick={() => { setProviderMethod('choose'); setError(null); setSuccess(null); }}
+        onClick={() => {
+          setProviderMethod('choose')
+          setError(null)
+          setSuccess(null)
+        }}
         sx={{ mb: 2 }}
       >
         Back
@@ -153,16 +167,25 @@ const ProviderUploadPage: React.FC = () => {
       <Typography variant="h6" gutterBottom>
         Upload Terraform Provider
       </Typography>
-      <Box sx={{ mb: 3, p: 2, bgcolor: (theme) => theme.palette.mode === 'dark' ? 'grey.800' : 'grey.50', borderRadius: 1 }}>
+      <Box
+        sx={{
+          mb: 3,
+          p: 2,
+          bgcolor: (theme) => (theme.palette.mode === 'dark' ? 'grey.800' : 'grey.50'),
+          borderRadius: 1,
+        }}
+      >
         <Typography variant="body2" color="text.secondary" gutterBottom>
           <strong>Requirements:</strong>
         </Typography>
         <Typography variant="body2" color="text.secondary" component="div">
-          • Package provider binary as a <strong>.zip</strong> file<br />
-          • Upload each OS/Architecture combination separately<br />
-          • Use semantic versioning matching the binary version<br />
-          • Filename should be: <strong>terraform-provider-NAME_VERSION_OS_ARCH.zip</strong><br />
-          • Provider address format: <strong>namespace/type</strong>
+          • Package provider binary as a <strong>.zip</strong> file
+          <br />
+          • Upload each OS/Architecture combination separately
+          <br />
+          • Use semantic versioning matching the binary version
+          <br />• Filename should be: <strong>terraform-provider-NAME_VERSION_OS_ARCH.zip</strong>
+          <br />• Provider address format: <strong>namespace/type</strong>
         </Typography>
       </Box>
 
@@ -259,7 +282,7 @@ const ProviderUploadPage: React.FC = () => {
         </Button>
       </Stack>
     </Box>
-  );
+  )
 
   return (
     <Container maxWidth="md" sx={{ py: 4 }}>
@@ -275,7 +298,7 @@ const ProviderUploadPage: React.FC = () => {
         {providerMethod === 'upload' && renderFileUploadForm()}
       </Paper>
     </Container>
-  );
-};
+  )
+}
 
-export default ProviderUploadPage;
+export default ProviderUploadPage

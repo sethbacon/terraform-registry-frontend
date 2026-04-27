@@ -1,5 +1,5 @@
-import React from 'react';
-import { useTranslation } from 'react-i18next';
+import React from 'react'
+import { useTranslation } from 'react-i18next'
 import {
   Container,
   Paper,
@@ -12,18 +12,18 @@ import {
   CircularProgress,
   Skeleton,
   TextField,
-} from '@mui/material';
-import LoginIcon from '@mui/icons-material/Login';
-import { useAuth } from '../contexts/AuthContext';
-import { useThemeMode } from '../contexts/ThemeContext';
-import { useNavigate } from 'react-router-dom';
-import api from '../services/api';
-import type { User } from '../types';
+} from '@mui/material'
+import LoginIcon from '@mui/icons-material/Login'
+import { useAuth } from '../contexts/AuthContext'
+import { useThemeMode } from '../contexts/ThemeContext'
+import { useNavigate } from 'react-router-dom'
+import api from '../services/api'
+import type { User } from '../types'
 
 interface AuthProvider {
-  type: string;
-  name: string;
-  id?: string;
+  type: string
+  name: string
+  id?: string
 }
 
 // Simple t type avoids excessively-deep instantiation from the large i18next key union
@@ -32,102 +32,101 @@ type SimpleTFunc = (key: string, options?: Record<string, unknown>) => string
 function providerLabel(p: AuthProvider, t: SimpleTFunc): string {
   switch (p.type) {
     case 'oidc':
-      return t('auth.signInWithSSO');
+      return t('auth.signInWithSSO')
     case 'azuread':
-      return t('auth.signInWithAzureAD');
+      return t('auth.signInWithAzureAD')
     case 'saml':
-      return t('auth.signInWith', { name: p.name });
+      return t('auth.signInWith', { name: p.name })
     default:
-      return t('auth.signInWith', { name: p.name });
+      return t('auth.signInWith', { name: p.name })
   }
 }
 
 function providerSx(p: AuthProvider): Record<string, unknown> | undefined {
   if (p.type === 'azuread') {
-    return { backgroundColor: '#0078d4', '&:hover': { backgroundColor: '#106ebe' } };
+    return { backgroundColor: '#0078d4', '&:hover': { backgroundColor: '#106ebe' } }
   }
-  return undefined;
+  return undefined
 }
 
 const LoginPage: React.FC = () => {
-  const { t } = useTranslation();
-  const { login } = useAuth();
-  const { productName } = useThemeMode();
-  const navigate = useNavigate();
-  const [loginError, setLoginError] = React.useState<string | null>(null);
-  const isDev = import.meta.env.MODE === 'development';
-  const [providers, setProviders] = React.useState<AuthProvider[]>([]);
-  const [loading, setLoading] = React.useState(true);
+  const { t } = useTranslation()
+  const { login } = useAuth()
+  const { productName } = useThemeMode()
+  const navigate = useNavigate()
+  const [loginError, setLoginError] = React.useState<string | null>(null)
+  const isDev = import.meta.env.MODE === 'development'
+  const [providers, setProviders] = React.useState<AuthProvider[]>([])
+  const [loading, setLoading] = React.useState(true)
 
   // LDAP form state
-  const [ldapUsername, setLdapUsername] = React.useState('');
-  const [ldapPassword, setLdapPassword] = React.useState('');
-  const [ldapLoading, setLdapLoading] = React.useState(false);
+  const [ldapUsername, setLdapUsername] = React.useState('')
+  const [ldapPassword, setLdapPassword] = React.useState('')
+  const [ldapLoading, setLdapLoading] = React.useState(false)
 
   React.useEffect(() => {
-    let cancelled = false;
+    let cancelled = false
     api
       .getAuthProviders()
       .then((res) => {
-        if (!cancelled) setProviders(res.providers || []);
+        if (!cancelled) setProviders(res.providers || [])
       })
       .catch(() => {
         // Silently ignore — providers will be empty
       })
       .finally(() => {
-        if (!cancelled) setLoading(false);
-      });
+        if (!cancelled) setLoading(false)
+      })
     return () => {
-      cancelled = true;
-    };
-  }, []);
+      cancelled = true
+    }
+  }, [])
 
   const handleDevLogin = async () => {
-    setLoginError(null);
+    setLoginError(null)
     try {
-      const response = await api.devLogin();
-      localStorage.setItem('auth_token', response.token);
-      localStorage.removeItem('user');
-      localStorage.removeItem('role_template');
-      localStorage.removeItem('allowed_scopes');
-      await login({} as User);
-      navigate('/');
+      const response = await api.devLogin()
+      localStorage.setItem('auth_token', response.token)
+      localStorage.removeItem('user')
+      localStorage.removeItem('role_template')
+      localStorage.removeItem('allowed_scopes')
+      await login({} as User)
+      navigate('/')
     } catch (err) {
-      const message = err instanceof Error ? err.message : t('auth.devLoginFailed');
-      setLoginError(message);
+      const message = err instanceof Error ? err.message : t('auth.devLoginFailed')
+      setLoginError(message)
     }
-  };
+  }
 
   const handleProviderLogin = (provider: AuthProvider) => {
-    setLoginError(null);
-    const providerParam = provider.id || provider.type;
-    api.login(providerParam);
-  };
+    setLoginError(null)
+    const providerParam = provider.id || provider.type
+    api.login(providerParam)
+  }
 
   const handleLdapLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoginError(null);
-    setLdapLoading(true);
+    e.preventDefault()
+    setLoginError(null)
+    setLdapLoading(true)
     try {
-      const response = await api.ldapLogin(ldapUsername, ldapPassword);
-      localStorage.setItem('auth_token', response.token);
-      localStorage.removeItem('user');
-      localStorage.removeItem('role_template');
-      localStorage.removeItem('allowed_scopes');
-      await login({} as User);
-      navigate('/');
+      const response = await api.ldapLogin(ldapUsername, ldapPassword)
+      localStorage.setItem('auth_token', response.token)
+      localStorage.removeItem('user')
+      localStorage.removeItem('role_template')
+      localStorage.removeItem('allowed_scopes')
+      await login({} as User)
+      navigate('/')
     } catch (err) {
-      const message =
-        err instanceof Error ? err.message : t('auth.ldapLoginFailed');
-      setLoginError(message);
+      const message = err instanceof Error ? err.message : t('auth.ldapLoginFailed')
+      setLoginError(message)
     } finally {
-      setLdapLoading(false);
+      setLdapLoading(false)
     }
-  };
+  }
 
-  const ssoProviders = providers.filter((p) => p.type !== 'ldap');
-  const hasLdap = providers.some((p) => p.type === 'ldap');
-  const showNoProvidersAlert = !loading && providers.length === 0 && !isDev;
+  const ssoProviders = providers.filter((p) => p.type !== 'ldap')
+  const hasLdap = providers.some((p) => p.type === 'ldap')
+  const showNoProvidersAlert = !loading && providers.length === 0 && !isDev
 
   return (
     <Container maxWidth="sm" sx={{ mx: 'auto' }}>
@@ -165,9 +164,7 @@ const LoginPage: React.FC = () => {
 
             {isDev && (
               <>
-                <Alert severity="info">
-                  {t('auth.devModeNotice')}
-                </Alert>
+                <Alert severity="info">{t('auth.devModeNotice')}</Alert>
                 <Button
                   variant="contained"
                   size="large"
@@ -281,7 +278,7 @@ const LoginPage: React.FC = () => {
         </Paper>
       </Box>
     </Container>
-  );
-};
+  )
+}
 
-export default LoginPage;
+export default LoginPage

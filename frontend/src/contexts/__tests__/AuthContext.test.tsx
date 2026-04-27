@@ -27,7 +27,9 @@ function clearStorage() {
   for (let i = 0; i < localStorage.length; i++) {
     keys.push(localStorage.key(i))
   }
-  keys.forEach((k) => { if (k) localStorage.removeItem(k) })
+  keys.forEach((k) => {
+    if (k) localStorage.removeItem(k)
+  })
 }
 
 describe('AuthContext', () => {
@@ -41,7 +43,7 @@ describe('AuthContext', () => {
   })
 
   it('throws when useAuth is called outside AuthProvider', () => {
-    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => { })
+    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
 
     function BadConsumer() {
       useAuth()
@@ -57,8 +59,12 @@ describe('AuthContext', () => {
 
     render(
       <AuthProvider>
-        <AuthConsumer onRender={(auth) => { authState = auth }} />
-      </AuthProvider>
+        <AuthConsumer
+          onRender={(auth) => {
+            authState = auth
+          }}
+        />
+      </AuthProvider>,
     )
 
     // Wait for the async /auth/me check to complete
@@ -71,7 +77,16 @@ describe('AuthContext', () => {
 
   it('logout clears all localStorage keys', () => {
     localStorage.setItem('auth_token', 'test-token')
-    localStorage.setItem('user', JSON.stringify({ id: '1', email: 'test@test.com', name: 'Test', created_at: '', updated_at: '' }))
+    localStorage.setItem(
+      'user',
+      JSON.stringify({
+        id: '1',
+        email: 'test@test.com',
+        name: 'Test',
+        created_at: '',
+        updated_at: '',
+      }),
+    )
     localStorage.setItem('role_template', JSON.stringify({ name: 'admin', display_name: 'Admin' }))
     localStorage.setItem('allowed_scopes', JSON.stringify(['admin']))
     localStorage.setItem('authorized', 'some-swagger-key')
@@ -80,8 +95,12 @@ describe('AuthContext', () => {
 
     render(
       <AuthProvider>
-        <AuthConsumer onRender={(auth) => { authState = auth }} />
-      </AuthProvider>
+        <AuthConsumer
+          onRender={(auth) => {
+            authState = auth
+          }}
+        />
+      </AuthProvider>,
     )
 
     act(() => {
@@ -100,8 +119,12 @@ describe('AuthContext', () => {
 
     render(
       <AuthProvider>
-        <AuthConsumer onRender={(auth) => { authState = auth }} />
-      </AuthProvider>
+        <AuthConsumer
+          onRender={(auth) => {
+            authState = auth
+          }}
+        />
+      </AuthProvider>,
     )
 
     act(() => {
@@ -119,8 +142,12 @@ describe('AuthContext', () => {
 
     render(
       <AuthProvider>
-        <AuthConsumer onRender={(auth) => { authState = auth }} />
-      </AuthProvider>
+        <AuthConsumer
+          onRender={(auth) => {
+            authState = auth
+          }}
+        />
+      </AuthProvider>,
     )
 
     act(() => {
@@ -135,8 +162,12 @@ describe('AuthContext', () => {
 
     render(
       <AuthProvider>
-        <AuthConsumer onRender={(auth) => { authState = auth }} />
-      </AuthProvider>
+        <AuthConsumer
+          onRender={(auth) => {
+            authState = auth
+          }}
+        />
+      </AuthProvider>,
     )
 
     act(() => {
@@ -147,7 +178,13 @@ describe('AuthContext', () => {
   })
 
   it('login with user object (dev mode) sets authenticated and fetches user from API', async () => {
-    const mockUser = { id: '1', email: 'dev@test.com', name: 'Dev User', created_at: '', updated_at: '' }
+    const mockUser = {
+      id: '1',
+      email: 'dev@test.com',
+      name: 'Dev User',
+      created_at: '',
+      updated_at: '',
+    }
     // First call: mount effect tries /auth/me (no session → reject).
     // Second call: dev-mode login calls fetchCurrentUser (succeeds).
     mockApi.getCurrentUserWithRole
@@ -162,8 +199,12 @@ describe('AuthContext', () => {
 
     render(
       <AuthProvider>
-        <AuthConsumer onRender={(auth) => { authState = auth }} />
-      </AuthProvider>
+        <AuthConsumer
+          onRender={(auth) => {
+            authState = auth
+          }}
+        />
+      </AuthProvider>,
     )
 
     // Wait for mount effect to complete
@@ -190,8 +231,12 @@ describe('AuthContext', () => {
 
     render(
       <AuthProvider>
-        <AuthConsumer onRender={(auth) => { authState = auth }} />
-      </AuthProvider>
+        <AuthConsumer
+          onRender={(auth) => {
+            authState = auth
+          }}
+        />
+      </AuthProvider>,
     )
 
     await act(async () => {
@@ -204,14 +249,18 @@ describe('AuthContext', () => {
 
   it('refreshToken calls logout on failure', async () => {
     mockApi.refreshToken.mockRejectedValueOnce(new Error('Token expired'))
-    vi.spyOn(console, 'error').mockImplementation(() => { })
+    vi.spyOn(console, 'error').mockImplementation(() => {})
 
     let authState: ReturnType<typeof useAuth> | null = null
 
     render(
       <AuthProvider>
-        <AuthConsumer onRender={(auth) => { authState = auth }} />
-      </AuthProvider>
+        <AuthConsumer
+          onRender={(auth) => {
+            authState = auth
+          }}
+        />
+      </AuthProvider>,
     )
 
     await act(async () => {
@@ -226,11 +275,23 @@ describe('AuthContext', () => {
   // ─── fetchUser on mount ────────────────────────────────────────────────
 
   it('fetches user from API on mount when token and user exist in localStorage', async () => {
-    const storedUser = { id: '1', email: 'stored@test.com', name: 'Stored', created_at: '', updated_at: '' }
+    const storedUser = {
+      id: '1',
+      email: 'stored@test.com',
+      name: 'Stored',
+      created_at: '',
+      updated_at: '',
+    }
     localStorage.setItem('auth_token', 'existing-token')
     localStorage.setItem('user', JSON.stringify(storedUser))
 
-    const freshUser = { id: '1', email: 'fresh@test.com', name: 'Fresh', created_at: '', updated_at: '' }
+    const freshUser = {
+      id: '1',
+      email: 'fresh@test.com',
+      name: 'Fresh',
+      created_at: '',
+      updated_at: '',
+    }
     mockApi.getCurrentUserWithRole.mockResolvedValueOnce({
       user: freshUser,
       role_template: null,
@@ -241,8 +302,12 @@ describe('AuthContext', () => {
 
     render(
       <AuthProvider>
-        <AuthConsumer onRender={(auth) => { authState = auth }} />
-      </AuthProvider>
+        <AuthConsumer
+          onRender={(auth) => {
+            authState = auth
+          }}
+        />
+      </AuthProvider>,
     )
 
     // Initially uses stored user
@@ -262,7 +327,13 @@ describe('AuthContext', () => {
     localStorage.setItem('auth_token', 'oidc-token')
     // No stored user
 
-    const apiUser = { id: '2', email: 'oidc@test.com', name: 'OIDC User', created_at: '', updated_at: '' }
+    const apiUser = {
+      id: '2',
+      email: 'oidc@test.com',
+      name: 'OIDC User',
+      created_at: '',
+      updated_at: '',
+    }
     mockApi.getCurrentUserWithRole.mockResolvedValueOnce({
       user: apiUser,
       role_template: null,
@@ -273,8 +344,12 @@ describe('AuthContext', () => {
 
     render(
       <AuthProvider>
-        <AuthConsumer onRender={(auth) => { authState = auth }} />
-      </AuthProvider>
+        <AuthConsumer
+          onRender={(auth) => {
+            authState = auth
+          }}
+        />
+      </AuthProvider>,
     )
 
     await waitFor(() => {
@@ -290,15 +365,22 @@ describe('AuthContext', () => {
 
   it('calls logout when fetchUser fails on mount (expired token)', async () => {
     localStorage.setItem('auth_token', 'expired-token')
-    localStorage.setItem('user', JSON.stringify({ id: '1', email: 'x@y.com', name: 'X', created_at: '', updated_at: '' }))
-    vi.spyOn(console, 'error').mockImplementation(() => { })
+    localStorage.setItem(
+      'user',
+      JSON.stringify({ id: '1', email: 'x@y.com', name: 'X', created_at: '', updated_at: '' }),
+    )
+    vi.spyOn(console, 'error').mockImplementation(() => {})
 
     mockApi.getCurrentUserWithRole.mockRejectedValueOnce(new Error('401 Unauthorized'))
 
     render(
       <AuthProvider>
-        <AuthConsumer onRender={(auth) => { void auth }} />
-      </AuthProvider>
+        <AuthConsumer
+          onRender={(auth) => {
+            void auth
+          }}
+        />
+      </AuthProvider>,
     )
 
     await waitFor(() => {
@@ -314,7 +396,10 @@ describe('AuthContext', () => {
 
   it('logout resets user, roleTemplate, allowedScopes and isAuthenticated', async () => {
     localStorage.setItem('auth_token', 'token')
-    localStorage.setItem('user', JSON.stringify({ id: '1', email: 'a@b.com', name: 'A', created_at: '', updated_at: '' }))
+    localStorage.setItem(
+      'user',
+      JSON.stringify({ id: '1', email: 'a@b.com', name: 'A', created_at: '', updated_at: '' }),
+    )
     localStorage.setItem('role_template', JSON.stringify({ name: 'admin', display_name: 'Admin' }))
     localStorage.setItem('allowed_scopes', JSON.stringify(['admin']))
 
@@ -328,8 +413,12 @@ describe('AuthContext', () => {
 
     render(
       <AuthProvider>
-        <AuthConsumer onRender={(auth) => { authState = auth }} />
-      </AuthProvider>
+        <AuthConsumer
+          onRender={(auth) => {
+            authState = auth
+          }}
+        />
+      </AuthProvider>,
     )
 
     await waitFor(() => {
@@ -351,17 +440,24 @@ describe('AuthContext', () => {
 // Build a signature-less JWT with a specific exp (seconds since epoch).
 function fakeJwt(expSec: number | 'invalid'): string {
   const header = btoa(JSON.stringify({ alg: 'none', typ: 'JWT' }))
-    .replace(/=+$/, '').replace(/\+/g, '-').replace(/\//g, '_')
+    .replace(/=+$/, '')
+    .replace(/\+/g, '-')
+    .replace(/\//g, '_')
   if (expSec === 'invalid') return 'not-a-jwt'
   const payload = btoa(JSON.stringify({ exp: expSec }))
-    .replace(/=+$/, '').replace(/\+/g, '-').replace(/\//g, '_')
+    .replace(/=+$/, '')
+    .replace(/\+/g, '-')
+    .replace(/\//g, '_')
   return `${header}.${payload}.`
 }
 
 describe('AuthContext session expiry (roadmap 4.2)', () => {
   beforeEach(() => {
     const keys: string[] = []
-    for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i); if (k) keys.push(k) }
+    for (let i = 0; i < localStorage.length; i++) {
+      const k = localStorage.key(i)
+      if (k) keys.push(k)
+    }
     keys.forEach((k) => localStorage.removeItem(k))
     vi.clearAllMocks()
     vi.useRealTimers()
@@ -388,21 +484,31 @@ describe('AuthContext session expiry (roadmap 4.2)', () => {
     let authState: ReturnType<typeof useAuth> | null = null
     render(
       <AuthProvider>
-        <AuthConsumer onRender={(auth) => { authState = auth }} />
-      </AuthProvider>
+        <AuthConsumer
+          onRender={(auth) => {
+            authState = auth
+          }}
+        />
+      </AuthProvider>,
     )
 
-    act(() => { authState!.setToken(fakeJwt(exp)) })
+    act(() => {
+      authState!.setToken(fakeJwt(exp))
+    })
     expect(authState!.sessionExpiresAt).not.toBeNull()
     expect(authState!.sessionExpiresSoon).toBe(false)
 
     // Advance to just before the warning window.
-    act(() => { vi.advanceTimersByTime(10 * 60 * 1000 - SESSION_WARNING_LEAD_MS - 1) })
+    act(() => {
+      vi.advanceTimersByTime(10 * 60 * 1000 - SESSION_WARNING_LEAD_MS - 1)
+    })
     expect(authState!.sessionExpiresSoon).toBe(false)
 
     // Cross the warning threshold — silent refresh fires and fails (default mock rejects),
     // then the catch handler sets sessionExpiresSoon = true.
-    await act(async () => { vi.advanceTimersByTime(2) })
+    await act(async () => {
+      vi.advanceTimersByTime(2)
+    })
     expect(authState!.sessionExpiresSoon).toBe(true)
     vi.useRealTimers()
   })
@@ -411,11 +517,17 @@ describe('AuthContext session expiry (roadmap 4.2)', () => {
     let authState: ReturnType<typeof useAuth> | null = null
     render(
       <AuthProvider>
-        <AuthConsumer onRender={(auth) => { authState = auth }} />
-      </AuthProvider>
+        <AuthConsumer
+          onRender={(auth) => {
+            authState = auth
+          }}
+        />
+      </AuthProvider>,
     )
 
-    act(() => { authState!.setToken('not-a-jwt') })
+    act(() => {
+      authState!.setToken('not-a-jwt')
+    })
     expect(authState!.sessionExpiresAt).toBeNull()
     expect(authState!.sessionExpiresSoon).toBe(false)
   })
@@ -428,13 +540,19 @@ describe('AuthContext session expiry (roadmap 4.2)', () => {
     let authState: ReturnType<typeof useAuth> | null = null
     render(
       <AuthProvider>
-        <AuthConsumer onRender={(auth) => { authState = auth }} />
-      </AuthProvider>
+        <AuthConsumer
+          onRender={(auth) => {
+            authState = auth
+          }}
+        />
+      </AuthProvider>,
     )
 
     // Silent refresh attempt fires immediately and fails (mock rejects),
     // then catch sets sessionExpiresSoon = true.
-    await act(async () => { authState!.setToken(fakeJwt(exp)) })
+    await act(async () => {
+      authState!.setToken(fakeJwt(exp))
+    })
     expect(authState!.sessionExpiresSoon).toBe(true)
     vi.useRealTimers()
   })
@@ -446,13 +564,21 @@ describe('AuthContext session expiry (roadmap 4.2)', () => {
     let authState: ReturnType<typeof useAuth> | null = null
     render(
       <AuthProvider>
-        <AuthConsumer onRender={(auth) => { authState = auth }} />
-      </AuthProvider>
+        <AuthConsumer
+          onRender={(auth) => {
+            authState = auth
+          }}
+        />
+      </AuthProvider>,
     )
-    await act(async () => { authState!.setToken(fakeJwt(exp)) })
+    await act(async () => {
+      authState!.setToken(fakeJwt(exp))
+    })
     expect(authState!.sessionExpiresSoon).toBe(true)
 
-    act(() => { authState!.logout() })
+    act(() => {
+      authState!.logout()
+    })
     expect(authState!.sessionExpiresAt).toBeNull()
     expect(authState!.sessionExpiresSoon).toBe(false)
     vi.useRealTimers()
@@ -473,13 +599,21 @@ describe('AuthContext session expiry (roadmap 4.2)', () => {
     let authState: ReturnType<typeof useAuth> | null = null
     render(
       <AuthProvider>
-        <AuthConsumer onRender={(auth) => { authState = auth }} />
-      </AuthProvider>
+        <AuthConsumer
+          onRender={(auth) => {
+            authState = auth
+          }}
+        />
+      </AuthProvider>,
     )
-    await act(async () => { authState!.setToken(fakeJwt(initialExp)) })
+    await act(async () => {
+      authState!.setToken(fakeJwt(initialExp))
+    })
     expect(authState!.sessionExpiresSoon).toBe(true)
 
-    await act(async () => { await authState!.refreshToken() })
+    await act(async () => {
+      await authState!.refreshToken()
+    })
     expect(authState!.sessionExpiresSoon).toBe(false)
     expect(authState!.sessionExpiresAt).not.toBeNull()
     vi.useRealTimers()

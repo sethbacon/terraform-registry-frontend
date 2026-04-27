@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react';
-import { useTranslation } from 'react-i18next';
+import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import {
   Dialog,
   DialogTitle,
@@ -12,31 +12,32 @@ import {
   Divider,
   Link,
   CircularProgress,
-} from '@mui/material';
-import { VersionInfo } from '../types';
-import apiClient from '../services/api';
-import { useThemeMode } from '../contexts/ThemeContext';
-import i18n from '../i18n';
+} from '@mui/material'
+import { VersionInfo } from '../types'
+import apiClient from '../services/api'
+import { useThemeMode } from '../contexts/ThemeContext'
+import i18n from '../i18n'
 
 interface AboutModalProps {
-  open: boolean;
-  onClose: () => void;
+  open: boolean
+  onClose: () => void
 }
 
 const AboutModal = ({ open, onClose }: AboutModalProps) => {
-  const { t } = useTranslation();
-  const [backendVersion, setBackendVersion] = useState<VersionInfo | null>(null);
-  const [loading, setLoading] = useState(false);
-  const { productName } = useThemeMode();
+  const { t } = useTranslation()
+  const [backendVersion, setBackendVersion] = useState<VersionInfo | null>(null)
+  const [loading, setLoading] = useState(false)
+  const { productName } = useThemeMode()
 
   useEffect(() => {
-    if (!open) return;
-    setLoading(true);
-    apiClient.getVersionInfo()
+    if (!open) return
+    setLoading(true)
+    apiClient
+      .getVersionInfo()
       .then(setBackendVersion)
       .catch(() => setBackendVersion(null))
-      .finally(() => setLoading(false));
-  }, [open]);
+      .finally(() => setLoading(false))
+  }, [open])
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
@@ -144,7 +145,7 @@ const AboutModal = ({ open, onClose }: AboutModalProps) => {
         <Button onClick={onClose}>{t('about.close')}</Button>
       </DialogActions>
     </Dialog>
-  );
-};
+  )
+}
 
-export default AboutModal;
+export default AboutModal

@@ -1,124 +1,124 @@
 // Mirror configuration types
 
 export interface MirrorConfiguration {
-  id: string;
-  name: string;
-  description?: string;
-  upstream_registry_url: string;
-  organization_id?: string;
-  namespace_filter?: string; // JSON array string
-  provider_filter?: string; // JSON array string
-  version_filter?: string; // Version filter: "3.", "latest:5", ">=3.0.0", or comma-separated
-  platform_filter?: string; // JSON array string of "os/arch" (e.g. ["linux/amd64", "windows/amd64"])
-  enabled: boolean;
-  sync_interval_hours: number;
-  last_sync_at?: string;
-  last_sync_status?: 'success' | 'failed' | 'in_progress';
-  last_sync_error?: string;
-  created_at: string;
-  updated_at: string;
-  created_by?: string;
+  id: string
+  name: string
+  description?: string
+  upstream_registry_url: string
+  organization_id?: string
+  namespace_filter?: string // JSON array string
+  provider_filter?: string // JSON array string
+  version_filter?: string // Version filter: "3.", "latest:5", ">=3.0.0", or comma-separated
+  platform_filter?: string // JSON array string of "os/arch" (e.g. ["linux/amd64", "windows/amd64"])
+  enabled: boolean
+  sync_interval_hours: number
+  last_sync_at?: string
+  last_sync_status?: 'success' | 'failed' | 'in_progress'
+  last_sync_error?: string
+  created_at: string
+  updated_at: string
+  created_by?: string
 }
 
 export interface MirrorSyncHistory {
-  id: string;
-  mirror_config_id: string;
-  started_at: string;
-  completed_at?: string;
-  status: 'running' | 'success' | 'failed' | 'cancelled';
-  providers_synced: number;
-  providers_failed: number;
-  error_message?: string;
-  sync_details?: string; // JSON string
+  id: string
+  mirror_config_id: string
+  started_at: string
+  completed_at?: string
+  status: 'running' | 'success' | 'failed' | 'cancelled'
+  providers_synced: number
+  providers_failed: number
+  error_message?: string
+  sync_details?: string // JSON string
 }
 
 export interface MirrorSyncStatus {
-  mirror_config: MirrorConfiguration;
-  current_sync?: MirrorSyncHistory;
-  recent_syncs: MirrorSyncHistory[];
-  next_scheduled?: string;
+  mirror_config: MirrorConfiguration
+  current_sync?: MirrorSyncHistory
+  recent_syncs: MirrorSyncHistory[]
+  next_scheduled?: string
 }
 
 export interface CreateMirrorConfigRequest {
-  name: string;
-  description?: string;
-  upstream_registry_url: string;
-  organization_id?: string;
-  namespace_filter?: string[];
-  provider_filter?: string[];
-  version_filter?: string; // Version filter: "3.", "latest:5", ">=3.0.0", or comma-separated
-  platform_filter?: string[]; // List of "os/arch" strings (e.g. ["linux/amd64", "windows/amd64"])
-  enabled?: boolean;
-  sync_interval_hours?: number;
+  name: string
+  description?: string
+  upstream_registry_url: string
+  organization_id?: string
+  namespace_filter?: string[]
+  provider_filter?: string[]
+  version_filter?: string // Version filter: "3.", "latest:5", ">=3.0.0", or comma-separated
+  platform_filter?: string[] // List of "os/arch" strings (e.g. ["linux/amd64", "windows/amd64"])
+  enabled?: boolean
+  sync_interval_hours?: number
 }
 
 export interface UpdateMirrorConfigRequest {
-  name?: string;
-  description?: string;
-  upstream_registry_url?: string;
-  organization_id?: string;
-  namespace_filter?: string[];
-  provider_filter?: string[];
-  version_filter?: string; // Version filter: "3.", "latest:5", ">=3.0.0", or comma-separated
-  platform_filter?: string[]; // List of "os/arch" strings (e.g. ["linux/amd64", "windows/amd64"])
-  enabled?: boolean;
-  sync_interval_hours?: number;
+  name?: string
+  description?: string
+  upstream_registry_url?: string
+  organization_id?: string
+  namespace_filter?: string[]
+  provider_filter?: string[]
+  version_filter?: string // Version filter: "3.", "latest:5", ">=3.0.0", or comma-separated
+  platform_filter?: string[] // List of "os/arch" strings (e.g. ["linux/amd64", "windows/amd64"])
+  enabled?: boolean
+  sync_interval_hours?: number
 }
 
 export interface TriggerSyncRequest {
-  namespace?: string;
-  provider_name?: string;
+  namespace?: string
+  provider_name?: string
 }
 
 export interface MirroredProviderPlatform {
-  id: string;
-  provider_version_id: string;
-  os: string;
-  arch: string;
-  filename: string;
-  shasum: string;
+  id: string
+  provider_version_id: string
+  os: string
+  arch: string
+  filename: string
+  shasum: string
 }
 
 export interface MirroredProviderVersion {
-  id: string;
-  mirrored_provider_id: string;
-  provider_version_id: string;
-  upstream_version: string;
-  synced_at: string;
-  shasum_verified: boolean;
-  gpg_verified: boolean;
-  platforms: MirroredProviderPlatform[];
+  id: string
+  mirrored_provider_id: string
+  provider_version_id: string
+  upstream_version: string
+  synced_at: string
+  shasum_verified: boolean
+  gpg_verified: boolean
+  platforms: MirroredProviderPlatform[]
 }
 
 export interface MirroredProvider {
-  id: string;
-  mirror_config_id: string;
-  provider_id: string;
-  upstream_namespace: string;
-  upstream_type: string;
-  last_synced_at: string;
-  last_sync_version?: string;
-  sync_enabled: boolean;
-  created_at: string;
-  versions: MirroredProviderVersion[];
+  id: string
+  mirror_config_id: string
+  provider_id: string
+  upstream_namespace: string
+  upstream_type: string
+  last_synced_at: string
+  last_sync_version?: string
+  sync_enabled: boolean
+  created_at: string
+  versions: MirroredProviderVersion[]
 }
 
 // Parsed versions for UI display
 export interface ParsedMirrorConfig extends MirrorConfiguration {
-  namespaceFilters: string[];
-  providerFilters: string[];
-  platformFilters: string[];
+  namespaceFilters: string[]
+  providerFilters: string[]
+  platformFilters: string[]
 }
 
 // Helper to parse JSON filter strings
 export function parseMirrorConfig(config: MirrorConfiguration): ParsedMirrorConfig {
-  let namespaceFilters: string[] = [];
-  let providerFilters: string[] = [];
-  let platformFilters: string[] = [];
+  let namespaceFilters: string[] = []
+  let providerFilters: string[] = []
+  let platformFilters: string[] = []
 
   try {
     if (config.namespace_filter) {
-      namespaceFilters = JSON.parse(config.namespace_filter);
+      namespaceFilters = JSON.parse(config.namespace_filter)
     }
   } catch {
     // Ignore parse errors
@@ -126,7 +126,7 @@ export function parseMirrorConfig(config: MirrorConfiguration): ParsedMirrorConf
 
   try {
     if (config.provider_filter) {
-      providerFilters = JSON.parse(config.provider_filter);
+      providerFilters = JSON.parse(config.provider_filter)
     }
   } catch {
     // Ignore parse errors
@@ -134,7 +134,7 @@ export function parseMirrorConfig(config: MirrorConfiguration): ParsedMirrorConf
 
   try {
     if (config.platform_filter) {
-      platformFilters = JSON.parse(config.platform_filter);
+      platformFilters = JSON.parse(config.platform_filter)
     }
   } catch {
     // Ignore parse errors
@@ -145,5 +145,5 @@ export function parseMirrorConfig(config: MirrorConfiguration): ParsedMirrorConf
     namespaceFilters,
     providerFilters,
     platformFilters,
-  };
+  }
 }

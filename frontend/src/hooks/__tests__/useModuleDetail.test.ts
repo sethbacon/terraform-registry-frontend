@@ -55,19 +55,18 @@ const moduleData = {
   namespace: 'hashicorp',
   name: 'consul',
   system: 'aws',
-  versions: [
-    { version: '1.0.0' },
-    { version: '2.0.0' },
-  ],
+  versions: [{ version: '1.0.0' }, { version: '2.0.0' }],
 }
 
 const versionsData = {
-  modules: [{
-    versions: [
-      { version: '2.0.0', readme: '# v2' },
-      { version: '1.0.0', readme: '# v1' },
-    ],
-  }],
+  modules: [
+    {
+      versions: [
+        { version: '2.0.0', readme: '# v2' },
+        { version: '1.0.0', readme: '# v1' },
+      ],
+    },
+  ],
 }
 
 // ── Wrapper ─────────────────────────────────────────────────────────────
@@ -99,8 +98,8 @@ describe('useModuleDetail', () => {
 
   it('starts in loading state', () => {
     // Block the API calls from resolving
-    mockApi.getModule.mockReturnValue(new Promise(() => { }))
-    mockApi.getModuleVersions.mockReturnValue(new Promise(() => { }))
+    mockApi.getModule.mockReturnValue(new Promise(() => {}))
+    mockApi.getModuleVersions.mockReturnValue(new Promise(() => {}))
 
     const { result } = renderHook(() => useModuleDetail(), { wrapper: createWrapper() })
 
@@ -193,9 +192,7 @@ describe('useModuleDetail', () => {
 
     // Scan is loaded for the selected version
     await waitFor(() => {
-      expect(mockApi.getModuleScan).toHaveBeenCalledWith(
-        'hashicorp', 'consul', 'aws', '2.0.0'
-      )
+      expect(mockApi.getModuleScan).toHaveBeenCalledWith('hashicorp', 'consul', 'aws', '2.0.0')
     })
   })
 
@@ -249,8 +246,8 @@ describe('useModuleDetail', () => {
 
   it('sets error with "Module not found" on 404', async () => {
     const err = new AxiosError('Not Found', 'ERR_BAD_REQUEST')
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      ; (err as any).response = { status: 404, data: {} }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ;(err as any).response = { status: 404, data: {} }
     mockApi.getModule.mockRejectedValue(err)
 
     const { result } = renderHook(() => useModuleDetail(), { wrapper: createWrapper() })
@@ -288,13 +285,18 @@ describe('useModuleDetail', () => {
     const { result } = renderHook(() => useModuleDetail(), { wrapper: createWrapper() })
     await waitFor(() => expect(result.current.loading).toBe(false))
 
-    act(() => { result.current.handlePublishNewVersion() })
+    act(() => {
+      result.current.handlePublishNewVersion()
+    })
 
-    expect(mockNavigate).toHaveBeenCalledWith('/admin/upload/module', expect.objectContaining({
-      state: expect.objectContaining({
-        moduleData: { namespace: 'hashicorp', name: 'consul', provider: 'aws' },
+    expect(mockNavigate).toHaveBeenCalledWith(
+      '/admin/upload/module',
+      expect.objectContaining({
+        state: expect.objectContaining({
+          moduleData: { namespace: 'hashicorp', name: 'consul', provider: 'aws' },
+        }),
       }),
-    }))
+    )
   })
 
   it('handleDeleteModule calls api.deleteModule and navigates on success', async () => {
@@ -330,7 +332,9 @@ describe('useModuleDetail', () => {
     const { result } = renderHook(() => useModuleDetail(), { wrapper: createWrapper() })
     await waitFor(() => expect(result.current.loading).toBe(false))
 
-    act(() => { result.current.handleDeleteVersion() })
+    act(() => {
+      result.current.handleDeleteVersion()
+    })
     expect(mockApi.deleteModuleVersion).not.toHaveBeenCalled()
   })
 
@@ -338,7 +342,9 @@ describe('useModuleDetail', () => {
     const { result } = renderHook(() => useModuleDetail(), { wrapper: createWrapper() })
     await waitFor(() => expect(result.current.loading).toBe(false))
 
-    act(() => { result.current.openDeleteVersionDialog('2.0.0') })
+    act(() => {
+      result.current.openDeleteVersionDialog('2.0.0')
+    })
 
     expect(result.current.versionToDelete).toBe('2.0.0')
     expect(result.current.deleteVersionDialogOpen).toBe(true)
@@ -349,14 +355,21 @@ describe('useModuleDetail', () => {
     const { result } = renderHook(() => useModuleDetail(), { wrapper: createWrapper() })
     await waitFor(() => expect(result.current.loading).toBe(false))
 
-    act(() => { result.current.openDeleteVersionDialog('2.0.0') })
+    act(() => {
+      result.current.openDeleteVersionDialog('2.0.0')
+    })
 
     await act(async () => {
       result.current.handleDeleteVersion()
     })
 
     await waitFor(() => {
-      expect(mockApi.deleteModuleVersion).toHaveBeenCalledWith('hashicorp', 'consul', 'aws', '2.0.0')
+      expect(mockApi.deleteModuleVersion).toHaveBeenCalledWith(
+        'hashicorp',
+        'consul',
+        'aws',
+        '2.0.0',
+      )
     })
   })
 
@@ -365,14 +378,21 @@ describe('useModuleDetail', () => {
     const { result } = renderHook(() => useModuleDetail(), { wrapper: createWrapper() })
     await waitFor(() => expect(result.current.selectedVersion?.version).toBe('2.0.0'))
 
-    act(() => { result.current.setDeprecationMessage('use 3.0.0 instead') })
+    act(() => {
+      result.current.setDeprecationMessage('use 3.0.0 instead')
+    })
     await act(async () => {
       result.current.handleDeprecateVersion()
     })
 
     await waitFor(() => {
       expect(mockApi.deprecateModuleVersion).toHaveBeenCalledWith(
-        'hashicorp', 'consul', 'aws', '2.0.0', 'use 3.0.0 instead', undefined,
+        'hashicorp',
+        'consul',
+        'aws',
+        '2.0.0',
+        'use 3.0.0 instead',
+        undefined,
       )
     })
   })
@@ -387,7 +407,12 @@ describe('useModuleDetail', () => {
     })
 
     await waitFor(() => {
-      expect(mockApi.undeprecateModuleVersion).toHaveBeenCalledWith('hashicorp', 'consul', 'aws', '2.0.0')
+      expect(mockApi.undeprecateModuleVersion).toHaveBeenCalledWith(
+        'hashicorp',
+        'consul',
+        'aws',
+        '2.0.0',
+      )
     })
   })
 
@@ -406,9 +431,10 @@ describe('useModuleDetail', () => {
     })
 
     await waitFor(() => {
-      expect(mockApi.deprecateModule).toHaveBeenCalledWith(
-        'hashicorp', 'consul', 'aws', { message: 'EOL', successor_module_id: 'other/mod/aws' },
-      )
+      expect(mockApi.deprecateModule).toHaveBeenCalledWith('hashicorp', 'consul', 'aws', {
+        message: 'EOL',
+        successor_module_id: 'other/mod/aws',
+      })
     })
   })
 
@@ -431,7 +457,9 @@ describe('useModuleDetail', () => {
     const { result } = renderHook(() => useModuleDetail(), { wrapper: createWrapper() })
     await waitFor(() => expect(result.current.loading).toBe(false))
 
-    act(() => { result.current.handleSCMSync() })
+    act(() => {
+      result.current.handleSCMSync()
+    })
     expect(mockApi.triggerManualSync).not.toHaveBeenCalled()
   })
 
@@ -440,7 +468,9 @@ describe('useModuleDetail', () => {
     const { result } = renderHook(() => useModuleDetail(), { wrapper: createWrapper() })
     await waitFor(() => expect(result.current.module?.id).toBe('mod-123'))
 
-    act(() => { result.current.handleSCMSync() })
+    act(() => {
+      result.current.handleSCMSync()
+    })
 
     await waitFor(() => {
       expect(mockApi.triggerManualSync).toHaveBeenCalledWith('mod-123')
@@ -452,7 +482,9 @@ describe('useModuleDetail', () => {
     const { result } = renderHook(() => useModuleDetail(), { wrapper: createWrapper() })
     await waitFor(() => expect(result.current.loading).toBe(false))
 
-    act(() => { result.current.handleSCMUnlink() })
+    act(() => {
+      result.current.handleSCMUnlink()
+    })
     expect(mockApi.unlinkModuleFromSCM).not.toHaveBeenCalled()
   })
 
@@ -461,7 +493,9 @@ describe('useModuleDetail', () => {
     const { result } = renderHook(() => useModuleDetail(), { wrapper: createWrapper() })
     await waitFor(() => expect(result.current.module?.id).toBe('mod-123'))
 
-    act(() => { result.current.handleSCMUnlink() })
+    act(() => {
+      result.current.handleSCMUnlink()
+    })
 
     await waitFor(() => {
       expect(mockApi.unlinkModuleFromSCM).toHaveBeenCalledWith('mod-123')
@@ -477,7 +511,9 @@ describe('useModuleDetail', () => {
     const { result } = renderHook(() => useModuleDetail(), { wrapper: createWrapper() })
     await waitFor(() => expect(result.current.selectedVersion?.version).toBe('2.0.0'))
 
-    act(() => { result.current.handleCopySource() })
+    act(() => {
+      result.current.handleCopySource()
+    })
 
     expect(writeText).toHaveBeenCalledWith('hashicorp/consul/aws')
     expect(result.current.copiedSource).toBe(true)
@@ -493,19 +529,23 @@ describe('useModuleDetail', () => {
     const { result } = renderHook(() => useModuleDetail(), { wrapper: createWrapper() })
     await waitFor(() => expect(result.current.loading).toBe(false))
 
-    act(() => { result.current.handleCopySource() })
+    act(() => {
+      result.current.handleCopySource()
+    })
     expect(writeText).not.toHaveBeenCalled()
   })
 
   it('handleUpdateDescription calls api.updateModule when module.id is available', async () => {
     const updateModule = vi.fn().mockResolvedValue(undefined)
-      // Extend api mock ad-hoc so updateModule is callable via the hook.
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      ; (mockApi as any).updateModule = updateModule
+    // Extend api mock ad-hoc so updateModule is callable via the hook.
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ;(mockApi as any).updateModule = updateModule
     const { result } = renderHook(() => useModuleDetail(), { wrapper: createWrapper() })
     await waitFor(() => expect(result.current.module?.id).toBe('mod-123'))
 
-    act(() => { result.current.handleUpdateDescription('new description') })
+    act(() => {
+      result.current.handleUpdateDescription('new description')
+    })
 
     await waitFor(() => {
       expect(updateModule).toHaveBeenCalledWith('mod-123', { description: 'new description' })
@@ -514,7 +554,13 @@ describe('useModuleDetail', () => {
 
   it('loadWebhookEvents populates webhookEvents list', async () => {
     mockApi.getWebhookEvents.mockResolvedValue([
-      { id: 'ev-1', delivery_id: 'd1', event_type: 'push', processed: true, created_at: '2025-01-01' },
+      {
+        id: 'ev-1',
+        delivery_id: 'd1',
+        event_type: 'push',
+        processed: true,
+        created_at: '2025-01-01',
+      },
     ])
     const { result } = renderHook(() => useModuleDetail(), { wrapper: createWrapper() })
     await waitFor(() => expect(result.current.loading).toBe(false))

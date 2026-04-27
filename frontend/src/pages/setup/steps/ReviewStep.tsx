@@ -1,26 +1,45 @@
-import React from 'react';
-import { Box, Typography, Divider, Stack, Chip, Alert, AlertTitle, Button, CircularProgress } from '@mui/material';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import ErrorIcon from '@mui/icons-material/Error';
-import SecurityIcon from '@mui/icons-material/Security';
-import StorageIcon from '@mui/icons-material/Storage';
-import ShieldIcon from '@mui/icons-material/Shield';
-import PersonIcon from '@mui/icons-material/Person';
-import { useSetupWizard } from '../../../contexts/SetupWizardContext';
+import React from 'react'
+import {
+  Box,
+  Typography,
+  Divider,
+  Stack,
+  Chip,
+  Alert,
+  AlertTitle,
+  Button,
+  CircularProgress,
+} from '@mui/material'
+import CheckCircleIcon from '@mui/icons-material/CheckCircle'
+import ErrorIcon from '@mui/icons-material/Error'
+import SecurityIcon from '@mui/icons-material/Security'
+import StorageIcon from '@mui/icons-material/Storage'
+import ShieldIcon from '@mui/icons-material/Shield'
+import PersonIcon from '@mui/icons-material/Person'
+import { useSetupWizard } from '../../../contexts/SetupWizardContext'
 
 const ReviewStep: React.FC = () => {
   const {
-    setupStatus, authMethod,
-    oidcForm, oidcSaved,
-    ldapForm, ldapSaved,
-    storageForm, storageSaved,
-    scanningForm, scanningSaved, scanningTestResult,
-    adminEmail, adminSaved,
-    completing, completeSetup, goToStep,
-  } = useSetupWizard();
+    setupStatus,
+    authMethod,
+    oidcForm,
+    oidcSaved,
+    ldapForm,
+    ldapSaved,
+    storageForm,
+    storageSaved,
+    scanningForm,
+    scanningSaved,
+    scanningTestResult,
+    adminEmail,
+    adminSaved,
+    completing,
+    completeSetup,
+    goToStep,
+  } = useSetupWizard()
 
-  const isPending = setupStatus?.pending_feature_setup ?? false;
-  const authSaved = authMethod === 'oidc' ? oidcSaved : ldapSaved;
+  const isPending = setupStatus?.pending_feature_setup ?? false
+  const authSaved = authMethod === 'oidc' ? oidcSaved : ldapSaved
 
   return (
     <Box>
@@ -50,7 +69,8 @@ const ReviewStep: React.FC = () => {
         </Box>
         {authSaved && authMethod === 'oidc' && (
           <Typography variant="body2" color="text.secondary" sx={{ pl: 4 }}>
-            {oidcForm.provider_type === 'azuread' ? 'Azure AD' : 'Generic OIDC'} — {oidcForm.issuer_url}
+            {oidcForm.provider_type === 'azuread' ? 'Azure AD' : 'Generic OIDC'} —{' '}
+            {oidcForm.issuer_url}
           </Typography>
         )}
         {authSaved && authMethod === 'ldap' && (
@@ -98,7 +118,8 @@ const ReviewStep: React.FC = () => {
         </Box>
         {scanningSaved && scanningForm.enabled && (
           <Typography variant="body2" color="text.secondary" sx={{ pl: 4 }}>
-            {scanningForm.tool}{scanningTestResult?.version ? ` v${scanningTestResult.version}` : ''}
+            {scanningForm.tool}
+            {scanningTestResult?.version ? ` v${scanningTestResult.version}` : ''}
           </Typography>
         )}
 
@@ -122,13 +143,15 @@ const ReviewStep: React.FC = () => {
 
       <Alert severity="warning" sx={{ mb: 3 }}>
         <AlertTitle>This action is permanent</AlertTitle>
-        After completing setup, the setup token will be invalidated and these endpoints
-        will be permanently disabled. All future configuration changes must be made through
-        the authenticated admin interface.
+        After completing setup, the setup token will be invalidated and these endpoints will be
+        permanently disabled. All future configuration changes must be made through the
+        authenticated admin interface.
       </Alert>
 
       <Stack direction="row" spacing={2} justifyContent="center">
-        <Button variant="text" onClick={() => goToStep(isPending ? 3 : 4)}>← Back</Button>
+        <Button variant="text" onClick={() => goToStep(isPending ? 3 : 4)}>
+          ← Back
+        </Button>
         <Button
           variant="contained"
           color="primary"
@@ -141,7 +164,7 @@ const ReviewStep: React.FC = () => {
         </Button>
       </Stack>
     </Box>
-  );
-};
+  )
+}
 
-export default ReviewStep;
+export default ReviewStep

@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import React, { useState, useEffect } from 'react'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import {
   Container,
   Typography,
@@ -34,58 +34,57 @@ import {
   Radio,
   RadioGroup,
   Slider,
-} from '@mui/material';
-import DeleteIcon from '@mui/icons-material/Delete';
-import AddIcon from '@mui/icons-material/Add';
-import KeyIcon from '@mui/icons-material/Key';
-import EmptyState from '../../components/EmptyState';
-import CopyIcon from '@mui/icons-material/ContentCopy';
-import InfoIcon from '@mui/icons-material/Info';
-import EditIcon from '@mui/icons-material/Edit';
-import AutorenewIcon from '@mui/icons-material/Autorenew';
-import api from '../../services/api';
-import { APIKey } from '../../types';
-import { REGISTRY_HOST } from '../../config';
-import { useAuth } from '../../contexts/AuthContext';
-import { AVAILABLE_SCOPES } from '../../types/rbac';
-import { getScopeInfo } from '../../utils';
-import { getErrorMessage } from '../../utils/errors';
-import { queryKeys } from '../../services/queryKeys';
+} from '@mui/material'
+import DeleteIcon from '@mui/icons-material/Delete'
+import AddIcon from '@mui/icons-material/Add'
+import KeyIcon from '@mui/icons-material/Key'
+import EmptyState from '../../components/EmptyState'
+import CopyIcon from '@mui/icons-material/ContentCopy'
+import InfoIcon from '@mui/icons-material/Info'
+import EditIcon from '@mui/icons-material/Edit'
+import AutorenewIcon from '@mui/icons-material/Autorenew'
+import api from '../../services/api'
+import { APIKey } from '../../types'
+import { REGISTRY_HOST } from '../../config'
+import { useAuth } from '../../contexts/AuthContext'
+import { AVAILABLE_SCOPES } from '../../types/rbac'
+import { getScopeInfo } from '../../utils'
+import { getErrorMessage } from '../../utils/errors'
+import { queryKeys } from '../../services/queryKeys'
 
-function getExpirationStatus(expiresAt?: string | null): 'expired' | 'expiring-soon' | 'active' | 'never' {
-  if (!expiresAt) return 'never';
-  const exp = new Date(expiresAt);
-  if (isNaN(exp.getTime())) return 'never';
-  const now = new Date();
-  if (exp <= now) return 'expired';
-  const sevenDays = 7 * 24 * 60 * 60 * 1000;
-  if (exp.getTime() - now.getTime() <= sevenDays) return 'expiring-soon';
-  return 'active';
+function getExpirationStatus(
+  expiresAt?: string | null,
+): 'expired' | 'expiring-soon' | 'active' | 'never' {
+  if (!expiresAt) return 'never'
+  const exp = new Date(expiresAt)
+  if (isNaN(exp.getTime())) return 'never'
+  const now = new Date()
+  if (exp <= now) return 'expired'
+  const sevenDays = 7 * 24 * 60 * 60 * 1000
+  if (exp.getTime() - now.getTime() <= sevenDays) return 'expiring-soon'
+  return 'active'
 }
 
 function toDatetimeLocalValue(isoString?: string | null): string {
-  if (!isoString) return '';
-  const d = new Date(isoString);
-  if (isNaN(d.getTime())) return '';
+  if (!isoString) return ''
+  const d = new Date(isoString)
+  if (isNaN(d.getTime())) return ''
   // Format as YYYY-MM-DDTHH:MM for datetime-local input
-  const pad = (n: number) => n.toString().padStart(2, '0');
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  const pad = (n: number) => n.toString().padStart(2, '0')
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`
 }
 
 const APIKeysPage: React.FC = () => {
-  const queryClient = useQueryClient();
-  const { allowedScopes, roleTemplate, user } = useAuth();
-  const [error, setError] = useState<string | null>(null);
+  const queryClient = useQueryClient()
+  const { allowedScopes, roleTemplate, user } = useAuth()
+  const [error, setError] = useState<string | null>(null)
 
   // Memberships query
-  const {
-    data: memberships = [],
-    isLoading: membershipsLoading,
-  } = useQuery({
+  const { data: memberships = [], isLoading: membershipsLoading } = useQuery({
     queryKey: queryKeys.apiKeys.memberships(user?.id ?? ''),
     queryFn: () => api.getCurrentUserMemberships(),
     enabled: !!user?.id,
-  });
+  })
 
   // API Keys query
   const {
@@ -95,42 +94,45 @@ const APIKeysPage: React.FC = () => {
   } = useQuery<APIKey[]>({
     queryKey: queryKeys.apiKeys.list(),
     queryFn: async () => {
-      const keys = await api.listAPIKeys();
-      return Array.isArray(keys) ? keys : [];
+      const keys = await api.listAPIKeys()
+      return Array.isArray(keys) ? keys : []
     },
-  });
+  })
 
   useEffect(() => {
     if (queryError && !error) {
-      setError('Failed to load API keys. Please try again.');
+      setError('Failed to load API keys. Please try again.')
     }
-  }, [queryError]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [queryError]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Create dialog state
-  const [openDialog, setOpenDialog] = useState(false);
-  const [newKeyValue, setNewKeyValue] = useState<string | null>(null);
-  const [copiedKey, setCopiedKey] = useState(false);
+  const [openDialog, setOpenDialog] = useState(false)
+  const [newKeyValue, setNewKeyValue] = useState<string | null>(null)
+  const [copiedKey, setCopiedKey] = useState(false)
 
   // Delete dialog state
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [keyToDelete, setKeyToDelete] = useState<APIKey | null>(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
+  const [keyToDelete, setKeyToDelete] = useState<APIKey | null>(null)
 
   // Edit dialog state
-  const [editDialogOpen, setEditDialogOpen] = useState(false);
-  const [keyToEdit, setKeyToEdit] = useState<APIKey | null>(null);
+  const [editDialogOpen, setEditDialogOpen] = useState(false)
+  const [keyToEdit, setKeyToEdit] = useState<APIKey | null>(null)
   const [editFormData, setEditFormData] = useState({
     name: '',
     scopes: [] as string[],
     expires_at: '',
-  });
+  })
 
   // Rotate dialog state
-  const [rotateDialogOpen, setRotateDialogOpen] = useState(false);
-  const [keyToRotate, setKeyToRotate] = useState<APIKey | null>(null);
-  const [rotateMode, setRotateMode] = useState<'immediate' | 'grace'>('immediate');
-  const [gracePeriodHours, setGracePeriodHours] = useState(24);
-  const [rotatedKeyValue, setRotatedKeyValue] = useState<string | null>(null);
-  const [rotateResult, setRotateResult] = useState<{ oldStatus: string; oldExpiresAt?: string } | null>(null);
+  const [rotateDialogOpen, setRotateDialogOpen] = useState(false)
+  const [keyToRotate, setKeyToRotate] = useState<APIKey | null>(null)
+  const [rotateMode, setRotateMode] = useState<'immediate' | 'grace'>('immediate')
+  const [gracePeriodHours, setGracePeriodHours] = useState(24)
+  const [rotatedKeyValue, setRotatedKeyValue] = useState<string | null>(null)
+  const [rotateResult, setRotateResult] = useState<{
+    oldStatus: string
+    oldExpiresAt?: string
+  } | null>(null)
 
   // Create form state
   const [formData, setFormData] = useState({
@@ -139,46 +141,45 @@ const APIKeysPage: React.FC = () => {
     organization_id: '',
     scopes: [] as string[],
     expires_at: '',
-  });
+  })
 
   // Check if user has admin scope (which grants all permissions)
-  const hasAdminScope = allowedScopes.includes('admin');
+  const hasAdminScope = allowedScopes.includes('admin')
 
   // Get available scopes for this user
-  const availableScopes = hasAdminScope
-    ? AVAILABLE_SCOPES.map((s) => s.value)
-    : allowedScopes;
+  const availableScopes = hasAdminScope ? AVAILABLE_SCOPES.map((s) => s.value) : allowedScopes
 
   // --- Create Dialog ---
 
   const handleOpenDialog = () => {
-    setNewKeyValue(null);
+    setNewKeyValue(null)
     const defaultScopes = ['modules:read', 'providers:read'].filter((s) =>
-      availableScopes.includes(s)
-    );
-    const defaultOrgId = memberships.length > 0 ? memberships[0].organization_id : '';
+      availableScopes.includes(s),
+    )
+    const defaultOrgId = memberships.length > 0 ? memberships[0].organization_id : ''
     setFormData({
       name: '',
       description: '',
       organization_id: defaultOrgId,
       scopes: defaultScopes,
       expires_at: '',
-    });
-    setError(null);
-    setOpenDialog(true);
-  };
+    })
+    setError(null)
+    setOpenDialog(true)
+  }
 
   const handleCloseDialog = () => {
-    setOpenDialog(false);
-  };
+    setOpenDialog(false)
+  }
 
   const handleCreateAPIKey = async () => {
     try {
-      setError(null);
-      const orgId = formData.organization_id || (memberships.length > 0 ? memberships[0].organization_id : '');
+      setError(null)
+      const orgId =
+        formData.organization_id || (memberships.length > 0 ? memberships[0].organization_id : '')
       if (!orgId) {
-        setError('You must be a member of an organization to create API keys.');
-        return;
+        setError('You must be a member of an organization to create API keys.')
+        return
       }
       const response = await api.createAPIKey({
         name: formData.name,
@@ -186,167 +187,170 @@ const APIKeysPage: React.FC = () => {
         description: formData.description || undefined,
         scopes: formData.scopes,
         expires_at: formData.expires_at ? new Date(formData.expires_at).toISOString() : undefined,
-      });
-      setNewKeyValue(response.key);
-      queryClient.invalidateQueries({ queryKey: queryKeys.apiKeys._def });
+      })
+      setNewKeyValue(response.key)
+      queryClient.invalidateQueries({ queryKey: queryKeys.apiKeys._def })
     } catch (err: unknown) {
-      console.error('Failed to create API key:', err);
-      setError(getErrorMessage(err, 'Failed to create API key. Please try again.'));
+      console.error('Failed to create API key:', err)
+      setError(getErrorMessage(err, 'Failed to create API key. Please try again.'))
     }
-  };
+  }
 
   // --- Edit Dialog ---
 
   const handleEditClick = (key: APIKey) => {
-    setKeyToEdit(key);
+    setKeyToEdit(key)
     setEditFormData({
       name: key.name || '',
       scopes: key.scopes || [],
       expires_at: toDatetimeLocalValue(key.expires_at),
-    });
-    setError(null);
-    setEditDialogOpen(true);
-  };
+    })
+    setError(null)
+    setEditDialogOpen(true)
+  }
 
   const handleEditScopeToggle = (scope: string) => {
     setEditFormData((prev) => {
       const newScopes = prev.scopes.includes(scope)
         ? prev.scopes.filter((s) => s !== scope)
-        : [...prev.scopes, scope];
-      return { ...prev, scopes: newScopes };
-    });
-  };
+        : [...prev.scopes, scope]
+      return { ...prev, scopes: newScopes }
+    })
+  }
 
   const handleEditSave = async () => {
-    if (!keyToEdit) return;
+    if (!keyToEdit) return
     try {
-      setError(null);
+      setError(null)
       await api.updateAPIKey(keyToEdit.id, {
         name: editFormData.name,
         scopes: editFormData.scopes,
-        expires_at: editFormData.expires_at ? new Date(editFormData.expires_at).toISOString() : undefined,
-      });
-      setEditDialogOpen(false);
-      setKeyToEdit(null);
-      queryClient.invalidateQueries({ queryKey: queryKeys.apiKeys._def });
+        expires_at: editFormData.expires_at
+          ? new Date(editFormData.expires_at).toISOString()
+          : undefined,
+      })
+      setEditDialogOpen(false)
+      setKeyToEdit(null)
+      queryClient.invalidateQueries({ queryKey: queryKeys.apiKeys._def })
     } catch (err: unknown) {
-      console.error('Failed to update API key:', err);
-      setError(getErrorMessage(err, 'Failed to update API key. Please try again.'));
+      console.error('Failed to update API key:', err)
+      setError(getErrorMessage(err, 'Failed to update API key. Please try again.'))
     }
-  };
+  }
 
   // --- Rotate Dialog ---
 
   const handleRotateClick = (key: APIKey) => {
-    setKeyToRotate(key);
-    setRotateMode('immediate');
-    setGracePeriodHours(24);
-    setRotatedKeyValue(null);
-    setRotateResult(null);
-    setError(null);
-    setRotateDialogOpen(true);
-  };
+    setKeyToRotate(key)
+    setRotateMode('immediate')
+    setGracePeriodHours(24)
+    setRotatedKeyValue(null)
+    setRotateResult(null)
+    setError(null)
+    setRotateDialogOpen(true)
+  }
 
   const handleRotateConfirm = async () => {
-    if (!keyToRotate) return;
+    if (!keyToRotate) return
     try {
-      setError(null);
-      const hours = rotateMode === 'immediate' ? 0 : gracePeriodHours;
-      const response = await api.rotateAPIKey(keyToRotate.id, hours);
-      const newKey = response.new_key;
-      setRotatedKeyValue(newKey?.key || newKey?.Key || '');
+      setError(null)
+      const hours = rotateMode === 'immediate' ? 0 : gracePeriodHours
+      const response = await api.rotateAPIKey(keyToRotate.id, hours)
+      const newKey = response.new_key
+      setRotatedKeyValue(newKey?.key || newKey?.Key || '')
       setRotateResult({
         oldStatus: response.old_key_status,
         oldExpiresAt: response.old_expires_at,
-      });
-      queryClient.invalidateQueries({ queryKey: queryKeys.apiKeys._def });
+      })
+      queryClient.invalidateQueries({ queryKey: queryKeys.apiKeys._def })
     } catch (err: unknown) {
-      console.error('Failed to rotate API key:', err);
-      setError(getErrorMessage(err, 'Failed to rotate API key. Please try again.'));
+      console.error('Failed to rotate API key:', err)
+      setError(getErrorMessage(err, 'Failed to rotate API key. Please try again.'))
     }
-  };
+  }
 
   const handleCloseRotateDialog = () => {
-    setRotateDialogOpen(false);
-    setKeyToRotate(null);
-    setRotatedKeyValue(null);
-    setRotateResult(null);
-  };
+    setRotateDialogOpen(false)
+    setKeyToRotate(null)
+    setRotatedKeyValue(null)
+    setRotateResult(null)
+  }
 
   // --- Delete Dialog ---
 
   const handleDeleteClick = (key: APIKey) => {
-    setKeyToDelete(key);
-    setDeleteDialogOpen(true);
-  };
+    setKeyToDelete(key)
+    setDeleteDialogOpen(true)
+  }
 
   const handleDeleteConfirm = async () => {
-    if (!keyToDelete) return;
+    if (!keyToDelete) return
     try {
-      setError(null);
-      await api.deleteAPIKey(keyToDelete.id);
-      setDeleteDialogOpen(false);
-      setKeyToDelete(null);
-      queryClient.invalidateQueries({ queryKey: queryKeys.apiKeys._def });
+      setError(null)
+      await api.deleteAPIKey(keyToDelete.id)
+      setDeleteDialogOpen(false)
+      setKeyToDelete(null)
+      queryClient.invalidateQueries({ queryKey: queryKeys.apiKeys._def })
     } catch (err: unknown) {
-      console.error('Failed to delete API key:', err);
-      setError(getErrorMessage(err, 'Failed to delete API key. Please try again.'));
+      console.error('Failed to delete API key:', err)
+      setError(getErrorMessage(err, 'Failed to delete API key. Please try again.'))
     }
-  };
+  }
 
   // --- Helpers ---
 
   const handleCopyKey = (key: string) => {
-    navigator.clipboard.writeText(key);
-    setCopiedKey(true);
-    setTimeout(() => setCopiedKey(false), 2000);
-  };
+    navigator.clipboard.writeText(key)
+    setCopiedKey(true)
+    setTimeout(() => setCopiedKey(false), 2000)
+  }
 
   const getKeyTail = (prefix: string) => {
-    return '...' + prefix.slice(-6);
-  };
+    return '...' + prefix.slice(-6)
+  }
 
   const handleScopeToggle = (scope: string) => {
     setFormData((prev) => {
       const newScopes = prev.scopes.includes(scope)
         ? prev.scopes.filter((s) => s !== scope)
-        : [...prev.scopes, scope];
-      return { ...prev, scopes: newScopes };
-    });
-  };
+        : [...prev.scopes, scope]
+      return { ...prev, scopes: newScopes }
+    })
+  }
 
   const renderExpirationChip = (expiresAt?: string | null) => {
-    const status = getExpirationStatus(expiresAt);
+    const status = getExpirationStatus(expiresAt)
     switch (status) {
       case 'expired':
-        return <Chip label="Expired" size="small" color="error" />;
+        return <Chip label="Expired" size="small" color="error" />
       case 'expiring-soon':
         return (
           <Tooltip title={`Expires ${new Date(expiresAt!).toLocaleString()}`}>
             <Chip label="Expires soon" size="small" color="warning" />
           </Tooltip>
-        );
+        )
       case 'active':
-        return (
-          <Typography variant="body2">
-            {new Date(expiresAt!).toLocaleDateString()}
-          </Typography>
-        );
+        return <Typography variant="body2">{new Date(expiresAt!).toLocaleDateString()}</Typography>
       case 'never':
       default:
         return (
           <Typography variant="body2" color="text.secondary">
             Never
           </Typography>
-        );
+        )
     }
-  };
+  }
 
   const renderScopeChips = (scopes: string[]) => {
-    if (!scopes || scopes.length === 0) return <Typography variant="body2" color="text.secondary">None</Typography>;
-    const maxVisible = 2;
-    const visible = scopes.slice(0, maxVisible);
-    const remaining = scopes.length - maxVisible;
+    if (!scopes || scopes.length === 0)
+      return (
+        <Typography variant="body2" color="text.secondary">
+          None
+        </Typography>
+      )
+    const maxVisible = 2
+    const visible = scopes.slice(0, maxVisible)
+    const remaining = scopes.length - maxVisible
     return (
       <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
         {visible.map((scope) => (
@@ -372,20 +376,18 @@ const APIKeysPage: React.FC = () => {
           </Tooltip>
         )}
       </Box>
-    );
-  };
+    )
+  }
 
   // Scope checkboxes component (reused in create and edit dialogs)
-  const renderScopeCheckboxes = (
-    selectedScopes: string[],
-    onToggle: (scope: string) => void
-  ) => (
+  const renderScopeCheckboxes = (selectedScopes: string[], onToggle: (scope: string) => void) => (
     <Box>
       <Typography variant="subtitle2" gutterBottom>
         Scopes
       </Typography>
       <Typography variant="caption" color="text.secondary" sx={{ mb: 1, display: 'block' }}>
-        Select the permissions for this API key. You can only select scopes within your role's permissions.
+        Select the permissions for this API key. You can only select scopes within your role's
+        permissions.
       </Typography>
       {availableScopes.length === 0 ? (
         <Alert severity="error">
@@ -394,7 +396,7 @@ const APIKeysPage: React.FC = () => {
       ) : (
         <FormGroup>
           {availableScopes.map((scope) => {
-            const info = getScopeInfo(scope);
+            const info = getScopeInfo(scope)
             return (
               <Tooltip key={scope} title={info.description} placement="right">
                 <FormControlLabel
@@ -426,7 +428,7 @@ const APIKeysPage: React.FC = () => {
                   }
                 />
               </Tooltip>
-            );
+            )
           })}
         </FormGroup>
       )}
@@ -436,7 +438,7 @@ const APIKeysPage: React.FC = () => {
         </Typography>
       )}
     </Box>
-  );
+  )
 
   return (
     <Container maxWidth="lg" sx={{ py: 4 }} aria-busy={loading} aria-live="polite">
@@ -449,11 +451,7 @@ const APIKeysPage: React.FC = () => {
             Manage API keys for Terraform CLI authentication
           </Typography>
         </Box>
-        <Button
-          variant="contained"
-          startIcon={<AddIcon />}
-          onClick={handleOpenDialog}
-        >
+        <Button variant="contained" startIcon={<AddIcon />} onClick={handleOpenDialog}>
           Create API Key
         </Button>
       </Box>
@@ -466,7 +464,8 @@ const APIKeysPage: React.FC = () => {
 
       {!membershipsLoading && memberships.length === 0 && (
         <Alert severity="warning" sx={{ mb: 3 }}>
-          You are not a member of any organization. Contact an administrator to add you to an organization before creating API keys.
+          You are not a member of any organization. Contact an administrator to add you to an
+          organization before creating API keys.
         </Alert>
       )}
 
@@ -504,7 +503,7 @@ const APIKeysPage: React.FC = () => {
               </TableHead>
               <TableBody>
                 {apiKeys.map((apiKey) => {
-                  const expStatus = getExpirationStatus(apiKey.expires_at);
+                  const expStatus = getExpirationStatus(apiKey.expires_at)
                   return (
                     <TableRow
                       key={apiKey.id}
@@ -513,7 +512,11 @@ const APIKeysPage: React.FC = () => {
                       <TableCell>
                         <Typography fontWeight="medium">{apiKey.name || '-'}</Typography>
                         {apiKey.description && (
-                          <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>
+                          <Typography
+                            variant="caption"
+                            color="text.secondary"
+                            sx={{ display: 'block' }}
+                          >
                             {apiKey.description}
                           </Typography>
                         )}
@@ -571,7 +574,7 @@ const APIKeysPage: React.FC = () => {
                         </Box>
                       </TableCell>
                     </TableRow>
-                  );
+                  )
                 })}
               </TableBody>
             </Table>
@@ -592,8 +595,8 @@ const APIKeysPage: React.FC = () => {
           {newKeyValue ? (
             <Box sx={{ mt: 2 }}>
               <Alert severity="success" sx={{ mb: 3 }}>
-                API key created successfully! Make sure to copy it now - you won't be able to see
-                it again.
+                API key created successfully! Make sure to copy it now - you won't be able to see it
+                again.
               </Alert>
               <TextField
                 label="API Key"
@@ -603,7 +606,10 @@ const APIKeysPage: React.FC = () => {
                   readOnly: true,
                   endAdornment: (
                     <InputAdornment position="end">
-                      <IconButton aria-label="Copy API key" onClick={() => handleCopyKey(newKeyValue)}>
+                      <IconButton
+                        aria-label="Copy API key"
+                        onClick={() => handleCopyKey(newKeyValue)}
+                      >
                         <CopyIcon />
                       </IconButton>
                     </InputAdornment>
@@ -627,8 +633,8 @@ const APIKeysPage: React.FC = () => {
               )}
               {roleTemplate && (
                 <Alert severity="info" icon={<InfoIcon />}>
-                  Your role: <strong>{roleTemplate.display_name}</strong>. You can only create API keys
-                  with scopes that match your role permissions.
+                  Your role: <strong>{roleTemplate.display_name}</strong>. You can only create API
+                  keys with scopes that match your role permissions.
                 </Alert>
               )}
               {memberships.length === 0 && (
@@ -644,11 +650,18 @@ const APIKeysPage: React.FC = () => {
                     onChange={(e) => setFormData({ ...formData, organization_id: e.target.value })}
                     label="Organization"
                   >
-                    {memberships.map((m: { organization_id: string; organization_name: string; role_template_display_name?: string }) => (
-                      <MenuItem key={m.organization_id} value={m.organization_id}>
-                        {m.organization_name} {m.role_template_display_name && `(${m.role_template_display_name})`}
-                      </MenuItem>
-                    ))}
+                    {memberships.map(
+                      (m: {
+                        organization_id: string
+                        organization_name: string
+                        role_template_display_name?: string
+                      }) => (
+                        <MenuItem key={m.organization_id} value={m.organization_id}>
+                          {m.organization_name}{' '}
+                          {m.role_template_display_name && `(${m.role_template_display_name})`}
+                        </MenuItem>
+                      ),
+                    )}
                   </Select>
                 </FormControl>
               )}
@@ -770,7 +783,10 @@ const APIKeysPage: React.FC = () => {
                   readOnly: true,
                   endAdornment: (
                     <InputAdornment position="end">
-                      <IconButton aria-label="Copy rotated key" onClick={() => handleCopyKey(rotatedKeyValue)}>
+                      <IconButton
+                        aria-label="Copy rotated key"
+                        onClick={() => handleCopyKey(rotatedKeyValue)}
+                      >
                         <CopyIcon />
                       </IconButton>
                     </InputAdornment>
@@ -794,8 +810,8 @@ const APIKeysPage: React.FC = () => {
           ) : (
             <Stack spacing={3} sx={{ mt: 2 }}>
               <Typography>
-                Rotating key "<strong>{keyToRotate?.name}</strong>" will generate a new key.
-                Choose how to handle the old key:
+                Rotating key "<strong>{keyToRotate?.name}</strong>" will generate a new key. Choose
+                how to handle the old key:
               </Typography>
               <FormControl>
                 <RadioGroup
@@ -835,7 +851,8 @@ const APIKeysPage: React.FC = () => {
                     valueLabelFormat={(v) => `${v}h`}
                   />
                   <Typography variant="caption" color="text.secondary">
-                    The old key will continue to work during the grace period, giving you time to update integrations.
+                    The old key will continue to work during the grace period, giving you time to
+                    update integrations.
                   </Typography>
                 </Box>
               )}
@@ -887,8 +904,8 @@ const APIKeysPage: React.FC = () => {
             sx={{
               mt: 2,
               p: 2,
-              backgroundColor: (theme) => theme.palette.mode === 'dark' ? '#2d2d2d' : '#f5f5f5',
-              color: (theme) => theme.palette.mode === 'dark' ? '#e6e6e6' : '#1e1e1e',
+              backgroundColor: (theme) => (theme.palette.mode === 'dark' ? '#2d2d2d' : '#f5f5f5'),
+              color: (theme) => (theme.palette.mode === 'dark' ? '#e6e6e6' : '#1e1e1e'),
               borderRadius: 1,
               overflow: 'auto',
               fontSize: '0.875rem',
@@ -902,7 +919,7 @@ credentials "${REGISTRY_HOST}" {
         </Typography>
       </Paper>
     </Container>
-  );
-};
+  )
+}
 
-export default APIKeysPage;
+export default APIKeysPage

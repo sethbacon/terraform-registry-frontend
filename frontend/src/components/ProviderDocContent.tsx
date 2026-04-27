@@ -1,21 +1,21 @@
-import React, { useEffect, useState } from 'react';
-import { Box, CircularProgress, Alert } from '@mui/material';
-import MarkdownRenderer from './MarkdownRenderer';
-import api from '../services/api';
+import React, { useEffect, useState } from 'react'
+import { Box, CircularProgress, Alert } from '@mui/material'
+import MarkdownRenderer from './MarkdownRenderer'
+import api from '../services/api'
 
 interface ProviderDocContentProps {
-  namespace: string;
-  type: string;
-  version: string;
-  category: string;
-  slug: string;
+  namespace: string
+  type: string
+  version: string
+  category: string
+  slug: string
 }
 
 function stripFrontmatter(content: string): string {
-  if (!content.startsWith('---')) return content;
-  const end = content.indexOf('\n---', 3);
-  if (end === -1) return content;
-  return content.slice(end + 4).trimStart();
+  if (!content.startsWith('---')) return content
+  const end = content.indexOf('\n---', 3)
+  if (end === -1) return content
+  return content.slice(end + 4).trimStart()
 }
 
 const ProviderDocContent: React.FC<ProviderDocContentProps> = ({
@@ -25,35 +25,35 @@ const ProviderDocContent: React.FC<ProviderDocContentProps> = ({
   category,
   slug,
 }) => {
-  const [content, setContent] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [content, setContent] = useState<string | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    let cancelled = false;
-    setLoading(true);
-    setError(null);
-    setContent(null);
+    let cancelled = false
+    setLoading(true)
+    setError(null)
+    setContent(null)
 
     api
       .getProviderDocContent(namespace, type, version, category, slug)
       .then((data) => {
         if (!cancelled) {
-          setContent(stripFrontmatter(data.content));
-          setLoading(false);
+          setContent(stripFrontmatter(data.content))
+          setLoading(false)
         }
       })
       .catch(() => {
         if (!cancelled) {
-          setError('Failed to load documentation.');
-          setLoading(false);
+          setError('Failed to load documentation.')
+          setLoading(false)
         }
-      });
+      })
 
     return () => {
-      cancelled = true;
-    };
-  }, [namespace, type, version, category, slug]);
+      cancelled = true
+    }
+  }, [namespace, type, version, category, slug])
 
   return (
     <Box aria-busy={loading} aria-live="polite">
@@ -71,7 +71,7 @@ const ProviderDocContent: React.FC<ProviderDocContentProps> = ({
         </Box>
       )}
     </Box>
-  );
-};
+  )
+}
 
-export default ProviderDocContent;
+export default ProviderDocContent

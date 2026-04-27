@@ -48,7 +48,7 @@ function renderLoginPage() {
   return render(
     <MemoryRouter>
       <LoginPage />
-    </MemoryRouter>
+    </MemoryRouter>,
   )
 }
 
@@ -64,7 +64,7 @@ describe('LoginPage', () => {
   })
 
   it('shows loading skeletons while fetching providers', () => {
-    mockGetAuthProviders.mockReturnValue(new Promise(() => { })) // never resolves
+    mockGetAuthProviders.mockReturnValue(new Promise(() => {})) // never resolves
     renderLoginPage()
     expect(screen.getByTestId('provider-loading')).toBeInTheDocument()
   })
@@ -116,7 +116,9 @@ describe('LoginPage', () => {
     mockProviders([{ type: 'oidc', name: 'OpenID Connect' }])
     renderLoginPage()
     const btn = await screen.findByRole('button', { name: 'Sign in with SSO' })
-    await act(async () => { await userEvent.click(btn) })
+    await act(async () => {
+      await userEvent.click(btn)
+    })
     await waitFor(() => expect(mockApiLogin).toHaveBeenCalledWith('oidc'))
   })
 
@@ -124,7 +126,9 @@ describe('LoginPage', () => {
     mockProviders([{ type: 'saml', name: 'Okta', id: 'okta-prod' }])
     renderLoginPage()
     const btn = await screen.findByRole('button', { name: 'Sign in with Okta' })
-    await act(async () => { await userEvent.click(btn) })
+    await act(async () => {
+      await userEvent.click(btn)
+    })
     await waitFor(() => expect(mockApiLogin).toHaveBeenCalledWith('okta-prod'))
   })
 

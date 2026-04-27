@@ -1,22 +1,14 @@
-import React from 'react';
-import {
-  Box,
-  Typography,
-  Paper,
-  Alert,
-  TextField,
-  Stack,
-  Chip,
-} from '@mui/material';
-import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
+import React from 'react'
+import { Box, Typography, Paper, Alert, TextField, Stack, Chip } from '@mui/material'
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined'
 
 /**
  * SCIMProvisioningPage displays SCIM 2.0 configuration info and endpoint URLs.
  * Admins use this to configure their identity provider's SCIM integration.
  */
 const SCIMProvisioningPage: React.FC = () => {
-  const baseUrl = window.location.origin;
-  const scimBaseUrl = `${baseUrl}/scim/v2`;
+  const baseUrl = window.location.origin
+  const scimBaseUrl = `${baseUrl}/scim/v2`
 
   return (
     <Box>
@@ -35,7 +27,8 @@ const SCIMProvisioningPage: React.FC = () => {
           </Typography>
           <Alert severity="info" icon={<InfoOutlinedIcon />} sx={{ mb: 2 }}>
             Configure your identity provider with the endpoints below. Authentication requires a
-            Bearer token (API key) with the <Chip label="scim:provision" size="small" sx={{ mx: 0.5 }} /> scope.
+            Bearer token (API key) with the{' '}
+            <Chip label="scim:provision" size="small" sx={{ mx: 0.5 }} /> scope.
           </Alert>
 
           <Stack spacing={2}>
@@ -84,7 +77,8 @@ const SCIMProvisioningPage: React.FC = () => {
           </Typography>
           <Stack spacing={1}>
             <Typography variant="body2">
-              <strong>Users:</strong> List, Get, Create, Update (PUT &amp; PATCH), Delete (soft-delete)
+              <strong>Users:</strong> List, Get, Create, Update (PUT &amp; PATCH), Delete
+              (soft-delete)
             </Typography>
             <Typography variant="body2">
               <strong>Groups:</strong> List, Get (read-only — groups map to registry organizations)
@@ -101,7 +95,7 @@ const SCIMProvisioningPage: React.FC = () => {
         </Paper>
       </Stack>
     </Box>
-  );
-};
+  )
+}
 
-export default SCIMProvisioningPage;
+export default SCIMProvisioningPage

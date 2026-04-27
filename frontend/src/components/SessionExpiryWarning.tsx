@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
-import { Snackbar, Alert, Stack, Button, CircularProgress } from '@mui/material';
-import { useAuth } from '../contexts/AuthContext';
+import React, { useState } from 'react'
+import { Snackbar, Alert, Stack, Button, CircularProgress } from '@mui/material'
+import { useAuth } from '../contexts/AuthContext'
 
 /**
  * Displays a persistent warning Snackbar when the current session is within the
@@ -9,19 +9,19 @@ import { useAuth } from '../contexts/AuthContext';
  * Mounted once in Layout so the warning appears on every authenticated page.
  */
 const SessionExpiryWarning: React.FC = () => {
-  const { sessionExpiresSoon, isAuthenticated, refreshToken, logout } = useAuth();
-  const [refreshing, setRefreshing] = useState(false);
+  const { sessionExpiresSoon, isAuthenticated, refreshToken, logout } = useAuth()
+  const [refreshing, setRefreshing] = useState(false)
 
-  if (!isAuthenticated || !sessionExpiresSoon) return null;
+  if (!isAuthenticated || !sessionExpiresSoon) return null
 
   const handleRefresh = async () => {
-    setRefreshing(true);
+    setRefreshing(true)
     try {
-      await refreshToken();
+      await refreshToken()
     } finally {
-      setRefreshing(false);
+      setRefreshing(false)
     }
-  };
+  }
 
   return (
     <Snackbar
@@ -59,7 +59,7 @@ const SessionExpiryWarning: React.FC = () => {
         Your session expires in 2 minutes. Refresh to stay signed in.
       </Alert>
     </Snackbar>
-  );
-};
+  )
+}
 
-export default SessionExpiryWarning;
+export default SessionExpiryWarning

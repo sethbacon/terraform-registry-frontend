@@ -1,24 +1,17 @@
-import React from 'react';
-import {
-  Paper,
-  Typography,
-  Divider,
-  Alert,
-  Button,
-  Stack,
-} from '@mui/material';
-import Delete from '@mui/icons-material/Delete';
-import Warning from '@mui/icons-material/Warning';
-import Restore from '@mui/icons-material/Restore';
-import { ModuleVersion } from '../types';
+import React from 'react'
+import { Paper, Typography, Divider, Alert, Button, Stack } from '@mui/material'
+import Delete from '@mui/icons-material/Delete'
+import Warning from '@mui/icons-material/Warning'
+import Restore from '@mui/icons-material/Restore'
+import { ModuleVersion } from '../types'
 
 interface VersionDetailsPanelProps {
-  selectedVersion: ModuleVersion | null;
-  canManage: boolean;
-  deprecating: boolean;
-  onUndeprecate: () => void;
-  onOpenDeprecateDialog: () => void;
-  onOpenDeleteVersionDialog: (version: string) => void;
+  selectedVersion: ModuleVersion | null
+  canManage: boolean
+  deprecating: boolean
+  onUndeprecate: () => void
+  onOpenDeprecateDialog: () => void
+  onOpenDeleteVersionDialog: (version: string) => void
 }
 
 const VersionDetailsPanel: React.FC<VersionDetailsPanelProps> = ({
@@ -29,7 +22,7 @@ const VersionDetailsPanel: React.FC<VersionDetailsPanelProps> = ({
   onOpenDeprecateDialog,
   onOpenDeleteVersionDialog,
 }) => {
-  if (!selectedVersion) return null;
+  if (!selectedVersion) return null
 
   return (
     <Paper sx={{ p: 3 }}>
@@ -39,8 +32,10 @@ const VersionDetailsPanel: React.FC<VersionDetailsPanelProps> = ({
       <Divider sx={{ mb: 2 }} />
       <Typography variant="body2" sx={{ mb: 2 }}>
         <strong>Published:</strong>{' '}
-        {(selectedVersion.published_at || selectedVersion.created_at)
-          ? new Date(selectedVersion.published_at || selectedVersion.created_at!).toLocaleDateString()
+        {selectedVersion.published_at || selectedVersion.created_at
+          ? new Date(
+              selectedVersion.published_at || selectedVersion.created_at!,
+            ).toLocaleDateString()
           : 'N/A'}
       </Typography>
       <Typography variant="body2" sx={{ mb: 2 }}>
@@ -114,7 +109,7 @@ const VersionDetailsPanel: React.FC<VersionDetailsPanelProps> = ({
         </Stack>
       )}
     </Paper>
-  );
-};
+  )
+}
 
-export default VersionDetailsPanel;
+export default VersionDetailsPanel

@@ -388,7 +388,9 @@ const ModuleUploadPage: React.FC = () => {
           <Button
             variant="contained"
             onClick={handleModuleUpload}
-            disabled={uploading || !moduleFile || (policyResult?.mode === 'block' && !policyResult?.allowed)}
+            disabled={
+              uploading || !moduleFile || (policyResult?.mode === 'block' && !policyResult?.allowed)
+            }
             startIcon={uploading ? <CircularProgress size={20} /> : <CloudUpload />}
             size="large"
           >
@@ -398,7 +400,9 @@ const ModuleUploadPage: React.FC = () => {
             <Button
               variant="outlined"
               size="large"
-              onClick={() => navigate(`/modules/${moduleNamespace}/${moduleName}/${moduleProvider}`)}
+              onClick={() =>
+                navigate(`/modules/${moduleNamespace}/${moduleName}/${moduleProvider}`)
+              }
             >
               View Module
             </Button>

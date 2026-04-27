@@ -1,4 +1,4 @@
-import React from 'react';
+import React from 'react'
 import {
   Box,
   Paper,
@@ -8,21 +8,21 @@ import {
   CircularProgress,
   Button,
   Stack,
-} from '@mui/material';
-import SCMIcon from '@mui/icons-material/AccountTree';
-import UnlinkIcon from '@mui/icons-material/LinkOff';
-import SyncIcon from '@mui/icons-material/Sync';
-import type { ModuleSCMLink } from '../types/scm';
+} from '@mui/material'
+import SCMIcon from '@mui/icons-material/AccountTree'
+import UnlinkIcon from '@mui/icons-material/LinkOff'
+import SyncIcon from '@mui/icons-material/Sync'
+import type { ModuleSCMLink } from '../types/scm'
 
 interface SCMRepositoryPanelProps {
-  isAuthenticated: boolean;
-  scmLinkLoaded: boolean;
-  scmLink: ModuleSCMLink | null;
-  scmSyncing: boolean;
-  scmUnlinking: boolean;
-  onSync: () => void;
-  onUnlink: () => void;
-  onOpenWizard: () => void;
+  isAuthenticated: boolean
+  scmLinkLoaded: boolean
+  scmLink: ModuleSCMLink | null
+  scmSyncing: boolean
+  scmUnlinking: boolean
+  onSync: () => void
+  onUnlink: () => void
+  onOpenWizard: () => void
 }
 
 const SCMRepositoryPanel: React.FC<SCMRepositoryPanelProps> = ({
@@ -35,7 +35,7 @@ const SCMRepositoryPanel: React.FC<SCMRepositoryPanelProps> = ({
   onUnlink,
   onOpenWizard,
 }) => {
-  if (!isAuthenticated || !scmLinkLoaded) return null;
+  if (!isAuthenticated || !scmLinkLoaded) return null
 
   return (
     <Paper sx={{ p: 3, mb: 3 }}>
@@ -47,7 +47,9 @@ const SCMRepositoryPanel: React.FC<SCMRepositoryPanelProps> = ({
       {scmLink ? (
         <Box>
           <Typography variant="body2" sx={{ mb: 0.5 }}>
-            <strong>{scmLink.repository_owner}/{scmLink.repository_name}</strong>
+            <strong>
+              {scmLink.repository_owner}/{scmLink.repository_name}
+            </strong>
           </Typography>
           <Typography variant="caption" color="text.secondary" display="block" sx={{ mb: 0.5 }}>
             Branch: {scmLink.default_branch}
@@ -108,7 +110,7 @@ const SCMRepositoryPanel: React.FC<SCMRepositoryPanelProps> = ({
         </Box>
       )}
     </Paper>
-  );
-};
+  )
+}
 
-export default SCMRepositoryPanel;
+export default SCMRepositoryPanel

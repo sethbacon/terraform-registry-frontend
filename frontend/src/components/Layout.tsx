@@ -1,6 +1,6 @@
-import { Outlet, Link as RouterLink, useLocation } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
-import i18n from '../i18n';
+import { Outlet, Link as RouterLink, useLocation } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
+import i18n from '../i18n'
 import {
   AppBar,
   Box,
@@ -22,51 +22,51 @@ import {
   useTheme,
   useMediaQuery,
   Tooltip,
-} from '@mui/material';
-import MenuIcon from '@mui/icons-material/Menu';
-import AccountCircle from '@mui/icons-material/AccountCircle';
-import Dashboard from '@mui/icons-material/Dashboard';
-import ViewModule from '@mui/icons-material/ViewModule';
-import Extension from '@mui/icons-material/Extension';
-import People from '@mui/icons-material/People';
-import Business from '@mui/icons-material/Business';
-import Key from '@mui/icons-material/Key';
-import Home from '@mui/icons-material/Home';
-import GitHub from '@mui/icons-material/GitHub';
-import CloudDownload from '@mui/icons-material/CloudDownload';
-import GetApp from '@mui/icons-material/GetApp';
-import Brightness4 from '@mui/icons-material/Brightness4';
-import Brightness7 from '@mui/icons-material/Brightness7';
-import HelpOutline from '@mui/icons-material/HelpOutline';
-import InfoOutlined from '@mui/icons-material/InfoOutlined';
-import SearchIcon from '@mui/icons-material/Search';
-import AdminPanelSettings from '@mui/icons-material/AdminPanelSettings';
-import VerifiedUser from '@mui/icons-material/VerifiedUser';
-import Security from '@mui/icons-material/Security';
-import Storage from '@mui/icons-material/Storage';
-import HourglassEmpty from '@mui/icons-material/HourglassEmpty';
-import Policy from '@mui/icons-material/Policy';
-import ManageAccounts from '@mui/icons-material/ManageAccounts';
-import SyncAlt from '@mui/icons-material/SyncAlt';
-import Description from '@mui/icons-material/Description';
-import ExpandMore from '@mui/icons-material/ExpandMore';
-import History from '@mui/icons-material/History';
-import ExpandLess from '@mui/icons-material/ExpandLess';
-import Palette from '@mui/icons-material/Palette';
-import SettingsIcon from '@mui/icons-material/Settings';
-import { useState, useMemo, useCallback, useEffect } from 'react';
-import { useAuth } from '../contexts/AuthContext';
-import { useThemeMode } from '../contexts/ThemeContext';
-import { useHelp } from '../contexts/HelpContext';
-import DevUserSwitcher from './DevUserSwitcher';
-import HelpPanel, { HELP_PANEL_WIDTH } from './HelpPanel';
-import AboutModal from './AboutModal';
-import AdminBreadcrumbs from './AdminBreadcrumbs';
-import CommandPalette from './CommandPalette';
-import { useHotkey } from '../hooks/useHotkey';
-import SessionExpiryWarning from './SessionExpiryWarning';
+} from '@mui/material'
+import MenuIcon from '@mui/icons-material/Menu'
+import AccountCircle from '@mui/icons-material/AccountCircle'
+import Dashboard from '@mui/icons-material/Dashboard'
+import ViewModule from '@mui/icons-material/ViewModule'
+import Extension from '@mui/icons-material/Extension'
+import People from '@mui/icons-material/People'
+import Business from '@mui/icons-material/Business'
+import Key from '@mui/icons-material/Key'
+import Home from '@mui/icons-material/Home'
+import GitHub from '@mui/icons-material/GitHub'
+import CloudDownload from '@mui/icons-material/CloudDownload'
+import GetApp from '@mui/icons-material/GetApp'
+import Brightness4 from '@mui/icons-material/Brightness4'
+import Brightness7 from '@mui/icons-material/Brightness7'
+import HelpOutline from '@mui/icons-material/HelpOutline'
+import InfoOutlined from '@mui/icons-material/InfoOutlined'
+import SearchIcon from '@mui/icons-material/Search'
+import AdminPanelSettings from '@mui/icons-material/AdminPanelSettings'
+import VerifiedUser from '@mui/icons-material/VerifiedUser'
+import Security from '@mui/icons-material/Security'
+import Storage from '@mui/icons-material/Storage'
+import HourglassEmpty from '@mui/icons-material/HourglassEmpty'
+import Policy from '@mui/icons-material/Policy'
+import ManageAccounts from '@mui/icons-material/ManageAccounts'
+import SyncAlt from '@mui/icons-material/SyncAlt'
+import Description from '@mui/icons-material/Description'
+import ExpandMore from '@mui/icons-material/ExpandMore'
+import History from '@mui/icons-material/History'
+import ExpandLess from '@mui/icons-material/ExpandLess'
+import Palette from '@mui/icons-material/Palette'
+import SettingsIcon from '@mui/icons-material/Settings'
+import { useState, useMemo, useCallback, useEffect } from 'react'
+import { useAuth } from '../contexts/AuthContext'
+import { useThemeMode } from '../contexts/ThemeContext'
+import { useHelp } from '../contexts/HelpContext'
+import DevUserSwitcher from './DevUserSwitcher'
+import HelpPanel, { HELP_PANEL_WIDTH } from './HelpPanel'
+import AboutModal from './AboutModal'
+import AdminBreadcrumbs from './AdminBreadcrumbs'
+import CommandPalette from './CommandPalette'
+import { useHotkey } from '../hooks/useHotkey'
+import SessionExpiryWarning from './SessionExpiryWarning'
 
-const drawerWidth = 240;
+const drawerWidth = 240
 
 // Native names are intentionally hardcoded (not translated) so each language is
 // always shown in its own script, making the picker usable even when the active
@@ -82,215 +82,348 @@ const LANGUAGE_NATIVE_NAMES = {
   nb: 'Norsk bokmål',
   zh: '简体中文',
   it: 'Italiano',
-} as const;
+} as const
 
-const SUPPORTED_LANGUAGES = Object.keys(LANGUAGE_NATIVE_NAMES) as Array<keyof typeof LANGUAGE_NATIVE_NAMES>;
+const SUPPORTED_LANGUAGES = Object.keys(LANGUAGE_NATIVE_NAMES) as Array<
+  keyof typeof LANGUAGE_NATIVE_NAMES
+>
 
 const Layout = () => {
-  const { t } = useTranslation();
-  const { user, isAuthenticated, logout, allowedScopes } = useAuth();
-  const { mode, toggleTheme, productName, logoUrl } = useThemeMode();
-  const { helpOpen, openHelp } = useHelp();
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
-  const location = useLocation();
+  const { t } = useTranslation()
+  const { user, isAuthenticated, logout, allowedScopes } = useAuth()
+  const { mode, toggleTheme, productName, logoUrl } = useThemeMode()
+  const { helpOpen, openHelp } = useHelp()
+  const theme = useTheme()
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'))
+  const location = useLocation()
 
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-  const [mobileOpen, setMobileOpen] = useState(false);
-  const [aboutOpen, setAboutOpen] = useState(false);
-  const [paletteOpen, setPaletteOpen] = useState(false);
-  const [settingsAnchorEl, setSettingsAnchorEl] = useState<null | HTMLElement>(null);
-  const [supportAnchorEl, setSupportAnchorEl] = useState<null | HTMLElement>(null);
-  useHotkey('mod+k', useCallback(() => setPaletteOpen((v) => !v), []));
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
+  const [mobileOpen, setMobileOpen] = useState(false)
+  const [aboutOpen, setAboutOpen] = useState(false)
+  const [paletteOpen, setPaletteOpen] = useState(false)
+  const [settingsAnchorEl, setSettingsAnchorEl] = useState<null | HTMLElement>(null)
+  const [supportAnchorEl, setSupportAnchorEl] = useState<null | HTMLElement>(null)
+  useHotkey(
+    'mod+k',
+    useCallback(() => setPaletteOpen((v) => !v), []),
+  )
 
   // Helper to check if user has a specific scope (or admin which grants all)
-  const hasScope = useCallback((scope: string) => {
-    return allowedScopes.includes('admin') || allowedScopes.includes(scope);
-  }, [allowedScopes]);
+  const hasScope = useCallback(
+    (scope: string) => {
+      return allowedScopes.includes('admin') || allowedScopes.includes(scope)
+    },
+    [allowedScopes],
+  )
 
   const handleMenu = useCallback((event: React.MouseEvent<HTMLElement>) => {
-    setAnchorEl(event.currentTarget);
-  }, []);
+    setAnchorEl(event.currentTarget)
+  }, [])
 
   const handleClose = useCallback(() => {
-    setAnchorEl(null);
-  }, []);
+    setAnchorEl(null)
+  }, [])
 
   const handleLogout = useCallback(() => {
-    handleClose();
-    logout();
+    handleClose()
+    logout()
     // logout() redirects the browser to the backend logout endpoint, which forwards
     // to the OIDC provider's end_session_endpoint. Do not navigate() here — the
     // full-page redirect from logout() takes over immediately.
-  }, [handleClose, logout]);
+  }, [handleClose, logout])
 
   const handleDrawerToggle = useCallback(() => {
-    setMobileOpen(prev => !prev);
-  }, []);
+    setMobileOpen((prev) => !prev)
+  }, [])
 
   const handleSettingsMenuOpen = useCallback((event: React.MouseEvent<HTMLElement>) => {
-    setSettingsAnchorEl(event.currentTarget);
-  }, []);
+    setSettingsAnchorEl(event.currentTarget)
+  }, [])
 
   const handleSettingsMenuClose = useCallback(() => {
-    setSettingsAnchorEl(null);
-  }, []);
+    setSettingsAnchorEl(null)
+  }, [])
 
   const handleSupportMenuOpen = useCallback((event: React.MouseEvent<HTMLElement>) => {
-    setSupportAnchorEl(event.currentTarget);
-  }, []);
+    setSupportAnchorEl(event.currentTarget)
+  }, [])
 
   const handleSupportMenuClose = useCallback(() => {
-    setSupportAnchorEl(null);
-  }, []);
+    setSupportAnchorEl(null)
+  }, [])
 
   const handleDarkModeToggle = useCallback(() => {
-    toggleTheme();
-    setSettingsAnchorEl(null);
-  }, [toggleTheme]);
+    toggleTheme()
+    setSettingsAnchorEl(null)
+  }, [toggleTheme])
 
   const handleChangeLanguage = useCallback((lang: string) => {
-    i18n.changeLanguage(lang);
-    setSettingsAnchorEl(null);
-  }, []);
+    i18n.changeLanguage(lang)
+    setSettingsAnchorEl(null)
+  }, [])
 
   const handleOpenContextHelp = useCallback(() => {
-    setSupportAnchorEl(null);
-    openHelp();
-  }, [openHelp]);
+    setSupportAnchorEl(null)
+    openHelp()
+  }, [openHelp])
 
   const handleOpenAbout = useCallback(() => {
-    setSupportAnchorEl(null);
-    setAboutOpen(true);
-  }, []);
+    setSupportAnchorEl(null)
+    setAboutOpen(true)
+  }, [])
 
-  const navigationItems = useMemo(() => [
-    { text: t('nav.home'), icon: <Home />, path: '/', tooltip: t('nav.homeTooltip') },
-    { text: t('nav.modules'), icon: <ViewModule />, path: '/modules', tooltip: t('nav.modulesTooltip') },
-    { text: t('nav.providers'), icon: <Extension />, path: '/providers', tooltip: t('nav.providersTooltip') },
-    { text: t('nav.terraformBinaries'), icon: <GetApp />, path: '/terraform-binaries', tooltip: t('nav.terraformBinariesTooltip') },
-    { text: t('nav.apiDocs'), icon: <Description />, path: '/api-docs', tooltip: t('nav.apiDocsTooltip') },
-  ], [t]);
+  const navigationItems = useMemo(
+    () => [
+      { text: t('nav.home'), icon: <Home />, path: '/', tooltip: t('nav.homeTooltip') },
+      {
+        text: t('nav.modules'),
+        icon: <ViewModule />,
+        path: '/modules',
+        tooltip: t('nav.modulesTooltip'),
+      },
+      {
+        text: t('nav.providers'),
+        icon: <Extension />,
+        path: '/providers',
+        tooltip: t('nav.providersTooltip'),
+      },
+      {
+        text: t('nav.terraformBinaries'),
+        icon: <GetApp />,
+        path: '/terraform-binaries',
+        tooltip: t('nav.terraformBinariesTooltip'),
+      },
+      {
+        text: t('nav.apiDocs'),
+        icon: <Description />,
+        path: '/api-docs',
+        tooltip: t('nav.apiDocsTooltip'),
+      },
+    ],
+    [t],
+  )
 
   // Admin nav groups — each group is collapsible. Items are filtered by scope.
-  const adminNavGroups = useMemo(() => [
-    {
-      key: 'identity',
-      label: t('nav.admin.identity'),
-      items: [
-        { text: t('nav.admin.organizations'), icon: <Business />, path: '/admin/organizations', tooltip: t('nav.admin.organizationsTooltip'), scope: 'organizations:read' },
-        { text: t('nav.admin.roles'), icon: <AdminPanelSettings />, path: '/admin/roles', tooltip: t('nav.admin.rolesTooltip'), scope: 'users:read' },
-        { text: t('nav.admin.users'), icon: <People />, path: '/admin/users', tooltip: t('nav.admin.usersTooltip'), scope: 'users:read' },
-        { text: t('nav.admin.oidcGroups'), icon: <ManageAccounts />, path: '/admin/oidc', tooltip: t('nav.admin.oidcGroupsTooltip'), scope: 'admin' },
-        { text: t('nav.admin.scim'), icon: <SyncAlt />, path: '/admin/scim', tooltip: t('nav.admin.scimTooltip'), scope: 'admin' },
-        { text: t('nav.admin.mtlsCerts'), icon: <VerifiedUser />, path: '/admin/mtls', tooltip: t('nav.admin.mtlsCertsTooltip'), scope: 'admin' },
-        { text: t('nav.admin.apiKeys'), icon: <Key />, path: '/admin/apikeys', tooltip: t('nav.admin.apiKeysTooltip'), scope: null },
-      ],
-    },
-    {
-      key: 'source-control',
-      label: t('nav.admin.sourceControl'),
-      items: [
-        { text: t('nav.admin.sourceControl'), icon: <GitHub />, path: '/admin/scm-providers', tooltip: t('nav.admin.sourceControlTooltip'), scope: 'scm:read' },
-      ],
-    },
-    {
-      key: 'mirroring',
-      label: t('nav.admin.mirroring'),
-      items: [
-        { text: t('nav.admin.providerConfig'), icon: <CloudDownload />, path: '/admin/mirrors', tooltip: t('nav.admin.providerConfigTooltip'), scope: 'mirrors:read' },
-        { text: t('nav.admin.binariesConfig'), icon: <GetApp />, path: '/admin/terraform-mirror', tooltip: t('nav.admin.binariesConfigTooltip'), scope: 'mirrors:read' },
-        { text: t('nav.admin.approvals'), icon: <HourglassEmpty />, path: '/admin/approvals', tooltip: t('nav.admin.approvalsTooltip'), scope: 'mirrors:read' },
-        { text: t('nav.admin.mirrorPolicies'), icon: <Policy />, path: '/admin/policies', tooltip: t('nav.admin.mirrorPoliciesTooltip'), scope: 'admin' },
-      ],
-    },
-    {
-      key: 'system',
-      label: t('nav.admin.system'),
-      items: [
-        { text: t('nav.admin.storage'), icon: <Storage />, path: '/admin/storage', tooltip: t('nav.admin.storageTooltip'), scope: 'admin' },
-        { text: t('nav.admin.securityScanning'), icon: <Security />, path: '/admin/security-scanning', tooltip: t('nav.admin.securityScanningTooltip'), scope: 'admin' },
-        { text: t('nav.admin.auditLogs'), icon: <History />, path: '/admin/audit-logs', tooltip: t('nav.admin.auditLogsTooltip'), scope: 'audit:read' },
-      ],
-    },
-  ], [t]);
+  const adminNavGroups = useMemo(
+    () => [
+      {
+        key: 'identity',
+        label: t('nav.admin.identity'),
+        items: [
+          {
+            text: t('nav.admin.organizations'),
+            icon: <Business />,
+            path: '/admin/organizations',
+            tooltip: t('nav.admin.organizationsTooltip'),
+            scope: 'organizations:read',
+          },
+          {
+            text: t('nav.admin.roles'),
+            icon: <AdminPanelSettings />,
+            path: '/admin/roles',
+            tooltip: t('nav.admin.rolesTooltip'),
+            scope: 'users:read',
+          },
+          {
+            text: t('nav.admin.users'),
+            icon: <People />,
+            path: '/admin/users',
+            tooltip: t('nav.admin.usersTooltip'),
+            scope: 'users:read',
+          },
+          {
+            text: t('nav.admin.oidcGroups'),
+            icon: <ManageAccounts />,
+            path: '/admin/oidc',
+            tooltip: t('nav.admin.oidcGroupsTooltip'),
+            scope: 'admin',
+          },
+          {
+            text: t('nav.admin.scim'),
+            icon: <SyncAlt />,
+            path: '/admin/scim',
+            tooltip: t('nav.admin.scimTooltip'),
+            scope: 'admin',
+          },
+          {
+            text: t('nav.admin.mtlsCerts'),
+            icon: <VerifiedUser />,
+            path: '/admin/mtls',
+            tooltip: t('nav.admin.mtlsCertsTooltip'),
+            scope: 'admin',
+          },
+          {
+            text: t('nav.admin.apiKeys'),
+            icon: <Key />,
+            path: '/admin/apikeys',
+            tooltip: t('nav.admin.apiKeysTooltip'),
+            scope: null,
+          },
+        ],
+      },
+      {
+        key: 'source-control',
+        label: t('nav.admin.sourceControl'),
+        items: [
+          {
+            text: t('nav.admin.sourceControl'),
+            icon: <GitHub />,
+            path: '/admin/scm-providers',
+            tooltip: t('nav.admin.sourceControlTooltip'),
+            scope: 'scm:read',
+          },
+        ],
+      },
+      {
+        key: 'mirroring',
+        label: t('nav.admin.mirroring'),
+        items: [
+          {
+            text: t('nav.admin.providerConfig'),
+            icon: <CloudDownload />,
+            path: '/admin/mirrors',
+            tooltip: t('nav.admin.providerConfigTooltip'),
+            scope: 'mirrors:read',
+          },
+          {
+            text: t('nav.admin.binariesConfig'),
+            icon: <GetApp />,
+            path: '/admin/terraform-mirror',
+            tooltip: t('nav.admin.binariesConfigTooltip'),
+            scope: 'mirrors:read',
+          },
+          {
+            text: t('nav.admin.approvals'),
+            icon: <HourglassEmpty />,
+            path: '/admin/approvals',
+            tooltip: t('nav.admin.approvalsTooltip'),
+            scope: 'mirrors:read',
+          },
+          {
+            text: t('nav.admin.mirrorPolicies'),
+            icon: <Policy />,
+            path: '/admin/policies',
+            tooltip: t('nav.admin.mirrorPoliciesTooltip'),
+            scope: 'admin',
+          },
+        ],
+      },
+      {
+        key: 'system',
+        label: t('nav.admin.system'),
+        items: [
+          {
+            text: t('nav.admin.storage'),
+            icon: <Storage />,
+            path: '/admin/storage',
+            tooltip: t('nav.admin.storageTooltip'),
+            scope: 'admin',
+          },
+          {
+            text: t('nav.admin.securityScanning'),
+            icon: <Security />,
+            path: '/admin/security-scanning',
+            tooltip: t('nav.admin.securityScanningTooltip'),
+            scope: 'admin',
+          },
+          {
+            text: t('nav.admin.auditLogs'),
+            icon: <History />,
+            path: '/admin/audit-logs',
+            tooltip: t('nav.admin.auditLogsTooltip'),
+            scope: 'audit:read',
+          },
+        ],
+      },
+    ],
+    [t],
+  )
 
   // Determine which group contains the current route (for mobile auto-open).
   const activeGroupKey = useMemo(() => {
-    const match = adminNavGroups.find(g =>
-      g.items.some(it => location.pathname.startsWith(it.path)),
-    );
-    return match?.key ?? null;
-  }, [adminNavGroups, location.pathname]);
+    const match = adminNavGroups.find((g) =>
+      g.items.some((it) => location.pathname.startsWith(it.path)),
+    )
+    return match?.key ?? null
+  }, [adminNavGroups, location.pathname])
 
   // Track which groups are open — persisted to localStorage so state survives navigation/refresh.
   // On mobile, default to an accordion pattern: only the active group (or none) is open.
   const [openGroups, setOpenGroups] = useState<Record<string, boolean>>(() => {
     if (isMobile) {
       return Object.fromEntries(
-        adminNavGroups.map(g => [g.key, activeGroupKey ? g.key === activeGroupKey : false]),
-      );
+        adminNavGroups.map((g) => [g.key, activeGroupKey ? g.key === activeGroupKey : false]),
+      )
     }
     try {
-      const stored = localStorage.getItem('adminNavGroups');
+      const stored = localStorage.getItem('adminNavGroups')
       if (stored) {
-        const parsed = JSON.parse(stored) as Record<string, boolean>;
+        const parsed = JSON.parse(stored) as Record<string, boolean>
         // Merge stored state with defaults (new groups default to open).
-        return Object.fromEntries(adminNavGroups.map(g => [g.key, parsed[g.key] ?? true]));
+        return Object.fromEntries(adminNavGroups.map((g) => [g.key, parsed[g.key] ?? true]))
       }
     } catch {
       // ignore malformed storage
     }
-    return Object.fromEntries(adminNavGroups.map(g => [g.key, true]));
-  });
+    return Object.fromEntries(adminNavGroups.map((g) => [g.key, true]))
+  })
 
   // When the viewport crosses the mobile/desktop boundary, re-apply sensible defaults.
   useEffect(() => {
     if (isMobile) {
       setOpenGroups(
         Object.fromEntries(
-          adminNavGroups.map(g => [g.key, activeGroupKey ? g.key === activeGroupKey : false]),
+          adminNavGroups.map((g) => [g.key, activeGroupKey ? g.key === activeGroupKey : false]),
         ),
-      );
+      )
     }
     // Desktop: do not reset; keep whatever the user had, honoring their localStorage prefs.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isMobile]);
+  }, [isMobile])
 
-  const toggleGroup = useCallback((key: string) =>
-    setOpenGroups(prev => {
-      if (isMobile) {
-        // Accordion: opening a group closes all others; toggling the open one closes it.
-        const wasOpen = !!prev[key];
-        const next = Object.fromEntries(
-          adminNavGroups.map(g => [g.key, !wasOpen && g.key === key]),
-        );
-        return next;
-      }
-      const next = { ...prev, [key]: !prev[key] };
-      try { localStorage.setItem('adminNavGroups', JSON.stringify(next)); } catch { /* quota */ }
-      return next;
-    }), [isMobile, adminNavGroups]);
+  const toggleGroup = useCallback(
+    (key: string) =>
+      setOpenGroups((prev) => {
+        if (isMobile) {
+          // Accordion: opening a group closes all others; toggling the open one closes it.
+          const wasOpen = !!prev[key]
+          const next = Object.fromEntries(
+            adminNavGroups.map((g) => [g.key, !wasOpen && g.key === key]),
+          )
+          return next
+        }
+        const next = { ...prev, [key]: !prev[key] }
+        try {
+          localStorage.setItem('adminNavGroups', JSON.stringify(next))
+        } catch {
+          /* quota */
+        }
+        return next
+      }),
+    [isMobile, adminNavGroups],
+  )
 
   // Filter each group's items by the user's scopes, then drop empty groups
-  const visibleAdminGroups = useMemo(() =>
-    isAuthenticated
-      ? adminNavGroups
-        .map(group => ({
-          ...group,
-          items: group.items.filter(item => item.scope === null || hasScope(item.scope)),
-        }))
-        .filter(group => group.items.length > 0)
-      : [],
-    [isAuthenticated, adminNavGroups, hasScope]);
+  const visibleAdminGroups = useMemo(
+    () =>
+      isAuthenticated
+        ? adminNavGroups
+            .map((group) => ({
+              ...group,
+              items: group.items.filter((item) => item.scope === null || hasScope(item.scope)),
+            }))
+            .filter((group) => group.items.length > 0)
+        : [],
+    [isAuthenticated, adminNavGroups, hasScope],
+  )
 
   const handleCloseMobileDrawer = useCallback(() => {
-    setMobileOpen(false);
-  }, []);
+    setMobileOpen(false)
+  }, [])
 
   const handleCloseAbout = useCallback(() => {
-    setAboutOpen(false);
-  }, []);
+    setAboutOpen(false)
+  }, [])
 
   const drawer = (
     <Box component="nav" aria-label="Main navigation">
@@ -311,9 +444,8 @@ const Layout = () => {
       <Divider />
       <List>
         {navigationItems.map((item) => {
-          const isActive = item.path === '/'
-            ? location.pathname === '/'
-            : location.pathname.startsWith(item.path);
+          const isActive =
+            item.path === '/' ? location.pathname === '/' : location.pathname.startsWith(item.path)
           return (
             <ListItem key={item.path} disablePadding>
               <Tooltip title={item.tooltip} placement="right" arrow>
@@ -322,7 +454,9 @@ const Layout = () => {
                   to={item.path}
                   onClick={handleCloseMobileDrawer}
                   sx={{
-                    borderLeft: isActive ? `3px solid ${theme.palette.primary.main}` : '3px solid transparent',
+                    borderLeft: isActive
+                      ? `3px solid ${theme.palette.primary.main}`
+                      : '3px solid transparent',
                     bgcolor: isActive ? `${theme.palette.primary.main}14` : 'transparent',
                     pl: isActive ? '13px' : '16px',
                   }}
@@ -337,7 +471,7 @@ const Layout = () => {
                 </ListItemButton>
               </Tooltip>
             </ListItem>
-          );
+          )
         })}
       </List>
       {import.meta.env.DEV && (
@@ -351,12 +485,14 @@ const Layout = () => {
                   to="/dev/components"
                   onClick={handleCloseMobileDrawer}
                   sx={{
-                    borderLeft: location.pathname === '/dev/components'
-                      ? `3px solid ${theme.palette.warning.main}`
-                      : '3px solid transparent',
-                    bgcolor: location.pathname === '/dev/components'
-                      ? `${theme.palette.warning.main}14`
-                      : 'transparent',
+                    borderLeft:
+                      location.pathname === '/dev/components'
+                        ? `3px solid ${theme.palette.warning.main}`
+                        : '3px solid transparent',
+                    bgcolor:
+                      location.pathname === '/dev/components'
+                        ? `${theme.palette.warning.main}14`
+                        : 'transparent',
                     pl: location.pathname === '/dev/components' ? '13px' : '16px',
                   }}
                 >
@@ -370,7 +506,12 @@ const Layout = () => {
                       fontSize: '0.875rem',
                     }}
                   />
-                  <Chip label="DEV" size="small" color="warning" sx={{ height: 20, fontSize: '0.65rem' }} />
+                  <Chip
+                    label="DEV"
+                    size="small"
+                    color="warning"
+                    sx={{ height: 20, fontSize: '0.65rem' }}
+                  />
                 </ListItemButton>
               </Tooltip>
             </ListItem>
@@ -384,7 +525,7 @@ const Layout = () => {
           <List disablePadding>
             <ListItem disablePadding>
               {(() => {
-                const isActive = location.pathname === '/admin';
+                const isActive = location.pathname === '/admin'
                 return (
                   <Tooltip title={t('nav.admin.dashboardTooltip')} placement="right" arrow>
                     <ListItemButton
@@ -392,18 +533,25 @@ const Layout = () => {
                       to="/admin"
                       onClick={handleCloseMobileDrawer}
                       sx={{
-                        borderLeft: isActive ? `3px solid ${theme.palette.primary.main}` : '3px solid transparent',
+                        borderLeft: isActive
+                          ? `3px solid ${theme.palette.primary.main}`
+                          : '3px solid transparent',
                         bgcolor: isActive ? `${theme.palette.primary.main}14` : 'transparent',
                         pl: isActive ? '13px' : '16px',
                       }}
                     >
-                      <ListItemIcon sx={{ color: isActive ? theme.palette.primary.main : 'inherit' }}>
+                      <ListItemIcon
+                        sx={{ color: isActive ? theme.palette.primary.main : 'inherit' }}
+                      >
                         <Dashboard />
                       </ListItemIcon>
-                      <ListItemText primary={t('nav.admin.dashboard')} primaryTypographyProps={{ fontWeight: isActive ? 600 : 400 }} />
+                      <ListItemText
+                        primary={t('nav.admin.dashboard')}
+                        primaryTypographyProps={{ fontWeight: isActive ? 600 : 400 }}
+                      />
                     </ListItemButton>
                   </Tooltip>
-                );
+                )
               })()}
             </ListItem>
           </List>
@@ -411,11 +559,7 @@ const Layout = () => {
             <Box key={group.key}>
               <List disablePadding>
                 {/* Group header — clicking collapses/expands the group */}
-                <ListItemButton
-                  onClick={() => toggleGroup(group.key)}
-                  dense
-                  sx={{ py: 0.5 }}
-                >
+                <ListItemButton onClick={() => toggleGroup(group.key)} dense sx={{ py: 0.5 }}>
                   <ListItemText
                     primary={group.label}
                     primaryTypographyProps={{
@@ -426,14 +570,16 @@ const Layout = () => {
                       color: 'text.secondary',
                     }}
                   />
-                  {openGroups[group.key]
-                    ? <ExpandLess fontSize="small" sx={{ color: 'text.secondary' }} />
-                    : <ExpandMore fontSize="small" sx={{ color: 'text.secondary' }} />}
+                  {openGroups[group.key] ? (
+                    <ExpandLess fontSize="small" sx={{ color: 'text.secondary' }} />
+                  ) : (
+                    <ExpandMore fontSize="small" sx={{ color: 'text.secondary' }} />
+                  )}
                 </ListItemButton>
                 <Collapse in={openGroups[group.key]} timeout="auto" unmountOnExit>
                   <List disablePadding>
                     {group.items.map((item) => {
-                      const isActive = location.pathname.startsWith(item.path);
+                      const isActive = location.pathname.startsWith(item.path)
                       return (
                         <ListItem key={item.path} disablePadding>
                           <Tooltip title={item.tooltip ?? item.text} placement="right" arrow>
@@ -443,11 +589,20 @@ const Layout = () => {
                               onClick={handleCloseMobileDrawer}
                               sx={{
                                 pl: isActive ? '21px' : '24px',
-                                borderLeft: isActive ? `3px solid ${theme.palette.primary.main}` : '3px solid transparent',
-                                bgcolor: isActive ? `${theme.palette.primary.main}14` : 'transparent',
+                                borderLeft: isActive
+                                  ? `3px solid ${theme.palette.primary.main}`
+                                  : '3px solid transparent',
+                                bgcolor: isActive
+                                  ? `${theme.palette.primary.main}14`
+                                  : 'transparent',
                               }}
                             >
-                              <ListItemIcon sx={{ minWidth: 36, color: isActive ? theme.palette.primary.main : 'inherit' }}>
+                              <ListItemIcon
+                                sx={{
+                                  minWidth: 36,
+                                  color: isActive ? theme.palette.primary.main : 'inherit',
+                                }}
+                              >
                                 {item.icon}
                               </ListItemIcon>
                               <ListItemText
@@ -457,7 +612,7 @@ const Layout = () => {
                             </ListItemButton>
                           </Tooltip>
                         </ListItem>
-                      );
+                      )
                     })}
                   </List>
                 </Collapse>
@@ -467,11 +622,13 @@ const Layout = () => {
         </>
       )}
     </Box>
-  );
+  )
 
   return (
     <Box sx={{ display: 'flex' }}>
-      <a href="#main-content" className="skip-link">{t('header.skipToContent')}</a>
+      <a href="#main-content" className="skip-link">
+        {t('header.skipToContent')}
+      </a>
       <AppBar
         position="fixed"
         sx={{
@@ -527,9 +684,11 @@ const Layout = () => {
             transformOrigin={{ vertical: 'top', horizontal: 'right' }}
           >
             <MenuItem onClick={handleDarkModeToggle}>
-              {mode === 'dark'
-                ? <Brightness7 sx={{ mr: 1.5 }} fontSize="small" />
-                : <Brightness4 sx={{ mr: 1.5 }} fontSize="small" />}
+              {mode === 'dark' ? (
+                <Brightness7 sx={{ mr: 1.5 }} fontSize="small" />
+              ) : (
+                <Brightness4 sx={{ mr: 1.5 }} fontSize="small" />
+              )}
               {mode === 'dark' ? t('header.lightMode') : t('header.darkMode')}
             </MenuItem>
             <Divider />
@@ -690,7 +849,7 @@ const Layout = () => {
       <CommandPalette open={paletteOpen} onClose={() => setPaletteOpen(false)} />
       <SessionExpiryWarning />
     </Box>
-  );
-};
+  )
+}
 
-export default Layout;
+export default Layout

@@ -112,7 +112,9 @@ describe('ProviderUploadPage', () => {
 
     // Simulate file selection via the hidden input in FileDropZone
     const input = document.querySelector('input[type="file"]') as HTMLInputElement
-    const file = new File(['zipdata'], 'terraform-provider-widget_1.0.0_linux_amd64.zip', { type: 'application/zip' })
+    const file = new File(['zipdata'], 'terraform-provider-widget_1.0.0_linux_amd64.zip', {
+      type: 'application/zip',
+    })
     fireEvent.change(input, { target: { files: [file] } })
 
     await waitFor(() => {
@@ -142,10 +144,14 @@ describe('ProviderUploadPage', () => {
     await user.click(await screen.findByRole('option', { name: /AMD64/i }))
 
     const input = document.querySelector('input[type="file"]') as HTMLInputElement
-    const file = new File(['x'], 'terraform-provider-widget_1.0.0_linux_amd64.zip', { type: 'application/zip' })
+    const file = new File(['x'], 'terraform-provider-widget_1.0.0_linux_amd64.zip', {
+      type: 'application/zip',
+    })
     fireEvent.change(input, { target: { files: [file] } })
 
-    await waitFor(() => expect(screen.getByRole('button', { name: /^upload provider$/i })).not.toBeDisabled())
+    await waitFor(() =>
+      expect(screen.getByRole('button', { name: /^upload provider$/i })).not.toBeDisabled(),
+    )
     await user.click(screen.getByRole('button', { name: /^upload provider$/i }))
     await waitFor(() => expect(screen.getByText(/upload blew up/)).toBeInTheDocument())
   })
@@ -155,10 +161,16 @@ describe('ProviderUploadPage', () => {
     renderPage()
     await user.click(screen.getByText('Manual Upload'))
     const input = document.querySelector('input[type="file"]') as HTMLInputElement
-    const file = new File(['x'], 'terraform-provider-w_1.0.0_linux_amd64.zip', { type: 'application/zip' })
+    const file = new File(['x'], 'terraform-provider-w_1.0.0_linux_amd64.zip', {
+      type: 'application/zip',
+    })
     fireEvent.change(input, { target: { files: [file] } })
-    await waitFor(() => expect(screen.getByRole('button', { name: /^upload provider$/i })).not.toBeDisabled())
+    await waitFor(() =>
+      expect(screen.getByRole('button', { name: /^upload provider$/i })).not.toBeDisabled(),
+    )
     await user.click(screen.getByRole('button', { name: /^upload provider$/i }))
-    await waitFor(() => expect(screen.getByText(/Please fill in all required fields/)).toBeInTheDocument())
+    await waitFor(() =>
+      expect(screen.getByText(/Please fill in all required fields/)).toBeInTheDocument(),
+    )
   })
 })

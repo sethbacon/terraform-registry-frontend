@@ -1,4 +1,4 @@
-import { useRouteFocus } from '../hooks/useRouteFocus';
+import { useRouteFocus } from '../hooks/useRouteFocus'
 
 /**
  * Invisible component that manages focus and screen-reader announcements
@@ -6,6 +6,6 @@ import { useRouteFocus } from '../hooks/useRouteFocus';
  * <AnnouncerProvider>.
  */
 export default function RouteFocusManager() {
-  useRouteFocus();
-  return null;
+  useRouteFocus()
+  return null
 }

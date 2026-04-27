@@ -352,12 +352,12 @@ export function useModuleDetail() {
           system ?? '',
           selectedVersion?.version ?? '',
         ),
-      });
+      })
     },
     onError: (err: unknown) => {
-      setError(getErrorMessage(err, 'Failed to queue re-scan. Please try again.'));
+      setError(getErrorMessage(err, 'Failed to queue re-scan. Please try again.'))
     },
-  });
+  })
 
   const scmSyncMutation = useMutation({
     mutationFn: () => api.triggerManualSync(module!.id),
@@ -401,9 +401,9 @@ export function useModuleDetail() {
   }, [queryClient, namespace, name, system])
 
   const handleRescan = () => {
-    if (!namespace || !name || !system || !selectedVersion) return;
-    rescanMutation.mutate();
-  };
+    if (!namespace || !name || !system || !selectedVersion) return
+    rescanMutation.mutate()
+  }
 
   const handleSCMSync = () => {
     if (!module?.id) {

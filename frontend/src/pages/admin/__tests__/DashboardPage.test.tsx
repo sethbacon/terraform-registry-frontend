@@ -119,7 +119,7 @@ describe('DashboardPage', () => {
   })
 
   it('shows loading spinner while fetching', () => {
-    getDashboardStatsMock.mockReturnValue(new Promise(() => { }))
+    getDashboardStatsMock.mockReturnValue(new Promise(() => {}))
     renderPage()
     expect(screen.getByRole('progressbar')).toBeInTheDocument()
   })
@@ -178,9 +178,7 @@ describe('DashboardPage', () => {
     getDashboardStatsMock.mockRejectedValue(new Error('Network error'))
     renderPage()
     await waitFor(() => {
-      expect(
-        screen.getByText('Failed to load dashboard statistics.'),
-      ).toBeInTheDocument()
+      expect(screen.getByText('Failed to load dashboard statistics.')).toBeInTheDocument()
     })
   })
 
@@ -200,9 +198,7 @@ describe('DashboardPage', () => {
     renderPage()
     await waitFor(() => {
       expect(
-        screen.getByText(
-          'No sync history yet. Trigger a sync from the mirror pages.',
-        ),
+        screen.getByText('No sync history yet. Trigger a sync from the mirror pages.'),
       ).toBeInTheDocument()
     })
   })

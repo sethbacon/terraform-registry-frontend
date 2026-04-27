@@ -1,19 +1,12 @@
-import {
-  Box,
-  Container,
-  FormControlLabel,
-  Paper,
-  Switch,
-  Typography,
-} from '@mui/material';
-import { useConsent } from '../contexts/ConsentContext';
+import { Box, Container, FormControlLabel, Paper, Switch, Typography } from '@mui/material'
+import { useConsent } from '../contexts/ConsentContext'
 
 /**
  * User-facing settings page where telemetry and consent preferences can be
  * reviewed and updated at any time (GDPR Art 7(3) — right to withdraw consent).
  */
 export default function SettingsPage() {
-  const { preferences, updatePreferences } = useConsent();
+  const { preferences, updatePreferences } = useConsent()
 
   return (
     <Container maxWidth="sm" sx={{ py: 4 }}>
@@ -73,5 +66,5 @@ export default function SettingsPage() {
         .
       </Typography>
     </Container>
-  );
+  )
 }

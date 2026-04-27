@@ -15,7 +15,14 @@ describe('queryKeys', () => {
     })
 
     it('search key with sort and order', () => {
-      const key = queryKeys.modules.search({ query: 'test', limit: 20, offset: 10, viewMode: 'list', sort: 'name', order: 'asc' })
+      const key = queryKeys.modules.search({
+        query: 'test',
+        limit: 20,
+        offset: 10,
+        viewMode: 'list',
+        sort: 'name',
+        order: 'asc',
+      })
       expect(key[2]).toMatchObject({ sort: 'name', order: 'asc' })
     })
 
@@ -56,7 +63,13 @@ describe('queryKeys', () => {
     })
 
     it('search key includes params', () => {
-      const key = queryKeys.providers.search({ query: 'aws', limit: 10, offset: 0, sort: 'name', order: 'asc' })
+      const key = queryKeys.providers.search({
+        query: 'aws',
+        limit: 10,
+        offset: 0,
+        sort: 'name',
+        order: 'asc',
+      })
       expect(key[0]).toBe('providers')
       expect(key[1]).toBe('search')
       expect(key[2]).toMatchObject({ query: 'aws', sort: 'name', order: 'asc' })
@@ -118,7 +131,11 @@ describe('queryKeys', () => {
     })
 
     it('members key includes orgId', () => {
-      expect(queryKeys.organizations.members('org-1')).toEqual(['organizations', 'members', 'org-1'])
+      expect(queryKeys.organizations.members('org-1')).toEqual([
+        'organizations',
+        'members',
+        'org-1',
+      ])
     })
   })
 
@@ -150,11 +167,19 @@ describe('queryKeys', () => {
     })
 
     it('tokenStatus key includes providerId', () => {
-      expect(queryKeys.scmProviders.tokenStatus('scm-1')).toEqual(['scmProviders', 'tokenStatus', 'scm-1'])
+      expect(queryKeys.scmProviders.tokenStatus('scm-1')).toEqual([
+        'scmProviders',
+        'tokenStatus',
+        'scm-1',
+      ])
     })
 
     it('memberships key includes userId', () => {
-      expect(queryKeys.scmProviders.memberships('u-1')).toEqual(['scmProviders', 'memberships', 'u-1'])
+      expect(queryKeys.scmProviders.memberships('u-1')).toEqual([
+        'scmProviders',
+        'memberships',
+        'u-1',
+      ])
     })
   })
 
@@ -185,7 +210,11 @@ describe('queryKeys', () => {
     })
 
     it('detail key includes id', () => {
-      expect(queryKeys.storageMigrations.detail('mig-1')).toEqual(['storageMigrations', 'detail', 'mig-1'])
+      expect(queryKeys.storageMigrations.detail('mig-1')).toEqual([
+        'storageMigrations',
+        'detail',
+        'mig-1',
+      ])
     })
   })
 
@@ -207,7 +236,11 @@ describe('queryKeys', () => {
 
   describe('approvals', () => {
     it('list key includes status param', () => {
-      expect(queryKeys.approvals.list({ status: 'pending' })).toEqual(['approvals', 'list', { status: 'pending' }])
+      expect(queryKeys.approvals.list({ status: 'pending' })).toEqual([
+        'approvals',
+        'list',
+        { status: 'pending' },
+      ])
     })
 
     it('list key works without params', () => {
@@ -233,15 +266,27 @@ describe('queryKeys', () => {
     })
 
     it('status key includes configId', () => {
-      expect(queryKeys.terraformMirrors.status('cfg-1')).toEqual(['terraformMirrors', 'status', 'cfg-1'])
+      expect(queryKeys.terraformMirrors.status('cfg-1')).toEqual([
+        'terraformMirrors',
+        'status',
+        'cfg-1',
+      ])
     })
 
     it('versions key includes configId', () => {
-      expect(queryKeys.terraformMirrors.versions('cfg-1')).toEqual(['terraformMirrors', 'versions', 'cfg-1'])
+      expect(queryKeys.terraformMirrors.versions('cfg-1')).toEqual([
+        'terraformMirrors',
+        'versions',
+        'cfg-1',
+      ])
     })
 
     it('history key includes configId', () => {
-      expect(queryKeys.terraformMirrors.history('cfg-1')).toEqual(['terraformMirrors', 'history', 'cfg-1'])
+      expect(queryKeys.terraformMirrors.history('cfg-1')).toEqual([
+        'terraformMirrors',
+        'history',
+        'cfg-1',
+      ])
     })
   })
 
@@ -265,7 +310,7 @@ describe('queryKeys', () => {
         queryKeys.oidcConfig._def,
         queryKeys.terraformMirrors._def,
       ]
-      const prefixes = allDefs.map(d => d[0])
+      const prefixes = allDefs.map((d) => d[0])
       expect(new Set(prefixes).size).toBe(prefixes.length)
     })
   })

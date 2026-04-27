@@ -26,7 +26,7 @@ function renderWithParams(search: string) {
   return render(
     <MemoryRouter initialEntries={[`/auth/callback${search}`]}>
       <CallbackPage />
-    </MemoryRouter>
+    </MemoryRouter>,
   )
 }
 

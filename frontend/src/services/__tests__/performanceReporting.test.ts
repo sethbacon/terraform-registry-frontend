@@ -45,16 +45,12 @@ describe('performanceReporting', () => {
       // reportNavigation pushes to buffer even without dsn
       reportNavigation('/admin/users', 150.5)
       // We can verify the log in dev mode
-      expect(console.log).toHaveBeenCalledWith(
-        expect.stringContaining('[Perf] Navigation')
-      )
+      expect(console.log).toHaveBeenCalledWith(expect.stringContaining('[Perf] Navigation'))
     })
 
     it('logs the route name and duration in dev mode', () => {
       reportNavigation('/modules', 42.3)
-      expect(console.log).toHaveBeenCalledWith(
-        expect.stringContaining('/modules')
-      )
+      expect(console.log).toHaveBeenCalledWith(expect.stringContaining('/modules'))
     })
   })
 
@@ -62,7 +58,7 @@ describe('performanceReporting', () => {
     it('logs initialization message without DSN', () => {
       init()
       expect(console.log).toHaveBeenCalledWith(
-        '[Perf] No DSN configured — metrics logged to console only'
+        '[Perf] No DSN configured — metrics logged to console only',
       )
     })
 
@@ -114,7 +110,7 @@ describe('performanceReporting', () => {
       mod.flush()
       expect(sendBeaconSpy).toHaveBeenCalledWith(
         'https://perf.example.com/report',
-        expect.any(String)
+        expect.any(String),
       )
 
       mod.destroy()

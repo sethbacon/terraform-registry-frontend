@@ -76,7 +76,7 @@ describe('MirrorPoliciesPage', () => {
   })
 
   it('shows loading spinner initially', () => {
-    listMirrorPoliciesMock.mockReturnValue(new Promise(() => { }))
+    listMirrorPoliciesMock.mockReturnValue(new Promise(() => {}))
     renderPage()
     expect(screen.getByRole('progressbar')).toBeInTheDocument()
   })
@@ -87,9 +87,7 @@ describe('MirrorPoliciesPage', () => {
     await waitFor(() => {
       expect(screen.getByText('Mirror Policies')).toBeInTheDocument()
     })
-    expect(
-      screen.getByText('Define allow/deny rules for provider mirroring'),
-    ).toBeInTheDocument()
+    expect(screen.getByText('Define allow/deny rules for provider mirroring')).toBeInTheDocument()
   })
 
   it('shows policy cards with policy data', async () => {
@@ -187,7 +185,9 @@ describe('MirrorPoliciesPage', () => {
     await userEvent.click(editBtns[0])
     await waitFor(() => expect(screen.getByText('Edit Policy')).toBeInTheDocument())
     await userEvent.click(screen.getByRole('button', { name: /^update$/i }))
-    await waitFor(() => expect(updateMirrorPolicyMock).toHaveBeenCalledWith('pol-1', expect.any(Object)))
+    await waitFor(() =>
+      expect(updateMirrorPolicyMock).toHaveBeenCalledWith('pol-1', expect.any(Object)),
+    )
   })
 
   it('opens delete confirmation dialog', async () => {
@@ -233,7 +233,10 @@ describe('MirrorPoliciesPage', () => {
     await waitFor(() => expect(screen.getByText('Allow HashiCorp')).toBeInTheDocument())
     await userEvent.click(screen.getByText('Evaluate'))
     await waitFor(() => expect(screen.getByText('Evaluate Policy')).toBeInTheDocument())
-    await userEvent.type(screen.getByRole('textbox', { name: /registry/i }), 'registry.terraform.io')
+    await userEvent.type(
+      screen.getByRole('textbox', { name: /registry/i }),
+      'registry.terraform.io',
+    )
     await userEvent.type(screen.getByRole('textbox', { name: /namespace/i }), 'hashicorp')
     await userEvent.type(screen.getByRole('textbox', { name: /provider/i }), 'aws')
     const evaluateBtns = screen.getAllByText('Evaluate')
@@ -253,7 +256,10 @@ describe('MirrorPoliciesPage', () => {
     await waitFor(() => expect(screen.getByText('Allow HashiCorp')).toBeInTheDocument())
     await userEvent.click(screen.getByText('Evaluate'))
     await waitFor(() => expect(screen.getByText('Evaluate Policy')).toBeInTheDocument())
-    await userEvent.type(screen.getByRole('textbox', { name: /registry/i }), 'registry.terraform.io')
+    await userEvent.type(
+      screen.getByRole('textbox', { name: /registry/i }),
+      'registry.terraform.io',
+    )
     await userEvent.type(screen.getByRole('textbox', { name: /namespace/i }), 'external-ns')
     await userEvent.type(screen.getByRole('textbox', { name: /provider/i }), 'anything')
     const evaluateBtns = screen.getAllByText('Evaluate')

@@ -9,21 +9,21 @@ import {
   Link as MuiLink,
   useTheme,
   useMediaQuery,
-} from '@mui/material';
-import Close from '@mui/icons-material/Close';
-import { Link as RouterLink, useLocation } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
+} from '@mui/material'
+import Close from '@mui/icons-material/Close'
+import { Link as RouterLink, useLocation } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 // Simplified t-function type — avoids excessively-deep instantiation from the
 // large i18next key union when using dynamic (computed) translation keys.
-type TStr = (key: string, options?: Record<string, unknown>) => string;
-import { useHelp } from '../contexts/HelpContext';
+type TStr = (key: string, options?: Record<string, unknown>) => string
+import { useHelp } from '../contexts/HelpContext'
 
-export const HELP_PANEL_WIDTH = 320;
+export const HELP_PANEL_WIDTH = 320
 
 interface HelpContent {
-  title: string;
-  overview: string;
-  actions: { heading: string; text: string }[];
+  title: string
+  overview: string
+  actions: { heading: string; text: string }[]
 }
 
 // Action key arrays keyed by help section name — order defines display order
@@ -53,17 +53,37 @@ const HELP_ACTION_KEYS: Record<string, string[]> = {
     'deleteVersion',
     'restoreDeprecatedVersion',
   ],
-  terraformMirror: ['createMirrorConfig', 'syncVersions', 'inspectPlatforms', 'enableDisable', 'deleteConfig'],
+  terraformMirror: [
+    'createMirrorConfig',
+    'syncVersions',
+    'inspectPlatforms',
+    'enableDisable',
+    'deleteConfig',
+  ],
   approvals: ['reviewRequest', 'createRequest', 'filterByStatus', 'mirrorPolicyLink'],
-  mirrorPolicies: ['createPolicy', 'allowVsDeny', 'requireApproval', 'priority', 'evaluatePolicy', 'enableDisable'],
-  auditLogs: ['filterByResourceType', 'filterByAction', 'filterByUser', 'dateRange', 'viewDetail', 'export'],
+  mirrorPolicies: [
+    'createPolicy',
+    'allowVsDeny',
+    'requireApproval',
+    'priority',
+    'evaluatePolicy',
+    'enableDisable',
+  ],
+  auditLogs: [
+    'filterByResourceType',
+    'filterByAction',
+    'filterByUser',
+    'dateRange',
+    'viewDetail',
+    'export',
+  ],
   securityScanning: ['viewConfiguration', 'summaryStatistics', 'reviewScanResults'],
   mtls: ['viewStatus', 'certificateMappings', 'configurationSource'],
   scim: ['endpointUrls', 'authentication', 'supportedOperations'],
-};
+}
 
 function makeContent(key: string, t: TStr): HelpContent {
-  const actionKeys = HELP_ACTION_KEYS[key] ?? [];
+  const actionKeys = HELP_ACTION_KEYS[key] ?? []
   return {
     title: t(`help.${key}.title`),
     overview: t(`help.${key}.overview`),
@@ -71,51 +91,75 @@ function makeContent(key: string, t: TStr): HelpContent {
       heading: t(`help.${key}.actions.${ak}.heading`),
       text: t(`help.${key}.actions.${ak}.text`),
     })),
-  };
+  }
 }
 
 function getHelpContent(pathname: string, t: TStr): HelpContent {
   // Parameterized routes — check before their parent prefix
-  const segments = pathname.split('/').filter(Boolean);
-  if (segments[0] === 'modules' && segments.length >= 3) return makeContent('moduleDetail', t);
-  if (segments[0] === 'providers' && segments.length >= 2) return makeContent('providerDetail', t);
-  if (segments[0] === 'terraform-binaries' && segments.length >= 2) return makeContent('terraformBinaryDetail', t);
+  const segments = pathname.split('/').filter(Boolean)
+  if (segments[0] === 'modules' && segments.length >= 3) return makeContent('moduleDetail', t)
+  if (segments[0] === 'providers' && segments.length >= 2) return makeContent('providerDetail', t)
+  if (segments[0] === 'terraform-binaries' && segments.length >= 2)
+    return makeContent('terraformBinaryDetail', t)
 
   switch (pathname) {
-    case '/': return makeContent('home', t);
-    case '/modules': return makeContent('modules', t);
-    case '/providers': return makeContent('providers', t);
-    case '/terraform-binaries': return makeContent('terraformBinaries', t);
-    case '/api-docs': return makeContent('apiDocs', t);
-    case '/admin': return makeContent('dashboard', t);
-    case '/admin/users': return makeContent('users', t);
-    case '/admin/organizations': return makeContent('organizations', t);
-    case '/admin/roles': return makeContent('roles', t);
-    case '/admin/oidc': return makeContent('oidcGroups', t);
-    case '/admin/apikeys': return makeContent('apiKeys', t);
-    case '/admin/upload': return makeContent('upload', t);
-    case '/admin/scm-providers': return makeContent('scmProviders', t);
-    case '/admin/mirrors': return makeContent('mirrors', t);
-    case '/admin/storage': return makeContent('storage', t);
-    case '/admin/audit-logs': return makeContent('auditLogs', t);
-    case '/admin/terraform-mirror': return makeContent('terraformMirror', t);
-    case '/admin/approvals': return makeContent('approvals', t);
-    case '/admin/policies': return makeContent('mirrorPolicies', t);
-    case '/admin/security-scanning': return makeContent('securityScanning', t);
-    case '/admin/mtls': return makeContent('mtls', t);
-    case '/admin/scim': return makeContent('scim', t);
-    default: return makeContent('default', t);
+    case '/':
+      return makeContent('home', t)
+    case '/modules':
+      return makeContent('modules', t)
+    case '/providers':
+      return makeContent('providers', t)
+    case '/terraform-binaries':
+      return makeContent('terraformBinaries', t)
+    case '/api-docs':
+      return makeContent('apiDocs', t)
+    case '/admin':
+      return makeContent('dashboard', t)
+    case '/admin/users':
+      return makeContent('users', t)
+    case '/admin/organizations':
+      return makeContent('organizations', t)
+    case '/admin/roles':
+      return makeContent('roles', t)
+    case '/admin/oidc':
+      return makeContent('oidcGroups', t)
+    case '/admin/apikeys':
+      return makeContent('apiKeys', t)
+    case '/admin/upload':
+      return makeContent('upload', t)
+    case '/admin/scm-providers':
+      return makeContent('scmProviders', t)
+    case '/admin/mirrors':
+      return makeContent('mirrors', t)
+    case '/admin/storage':
+      return makeContent('storage', t)
+    case '/admin/audit-logs':
+      return makeContent('auditLogs', t)
+    case '/admin/terraform-mirror':
+      return makeContent('terraformMirror', t)
+    case '/admin/approvals':
+      return makeContent('approvals', t)
+    case '/admin/policies':
+      return makeContent('mirrorPolicies', t)
+    case '/admin/security-scanning':
+      return makeContent('securityScanning', t)
+    case '/admin/mtls':
+      return makeContent('mtls', t)
+    case '/admin/scim':
+      return makeContent('scim', t)
+    default:
+      return makeContent('default', t)
   }
 }
 
 const HelpPanel = () => {
-  const { helpOpen, closeHelp } = useHelp();
-  const { pathname } = useLocation();
-  const { t } = useTranslation();
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  const { helpOpen, closeHelp } = useHelp()
+  const { pathname } = useLocation()
+  const { t } = useTranslation()
+  const theme = useTheme()
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'))
 
-  const content = getHelpContent(pathname, t);
+  const content = getHelpContent(pathname, t)
 
   return (
     <Drawer
@@ -134,7 +178,15 @@ const HelpPanel = () => {
       }}
     >
       {/* Header */}
-      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', px: 2, py: 1.5 }}>
+      <Box
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          px: 2,
+          py: 1.5,
+        }}
+      >
         <Typography variant="subtitle1" fontWeight="bold">
           {content.title}
         </Typography>
@@ -181,7 +233,7 @@ const HelpPanel = () => {
         </Typography>
       </Box>
     </Drawer>
-  );
-};
+  )
+}
 
-export default HelpPanel;
+export default HelpPanel

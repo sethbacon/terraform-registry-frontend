@@ -10,6 +10,6 @@
  * @returns The locale-formatted date string, or `fallback`.
  */
 export function formatDate(dateStr?: string | null, fallback = 'N/A'): string {
-  if (!dateStr) return fallback;
-  return new Date(dateStr).toLocaleString();
+  if (!dateStr) return fallback
+  return new Date(dateStr).toLocaleString()
 }

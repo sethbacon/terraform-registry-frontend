@@ -1,7 +1,7 @@
-import { Box, Card, CardContent, Grid, Skeleton, Stack } from '@mui/material';
+import { Box, Card, CardContent, Grid, Skeleton, Stack } from '@mui/material'
 
 export interface RegistryItemCardSkeletonProps {
-  'data-testid'?: string;
+  'data-testid'?: string
 }
 
 /** Skeleton placeholder that matches the dimensions of RegistryItemCard. */
@@ -16,19 +16,24 @@ export default function RegistryItemCardSkeleton({
           <Skeleton variant="text" width="60%" height={28} />
         </Stack>
         <Skeleton variant="text" width="40%" height={20} sx={{ mb: 1 }} />
-        <Skeleton variant="rectangular" width="100%" height={54} sx={{ mb: 1.5, borderRadius: 1 }} />
+        <Skeleton
+          variant="rectangular"
+          width="100%"
+          height={54}
+          sx={{ mb: 1.5, borderRadius: 1 }}
+        />
         <Stack direction="row" spacing={1}>
           <Skeleton variant="rounded" width={60} height={24} />
           <Skeleton variant="rounded" width={80} height={24} />
         </Stack>
       </CardContent>
     </Card>
-  );
+  )
 }
 
 export interface RegistryItemGridSkeletonProps {
-  count?: number;
-  'data-testid'?: string;
+  count?: number
+  'data-testid'?: string
 }
 
 /** Grid of RegistryItemCardSkeleton placeholders, matching the ModulesPage/ProvidersPage layout. */
@@ -46,5 +51,5 @@ export function RegistryItemGridSkeleton({
         ))}
       </Grid>
     </Box>
-  );
+  )
 }

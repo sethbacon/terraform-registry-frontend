@@ -1,17 +1,25 @@
-import { createContext, useCallback, useContext, useEffect, useRef, useState, ReactNode } from 'react';
-import { Box } from '@mui/material';
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+  ReactNode,
+} from 'react'
+import { Box } from '@mui/material'
 
-export type AnnouncerPriority = 'polite' | 'assertive';
+export type AnnouncerPriority = 'polite' | 'assertive'
 
 interface AnnouncerContextType {
-  announce: (message: string, priority?: AnnouncerPriority) => void;
+  announce: (message: string, priority?: AnnouncerPriority) => void
 }
 
-const AnnouncerContext = createContext<AnnouncerContextType | undefined>(undefined);
+const AnnouncerContext = createContext<AnnouncerContextType | undefined>(undefined)
 
 // How long an announcement stays in the live region before being cleared.
 // Clearing allows identical consecutive messages to re-trigger a screen-reader readout.
-const CLEAR_AFTER_MS = 3000;
+const CLEAR_AFTER_MS = 3000
 
 const srOnlySx = {
   position: 'absolute' as const,
@@ -23,36 +31,36 @@ const srOnlySx = {
   clip: 'rect(0, 0, 0, 0)',
   whiteSpace: 'nowrap' as const,
   border: 0,
-};
+}
 
 export const AnnouncerProvider = ({ children }: { children: ReactNode }) => {
-  const [politeMessage, setPoliteMessage] = useState('');
-  const [assertiveMessage, setAssertiveMessage] = useState('');
-  const politeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const assertiveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [politeMessage, setPoliteMessage] = useState('')
+  const [assertiveMessage, setAssertiveMessage] = useState('')
+  const politeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const assertiveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const announce = useCallback((message: string, priority: AnnouncerPriority = 'polite') => {
-    if (!message) return;
+    if (!message) return
     if (priority === 'assertive') {
-      if (assertiveTimerRef.current) clearTimeout(assertiveTimerRef.current);
+      if (assertiveTimerRef.current) clearTimeout(assertiveTimerRef.current)
       // Toggle through empty string first so identical consecutive messages re-announce.
-      setAssertiveMessage('');
-      setTimeout(() => setAssertiveMessage(message), 0);
-      assertiveTimerRef.current = setTimeout(() => setAssertiveMessage(''), CLEAR_AFTER_MS);
+      setAssertiveMessage('')
+      setTimeout(() => setAssertiveMessage(message), 0)
+      assertiveTimerRef.current = setTimeout(() => setAssertiveMessage(''), CLEAR_AFTER_MS)
     } else {
-      if (politeTimerRef.current) clearTimeout(politeTimerRef.current);
-      setPoliteMessage('');
-      setTimeout(() => setPoliteMessage(message), 0);
-      politeTimerRef.current = setTimeout(() => setPoliteMessage(''), CLEAR_AFTER_MS);
+      if (politeTimerRef.current) clearTimeout(politeTimerRef.current)
+      setPoliteMessage('')
+      setTimeout(() => setPoliteMessage(message), 0)
+      politeTimerRef.current = setTimeout(() => setPoliteMessage(''), CLEAR_AFTER_MS)
     }
-  }, []);
+  }, [])
 
   useEffect(() => {
     return () => {
-      if (politeTimerRef.current) clearTimeout(politeTimerRef.current);
-      if (assertiveTimerRef.current) clearTimeout(assertiveTimerRef.current);
-    };
-  }, []);
+      if (politeTimerRef.current) clearTimeout(politeTimerRef.current)
+      if (assertiveTimerRef.current) clearTimeout(assertiveTimerRef.current)
+    }
+  }, [])
 
   return (
     <AnnouncerContext.Provider value={{ announce }}>
@@ -78,16 +86,16 @@ export const AnnouncerProvider = ({ children }: { children: ReactNode }) => {
         {assertiveMessage}
       </Box>
     </AnnouncerContext.Provider>
-  );
-};
+  )
+}
 
 export const useAnnouncer = (): AnnouncerContextType => {
-  const ctx = useContext(AnnouncerContext);
+  const ctx = useContext(AnnouncerContext)
   if (!ctx) {
-    throw new Error('useAnnouncer must be used within an AnnouncerProvider');
+    throw new Error('useAnnouncer must be used within an AnnouncerProvider')
   }
-  return ctx;
-};
+  return ctx
+}
 
 // Exported for tests only.
-export const __ANNOUNCER_CLEAR_MS = CLEAR_AFTER_MS;
+export const __ANNOUNCER_CLEAR_MS = CLEAR_AFTER_MS

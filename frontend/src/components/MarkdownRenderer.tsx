@@ -1,12 +1,12 @@
-import React from 'react';
-import { Box } from '@mui/material';
-import ReactMarkdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
-import rehypeSanitize from 'rehype-sanitize';
-import type { Components } from 'react-markdown';
+import React from 'react'
+import { Box } from '@mui/material'
+import ReactMarkdown from 'react-markdown'
+import remarkGfm from 'remark-gfm'
+import rehypeSanitize from 'rehype-sanitize'
+import type { Components } from 'react-markdown'
 
 interface MarkdownRendererProps {
-  children: string;
+  children: string
 }
 
 /**
@@ -21,7 +21,7 @@ const markdownComponents: Partial<Components> = {
   h4: ({ children, ...props }) => <h5 {...props}>{children}</h5>,
   h5: ({ children, ...props }) => <h6 {...props}>{children}</h6>,
   h6: ({ children, ...props }) => <h6 {...props}>{children}</h6>,
-};
+}
 
 const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ children }) => (
   <Box
@@ -65,10 +65,14 @@ const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ children }) => (
       },
     })}
   >
-    <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeSanitize]} components={markdownComponents}>
+    <ReactMarkdown
+      remarkPlugins={[remarkGfm]}
+      rehypePlugins={[rehypeSanitize]}
+      components={markdownComponents}
+    >
       {children}
     </ReactMarkdown>
   </Box>
-);
+)
 
-export default MarkdownRenderer;
+export default MarkdownRenderer

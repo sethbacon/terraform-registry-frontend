@@ -61,8 +61,9 @@ beforeEach(() => {
       ioInstances.push(this)
     }
   }
-  ;(globalThis as unknown as { IntersectionObserver: typeof IntersectionObserver }).IntersectionObserver =
-    TrackedIO as unknown as typeof IntersectionObserver
+  ;(
+    globalThis as unknown as { IntersectionObserver: typeof IntersectionObserver }
+  ).IntersectionObserver = TrackedIO as unknown as typeof IntersectionObserver
   localStorage.clear()
 })
 
@@ -178,7 +179,17 @@ describe('ApiDocumentation', () => {
     const target = document.createElement('div')
     target.id = 'operations-tag-Providers'
     target.getBoundingClientRect = () =>
-      ({ top: 500, bottom: 0, left: 0, right: 0, height: 0, width: 0, x: 0, y: 0, toJSON: () => ({}) }) as DOMRect
+      ({
+        top: 500,
+        bottom: 0,
+        left: 0,
+        right: 0,
+        height: 0,
+        width: 0,
+        x: 0,
+        y: 0,
+        toJSON: () => ({}),
+      }) as DOMRect
     document.body.appendChild(target)
 
     const scrollSpy = vi.fn()
@@ -186,9 +197,7 @@ describe('ApiDocumentation', () => {
 
     await user.click(screen.getByRole('button', { name: 'Providers' }))
 
-    expect(scrollSpy).toHaveBeenCalledWith(
-      expect.objectContaining({ behavior: 'smooth' }),
-    )
+    expect(scrollSpy).toHaveBeenCalledWith(expect.objectContaining({ behavior: 'smooth' }))
   })
 
   it('does not scroll when the target element is missing', async () => {
@@ -328,7 +337,17 @@ describe('ApiDocumentation', () => {
     const target = document.createElement('div')
     target.id = 'operations-tag-Admin_Tools'
     target.getBoundingClientRect = () =>
-      ({ top: 100, bottom: 0, left: 0, right: 0, height: 0, width: 0, x: 0, y: 0, toJSON: () => ({}) }) as DOMRect
+      ({
+        top: 100,
+        bottom: 0,
+        left: 0,
+        right: 0,
+        height: 0,
+        width: 0,
+        x: 0,
+        y: 0,
+        toJSON: () => ({}),
+      }) as DOMRect
     document.body.appendChild(target)
     const scrollSpy = vi.fn()
     window.scrollTo = scrollSpy as unknown as typeof window.scrollTo

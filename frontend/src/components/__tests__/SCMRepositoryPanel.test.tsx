@@ -32,16 +32,12 @@ const defaultProps = {
 
 describe('SCMRepositoryPanel', () => {
   it('returns null when not authenticated', () => {
-    const { container } = render(
-      <SCMRepositoryPanel {...defaultProps} isAuthenticated={false} />
-    )
+    const { container } = render(<SCMRepositoryPanel {...defaultProps} isAuthenticated={false} />)
     expect(container.innerHTML).toBe('')
   })
 
   it('returns null when scm link not loaded', () => {
-    const { container } = render(
-      <SCMRepositoryPanel {...defaultProps} scmLinkLoaded={false} />
-    )
+    const { container } = render(<SCMRepositoryPanel {...defaultProps} scmLinkLoaded={false} />)
     expect(container.innerHTML).toBe('')
   })
 
@@ -58,7 +54,7 @@ describe('SCMRepositoryPanel', () => {
       <SCMRepositoryPanel
         {...defaultProps}
         scmLink={{ ...defaultLink, auto_publish_enabled: false }}
-      />
+      />,
     )
     expect(screen.getByText('Auto-publish off')).toBeInTheDocument()
   })

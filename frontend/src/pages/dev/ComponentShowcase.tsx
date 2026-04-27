@@ -1,24 +1,14 @@
-import { useState } from 'react';
-import {
-  Box,
-  Container,
-  Typography,
-  Divider,
-  Paper,
-  Chip,
-  Link,
-  Grid,
-  Alert,
-} from '@mui/material';
-import RegistryItemCard from '../../components/RegistryItemCard';
-import MarkdownRenderer from '../../components/MarkdownRenderer';
-import ErrorBoundary from '../../components/ErrorBoundary';
-import { ProviderIcon, providerDisplayName } from '../../components/ProviderIcon';
-import SecurityScanPanel from '../../components/SecurityScanPanel';
-import VersionDetailsPanel from '../../components/VersionDetailsPanel';
-import AboutModal from '../../components/AboutModal';
-import StorageMigrationWizard from '../../components/StorageMigrationWizard';
-import type { ModuleVersion, ModuleScan, StorageConfigResponse } from '../../types';
+import { useState } from 'react'
+import { Box, Container, Typography, Divider, Paper, Chip, Link, Grid, Alert } from '@mui/material'
+import RegistryItemCard from '../../components/RegistryItemCard'
+import MarkdownRenderer from '../../components/MarkdownRenderer'
+import ErrorBoundary from '../../components/ErrorBoundary'
+import { ProviderIcon, providerDisplayName } from '../../components/ProviderIcon'
+import SecurityScanPanel from '../../components/SecurityScanPanel'
+import VersionDetailsPanel from '../../components/VersionDetailsPanel'
+import AboutModal from '../../components/AboutModal'
+import StorageMigrationWizard from '../../components/StorageMigrationWizard'
+import type { ModuleVersion, ModuleScan, StorageConfigResponse } from '../../types'
 
 // ---------------------------------------------------------------------------
 // Sample data
@@ -32,7 +22,7 @@ const sampleModuleVersion: ModuleVersion = {
   published_at: '2026-03-15T10:00:00Z',
   published_by_name: 'jane.doe',
   deprecated: false,
-};
+}
 
 const sampleDeprecatedVersion: ModuleVersion = {
   id: 'mv-002',
@@ -44,7 +34,7 @@ const sampleDeprecatedVersion: ModuleVersion = {
   deprecated: true,
   deprecated_at: '2026-01-15T10:00:00Z',
   deprecation_message: 'This version has a known security vulnerability. Please upgrade to v2.x.',
-};
+}
 
 const sampleScanClean: ModuleScan = {
   id: 'scan-001',
@@ -62,7 +52,7 @@ const sampleScanClean: ModuleScan = {
   error_message: null,
   created_at: '2026-03-15T11:00:00Z',
   updated_at: '2026-03-15T11:00:00Z',
-};
+}
 
 const sampleScanFindings: ModuleScan = {
   id: 'scan-002',
@@ -80,7 +70,7 @@ const sampleScanFindings: ModuleScan = {
   error_message: null,
   created_at: '2025-06-01T12:00:00Z',
   updated_at: '2025-06-01T12:00:00Z',
-};
+}
 
 const sampleStorageConfigs: StorageConfigResponse[] = [
   {
@@ -105,7 +95,7 @@ const sampleStorageConfigs: StorageConfigResponse[] = [
     created_at: '2025-06-01T12:00:00Z',
     updated_at: '2025-06-01T12:00:00Z',
   },
-];
+]
 
 const sampleMarkdown = `# Module README
 
@@ -150,7 +140,7 @@ module "vpc" {
 - [x] VPC creation
 - [x] Subnet creation
 - [ ] Transit Gateway support
-`;
+`
 
 const providerSlugs = [
   'aws',
@@ -163,15 +153,15 @@ const providerSlugs = [
   'vsphere',
   'googlecloud',
   'microsoft',
-];
+]
 
 // ---------------------------------------------------------------------------
 // Table of contents sections
 // ---------------------------------------------------------------------------
 
 interface TocEntry {
-  id: string;
-  label: string;
+  id: string
+  label: string
 }
 
 const TOC_ENTRIES: TocEntry[] = [
@@ -183,15 +173,15 @@ const TOC_ENTRIES: TocEntry[] = [
   { id: 'version-details-panel', label: 'VersionDetailsPanel' },
   { id: 'about-modal', label: 'AboutModal' },
   { id: 'storage-migration-wizard', label: 'StorageMigrationWizard' },
-];
+]
 
 // ---------------------------------------------------------------------------
 // Component
 // ---------------------------------------------------------------------------
 
 const ComponentShowcase = () => {
-  const [aboutOpen, setAboutOpen] = useState(false);
-  const [migrationWizardOpen, setMigrationWizardOpen] = useState(false);
+  const [aboutOpen, setAboutOpen] = useState(false)
+  const [migrationWizardOpen, setMigrationWizardOpen] = useState(false)
 
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
@@ -318,18 +308,35 @@ const ComponentShowcase = () => {
       <Paper variant="outlined" sx={{ p: 3, mb: 3 }}>
         <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 3 }}>
           {providerSlugs.map((slug) => (
-            <Box key={slug} sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 0.5 }}>
+            <Box
+              key={slug}
+              sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 0.5 }}
+            >
               <ProviderIcon provider={slug} size={36} />
               <Typography variant="caption">{providerDisplayName(slug)}</Typography>
-              <Typography variant="caption" color="text.secondary">{slug}</Typography>
+              <Typography variant="caption" color="text.secondary">
+                {slug}
+              </Typography>
             </Box>
           ))}
           <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 0.5 }}>
-            <Box sx={{ width: 36, height: 36, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <Typography variant="caption" color="text.secondary">(null)</Typography>
+            <Box
+              sx={{
+                width: 36,
+                height: 36,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              <Typography variant="caption" color="text.secondary">
+                (null)
+              </Typography>
             </Box>
             <Typography variant="caption">Unknown</Typography>
-            <Typography variant="caption" color="text.secondary">unknown-provider</Typography>
+            <Typography variant="caption" color="text.secondary">
+              unknown-provider
+            </Typography>
           </Box>
         </Box>
       </Paper>
@@ -353,9 +360,9 @@ const ComponentShowcase = () => {
       <SectionHeader id="error-boundary" title="ErrorBoundary" category="Utilities" />
 
       <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-        The ErrorBoundary component renders a fallback UI when a child component throws.
-        Below is a static recreation of the fallback UI (triggering a real error would
-        be destructive to the showcase page).
+        The ErrorBoundary component renders a fallback UI when a child component throws. Below is a
+        static recreation of the fallback UI (triggering a real error would be destructive to the
+        showcase page).
       </Typography>
       <Paper variant="outlined" sx={{ p: 3, mb: 3 }}>
         <ErrorBoundary>
@@ -408,7 +415,11 @@ const ComponentShowcase = () => {
       {/* ----------------------------------------------------------------- */}
       {/* VersionDetailsPanel */}
       {/* ----------------------------------------------------------------- */}
-      <SectionHeader id="version-details-panel" title="VersionDetailsPanel" category="Detail Panels" />
+      <SectionHeader
+        id="version-details-panel"
+        title="VersionDetailsPanel"
+        category="Detail Panels"
+      />
 
       <Grid container spacing={2} sx={{ mb: 3 }}>
         <Grid size={{ xs: 12, md: 6 }}>
@@ -464,12 +475,16 @@ const ComponentShowcase = () => {
       {/* ----------------------------------------------------------------- */}
       {/* StorageMigrationWizard */}
       {/* ----------------------------------------------------------------- */}
-      <SectionHeader id="storage-migration-wizard" title="StorageMigrationWizard" category="Dialogs" />
+      <SectionHeader
+        id="storage-migration-wizard"
+        title="StorageMigrationWizard"
+        category="Dialogs"
+      />
 
       <Box sx={{ mb: 3 }}>
         <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-          Click the button below to open the Storage Migration Wizard dialog. Note: API
-          calls will fail in this showcase context, but the UI flow is visible.
+          Click the button below to open the Storage Migration Wizard dialog. Note: API calls will
+          fail in this showcase context, but the UI flow is visible.
         </Typography>
         <Chip
           label="Open StorageMigrationWizard"
@@ -488,16 +503,16 @@ const ComponentShowcase = () => {
       <Divider sx={{ my: 4 }} />
       <Alert severity="info" sx={{ mb: 2 }}>
         Components that require API calls or complex context (PublishFromSCMWizard,
-        RepositoryBrowser, DevUserSwitcher, HelpPanel, Layout, ProtectedRoute) are not
-        rendered in this showcase because they depend on live backend services or deep
-        context providers. See the component source files for their prop interfaces.
+        RepositoryBrowser, DevUserSwitcher, HelpPanel, Layout, ProtectedRoute) are not rendered in
+        this showcase because they depend on live backend services or deep context providers. See
+        the component source files for their prop interfaces.
       </Alert>
       <Typography variant="caption" color="text.secondary">
         Route: <code>/dev/components</code> &mdash; available only in development mode.
       </Typography>
     </Container>
-  );
-};
+  )
+}
 
 // ---------------------------------------------------------------------------
 // Helper components
@@ -516,7 +531,7 @@ function SectionHeader({ id, title, category }: { id: string; title: string; cat
         </Link>
       </Typography>
     </Box>
-  );
+  )
 }
 
 /** Static recreation of the ErrorBoundary fallback so we do not crash the page. */
@@ -548,7 +563,7 @@ function ErrorBoundaryFallbackPreview() {
         <Chip label="Reload Page" size="small" color="primary" />
       </Box>
     </Alert>
-  );
+  )
 }
 
-export default ComponentShowcase;
+export default ComponentShowcase

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState } from 'react'
 import {
   IconButton,
   Menu,
@@ -7,25 +7,25 @@ import {
   ListItemText,
   Tooltip,
   Divider,
-} from '@mui/material';
-import MoreVertIcon from '@mui/icons-material/MoreVert';
-import Delete from '@mui/icons-material/Delete';
-import Warning from '@mui/icons-material/Warning';
-import Undo from '@mui/icons-material/Undo';
-import Edit from '@mui/icons-material/Edit';
-import Add from '@mui/icons-material/Add';
+} from '@mui/material'
+import MoreVertIcon from '@mui/icons-material/MoreVert'
+import Delete from '@mui/icons-material/Delete'
+import Warning from '@mui/icons-material/Warning'
+import Undo from '@mui/icons-material/Undo'
+import Edit from '@mui/icons-material/Edit'
+import Add from '@mui/icons-material/Add'
 
 export interface ModuleActionsMenuProps {
-  canManage: boolean;
-  deprecated: boolean;
+  canManage: boolean
+  deprecated: boolean
   /** When true, show "Publish new version" as the first item (mobile/narrow viewports). */
-  includePublishAction?: boolean;
-  onPublishNewVersion?: () => void;
-  onEditDescription?: () => void;
-  onDeprecateModule?: () => void;
-  onUndeprecateModule?: () => void;
-  onDeleteModule?: () => void;
-  'data-testid'?: string;
+  includePublishAction?: boolean
+  onPublishNewVersion?: () => void
+  onEditDescription?: () => void
+  onDeprecateModule?: () => void
+  onUndeprecateModule?: () => void
+  onDeleteModule?: () => void
+  'data-testid'?: string
 }
 
 export default function ModuleActionsMenu({
@@ -39,17 +39,17 @@ export default function ModuleActionsMenu({
   onDeleteModule,
   'data-testid': testId = 'module-actions-menu',
 }: ModuleActionsMenuProps) {
-  const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
-  const open = Boolean(anchorEl);
+  const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null)
+  const open = Boolean(anchorEl)
 
-  if (!canManage) return null;
+  if (!canManage) return null
 
-  const handleOpen = (e: React.MouseEvent<HTMLElement>) => setAnchorEl(e.currentTarget);
-  const handleClose = () => setAnchorEl(null);
+  const handleOpen = (e: React.MouseEvent<HTMLElement>) => setAnchorEl(e.currentTarget)
+  const handleClose = () => setAnchorEl(null)
   const wrap = (handler?: () => void) => () => {
-    handleClose();
-    handler?.();
-  };
+    handleClose()
+    handler?.()
+  }
 
   return (
     <>
@@ -73,10 +73,7 @@ export default function ModuleActionsMenu({
         MenuListProps={{ 'aria-label': 'Module actions' }}
       >
         {includePublishAction && onPublishNewVersion && (
-          <MenuItem
-            onClick={wrap(onPublishNewVersion)}
-            data-testid={`${testId}-publish`}
-          >
+          <MenuItem onClick={wrap(onPublishNewVersion)} data-testid={`${testId}-publish`}>
             <ListItemIcon>
               <Add fontSize="small" />
             </ListItemIcon>
@@ -84,10 +81,7 @@ export default function ModuleActionsMenu({
           </MenuItem>
         )}
         {onEditDescription && (
-          <MenuItem
-            onClick={wrap(onEditDescription)}
-            data-testid={`${testId}-edit-description`}
-          >
+          <MenuItem onClick={wrap(onEditDescription)} data-testid={`${testId}-edit-description`}>
             <ListItemIcon>
               <Edit fontSize="small" />
             </ListItemIcon>
@@ -96,10 +90,7 @@ export default function ModuleActionsMenu({
         )}
         {(includePublishAction || onEditDescription) && <Divider />}
         {!deprecated && onDeprecateModule && (
-          <MenuItem
-            onClick={wrap(onDeprecateModule)}
-            data-testid={`${testId}-deprecate`}
-          >
+          <MenuItem onClick={wrap(onDeprecateModule)} data-testid={`${testId}-deprecate`}>
             <ListItemIcon>
               <Warning fontSize="small" color="warning" />
             </ListItemIcon>
@@ -107,10 +98,7 @@ export default function ModuleActionsMenu({
           </MenuItem>
         )}
         {deprecated && onUndeprecateModule && (
-          <MenuItem
-            onClick={wrap(onUndeprecateModule)}
-            data-testid={`${testId}-undeprecate`}
-          >
+          <MenuItem onClick={wrap(onUndeprecateModule)} data-testid={`${testId}-undeprecate`}>
             <ListItemIcon>
               <Undo fontSize="small" />
             </ListItemIcon>
@@ -131,5 +119,5 @@ export default function ModuleActionsMenu({
         )}
       </Menu>
     </>
-  );
+  )
 }

@@ -1,4 +1,4 @@
-import React from 'react';
+import React from 'react'
 import {
   Box,
   Paper,
@@ -12,23 +12,23 @@ import {
   List,
   ListItem,
   ListItemText,
-} from '@mui/material';
-import WebhookIcon from '@mui/icons-material/Webhook';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import ExpandLessIcon from '@mui/icons-material/ExpandLess';
-import SyncIcon from '@mui/icons-material/Sync';
-import type { ModuleSCMLink, SCMWebhookEvent } from '../types/scm';
+} from '@mui/material'
+import WebhookIcon from '@mui/icons-material/Webhook'
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
+import ExpandLessIcon from '@mui/icons-material/ExpandLess'
+import SyncIcon from '@mui/icons-material/Sync'
+import type { ModuleSCMLink, SCMWebhookEvent } from '../types/scm'
 
 interface WebhookEventsPanelProps {
-  isAuthenticated: boolean;
-  scmLink: ModuleSCMLink | null;
-  moduleId: string | undefined;
-  webhookEvents: SCMWebhookEvent[];
-  webhookEventsLoaded: boolean;
-  webhookEventsLoading: boolean;
-  webhookEventsExpanded: boolean;
-  onToggleExpanded: () => void;
-  onLoadEvents: (moduleId: string) => Promise<void>;
+  isAuthenticated: boolean
+  scmLink: ModuleSCMLink | null
+  moduleId: string | undefined
+  webhookEvents: SCMWebhookEvent[]
+  webhookEventsLoaded: boolean
+  webhookEventsLoading: boolean
+  webhookEventsExpanded: boolean
+  onToggleExpanded: () => void
+  onLoadEvents: (moduleId: string) => Promise<void>
 }
 
 const WebhookEventsPanel: React.FC<WebhookEventsPanelProps> = ({
@@ -42,14 +42,14 @@ const WebhookEventsPanel: React.FC<WebhookEventsPanelProps> = ({
   onToggleExpanded,
   onLoadEvents,
 }) => {
-  if (!isAuthenticated || !scmLink) return null;
+  if (!isAuthenticated || !scmLink) return null
 
   const handleToggle = () => {
     if (!webhookEventsExpanded && !webhookEventsLoaded && moduleId) {
-      onLoadEvents(moduleId);
+      onLoadEvents(moduleId)
     }
-    onToggleExpanded();
-  };
+    onToggleExpanded()
+  }
 
   return (
     <Paper sx={{ p: 3, mb: 3 }}>
@@ -120,7 +120,11 @@ const WebhookEventsPanel: React.FC<WebhookEventsPanelProps> = ({
               </ListItem>
             ))}
             {webhookEvents.length > 10 && (
-              <Typography variant="caption" color="text.secondary" sx={{ pl: 0, mt: 1, display: 'block' }}>
+              <Typography
+                variant="caption"
+                color="text.secondary"
+                sx={{ pl: 0, mt: 1, display: 'block' }}
+              >
                 Showing 10 of {webhookEvents.length} events
               </Typography>
             )}
@@ -132,8 +136,8 @@ const WebhookEventsPanel: React.FC<WebhookEventsPanelProps> = ({
               size="small"
               startIcon={<SyncIcon />}
               onClick={(e) => {
-                e.stopPropagation();
-                if (moduleId) onLoadEvents(moduleId);
+                e.stopPropagation()
+                if (moduleId) onLoadEvents(moduleId)
               }}
               disabled={webhookEventsLoading}
             >
@@ -143,7 +147,7 @@ const WebhookEventsPanel: React.FC<WebhookEventsPanelProps> = ({
         )}
       </Collapse>
     </Paper>
-  );
-};
+  )
+}
 
-export default WebhookEventsPanel;
+export default WebhookEventsPanel

@@ -20,12 +20,7 @@ describe('RegistryItemCard', () => {
   })
 
   it('shows fallback text when no description provided', () => {
-    render(
-      <RegistryItemCard
-        title="test-module"
-        onClick={vi.fn()}
-      />
-    )
+    render(<RegistryItemCard title="test-module" onClick={vi.fn()} />)
 
     expect(screen.getByText('No description available')).toBeInTheDocument()
   })
@@ -37,9 +32,7 @@ describe('RegistryItemCard', () => {
   })
 
   it('shows custom action label', () => {
-    render(
-      <RegistryItemCard {...defaultProps} actionLabel="Explore" />
-    )
+    render(<RegistryItemCard {...defaultProps} actionLabel="Explore" />)
 
     expect(screen.getByText('Explore')).toBeInTheDocument()
   })
@@ -59,36 +52,20 @@ describe('RegistryItemCard', () => {
   })
 
   it('renders badge when provided', () => {
-    render(
-      <RegistryItemCard
-        {...defaultProps}
-        badge={<span data-testid="badge">Mirrored</span>}
-      />
-    )
+    render(<RegistryItemCard {...defaultProps} badge={<span data-testid="badge">Mirrored</span>} />)
 
     expect(screen.getByTestId('badge')).toBeInTheDocument()
     expect(screen.getByText('Mirrored')).toBeInTheDocument()
   })
 
   it('renders chips when provided', () => {
-    render(
-      <RegistryItemCard
-        {...defaultProps}
-        chips={<span data-testid="chip">v1.0.0</span>}
-      />
-    )
+    render(<RegistryItemCard {...defaultProps} chips={<span data-testid="chip">v1.0.0</span>} />)
 
     expect(screen.getByTestId('chip')).toBeInTheDocument()
   })
 
   it('does not render subtitle when not provided', () => {
-    render(
-      <RegistryItemCard
-        title="test-module"
-        description="A test module"
-        onClick={vi.fn()}
-      />
-    )
+    render(<RegistryItemCard title="test-module" description="A test module" onClick={vi.fn()} />)
 
     // Title should exist, but no subtitle text
     expect(screen.getByText('test-module')).toBeInTheDocument()

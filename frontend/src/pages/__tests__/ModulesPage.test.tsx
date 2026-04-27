@@ -32,7 +32,9 @@ vi.mock('../../contexts/AuthContext', () => ({
 }))
 
 vi.mock('../../components/ProviderIcon', () => ({
-  ProviderIcon: ({ provider }: { provider: string }) => <span data-testid="provider-icon">{provider}</span>,
+  ProviderIcon: ({ provider }: { provider: string }) => (
+    <span data-testid="provider-icon">{provider}</span>
+  ),
   providerDisplayName: (slug: string) => slug.charAt(0).toUpperCase() + slug.slice(1),
 }))
 
@@ -135,9 +137,7 @@ describe('ModulesPage', () => {
     renderWithRoute('/modules?page=2&view=grid')
     // The API should be called with offset 12 (page 2, limit 12)
     await screen.findByText('Terraform Modules')
-    expect(searchModulesMock).toHaveBeenCalledWith(
-      expect.objectContaining({ offset: 12 }),
-    )
+    expect(searchModulesMock).toHaveBeenCalledWith(expect.objectContaining({ offset: 12 }))
   })
 
   it('reads sort/order from URL params and passes to API', async () => {

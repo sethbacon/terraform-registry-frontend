@@ -1,18 +1,18 @@
-import React from 'react';
-import { Avatar, Box } from '@mui/material';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faAws, faMicrosoft } from '@fortawesome/free-brands-svg-icons';
-import type { IconDefinition } from '@fortawesome/fontawesome-svg-core';
-import { siHashicorp, siVmware, siGooglecloud, siGoogle } from 'simple-icons';
+import React from 'react'
+import { Avatar, Box } from '@mui/material'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faAws, faMicrosoft } from '@fortawesome/free-brands-svg-icons'
+import type { IconDefinition } from '@fortawesome/fontawesome-svg-core'
+import { siHashicorp, siVmware, siGooglecloud, siGoogle } from 'simple-icons'
 
 // ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
 
 interface SimpleIconDef {
-  path: string;
-  hex: string;
-  title: string;
+  path: string
+  hex: string
+  title: string
 }
 
 /** 'si'     → simple-icons SVG path
@@ -21,11 +21,11 @@ interface SimpleIconDef {
 type IconStrategy =
   | { kind: 'si'; icon: SimpleIconDef }
   | { kind: 'fa'; icon: IconDefinition; color: string }
-  | { kind: 'avatar'; abbrev: string; color: string };
+  | { kind: 'avatar'; abbrev: string; color: string }
 
 interface ProviderConfig {
-  displayName: string;
-  strategy: IconStrategy;
+  displayName: string
+  strategy: IconStrategy
 }
 
 // ---------------------------------------------------------------------------
@@ -81,7 +81,7 @@ const PROVIDERS: Record<string, ProviderConfig> = {
     displayName: 'VMware',
     strategy: { kind: 'si', icon: siVmware },
   },
-};
+}
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -93,7 +93,7 @@ export function providerDisplayName(slug: string): string {
     PROVIDERS[slug.toLowerCase()]?.displayName ??
     // Fallback: title-case the raw slug for unknown providers
     slug.charAt(0).toUpperCase() + slug.slice(1)
-  );
+  )
 }
 
 // ---------------------------------------------------------------------------
@@ -101,30 +101,38 @@ export function providerDisplayName(slug: string): string {
 // ---------------------------------------------------------------------------
 
 interface ProviderIconProps {
-  provider: string;
+  provider: string
   /** Icon size in px (default 28). */
-  size?: number;
+  size?: number
 }
 
 /** Renders a recognisable icon for known Terraform providers.
  *  Returns null for unknown providers so the caller can decide whether to
  *  show a fallback itself. */
 export const ProviderIcon: React.FC<ProviderIconProps> = ({ provider, size = 28 }) => {
-  const config = PROVIDERS[provider.toLowerCase()];
-  if (!config) return null;
+  const config = PROVIDERS[provider.toLowerCase()]
+  if (!config) return null
 
-  const { strategy } = config;
+  const { strategy } = config
 
   if (strategy.kind === 'fa') {
     return (
       <Box
         component="span"
         aria-label={config.displayName}
-        sx={{ display: 'inline-flex', width: size, height: size, alignItems: 'center', justifyContent: 'center', flexShrink: 0, color: strategy.color }}
+        sx={{
+          display: 'inline-flex',
+          width: size,
+          height: size,
+          alignItems: 'center',
+          justifyContent: 'center',
+          flexShrink: 0,
+          color: strategy.color,
+        }}
       >
         <FontAwesomeIcon icon={strategy.icon} style={{ width: size, height: size }} />
       </Box>
-    );
+    )
   }
 
   if (strategy.kind === 'si') {
@@ -140,14 +148,11 @@ export const ProviderIcon: React.FC<ProviderIconProps> = ({ provider, size = 28 
       >
         <path d={strategy.icon.path} />
       </Box>
-    );
+    )
   }
 
   // avatar fallback
-  const fontSize =
-    strategy.abbrev.length >= 3
-      ? `${size * 0.28}px`
-      : `${size * 0.34}px`;
+  const fontSize = strategy.abbrev.length >= 3 ? `${size * 0.28}px` : `${size * 0.34}px`
 
   return (
     <Avatar
@@ -164,5 +169,5 @@ export const ProviderIcon: React.FC<ProviderIconProps> = ({ provider, size = 28 
     >
       {strategy.abbrev}
     </Avatar>
-  );
-};
+  )
+}

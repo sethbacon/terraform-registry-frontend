@@ -18,7 +18,8 @@ import QuickApiKeyDialog from '../QuickApiKeyDialog'
 
 function renderDialog(props: Partial<React.ComponentProps<typeof QuickApiKeyDialog>> = {}) {
   const onClose = props.onClose ?? vi.fn()
-  const organizationId = 'organizationId' in props ? (props.organizationId as string | null) : 'org-1'
+  const organizationId =
+    'organizationId' in props ? (props.organizationId as string | null) : 'org-1'
   return {
     onClose,
     ...render(
@@ -28,7 +29,7 @@ function renderDialog(props: Partial<React.ComponentProps<typeof QuickApiKeyDial
         organizationId={organizationId}
         hostname={props.hostname ?? 'registry.example.com'}
         defaultScopes={props.defaultScopes}
-      />
+      />,
     ),
   }
 }
@@ -51,9 +52,7 @@ describe('QuickApiKeyDialog', () => {
 
   it('warns when no organization is available and disables submit', () => {
     renderDialog({ organizationId: null })
-    expect(
-      screen.getByText(/You must be a member of an organization/i)
-    ).toBeInTheDocument()
+    expect(screen.getByText(/You must be a member of an organization/i)).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /^Create$/ })).toBeDisabled()
   })
 
@@ -112,14 +111,7 @@ describe('QuickApiKeyDialog', () => {
   it('prompts for confirmation when closing after token generation without copying', async () => {
     createAPIKeyMock.mockResolvedValue({ key: 'tok-xyz' })
     const onClose = vi.fn()
-    render(
-      <QuickApiKeyDialog
-        open={true}
-        onClose={onClose}
-        organizationId="org-1"
-        hostname="h"
-      />
-    )
+    render(<QuickApiKeyDialog open={true} onClose={onClose} organizationId="org-1" hostname="h" />)
     await userEvent.type(screen.getByLabelText(/API key name/i), 'k')
     await userEvent.click(screen.getByRole('button', { name: /^Create$/ }))
     await screen.findByTestId('quick-apikey-snippet')

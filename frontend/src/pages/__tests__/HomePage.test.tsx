@@ -17,7 +17,8 @@ vi.mock('../../services/api', () => ({
     getSetupStatus: (...args: unknown[]) => getSetupStatusMock(...args),
     searchModules: (...args: unknown[]) => searchModulesMock(...args),
     searchProviders: (...args: unknown[]) => searchProvidersMock(...args),
-    listPublicTerraformMirrorConfigs: (...args: unknown[]) => listPublicTerraformMirrorConfigsMock(...args),
+    listPublicTerraformMirrorConfigs: (...args: unknown[]) =>
+      listPublicTerraformMirrorConfigsMock(...args),
     getCurrentUserMemberships: (...args: unknown[]) => getCurrentUserMembershipsMock(...args),
     createAPIKey: (...args: unknown[]) => createAPIKeyMock(...args),
   },
@@ -25,7 +26,9 @@ vi.mock('../../services/api', () => ({
 
 // Mock AuthContext — toggle isAuthenticated via setAuthState.
 let authState: { isAuthenticated: boolean } = { isAuthenticated: false }
-function setAuthState(next: { isAuthenticated: boolean }) { authState = next }
+function setAuthState(next: { isAuthenticated: boolean }) {
+  authState = next
+}
 vi.mock('../../contexts/AuthContext', () => ({
   useAuth: () => ({ isAuthenticated: authState.isAuthenticated }),
 }))
@@ -61,14 +64,10 @@ function mockSuccessfulLoad() {
     meta: { total: 10 },
   })
   searchProvidersMock.mockResolvedValue({
-    providers: [
-      { namespace: 'hashicorp', type: 'aws' },
-    ],
+    providers: [{ namespace: 'hashicorp', type: 'aws' }],
     meta: { total: 5 },
   })
-  listPublicTerraformMirrorConfigsMock.mockResolvedValue([
-    { name: 'terraform', tool: 'terraform' },
-  ])
+  listPublicTerraformMirrorConfigsMock.mockResolvedValue([{ name: 'terraform', tool: 'terraform' }])
 }
 
 // ---- Tests ----
@@ -196,7 +195,7 @@ describe('HomePage', () => {
       const input = screen.getByPlaceholderText(/Search modules/) as HTMLInputElement
       await userEvent.type(input, 'consul{Enter}')
       await waitFor(() =>
-        expect(navigateMock).toHaveBeenCalledWith(expect.stringMatching(/^\/modules\?q=consul/))
+        expect(navigateMock).toHaveBeenCalledWith(expect.stringMatching(/^\/modules\?q=consul/)),
       )
     })
 
@@ -210,7 +209,7 @@ describe('HomePage', () => {
       const input = screen.getByPlaceholderText(/Search providers/) as HTMLInputElement
       await userEvent.type(input, 'aws{Enter}')
       await waitFor(() =>
-        expect(navigateMock).toHaveBeenCalledWith(expect.stringMatching(/^\/providers\?q=aws/))
+        expect(navigateMock).toHaveBeenCalledWith(expect.stringMatching(/^\/providers\?q=aws/)),
       )
     })
   })

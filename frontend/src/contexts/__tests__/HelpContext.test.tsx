@@ -21,7 +21,7 @@ describe('HelpContext', () => {
   })
 
   it('throws when useHelp is used outside HelpProvider', () => {
-    vi.spyOn(console, 'error').mockImplementation(() => { })
+    vi.spyOn(console, 'error').mockImplementation(() => {})
 
     function BadConsumer() {
       useHelp()
@@ -35,7 +35,7 @@ describe('HelpContext', () => {
     render(
       <HelpProvider>
         <HelpConsumer />
-      </HelpProvider>
+      </HelpProvider>,
     )
 
     expect(screen.getByTestId('open').textContent).toBe('false')
@@ -47,7 +47,7 @@ describe('HelpContext', () => {
     render(
       <HelpProvider>
         <HelpConsumer />
-      </HelpProvider>
+      </HelpProvider>,
     )
 
     expect(screen.getByTestId('open').textContent).toBe('true')
@@ -57,7 +57,7 @@ describe('HelpContext', () => {
     render(
       <HelpProvider>
         <HelpConsumer />
-      </HelpProvider>
+      </HelpProvider>,
     )
 
     expect(screen.getByTestId('open').textContent).toBe('false')
@@ -75,7 +75,7 @@ describe('HelpContext', () => {
     render(
       <HelpProvider>
         <HelpConsumer />
-      </HelpProvider>
+      </HelpProvider>,
     )
 
     expect(screen.getByTestId('open').textContent).toBe('true')
@@ -91,7 +91,7 @@ describe('HelpContext', () => {
     render(
       <HelpProvider>
         <HelpConsumer />
-      </HelpProvider>
+      </HelpProvider>,
     )
 
     act(() => {
@@ -107,7 +107,7 @@ describe('HelpContext', () => {
     render(
       <HelpProvider>
         <HelpConsumer />
-      </HelpProvider>
+      </HelpProvider>,
     )
 
     act(() => {

@@ -98,7 +98,7 @@ describe('MirrorsPage', () => {
   })
 
   it('shows loading spinner while fetching', () => {
-    listMirrorsMock.mockReturnValue(new Promise(() => { }))
+    listMirrorsMock.mockReturnValue(new Promise(() => {}))
     renderWithProviders(<MirrorsPage />)
     expect(screen.getByRole('progressbar')).toBeInTheDocument()
   })
@@ -121,9 +121,7 @@ describe('MirrorsPage', () => {
       expect(screen.getByText('Upstream Public')).toBeInTheDocument()
     })
     expect(screen.getByText('Datadog Mirror')).toBeInTheDocument()
-    expect(
-      screen.getAllByText('https://registry.terraform.io').length,
-    ).toBeGreaterThanOrEqual(2)
+    expect(screen.getAllByText('https://registry.terraform.io').length).toBeGreaterThanOrEqual(2)
   })
 
   it('shows Enabled/Disabled chips on mirror cards', async () => {
@@ -155,16 +153,12 @@ describe('MirrorsPage', () => {
     listMirrorsMock.mockResolvedValue([baseMirror])
     renderWithProviders(<MirrorsPage />)
     await waitFor(() => {
-      expect(
-        screen.getByText('Main upstream mirror for hashicorp providers'),
-      ).toBeInTheDocument()
+      expect(screen.getByText('Main upstream mirror for hashicorp providers')).toBeInTheDocument()
     })
     expect(screen.getByText('Namespaces: hashicorp')).toBeInTheDocument()
     expect(screen.getByText('Providers: aws, google')).toBeInTheDocument()
     expect(screen.getByText('Versions: >=3.0.0')).toBeInTheDocument()
-    expect(
-      screen.getByText('Platforms: linux/amd64, darwin/arm64'),
-    ).toBeInTheDocument()
+    expect(screen.getByText('Platforms: linux/amd64, darwin/arm64')).toBeInTheDocument()
   })
 
   it('shows sync interval and last sync date', async () => {
@@ -266,9 +260,7 @@ describe('MirrorsPage', () => {
     expect(screen.getByLabelText('Namespace Filter')).toHaveValue('hashicorp')
     expect(screen.getByLabelText('Provider Filter')).toHaveValue('aws, google')
     expect(screen.getByLabelText('Version Filter')).toHaveValue('>=3.0.0')
-    expect(screen.getByLabelText('Platform Filter')).toHaveValue(
-      'linux/amd64, darwin/arm64',
-    )
+    expect(screen.getByLabelText('Platform Filter')).toHaveValue('linux/amd64, darwin/arm64')
     expect(screen.getByText('Update')).toBeInTheDocument()
   })
 
@@ -324,9 +316,7 @@ describe('MirrorsPage', () => {
       expect(triggerMirrorSyncMock).toHaveBeenCalledWith('mirror-1')
     })
     await waitFor(() => {
-      expect(
-        screen.getByText('Sync triggered for "Upstream Public"'),
-      ).toBeInTheDocument()
+      expect(screen.getByText('Sync triggered for "Upstream Public"')).toBeInTheDocument()
     })
   })
 
@@ -363,9 +353,7 @@ describe('MirrorsPage', () => {
 
     await user.click(screen.getByText('View Details'))
     await waitFor(() => {
-      expect(
-        screen.getByText('Providers — Upstream Public'),
-      ).toBeInTheDocument()
+      expect(screen.getByText('Providers — Upstream Public')).toBeInTheDocument()
     })
 
     await waitFor(() => {
@@ -386,9 +374,7 @@ describe('MirrorsPage', () => {
 
     await user.click(screen.getByText('View Details'))
     await waitFor(() => {
-      expect(
-        screen.getByText('No providers have been synced yet.'),
-      ).toBeInTheDocument()
+      expect(screen.getByText('No providers have been synced yet.')).toBeInTheDocument()
     })
   })
 
@@ -426,9 +412,7 @@ describe('MirrorsPage', () => {
 
     await user.click(screen.getByLabelText('View sync history'))
     await waitFor(() => {
-      expect(
-        screen.getByText('Sync History — Upstream Public'),
-      ).toBeInTheDocument()
+      expect(screen.getByText('Sync History — Upstream Public')).toBeInTheDocument()
     })
 
     // Wait for history entries to appear
@@ -453,9 +437,7 @@ describe('MirrorsPage', () => {
 
     await user.click(screen.getByLabelText('View sync history'))
     await waitFor(() => {
-      expect(
-        screen.getByText('No sync history available.'),
-      ).toBeInTheDocument()
+      expect(screen.getByText('No sync history available.')).toBeInTheDocument()
     })
   })
 
@@ -633,9 +615,7 @@ describe('MirrorsPage', () => {
       expect(screen.getByText('linux')).toBeInTheDocument()
     })
     expect(screen.getByText('amd64')).toBeInTheDocument()
-    expect(
-      screen.getByText('terraform-provider-aws_5.10.0_linux_amd64.zip'),
-    ).toBeInTheDocument()
+    expect(screen.getByText('terraform-provider-aws_5.10.0_linux_amd64.zip')).toBeInTheDocument()
   })
 
   it('shows default status chip for unknown sync status', async () => {
@@ -677,9 +657,7 @@ describe('MirrorsPage', () => {
     await user.click(screen.getByText('View Details'))
     // When providers fetch fails, it shows "No providers have been synced yet." (empty fallback)
     await waitFor(() => {
-      expect(
-        screen.getByText('No providers have been synced yet.'),
-      ).toBeInTheDocument()
+      expect(screen.getByText('No providers have been synced yet.')).toBeInTheDocument()
     })
   })
 
@@ -694,9 +672,7 @@ describe('MirrorsPage', () => {
     await user.click(screen.getByLabelText('View sync history'))
     // When status fetch fails, it falls back to empty history
     await waitFor(() => {
-      expect(
-        screen.getByText('No sync history available.'),
-      ).toBeInTheDocument()
+      expect(screen.getByText('No sync history available.')).toBeInTheDocument()
     })
   })
 

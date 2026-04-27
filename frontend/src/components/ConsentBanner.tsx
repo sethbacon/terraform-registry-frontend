@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState } from 'react'
 import {
   Box,
   Button,
@@ -8,8 +8,8 @@ import {
   Switch,
   Typography,
   FormControlLabel,
-} from '@mui/material';
-import { useConsent } from '../contexts/ConsentContext';
+} from '@mui/material'
+import { useConsent } from '../contexts/ConsentContext'
 
 /**
  * GDPR / ePrivacy consent banner. Shown as a bottom sheet when the user
@@ -18,10 +18,10 @@ import { useConsent } from '../contexts/ConsentContext';
  * Users can accept all, reject all (essential only), or customize.
  */
 export default function ConsentBanner() {
-  const { hasConsented, preferences, updatePreferences, acceptAll, rejectAll } = useConsent();
-  const [showDetails, setShowDetails] = useState(false);
+  const { hasConsented, preferences, updatePreferences, acceptAll, rejectAll } = useConsent()
+  const [showDetails, setShowDetails] = useState(false)
 
-  if (hasConsented) return null;
+  if (hasConsented) return null
 
   return (
     <Slide direction="up" in={!hasConsented} mountOnEnter unmountOnExit>
@@ -54,10 +54,7 @@ export default function ConsentBanner() {
 
         {showDetails && (
           <Box sx={{ my: 2 }}>
-            <FormControlLabel
-              control={<Switch checked disabled />}
-              label="Essential (always on)"
-            />
+            <FormControlLabel control={<Switch checked disabled />} label="Essential (always on)" />
             <FormControlLabel
               control={
                 <Switch
@@ -101,5 +98,5 @@ export default function ConsentBanner() {
         </Stack>
       </Paper>
     </Slide>
-  );
+  )
 }

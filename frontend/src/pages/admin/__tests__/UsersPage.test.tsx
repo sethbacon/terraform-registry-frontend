@@ -108,7 +108,7 @@ describe('UsersPage', () => {
   })
 
   it('shows loading spinner initially', () => {
-    listUsersMock.mockReturnValue(new Promise(() => { }))
+    listUsersMock.mockReturnValue(new Promise(() => {}))
     renderPage()
     expect(screen.getByRole('progressbar')).toBeInTheDocument()
   })
@@ -265,7 +265,12 @@ describe('UsersPage', () => {
     await userEvent.click(editButtons[0])
     await waitFor(() => expect(screen.getByText('Edit User')).toBeInTheDocument())
     await userEvent.click(screen.getByRole('button', { name: /^save$/i }))
-    await waitFor(() => expect(updateUserMock).toHaveBeenCalledWith('u1', expect.objectContaining({ name: expect.any(String) })))
+    await waitFor(() =>
+      expect(updateUserMock).toHaveBeenCalledWith(
+        'u1',
+        expect.objectContaining({ name: expect.any(String) }),
+      ),
+    )
   })
 
   it('cancels Add User dialog', async () => {

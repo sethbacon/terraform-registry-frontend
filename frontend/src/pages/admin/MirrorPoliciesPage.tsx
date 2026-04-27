@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import React, { useState } from 'react'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import {
   Box,
   Button,
@@ -25,29 +25,29 @@ import {
   InputLabel,
   IconButton,
   Container,
-} from '@mui/material';
-import AddIcon from '@mui/icons-material/Add';
-import EditIcon from '@mui/icons-material/Edit';
-import DeleteIcon from '@mui/icons-material/Delete';
-import RefreshIcon from '@mui/icons-material/Refresh';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import BlockIcon from '@mui/icons-material/Block';
-import PlayArrowIcon from '@mui/icons-material/PlayArrow';
-import api from '../../services/api';
-import { MirrorPolicy } from '../../types/rbac';
-import { getErrorMessage } from '../../utils/errors';
-import { queryKeys } from '../../services/queryKeys';
+} from '@mui/material'
+import AddIcon from '@mui/icons-material/Add'
+import EditIcon from '@mui/icons-material/Edit'
+import DeleteIcon from '@mui/icons-material/Delete'
+import RefreshIcon from '@mui/icons-material/Refresh'
+import CheckCircleIcon from '@mui/icons-material/CheckCircle'
+import BlockIcon from '@mui/icons-material/Block'
+import PlayArrowIcon from '@mui/icons-material/PlayArrow'
+import api from '../../services/api'
+import { MirrorPolicy } from '../../types/rbac'
+import { getErrorMessage } from '../../utils/errors'
+import { queryKeys } from '../../services/queryKeys'
 
 interface PolicyFormData {
-  name: string;
-  description: string;
-  policy_type: 'allow' | 'deny';
-  upstream_registry: string;
-  namespace_pattern: string;
-  provider_pattern: string;
-  priority: number;
-  is_active: boolean;
-  requires_approval: boolean;
+  name: string
+  description: string
+  policy_type: 'allow' | 'deny'
+  upstream_registry: string
+  namespace_pattern: string
+  provider_pattern: string
+  priority: number
+  is_active: boolean
+  requires_approval: boolean
 }
 
 const defaultFormData: PolicyFormData = {
@@ -60,27 +60,31 @@ const defaultFormData: PolicyFormData = {
   priority: 0,
   is_active: true,
   requires_approval: false,
-};
+}
 
 const MirrorPoliciesPage: React.FC = () => {
-  const queryClient = useQueryClient();
-  const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<string | null>(null);
+  const queryClient = useQueryClient()
+  const [error, setError] = useState<string | null>(null)
+  const [success, setSuccess] = useState<string | null>(null)
 
   // Create / Edit dialog
-  const [formDialogOpen, setFormDialogOpen] = useState(false);
-  const [editingPolicy, setEditingPolicy] = useState<MirrorPolicy | null>(null);
-  const [formData, setFormData] = useState<PolicyFormData>(defaultFormData);
+  const [formDialogOpen, setFormDialogOpen] = useState(false)
+  const [editingPolicy, setEditingPolicy] = useState<MirrorPolicy | null>(null)
+  const [formData, setFormData] = useState<PolicyFormData>(defaultFormData)
 
   // Delete dialog
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [policyToDelete, setPolicyToDelete] = useState<MirrorPolicy | null>(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
+  const [policyToDelete, setPolicyToDelete] = useState<MirrorPolicy | null>(null)
 
   // Evaluate dialog
-  const [evaluateDialogOpen, setEvaluateDialogOpen] = useState(false);
-  const [evaluateForm, setEvaluateForm] = useState({ registry: '', namespace: '', provider: '' });
-  const [evaluateResult, setEvaluateResult] = useState<{ allowed: boolean; matched_policy?: string; reason?: string } | null>(null);
-  const [evaluating, setEvaluating] = useState(false);
+  const [evaluateDialogOpen, setEvaluateDialogOpen] = useState(false)
+  const [evaluateForm, setEvaluateForm] = useState({ registry: '', namespace: '', provider: '' })
+  const [evaluateResult, setEvaluateResult] = useState<{
+    allowed: boolean
+    matched_policy?: string
+    reason?: string
+  } | null>(null)
+  const [evaluating, setEvaluating] = useState(false)
 
   const {
     data: policies = [],
@@ -90,53 +94,53 @@ const MirrorPoliciesPage: React.FC = () => {
   } = useQuery<MirrorPolicy[]>({
     queryKey: queryKeys.policies.list(),
     queryFn: async () => {
-      const data = await api.listMirrorPolicies();
-      return Array.isArray(data) ? data : [];
+      const data = await api.listMirrorPolicies()
+      return Array.isArray(data) ? data : []
     },
-  });
+  })
 
   if (queryError && !error) {
-    setError(getErrorMessage(queryError, 'Failed to load mirror policies'));
+    setError(getErrorMessage(queryError, 'Failed to load mirror policies'))
   }
 
   const saveMutation = useMutation({
     mutationFn: async (payload: Parameters<typeof api.createMirrorPolicy>[0]) => {
       if (editingPolicy) {
-        return api.updateMirrorPolicy(editingPolicy.id, payload);
+        return api.updateMirrorPolicy(editingPolicy.id, payload)
       }
-      return api.createMirrorPolicy(payload);
+      return api.createMirrorPolicy(payload)
     },
     onSuccess: () => {
-      setSuccess(editingPolicy ? 'Policy updated successfully' : 'Policy created successfully');
-      setError(null);
-      setFormDialogOpen(false);
-      setEditingPolicy(null);
-      setFormData(defaultFormData);
-      queryClient.invalidateQueries({ queryKey: queryKeys.policies._def });
+      setSuccess(editingPolicy ? 'Policy updated successfully' : 'Policy created successfully')
+      setError(null)
+      setFormDialogOpen(false)
+      setEditingPolicy(null)
+      setFormData(defaultFormData)
+      queryClient.invalidateQueries({ queryKey: queryKeys.policies._def })
     },
     onError: (err: unknown) => {
-      setError(getErrorMessage(err, 'Failed to save policy'));
+      setError(getErrorMessage(err, 'Failed to save policy'))
     },
-  });
+  })
 
   const deleteMutation = useMutation({
     mutationFn: (id: string) => api.deleteMirrorPolicy(id),
     onSuccess: () => {
-      setDeleteDialogOpen(false);
-      setPolicyToDelete(null);
-      setSuccess('Policy deleted successfully');
-      setError(null);
-      queryClient.invalidateQueries({ queryKey: queryKeys.policies._def });
+      setDeleteDialogOpen(false)
+      setPolicyToDelete(null)
+      setSuccess('Policy deleted successfully')
+      setError(null)
+      queryClient.invalidateQueries({ queryKey: queryKeys.policies._def })
     },
     onError: (err: unknown) => {
-      setError(getErrorMessage(err, 'Failed to delete policy'));
+      setError(getErrorMessage(err, 'Failed to delete policy'))
     },
-  });
+  })
 
-  const saving = saveMutation.isPending;
+  const saving = saveMutation.isPending
 
   const handleSave = () => {
-    setError(null);
+    setError(null)
     saveMutation.mutate({
       name: formData.name,
       description: formData.description || undefined,
@@ -147,34 +151,34 @@ const MirrorPoliciesPage: React.FC = () => {
       priority: formData.priority,
       is_active: formData.is_active,
       requires_approval: formData.requires_approval,
-    });
-  };
+    })
+  }
 
   const handleDelete = () => {
-    if (!policyToDelete) return;
-    setError(null);
-    deleteMutation.mutate(policyToDelete.id);
-  };
+    if (!policyToDelete) return
+    setError(null)
+    deleteMutation.mutate(policyToDelete.id)
+  }
 
   const handleEvaluate = async () => {
     try {
-      setEvaluating(true);
-      setEvaluateResult(null);
+      setEvaluating(true)
+      setEvaluateResult(null)
       const result = await api.evaluateMirrorPolicy({
         registry: evaluateForm.registry,
         namespace: evaluateForm.namespace,
         provider: evaluateForm.provider,
-      });
-      setEvaluateResult(result);
+      })
+      setEvaluateResult(result)
     } catch (err: unknown) {
-      setError(getErrorMessage(err, 'Failed to evaluate policy'));
+      setError(getErrorMessage(err, 'Failed to evaluate policy'))
     } finally {
-      setEvaluating(false);
+      setEvaluating(false)
     }
-  };
+  }
 
   const openEditDialog = (policy: MirrorPolicy) => {
-    setEditingPolicy(policy);
+    setEditingPolicy(policy)
     setFormData({
       name: policy.name,
       description: policy.description || '',
@@ -185,32 +189,41 @@ const MirrorPoliciesPage: React.FC = () => {
       priority: policy.priority ?? 0,
       is_active: policy.is_active,
       requires_approval: policy.requires_approval,
-    });
-    setFormDialogOpen(true);
-  };
+    })
+    setFormDialogOpen(true)
+  }
 
   const openCreateDialog = () => {
-    setEditingPolicy(null);
-    setFormData(defaultFormData);
-    setFormDialogOpen(true);
-  };
+    setEditingPolicy(null)
+    setFormData(defaultFormData)
+    setFormDialogOpen(true)
+  }
 
   const getPolicyTypeChip = (policyType: 'allow' | 'deny') => {
     if (policyType === 'allow') {
-      return <Chip label="Allow" size="small" color="success" icon={<CheckCircleIcon />} />;
+      return <Chip label="Allow" size="small" color="success" icon={<CheckCircleIcon />} />
     }
-    return <Chip label="Deny" size="small" color="error" icon={<BlockIcon />} />;
-  };
+    return <Chip label="Deny" size="small" color="error" icon={<BlockIcon />} />
+  }
 
   return (
     <Container maxWidth="lg" sx={{ py: 4 }} aria-busy={loading} aria-live="polite">
       {loading ? (
-        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '400px' }}>
+        <Box
+          sx={{
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            minHeight: '400px',
+          }}
+        >
           <CircularProgress />
         </Box>
       ) : (
         <>
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+          <Box
+            sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}
+          >
             <Box>
               <Typography variant="h4">Mirror Policies</Typography>
               <Typography variant="body2" color="text.secondary">
@@ -223,9 +236,9 @@ const MirrorPoliciesPage: React.FC = () => {
                   variant="outlined"
                   startIcon={<PlayArrowIcon />}
                   onClick={() => {
-                    setEvaluateForm({ registry: '', namespace: '', provider: '' });
-                    setEvaluateResult(null);
-                    setEvaluateDialogOpen(true);
+                    setEvaluateForm({ registry: '', namespace: '', provider: '' })
+                    setEvaluateResult(null)
+                    setEvaluateDialogOpen(true)
                   }}
                 >
                   Evaluate
@@ -234,15 +247,13 @@ const MirrorPoliciesPage: React.FC = () => {
               <Button
                 variant="outlined"
                 startIcon={<RefreshIcon />}
-                onClick={() => { loadPolicies(); }}
+                onClick={() => {
+                  loadPolicies()
+                }}
               >
                 Refresh
               </Button>
-              <Button
-                variant="contained"
-                startIcon={<AddIcon />}
-                onClick={openCreateDialog}
-              >
+              <Button variant="contained" startIcon={<AddIcon />} onClick={openCreateDialog}>
                 Create Policy
               </Button>
             </Box>
@@ -265,7 +276,12 @@ const MirrorPoliciesPage: React.FC = () => {
               <Grid size={{ xs: 12, md: 6 }} key={policy.id}>
                 <Card sx={{ opacity: policy.is_active ? 1 : 0.6 }}>
                   <CardContent>
-                    <Box display="flex" justifyContent="space-between" alignItems="flex-start" mb={1}>
+                    <Box
+                      display="flex"
+                      justifyContent="space-between"
+                      alignItems="flex-start"
+                      mb={1}
+                    >
                       <Typography variant="h6" sx={{ flex: 1, mr: 1 }}>
                         {policy.name}
                       </Typography>
@@ -309,11 +325,7 @@ const MirrorPoliciesPage: React.FC = () => {
                         />
                       )}
                       {policy.requires_approval && (
-                        <Chip
-                          size="small"
-                          color="warning"
-                          label="Requires approval"
-                        />
+                        <Chip size="small" color="warning" label="Requires approval" />
                       )}
                     </Box>
 
@@ -326,7 +338,11 @@ const MirrorPoliciesPage: React.FC = () => {
 
                   <CardActions>
                     <Tooltip title="Edit">
-                      <IconButton size="small" aria-label="Edit policy" onClick={() => openEditDialog(policy)}>
+                      <IconButton
+                        size="small"
+                        aria-label="Edit policy"
+                        onClick={() => openEditDialog(policy)}
+                      >
                         <EditIcon />
                       </IconButton>
                     </Tooltip>
@@ -336,8 +352,8 @@ const MirrorPoliciesPage: React.FC = () => {
                         aria-label="Delete policy"
                         color="error"
                         onClick={() => {
-                          setPolicyToDelete(policy);
-                          setDeleteDialogOpen(true);
+                          setPolicyToDelete(policy)
+                          setDeleteDialogOpen(true)
                         }}
                       >
                         <DeleteIcon />
@@ -353,7 +369,8 @@ const MirrorPoliciesPage: React.FC = () => {
                 <Card>
                   <CardContent>
                     <Typography variant="body1" color="textSecondary" align="center">
-                      No mirror policies found. Create one to control which providers can be mirrored.
+                      No mirror policies found. Create one to control which providers can be
+                      mirrored.
                     </Typography>
                   </CardContent>
                 </Card>
@@ -365,8 +382,8 @@ const MirrorPoliciesPage: React.FC = () => {
           <Dialog
             open={formDialogOpen}
             onClose={() => {
-              setFormDialogOpen(false);
-              setEditingPolicy(null);
+              setFormDialogOpen(false)
+              setEditingPolicy(null)
             }}
             maxWidth="sm"
             fullWidth
@@ -401,8 +418,12 @@ const MirrorPoliciesPage: React.FC = () => {
                       setFormData({ ...formData, policy_type: e.target.value as 'allow' | 'deny' })
                     }
                   >
-                    <MenuItem value="allow">Allow — permit matching providers to be mirrored</MenuItem>
-                    <MenuItem value="deny">Deny — block matching providers from being mirrored</MenuItem>
+                    <MenuItem value="allow">
+                      Allow — permit matching providers to be mirrored
+                    </MenuItem>
+                    <MenuItem value="deny">
+                      Deny — block matching providers from being mirrored
+                    </MenuItem>
                   </Select>
                 </FormControl>
 
@@ -468,18 +489,14 @@ const MirrorPoliciesPage: React.FC = () => {
             <DialogActions>
               <Button
                 onClick={() => {
-                  setFormDialogOpen(false);
-                  setEditingPolicy(null);
+                  setFormDialogOpen(false)
+                  setEditingPolicy(null)
                 }}
                 disabled={saving}
               >
                 Cancel
               </Button>
-              <Button
-                variant="contained"
-                onClick={handleSave}
-                disabled={!formData.name || saving}
-              >
+              <Button variant="contained" onClick={handleSave} disabled={!formData.name || saving}>
                 {saving ? 'Saving...' : editingPolicy ? 'Update' : 'Create'}
               </Button>
             </DialogActions>
@@ -490,8 +507,8 @@ const MirrorPoliciesPage: React.FC = () => {
             <DialogTitle>Confirm Delete</DialogTitle>
             <DialogContent>
               <Typography>
-                Are you sure you want to delete the policy "{policyToDelete?.name}"? This action cannot
-                be undone.
+                Are you sure you want to delete the policy "{policyToDelete?.name}"? This action
+                cannot be undone.
               </Typography>
             </DialogContent>
             <DialogActions>
@@ -513,7 +530,8 @@ const MirrorPoliciesPage: React.FC = () => {
             <DialogContent>
               <Box sx={{ pt: 2, display: 'flex', flexDirection: 'column', gap: 2 }}>
                 <Typography variant="body2" color="textSecondary">
-                  Check whether a specific provider would be allowed or denied by the current policy set.
+                  Check whether a specific provider would be allowed or denied by the current policy
+                  set.
                 </Typography>
                 <TextField
                   label="Registry"
@@ -540,10 +558,7 @@ const MirrorPoliciesPage: React.FC = () => {
                   placeholder="aws"
                 />
                 {evaluateResult && (
-                  <Alert
-                    severity={evaluateResult.allowed ? 'success' : 'error'}
-                    sx={{ mt: 1 }}
-                  >
+                  <Alert severity={evaluateResult.allowed ? 'success' : 'error'} sx={{ mt: 1 }}>
                     <Typography variant="body2">
                       <strong>{evaluateResult.allowed ? 'Allowed' : 'Denied'}</strong>
                       {evaluateResult.matched_policy && (
@@ -575,7 +590,7 @@ const MirrorPoliciesPage: React.FC = () => {
         </>
       )}
     </Container>
-  );
-};
+  )
+}
 
-export default MirrorPoliciesPage;
+export default MirrorPoliciesPage

@@ -31,14 +31,14 @@ describe('ErrorBoundary', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     // Suppress React error boundary console.error output in test logs
-    vi.spyOn(console, 'error').mockImplementation(() => { })
+    vi.spyOn(console, 'error').mockImplementation(() => {})
   })
 
   it('renders children when no error occurs', () => {
     render(
       <ErrorBoundary>
         <div>Hello World</div>
-      </ErrorBoundary>
+      </ErrorBoundary>,
     )
 
     expect(screen.getByText('Hello World')).toBeInTheDocument()
@@ -57,7 +57,7 @@ describe('ErrorBoundary', () => {
 
     expect(captureError).toHaveBeenCalledWith(
       expect.objectContaining({ message: 'Test error from child' }),
-      expect.objectContaining({ componentStack: expect.any(String) })
+      expect.objectContaining({ componentStack: expect.any(String) }),
     )
   })
 
@@ -75,7 +75,7 @@ describe('ErrorBoundary', () => {
     render(
       <ErrorBoundary>
         <ConditionalThrower />
-      </ErrorBoundary>
+      </ErrorBoundary>,
     )
 
     expect(screen.getByText('Something went wrong')).toBeInTheDocument()
@@ -99,7 +99,7 @@ describe('ErrorBoundary', () => {
     render(
       <ErrorBoundary fallback={<div>Custom fallback UI</div>}>
         <ThrowingChild shouldThrow={true} />
-      </ErrorBoundary>
+      </ErrorBoundary>,
     )
 
     expect(screen.getByText('Custom fallback UI')).toBeInTheDocument()

@@ -58,16 +58,12 @@ const defaultProps = {
 
 describe('WebhookEventsPanel', () => {
   it('returns null when not authenticated', () => {
-    const { container } = render(
-      <WebhookEventsPanel {...defaultProps} isAuthenticated={false} />
-    )
+    const { container } = render(<WebhookEventsPanel {...defaultProps} isAuthenticated={false} />)
     expect(container.innerHTML).toBe('')
   })
 
   it('returns null when no scmLink', () => {
-    const { container } = render(
-      <WebhookEventsPanel {...defaultProps} scmLink={null} />
-    )
+    const { container } = render(<WebhookEventsPanel {...defaultProps} scmLink={null} />)
     expect(container.innerHTML).toBe('')
   })
 
@@ -89,16 +85,12 @@ describe('WebhookEventsPanel', () => {
   })
 
   it('shows empty message when no events', () => {
-    render(
-      <WebhookEventsPanel {...defaultProps} webhookEvents={[]} />
-    )
+    render(<WebhookEventsPanel {...defaultProps} webhookEvents={[]} />)
     expect(screen.getByText('No webhook events recorded yet.')).toBeInTheDocument()
   })
 
   it('shows loading spinner when loading', () => {
-    render(
-      <WebhookEventsPanel {...defaultProps} webhookEventsLoading={true} webhookEvents={[]} />
-    )
+    render(<WebhookEventsPanel {...defaultProps} webhookEventsLoading={true} webhookEvents={[]} />)
     expect(screen.getByRole('progressbar')).toBeInTheDocument()
   })
 
@@ -110,9 +102,7 @@ describe('WebhookEventsPanel', () => {
   it('calls onToggleExpanded when header clicked', async () => {
     const onToggleExpanded = vi.fn()
     const user = userEvent.setup()
-    render(
-      <WebhookEventsPanel {...defaultProps} onToggleExpanded={onToggleExpanded} />
-    )
+    render(<WebhookEventsPanel {...defaultProps} onToggleExpanded={onToggleExpanded} />)
     await user.click(screen.getByText('Webhook Events'))
     expect(onToggleExpanded).toHaveBeenCalled()
   })

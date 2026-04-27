@@ -118,7 +118,7 @@ function mockSetupRequired() {
 /** Helper: mock API for existing configs state */
 function mockExistingConfigs(
   configs: StorageConfigResponse[] = [fakeLocalConfig, fakeS3Config],
-  migrations: typeof fakeMigration[] = [],
+  migrations: (typeof fakeMigration)[] = [],
 ) {
   getSetupStatusMock.mockResolvedValue({ setup_required: false, storage_configured: true })
   listStorageConfigsMock.mockResolvedValue(configs)
@@ -133,7 +133,7 @@ describe('StoragePage', () => {
   // ---- Loading state ----
 
   it('shows loading spinner while fetching', () => {
-    getSetupStatusMock.mockReturnValue(new Promise(() => { }))
+    getSetupStatusMock.mockReturnValue(new Promise(() => {}))
     renderWithProviders(<StoragePage />)
     expect(screen.getByRole('progressbar')).toBeInTheDocument()
   })
@@ -147,7 +147,7 @@ describe('StoragePage', () => {
       expect(screen.getByText('Storage Configuration')).toBeInTheDocument()
     })
     expect(
-      screen.getByText(/Configure where the registry will store module and provider files/)
+      screen.getByText(/Configure where the registry will store module and provider files/),
     ).toBeInTheDocument()
   })
 
@@ -181,9 +181,7 @@ describe('StoragePage', () => {
     })
     await user.click(screen.getByText('Next'))
     expect(screen.getByLabelText(/Base Path/)).toBeInTheDocument()
-    expect(
-      screen.getByText(/Serve files directly/)
-    ).toBeInTheDocument()
+    expect(screen.getByText(/Serve files directly/)).toBeInTheDocument()
   })
 
   it('shows Azure settings when Azure backend is selected', async () => {
@@ -277,7 +275,7 @@ describe('StoragePage', () => {
       expect(createStorageConfigMock).toHaveBeenCalledTimes(1)
     })
     expect(createStorageConfigMock).toHaveBeenCalledWith(
-      expect.objectContaining({ backend_type: 'local' })
+      expect.objectContaining({ backend_type: 'local' }),
     )
   })
 
@@ -346,7 +344,9 @@ describe('StoragePage', () => {
     mockExistingConfigs()
     renderWithProviders(<StoragePage />)
     await waitFor(() => {
-      expect(screen.getByText(/Changing storage backends after initial setup may result in data loss/)).toBeInTheDocument()
+      expect(
+        screen.getByText(/Changing storage backends after initial setup may result in data loss/),
+      ).toBeInTheDocument()
     })
   })
 
@@ -414,7 +414,7 @@ describe('StoragePage', () => {
     })
     await user.click(screen.getByLabelText('Delete Amazon S3 / S3-Compatible'))
     expect(confirmMock).toHaveBeenCalledWith(
-      'Are you sure you want to delete this storage configuration?'
+      'Are you sure you want to delete this storage configuration?',
     )
     await waitFor(() => {
       expect(deleteStorageConfigMock).toHaveBeenCalledWith('cfg-2')
@@ -447,7 +447,7 @@ describe('StoragePage', () => {
     await user.click(screen.getByLabelText('Test Local File System'))
     await waitFor(() => {
       expect(testStorageConfigMock).toHaveBeenCalledWith(
-        expect.objectContaining({ backend_type: 'local', local_base_path: './data/storage' })
+        expect.objectContaining({ backend_type: 'local', local_base_path: './data/storage' }),
       )
     })
   })

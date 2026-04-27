@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { queryKeys } from '../../services/queryKeys';
+import React, { useState, useEffect } from 'react'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { queryKeys } from '../../services/queryKeys'
 import {
   Alert,
   Box,
@@ -31,20 +31,20 @@ import {
   TextField,
   Tooltip,
   Typography,
-} from '@mui/material';
-import AddIcon from '@mui/icons-material/Add';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import DeleteIcon from '@mui/icons-material/Delete';
-import EditIcon from '@mui/icons-material/Edit';
-import ErrorIcon from '@mui/icons-material/Error';
-import ExpandLessIcon from '@mui/icons-material/ExpandLess';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import HistoryIcon from '@mui/icons-material/History';
-import RefreshIcon from '@mui/icons-material/Refresh';
-import SyncIcon from '@mui/icons-material/Sync';
+} from '@mui/material'
+import AddIcon from '@mui/icons-material/Add'
+import CheckCircleIcon from '@mui/icons-material/CheckCircle'
+import DeleteIcon from '@mui/icons-material/Delete'
+import EditIcon from '@mui/icons-material/Edit'
+import ErrorIcon from '@mui/icons-material/Error'
+import ExpandLessIcon from '@mui/icons-material/ExpandLess'
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
+import HistoryIcon from '@mui/icons-material/History'
+import RefreshIcon from '@mui/icons-material/Refresh'
+import SyncIcon from '@mui/icons-material/Sync'
 
-import api from '../../services/api';
-import { getErrorMessage } from '../../utils/errors';
+import api from '../../services/api'
+import { getErrorMessage } from '../../utils/errors'
 import {
   type TerraformMirrorConfig,
   type TerraformMirrorStatusResponse,
@@ -55,7 +55,7 @@ import {
   type UpdateTerraformMirrorConfigRequest,
   syncStatusColor,
   parsePlatformFilter,
-} from '../../types/terraform_mirror';
+} from '../../types/terraform_mirror'
 
 // ---------------------------------------------------------------------------
 // Helper chip components
@@ -77,40 +77,40 @@ const SyncStatusChip: React.FC<{ status: string; size?: 'small' | 'medium' }> = 
       ) : undefined
     }
   />
-);
+)
 
 const ToolChip: React.FC<{ tool: string }> = ({ tool }) => {
-  const color = tool === 'terraform' ? 'primary' : tool === 'opentofu' ? 'secondary' : 'default';
-  return <Chip label={tool} size="small" color={color} variant="outlined" />;
-};
+  const color = tool === 'terraform' ? 'primary' : tool === 'opentofu' ? 'secondary' : 'default'
+  return <Chip label={tool} size="small" color={color} variant="outlined" />
+}
 
 // ---------------------------------------------------------------------------
 // Version row with expandable platform list
 // ---------------------------------------------------------------------------
 
 const VersionRow: React.FC<{
-  version: TerraformVersion;
-  configId: string;
-  onDelete: (v: TerraformVersion) => void;
+  version: TerraformVersion
+  configId: string
+  onDelete: (v: TerraformVersion) => void
 }> = ({ version, configId, onDelete }) => {
-  const [open, setOpen] = useState(false);
-  const [platforms, setPlatforms] = useState<TerraformVersionPlatform[] | null>(null);
-  const [loadingPlatforms, setLoadingPlatforms] = useState(false);
+  const [open, setOpen] = useState(false)
+  const [platforms, setPlatforms] = useState<TerraformVersionPlatform[] | null>(null)
+  const [loadingPlatforms, setLoadingPlatforms] = useState(false)
 
   const handleExpand = async () => {
     if (!open && platforms === null) {
-      setLoadingPlatforms(true);
+      setLoadingPlatforms(true)
       try {
-        const data = await api.listTerraformVersionPlatforms(configId, version.version);
-        setPlatforms(data);
+        const data = await api.listTerraformVersionPlatforms(configId, version.version)
+        setPlatforms(data)
       } catch {
-        setPlatforms([]);
+        setPlatforms([])
       } finally {
-        setLoadingPlatforms(false);
+        setLoadingPlatforms(false)
       }
     }
-    setOpen((prev) => !prev);
-  };
+    setOpen((prev) => !prev)
+  }
 
   return (
     <>
@@ -176,7 +176,11 @@ const VersionRow: React.FC<{
                         <TableCell>{p.os}</TableCell>
                         <TableCell>{p.arch}</TableCell>
                         <TableCell>
-                          <Typography variant="caption" fontFamily="monospace" sx={{ wordBreak: 'break-all' }}>
+                          <Typography
+                            variant="caption"
+                            fontFamily="monospace"
+                            sx={{ wordBreak: 'break-all' }}
+                          >
                             {p.filename}
                           </Typography>
                         </TableCell>
@@ -211,26 +215,28 @@ const VersionRow: React.FC<{
         </TableCell>
       </TableRow>
     </>
-  );
-};
+  )
+}
 
 // ---------------------------------------------------------------------------
 // Config card
 // ---------------------------------------------------------------------------
 
 const ConfigCard: React.FC<{
-  config: TerraformMirrorConfig;
-  status?: TerraformMirrorStatusResponse;
-  onEdit: (c: TerraformMirrorConfig) => void;
-  onDelete: (c: TerraformMirrorConfig) => void;
-  onSync: (c: TerraformMirrorConfig) => void;
-  onViewVersions: (c: TerraformMirrorConfig) => void;
-  onViewHistory: (c: TerraformMirrorConfig) => void;
-  syncing: boolean;
+  config: TerraformMirrorConfig
+  status?: TerraformMirrorStatusResponse
+  onEdit: (c: TerraformMirrorConfig) => void
+  onDelete: (c: TerraformMirrorConfig) => void
+  onSync: (c: TerraformMirrorConfig) => void
+  onViewVersions: (c: TerraformMirrorConfig) => void
+  onViewHistory: (c: TerraformMirrorConfig) => void
+  syncing: boolean
 }> = ({ config, status, onEdit, onDelete, onSync, onViewVersions, onViewHistory, syncing }) => (
   <Card variant="outlined">
     <CardContent>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1 }}>
+      <Box
+        sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1 }}
+      >
         <Typography variant="h6" sx={{ wordBreak: 'break-word' }}>
           {config.name}
         </Typography>
@@ -259,7 +265,12 @@ const ConfigCard: React.FC<{
           <Chip size="small" label={`${status.version_count} versions`} variant="outlined" />
           <Chip size="small" label={`${status.platform_count} platforms`} variant="outlined" />
           {status.pending_count > 0 && (
-            <Chip size="small" label={`${status.pending_count} pending`} variant="outlined" color="warning" />
+            <Chip
+              size="small"
+              label={`${status.pending_count} pending`}
+              variant="outlined"
+              color="warning"
+            />
           )}
         </Box>
       )}
@@ -290,7 +301,11 @@ const ConfigCard: React.FC<{
           </Button>
         </Tooltip>
         <Tooltip title="View sync history">
-          <IconButton size="small" aria-label="View sync history" onClick={() => onViewHistory(config)}>
+          <IconButton
+            size="small"
+            aria-label="View sync history"
+            onClick={() => onViewHistory(config)}
+          >
             <HistoryIcon fontSize="small" />
           </IconButton>
         </Tooltip>
@@ -298,7 +313,12 @@ const ConfigCard: React.FC<{
       <Box>
         <Tooltip title="Trigger sync">
           <span>
-            <IconButton size="small" aria-label="Sync mirror" onClick={() => onSync(config)} disabled={syncing || !config.enabled}>
+            <IconButton
+              size="small"
+              aria-label="Sync mirror"
+              onClick={() => onSync(config)}
+              disabled={syncing || !config.enabled}
+            >
               <SyncIcon fontSize="small" />
             </IconButton>
           </span>
@@ -309,14 +329,19 @@ const ConfigCard: React.FC<{
           </IconButton>
         </Tooltip>
         <Tooltip title="Delete mirror">
-          <IconButton size="small" aria-label="Delete mirror" color="error" onClick={() => onDelete(config)}>
+          <IconButton
+            size="small"
+            aria-label="Delete mirror"
+            color="error"
+            onClick={() => onDelete(config)}
+          >
             <DeleteIcon fontSize="small" />
           </IconButton>
         </Tooltip>
       </Box>
     </CardActions>
   </Card>
-);
+)
 
 // ---------------------------------------------------------------------------
 // Tool defaults
@@ -325,11 +350,11 @@ const ConfigCard: React.FC<{
 const TOOL_DEFAULT_URLS: Record<string, string> = {
   terraform: 'https://releases.hashicorp.com',
   opentofu: 'https://github.com/opentofu/opentofu',
-};
+}
 
 /** Returns the canonical upstream URL for a known tool, or '' for custom. */
 function toolDefaultUrl(tool: string): string {
-  return TOOL_DEFAULT_URLS[tool] ?? '';
+  return TOOL_DEFAULT_URLS[tool] ?? ''
 }
 
 // ---------------------------------------------------------------------------
@@ -345,49 +370,49 @@ const emptyCreate = (): CreateTerraformMirrorConfigRequest => ({
   stable_only: false,
   enabled: true,
   sync_interval_hours: 24,
-});
+})
 
 // ---------------------------------------------------------------------------
 // Main page
 // ---------------------------------------------------------------------------
 
 const TerraformMirrorPage: React.FC = () => {
-  const queryClient = useQueryClient();
-  const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<string | null>(null);
+  const queryClient = useQueryClient()
+  const [error, setError] = useState<string | null>(null)
+  const [success, setSuccess] = useState<string | null>(null)
 
   // ---- create dialog ----
-  const [createOpen, setCreateOpen] = useState(false);
-  const [createForm, setCreateForm] = useState<CreateTerraformMirrorConfigRequest>(emptyCreate());
-  const [createVersionFilter, setCreateVersionFilter] = useState('');
-  const [createPlatformFilter, setCreatePlatformFilter] = useState('');
+  const [createOpen, setCreateOpen] = useState(false)
+  const [createForm, setCreateForm] = useState<CreateTerraformMirrorConfigRequest>(emptyCreate())
+  const [createVersionFilter, setCreateVersionFilter] = useState('')
+  const [createPlatformFilter, setCreatePlatformFilter] = useState('')
 
   // ---- edit dialog ----
-  const [editConfig, setEditConfig] = useState<TerraformMirrorConfig | null>(null);
-  const [editForm, setEditForm] = useState<UpdateTerraformMirrorConfigRequest>({});
-  const [editVersionFilter, setEditVersionFilter] = useState('');
-  const [editPlatformFilter, setEditPlatformFilter] = useState('');
+  const [editConfig, setEditConfig] = useState<TerraformMirrorConfig | null>(null)
+  const [editForm, setEditForm] = useState<UpdateTerraformMirrorConfigRequest>({})
+  const [editVersionFilter, setEditVersionFilter] = useState('')
+  const [editPlatformFilter, setEditPlatformFilter] = useState('')
 
   // ---- delete dialog ----
-  const [deleteConfig, setDeleteConfig] = useState<TerraformMirrorConfig | null>(null);
+  const [deleteConfig, setDeleteConfig] = useState<TerraformMirrorConfig | null>(null)
 
   // ---- versions dialog ----
-  const [versionsConfig, setVersionsConfig] = useState<TerraformMirrorConfig | null>(null);
-  const [versions, setVersions] = useState<TerraformVersion[]>([]);
-  const [versionsLoading, setVersionsLoading] = useState(false);
-  const [deleteVersion, setDeleteVersion] = useState<TerraformVersion | null>(null);
-  const [deletingVersion, setDeletingVersion] = useState(false);
+  const [versionsConfig, setVersionsConfig] = useState<TerraformMirrorConfig | null>(null)
+  const [versions, setVersions] = useState<TerraformVersion[]>([])
+  const [versionsLoading, setVersionsLoading] = useState(false)
+  const [deleteVersion, setDeleteVersion] = useState<TerraformVersion | null>(null)
+  const [deletingVersion, setDeletingVersion] = useState(false)
 
   // ---- status overlay (per-card) ----
-  const [statusMap, setStatusMap] = useState<Record<string, TerraformMirrorStatusResponse>>({});
+  const [statusMap, setStatusMap] = useState<Record<string, TerraformMirrorStatusResponse>>({})
 
   // ---- history dialog ----
-  const [historyConfig, setHistoryConfig] = useState<TerraformMirrorConfig | null>(null);
-  const [history, setHistory] = useState<TerraformSyncHistory[]>([]);
-  const [historyLoading, setHistoryLoading] = useState(false);
+  const [historyConfig, setHistoryConfig] = useState<TerraformMirrorConfig | null>(null)
+  const [history, setHistory] = useState<TerraformSyncHistory[]>([])
+  const [historyLoading, setHistoryLoading] = useState(false)
 
   // ---- sync in-progress ----
-  const [syncingIds, setSyncingIds] = useState<Set<string>>(new Set());
+  const [syncingIds, setSyncingIds] = useState<Set<string>>(new Set())
 
   // ---------------------------------------------------------------------------
   // Load configs via React Query
@@ -399,26 +424,26 @@ const TerraformMirrorPage: React.FC = () => {
   } = useQuery<TerraformMirrorConfig[]>({
     queryKey: queryKeys.terraformMirrors.list(),
     queryFn: async () => {
-      const data = await api.listTerraformMirrorConfigs();
-      return data.configs ?? [];
+      const data = await api.listTerraformMirrorConfigs()
+      return data.configs ?? []
     },
-  });
+  })
 
   if (queryError && !error) {
-    setError(getErrorMessage(queryError, 'Failed to load Terraform mirror configurations'));
+    setError(getErrorMessage(queryError, 'Failed to load Terraform mirror configurations'))
   }
 
   // Lazy-load status for each card when configs change
   useEffect(() => {
     configs.forEach(async (c) => {
       try {
-        const s = await api.getTerraformMirrorStatus(c.id);
-        setStatusMap((prev) => ({ ...prev, [c.id]: s }));
+        const s = await api.getTerraformMirrorStatus(c.id)
+        setStatusMap((prev) => ({ ...prev, [c.id]: s }))
       } catch {
         // ignore status load failures
       }
-    });
-  }, [configs]);
+    })
+  }, [configs])
 
   // ---------------------------------------------------------------------------
   // Create
@@ -428,37 +453,37 @@ const TerraformMirrorPage: React.FC = () => {
       const platformFilter = createPlatformFilter
         .split(',')
         .map((s) => s.trim())
-        .filter(Boolean);
+        .filter(Boolean)
       await api.createTerraformMirrorConfig({
         ...createForm,
         platform_filter: platformFilter.length > 0 ? platformFilter : undefined,
         version_filter: createVersionFilter.trim() || undefined,
-      });
+      })
     },
     onSuccess: () => {
-      setSuccess(`Mirror "${createForm.name}" created`);
-      setCreateOpen(false);
-      setCreateForm(emptyCreate());
-      setCreateVersionFilter('');
-      setCreatePlatformFilter('');
-      queryClient.invalidateQueries({ queryKey: queryKeys.terraformMirrors._def });
+      setSuccess(`Mirror "${createForm.name}" created`)
+      setCreateOpen(false)
+      setCreateForm(emptyCreate())
+      setCreateVersionFilter('')
+      setCreatePlatformFilter('')
+      queryClient.invalidateQueries({ queryKey: queryKeys.terraformMirrors._def })
     },
     onError: (err: unknown) => {
-      setError(getErrorMessage(err, 'Failed to create mirror config'));
+      setError(getErrorMessage(err, 'Failed to create mirror config'))
     },
-  });
+  })
 
   const handleCreate = () => {
-    createMutation.mutate();
-  };
+    createMutation.mutate()
+  }
 
   // ---------------------------------------------------------------------------
   // Edit
   // ---------------------------------------------------------------------------
   const openEdit = (config: TerraformMirrorConfig) => {
-    setEditConfig(config);
-    setEditVersionFilter(config.version_filter ?? '');
-    setEditPlatformFilter(parsePlatformFilter(config.platform_filter).join(', '));
+    setEditConfig(config)
+    setEditVersionFilter(config.version_filter ?? '')
+    setEditPlatformFilter(parsePlatformFilter(config.platform_filter).join(', '))
     setEditForm({
       name: config.name,
       description: config.description ?? '',
@@ -468,134 +493,134 @@ const TerraformMirrorPage: React.FC = () => {
       gpg_verify: config.gpg_verify,
       stable_only: config.stable_only,
       sync_interval_hours: config.sync_interval_hours,
-    });
-  };
+    })
+  }
 
   const editMutation = useMutation({
     mutationFn: async () => {
-      if (!editConfig) throw new Error('No config to edit');
+      if (!editConfig) throw new Error('No config to edit')
       const platformFilter = editPlatformFilter
         .split(',')
         .map((s) => s.trim())
-        .filter(Boolean);
+        .filter(Boolean)
       await api.updateTerraformMirrorConfig(editConfig.id, {
         ...editForm,
         platform_filter: platformFilter.length > 0 ? platformFilter : [],
         version_filter: editVersionFilter.trim() || '',
-      });
+      })
     },
     onSuccess: () => {
-      setSuccess(`Mirror "${editConfig?.name}" updated`);
-      setEditConfig(null);
-      queryClient.invalidateQueries({ queryKey: queryKeys.terraformMirrors._def });
+      setSuccess(`Mirror "${editConfig?.name}" updated`)
+      setEditConfig(null)
+      queryClient.invalidateQueries({ queryKey: queryKeys.terraformMirrors._def })
     },
     onError: (err: unknown) => {
-      setError(getErrorMessage(err, 'Failed to update mirror config'));
+      setError(getErrorMessage(err, 'Failed to update mirror config'))
     },
-  });
+  })
 
   const handleEdit = () => {
-    if (!editConfig) return;
-    editMutation.mutate();
-  };
+    if (!editConfig) return
+    editMutation.mutate()
+  }
 
   // ---------------------------------------------------------------------------
   // Delete
   // ---------------------------------------------------------------------------
   const deleteMutation = useMutation({
     mutationFn: async () => {
-      if (!deleteConfig) throw new Error('No config to delete');
-      await api.deleteTerraformMirrorConfig(deleteConfig.id);
+      if (!deleteConfig) throw new Error('No config to delete')
+      await api.deleteTerraformMirrorConfig(deleteConfig.id)
     },
     onSuccess: () => {
-      setSuccess(`Mirror "${deleteConfig?.name}" deleted`);
-      setDeleteConfig(null);
-      queryClient.invalidateQueries({ queryKey: queryKeys.terraformMirrors._def });
+      setSuccess(`Mirror "${deleteConfig?.name}" deleted`)
+      setDeleteConfig(null)
+      queryClient.invalidateQueries({ queryKey: queryKeys.terraformMirrors._def })
     },
     onError: (err: unknown) => {
-      setError(getErrorMessage(err, 'Failed to delete mirror config'));
+      setError(getErrorMessage(err, 'Failed to delete mirror config'))
     },
-  });
+  })
 
   const handleDelete = () => {
-    if (!deleteConfig) return;
-    deleteMutation.mutate();
-  };
+    if (!deleteConfig) return
+    deleteMutation.mutate()
+  }
 
   // ---------------------------------------------------------------------------
   // Sync
   // ---------------------------------------------------------------------------
   const handleSync = async (config: TerraformMirrorConfig) => {
-    setSyncingIds((prev) => new Set([...prev, config.id]));
+    setSyncingIds((prev) => new Set([...prev, config.id]))
     try {
-      await api.triggerTerraformMirrorSync(config.id);
-      setSuccess(`Sync triggered for "${config.name}"`);
+      await api.triggerTerraformMirrorSync(config.id)
+      setSuccess(`Sync triggered for "${config.name}"`)
     } catch (err: unknown) {
-      setError(getErrorMessage(err, 'Failed to trigger sync'));
+      setError(getErrorMessage(err, 'Failed to trigger sync'))
     } finally {
       setSyncingIds((prev) => {
-        const next = new Set(prev);
-        next.delete(config.id);
-        return next;
-      });
+        const next = new Set(prev)
+        next.delete(config.id)
+        return next
+      })
     }
-  };
+  }
 
   // ---------------------------------------------------------------------------
   // Versions dialog
   // ---------------------------------------------------------------------------
   const openVersions = async (config: TerraformMirrorConfig) => {
-    setVersionsConfig(config);
-    setVersionsLoading(true);
-    setVersions([]);
+    setVersionsConfig(config)
+    setVersionsLoading(true)
+    setVersions([])
     try {
-      const data = await api.listTerraformVersions(config.id, { synced: false });
-      const rows = data.versions ?? [];
+      const data = await api.listTerraformVersions(config.id, { synced: false })
+      const rows = data.versions ?? []
       // Sort: latest first, then by version descending
       const sorted = [...rows].sort((a, b) => {
-        if (a.is_latest !== b.is_latest) return a.is_latest ? -1 : 1;
-        return b.version.localeCompare(a.version, undefined, { numeric: true });
-      });
-      setVersions(sorted);
+        if (a.is_latest !== b.is_latest) return a.is_latest ? -1 : 1
+        return b.version.localeCompare(a.version, undefined, { numeric: true })
+      })
+      setVersions(sorted)
     } catch {
-      setVersions([]);
+      setVersions([])
     } finally {
-      setVersionsLoading(false);
+      setVersionsLoading(false)
     }
-  };
+  }
 
   const handleDeleteVersion = async () => {
-    if (!deleteVersion || !versionsConfig) return;
-    setDeletingVersion(true);
+    if (!deleteVersion || !versionsConfig) return
+    setDeletingVersion(true)
     try {
-      await api.deleteTerraformVersion(versionsConfig.id, deleteVersion.version);
-      setSuccess(`Version ${deleteVersion.version} deleted`);
-      setDeleteVersion(null);
-      openVersions(versionsConfig);
+      await api.deleteTerraformVersion(versionsConfig.id, deleteVersion.version)
+      setSuccess(`Version ${deleteVersion.version} deleted`)
+      setDeleteVersion(null)
+      openVersions(versionsConfig)
     } catch (err: unknown) {
-      setError(getErrorMessage(err, 'Failed to delete version'));
-      setDeleteVersion(null);
+      setError(getErrorMessage(err, 'Failed to delete version'))
+      setDeleteVersion(null)
     } finally {
-      setDeletingVersion(false);
+      setDeletingVersion(false)
     }
-  };
+  }
 
   // ---------------------------------------------------------------------------
   // History dialog
   // ---------------------------------------------------------------------------
   const openHistory = async (config: TerraformMirrorConfig) => {
-    setHistoryConfig(config);
-    setHistoryLoading(true);
-    setHistory([]);
+    setHistoryConfig(config)
+    setHistoryLoading(true)
+    setHistory([])
     try {
-      const data = await api.getTerraformMirrorHistory(config.id, 20);
-      setHistory(data.history ?? []);
+      const data = await api.getTerraformMirrorHistory(config.id, 20)
+      setHistory(data.history ?? [])
     } catch {
-      setHistory([]);
+      setHistory([])
     } finally {
-      setHistoryLoading(false);
+      setHistoryLoading(false)
     }
-  };
+  }
 
   // ---------------------------------------------------------------------------
   // Render
@@ -603,13 +628,22 @@ const TerraformMirrorPage: React.FC = () => {
   return (
     <Box aria-busy={loading} aria-live="polite">
       {loading ? (
-        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '400px' }}>
+        <Box
+          sx={{
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            minHeight: '400px',
+          }}
+        >
           <CircularProgress />
         </Box>
       ) : (
         <Container maxWidth="lg" sx={{ py: 4 }}>
           {/* Header */}
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+          <Box
+            sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}
+          >
             <Box>
               <Typography variant="h4">Mirroring — Binaries Config</Typography>
             </Box>
@@ -617,7 +651,9 @@ const TerraformMirrorPage: React.FC = () => {
               <Button
                 variant="outlined"
                 startIcon={<RefreshIcon />}
-                onClick={() => queryClient.invalidateQueries({ queryKey: queryKeys.terraformMirrors._def })}
+                onClick={() =>
+                  queryClient.invalidateQueries({ queryKey: queryKeys.terraformMirrors._def })
+                }
                 disabled={loading}
               >
                 Refresh
@@ -625,7 +661,12 @@ const TerraformMirrorPage: React.FC = () => {
               <Button
                 variant="contained"
                 startIcon={<AddIcon />}
-                onClick={() => { setCreateForm(emptyCreate()); setCreateVersionFilter(''); setCreatePlatformFilter(''); setCreateOpen(true); }}
+                onClick={() => {
+                  setCreateForm(emptyCreate())
+                  setCreateVersionFilter('')
+                  setCreatePlatformFilter('')
+                  setCreateOpen(true)
+                }}
               >
                 Add Mirror
               </Button>
@@ -636,9 +677,11 @@ const TerraformMirrorPage: React.FC = () => {
           <Alert severity="info" sx={{ mb: 2 }}>
             <Typography variant="body2">
               Clients download binaries at{' '}
-              <code>/terraform/binaries/&#123;name&#125;/versions/&#123;version&#125;/&#123;os&#125;/&#123;arch&#125;</code>.
-              This endpoint is unauthenticated — configure your CI or developer machines to point at
-              your registry host.
+              <code>
+                /terraform/binaries/&#123;name&#125;/versions/&#123;version&#125;/&#123;os&#125;/&#123;arch&#125;
+              </code>
+              . This endpoint is unauthenticated — configure your CI or developer machines to point
+              at your registry host.
             </Typography>
           </Alert>
 
@@ -662,7 +705,7 @@ const TerraformMirrorPage: React.FC = () => {
           ) : (
             <Grid container spacing={2} sx={{ mb: 3 }}>
               {configs.map((cfg) => {
-                const status = statusMap[cfg.id];
+                const status = statusMap[cfg.id]
                 return (
                   <Grid size={{ xs: 12, md: 6 }} key={cfg.id}>
                     <ConfigCard
@@ -676,7 +719,7 @@ const TerraformMirrorPage: React.FC = () => {
                       syncing={syncingIds.has(cfg.id)}
                     />
                   </Grid>
-                );
+                )
               })}
             </Grid>
           )}
@@ -699,7 +742,9 @@ const TerraformMirrorPage: React.FC = () => {
                 <TextField
                   label="Description"
                   value={createForm.description ?? ''}
-                  onChange={(e) => setCreateForm((prev) => ({ ...prev, description: e.target.value }))}
+                  onChange={(e) =>
+                    setCreateForm((prev) => ({ ...prev, description: e.target.value }))
+                  }
                   fullWidth
                 />
                 <TextField
@@ -707,17 +752,18 @@ const TerraformMirrorPage: React.FC = () => {
                   label="Tool"
                   value={createForm.tool}
                   onChange={(e) => {
-                    const newTool = e.target.value;
+                    const newTool = e.target.value
                     setCreateForm((prev) => {
                       // Auto-update upstream URL only if it still matches the previous tool's default
-                      const prevDefault = toolDefaultUrl(prev.tool);
-                      const shouldUpdate = prev.upstream_url === prevDefault || prev.upstream_url === '';
+                      const prevDefault = toolDefaultUrl(prev.tool)
+                      const shouldUpdate =
+                        prev.upstream_url === prevDefault || prev.upstream_url === ''
                       return {
                         ...prev,
                         tool: newTool,
                         upstream_url: shouldUpdate ? toolDefaultUrl(newTool) : prev.upstream_url,
-                      };
-                    });
+                      }
+                    })
                   }}
                   fullWidth
                 >
@@ -728,7 +774,9 @@ const TerraformMirrorPage: React.FC = () => {
                 <TextField
                   label="Upstream URL"
                   value={createForm.upstream_url}
-                  onChange={(e) => setCreateForm((prev) => ({ ...prev, upstream_url: e.target.value }))}
+                  onChange={(e) =>
+                    setCreateForm((prev) => ({ ...prev, upstream_url: e.target.value }))
+                  }
                   helperText={
                     createForm.tool === 'opentofu'
                       ? 'OpenTofu releases server (releases.opentofu.org) or a GitHub repo URL (e.g. https://github.com/opentofu/opentofu).'
@@ -831,7 +879,9 @@ const TerraformMirrorPage: React.FC = () => {
                 <TextField
                   label="Description"
                   value={editForm.description ?? ''}
-                  onChange={(e) => setEditForm((prev) => ({ ...prev, description: e.target.value }))}
+                  onChange={(e) =>
+                    setEditForm((prev) => ({ ...prev, description: e.target.value }))
+                  }
                   fullWidth
                 />
                 <TextField
@@ -839,16 +889,18 @@ const TerraformMirrorPage: React.FC = () => {
                   label="Tool"
                   value={editForm.tool ?? 'terraform'}
                   onChange={(e) => {
-                    const newTool = e.target.value;
+                    const newTool = e.target.value
                     setEditForm((prev) => {
-                      const prevDefault = toolDefaultUrl(prev.tool ?? 'terraform');
-                      const shouldUpdate = (prev.upstream_url ?? '') === prevDefault || (prev.upstream_url ?? '') === '';
+                      const prevDefault = toolDefaultUrl(prev.tool ?? 'terraform')
+                      const shouldUpdate =
+                        (prev.upstream_url ?? '') === prevDefault ||
+                        (prev.upstream_url ?? '') === ''
                       return {
                         ...prev,
                         tool: newTool,
                         upstream_url: shouldUpdate ? toolDefaultUrl(newTool) : prev.upstream_url,
-                      };
-                    });
+                      }
+                    })
                   }}
                   fullWidth
                 >
@@ -859,7 +911,9 @@ const TerraformMirrorPage: React.FC = () => {
                 <TextField
                   label="Upstream URL"
                   value={editForm.upstream_url ?? ''}
-                  onChange={(e) => setEditForm((prev) => ({ ...prev, upstream_url: e.target.value }))}
+                  onChange={(e) =>
+                    setEditForm((prev) => ({ ...prev, upstream_url: e.target.value }))
+                  }
                   helperText={
                     editForm.tool === 'opentofu'
                       ? 'OpenTofu releases server (releases.opentofu.org) or a GitHub repo URL (e.g. https://github.com/opentofu/opentofu).'
@@ -965,12 +1019,7 @@ const TerraformMirrorPage: React.FC = () => {
           Versions Dialog
       ================================================================== */}
           {versionsConfig && (
-            <Dialog
-              open
-              onClose={() => setVersionsConfig(null)}
-              maxWidth="lg"
-              fullWidth
-            >
+            <Dialog open onClose={() => setVersionsConfig(null)} maxWidth="lg" fullWidth>
               <DialogTitle>
                 Versions — {versionsConfig.name}
                 <Box component="span" sx={{ ml: 1 }}>
@@ -1021,9 +1070,8 @@ const TerraformMirrorPage: React.FC = () => {
             <DialogTitle>Delete Terraform Version</DialogTitle>
             <DialogContent>
               <Typography>
-                Are you sure you want to delete version{' '}
-                <strong>{deleteVersion?.version}</strong>? This will remove the version record
-                and cannot be undone.
+                Are you sure you want to delete version <strong>{deleteVersion?.version}</strong>?
+                This will remove the version record and cannot be undone.
               </Typography>
             </DialogContent>
             <DialogActions>
@@ -1099,7 +1147,7 @@ const TerraformMirrorPage: React.FC = () => {
         </Container>
       )}
     </Box>
-  );
-};
+  )
+}
 
-export default TerraformMirrorPage;
+export default TerraformMirrorPage

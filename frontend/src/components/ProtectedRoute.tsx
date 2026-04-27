@@ -1,30 +1,36 @@
-import { Navigate } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext';
-import { CircularProgress, Box, Container, Typography, Alert, Button } from '@mui/material';
+import { Navigate } from 'react-router-dom'
+import { useAuth } from '../contexts/AuthContext'
+import { CircularProgress, Box, Container, Typography, Alert, Button } from '@mui/material'
 
 interface ProtectedRouteProps {
-  children: React.ReactNode;
-  requiredScope?: string; // Optional scope required to access this route
+  children: React.ReactNode
+  requiredScope?: string // Optional scope required to access this route
 }
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, requiredScope }) => {
-  const { isAuthenticated, isLoading, allowedScopes } = useAuth();
+  const { isAuthenticated, isLoading, allowedScopes } = useAuth()
 
   // Helper to check if user has a specific scope (or admin which grants all)
   const hasScope = (scope: string) => {
-    return allowedScopes.includes('admin') || allowedScopes.includes(scope);
-  };
+    return allowedScopes.includes('admin') || allowedScopes.includes(scope)
+  }
 
   if (isLoading) {
     return (
-      <Box display="flex" justifyContent="center" alignItems="center" minHeight="100vh" aria-busy="true">
+      <Box
+        display="flex"
+        justifyContent="center"
+        alignItems="center"
+        minHeight="100vh"
+        aria-busy="true"
+      >
         <CircularProgress />
       </Box>
-    );
+    )
   }
 
   if (!isAuthenticated) {
-    return <Navigate to="/login" replace />;
+    return <Navigate to="/login" replace />
   }
 
   // Check scope permission if a required scope is specified
@@ -44,10 +50,10 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, requiredScope
           Go to Dashboard
         </Button>
       </Container>
-    );
+    )
   }
 
-  return <>{children}</>;
-};
+  return <>{children}</>
+}
 
-export default ProtectedRoute;
+export default ProtectedRoute
