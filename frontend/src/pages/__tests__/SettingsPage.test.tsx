@@ -10,7 +10,7 @@ function renderSettings() {
   return render(
     <ConsentProvider>
       <SettingsPage />
-    </ConsentProvider>
+    </ConsentProvider>,
   )
 }
 
@@ -25,7 +25,7 @@ describe('SettingsPage', () => {
         errorReporting: false,
         performanceReporting: false,
         analytics: false,
-      })
+      }),
     )
   })
 

@@ -14,8 +14,7 @@ vi.mock('../../services/api', () => ({
   default: {
     listPublicTerraformMirrorConfigs: (...args: unknown[]) =>
       listPublicTerraformMirrorConfigsMock(...args),
-    listPublicTerraformVersions: (...args: unknown[]) =>
-      listPublicTerraformVersionsMock(...args),
+    listPublicTerraformVersions: (...args: unknown[]) => listPublicTerraformVersionsMock(...args),
     getPublicTerraformVersion: (...args: unknown[]) => getPublicTerraformVersionMock(...args),
     deprecateTerraformVersion: (...args: unknown[]) => deprecateTerraformVersionMock(...args),
     undeprecateTerraformVersion: (...args: unknown[]) => undeprecateTerraformVersionMock(...args),
@@ -88,7 +87,7 @@ describe('TerraformBinaryDetailPage', () => {
   })
 
   it('shows loading spinner initially', () => {
-    listPublicTerraformMirrorConfigsMock.mockReturnValue(new Promise(() => { }))
+    listPublicTerraformMirrorConfigsMock.mockReturnValue(new Promise(() => {}))
     renderPage()
     expect(screen.getByRole('progressbar')).toBeInTheDocument()
   })
@@ -144,7 +143,15 @@ describe('TerraformBinaryDetailPage', () => {
     listPublicTerraformVersionsMock.mockResolvedValue(fakeVersions)
     getPublicTerraformVersionMock.mockResolvedValue({
       platforms: [
-        { id: 'p-1', os: 'linux', arch: 'amd64', sync_status: 'synced', filename: 'terraform_1.8.0_linux_amd64.zip', sha256_verified: true, gpg_verified: false },
+        {
+          id: 'p-1',
+          os: 'linux',
+          arch: 'amd64',
+          sync_status: 'synced',
+          filename: 'terraform_1.8.0_linux_amd64.zip',
+          sha256_verified: true,
+          gpg_verified: false,
+        },
       ],
     })
     renderPage()
@@ -176,7 +183,9 @@ describe('TerraformBinaryDetailPage', () => {
     await waitFor(() => expect(screen.getByRole('dialog')).toBeInTheDocument())
     const dlgBtns = screen.getAllByRole('button', { name: /^deprecate$/i })
     await userEvent.click(dlgBtns[dlgBtns.length - 1])
-    await waitFor(() => expect(deprecateTerraformVersionMock).toHaveBeenCalledWith('cfg-uuid-1', '1.8.0'))
+    await waitFor(() =>
+      expect(deprecateTerraformVersionMock).toHaveBeenCalledWith('cfg-uuid-1', '1.8.0'),
+    )
   })
 
   it('opens Delete dialog and deletes a version', async () => {
@@ -190,7 +199,9 @@ describe('TerraformBinaryDetailPage', () => {
     await waitFor(() => expect(screen.getByRole('dialog')).toBeInTheDocument())
     const confirmBtns = screen.getAllByRole('button', { name: /^delete$/i })
     await userEvent.click(confirmBtns[confirmBtns.length - 1])
-    await waitFor(() => expect(deleteTerraformVersionMock).toHaveBeenCalledWith('cfg-uuid-1', '1.8.0'))
+    await waitFor(() =>
+      expect(deleteTerraformVersionMock).toHaveBeenCalledWith('cfg-uuid-1', '1.8.0'),
+    )
   })
 
   it('undeprecates a deprecated version', async () => {
@@ -201,7 +212,9 @@ describe('TerraformBinaryDetailPage', () => {
     await waitFor(() => expect(screen.getByText('1.7.0')).toBeInTheDocument())
     const undepBtn = screen.getByRole('button', { name: /undeprecate version/i })
     await userEvent.click(undepBtn)
-    await waitFor(() => expect(undeprecateTerraformVersionMock).toHaveBeenCalledWith('cfg-uuid-1', '1.7.0'))
+    await waitFor(() =>
+      expect(undeprecateTerraformVersionMock).toHaveBeenCalledWith('cfg-uuid-1', '1.7.0'),
+    )
   })
 
   it('cancels Deprecate dialog without action', async () => {
@@ -229,6 +242,8 @@ describe('TerraformBinaryDetailPage', () => {
     listPublicTerraformMirrorConfigsMock.mockResolvedValue([fakeConfig])
     listPublicTerraformVersionsMock.mockResolvedValue({ versions: [] })
     renderPage()
-    await waitFor(() => expect(screen.getByText(/No versions have been synced yet/)).toBeInTheDocument())
+    await waitFor(() =>
+      expect(screen.getByText(/No versions have been synced yet/)).toBeInTheDocument(),
+    )
   })
 })

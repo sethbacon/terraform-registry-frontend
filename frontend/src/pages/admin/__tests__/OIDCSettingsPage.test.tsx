@@ -45,8 +45,20 @@ const fakeConfig: OIDCConfigResponse = {
 }
 
 const fakeOrgs: Organization[] = [
-  { id: 'org-1', name: 'infra-team', display_name: 'Infra Team', created_at: '2025-01-01T00:00:00Z', updated_at: '2025-01-01T00:00:00Z' },
-  { id: 'org-2', name: 'dev-org', display_name: 'Dev Org', created_at: '2025-01-01T00:00:00Z', updated_at: '2025-01-01T00:00:00Z' },
+  {
+    id: 'org-1',
+    name: 'infra-team',
+    display_name: 'Infra Team',
+    created_at: '2025-01-01T00:00:00Z',
+    updated_at: '2025-01-01T00:00:00Z',
+  },
+  {
+    id: 'org-2',
+    name: 'dev-org',
+    display_name: 'Dev Org',
+    created_at: '2025-01-01T00:00:00Z',
+    updated_at: '2025-01-01T00:00:00Z',
+  },
 ]
 
 describe('OIDCSettingsPage', () => {
@@ -56,7 +68,7 @@ describe('OIDCSettingsPage', () => {
   })
 
   it('shows loading spinner while fetching', () => {
-    getAdminOIDCConfigMock.mockReturnValue(new Promise(() => { }))
+    getAdminOIDCConfigMock.mockReturnValue(new Promise(() => {}))
     renderWithProviders(<OIDCSettingsPage />)
     expect(screen.getByRole('progressbar')).toBeInTheDocument()
   })
@@ -68,7 +80,7 @@ describe('OIDCSettingsPage', () => {
       expect(screen.getByText('OIDC Groups')).toBeInTheDocument()
     })
     expect(
-      screen.getByText(/Configure group claim mapping from your identity provider/)
+      screen.getByText(/Configure group claim mapping from your identity provider/),
     ).toBeInTheDocument()
   })
 
@@ -121,9 +133,7 @@ describe('OIDCSettingsPage', () => {
     })
     renderWithProviders(<OIDCSettingsPage />)
     await waitFor(() => {
-      expect(
-        screen.getByText(/No group mappings configured/)
-      ).toBeInTheDocument()
+      expect(screen.getByText(/No group mappings configured/)).toBeInTheDocument()
     })
   })
 
@@ -219,9 +229,7 @@ describe('OIDCSettingsPage', () => {
       })
     })
     await waitFor(() => {
-      expect(
-        screen.getByText('Group mapping settings saved successfully.')
-      ).toBeInTheDocument()
+      expect(screen.getByText('Group mapping settings saved successfully.')).toBeInTheDocument()
     })
   })
 

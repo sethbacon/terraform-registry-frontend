@@ -1,5 +1,5 @@
-import React from 'react';
-import { useQuery } from '@tanstack/react-query';
+import React from 'react'
+import { useQuery } from '@tanstack/react-query'
 import {
   Container,
   Typography,
@@ -15,9 +15,9 @@ import {
   Box,
   Chip,
   Stack,
-} from '@mui/material';
-import api from '../../services/api';
-import type { MTLSConfigResponse } from '../../types';
+} from '@mui/material'
+import api from '../../services/api'
+import type { MTLSConfigResponse } from '../../types'
 
 const MTLSPage: React.FC = () => {
   const {
@@ -27,7 +27,7 @@ const MTLSPage: React.FC = () => {
   } = useQuery<MTLSConfigResponse>({
     queryKey: ['admin', 'mtls', 'config'],
     queryFn: () => api.getMTLSConfig(),
-  });
+  })
 
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
@@ -106,7 +106,7 @@ const MTLSPage: React.FC = () => {
         </>
       )}
     </Container>
-  );
-};
+  )
+}
 
-export default MTLSPage;
+export default MTLSPage

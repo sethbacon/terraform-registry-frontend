@@ -1,79 +1,75 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import {
-  Container,
-  Typography,
-  Box,
-  Grid,
-  Chip,
-  CircularProgress,
-  Alert,
-} from '@mui/material';
-import api from '../services/api';
-import RegistryItemCard from '../components/RegistryItemCard';
+import React, { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { Container, Typography, Box, Grid, Chip, CircularProgress, Alert } from '@mui/material'
+import api from '../services/api'
+import RegistryItemCard from '../components/RegistryItemCard'
 
 interface MirrorSummary {
-  name: string;
-  description?: string | null;
-  tool: string;
+  name: string
+  description?: string | null
+  tool: string
 }
 
 interface MirrorStats {
-  versionCount: number;
-  latestVersion: string | null;
+  versionCount: number
+  latestVersion: string | null
 }
 
 const ToolChip: React.FC<{ tool: string }> = ({ tool }) => {
-  const color = tool === 'terraform' ? 'primary' : tool === 'opentofu' ? 'secondary' : 'default';
-  return <Chip label={tool} size="small" color={color} variant="outlined" />;
-};
+  const color = tool === 'terraform' ? 'primary' : tool === 'opentofu' ? 'secondary' : 'default'
+  return <Chip label={tool} size="small" color={color} variant="outlined" />
+}
 
 const TerraformBinariesPage: React.FC = () => {
-  const navigate = useNavigate();
-  const [configs, setConfigs] = useState<MirrorSummary[]>([]);
-  const [statsMap, setStatsMap] = useState<Record<string, MirrorStats>>({});
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const navigate = useNavigate()
+  const [configs, setConfigs] = useState<MirrorSummary[]>([])
+  const [statsMap, setStatsMap] = useState<Record<string, MirrorStats>>({})
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    let cancelled = false;
-    setLoading(true);
-    setError(null);
+    let cancelled = false
+    setLoading(true)
+    setError(null)
 
-    api.listPublicTerraformMirrorConfigs()
+    api
+      .listPublicTerraformMirrorConfigs()
       .then((data) => {
-        if (cancelled) return;
-        setConfigs(data);
+        if (cancelled) return
+        setConfigs(data)
         // Load public version lists per mirror to get count + latest
         data.forEach((cfg) => {
-          api.listPublicTerraformVersions(cfg.name)
+          api
+            .listPublicTerraformVersions(cfg.name)
             .then((vd) => {
-              if (cancelled) return;
-              const versions = vd.versions ?? [];
-              const latest = versions.find((v) => v.is_latest)?.version ?? null;
+              if (cancelled) return
+              const versions = vd.versions ?? []
+              const latest = versions.find((v) => v.is_latest)?.version ?? null
               setStatsMap((prev) => ({
                 ...prev,
                 [cfg.name]: { versionCount: versions.length, latestVersion: latest },
-              }));
+              }))
             })
             .catch(() => {
-              if (cancelled) return;
+              if (cancelled) return
               setStatsMap((prev) => ({
                 ...prev,
                 [cfg.name]: { versionCount: 0, latestVersion: null },
-              }));
-            });
-        });
+              }))
+            })
+        })
       })
       .catch(() => {
-        if (!cancelled) setError('Failed to load Terraform binary mirrors.');
+        if (!cancelled) setError('Failed to load Terraform binary mirrors.')
       })
       .finally(() => {
-        if (!cancelled) setLoading(false);
-      });
+        if (!cancelled) setLoading(false)
+      })
 
-    return () => { cancelled = true; };
-  }, []);
+    return () => {
+      cancelled = true
+    }
+  }, [])
 
   return (
     <Container maxWidth="lg" sx={{ py: 4 }} aria-busy={loading} aria-live="polite">
@@ -110,7 +106,7 @@ const TerraformBinariesPage: React.FC = () => {
       ) : (
         <Grid container spacing={3}>
           {configs.map((cfg) => {
-            const stats = statsMap[cfg.name];
+            const stats = statsMap[cfg.name]
             return (
               <Grid size={{ xs: 12, sm: 6, md: 4 }} key={cfg.name}>
                 <RegistryItemCard
@@ -142,12 +138,12 @@ const TerraformBinariesPage: React.FC = () => {
                   onClick={() => navigate(`/terraform-binaries/${cfg.name}`)}
                 />
               </Grid>
-            );
+            )
           })}
         </Grid>
       )}
     </Container>
-  );
-};
+  )
+}
 
-export default TerraformBinariesPage;
+export default TerraformBinariesPage

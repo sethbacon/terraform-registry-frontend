@@ -34,7 +34,9 @@ describe('ConsentContext', () => {
       useConsent()
       return null
     }
-    expect(() => render(<BadConsumer />)).toThrow('useConsent must be used within a ConsentProvider')
+    expect(() => render(<BadConsumer />)).toThrow(
+      'useConsent must be used within a ConsentProvider',
+    )
     spy.mockRestore()
   })
 
@@ -42,7 +44,7 @@ describe('ConsentContext', () => {
     render(
       <ConsentProvider>
         <ConsentConsumer />
-      </ConsentProvider>
+      </ConsentProvider>,
     )
     expect(screen.getByTestId('consented').textContent).toBe('false')
     expect(screen.getByTestId('error').textContent).toBe('false')
@@ -54,7 +56,7 @@ describe('ConsentContext', () => {
     render(
       <ConsentProvider>
         <ConsentConsumer />
-      </ConsentProvider>
+      </ConsentProvider>,
     )
     await userEvent.click(screen.getByText('Accept All'))
     expect(screen.getByTestId('consented').textContent).toBe('true')
@@ -67,7 +69,7 @@ describe('ConsentContext', () => {
     render(
       <ConsentProvider>
         <ConsentConsumer />
-      </ConsentProvider>
+      </ConsentProvider>,
     )
     await userEvent.click(screen.getByText('Reject All'))
     expect(screen.getByTestId('consented').textContent).toBe('true')
@@ -80,7 +82,7 @@ describe('ConsentContext', () => {
     render(
       <ConsentProvider>
         <ConsentConsumer />
-      </ConsentProvider>
+      </ConsentProvider>,
     )
     await userEvent.click(screen.getByText('Enable Error'))
     expect(screen.getByTestId('consented').textContent).toBe('true')
@@ -92,7 +94,7 @@ describe('ConsentContext', () => {
     render(
       <ConsentProvider>
         <ConsentConsumer />
-      </ConsentProvider>
+      </ConsentProvider>,
     )
     await userEvent.click(screen.getByText('Enable Analytics+Perf'))
     expect(screen.getByTestId('analytics').textContent).toBe('true')
@@ -104,7 +106,7 @@ describe('ConsentContext', () => {
     render(
       <ConsentProvider>
         <ConsentConsumer />
-      </ConsentProvider>
+      </ConsentProvider>,
     )
     await userEvent.click(screen.getByText('Accept All'))
     const stored = JSON.parse(localStorage.getItem(CONSENT_KEY)!)
@@ -120,12 +122,12 @@ describe('ConsentContext', () => {
         errorReporting: true,
         performanceReporting: false,
         analytics: true,
-      })
+      }),
     )
     render(
       <ConsentProvider>
         <ConsentConsumer />
-      </ConsentProvider>
+      </ConsentProvider>,
     )
     expect(screen.getByTestId('consented').textContent).toBe('true')
     expect(screen.getByTestId('error').textContent).toBe('true')
@@ -138,7 +140,7 @@ describe('ConsentContext', () => {
     render(
       <ConsentProvider>
         <ConsentConsumer />
-      </ConsentProvider>
+      </ConsentProvider>,
     )
     expect(screen.getByTestId('consented').textContent).toBe('false')
     expect(screen.getByTestId('error').textContent).toBe('false')

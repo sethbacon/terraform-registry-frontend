@@ -41,7 +41,7 @@ describe('MTLSPage', () => {
   })
 
   it('shows loading spinner initially', () => {
-    getMTLSConfigMock.mockReturnValue(new Promise(() => { }))
+    getMTLSConfigMock.mockReturnValue(new Promise(() => {}))
     renderWithProviders(<MTLSPage />)
     expect(screen.getByRole('progressbar')).toBeInTheDocument()
   })

@@ -80,7 +80,7 @@ describe('TerraformMirrorPage', () => {
   })
 
   it('shows loading spinner initially', () => {
-    listTerraformMirrorConfigsMock.mockReturnValue(new Promise(() => { }))
+    listTerraformMirrorConfigsMock.mockReturnValue(new Promise(() => {}))
     renderPage()
     expect(screen.getByRole('progressbar')).toBeInTheDocument()
   })
@@ -167,7 +167,13 @@ describe('TerraformMirrorPage', () => {
     listTerraformMirrorConfigsMock.mockResolvedValue({ configs: fakeConfigs })
     listVersionsMock.mockResolvedValue({
       versions: [
-        { version: '1.5.0', sync_status: 'synced', is_latest: true, is_deprecated: false, synced_at: '2025-06-01T00:00:00Z' },
+        {
+          version: '1.5.0',
+          sync_status: 'synced',
+          is_latest: true,
+          is_deprecated: false,
+          synced_at: '2025-06-01T00:00:00Z',
+        },
       ],
     })
     renderPage()
@@ -180,7 +186,15 @@ describe('TerraformMirrorPage', () => {
     listTerraformMirrorConfigsMock.mockResolvedValue({ configs: fakeConfigs })
     getHistoryMock.mockResolvedValue({
       history: [
-        { id: 'h-1', started_at: '2025-06-01T00:00:00Z', completed_at: '2025-06-01T00:01:00Z', sync_status: 'success', versions_added: 1, versions_updated: 0, error_message: null },
+        {
+          id: 'h-1',
+          started_at: '2025-06-01T00:00:00Z',
+          completed_at: '2025-06-01T00:01:00Z',
+          sync_status: 'success',
+          versions_added: 1,
+          versions_updated: 0,
+          error_message: null,
+        },
       ],
     })
     renderPage()
@@ -228,7 +242,9 @@ describe('TerraformMirrorPage', () => {
     listTerraformMirrorConfigsMock.mockResolvedValue({ configs: [] })
     createMirrorMock.mockResolvedValue({ id: 'new-id' })
     renderPage()
-    await waitFor(() => expect(screen.getByRole('button', { name: /add mirror/i })).toBeInTheDocument())
+    await waitFor(() =>
+      expect(screen.getByRole('button', { name: /add mirror/i })).toBeInTheDocument(),
+    )
     await userEvent.click(screen.getByRole('button', { name: /add mirror/i }))
     await waitFor(() => expect(screen.getByRole('dialog')).toBeInTheDocument())
     const nameInput = screen.getByLabelText(/^Name/i)
@@ -242,7 +258,9 @@ describe('TerraformMirrorPage', () => {
     listTerraformMirrorConfigsMock.mockResolvedValue({ configs: [] })
     createMirrorMock.mockRejectedValue(new Error('create failed'))
     renderPage()
-    await waitFor(() => expect(screen.getByRole('button', { name: /add mirror/i })).toBeInTheDocument())
+    await waitFor(() =>
+      expect(screen.getByRole('button', { name: /add mirror/i })).toBeInTheDocument(),
+    )
     await userEvent.click(screen.getByRole('button', { name: /add mirror/i }))
     await waitFor(() => expect(screen.getByRole('dialog')).toBeInTheDocument())
     await userEvent.type(screen.getByLabelText(/^Name/i), 'x')
@@ -276,7 +294,9 @@ describe('TerraformMirrorPage', () => {
   it('cancels create dialog', async () => {
     listTerraformMirrorConfigsMock.mockResolvedValue({ configs: [] })
     renderPage()
-    await waitFor(() => expect(screen.getByRole('button', { name: /add mirror/i })).toBeInTheDocument())
+    await waitFor(() =>
+      expect(screen.getByRole('button', { name: /add mirror/i })).toBeInTheDocument(),
+    )
     await userEvent.click(screen.getByRole('button', { name: /add mirror/i }))
     await waitFor(() => expect(screen.getByRole('dialog')).toBeInTheDocument())
     await userEvent.click(screen.getByRole('button', { name: /^cancel$/i }))
@@ -287,8 +307,22 @@ describe('TerraformMirrorPage', () => {
     listTerraformMirrorConfigsMock.mockResolvedValue({ configs: fakeConfigs })
     listVersionsMock.mockResolvedValue({
       versions: [
-        { id: 'v1', version: '1.5.0', sync_status: 'synced', is_latest: true, is_deprecated: false, synced_at: '2025-06-01T00:00:00Z' },
-        { id: 'v2', version: '1.4.0', sync_status: 'pending', is_latest: false, is_deprecated: false, synced_at: null },
+        {
+          id: 'v1',
+          version: '1.5.0',
+          sync_status: 'synced',
+          is_latest: true,
+          is_deprecated: false,
+          synced_at: '2025-06-01T00:00:00Z',
+        },
+        {
+          id: 'v2',
+          version: '1.4.0',
+          sync_status: 'pending',
+          is_latest: false,
+          is_deprecated: false,
+          synced_at: null,
+        },
       ],
     })
     renderPage()
@@ -304,15 +338,33 @@ describe('TerraformMirrorPage', () => {
     renderPage()
     await waitFor(() => expect(screen.getAllByText('terraform').length).toBeGreaterThan(0))
     await userEvent.click(screen.getByRole('button', { name: /view details/i }))
-    await waitFor(() => expect(screen.getByText(/no versions have been synced/i)).toBeInTheDocument())
+    await waitFor(() =>
+      expect(screen.getByText(/no versions have been synced/i)).toBeInTheDocument(),
+    )
   })
 
   it('renders sync history entries', async () => {
     listTerraformMirrorConfigsMock.mockResolvedValue({ configs: fakeConfigs })
     getHistoryMock.mockResolvedValue({
       history: [
-        { id: 'h-1', started_at: '2025-06-01T00:00:00Z', completed_at: '2025-06-01T00:01:00Z', sync_status: 'success', versions_added: 2, versions_updated: 1, error_message: null },
-        { id: 'h-2', started_at: '2025-06-02T00:00:00Z', completed_at: null, sync_status: 'failed', versions_added: 0, versions_updated: 0, error_message: 'Network timeout' },
+        {
+          id: 'h-1',
+          started_at: '2025-06-01T00:00:00Z',
+          completed_at: '2025-06-01T00:01:00Z',
+          sync_status: 'success',
+          versions_added: 2,
+          versions_updated: 1,
+          error_message: null,
+        },
+        {
+          id: 'h-2',
+          started_at: '2025-06-02T00:00:00Z',
+          completed_at: null,
+          sync_status: 'failed',
+          versions_added: 0,
+          versions_updated: 0,
+          error_message: 'Network timeout',
+        },
       ],
     })
     renderPage()
@@ -325,7 +377,14 @@ describe('TerraformMirrorPage', () => {
     listTerraformMirrorConfigsMock.mockResolvedValue({ configs: fakeConfigs })
     listVersionsMock.mockResolvedValue({
       versions: [
-        { id: 'v1', version: '1.5.0', sync_status: 'synced', is_latest: true, is_deprecated: false, synced_at: '2025-06-01T00:00:00Z' },
+        {
+          id: 'v1',
+          version: '1.5.0',
+          sync_status: 'synced',
+          is_latest: true,
+          is_deprecated: false,
+          synced_at: '2025-06-01T00:00:00Z',
+        },
       ],
     })
     renderPage()
@@ -348,7 +407,9 @@ describe('TerraformMirrorPage', () => {
   it('changes tool in Add dialog updates upstream URL', async () => {
     listTerraformMirrorConfigsMock.mockResolvedValue({ configs: [] })
     renderPage()
-    await waitFor(() => expect(screen.getByRole('button', { name: /add mirror/i })).toBeInTheDocument())
+    await waitFor(() =>
+      expect(screen.getByRole('button', { name: /add mirror/i })).toBeInTheDocument(),
+    )
     await userEvent.click(screen.getByRole('button', { name: /add mirror/i }))
     await waitFor(() => expect(screen.getByRole('dialog')).toBeInTheDocument())
     const toolSelect = screen.getByLabelText(/^Tool/i)
@@ -374,7 +435,14 @@ describe('TerraformMirrorPage', () => {
     listTerraformMirrorConfigsMock.mockResolvedValue({ configs: fakeConfigs })
     listVersionsMock.mockResolvedValue({
       versions: [
-        { id: 'v1', version: '1.5.0', sync_status: 'synced', is_latest: true, is_deprecated: false, synced_at: '2025-06-01T00:00:00Z' },
+        {
+          id: 'v1',
+          version: '1.5.0',
+          sync_status: 'synced',
+          is_latest: true,
+          is_deprecated: false,
+          synced_at: '2025-06-01T00:00:00Z',
+        },
       ],
     })
     deleteVersionMock.mockResolvedValue({})
@@ -383,25 +451,28 @@ describe('TerraformMirrorPage', () => {
     await userEvent.click(screen.getByRole('button', { name: /view details/i }))
     await waitFor(() => expect(screen.getByText('1.5.0')).toBeInTheDocument())
     await userEvent.click(screen.getByRole('button', { name: /delete version/i }))
-    await waitFor(() =>
-      expect(screen.getByText(/Delete Terraform Version/i)).toBeInTheDocument(),
-    )
+    await waitFor(() => expect(screen.getByText(/Delete Terraform Version/i)).toBeInTheDocument())
     const dialogs = screen.getAllByRole('dialog')
     const deleteDialog = dialogs[dialogs.length - 1]
     const deleteBtn = deleteDialog.querySelector(
       'button[class*="MuiButton-colorError"]',
     ) as HTMLButtonElement
     await userEvent.click(deleteBtn)
-    await waitFor(() =>
-      expect(deleteVersionMock).toHaveBeenCalledWith('tm-1', '1.5.0'),
-    )
+    await waitFor(() => expect(deleteVersionMock).toHaveBeenCalledWith('tm-1', '1.5.0'))
   })
 
   it('cancels delete version dialog', async () => {
     listTerraformMirrorConfigsMock.mockResolvedValue({ configs: fakeConfigs })
     listVersionsMock.mockResolvedValue({
       versions: [
-        { id: 'v1', version: '1.5.0', sync_status: 'synced', is_latest: true, is_deprecated: false, synced_at: '2025-06-01T00:00:00Z' },
+        {
+          id: 'v1',
+          version: '1.5.0',
+          sync_status: 'synced',
+          is_latest: true,
+          is_deprecated: false,
+          synced_at: '2025-06-01T00:00:00Z',
+        },
       ],
     })
     renderPage()
@@ -409,9 +480,7 @@ describe('TerraformMirrorPage', () => {
     await userEvent.click(screen.getByRole('button', { name: /view details/i }))
     await waitFor(() => expect(screen.getByText('1.5.0')).toBeInTheDocument())
     await userEvent.click(screen.getByRole('button', { name: /delete version/i }))
-    await waitFor(() =>
-      expect(screen.getByText(/Delete Terraform Version/i)).toBeInTheDocument(),
-    )
+    await waitFor(() => expect(screen.getByText(/Delete Terraform Version/i)).toBeInTheDocument())
     const cancelBtns = screen.getAllByRole('button', { name: /^cancel$/i })
     await userEvent.click(cancelBtns[cancelBtns.length - 1])
     await waitFor(() =>
@@ -424,20 +493,33 @@ describe('TerraformMirrorPage', () => {
     listTerraformMirrorConfigsMock.mockResolvedValue({ configs: fakeConfigs })
     listVersionsMock.mockResolvedValue({
       versions: [
-        { id: 'v1', version: '1.5.0', sync_status: 'synced', is_latest: true, is_deprecated: false, synced_at: '2025-06-01T00:00:00Z' },
+        {
+          id: 'v1',
+          version: '1.5.0',
+          sync_status: 'synced',
+          is_latest: true,
+          is_deprecated: false,
+          synced_at: '2025-06-01T00:00:00Z',
+        },
       ],
     })
     listVersionPlatformsMock.mockResolvedValue([
-      { id: 'p-1', os: 'linux', arch: 'amd64', sync_status: 'synced', filename: 'terraform_1.5.0_linux_amd64.zip', sha256_verified: true, gpg_verified: false },
+      {
+        id: 'p-1',
+        os: 'linux',
+        arch: 'amd64',
+        sync_status: 'synced',
+        filename: 'terraform_1.5.0_linux_amd64.zip',
+        sha256_verified: true,
+        gpg_verified: false,
+      },
     ])
     renderPage()
     await waitFor(() => expect(screen.getAllByText('terraform').length).toBeGreaterThan(0))
     await userEvent.click(screen.getByRole('button', { name: /view details/i }))
     await waitFor(() => expect(screen.getByText('1.5.0')).toBeInTheDocument())
     await userEvent.click(screen.getByRole('button', { name: /toggle version details/i }))
-    await waitFor(() =>
-      expect(listVersionPlatformsMock).toHaveBeenCalledWith('tm-1', '1.5.0'),
-    )
+    await waitFor(() => expect(listVersionPlatformsMock).toHaveBeenCalledWith('tm-1', '1.5.0'))
     await waitFor(() => expect(screen.getByText('linux')).toBeInTheDocument())
   })
 
@@ -445,7 +527,14 @@ describe('TerraformMirrorPage', () => {
     listTerraformMirrorConfigsMock.mockResolvedValue({ configs: fakeConfigs })
     listVersionsMock.mockResolvedValue({
       versions: [
-        { id: 'v1', version: '1.5.0', sync_status: 'synced', is_latest: true, is_deprecated: false, synced_at: '2025-06-01T00:00:00Z' },
+        {
+          id: 'v1',
+          version: '1.5.0',
+          sync_status: 'synced',
+          is_latest: true,
+          is_deprecated: false,
+          synced_at: '2025-06-01T00:00:00Z',
+        },
       ],
     })
     listVersionPlatformsMock.mockRejectedValue(new Error('boom'))
@@ -454,9 +543,7 @@ describe('TerraformMirrorPage', () => {
     await userEvent.click(screen.getByRole('button', { name: /view details/i }))
     await waitFor(() => expect(screen.getByText('1.5.0')).toBeInTheDocument())
     await userEvent.click(screen.getByRole('button', { name: /toggle version details/i }))
-    await waitFor(() =>
-      expect(screen.getByText(/No platforms synced yet/i)).toBeInTheDocument(),
-    )
+    await waitFor(() => expect(screen.getByText(/No platforms synced yet/i)).toBeInTheDocument())
   })
 
   it('closes history dialog via Close button', async () => {
@@ -479,9 +566,7 @@ describe('TerraformMirrorPage', () => {
     await waitFor(() => expect(screen.getAllByText('terraform').length).toBeGreaterThan(0))
     await userEvent.click(screen.getByRole('button', { name: /view sync history/i }))
     await waitFor(() => expect(getHistoryMock).toHaveBeenCalled())
-    await waitFor(() =>
-      expect(screen.getByText(/Sync History — terraform/i)).toBeInTheDocument(),
-    )
+    await waitFor(() => expect(screen.getByText(/Sync History — terraform/i)).toBeInTheDocument())
     await userEvent.click(screen.getByRole('button', { name: /^close$/i }))
     await waitFor(() =>
       expect(screen.queryByText(/Sync History — terraform/i)).not.toBeInTheDocument(),
@@ -494,9 +579,7 @@ describe('TerraformMirrorPage', () => {
     renderPage()
     await waitFor(() => expect(screen.getAllByText('terraform').length).toBeGreaterThan(0))
     await userEvent.click(screen.getByRole('button', { name: /view sync history/i }))
-    await waitFor(() =>
-      expect(screen.getByText(/No sync history yet/i)).toBeInTheDocument(),
-    )
+    await waitFor(() => expect(screen.getByText(/No sync history yet/i)).toBeInTheDocument())
   })
 
   it('cancels delete mirror dialog without action', async () => {
@@ -506,9 +589,7 @@ describe('TerraformMirrorPage', () => {
     await userEvent.click(screen.getByRole('button', { name: /delete mirror/i }))
     await waitFor(() => expect(screen.getByRole('dialog')).toBeInTheDocument())
     await userEvent.click(screen.getByRole('button', { name: /^cancel$/i }))
-    await waitFor(() =>
-      expect(screen.queryByRole('dialog')).not.toBeInTheDocument(),
-    )
+    await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument())
     expect(deleteMirrorMock).not.toHaveBeenCalled()
   })
 
@@ -519,9 +600,7 @@ describe('TerraformMirrorPage', () => {
     await userEvent.click(screen.getByRole('button', { name: /edit mirror/i }))
     await waitFor(() => expect(screen.getByRole('dialog')).toBeInTheDocument())
     await userEvent.click(screen.getByRole('button', { name: /^cancel$/i }))
-    await waitFor(() =>
-      expect(screen.queryByRole('dialog')).not.toBeInTheDocument(),
-    )
+    await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument())
     expect(updateMirrorMock).not.toHaveBeenCalled()
   })
 })

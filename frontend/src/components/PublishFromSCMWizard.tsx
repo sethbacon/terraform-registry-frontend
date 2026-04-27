@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react'
 import {
   Box,
   Stepper,
@@ -21,22 +21,22 @@ import {
   Radio,
   RadioGroup,
   FormLabel,
-} from '@mui/material';
-import api from '../services/api';
-import { getErrorMessage } from '../utils/errors';
-import RepositoryBrowser from './RepositoryBrowser';
-import type { SCMProvider, SCMRepository, SCMTag } from '../types/scm';
+} from '@mui/material'
+import api from '../services/api'
+import { getErrorMessage } from '../utils/errors'
+import RepositoryBrowser from './RepositoryBrowser'
+import type { SCMProvider, SCMRepository, SCMTag } from '../types/scm'
 
 interface PublishFromSCMWizardProps {
-  moduleId: string;
-  moduleSystem?: string;
-  onComplete?: () => void;
-  onCancel?: () => void;
+  moduleId: string
+  moduleSystem?: string
+  onComplete?: () => void
+  onCancel?: () => void
 }
 
-const steps = ['Select Provider', 'Choose Repository', 'Configure Settings'];
+const steps = ['Select Provider', 'Choose Repository', 'Configure Settings']
 
-type PublishMode = 'sync_all' | 'specific_tag';
+type PublishMode = 'sync_all' | 'specific_tag'
 
 const PublishFromSCMWizard: React.FC<PublishFromSCMWizardProps> = ({
   moduleId,
@@ -44,66 +44,66 @@ const PublishFromSCMWizard: React.FC<PublishFromSCMWizardProps> = ({
   onComplete,
   onCancel,
 }) => {
-  const [activeStep, setActiveStep] = useState(0);
-  const [providers, setProviders] = useState<SCMProvider[]>([]);
-  const [selectedProvider, setSelectedProvider] = useState<SCMProvider | null>(null);
-  const [selectedRepository, setSelectedRepository] = useState<SCMRepository | null>(null);
-  const [selectedTag, setSelectedTag] = useState<SCMTag | null>(null);
-  const [publishMode, setPublishMode] = useState<PublishMode>('sync_all');
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [activeStep, setActiveStep] = useState(0)
+  const [providers, setProviders] = useState<SCMProvider[]>([])
+  const [selectedProvider, setSelectedProvider] = useState<SCMProvider | null>(null)
+  const [selectedRepository, setSelectedRepository] = useState<SCMRepository | null>(null)
+  const [selectedTag, setSelectedTag] = useState<SCMTag | null>(null)
+  const [publishMode, setPublishMode] = useState<PublishMode>('sync_all')
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   const [settings, setSettings] = useState({
     repository_path: '',
     default_branch: 'main',
     auto_publish_enabled: true,
     tag_pattern: 'v*',
-  });
+  })
 
   useEffect(() => {
-    loadProviders();
-  }, []);
+    loadProviders()
+  }, [])
 
   const loadProviders = async () => {
     try {
-      setLoading(true);
-      const data = await api.listSCMProviders();
-      setProviders(Array.isArray(data) ? data.filter((p: SCMProvider) => p.is_active) : []);
+      setLoading(true)
+      const data = await api.listSCMProviders()
+      setProviders(Array.isArray(data) ? data.filter((p: SCMProvider) => p.is_active) : [])
     } catch (err: unknown) {
-      setError('Failed to load SCM providers');
-      console.error('Error loading providers:', err);
+      setError('Failed to load SCM providers')
+      console.error('Error loading providers:', err)
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   const handleNext = () => {
     // When moving from Step 2 → Step 3, default the publish mode based on
     // whether the user selected a specific tag in the repository browser.
     if (activeStep === 1) {
-      setPublishMode(selectedTag ? 'specific_tag' : 'sync_all');
+      setPublishMode(selectedTag ? 'specific_tag' : 'sync_all')
     }
-    setActiveStep((prevActiveStep) => prevActiveStep + 1);
-  };
+    setActiveStep((prevActiveStep) => prevActiveStep + 1)
+  }
 
   const handleBack = () => {
-    setActiveStep((prevActiveStep) => prevActiveStep - 1);
-  };
+    setActiveStep((prevActiveStep) => prevActiveStep - 1)
+  }
 
   const handleComplete = async () => {
     if (!selectedProvider || !selectedRepository) {
-      setError('Please select a provider and repository');
-      return;
+      setError('Please select a provider and repository')
+      return
     }
 
     try {
-      setLoading(true);
-      setError(null);
+      setLoading(true)
+      setError(null)
 
       if (publishMode === 'specific_tag') {
         if (!selectedTag) {
-          setError('Please select a specific tag in Step 2');
-          return;
+          setError('Please select a specific tag in Step 2')
+          return
         }
         // Link with the exact tag as the pattern and auto-publish disabled.
         // Then trigger an immediate sync so that single version is imported.
@@ -115,9 +115,9 @@ const PublishFromSCMWizard: React.FC<PublishFromSCMWizardProps> = ({
           default_branch: settings.default_branch,
           auto_publish_enabled: false,
           tag_pattern: selectedTag.tag_name,
-        });
+        })
         try {
-          await api.triggerManualSync(moduleId);
+          await api.triggerManualSync(moduleId)
         } catch {
           // non-fatal — user can trigger sync manually from the module page
         }
@@ -130,40 +130,40 @@ const PublishFromSCMWizard: React.FC<PublishFromSCMWizardProps> = ({
           default_branch: settings.default_branch,
           auto_publish_enabled: settings.auto_publish_enabled,
           tag_pattern: settings.tag_pattern,
-        });
+        })
       }
 
       if (onComplete) {
-        onComplete();
+        onComplete()
       }
     } catch (err: unknown) {
-      setError(getErrorMessage(err, 'Failed to link module to SCM'));
+      setError(getErrorMessage(err, 'Failed to link module to SCM'))
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   const canProceedToNext = () => {
     switch (activeStep) {
       case 0:
-        return selectedProvider !== null;
+        return selectedProvider !== null
       case 1:
-        return selectedRepository !== null;
+        return selectedRepository !== null
       case 2:
-        return publishMode === 'sync_all' || selectedTag !== null;
+        return publishMode === 'sync_all' || selectedTag !== null
       default:
-        return false;
+        return false
     }
-  };
+  }
 
   const repoNameFilter: RegExp | undefined = moduleSystem
     ? new RegExp(
         '^terraform-' +
           moduleSystem.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') +
           '-[a-z0-9][a-z0-9-]*$',
-        'i'
+        'i',
       )
-    : undefined;
+    : undefined
 
   const getStepContent = (step: number) => {
     switch (step) {
@@ -187,8 +187,8 @@ const PublishFromSCMWizard: React.FC<PublishFromSCMWizardProps> = ({
                 <Select
                   value={selectedProvider?.id || ''}
                   onChange={(e) => {
-                    const provider = providers.find((p) => p.id === e.target.value);
-                    setSelectedProvider(provider || null);
+                    const provider = providers.find((p) => p.id === e.target.value)
+                    setSelectedProvider(provider || null)
                   }}
                   label="Provider"
                 >
@@ -201,7 +201,7 @@ const PublishFromSCMWizard: React.FC<PublishFromSCMWizardProps> = ({
               </FormControl>
             )}
           </Box>
-        );
+        )
 
       case 1:
         return (
@@ -221,19 +221,19 @@ const PublishFromSCMWizard: React.FC<PublishFromSCMWizardProps> = ({
                 selectedTag={selectedTag}
                 nameFilter={repoNameFilter}
                 onRepositorySelect={(repo) => {
-                  setSelectedRepository(repo);
-                  setSelectedTag(null);
+                  setSelectedRepository(repo)
+                  setSelectedTag(null)
                 }}
                 onTagSelect={(repo, tag) => {
-                  setSelectedRepository(repo);
-                  setSelectedTag(tag);
+                  setSelectedRepository(repo)
+                  setSelectedTag(tag)
                 }}
               />
             ) : (
               <Alert severity="warning">Please select a provider first</Alert>
             )}
           </Box>
-        );
+        )
 
       case 2:
         return (
@@ -280,9 +280,7 @@ const PublishFromSCMWizard: React.FC<PublishFromSCMWizardProps> = ({
                     control={<Radio />}
                     label={
                       <Box>
-                        <Typography variant="subtitle2">
-                          Sync all matching tags
-                        </Typography>
+                        <Typography variant="subtitle2">Sync all matching tags</Typography>
                         <Typography variant="body2" color="textSecondary">
                           All existing tags matching the pattern will be imported, and new matching
                           tags can trigger automatic publishing via webhooks.
@@ -299,7 +297,8 @@ const PublishFromSCMWizard: React.FC<PublishFromSCMWizardProps> = ({
                     p: 2,
                     cursor: 'pointer',
                     borderColor: publishMode === 'specific_tag' ? 'primary.main' : 'divider',
-                    bgcolor: publishMode === 'specific_tag' ? 'action.selected' : 'background.paper',
+                    bgcolor:
+                      publishMode === 'specific_tag' ? 'action.selected' : 'background.paper',
                   }}
                   onClick={() => setPublishMode('specific_tag')}
                 >
@@ -308,9 +307,7 @@ const PublishFromSCMWizard: React.FC<PublishFromSCMWizardProps> = ({
                     control={<Radio />}
                     label={
                       <Box>
-                        <Typography variant="subtitle2">
-                          Publish specific tag
-                        </Typography>
+                        <Typography variant="subtitle2">Publish specific tag</Typography>
                         <Typography variant="body2" color="textSecondary">
                           Publishes only the single tag you selected. Auto-publish is disabled —
                           future versions must be published manually or via a new sync.
@@ -365,8 +362,8 @@ const PublishFromSCMWizard: React.FC<PublishFromSCMWizardProps> = ({
 
                 {settings.auto_publish_enabled && (
                   <Alert severity="info">
-                    When enabled, new versions will be automatically published when matching tags are
-                    pushed to the repository. Webhooks will be configured automatically.
+                    When enabled, new versions will be automatically published when matching tags
+                    are pushed to the repository. Webhooks will be configured automatically.
                   </Alert>
                 )}
               </Box>
@@ -391,8 +388,8 @@ const PublishFromSCMWizard: React.FC<PublishFromSCMWizardProps> = ({
                   </Paper>
                 ) : (
                   <Alert severity="warning">
-                    No tag selected. Go back to Step 2 and select a specific tag from the
-                    repository browser.
+                    No tag selected. Go back to Step 2 and select a specific tag from the repository
+                    browser.
                   </Alert>
                 )}
 
@@ -420,12 +417,12 @@ const PublishFromSCMWizard: React.FC<PublishFromSCMWizardProps> = ({
               </Box>
             )}
           </Box>
-        );
+        )
 
       default:
-        return 'Unknown step';
+        return 'Unknown step'
     }
-  };
+  }
 
   return (
     <Box aria-busy={loading} aria-live="polite">
@@ -470,11 +467,7 @@ const PublishFromSCMWizard: React.FC<PublishFromSCMWizardProps> = ({
                   Link Module
                 </Button>
               ) : (
-                <Button
-                  variant="contained"
-                  onClick={handleNext}
-                  disabled={!canProceedToNext()}
-                >
+                <Button variant="contained" onClick={handleNext} disabled={!canProceedToNext()}>
                   Next
                 </Button>
               )}
@@ -483,7 +476,7 @@ const PublishFromSCMWizard: React.FC<PublishFromSCMWizardProps> = ({
         </>
       )}
     </Box>
-  );
-};
+  )
+}
 
-export default PublishFromSCMWizard;
+export default PublishFromSCMWizard

@@ -62,7 +62,7 @@ describe('RepositoryBrowser', () => {
   })
 
   it('shows loading spinner initially', () => {
-    listSCMRepositoriesMock.mockReturnValue(new Promise(() => { }))
+    listSCMRepositoriesMock.mockReturnValue(new Promise(() => {}))
     render(<RepositoryBrowser providerId="scm-1" />)
     expect(screen.getByRole('progressbar')).toBeInTheDocument()
   })
@@ -123,12 +123,7 @@ describe('RepositoryBrowser', () => {
     listSCMRepositoryBranchesMock.mockResolvedValue({
       branches: [{ branch_name: 'main', head_commit: 'def1234567890', is_protected: true }],
     })
-    render(
-      <RepositoryBrowser
-        providerId="scm-1"
-        onRepositorySelect={onRepositorySelect}
-      />,
-    )
+    render(<RepositoryBrowser providerId="scm-1" onRepositorySelect={onRepositorySelect} />)
     await waitFor(() => expect(screen.getByText('hashicorp/terraform-aws-vpc')).toBeInTheDocument())
     await userEvent.click(screen.getByText('hashicorp/terraform-aws-vpc'))
     expect(onRepositorySelect).toHaveBeenCalled()
@@ -198,12 +193,7 @@ describe('RepositoryBrowser', () => {
 
   it('hides repos that do not match nameFilter and shows the hidden-count alert', async () => {
     listSCMRepositoriesMock.mockResolvedValue({ repositories: fakeRepos })
-    render(
-      <RepositoryBrowser
-        providerId="scm-1"
-        nameFilter={/^terraform-[a-z0-9-]+$/}
-      />,
-    )
+    render(<RepositoryBrowser providerId="scm-1" nameFilter={/^terraform-[a-z0-9-]+$/} />)
     await waitFor(() => expect(screen.getByText('hashicorp/terraform-aws-vpc')).toBeInTheDocument())
     expect(screen.queryByText('hashicorp/internal-module')).not.toBeInTheDocument()
     expect(screen.getByText(/hidden/i)).toBeInTheDocument()
@@ -211,12 +201,7 @@ describe('RepositoryBrowser', () => {
 
   it('renders Selected chip on the currently selected repository', async () => {
     listSCMRepositoriesMock.mockResolvedValue({ repositories: fakeRepos })
-    render(
-      <RepositoryBrowser
-        providerId="scm-1"
-        selectedRepository={fakeRepos[0]}
-      />,
-    )
+    render(<RepositoryBrowser providerId="scm-1" selectedRepository={fakeRepos[0]} />)
     await waitFor(() => expect(screen.getByText('hashicorp/terraform-aws-vpc')).toBeInTheDocument())
     expect(screen.getByText('Selected')).toBeInTheDocument()
   })

@@ -29,7 +29,9 @@ vi.mock('../../contexts/AuthContext', () => ({
 }))
 
 vi.mock('../../components/ProviderIcon', () => ({
-  ProviderIcon: ({ provider }: { provider: string }) => <span data-testid="provider-icon">{provider}</span>,
+  ProviderIcon: ({ provider }: { provider: string }) => (
+    <span data-testid="provider-icon">{provider}</span>
+  ),
   providerDisplayName: (slug: string) => slug.charAt(0).toUpperCase() + slug.slice(1),
 }))
 
@@ -89,13 +91,13 @@ describe('ProvidersPage', () => {
   })
 
   it('shows loading skeleton while fetching', () => {
-    searchProvidersMock.mockReturnValue(new Promise(() => { }))
+    searchProvidersMock.mockReturnValue(new Promise(() => {}))
     renderPage()
     expect(screen.getByTestId('registry-item-grid-skeleton')).toBeInTheDocument()
   })
 
   it('renders page heading', () => {
-    searchProvidersMock.mockReturnValue(new Promise(() => { }))
+    searchProvidersMock.mockReturnValue(new Promise(() => {}))
     renderPage()
     expect(screen.getByText('Terraform Providers')).toBeInTheDocument()
     expect(screen.getByText(/Browse and discover/)).toBeInTheDocument()
@@ -133,13 +135,13 @@ describe('ProvidersPage', () => {
   })
 
   it('shows search field', () => {
-    searchProvidersMock.mockReturnValue(new Promise(() => { }))
+    searchProvidersMock.mockReturnValue(new Promise(() => {}))
     renderPage()
     expect(screen.getByPlaceholderText('Search providers...')).toBeInTheDocument()
   })
 
   it('shows sort dropdown', () => {
-    searchProvidersMock.mockReturnValue(new Promise(() => { }))
+    searchProvidersMock.mockReturnValue(new Promise(() => {}))
     renderPage()
     expect(screen.getByLabelText('Sort By')).toBeInTheDocument()
   })
@@ -169,14 +171,14 @@ describe('ProvidersPage', () => {
 
   it('renders Publish Provider button for authenticated users', () => {
     mockIsAuthenticated = true
-    searchProvidersMock.mockReturnValue(new Promise(() => { }))
+    searchProvidersMock.mockReturnValue(new Promise(() => {}))
     renderPage()
     expect(screen.getByRole('button', { name: /publish provider/i })).toBeInTheDocument()
   })
 
   it('navigates to upload page when Publish Provider is clicked', async () => {
     mockIsAuthenticated = true
-    searchProvidersMock.mockReturnValue(new Promise(() => { }))
+    searchProvidersMock.mockReturnValue(new Promise(() => {}))
     renderPage()
     await userEvent.click(screen.getByRole('button', { name: /publish provider/i }))
     expect(mockNavigate).toHaveBeenCalledWith('/admin/upload/provider')
@@ -200,9 +202,7 @@ describe('ProvidersPage', () => {
     const input = screen.getByPlaceholderText('Search providers...')
     await user.type(input, 'aws')
     await waitFor(() => {
-      expect(searchProvidersMock).toHaveBeenCalledWith(
-        expect.objectContaining({ query: 'aws' }),
-      )
+      expect(searchProvidersMock).toHaveBeenCalledWith(expect.objectContaining({ query: 'aws' }))
     })
   })
 
@@ -220,7 +220,9 @@ describe('ProvidersPage', () => {
     await waitFor(() => expect(screen.getByText('No providers found')).toBeInTheDocument())
     await user.click(screen.getByRole('button', { name: /clear filters/i }))
     await waitFor(() => {
-      expect((screen.getByPlaceholderText('Search providers...') as HTMLInputElement).value).toBe('')
+      expect((screen.getByPlaceholderText('Search providers...') as HTMLInputElement).value).toBe(
+        '',
+      )
     })
   })
 
@@ -280,9 +282,7 @@ describe('ProvidersPage', () => {
     const page2 = screen.getByRole('button', { name: /go to page 2/i })
     await userEvent.click(page2)
     await waitFor(() => {
-      expect(searchProvidersMock).toHaveBeenCalledWith(
-        expect.objectContaining({ offset: 12 }),
-      )
+      expect(searchProvidersMock).toHaveBeenCalledWith(expect.objectContaining({ offset: 12 }))
     })
   })
 

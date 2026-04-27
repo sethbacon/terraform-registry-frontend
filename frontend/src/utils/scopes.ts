@@ -2,7 +2,7 @@
  * Shared scope display utilities used across admin pages.
  */
 
-import { AVAILABLE_SCOPES } from '../types/rbac';
+import { AVAILABLE_SCOPES } from '../types/rbac'
 
 /**
  * Look up a scope's metadata (label, description) from {@link AVAILABLE_SCOPES}.
@@ -16,7 +16,7 @@ export function getScopeInfo(scopeValue: string) {
       label: scopeValue,
       description: 'Unknown scope',
     }
-  );
+  )
 }
 
 /**
@@ -25,8 +25,8 @@ export function getScopeInfo(scopeValue: string) {
 export function getScopeColor(
   scope: string,
 ): 'default' | 'primary' | 'secondary' | 'success' | 'warning' | 'error' | 'info' {
-  if (scope === 'admin') return 'error';
-  if (scope.includes(':write') || scope.includes(':manage')) return 'warning';
-  if (scope.includes(':read')) return 'success';
-  return 'default';
+  if (scope === 'admin') return 'error'
+  if (scope.includes(':write') || scope.includes(':manage')) return 'warning'
+  if (scope.includes(':read')) return 'success'
+  return 'default'
 }

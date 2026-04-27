@@ -7,8 +7,8 @@ describe('errorReporting', () => {
   beforeEach(() => {
     originalFetch = globalThis.fetch
     globalThis.fetch = vi.fn().mockResolvedValue({ ok: true })
-    vi.spyOn(console, 'log').mockImplementation(() => { })
-    vi.spyOn(console, 'error').mockImplementation(() => { })
+    vi.spyOn(console, 'log').mockImplementation(() => {})
+    vi.spyOn(console, 'error').mockImplementation(() => {})
   })
 
   afterEach(() => {
@@ -27,7 +27,7 @@ describe('errorReporting', () => {
       freshInit()
 
       expect(console.log).toHaveBeenCalledWith(
-        expect.stringContaining('Initialized with DSN endpoint')
+        expect.stringContaining('Initialized with DSN endpoint'),
       )
     })
 
@@ -37,9 +37,7 @@ describe('errorReporting', () => {
       const { init: freshInit } = await import('../errorReporting')
       freshInit()
 
-      expect(console.log).toHaveBeenCalledWith(
-        expect.stringContaining('No DSN configured')
-      )
+      expect(console.log).toHaveBeenCalledWith(expect.stringContaining('No DSN configured'))
     })
   })
 
@@ -48,18 +46,20 @@ describe('errorReporting', () => {
       const error = new Error('Something broke')
       captureError(error, { page: '/modules' })
 
-      expect(console.error).toHaveBeenCalledWith(
-        '[ErrorReporting]',
-        'Something broke',
-        { page: '/modules' }
-      )
+      expect(console.error).toHaveBeenCalledWith('[ErrorReporting]', 'Something broke', {
+        page: '/modules',
+      })
     })
 
     it('sends error payload via fetch when DSN is configured', async () => {
       vi.stubEnv('VITE_ERROR_REPORTING_DSN', 'https://errors.example.com/report')
       vi.stubEnv('VITE_SENTRY_DSN', '')
 
-      const { init: freshInit, captureError: freshCapture, flush: freshFlush } = await import('../errorReporting')
+      const {
+        init: freshInit,
+        captureError: freshCapture,
+        flush: freshFlush,
+      } = await import('../errorReporting')
       freshInit()
 
       const error = new Error('Test error')
@@ -74,13 +74,11 @@ describe('errorReporting', () => {
         expect.objectContaining({
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-        })
+        }),
       )
 
       // Verify payload structure (batched format)
-      const body = JSON.parse(
-        (globalThis.fetch as ReturnType<typeof vi.fn>).mock.calls[0][1].body
-      )
+      const body = JSON.parse((globalThis.fetch as ReturnType<typeof vi.fn>).mock.calls[0][1].body)
       expect(body.type).toBe('errors')
       expect(body.entries).toHaveLength(1)
       expect(body.entries[0]).toMatchObject({
@@ -132,18 +130,14 @@ describe('errorReporting', () => {
       freshCapture(new Error('User error'))
       freshFlush()
 
-      const body = JSON.parse(
-        (globalThis.fetch as ReturnType<typeof vi.fn>).mock.calls[0][1].body
-      )
+      const body = JSON.parse((globalThis.fetch as ReturnType<typeof vi.fn>).mock.calls[0][1].body)
       expect(body.entries[0].userId).toBe('user-42')
     })
 
     it('logs the user context', () => {
       setUser('user-99')
 
-      expect(console.log).toHaveBeenCalledWith(
-        expect.stringContaining('User context set: user-99')
-      )
+      expect(console.log).toHaveBeenCalledWith(expect.stringContaining('User context set: user-99'))
     })
   })
 
@@ -158,9 +152,7 @@ describe('errorReporting', () => {
       mod.captureError(new Error('nav error'))
       mod.flush()
 
-      const body = JSON.parse(
-        (globalThis.fetch as ReturnType<typeof vi.fn>).mock.calls[0][1].body
-      )
+      const body = JSON.parse((globalThis.fetch as ReturnType<typeof vi.fn>).mock.calls[0][1].body)
       const bc = body.entries[0].breadcrumbs
       expect(bc).toHaveLength(1)
       expect(bc[0].type).toBe('navigation')
@@ -177,9 +169,7 @@ describe('errorReporting', () => {
       mod.captureError(new Error('api error'))
       mod.flush()
 
-      const body = JSON.parse(
-        (globalThis.fetch as ReturnType<typeof vi.fn>).mock.calls[0][1].body
-      )
+      const body = JSON.parse((globalThis.fetch as ReturnType<typeof vi.fn>).mock.calls[0][1].body)
       const bc = body.entries[0].breadcrumbs
       expect(bc[0].type).toBe('api')
       expect(bc[0].data).toMatchObject({ method: 'GET', url: '/api/v1/modules', status: 200 })
@@ -195,9 +185,7 @@ describe('errorReporting', () => {
       mod.captureError(new Error('console error'))
       mod.flush()
 
-      const body = JSON.parse(
-        (globalThis.fetch as ReturnType<typeof vi.fn>).mock.calls[0][1].body
-      )
+      const body = JSON.parse((globalThis.fetch as ReturnType<typeof vi.fn>).mock.calls[0][1].body)
       expect(body.entries[0].breadcrumbs[0].type).toBe('console')
     })
 
@@ -211,9 +199,7 @@ describe('errorReporting', () => {
       mod.captureError(new Error('custom error'))
       mod.flush()
 
-      const body = JSON.parse(
-        (globalThis.fetch as ReturnType<typeof vi.fn>).mock.calls[0][1].body
-      )
+      const body = JSON.parse((globalThis.fetch as ReturnType<typeof vi.fn>).mock.calls[0][1].body)
       expect(body.entries[0].breadcrumbs[0].type).toBe('custom')
       expect(body.entries[0].breadcrumbs[0].data).toEqual({ buttonId: 'submit' })
     })

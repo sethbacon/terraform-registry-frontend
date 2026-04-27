@@ -3,10 +3,20 @@ import userEvent from '@testing-library/user-event'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 
 const defaultLdapForm = {
-  host: '', port: 389, use_tls: false, start_tls: true, insecure_skip_verify: false,
-  bind_dn: '', bind_password: '', base_dn: '', user_filter: '(sAMAccountName=%s)',
-  user_attr_email: 'mail', user_attr_name: 'displayName',
-  group_base_dn: '', group_filter: '', group_member_attr: 'member',
+  host: '',
+  port: 389,
+  use_tls: false,
+  start_tls: true,
+  insecure_skip_verify: false,
+  bind_dn: '',
+  bind_password: '',
+  base_dn: '',
+  user_filter: '(sAMAccountName=%s)',
+  user_attr_email: 'mail',
+  user_attr_name: 'displayName',
+  group_base_dn: '',
+  group_filter: '',
+  group_member_attr: 'member',
 }
 
 const mockCtx = {

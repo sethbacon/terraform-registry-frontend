@@ -1,17 +1,36 @@
-import React from 'react';
-import { Box, Container, Paper, Typography, Alert, Stepper, Step, StepLabel, Collapse, CircularProgress } from '@mui/material';
-import SettingsIcon from '@mui/icons-material/Settings';
-import { useNavigate } from 'react-router-dom';
-import { SetupWizardProvider, useSetupWizard } from '../contexts/SetupWizardContext';
-import AuthenticateStep from './setup/steps/AuthenticateStep';
-import OIDCStep from './setup/steps/OIDCStep';
-import StorageStep from './setup/steps/StorageStep';
-import ScanningStep from './setup/steps/ScanningStep';
-import BrandingStep from './setup/steps/BrandingStep';
-import AdminUserStep from './setup/steps/AdminUserStep';
-import ReviewStep from './setup/steps/ReviewStep';
+import React from 'react'
+import {
+  Box,
+  Container,
+  Paper,
+  Typography,
+  Alert,
+  Stepper,
+  Step,
+  StepLabel,
+  Collapse,
+  CircularProgress,
+} from '@mui/material'
+import SettingsIcon from '@mui/icons-material/Settings'
+import { useNavigate } from 'react-router-dom'
+import { SetupWizardProvider, useSetupWizard } from '../contexts/SetupWizardContext'
+import AuthenticateStep from './setup/steps/AuthenticateStep'
+import OIDCStep from './setup/steps/OIDCStep'
+import StorageStep from './setup/steps/StorageStep'
+import ScanningStep from './setup/steps/ScanningStep'
+import BrandingStep from './setup/steps/BrandingStep'
+import AdminUserStep from './setup/steps/AdminUserStep'
+import ReviewStep from './setup/steps/ReviewStep'
 
-const steps = ['Authenticate', 'Identity Provider', 'Storage Backend', 'Security Scanning', 'Branding', 'Admin User', 'Complete'];
+const steps = [
+  'Authenticate',
+  'Identity Provider',
+  'Storage Backend',
+  'Security Scanning',
+  'Branding',
+  'Admin User',
+  'Complete',
+]
 
 const stepComponents: Record<number, React.FC> = {
   0: AuthenticateStep,
@@ -21,27 +40,28 @@ const stepComponents: Record<number, React.FC> = {
   4: BrandingStep,
   5: AdminUserStep,
   6: ReviewStep,
-};
+}
 
 const SetupWizardShell: React.FC = () => {
-  const { loading, setupStatus, activeStep, error, setError, success, setSuccess } = useSetupWizard();
+  const { loading, setupStatus, activeStep, error, setError, success, setSuccess } =
+    useSetupWizard()
 
-  if (!loading && setupStatus?.setup_completed && !setupStatus?.pending_feature_setup) return null;
+  if (!loading && setupStatus?.setup_completed && !setupStatus?.pending_feature_setup) return null
 
-  const isPending = setupStatus?.pending_feature_setup ?? false;
-  const StepComponent = stepComponents[activeStep];
+  const isPending = setupStatus?.pending_feature_setup ?? false
+  const StepComponent = stepComponents[activeStep]
 
   // In pending-feature mode, show only Token + the unconfigured steps + Complete
   const pendingSteps = isPending
     ? [
-      { label: 'Authenticate', index: 0 },
-      ...(!setupStatus?.scanning_configured ? [{ label: 'Security Scanning', index: 3 }] : []),
-      { label: 'Complete', index: 6 },
-    ]
-    : steps.map((label, index) => ({ label, index }));
+        { label: 'Authenticate', index: 0 },
+        ...(!setupStatus?.scanning_configured ? [{ label: 'Security Scanning', index: 3 }] : []),
+        { label: 'Complete', index: 6 },
+      ]
+    : steps.map((label, index) => ({ label, index }))
 
   // Map the activeStep to the stepper's visual position
-  const visualActiveStep = pendingSteps.findIndex((s) => s.index === activeStep);
+  const visualActiveStep = pendingSteps.findIndex((s) => s.index === activeStep)
 
   return (
     <Box aria-busy={loading} aria-live="polite">
@@ -64,39 +84,54 @@ const SetupWizardShell: React.FC = () => {
               </Typography>
             </Box>
 
-            <Stepper activeStep={visualActiveStep} sx={{ mb: 4 }} alternativeLabel aria-label="Setup progress">
+            <Stepper
+              activeStep={visualActiveStep}
+              sx={{ mb: 4 }}
+              alternativeLabel
+              aria-label="Setup progress"
+            >
               {pendingSteps.map(({ label }) => (
-                <Step key={label}><StepLabel>{label}</StepLabel></Step>
+                <Step key={label}>
+                  <StepLabel>{label}</StepLabel>
+                </Step>
               ))}
             </Stepper>
 
             <Collapse in={!!error}>
-              <Alert severity="error" onClose={() => setError(null)} sx={{ mb: 2 }}>{error}</Alert>
+              <Alert severity="error" onClose={() => setError(null)} sx={{ mb: 2 }}>
+                {error}
+              </Alert>
             </Collapse>
             <Collapse in={!!success}>
-              <Alert severity="success" onClose={() => setSuccess(null)} sx={{ mb: 2 }}>{success}</Alert>
+              <Alert severity="success" onClose={() => setSuccess(null)} sx={{ mb: 2 }}>
+                {success}
+              </Alert>
             </Collapse>
 
             {StepComponent && <StepComponent />}
           </Paper>
 
           <Paper elevation={1} sx={{ p: 3, mt: 3 }}>
-            <Typography variant="subtitle2" gutterBottom>Prefer using the command line?</Typography>
+            <Typography variant="subtitle2" gutterBottom>
+              Prefer using the command line?
+            </Typography>
             <Typography variant="body2" color="text.secondary">
               All setup steps can also be performed via curl or any HTTP client. See the{' '}
-              <a href="/api-docs/" target="_blank" rel="noopener noreferrer">API documentation</a>{' '}
-              for details. Use the <code>Authorization: SetupToken YOUR_TOKEN</code> header
-              for authentication.
+              <a href="/api-docs/" target="_blank" rel="noopener noreferrer">
+                API documentation
+              </a>{' '}
+              for details. Use the <code>Authorization: SetupToken YOUR_TOKEN</code> header for
+              authentication.
             </Typography>
           </Paper>
         </Container>
       )}
     </Box>
-  );
-};
+  )
+}
 
 const SetupWizardPage: React.FC = () => {
-  const navigate = useNavigate();
+  const navigate = useNavigate()
   return (
     <SetupWizardProvider
       onSetupCompleted={() => navigate('/', { replace: true })}
@@ -104,7 +139,7 @@ const SetupWizardPage: React.FC = () => {
     >
       <SetupWizardShell />
     </SetupWizardProvider>
-  );
-};
+  )
+}
 
-export default SetupWizardPage;
+export default SetupWizardPage

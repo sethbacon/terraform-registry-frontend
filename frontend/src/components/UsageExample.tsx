@@ -79,11 +79,19 @@ const UsageExample: React.FC<UsageExampleProps> = ({
     if (isOci) setTab(0)
   }, [isOci])
 
-  const opts = { registryHost, namespace, name, system, version, inputs, tool: isOci ? 'terraform' as const : tool }
+  const opts = {
+    registryHost,
+    namespace,
+    name,
+    system,
+    version,
+    inputs,
+    tool: isOci ? ('terraform' as const) : tool,
+  }
   const sourceBlock = buildSourceExample(opts)
   const inputsBlock = buildRequiredInputsExample(opts)
   const ociBlock = `oras pull ${registryHost}/modules/${namespace}/${name}/${system}:${version}`
-  const visible = isOci ? ociBlock : (activeTab === 1 ? inputsBlock : sourceBlock)
+  const visible = isOci ? ociBlock : activeTab === 1 ? inputsBlock : sourceBlock
 
   const handleToolChange = (_: unknown, next: UsageTool | null) => {
     if (!next) return
@@ -186,8 +194,7 @@ const UsageExample: React.FC<UsageExampleProps> = ({
       )}
       {isOci && (
         <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 1 }}>
-          Requires{' '}
-          <code>oras</code> CLI. Pull the module archive directly from the OCI registry.
+          Requires <code>oras</code> CLI. Pull the module archive directly from the OCI registry.
         </Typography>
       )}
     </Paper>

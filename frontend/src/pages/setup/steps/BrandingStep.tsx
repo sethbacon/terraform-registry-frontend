@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState } from 'react'
 import {
   Box,
   Typography,
@@ -8,60 +8,60 @@ import {
   Button,
   CircularProgress,
   InputAdornment,
-} from '@mui/material';
-import BrushIcon from '@mui/icons-material/Brush';
-import { useSetupWizard } from '../../../contexts/SetupWizardContext';
-import api from '../../../services/api';
-import { getErrorMessage } from '../../../utils/errors';
+} from '@mui/material'
+import BrushIcon from '@mui/icons-material/Brush'
+import { useSetupWizard } from '../../../contexts/SetupWizardContext'
+import api from '../../../services/api'
+import { getErrorMessage } from '../../../utils/errors'
 
 const BrandingStep: React.FC = () => {
-  const { goToStep, setError, setSuccess } = useSetupWizard();
+  const { goToStep, setError, setSuccess } = useSetupWizard()
 
-  const [saving, setSaving] = useState(false);
+  const [saving, setSaving] = useState(false)
   const [form, setForm] = useState({
     product_name: '',
     logo_url: '',
     primary_color: '',
     login_hero_url: '',
     favicon_url: '',
-  });
+  })
 
   const handleChange = (field: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement>) => {
-    setForm((prev) => ({ ...prev, [field]: e.target.value }));
-  };
+    setForm((prev) => ({ ...prev, [field]: e.target.value }))
+  }
 
   const handleSave = async () => {
     try {
-      setSaving(true);
-      setError(null);
-      const payload = Object.fromEntries(
-        Object.entries(form).filter(([, v]) => v.trim() !== ''),
-      );
-      await api.updateAdminUITheme(payload);
-      setSuccess('Branding saved successfully');
-      goToStep(5);
+      setSaving(true)
+      setError(null)
+      const payload = Object.fromEntries(Object.entries(form).filter(([, v]) => v.trim() !== ''))
+      await api.updateAdminUITheme(payload)
+      setSuccess('Branding saved successfully')
+      goToStep(5)
     } catch (err: unknown) {
-      setError(getErrorMessage(err, 'Failed to save branding'));
+      setError(getErrorMessage(err, 'Failed to save branding'))
     } finally {
-      setSaving(false);
+      setSaving(false)
     }
-  };
+  }
 
   return (
     <Box>
       <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
         <BrushIcon sx={{ mr: 1, color: 'primary.main' }} />
-        <Typography variant="h6" component="h2">White-Label Branding</Typography>
+        <Typography variant="h6" component="h2">
+          White-Label Branding
+        </Typography>
       </Box>
       <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-        Customize the registry's appearance for your organization. All fields are optional —
-        leave any blank to keep the built-in defaults. You can change these settings later
-        from the admin panel.
+        Customize the registry's appearance for your organization. All fields are optional — leave
+        any blank to keep the built-in defaults. You can change these settings later from the admin
+        panel.
       </Typography>
 
       <Alert severity="info" sx={{ mb: 3 }}>
-        Branding changes take effect immediately. Logo and hero images must be publicly
-        accessible URLs (HTTPS recommended).
+        Branding changes take effect immediately. Logo and hero images must be publicly accessible
+        URLs (HTTPS recommended).
       </Alert>
 
       <Stack spacing={2}>
@@ -127,7 +127,9 @@ const BrandingStep: React.FC = () => {
         />
 
         <Stack direction="row" spacing={2} justifyContent="space-between">
-          <Button variant="text" onClick={() => goToStep(3)}>← Back</Button>
+          <Button variant="text" onClick={() => goToStep(3)}>
+            ← Back
+          </Button>
           <Stack direction="row" spacing={1}>
             <Button variant="outlined" onClick={() => goToStep(5)}>
               Skip
@@ -144,7 +146,7 @@ const BrandingStep: React.FC = () => {
         </Stack>
       </Stack>
     </Box>
-  );
-};
+  )
+}
 
-export default BrandingStep;
+export default BrandingStep

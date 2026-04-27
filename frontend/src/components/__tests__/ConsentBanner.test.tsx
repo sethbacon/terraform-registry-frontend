@@ -10,7 +10,7 @@ function renderBanner() {
   return render(
     <ConsentProvider>
       <ConsentBanner />
-    </ConsentProvider>
+    </ConsentProvider>,
   )
 }
 
@@ -28,7 +28,12 @@ describe('ConsentBanner', () => {
   it('hides when user has already consented', () => {
     localStorage.setItem(
       CONSENT_KEY,
-      JSON.stringify({ essential: true, errorReporting: false, performanceReporting: false, analytics: false })
+      JSON.stringify({
+        essential: true,
+        errorReporting: false,
+        performanceReporting: false,
+        analytics: false,
+      }),
     )
     renderBanner()
     expect(screen.queryByRole('dialog', { name: /cookie consent/i })).not.toBeInTheDocument()

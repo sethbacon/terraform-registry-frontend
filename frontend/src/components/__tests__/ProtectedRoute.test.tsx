@@ -16,7 +16,7 @@ function renderWithRouter(ui: React.ReactElement, { route = '/' } = {}) {
         <Route path="/" element={ui} />
         <Route path="/login" element={<div>Login Page</div>} />
       </Routes>
-    </MemoryRouter>
+    </MemoryRouter>,
   )
 }
 
@@ -29,7 +29,9 @@ describe('ProtectedRoute', () => {
     })
 
     renderWithRouter(
-      <ProtectedRoute><div>Protected Content</div></ProtectedRoute>
+      <ProtectedRoute>
+        <div>Protected Content</div>
+      </ProtectedRoute>,
     )
 
     expect(screen.getByRole('progressbar')).toBeInTheDocument()
@@ -43,7 +45,9 @@ describe('ProtectedRoute', () => {
     })
 
     renderWithRouter(
-      <ProtectedRoute><div>Protected Content</div></ProtectedRoute>
+      <ProtectedRoute>
+        <div>Protected Content</div>
+      </ProtectedRoute>,
     )
 
     expect(screen.getByText('Login Page')).toBeInTheDocument()
@@ -58,7 +62,9 @@ describe('ProtectedRoute', () => {
     })
 
     renderWithRouter(
-      <ProtectedRoute requiredScope="admin"><div>Admin Content</div></ProtectedRoute>
+      <ProtectedRoute requiredScope="admin">
+        <div>Admin Content</div>
+      </ProtectedRoute>,
     )
 
     expect(screen.getByText('Access Denied')).toBeInTheDocument()
@@ -73,7 +79,9 @@ describe('ProtectedRoute', () => {
     })
 
     renderWithRouter(
-      <ProtectedRoute requiredScope="modules:read"><div>Module Content</div></ProtectedRoute>
+      <ProtectedRoute requiredScope="modules:read">
+        <div>Module Content</div>
+      </ProtectedRoute>,
     )
 
     expect(screen.getByText('Module Content')).toBeInTheDocument()
@@ -87,7 +95,9 @@ describe('ProtectedRoute', () => {
     })
 
     renderWithRouter(
-      <ProtectedRoute requiredScope="modules:write"><div>Admin Access Content</div></ProtectedRoute>
+      <ProtectedRoute requiredScope="modules:write">
+        <div>Admin Access Content</div>
+      </ProtectedRoute>,
     )
 
     expect(screen.getByText('Admin Access Content')).toBeInTheDocument()
@@ -101,7 +111,9 @@ describe('ProtectedRoute', () => {
     })
 
     renderWithRouter(
-      <ProtectedRoute><div>Any Auth Content</div></ProtectedRoute>
+      <ProtectedRoute>
+        <div>Any Auth Content</div>
+      </ProtectedRoute>,
     )
 
     expect(screen.getByText('Any Auth Content')).toBeInTheDocument()

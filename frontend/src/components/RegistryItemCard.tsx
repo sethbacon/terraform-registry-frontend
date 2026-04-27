@@ -1,4 +1,4 @@
-import React from 'react';
+import React from 'react'
 import {
   Card,
   CardActions,
@@ -9,32 +9,32 @@ import {
   Chip,
   type SxProps,
   type Theme,
-} from '@mui/material';
+} from '@mui/material'
 
 export interface RegistryItemCardProps {
   /** Primary title displayed at the top of the card (e.g. module name, provider type). */
-  title: string;
+  title: string
   /** Secondary line shown below the title (e.g. namespace/system). */
-  subtitle?: string;
+  subtitle?: string
   /** Body text, clamped to 3 lines. Falls back to "No description available". */
-  description?: string;
+  description?: string
   /**
    * Optional badge rendered above the chips row (e.g. a "Network Mirrored" Chip).
    * Displayed with mb:1 spacing beneath the description.
    */
-  badge?: React.ReactNode;
+  badge?: React.ReactNode
   /** Chip(s) rendered in the bottom chip row (e.g. version + download count). */
-  chips?: React.ReactNode;
+  chips?: React.ReactNode
   /** Label for the CardActions button. Defaults to "View Details". */
-  actionLabel?: string;
+  actionLabel?: string
   /** MUI button color for the action button. Defaults to "primary". */
-  actionColor?: 'primary' | 'secondary';
+  actionColor?: 'primary' | 'secondary'
   /** Click handler attached to both the card and the action button. */
-  onClick: () => void;
+  onClick: () => void
   /** Whether this item is deprecated. Adds a visual indicator. */
-  deprecated?: boolean;
+  deprecated?: boolean
   /** Additional sx overrides for the root Card element. */
-  sx?: SxProps<Theme>;
+  sx?: SxProps<Theme>
 }
 
 const cardHoverSx: SxProps<Theme> = {
@@ -47,7 +47,7 @@ const cardHoverSx: SxProps<Theme> = {
     boxShadow: 4,
     cursor: 'pointer',
   },
-};
+}
 
 const RegistryItemCard: React.FC<RegistryItemCardProps> = ({
   title,
@@ -62,9 +62,18 @@ const RegistryItemCard: React.FC<RegistryItemCardProps> = ({
   sx,
 }) => (
   <Card
-    sx={[cardHoverSx, ...(deprecated ? [{ opacity: 0.7 } as const] : []), ...(Array.isArray(sx) ? sx : sx ? [sx] : [])]}
+    sx={[
+      cardHoverSx,
+      ...(deprecated ? [{ opacity: 0.7 } as const] : []),
+      ...(Array.isArray(sx) ? sx : sx ? [sx] : []),
+    ]}
     onClick={onClick}
-    onKeyDown={(e: React.KeyboardEvent) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onClick(); } }}
+    onKeyDown={(e: React.KeyboardEvent) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault()
+        onClick()
+      }
+    }}
     tabIndex={0}
     role="article"
     aria-label={`${title}${deprecated ? ' (deprecated)' : ''}`}
@@ -101,11 +110,16 @@ const RegistryItemCard: React.FC<RegistryItemCardProps> = ({
       </Box>
     </CardContent>
     <CardActions>
-      <Button size="small" color={actionColor} onClick={onClick} aria-label={`${actionLabel} for ${title}`}>
+      <Button
+        size="small"
+        color={actionColor}
+        onClick={onClick}
+        aria-label={`${actionLabel} for ${title}`}
+      >
         {actionLabel}
       </Button>
     </CardActions>
   </Card>
-);
+)
 
-export default React.memo(RegistryItemCard);
+export default React.memo(RegistryItemCard)

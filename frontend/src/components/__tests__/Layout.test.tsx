@@ -34,7 +34,11 @@ vi.mock('../HelpPanel', () => ({
 
 vi.mock('../AboutModal', () => ({
   default: ({ open, onClose }: { open: boolean; onClose: () => void }) =>
-    open ? <div data-testid="about-modal"><button onClick={onClose}>Close</button></div> : null,
+    open ? (
+      <div data-testid="about-modal">
+        <button onClick={onClose}>Close</button>
+      </div>
+    ) : null,
 }))
 
 import Layout from '../Layout'
@@ -65,7 +69,14 @@ function renderLayout(route = '/') {
 beforeEach(() => {
   vi.clearAllMocks()
   localStorage.clear()
-  mockUseThemeMode.mockReturnValue({ mode: 'light', toggleTheme: mockToggleTheme, productName: 'Terraform Registry', logoUrl: null, loginHeroUrl: null, direction: 'ltr' })
+  mockUseThemeMode.mockReturnValue({
+    mode: 'light',
+    toggleTheme: mockToggleTheme,
+    productName: 'Terraform Registry',
+    logoUrl: null,
+    loginHeroUrl: null,
+    direction: 'ltr',
+  })
   mockUseHelp.mockReturnValue({ helpOpen: false, openHelp: mockOpenHelp, closeHelp: vi.fn() })
   setAuth()
 })

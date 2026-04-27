@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect } from 'react'
 
 /**
  * Normalised hotkey hook. Listens for a key combination on `window` and fires
@@ -10,32 +10,35 @@ export function useHotkey(
   callback: (event: KeyboardEvent) => void,
   options: { enabled?: boolean; preventDefault?: boolean } = {},
 ): void {
-  const { enabled = true, preventDefault = true } = options;
+  const { enabled = true, preventDefault = true } = options
 
   useEffect(() => {
-    if (!enabled) return;
+    if (!enabled) return
 
-    const parts = combo.toLowerCase().split('+').map((p) => p.trim());
-    const key = parts[parts.length - 1];
-    const wantMod = parts.includes('mod');
-    const wantShift = parts.includes('shift');
-    const wantAlt = parts.includes('alt');
+    const parts = combo
+      .toLowerCase()
+      .split('+')
+      .map((p) => p.trim())
+    const key = parts[parts.length - 1]
+    const wantMod = parts.includes('mod')
+    const wantShift = parts.includes('shift')
+    const wantAlt = parts.includes('alt')
 
     const handler = (event: KeyboardEvent) => {
-      if (event.key.toLowerCase() !== key) return;
-      const modDown = event.metaKey || event.ctrlKey;
-      if (wantMod && !modDown) return;
-      if (!wantMod && modDown) return;
-      if (wantShift !== event.shiftKey) return;
-      if (wantAlt !== event.altKey) return;
+      if (event.key.toLowerCase() !== key) return
+      const modDown = event.metaKey || event.ctrlKey
+      if (wantMod && !modDown) return
+      if (!wantMod && modDown) return
+      if (wantShift !== event.shiftKey) return
+      if (wantAlt !== event.altKey) return
 
-      if (preventDefault) event.preventDefault();
-      callback(event);
-    };
+      if (preventDefault) event.preventDefault()
+      callback(event)
+    }
 
-    window.addEventListener('keydown', handler);
-    return () => window.removeEventListener('keydown', handler);
-  }, [combo, callback, enabled, preventDefault]);
+    window.addEventListener('keydown', handler)
+    return () => window.removeEventListener('keydown', handler)
+  }, [combo, callback, enabled, preventDefault])
 }
 
-export default useHotkey;
+export default useHotkey

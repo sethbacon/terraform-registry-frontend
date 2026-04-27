@@ -1,20 +1,20 @@
-import React from 'react';
-import { Box, Button, Stack, Typography } from '@mui/material';
-import InboxOutlined from '@mui/icons-material/InboxOutlined';
+import React from 'react'
+import { Box, Button, Stack, Typography } from '@mui/material'
+import InboxOutlined from '@mui/icons-material/InboxOutlined'
 
 export interface EmptyStateAction {
-  label: string;
-  onClick: () => void;
-  icon?: React.ReactNode;
+  label: string
+  onClick: () => void
+  icon?: React.ReactNode
 }
 
 export interface EmptyStateProps {
-  title: string;
-  description?: React.ReactNode;
-  icon?: React.ReactNode;
-  primaryAction?: EmptyStateAction;
-  secondaryAction?: EmptyStateAction;
-  'data-testid'?: string;
+  title: string
+  description?: React.ReactNode
+  icon?: React.ReactNode
+  primaryAction?: EmptyStateAction
+  secondaryAction?: EmptyStateAction
+  'data-testid'?: string
 }
 
 const EmptyState: React.FC<EmptyStateProps> = ({
@@ -51,11 +51,7 @@ const EmptyState: React.FC<EmptyStateProps> = ({
         {title}
       </Typography>
       {description && (
-        <Typography
-          variant="body2"
-          color="text.secondary"
-          sx={{ maxWidth: 480, mb: 2 }}
-        >
+        <Typography variant="body2" color="text.secondary" sx={{ maxWidth: 480, mb: 2 }}>
           {description}
         </Typography>
       )}
@@ -84,7 +80,7 @@ const EmptyState: React.FC<EmptyStateProps> = ({
         </Stack>
       )}
     </Box>
-  );
-};
+  )
+}
 
-export default EmptyState;
+export default EmptyState

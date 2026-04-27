@@ -46,7 +46,7 @@ function renderPage() {
   return render(
     <QueryClientProvider client={qc}>
       <APIKeysPage />
-    </QueryClientProvider>
+    </QueryClientProvider>,
   )
 }
 
@@ -105,7 +105,7 @@ describe('APIKeysPage', () => {
 
   // 1. Loading state
   it('shows a loading spinner while API keys are being fetched', () => {
-    listAPIKeysMock.mockReturnValue(new Promise(() => { }))
+    listAPIKeysMock.mockReturnValue(new Promise(() => {}))
     renderPage()
     expect(screen.getByRole('progressbar')).toBeInTheDocument()
   })
@@ -305,7 +305,10 @@ describe('APIKeysPage', () => {
     await user.type(nameInput, 'Renamed Key')
     await user.click(within(dialog).getByRole('button', { name: 'Save' }))
     await waitFor(() => {
-      expect(updateAPIKeyMock).toHaveBeenCalledWith('key-1', expect.objectContaining({ name: 'Renamed Key' }))
+      expect(updateAPIKeyMock).toHaveBeenCalledWith(
+        'key-1',
+        expect.objectContaining({ name: 'Renamed Key' }),
+      )
     })
   })
 
@@ -390,9 +393,7 @@ describe('APIKeysPage', () => {
     listAPIKeysMock.mockResolvedValue([])
     renderPage()
     await waitFor(() => {
-      expect(
-        screen.getByText(/not a member of any organization/)
-      ).toBeInTheDocument()
+      expect(screen.getByText(/not a member of any organization/)).toBeInTheDocument()
     })
   })
 

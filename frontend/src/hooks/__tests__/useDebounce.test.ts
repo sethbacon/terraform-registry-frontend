@@ -13,10 +13,9 @@ describe('useDebounce', () => {
   })
 
   it('does not update the value before the delay', () => {
-    const { result, rerender } = renderHook(
-      ({ value, delay }) => useDebounce(value, delay),
-      { initialProps: { value: 'hello', delay: 500 } }
-    )
+    const { result, rerender } = renderHook(({ value, delay }) => useDebounce(value, delay), {
+      initialProps: { value: 'hello', delay: 500 },
+    })
 
     rerender({ value: 'world', delay: 500 })
     vi.advanceTimersByTime(300)
@@ -24,10 +23,9 @@ describe('useDebounce', () => {
   })
 
   it('updates the value after the delay', () => {
-    const { result, rerender } = renderHook(
-      ({ value, delay }) => useDebounce(value, delay),
-      { initialProps: { value: 'hello', delay: 500 } }
-    )
+    const { result, rerender } = renderHook(({ value, delay }) => useDebounce(value, delay), {
+      initialProps: { value: 'hello', delay: 500 },
+    })
 
     rerender({ value: 'world', delay: 500 })
     act(() => {
@@ -37,10 +35,9 @@ describe('useDebounce', () => {
   })
 
   it('only produces the final value on rapid updates', () => {
-    const { result, rerender } = renderHook(
-      ({ value, delay }) => useDebounce(value, delay),
-      { initialProps: { value: 'a', delay: 300 } }
-    )
+    const { result, rerender } = renderHook(({ value, delay }) => useDebounce(value, delay), {
+      initialProps: { value: 'a', delay: 300 },
+    })
 
     rerender({ value: 'b', delay: 300 })
     vi.advanceTimersByTime(100)
@@ -57,7 +54,7 @@ describe('useDebounce', () => {
   it('cleans up the timer on unmount', () => {
     const { result, rerender, unmount } = renderHook(
       ({ value, delay }) => useDebounce(value, delay),
-      { initialProps: { value: 'hello', delay: 500 } }
+      { initialProps: { value: 'hello', delay: 500 } },
     )
 
     rerender({ value: 'world', delay: 500 })

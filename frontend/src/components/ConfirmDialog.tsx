@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react'
 import {
   Dialog,
   DialogTitle,
@@ -12,52 +12,54 @@ import {
   Typography,
   Alert,
   CircularProgress,
-} from '@mui/material';
-import WarningAmberIcon from '@mui/icons-material/WarningAmber';
-import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline';
-import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
+} from '@mui/material'
+import WarningAmberIcon from '@mui/icons-material/WarningAmber'
+import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline'
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined'
 
-export type ConfirmDialogSeverity = 'info' | 'warning' | 'error';
+export type ConfirmDialogSeverity = 'info' | 'warning' | 'error'
 
 export interface ConfirmDialogField {
-  id: string;
-  label: string;
-  multiline?: boolean;
-  required?: boolean;
-  placeholder?: string;
-  helperText?: string;
-  rows?: number;
-  initialValue?: string;
+  id: string
+  label: string
+  multiline?: boolean
+  required?: boolean
+  placeholder?: string
+  helperText?: string
+  rows?: number
+  initialValue?: string
 }
 
 export interface ConfirmDialogProps {
-  open: boolean;
-  onClose: () => void;
+  open: boolean
+  onClose: () => void
   /** Called when the confirm button is pressed. May return a Promise. */
-  onConfirm?: () => void | Promise<void>;
+  onConfirm?: () => void | Promise<void>
   /** When `fields` is set, this is called with the collected values instead of onConfirm. */
-  onSubmit?: (values: Record<string, string>) => void | Promise<void>;
-  title: string;
-  description?: React.ReactNode;
-  confirmLabel?: string;
-  cancelLabel?: string;
-  severity?: ConfirmDialogSeverity;
+  onSubmit?: (values: Record<string, string>) => void | Promise<void>
+  title: string
+  description?: React.ReactNode
+  confirmLabel?: string
+  cancelLabel?: string
+  severity?: ConfirmDialogSeverity
   /** If set, require the user to type this exact string before confirm is enabled. */
-  typeToConfirmText?: string;
-  fields?: ConfirmDialogField[];
+  typeToConfirmText?: string
+  fields?: ConfirmDialogField[]
   /** External loading state (e.g., mutation in flight). */
-  loading?: boolean;
+  loading?: boolean
   /** Optional test id for the dialog root. */
-  'data-testid'?: string;
+  'data-testid'?: string
 }
 
 function SeverityIcon({ severity }: { severity: ConfirmDialogSeverity }) {
-  const common = { fontSize: 'inherit' as const };
+  const common = { fontSize: 'inherit' as const }
   if (severity === 'error')
-    return <ErrorOutlineIcon color="error" {...common} data-testid="confirm-dialog-icon-error" />;
+    return <ErrorOutlineIcon color="error" {...common} data-testid="confirm-dialog-icon-error" />
   if (severity === 'warning')
-    return <WarningAmberIcon color="warning" {...common} data-testid="confirm-dialog-icon-warning" />;
-  return <InfoOutlinedIcon color="info" {...common} data-testid="confirm-dialog-icon-info" />;
+    return (
+      <WarningAmberIcon color="warning" {...common} data-testid="confirm-dialog-icon-warning" />
+    )
+  return <InfoOutlinedIcon color="info" {...common} data-testid="confirm-dialog-icon-info" />
 }
 
 const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
@@ -75,72 +77,67 @@ const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
   loading: externalLoading,
   'data-testid': testId = 'confirm-dialog',
 }) => {
-  const [typed, setTyped] = useState('');
-  const [fieldValues, setFieldValues] = useState<Record<string, string>>({});
-  const [internalLoading, setInternalLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [typed, setTyped] = useState('')
+  const [fieldValues, setFieldValues] = useState<Record<string, string>>({})
+  const [internalLoading, setInternalLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
-  const loading = externalLoading || internalLoading;
+  const loading = externalLoading || internalLoading
 
   // Reset state each time the dialog opens
   useEffect(() => {
     if (open) {
-      setTyped('');
-      setError(null);
+      setTyped('')
+      setError(null)
       setFieldValues(
         (fields ?? []).reduce<Record<string, string>>((acc, f) => {
-          acc[f.id] = f.initialValue ?? '';
-          return acc;
+          acc[f.id] = f.initialValue ?? ''
+          return acc
         }, {}),
-      );
+      )
     }
-  }, [open, fields]);
+  }, [open, fields])
 
   const typedMatches = useMemo(() => {
-    if (!typeToConfirmText) return true;
-    return typed === typeToConfirmText;
-  }, [typed, typeToConfirmText]);
+    if (!typeToConfirmText) return true
+    return typed === typeToConfirmText
+  }, [typed, typeToConfirmText])
 
   const requiredFieldsFilled = useMemo(() => {
-    if (!fields) return true;
-    return fields.every((f) => !f.required || (fieldValues[f.id] ?? '').trim().length > 0);
-  }, [fields, fieldValues]);
+    if (!fields) return true
+    return fields.every((f) => !f.required || (fieldValues[f.id] ?? '').trim().length > 0)
+  }, [fields, fieldValues])
 
-  const confirmDisabled = loading || !typedMatches || !requiredFieldsFilled;
+  const confirmDisabled = loading || !typedMatches || !requiredFieldsFilled
 
   const handleConfirm = async () => {
-    if (confirmDisabled) return;
+    if (confirmDisabled) return
     try {
-      setError(null);
-      setInternalLoading(true);
+      setError(null)
+      setInternalLoading(true)
       if (onSubmit) {
-        await onSubmit(fieldValues);
+        await onSubmit(fieldValues)
       } else if (onConfirm) {
-        await onConfirm();
+        await onConfirm()
       }
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'An unexpected error occurred.';
-      setError(message);
+      const message = err instanceof Error ? err.message : 'An unexpected error occurred.'
+      setError(message)
     } finally {
-      setInternalLoading(false);
+      setInternalLoading(false)
     }
-  };
+  }
 
   const handleClose = () => {
-    if (loading) return;
-    onClose();
-  };
+    if (loading) return
+    onClose()
+  }
 
-  const confirmColor = severity === 'error' ? 'error' : severity === 'warning' ? 'warning' : 'primary';
+  const confirmColor =
+    severity === 'error' ? 'error' : severity === 'warning' ? 'warning' : 'primary'
 
   return (
-    <Dialog
-      open={open}
-      onClose={handleClose}
-      maxWidth="sm"
-      fullWidth
-      data-testid={testId}
-    >
+    <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth data-testid={testId}>
       <DialogTitle sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
         <Box sx={{ display: 'inline-flex', fontSize: 24, lineHeight: 0 }}>
           <SeverityIcon severity={severity} />
@@ -165,9 +162,7 @@ const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
                 key={f.id}
                 label={f.label}
                 value={fieldValues[f.id] ?? ''}
-                onChange={(e) =>
-                  setFieldValues((prev) => ({ ...prev, [f.id]: e.target.value }))
-                }
+                onChange={(e) => setFieldValues((prev) => ({ ...prev, [f.id]: e.target.value }))}
                 placeholder={f.placeholder}
                 helperText={f.helperText}
                 required={f.required}
@@ -229,7 +224,7 @@ const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
         </Button>
       </DialogActions>
     </Dialog>
-  );
-};
+  )
+}
 
-export default ConfirmDialog;
+export default ConfirmDialog

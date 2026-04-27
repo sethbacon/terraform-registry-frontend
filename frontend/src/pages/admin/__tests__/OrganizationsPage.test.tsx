@@ -76,7 +76,7 @@ describe('OrganizationsPage', () => {
   })
 
   it('shows loading spinner initially', () => {
-    listOrganizationsMock.mockReturnValue(new Promise(() => { }))
+    listOrganizationsMock.mockReturnValue(new Promise(() => {}))
     renderPage()
     expect(screen.getByRole('progressbar')).toBeInTheDocument()
   })
@@ -87,9 +87,7 @@ describe('OrganizationsPage', () => {
     await waitFor(() => {
       expect(screen.getByText('Organizations')).toBeInTheDocument()
     })
-    expect(
-      screen.getByText('Manage organizations and their members'),
-    ).toBeInTheDocument()
+    expect(screen.getByText('Manage organizations and their members')).toBeInTheDocument()
   })
 
   it('shows org table with data', async () => {
@@ -179,9 +177,7 @@ describe('OrganizationsPage', () => {
     await waitFor(() => expect(screen.getByText('acme-corp')).toBeInTheDocument())
     const membersBtns = screen.getAllByRole('button', { name: /view members/i })
     await userEvent.click(membersBtns[0])
-    await waitFor(() =>
-      expect(listOrganizationMembersMock).toHaveBeenCalledWith('org-1'),
-    )
+    await waitFor(() => expect(listOrganizationMembersMock).toHaveBeenCalledWith('org-1'))
   })
 
   it('creates a new organization via the Add dialog', async () => {
@@ -273,9 +269,7 @@ describe('OrganizationsPage', () => {
     )
     await userEvent.click(screen.getByRole('button', { name: /^close$/i }))
     await waitFor(() =>
-      expect(
-        screen.queryByText(/Organization Members - acme-corp/i),
-      ).not.toBeInTheDocument(),
+      expect(screen.queryByText(/Organization Members - acme-corp/i)).not.toBeInTheDocument(),
     )
   })
 
@@ -296,9 +290,7 @@ describe('OrganizationsPage', () => {
     )
     const addFirstBtns = screen.getAllByRole('button', { name: /add.*member/i })
     await userEvent.click(addFirstBtns[0])
-    await waitFor(() =>
-      expect(screen.getByText(/Add Member to acme-corp/i)).toBeInTheDocument(),
-    )
+    await waitFor(() => expect(screen.getByText(/Add Member to acme-corp/i)).toBeInTheDocument())
     await waitFor(() => expect(listUsersMock).toHaveBeenCalled())
   })
 
@@ -313,12 +305,8 @@ describe('OrganizationsPage', () => {
     await waitFor(() =>
       expect(screen.getByText(/Organization Members - acme-corp/i)).toBeInTheDocument(),
     )
-    await userEvent.click(
-      screen.getAllByRole('button', { name: /add.*member/i })[0],
-    )
-    await waitFor(() =>
-      expect(screen.getByText(/Add Member to acme-corp/i)).toBeInTheDocument(),
-    )
+    await userEvent.click(screen.getAllByRole('button', { name: /add.*member/i })[0])
+    await waitFor(() => expect(screen.getByText(/Add Member to acme-corp/i)).toBeInTheDocument())
     await userEvent.click(screen.getByRole('button', { name: /^cancel$/i }))
     await waitFor(() =>
       expect(screen.queryByText(/Add Member to acme-corp/i)).not.toBeInTheDocument(),
@@ -371,17 +359,12 @@ describe('OrganizationsPage', () => {
     await userEvent.click(screen.getAllByRole('button', { name: /view members/i })[0])
     await waitFor(() => expect(screen.getByText('Alice')).toBeInTheDocument())
     await userEvent.click(screen.getByRole('button', { name: /remove member/i }))
-    await waitFor(() =>
-      expect(removeOrgMemberMock).toHaveBeenCalledWith('org-1', 'u1'),
-    )
+    await waitFor(() => expect(removeOrgMemberMock).toHaveBeenCalledWith('org-1', 'u1'))
   })
 
   // ── Phase 2: Identity Provider fields ─────────────────────────────────────
   it('shows Identity Provider column with IdP chip', async () => {
-    const orgsWithIdp = [
-      { ...fakeOrgs[0], idp_type: 'saml', idp_name: 'Okta' },
-      { ...fakeOrgs[1] },
-    ]
+    const orgsWithIdp = [{ ...fakeOrgs[0], idp_type: 'saml', idp_name: 'Okta' }, { ...fakeOrgs[1] }]
     listOrganizationsMock.mockResolvedValue(orgsWithIdp)
     renderPage()
     await waitFor(() => expect(screen.getByText('acme-corp')).toBeInTheDocument())
@@ -390,9 +373,7 @@ describe('OrganizationsPage', () => {
   })
 
   it('shows IdP chip without name when idp_name is empty', async () => {
-    const orgsWithIdp = [
-      { ...fakeOrgs[0], idp_type: 'ldap' },
-    ]
+    const orgsWithIdp = [{ ...fakeOrgs[0], idp_type: 'ldap' }]
     listOrganizationsMock.mockResolvedValue(orgsWithIdp)
     renderPage()
     await waitFor(() => expect(screen.getByText('acme-corp')).toBeInTheDocument())

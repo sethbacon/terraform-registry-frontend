@@ -3,10 +3,20 @@ import userEvent from '@testing-library/user-event'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 
 const defaultLdapForm = {
-  host: '', port: 389, use_tls: false, start_tls: true, insecure_skip_verify: false,
-  bind_dn: '', bind_password: '', base_dn: '', user_filter: '(sAMAccountName=%s)',
-  user_attr_email: 'mail', user_attr_name: 'displayName',
-  group_base_dn: '', group_filter: '', group_member_attr: 'member',
+  host: '',
+  port: 389,
+  use_tls: false,
+  start_tls: true,
+  insecure_skip_verify: false,
+  bind_dn: '',
+  bind_password: '',
+  base_dn: '',
+  user_filter: '(sAMAccountName=%s)',
+  user_attr_email: 'mail',
+  user_attr_name: 'displayName',
+  group_base_dn: '',
+  group_filter: '',
+  group_member_attr: 'member',
 }
 
 const mockCtx = {
@@ -99,13 +109,24 @@ describe('OIDCStep', () => {
   })
 
   it('disables Save button when redirect_url is empty', () => {
-    mockCtx.oidcForm = { ...mockCtx.oidcForm, issuer_url: 'https://x', client_id: 'a', client_secret: 'b', redirect_url: '' }
+    mockCtx.oidcForm = {
+      ...mockCtx.oidcForm,
+      issuer_url: 'https://x',
+      client_id: 'a',
+      client_secret: 'b',
+      redirect_url: '',
+    }
     render(<OIDCStep />)
     expect(screen.getByRole('button', { name: /Save OIDC/i })).toBeDisabled()
   })
 
   it('enables Test button when issuer, client_id, client_secret filled', () => {
-    mockCtx.oidcForm = { ...mockCtx.oidcForm, issuer_url: 'https://x', client_id: 'a', client_secret: 'b' }
+    mockCtx.oidcForm = {
+      ...mockCtx.oidcForm,
+      issuer_url: 'https://x',
+      client_id: 'a',
+      client_secret: 'b',
+    }
     render(<OIDCStep />)
     expect(screen.getByRole('button', { name: /Test Connection/i })).toBeEnabled()
   })
@@ -150,7 +171,9 @@ describe('OIDCStep', () => {
 
   it('does not show Next button before save', () => {
     render(<OIDCStep />)
-    expect(screen.queryByRole('button', { name: /Next: Configure Storage/i })).not.toBeInTheDocument()
+    expect(
+      screen.queryByRole('button', { name: /Next: Configure Storage/i }),
+    ).not.toBeInTheDocument()
   })
 
   it('toggles client secret visibility', async () => {

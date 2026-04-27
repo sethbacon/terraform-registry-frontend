@@ -1,17 +1,17 @@
-import i18n from 'i18next';
-import { initReactI18next } from 'react-i18next';
-import LanguageDetector from 'i18next-browser-languagedetector';
+import i18n from 'i18next'
+import { initReactI18next } from 'react-i18next'
+import LanguageDetector from 'i18next-browser-languagedetector'
 
-import enTranslation from './locales/en/translation.json';
-import esTranslation from './locales/es/translation.json';
-import frTranslation from './locales/fr/translation.json';
-import deTranslation from './locales/de/translation.json';
-import jaTranslation from './locales/ja/translation.json';
-import ptTranslation from './locales/pt/translation.json';
-import nlTranslation from './locales/nl/translation.json';
-import nbTranslation from './locales/nb/translation.json';
-import zhTranslation from './locales/zh/translation.json';
-import itTranslation from './locales/it/translation.json';
+import enTranslation from './locales/en/translation.json'
+import esTranslation from './locales/es/translation.json'
+import frTranslation from './locales/fr/translation.json'
+import deTranslation from './locales/de/translation.json'
+import jaTranslation from './locales/ja/translation.json'
+import ptTranslation from './locales/pt/translation.json'
+import nlTranslation from './locales/nl/translation.json'
+import nbTranslation from './locales/nb/translation.json'
+import zhTranslation from './locales/zh/translation.json'
+import itTranslation from './locales/it/translation.json'
 
 // Non-English locales are machine-translated via DeepL. The translation
 // script (scripts/translate.mjs) tracks source hashes to detect stale
@@ -44,9 +44,9 @@ i18n
       // React already escapes output — no double-escaping needed.
       escapeValue: false,
     },
-  });
+  })
 
-export default i18n;
+export default i18n
 
 // Type augmentation for i18next. We intentionally use Record<string, unknown>
 // rather than `typeof enTranslation` to avoid a TypeScript compiler crash
@@ -56,9 +56,9 @@ export default i18n;
 // compile-time key checking.
 declare module 'i18next' {
   interface CustomTypeOptions {
-    defaultNS: 'translation';
+    defaultNS: 'translation'
     resources: {
-      translation: Record<string, unknown>;
-    };
+      translation: Record<string, unknown>
+    }
   }
 }

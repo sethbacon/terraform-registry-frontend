@@ -1,26 +1,29 @@
-import React from 'react';
-import { Box, Typography, Alert, Stack, TextField, Button, CircularProgress } from '@mui/material';
-import PersonIcon from '@mui/icons-material/Person';
-import { useSetupWizard } from '../../../contexts/SetupWizardContext';
+import React from 'react'
+import { Box, Typography, Alert, Stack, TextField, Button, CircularProgress } from '@mui/material'
+import PersonIcon from '@mui/icons-material/Person'
+import { useSetupWizard } from '../../../contexts/SetupWizardContext'
 
 const AdminUserStep: React.FC = () => {
-  const { adminEmail, setAdminEmail, adminSaving, adminSaved, saveAdmin, goToStep } = useSetupWizard();
+  const { adminEmail, setAdminEmail, adminSaving, adminSaved, saveAdmin, goToStep } =
+    useSetupWizard()
 
   return (
     <Box>
       <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
         <PersonIcon sx={{ mr: 1, color: 'primary.main' }} />
-        <Typography variant="h6" component="h2">Initial Admin User</Typography>
+        <Typography variant="h6" component="h2">
+          Initial Admin User
+        </Typography>
       </Box>
       <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-        Specify the email address of the first admin user. This must match the email
-        in your OIDC provider. When this user logs in via OIDC for the first time,
-        they will automatically receive admin privileges.
+        Specify the email address of the first admin user. This must match the email in your OIDC
+        provider. When this user logs in via OIDC for the first time, they will automatically
+        receive admin privileges.
       </Typography>
 
       <Alert severity="info" sx={{ mb: 2 }}>
-        The admin user will be added to the default organization with the &quot;admin&quot;
-        role template, granting full access to all registry features.
+        The admin user will be added to the default organization with the &quot;admin&quot; role
+        template, granting full access to all registry features.
       </Alert>
 
       <Stack spacing={2}>
@@ -36,7 +39,9 @@ const AdminUserStep: React.FC = () => {
         />
 
         <Stack direction="row" spacing={2}>
-          <Button variant="text" onClick={() => goToStep(4)}>← Back</Button>
+          <Button variant="text" onClick={() => goToStep(4)}>
+            ← Back
+          </Button>
           <Button
             variant="contained"
             onClick={saveAdmin}
@@ -56,7 +61,7 @@ const AdminUserStep: React.FC = () => {
         )}
       </Stack>
     </Box>
-  );
-};
+  )
+}
 
-export default AdminUserStep;
+export default AdminUserStep

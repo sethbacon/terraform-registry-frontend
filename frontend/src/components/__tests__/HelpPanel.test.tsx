@@ -19,7 +19,7 @@ function renderAtPath(path: string) {
   return render(
     <MemoryRouter initialEntries={[path]}>
       <HelpPanel />
-    </MemoryRouter>
+    </MemoryRouter>,
   )
 }
 

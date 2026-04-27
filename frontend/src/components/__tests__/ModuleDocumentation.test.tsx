@@ -5,9 +5,7 @@ import type { ModuleDoc } from '../../types'
 
 describe('ModuleDocumentation', () => {
   it('returns null when loading', () => {
-    const { container } = render(
-      <ModuleDocumentation moduleDocs={null} docsLoading={true} />
-    )
+    const { container } = render(<ModuleDocumentation moduleDocs={null} docsLoading={true} />)
     expect(container.innerHTML).toBe('')
   })
 
@@ -30,8 +28,20 @@ describe('ModuleDocumentation', () => {
   it('renders inputs table', () => {
     const docs: ModuleDoc = {
       inputs: [
-        { name: 'vpc_id', type: 'string', description: 'VPC ID', required: true, default: undefined },
-        { name: 'region', type: 'string', description: 'AWS region', required: false, default: 'us-east-1' },
+        {
+          name: 'vpc_id',
+          type: 'string',
+          description: 'VPC ID',
+          required: true,
+          default: undefined,
+        },
+        {
+          name: 'region',
+          type: 'string',
+          description: 'AWS region',
+          required: false,
+          default: 'us-east-1',
+        },
       ],
       outputs: [],
       providers: [],
@@ -67,9 +77,7 @@ describe('ModuleDocumentation', () => {
     const docs: ModuleDoc = {
       inputs: [],
       outputs: [],
-      providers: [
-        { name: 'aws', source: 'hashicorp/aws', version_constraints: '>= 5.0' },
-      ],
+      providers: [{ name: 'aws', source: 'hashicorp/aws', version_constraints: '>= 5.0' }],
       requirements: null,
     }
     render(<ModuleDocumentation moduleDocs={docs} docsLoading={false} />)
@@ -80,7 +88,9 @@ describe('ModuleDocumentation', () => {
 
   it('renders terraform version requirement', () => {
     const docs: ModuleDoc = {
-      inputs: [{ name: 'x', type: 'string', description: 'test', required: true, default: undefined }],
+      inputs: [
+        { name: 'x', type: 'string', description: 'test', required: true, default: undefined },
+      ],
       outputs: [],
       providers: [],
       requirements: { required_version: '>= 1.5.0' },
@@ -92,7 +102,9 @@ describe('ModuleDocumentation', () => {
 
   it('renders all sections together', () => {
     const docs: ModuleDoc = {
-      inputs: [{ name: 'name', type: 'string', description: 'Name', required: true, default: undefined }],
+      inputs: [
+        { name: 'name', type: 'string', description: 'Name', required: true, default: undefined },
+      ],
       outputs: [{ name: 'id', description: 'Resource ID', sensitive: false }],
       providers: [{ name: 'aws', source: 'hashicorp/aws', version_constraints: '~> 5.0' }],
       requirements: { required_version: '>= 1.5.0' },

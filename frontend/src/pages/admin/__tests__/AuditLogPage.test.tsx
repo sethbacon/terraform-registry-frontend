@@ -70,13 +70,13 @@ describe('AuditLogPage', () => {
   })
 
   it('shows loading spinner while fetching', () => {
-    listAuditLogsMock.mockReturnValue(new Promise(() => { }))
+    listAuditLogsMock.mockReturnValue(new Promise(() => {}))
     renderPage()
     expect(screen.getByRole('progressbar')).toBeInTheDocument()
   })
 
   it('renders heading "Audit Logs"', () => {
-    listAuditLogsMock.mockReturnValue(new Promise(() => { }))
+    listAuditLogsMock.mockReturnValue(new Promise(() => {}))
     renderPage()
     expect(screen.getByText('Audit Logs')).toBeInTheDocument()
   })
@@ -94,7 +94,7 @@ describe('AuditLogPage', () => {
   })
 
   it('shows filter controls', () => {
-    listAuditLogsMock.mockReturnValue(new Promise(() => { }))
+    listAuditLogsMock.mockReturnValue(new Promise(() => {}))
     renderPage()
     expect(screen.getByLabelText('Resource Type')).toBeInTheDocument()
     expect(screen.getByLabelText('Action')).toBeInTheDocument()
@@ -102,7 +102,7 @@ describe('AuditLogPage', () => {
   })
 
   it('shows Export button', () => {
-    listAuditLogsMock.mockReturnValue(new Promise(() => { }))
+    listAuditLogsMock.mockReturnValue(new Promise(() => {}))
     renderPage()
     expect(screen.getByText('Export')).toBeInTheDocument()
   })
@@ -114,9 +114,7 @@ describe('AuditLogPage', () => {
     })
     renderPage()
     await waitFor(() => {
-      expect(
-        screen.getByText('No audit entries match the current filters'),
-      ).toBeInTheDocument()
+      expect(screen.getByText('No audit entries match the current filters')).toBeInTheDocument()
     })
   })
 
@@ -238,9 +236,7 @@ describe('AuditLogPage', () => {
     // Wait for debounce (400ms)
     await new Promise((r) => setTimeout(r, 500))
     await waitFor(() => {
-      expect(listAuditLogsMock).toHaveBeenCalledWith(
-        expect.objectContaining({ action: 'POST' }),
-      )
+      expect(listAuditLogsMock).toHaveBeenCalledWith(expect.objectContaining({ action: 'POST' }))
     })
   })
 

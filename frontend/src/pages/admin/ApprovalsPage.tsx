@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import React, { useState } from 'react'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import {
   Box,
   Button,
@@ -21,42 +21,42 @@ import {
   MenuItem,
   FormControl,
   InputLabel,
-} from '@mui/material';
-import AddIcon from '@mui/icons-material/Add';
-import RefreshIcon from '@mui/icons-material/Refresh';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import CancelIcon from '@mui/icons-material/Cancel';
-import HourglassEmptyIcon from '@mui/icons-material/HourglassEmpty';
-import api from '../../services/api';
-import { formatDate } from '../../utils';
-import { MirrorApprovalRequest } from '../../types/rbac';
-import { getErrorMessage } from '../../utils/errors';
-import { queryKeys } from '../../services/queryKeys';
+} from '@mui/material'
+import AddIcon from '@mui/icons-material/Add'
+import RefreshIcon from '@mui/icons-material/Refresh'
+import CheckCircleIcon from '@mui/icons-material/CheckCircle'
+import CancelIcon from '@mui/icons-material/Cancel'
+import HourglassEmptyIcon from '@mui/icons-material/HourglassEmpty'
+import api from '../../services/api'
+import { formatDate } from '../../utils'
+import { MirrorApprovalRequest } from '../../types/rbac'
+import { getErrorMessage } from '../../utils/errors'
+import { queryKeys } from '../../services/queryKeys'
 
 const ApprovalsPage: React.FC = () => {
-  const queryClient = useQueryClient();
-  const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<string | null>(null);
+  const queryClient = useQueryClient()
+  const [error, setError] = useState<string | null>(null)
+  const [success, setSuccess] = useState<string | null>(null)
 
   // Create dialog state
-  const [createDialogOpen, setCreateDialogOpen] = useState(false);
+  const [createDialogOpen, setCreateDialogOpen] = useState(false)
   const [createForm, setCreateForm] = useState({
     mirror_config_id: '',
     provider_namespace: '',
     provider_name: '',
     reason: '',
-  });
+  })
 
   // Review dialog state
-  const [reviewDialogOpen, setReviewDialogOpen] = useState(false);
-  const [reviewingApproval, setReviewingApproval] = useState<MirrorApprovalRequest | null>(null);
+  const [reviewDialogOpen, setReviewDialogOpen] = useState(false)
+  const [reviewingApproval, setReviewingApproval] = useState<MirrorApprovalRequest | null>(null)
   const [reviewForm, setReviewForm] = useState<{
-    status: 'approved' | 'rejected';
-    notes: string;
-  }>({ status: 'approved', notes: '' });
+    status: 'approved' | 'rejected'
+    notes: string
+  }>({ status: 'approved', notes: '' })
 
   // Status filter
-  const [statusFilter, setStatusFilter] = useState<string>('');
+  const [statusFilter, setStatusFilter] = useState<string>('')
 
   const {
     data: approvals = [],
@@ -67,14 +67,14 @@ const ApprovalsPage: React.FC = () => {
     queryKey: queryKeys.approvals.list(statusFilter ? { status: statusFilter } : undefined),
     queryFn: async () => {
       const data = await api.listApprovalRequests(
-        statusFilter ? { status: statusFilter } : undefined
-      );
-      return Array.isArray(data) ? data : [];
+        statusFilter ? { status: statusFilter } : undefined,
+      )
+      return Array.isArray(data) ? data : []
     },
-  });
+  })
 
   if (queryError && !error) {
-    setError(getErrorMessage(queryError, 'Failed to load approval requests'));
+    setError(getErrorMessage(queryError, 'Failed to load approval requests'))
   }
 
   const createMutation = useMutation({
@@ -86,75 +86,94 @@ const ApprovalsPage: React.FC = () => {
         reason: createForm.reason || undefined,
       }),
     onSuccess: () => {
-      setCreateDialogOpen(false);
-      setCreateForm({ mirror_config_id: '', provider_namespace: '', provider_name: '', reason: '' });
-      setSuccess('Approval request created successfully');
-      setError(null);
-      queryClient.invalidateQueries({ queryKey: queryKeys.approvals._def });
+      setCreateDialogOpen(false)
+      setCreateForm({ mirror_config_id: '', provider_namespace: '', provider_name: '', reason: '' })
+      setSuccess('Approval request created successfully')
+      setError(null)
+      queryClient.invalidateQueries({ queryKey: queryKeys.approvals._def })
     },
     onError: (err: unknown) => {
-      setError(getErrorMessage(err, 'Failed to create approval request'));
+      setError(getErrorMessage(err, 'Failed to create approval request'))
     },
-  });
+  })
 
   const reviewMutation = useMutation({
-    mutationFn: ({ id, status, notes }: { id: string; status: 'approved' | 'rejected'; notes?: string }) =>
-      api.reviewApproval(id, { status, notes }),
+    mutationFn: ({
+      id,
+      status,
+      notes,
+    }: {
+      id: string
+      status: 'approved' | 'rejected'
+      notes?: string
+    }) => api.reviewApproval(id, { status, notes }),
     onSuccess: () => {
-      setReviewDialogOpen(false);
-      setSuccess(`Approval request ${reviewForm.status}`);
-      setError(null);
-      setReviewingApproval(null);
-      setReviewForm({ status: 'approved', notes: '' });
-      queryClient.invalidateQueries({ queryKey: queryKeys.approvals._def });
+      setReviewDialogOpen(false)
+      setSuccess(`Approval request ${reviewForm.status}`)
+      setError(null)
+      setReviewingApproval(null)
+      setReviewForm({ status: 'approved', notes: '' })
+      queryClient.invalidateQueries({ queryKey: queryKeys.approvals._def })
     },
     onError: (err: unknown) => {
-      setError(getErrorMessage(err, 'Failed to review approval request'));
+      setError(getErrorMessage(err, 'Failed to review approval request'))
     },
-  });
+  })
 
   const handleCreate = () => {
-    createMutation.mutate();
-  };
+    createMutation.mutate()
+  }
 
   const handleReview = () => {
-    if (!reviewingApproval) return;
+    if (!reviewingApproval) return
     reviewMutation.mutate({
       id: reviewingApproval.id,
       status: reviewForm.status,
       notes: reviewForm.notes || undefined,
-    });
-  };
+    })
+  }
 
-  const reviewing = reviewMutation.isPending;
+  const reviewing = reviewMutation.isPending
 
-  const openReviewDialog = (approval: MirrorApprovalRequest, defaultStatus: 'approved' | 'rejected') => {
-    setReviewingApproval(approval);
-    setReviewForm({ status: defaultStatus, notes: '' });
-    setReviewDialogOpen(true);
-  };
+  const openReviewDialog = (
+    approval: MirrorApprovalRequest,
+    defaultStatus: 'approved' | 'rejected',
+  ) => {
+    setReviewingApproval(approval)
+    setReviewForm({ status: defaultStatus, notes: '' })
+    setReviewDialogOpen(true)
+  }
 
   const getStatusChip = (status: string) => {
     switch (status) {
       case 'approved':
-        return <Chip label="Approved" size="small" color="success" icon={<CheckCircleIcon />} />;
+        return <Chip label="Approved" size="small" color="success" icon={<CheckCircleIcon />} />
       case 'rejected':
-        return <Chip label="Rejected" size="small" color="error" icon={<CancelIcon />} />;
+        return <Chip label="Rejected" size="small" color="error" icon={<CancelIcon />} />
       case 'pending':
       default:
-        return <Chip label="Pending" size="small" color="warning" icon={<HourglassEmptyIcon />} />;
+        return <Chip label="Pending" size="small" color="warning" icon={<HourglassEmptyIcon />} />
     }
-  };
+  }
 
   return (
     <Container maxWidth="lg" sx={{ py: 4 }} aria-busy={loading} aria-live="polite">
       {loading ? (
-        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '400px' }}>
+        <Box
+          sx={{
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            minHeight: '400px',
+          }}
+        >
           <CircularProgress />
         </Box>
       ) : (
         <>
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+          <Box
+            sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}
+          >
             <Box>
               <Typography variant="h4">Approval Requests</Typography>
               <Typography variant="body2" color="text.secondary">
@@ -178,7 +197,9 @@ const ApprovalsPage: React.FC = () => {
               <Button
                 variant="outlined"
                 startIcon={<RefreshIcon />}
-                onClick={() => { loadApprovals(); }}
+                onClick={() => {
+                  loadApprovals()
+                }}
               >
                 Refresh
               </Button>
@@ -209,7 +230,12 @@ const ApprovalsPage: React.FC = () => {
               <Grid size={{ xs: 12, md: 6 }} key={approval.id}>
                 <Card>
                   <CardContent>
-                    <Box display="flex" justifyContent="space-between" alignItems="flex-start" mb={1}>
+                    <Box
+                      display="flex"
+                      justifyContent="space-between"
+                      alignItems="flex-start"
+                      mb={1}
+                    >
                       <Typography variant="h6" sx={{ wordBreak: 'break-word', flex: 1, mr: 1 }}>
                         {approval.provider_namespace}
                         {approval.provider_name ? `/${approval.provider_name}` : ''}
@@ -299,7 +325,9 @@ const ApprovalsPage: React.FC = () => {
                   fullWidth
                   required
                   value={createForm.mirror_config_id}
-                  onChange={(e) => setCreateForm({ ...createForm, mirror_config_id: e.target.value })}
+                  onChange={(e) =>
+                    setCreateForm({ ...createForm, mirror_config_id: e.target.value })
+                  }
                   helperText="The ID of the mirror configuration to request access for"
                 />
                 <TextField
@@ -307,7 +335,9 @@ const ApprovalsPage: React.FC = () => {
                   fullWidth
                   required
                   value={createForm.provider_namespace}
-                  onChange={(e) => setCreateForm({ ...createForm, provider_namespace: e.target.value })}
+                  onChange={(e) =>
+                    setCreateForm({ ...createForm, provider_namespace: e.target.value })
+                  }
                   helperText="e.g., hashicorp"
                 />
                 <TextField
@@ -366,7 +396,10 @@ const ApprovalsPage: React.FC = () => {
                       label="Decision"
                       value={reviewForm.status}
                       onChange={(e) =>
-                        setReviewForm({ ...reviewForm, status: e.target.value as 'approved' | 'rejected' })
+                        setReviewForm({
+                          ...reviewForm,
+                          status: e.target.value as 'approved' | 'rejected',
+                        })
                       }
                     >
                       <MenuItem value="approved">Approve</MenuItem>
@@ -395,14 +428,18 @@ const ApprovalsPage: React.FC = () => {
                 onClick={handleReview}
                 disabled={reviewing}
               >
-                {reviewing ? 'Submitting...' : reviewForm.status === 'approved' ? 'Approve' : 'Reject'}
+                {reviewing
+                  ? 'Submitting...'
+                  : reviewForm.status === 'approved'
+                    ? 'Approve'
+                    : 'Reject'}
               </Button>
             </DialogActions>
           </Dialog>
         </>
       )}
     </Container>
-  );
-};
+  )
+}
 
-export default ApprovalsPage;
+export default ApprovalsPage

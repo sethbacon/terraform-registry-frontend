@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query';
+import React, { useState } from 'react'
+import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query'
 import {
   Box,
   Button,
@@ -36,43 +36,48 @@ import {
   TableRow,
   IconButton,
   Tooltip,
-} from '@mui/material';
-import StorageIcon from '@mui/icons-material/Storage';
-import CloudIcon from '@mui/icons-material/Cloud';
-import FolderIcon from '@mui/icons-material/Folder';
-import AddIcon from '@mui/icons-material/Add';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import RefreshIcon from '@mui/icons-material/Refresh';
-import InfoIcon from '@mui/icons-material/Info';
-import DeleteIcon from '@mui/icons-material/Delete';
-import PlayArrowIcon from '@mui/icons-material/PlayArrow';
-import SyncIcon from '@mui/icons-material/Sync';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import HistoryIcon from '@mui/icons-material/History';
-import api from '../../services/api';
-import { getErrorMessage } from '../../utils/errors';
-import type { StorageConfigResponse, StorageConfigInput, StorageBackendType, StorageMigration } from '../../types';
-import { queryKeys } from '../../services/queryKeys';
-import StorageMigrationWizard from '../../components/StorageMigrationWizard';
+} from '@mui/material'
+import StorageIcon from '@mui/icons-material/Storage'
+import CloudIcon from '@mui/icons-material/Cloud'
+import FolderIcon from '@mui/icons-material/Folder'
+import AddIcon from '@mui/icons-material/Add'
+import CheckCircleIcon from '@mui/icons-material/CheckCircle'
+import RefreshIcon from '@mui/icons-material/Refresh'
+import InfoIcon from '@mui/icons-material/Info'
+import DeleteIcon from '@mui/icons-material/Delete'
+import PlayArrowIcon from '@mui/icons-material/PlayArrow'
+import SyncIcon from '@mui/icons-material/Sync'
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
+import HistoryIcon from '@mui/icons-material/History'
+import api from '../../services/api'
+import { getErrorMessage } from '../../utils/errors'
+import type {
+  StorageConfigResponse,
+  StorageConfigInput,
+  StorageBackendType,
+  StorageMigration,
+} from '../../types'
+import { queryKeys } from '../../services/queryKeys'
+import StorageMigrationWizard from '../../components/StorageMigrationWizard'
 
 const StoragePage: React.FC = () => {
-  const queryClient = useQueryClient();
-  const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<string | null>(null);
-  const [saving, setSaving] = useState(false);
-  const [testing, setTesting] = useState(false);
-  const [migrationWizardOpen, setMigrationWizardOpen] = useState(false);
-  const [showAddWizard, setShowAddWizard] = useState(false);
+  const queryClient = useQueryClient()
+  const [error, setError] = useState<string | null>(null)
+  const [success, setSuccess] = useState<string | null>(null)
+  const [saving, setSaving] = useState(false)
+  const [testing, setTesting] = useState(false)
+  const [migrationWizardOpen, setMigrationWizardOpen] = useState(false)
+  const [showAddWizard, setShowAddWizard] = useState(false)
 
   // Wizard state
-  const [activeStep, setActiveStep] = useState(0);
+  const [activeStep, setActiveStep] = useState(0)
   const [formData, setFormData] = useState<StorageConfigInput>({
     backend_type: 'local',
     local_base_path: './data/storage',
     local_serve_directly: true,
-  });
+  })
 
-  const steps = ['Select Backend', 'Configure Settings', 'Review & Save'];
+  const steps = ['Select Backend', 'Configure Settings', 'Review & Save']
 
   const {
     data: storageData,
@@ -81,168 +86,168 @@ const StoragePage: React.FC = () => {
   } = useQuery({
     queryKey: [...queryKeys.storageConfigs.list(), 'withSetup'],
     queryFn: async () => {
-      const status = await api.getSetupStatus();
-      let configs: StorageConfigResponse[] = [];
+      const status = await api.getSetupStatus()
+      let configs: StorageConfigResponse[] = []
       if (!status.setup_required) {
-        const configList = await api.listStorageConfigs();
-        configs = Array.isArray(configList) ? configList : [];
+        const configList = await api.listStorageConfigs()
+        configs = Array.isArray(configList) ? configList : []
       }
-      return { setupStatus: status, configs };
+      return { setupStatus: status, configs }
     },
-  });
+  })
 
-  const setupStatus = storageData?.setupStatus ?? null;
-  const configs = storageData?.configs ?? [];
+  const setupStatus = storageData?.setupStatus ?? null
+  const configs = storageData?.configs ?? []
 
   // Migration history query
   const { data: migrations = [] } = useQuery<StorageMigration[]>({
     queryKey: queryKeys.storageMigrations.list(),
     queryFn: () => api.listStorageMigrations(),
     enabled: !storageData?.setupStatus?.setup_required && configs.length > 0,
-  });
+  })
 
   // Config action mutations
   const activateMutation = useMutation({
     mutationFn: (id: string) => api.activateStorageConfig(id),
     onSuccess: (data) => {
-      setSuccess(data.message || 'Configuration activated successfully');
-      queryClient.invalidateQueries({ queryKey: queryKeys.storageConfigs._def });
+      setSuccess(data.message || 'Configuration activated successfully')
+      queryClient.invalidateQueries({ queryKey: queryKeys.storageConfigs._def })
     },
     onError: (err) => setError(getErrorMessage(err, 'Failed to activate configuration')),
-  });
+  })
 
   const deleteMutation = useMutation({
     mutationFn: (id: string) => api.deleteStorageConfig(id),
     onSuccess: () => {
-      setSuccess('Configuration deleted successfully');
-      queryClient.invalidateQueries({ queryKey: queryKeys.storageConfigs._def });
+      setSuccess('Configuration deleted successfully')
+      queryClient.invalidateQueries({ queryKey: queryKeys.storageConfigs._def })
     },
     onError: (err) => setError(getErrorMessage(err, 'Failed to delete configuration')),
-  });
+  })
 
   const testMutation = useMutation({
     mutationFn: (config: StorageConfigResponse) => {
       // Build a StorageConfigInput from the response for testing
-      const input: StorageConfigInput = { backend_type: config.backend_type };
+      const input: StorageConfigInput = { backend_type: config.backend_type }
       if (config.backend_type === 'local') {
-        input.local_base_path = config.local_base_path;
-        input.local_serve_directly = config.local_serve_directly;
+        input.local_base_path = config.local_base_path
+        input.local_serve_directly = config.local_serve_directly
       } else if (config.backend_type === 'azure') {
-        input.azure_account_name = config.azure_account_name;
-        input.azure_container_name = config.azure_container_name;
-        input.azure_cdn_url = config.azure_cdn_url;
+        input.azure_account_name = config.azure_account_name
+        input.azure_container_name = config.azure_container_name
+        input.azure_cdn_url = config.azure_cdn_url
       } else if (config.backend_type === 's3') {
-        input.s3_bucket = config.s3_bucket;
-        input.s3_region = config.s3_region;
-        input.s3_endpoint = config.s3_endpoint;
-        input.s3_auth_method = config.s3_auth_method;
+        input.s3_bucket = config.s3_bucket
+        input.s3_region = config.s3_region
+        input.s3_endpoint = config.s3_endpoint
+        input.s3_auth_method = config.s3_auth_method
       } else if (config.backend_type === 'gcs') {
-        input.gcs_bucket = config.gcs_bucket;
-        input.gcs_project_id = config.gcs_project_id;
-        input.gcs_auth_method = config.gcs_auth_method;
-        input.gcs_endpoint = config.gcs_endpoint;
+        input.gcs_bucket = config.gcs_bucket
+        input.gcs_project_id = config.gcs_project_id
+        input.gcs_auth_method = config.gcs_auth_method
+        input.gcs_endpoint = config.gcs_endpoint
       }
-      return api.testStorageConfig(input);
+      return api.testStorageConfig(input)
     },
     onSuccess: (result) => {
       if (result.success) {
-        setSuccess('Storage configuration test passed');
+        setSuccess('Storage configuration test passed')
       } else {
-        setError(result.message || 'Storage configuration test failed');
+        setError(result.message || 'Storage configuration test failed')
       }
     },
     onError: (err) => setError(getErrorMessage(err, 'Configuration test failed')),
-  });
+  })
 
   if (queryError && !error) {
-    setError(getErrorMessage(queryError, 'Failed to load storage configuration'));
+    setError(getErrorMessage(queryError, 'Failed to load storage configuration'))
   }
 
   const handleBackendChange = (type: StorageBackendType) => {
-    const newFormData: StorageConfigInput = { backend_type: type };
+    const newFormData: StorageConfigInput = { backend_type: type }
 
     switch (type) {
       case 'local':
-        newFormData.local_base_path = './data/storage';
-        newFormData.local_serve_directly = true;
-        break;
+        newFormData.local_base_path = './data/storage'
+        newFormData.local_serve_directly = true
+        break
       case 'azure':
-        newFormData.azure_account_name = '';
-        newFormData.azure_account_key = '';
-        newFormData.azure_container_name = '';
-        break;
+        newFormData.azure_account_name = ''
+        newFormData.azure_account_key = ''
+        newFormData.azure_container_name = ''
+        break
       case 's3':
-        newFormData.s3_region = 'us-east-1';
-        newFormData.s3_bucket = '';
-        newFormData.s3_auth_method = 'default';
-        break;
+        newFormData.s3_region = 'us-east-1'
+        newFormData.s3_bucket = ''
+        newFormData.s3_auth_method = 'default'
+        break
       case 'gcs':
-        newFormData.gcs_bucket = '';
-        newFormData.gcs_auth_method = 'default';
-        break;
+        newFormData.gcs_bucket = ''
+        newFormData.gcs_auth_method = 'default'
+        break
     }
 
-    setFormData(newFormData);
-  };
+    setFormData(newFormData)
+  }
 
   const handleTestConfig = async () => {
     try {
-      setTesting(true);
-      setError(null);
-      const result = await api.testStorageConfig(formData);
+      setTesting(true)
+      setError(null)
+      const result = await api.testStorageConfig(formData)
       if (result.success) {
-        setSuccess('Storage configuration is valid!');
+        setSuccess('Storage configuration is valid!')
       }
     } catch (err: unknown) {
-      setError(getErrorMessage(err, 'Configuration test failed'));
+      setError(getErrorMessage(err, 'Configuration test failed'))
     } finally {
-      setTesting(false);
+      setTesting(false)
     }
-  };
+  }
 
   const handleSaveConfig = async () => {
     try {
-      setSaving(true);
-      setError(null);
-      await api.createStorageConfig(formData);
-      setSuccess('Storage configuration saved successfully!');
-      queryClient.invalidateQueries({ queryKey: queryKeys.storageConfigs._def });
-      setActiveStep(0);
-      setShowAddWizard(false);
+      setSaving(true)
+      setError(null)
+      await api.createStorageConfig(formData)
+      setSuccess('Storage configuration saved successfully!')
+      queryClient.invalidateQueries({ queryKey: queryKeys.storageConfigs._def })
+      setActiveStep(0)
+      setShowAddWizard(false)
     } catch (err: unknown) {
-      setError(getErrorMessage(err, 'Failed to save configuration'));
+      setError(getErrorMessage(err, 'Failed to save configuration'))
     } finally {
-      setSaving(false);
+      setSaving(false)
     }
-  };
+  }
 
   const getBackendIcon = (type: StorageBackendType) => {
     switch (type) {
       case 'local':
-        return <FolderIcon />;
+        return <FolderIcon />
       case 'azure':
       case 's3':
       case 'gcs':
-        return <CloudIcon />;
+        return <CloudIcon />
       default:
-        return <StorageIcon />;
+        return <StorageIcon />
     }
-  };
+  }
 
   const getBackendLabel = (type: StorageBackendType) => {
     switch (type) {
       case 'local':
-        return 'Local File System';
+        return 'Local File System'
       case 'azure':
-        return 'Azure Blob Storage';
+        return 'Azure Blob Storage'
       case 's3':
-        return 'Amazon S3 / S3-Compatible';
+        return 'Amazon S3 / S3-Compatible'
       case 'gcs':
-        return 'Google Cloud Storage';
+        return 'Google Cloud Storage'
       default:
-        return type;
+        return type
     }
-  };
+  }
 
   const renderBackendSelection = () => (
     <Grid container spacing={3}>
@@ -268,17 +273,21 @@ const StoragePage: React.FC = () => {
                 )}
               </Box>
               <Typography variant="body2" color="textSecondary">
-                {type === 'local' && 'Store files on the local file system. Best for development and small deployments.'}
-                {type === 'azure' && 'Use Azure Blob Storage for scalable cloud storage with Azure integration.'}
-                {type === 's3' && 'Use Amazon S3 or any S3-compatible storage (MinIO, DigitalOcean Spaces, etc.).'}
-                {type === 'gcs' && 'Use Google Cloud Storage for GCP-native storage with workload identity support.'}
+                {type === 'local' &&
+                  'Store files on the local file system. Best for development and small deployments.'}
+                {type === 'azure' &&
+                  'Use Azure Blob Storage for scalable cloud storage with Azure integration.'}
+                {type === 's3' &&
+                  'Use Amazon S3 or any S3-compatible storage (MinIO, DigitalOcean Spaces, etc.).'}
+                {type === 'gcs' &&
+                  'Use Google Cloud Storage for GCP-native storage with workload identity support.'}
               </Typography>
             </CardContent>
           </Card>
         </Grid>
       ))}
     </Grid>
-  );
+  )
 
   const renderLocalSettings = () => (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
@@ -300,7 +309,7 @@ const StoragePage: React.FC = () => {
         label="Serve files directly (recommended for local development)"
       />
     </Box>
-  );
+  )
 
   const renderAzureSettings = () => (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
@@ -337,7 +346,7 @@ const StoragePage: React.FC = () => {
         helperText="If using Azure CDN, provide the CDN endpoint URL"
       />
     </Box>
-  );
+  )
 
   const renderS3Settings = () => (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
@@ -377,7 +386,9 @@ const StoragePage: React.FC = () => {
           <MenuItem value="assume_role">AssumeRole</MenuItem>
         </Select>
         <FormHelperText>
-          default = AWS credential chain (recommended for EC2/EKS with IAM roles) · static = explicit key/secret (local dev or non-AWS S3-compatible) · oidc = web identity token (GitHub Actions, EKS pod identity) · assume_role = cross-account access
+          default = AWS credential chain (recommended for EC2/EKS with IAM roles) · static =
+          explicit key/secret (local dev or non-AWS S3-compatible) · oidc = web identity token
+          (GitHub Actions, EKS pod identity) · assume_role = cross-account access
         </FormHelperText>
       </FormControl>
 
@@ -442,7 +453,7 @@ const StoragePage: React.FC = () => {
         />
       )}
     </Box>
-  );
+  )
 
   const renderGCSSettings = () => (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
@@ -472,7 +483,8 @@ const StoragePage: React.FC = () => {
           <MenuItem value="workload_identity">Workload Identity</MenuItem>
         </Select>
         <FormHelperText>
-          default = ADC / gcloud auth (recommended for GKE) · service_account = JSON key file · workload_identity = keyless federation (GitHub Actions, GKE Workload Identity)
+          default = ADC / gcloud auth (recommended for GKE) · service_account = JSON key file ·
+          workload_identity = keyless federation (GitHub Actions, GKE Workload Identity)
         </FormHelperText>
       </FormControl>
 
@@ -505,22 +517,22 @@ const StoragePage: React.FC = () => {
         helperText="For GCS emulators or compatible services"
       />
     </Box>
-  );
+  )
 
   const renderSettingsForm = () => {
     switch (formData.backend_type) {
       case 'local':
-        return renderLocalSettings();
+        return renderLocalSettings()
       case 'azure':
-        return renderAzureSettings();
+        return renderAzureSettings()
       case 's3':
-        return renderS3Settings();
+        return renderS3Settings()
       case 'gcs':
-        return renderGCSSettings();
+        return renderGCSSettings()
       default:
-        return null;
+        return null
     }
-  };
+  }
 
   const renderReview = () => (
     <Box>
@@ -530,7 +542,9 @@ const StoragePage: React.FC = () => {
       <Paper variant="outlined" sx={{ p: 2, mb: 2 }}>
         <Grid container spacing={2}>
           <Grid size={4}>
-            <Typography variant="body2" color="textSecondary">Backend Type</Typography>
+            <Typography variant="body2" color="textSecondary">
+              Backend Type
+            </Typography>
           </Grid>
           <Grid size={8}>
             <Typography variant="body1">{getBackendLabel(formData.backend_type)}</Typography>
@@ -539,7 +553,9 @@ const StoragePage: React.FC = () => {
           {formData.backend_type === 'local' && (
             <>
               <Grid size={4}>
-                <Typography variant="body2" color="textSecondary">Base Path</Typography>
+                <Typography variant="body2" color="textSecondary">
+                  Base Path
+                </Typography>
               </Grid>
               <Grid size={8}>
                 <Typography variant="body1">{formData.local_base_path}</Typography>
@@ -550,13 +566,17 @@ const StoragePage: React.FC = () => {
           {formData.backend_type === 'azure' && (
             <>
               <Grid size={4}>
-                <Typography variant="body2" color="textSecondary">Account Name</Typography>
+                <Typography variant="body2" color="textSecondary">
+                  Account Name
+                </Typography>
               </Grid>
               <Grid size={8}>
                 <Typography variant="body1">{formData.azure_account_name}</Typography>
               </Grid>
               <Grid size={4}>
-                <Typography variant="body2" color="textSecondary">Container</Typography>
+                <Typography variant="body2" color="textSecondary">
+                  Container
+                </Typography>
               </Grid>
               <Grid size={8}>
                 <Typography variant="body1">{formData.azure_container_name}</Typography>
@@ -567,19 +587,25 @@ const StoragePage: React.FC = () => {
           {formData.backend_type === 's3' && (
             <>
               <Grid size={4}>
-                <Typography variant="body2" color="textSecondary">Bucket</Typography>
+                <Typography variant="body2" color="textSecondary">
+                  Bucket
+                </Typography>
               </Grid>
               <Grid size={8}>
                 <Typography variant="body1">{formData.s3_bucket}</Typography>
               </Grid>
               <Grid size={4}>
-                <Typography variant="body2" color="textSecondary">Region</Typography>
+                <Typography variant="body2" color="textSecondary">
+                  Region
+                </Typography>
               </Grid>
               <Grid size={8}>
                 <Typography variant="body1">{formData.s3_region}</Typography>
               </Grid>
               <Grid size={4}>
-                <Typography variant="body2" color="textSecondary">Auth Method</Typography>
+                <Typography variant="body2" color="textSecondary">
+                  Auth Method
+                </Typography>
               </Grid>
               <Grid size={8}>
                 <Typography variant="body1">{formData.s3_auth_method || 'default'}</Typography>
@@ -590,13 +616,17 @@ const StoragePage: React.FC = () => {
           {formData.backend_type === 'gcs' && (
             <>
               <Grid size={4}>
-                <Typography variant="body2" color="textSecondary">Bucket</Typography>
+                <Typography variant="body2" color="textSecondary">
+                  Bucket
+                </Typography>
               </Grid>
               <Grid size={8}>
                 <Typography variant="body1">{formData.gcs_bucket}</Typography>
               </Grid>
               <Grid size={4}>
-                <Typography variant="body2" color="textSecondary">Auth Method</Typography>
+                <Typography variant="body2" color="textSecondary">
+                  Auth Method
+                </Typography>
               </Grid>
               <Grid size={8}>
                 <Typography variant="body1">{formData.gcs_auth_method || 'default'}</Typography>
@@ -617,7 +647,7 @@ const StoragePage: React.FC = () => {
         </Button>
       </Box>
     </Box>
-  );
+  )
 
   const renderSetupWizard = () => (
     <Container maxWidth="lg" sx={{ py: 4 }}>
@@ -658,14 +688,16 @@ const StoragePage: React.FC = () => {
 
       <Box display="flex" justifyContent="space-between">
         <Box sx={{ display: 'flex', gap: 1 }}>
-          <Button
-            disabled={activeStep === 0}
-            onClick={() => setActiveStep((prev) => prev - 1)}
-          >
+          <Button disabled={activeStep === 0} onClick={() => setActiveStep((prev) => prev - 1)}>
             Back
           </Button>
           {showAddWizard && (
-            <Button onClick={() => { setShowAddWizard(false); setActiveStep(0); }}>
+            <Button
+              onClick={() => {
+                setShowAddWizard(false)
+                setActiveStep(0)
+              }}
+            >
               Cancel
             </Button>
           )}
@@ -681,17 +713,14 @@ const StoragePage: React.FC = () => {
               Save Configuration
             </Button>
           ) : (
-            <Button
-              variant="contained"
-              onClick={() => setActiveStep((prev) => prev + 1)}
-            >
+            <Button variant="contained" onClick={() => setActiveStep((prev) => prev + 1)}>
               Next
             </Button>
           )}
         </Box>
       </Box>
     </Container>
-  );
+  )
 
   const renderExistingConfigs = () => (
     <Container maxWidth="lg" sx={{ py: 4 }}>
@@ -712,7 +741,10 @@ const StoragePage: React.FC = () => {
             <Button
               variant="outlined"
               startIcon={<AddIcon />}
-              onClick={() => { setActiveStep(0); setShowAddWizard(true); }}
+              onClick={() => {
+                setActiveStep(0)
+                setShowAddWizard(true)
+              }}
             >
               Add Configuration
             </Button>
@@ -720,7 +752,9 @@ const StoragePage: React.FC = () => {
           <Button
             variant="outlined"
             startIcon={<RefreshIcon />}
-            onClick={() => queryClient.invalidateQueries({ queryKey: queryKeys.storageConfigs._def })}
+            onClick={() =>
+              queryClient.invalidateQueries({ queryKey: queryKeys.storageConfigs._def })
+            }
           >
             Refresh
           </Button>
@@ -742,15 +776,16 @@ const StoragePage: React.FC = () => {
       <Alert severity="info" sx={{ mb: 3 }}>
         <Box display="flex" alignItems="center">
           <InfoIcon sx={{ mr: 1 }} />
-          Storage has been configured. Changing storage backends after initial setup may result in data loss.
-          Create a new configuration and activate it only after migrating existing data.
+          Storage has been configured. Changing storage backends after initial setup may result in
+          data loss. Create a new configuration and activate it only after migrating existing data.
         </Box>
       </Alert>
 
       {configs.length === 1 && (
         <Alert severity="info" sx={{ mb: 3 }} icon={<SyncIcon />}>
-          To migrate data to a different storage backend, click <strong>Add Configuration</strong> above
-          to configure a second backend. A migration option will appear once a second configuration exists.
+          To migrate data to a different storage backend, click <strong>Add Configuration</strong>{' '}
+          above to configure a second backend. A migration option will appear once a second
+          configuration exists.
         </Alert>
       )}
 
@@ -849,8 +884,12 @@ const StoragePage: React.FC = () => {
                       size="small"
                       color="error"
                       onClick={() => {
-                        if (window.confirm('Are you sure you want to delete this storage configuration?')) {
-                          deleteMutation.mutate(config.id);
+                        if (
+                          window.confirm(
+                            'Are you sure you want to delete this storage configuration?',
+                          )
+                        ) {
+                          deleteMutation.mutate(config.id)
                         }
                       }}
                       disabled={deleteMutation.isPending}
@@ -891,8 +930,8 @@ const StoragePage: React.FC = () => {
                 </TableHead>
                 <TableBody>
                   {migrations.map((m) => {
-                    const src = configs.find((c) => c.id === m.source_config_id);
-                    const tgt = configs.find((c) => c.id === m.target_config_id);
+                    const src = configs.find((c) => c.id === m.source_config_id)
+                    const tgt = configs.find((c) => c.id === m.target_config_id)
                     return (
                       <TableRow key={m.id}>
                         <TableCell>
@@ -927,7 +966,7 @@ const StoragePage: React.FC = () => {
                           {m.completed_at ? new Date(m.completed_at).toLocaleString() : '-'}
                         </TableCell>
                       </TableRow>
-                    );
+                    )
                   })}
                 </TableBody>
               </Table>
@@ -943,19 +982,28 @@ const StoragePage: React.FC = () => {
         configs={configs}
       />
     </Container>
-  );
+  )
 
   return (
     <Box aria-busy={loading} aria-live="polite">
       {loading ? (
-        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '400px' }}>
+        <Box
+          sx={{
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            minHeight: '400px',
+          }}
+        >
           <CircularProgress />
         </Box>
+      ) : setupStatus?.setup_required || showAddWizard ? (
+        renderSetupWizard()
       ) : (
-        setupStatus?.setup_required || showAddWizard ? renderSetupWizard() : renderExistingConfigs()
+        renderExistingConfigs()
       )}
     </Box>
-  );
-};
+  )
+}
 
-export default StoragePage;
+export default StoragePage

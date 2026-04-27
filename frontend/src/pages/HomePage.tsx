@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { useTranslation } from 'react-i18next';
+import React, { useState, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import {
   Container,
   Typography,
@@ -22,31 +22,31 @@ import {
   ToggleButtonGroup,
   useMediaQuery,
   useTheme,
-} from '@mui/material';
-import ExtensionIcon from '@mui/icons-material/Extension';
-import CloudUploadIcon from '@mui/icons-material/CloudUpload';
-import SearchIcon from '@mui/icons-material/Search';
-import GetAppIcon from '@mui/icons-material/GetApp';
-import ContentCopyIcon from '@mui/icons-material/ContentCopy';
-import WarningAmberIcon from '@mui/icons-material/WarningAmber';
-import MenuBookIcon from '@mui/icons-material/MenuBook';
-import VpnKeyIcon from '@mui/icons-material/VpnKey';
-import LoginIcon from '@mui/icons-material/Login';
-import { useNavigate, Link as RouterLink } from 'react-router-dom';
-import api from '../services/api';
-import { useAuth } from '../contexts/AuthContext';
-import { useAnnouncer } from '../contexts/AnnouncerContext';
-import QuickApiKeyDialog from '../components/QuickApiKeyDialog';
+} from '@mui/material'
+import ExtensionIcon from '@mui/icons-material/Extension'
+import CloudUploadIcon from '@mui/icons-material/CloudUpload'
+import SearchIcon from '@mui/icons-material/Search'
+import GetAppIcon from '@mui/icons-material/GetApp'
+import ContentCopyIcon from '@mui/icons-material/ContentCopy'
+import WarningAmberIcon from '@mui/icons-material/WarningAmber'
+import MenuBookIcon from '@mui/icons-material/MenuBook'
+import VpnKeyIcon from '@mui/icons-material/VpnKey'
+import LoginIcon from '@mui/icons-material/Login'
+import { useNavigate, Link as RouterLink } from 'react-router-dom'
+import api from '../services/api'
+import { useAuth } from '../contexts/AuthContext'
+import { useAnnouncer } from '../contexts/AnnouncerContext'
+import QuickApiKeyDialog from '../components/QuickApiKeyDialog'
 
 interface HomeStats {
-  setupRequired: boolean;
-  pendingFeatureSetup: boolean;
-  moduleCount: number | null;
-  moduleNames: { namespace: string; name: string; system: string }[];
-  providerCount: number | null;
-  providerNames: { namespace: string; type: string }[];
-  binaryTools: string[];
-  loading: boolean;
+  setupRequired: boolean
+  pendingFeatureSetup: boolean
+  moduleCount: number | null
+  moduleNames: { namespace: string; name: string; system: string }[]
+  providerCount: number | null
+  providerNames: { namespace: string; type: string }[]
+  binaryTools: string[]
+  loading: boolean
 }
 
 const initialStats: HomeStats = {
@@ -58,38 +58,41 @@ const initialStats: HomeStats = {
   providerNames: [],
   binaryTools: [],
   loading: true,
-};
+}
 
 const HomePage: React.FC = () => {
-  const { t } = useTranslation();
-  const navigate = useNavigate();
-  const theme = useTheme();
-  const isXs = useMediaQuery(theme.breakpoints.down('sm'));
-  const { isAuthenticated } = useAuth();
-  const { announce } = useAnnouncer();
-  const [stats, setStats] = useState<HomeStats>(initialStats);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [searchType, setSearchType] = useState<'modules' | 'providers'>('modules');
-  const [copied, setCopied] = useState(false);
-  const [quickKeyOpen, setQuickKeyOpen] = useState(false);
-  const [primaryOrgId, setPrimaryOrgId] = useState<string | null>(null);
+  const { t } = useTranslation()
+  const navigate = useNavigate()
+  const theme = useTheme()
+  const isXs = useMediaQuery(theme.breakpoints.down('sm'))
+  const { isAuthenticated } = useAuth()
+  const { announce } = useAnnouncer()
+  const [stats, setStats] = useState<HomeStats>(initialStats)
+  const [searchQuery, setSearchQuery] = useState('')
+  const [searchType, setSearchType] = useState<'modules' | 'providers'>('modules')
+  const [copied, setCopied] = useState(false)
+  const [quickKeyOpen, setQuickKeyOpen] = useState(false)
+  const [primaryOrgId, setPrimaryOrgId] = useState<string | null>(null)
 
   useEffect(() => {
     if (!isAuthenticated) {
-      setPrimaryOrgId(null);
-      return;
+      setPrimaryOrgId(null)
+      return
     }
-    let cancelled = false;
-    api.getCurrentUserMemberships()
+    let cancelled = false
+    api
+      .getCurrentUserMemberships()
       .then((memberships: Array<{ organization_id: string }>) => {
-        if (cancelled) return;
-        setPrimaryOrgId(memberships?.[0]?.organization_id ?? null);
+        if (cancelled) return
+        setPrimaryOrgId(memberships?.[0]?.organization_id ?? null)
       })
       .catch(() => {
-        if (!cancelled) setPrimaryOrgId(null);
-      });
-    return () => { cancelled = true; };
-  }, [isAuthenticated]);
+        if (!cancelled) setPrimaryOrgId(null)
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [isAuthenticated])
 
   useEffect(() => {
     Promise.allSettled([
@@ -101,68 +104,79 @@ const HomePage: React.FC = () => {
       setStats({
         loading: false,
         setupRequired: setup.status === 'fulfilled' ? (setup.value.setup_required ?? false) : false,
-        pendingFeatureSetup: setup.status === 'fulfilled' ? (setup.value.pending_feature_setup ?? false) : false,
+        pendingFeatureSetup:
+          setup.status === 'fulfilled' ? (setup.value.pending_feature_setup ?? false) : false,
         moduleCount: mods.status === 'fulfilled' ? (mods.value.meta?.total ?? null) : null,
         moduleNames: mods.status === 'fulfilled' ? (mods.value.modules ?? []).slice(0, 3) : [],
         providerCount: provs.status === 'fulfilled' ? (provs.value.meta?.total ?? null) : null,
-        providerNames: provs.status === 'fulfilled' ? (provs.value.providers ?? []).slice(0, 3) : [],
-        binaryTools: bins.status === 'fulfilled'
-          ? [...new Set((bins.value as { tool: string }[]).map((b) => b.tool))]
-          : [],
-      });
-    });
-  }, []);
+        providerNames:
+          provs.status === 'fulfilled' ? (provs.value.providers ?? []).slice(0, 3) : [],
+        binaryTools:
+          bins.status === 'fulfilled'
+            ? [...new Set((bins.value as { tool: string }[]).map((b) => b.tool))]
+            : [],
+      })
+    })
+  }, [])
 
   const handleSearch = () => {
-    const q = searchQuery.trim();
+    const q = searchQuery.trim()
     if (q) {
-      navigate(`/${searchType}?q=${encodeURIComponent(q)}`);
+      navigate(`/${searchType}?q=${encodeURIComponent(q)}`)
     } else {
-      navigate(`/${searchType}`);
+      navigate(`/${searchType}`)
     }
-  };
+  }
 
   const handleSearchKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') handleSearch();
-  };
+    if (e.key === 'Enter') handleSearch()
+  }
 
   const handleCopyCredentials = () => {
-    const snippet = `credentials "${window.location.hostname}" {\n  token = "<your-api-key>"\n}`;
+    const snippet = `credentials "${window.location.hostname}" {\n  token = "<your-api-key>"\n}`
     navigator.clipboard.writeText(snippet).then(() => {
-      setCopied(true);
-      announce(t('home.credentialsCopied'));
-      setTimeout(() => setCopied(false), 2000);
-    });
-  };
+      setCopied(true)
+      announce(t('home.credentialsCopied'))
+      setTimeout(() => setCopied(false), 2000)
+    })
+  }
 
   // Build hero summary line
-  const summaryParts: string[] = [];
-  if (stats.moduleCount !== null) summaryParts.push(`${stats.moduleCount} module${stats.moduleCount !== 1 ? 's' : ''}`);
-  if (stats.providerCount !== null) summaryParts.push(`${stats.providerCount} provider${stats.providerCount !== 1 ? 's' : ''}`);
+  const summaryParts: string[] = []
+  if (stats.moduleCount !== null)
+    summaryParts.push(`${stats.moduleCount} module${stats.moduleCount !== 1 ? 's' : ''}`)
+  if (stats.providerCount !== null)
+    summaryParts.push(`${stats.providerCount} provider${stats.providerCount !== 1 ? 's' : ''}`)
   if (stats.binaryTools.length > 0) {
-    const toolLabel = stats.binaryTools.map((tool) => tool.charAt(0).toUpperCase() + tool.slice(1)).join(' & ');
-    summaryParts.push(`${toolLabel} binaries`);
+    const toolLabel = stats.binaryTools
+      .map((tool) => tool.charAt(0).toUpperCase() + tool.slice(1))
+      .join(' & ')
+    summaryParts.push(`${toolLabel} binaries`)
   }
 
   return (
     <Box>
-
       {/* Setup banner — only shown when setup is required */}
       {stats.setupRequired && (
         <Alert
           severity="warning"
           icon={<WarningAmberIcon />}
           action={
-            <Button color="inherit" size="small" onClick={() => navigate('/setup')} sx={{ fontWeight: 600 }}>
+            <Button
+              color="inherit"
+              size="small"
+              onClick={() => navigate('/setup')}
+              sx={{ fontWeight: 600 }}
+            >
               {stats.pendingFeatureSetup ? t('home.configureFeatures') : t('home.startSetup')}
             </Button>
           }
           sx={{ borderRadius: 0 }}
         >
-          <AlertTitle>{stats.pendingFeatureSetup ? t('home.featureSetupRequired') : t('home.setupRequired')}</AlertTitle>
-          {stats.pendingFeatureSetup
-            ? t('home.featureSetupDesc')
-            : t('home.setupRequiredDesc')}
+          <AlertTitle>
+            {stats.pendingFeatureSetup ? t('home.featureSetupRequired') : t('home.setupRequired')}
+          </AlertTitle>
+          {stats.pendingFeatureSetup ? t('home.featureSetupDesc') : t('home.setupRequiredDesc')}
         </Alert>
       )}
 
@@ -250,7 +264,9 @@ const HomePage: React.FC = () => {
             size="small"
             exclusive
             value={searchType}
-            onChange={(_e, val) => { if (val) setSearchType(val); }}
+            onChange={(_e, val) => {
+              if (val) setSearchType(val)
+            }}
             aria-label="Search scope"
             data-testid="quick-search-toggle"
             sx={{ alignSelf: isXs ? 'center' : 'auto', flexShrink: 0 }}
@@ -289,10 +305,17 @@ const HomePage: React.FC = () => {
           {t('home.whatsAvailable')}
         </Typography>
         <Grid container spacing={3}>
-
           {/* Modules */}
           <Grid size={{ xs: 12, md: 4 }}>
-            <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column', transition: 'transform 0.2s', '&:hover': { transform: 'translateY(-4px)' } }}>
+            <Card
+              sx={{
+                height: '100%',
+                display: 'flex',
+                flexDirection: 'column',
+                transition: 'transform 0.2s',
+                '&:hover': { transform: 'translateY(-4px)' },
+              }}
+            >
               <CardContent sx={{ flexGrow: 1 }}>
                 <Box sx={{ color: '#5C4EE5', mb: 2 }}>
                   <ExtensionIcon sx={{ fontSize: 40 }} />
@@ -300,7 +323,12 @@ const HomePage: React.FC = () => {
                 <Typography variant="h6" gutterBottom>
                   {t('nav.modules')}
                   {stats.moduleCount !== null && (
-                    <Typography component="span" variant="body2" color="text.secondary" sx={{ ml: 1 }}>
+                    <Typography
+                      component="span"
+                      variant="body2"
+                      color="text.secondary"
+                      sx={{ ml: 1 }}
+                    >
                       ({stats.moduleCount})
                     </Typography>
                   )}
@@ -309,20 +337,24 @@ const HomePage: React.FC = () => {
                   {t('home.modulesDescription')}
                 </Typography>
                 <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.75, minHeight: 32 }}>
-                  {stats.loading ? (
-                    [1, 2, 3].map((i) => <Skeleton key={i} variant="rounded" width={80} height={24} />)
-                  ) : stats.moduleNames.length > 0 ? (
-                    stats.moduleNames.map((m) => (
-                      <Chip
-                        key={`${m.namespace}/${m.name}/${m.system}`}
-                        label={`${m.namespace}/${m.name}`}
-                        size="small"
-                        clickable
-                        onClick={() => navigate(`/modules/${m.namespace}/${m.name}/${m.system}`)}
-                        sx={{ fontFamily: 'monospace', fontSize: '0.7rem' }}
-                      />
-                    ))
-                  ) : null}
+                  {stats.loading
+                    ? [1, 2, 3].map((i) => (
+                        <Skeleton key={i} variant="rounded" width={80} height={24} />
+                      ))
+                    : stats.moduleNames.length > 0
+                      ? stats.moduleNames.map((m) => (
+                          <Chip
+                            key={`${m.namespace}/${m.name}/${m.system}`}
+                            label={`${m.namespace}/${m.name}`}
+                            size="small"
+                            clickable
+                            onClick={() =>
+                              navigate(`/modules/${m.namespace}/${m.name}/${m.system}`)
+                            }
+                            sx={{ fontFamily: 'monospace', fontSize: '0.7rem' }}
+                          />
+                        ))
+                      : null}
                 </Box>
               </CardContent>
               <CardActions>
@@ -335,7 +367,15 @@ const HomePage: React.FC = () => {
 
           {/* Providers */}
           <Grid size={{ xs: 12, md: 4 }}>
-            <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column', transition: 'transform 0.2s', '&:hover': { transform: 'translateY(-4px)' } }}>
+            <Card
+              sx={{
+                height: '100%',
+                display: 'flex',
+                flexDirection: 'column',
+                transition: 'transform 0.2s',
+                '&:hover': { transform: 'translateY(-4px)' },
+              }}
+            >
               <CardContent sx={{ flexGrow: 1 }}>
                 <Box sx={{ color: 'secondary.main', mb: 2 }}>
                   <CloudUploadIcon sx={{ fontSize: 40 }} />
@@ -343,7 +383,12 @@ const HomePage: React.FC = () => {
                 <Typography variant="h6" gutterBottom>
                   {t('nav.providers')}
                   {stats.providerCount !== null && (
-                    <Typography component="span" variant="body2" color="text.secondary" sx={{ ml: 1 }}>
+                    <Typography
+                      component="span"
+                      variant="body2"
+                      color="text.secondary"
+                      sx={{ ml: 1 }}
+                    >
                       ({stats.providerCount})
                     </Typography>
                   )}
@@ -352,20 +397,22 @@ const HomePage: React.FC = () => {
                   {t('home.providersDescription')}
                 </Typography>
                 <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.75, minHeight: 32 }}>
-                  {stats.loading ? (
-                    [1, 2, 3].map((i) => <Skeleton key={i} variant="rounded" width={80} height={24} />)
-                  ) : stats.providerNames.length > 0 ? (
-                    stats.providerNames.map((p) => (
-                      <Chip
-                        key={`${p.namespace}/${p.type}`}
-                        label={`${p.namespace}/${p.type}`}
-                        size="small"
-                        clickable
-                        onClick={() => navigate(`/providers/${p.namespace}/${p.type}`)}
-                        sx={{ fontFamily: 'monospace', fontSize: '0.7rem' }}
-                      />
-                    ))
-                  ) : null}
+                  {stats.loading
+                    ? [1, 2, 3].map((i) => (
+                        <Skeleton key={i} variant="rounded" width={80} height={24} />
+                      ))
+                    : stats.providerNames.length > 0
+                      ? stats.providerNames.map((p) => (
+                          <Chip
+                            key={`${p.namespace}/${p.type}`}
+                            label={`${p.namespace}/${p.type}`}
+                            size="small"
+                            clickable
+                            onClick={() => navigate(`/providers/${p.namespace}/${p.type}`)}
+                            sx={{ fontFamily: 'monospace', fontSize: '0.7rem' }}
+                          />
+                        ))
+                      : null}
                 </Box>
               </CardContent>
               <CardActions>
@@ -378,7 +425,15 @@ const HomePage: React.FC = () => {
 
           {/* Terraform Binaries */}
           <Grid size={{ xs: 12, md: 4 }}>
-            <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column', transition: 'transform 0.2s', '&:hover': { transform: 'translateY(-4px)' } }}>
+            <Card
+              sx={{
+                height: '100%',
+                display: 'flex',
+                flexDirection: 'column',
+                transition: 'transform 0.2s',
+                '&:hover': { transform: 'translateY(-4px)' },
+              }}
+            >
               <CardContent sx={{ flexGrow: 1 }}>
                 <Box sx={{ color: 'error.main', mb: 2 }}>
                   <GetAppIcon sx={{ fontSize: 40 }} />
@@ -398,7 +453,13 @@ const HomePage: React.FC = () => {
                         key={tool}
                         label={tool}
                         size="small"
-                        color={tool === 'terraform' ? 'primary' : tool === 'opentofu' ? 'secondary' : 'default'}
+                        color={
+                          tool === 'terraform'
+                            ? 'primary'
+                            : tool === 'opentofu'
+                              ? 'secondary'
+                              : 'default'
+                        }
                         variant="outlined"
                       />
                     ))
@@ -416,12 +477,16 @@ const HomePage: React.FC = () => {
               </CardActions>
             </Card>
           </Grid>
-
         </Grid>
       </Container>
 
       {/* Getting Started */}
-      <Box sx={{ backgroundColor: (theme) => theme.palette.mode === 'dark' ? '#1a1a1a' : '#f5f5f5', py: 6 }}>
+      <Box
+        sx={{
+          backgroundColor: (theme) => (theme.palette.mode === 'dark' ? '#1a1a1a' : '#f5f5f5'),
+          py: 6,
+        }}
+      >
         <Container maxWidth="lg">
           <Typography variant="h4" fontWeight={600} gutterBottom sx={{ mb: 4 }}>
             {t('home.gettingStarted')}
@@ -446,9 +511,7 @@ const HomePage: React.FC = () => {
                     {t('home.step2Title')}
                   </Typography>
                   <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }}>
-                    {isAuthenticated
-                      ? t('home.step2DescAuth')
-                      : t('home.step2DescUnauth')}
+                    {isAuthenticated ? t('home.step2DescAuth') : t('home.step2DescUnauth')}
                   </Typography>
 
                   {!isAuthenticated ? (
@@ -472,7 +535,14 @@ const HomePage: React.FC = () => {
                       >
                         <Box
                           component="pre"
-                          sx={{ m: 0, p: 1.5, fontSize: '0.75rem', lineHeight: 1.6, overflowX: 'auto', color: 'text.secondary' }}
+                          sx={{
+                            m: 0,
+                            p: 1.5,
+                            fontSize: '0.75rem',
+                            lineHeight: 1.6,
+                            overflowX: 'auto',
+                            color: 'text.secondary',
+                          }}
                         >
                           {`credentials "${window.location.hostname}" {\n  token = "<your-api-key>"\n}`}
                         </Box>
@@ -521,12 +591,21 @@ const HomePage: React.FC = () => {
                         >
                           {`credentials "${window.location.hostname}" {\n  token = "<your-api-key>"\n}`}
                         </Box>
-                        <Tooltip title={copied ? t('home.copied') : t('home.copyToClipboard')} placement="top">
+                        <Tooltip
+                          title={copied ? t('home.copied') : t('home.copyToClipboard')}
+                          placement="top"
+                        >
                           <IconButton
                             size="small"
                             aria-label={t('home.copyUsageExample')}
                             onClick={handleCopyCredentials}
-                            sx={{ position: 'absolute', top: 4, right: 4, opacity: 0.6, '&:hover': { opacity: 1 } }}
+                            sx={{
+                              position: 'absolute',
+                              top: 4,
+                              right: 4,
+                              opacity: 0.6,
+                              '&:hover': { opacity: 1 },
+                            }}
                           >
                             <ContentCopyIcon fontSize="small" />
                           </IconButton>
@@ -582,9 +661,8 @@ const HomePage: React.FC = () => {
         organizationId={primaryOrgId}
         hostname={typeof window !== 'undefined' ? window.location.hostname : ''}
       />
-
     </Box>
-  );
-};
+  )
+}
 
-export default HomePage;
+export default HomePage

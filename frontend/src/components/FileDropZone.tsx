@@ -1,37 +1,37 @@
-import React, { useCallback, useRef, useState } from 'react';
-import { Box, Button, Stack, Typography, Alert } from '@mui/material';
-import CloudUpload from '@mui/icons-material/CloudUpload';
-import InsertDriveFileIcon from '@mui/icons-material/InsertDriveFile';
+import React, { useCallback, useRef, useState } from 'react'
+import { Box, Button, Stack, Typography, Alert } from '@mui/material'
+import CloudUpload from '@mui/icons-material/CloudUpload'
+import InsertDriveFileIcon from '@mui/icons-material/InsertDriveFile'
 
-export const HARD_MAX_BYTES = 100 * 1024 * 1024; // 100MB (backend limit)
-export const SOFT_WARN_BYTES = 50 * 1024 * 1024; // 50MB
+export const HARD_MAX_BYTES = 100 * 1024 * 1024 // 100MB (backend limit)
+export const SOFT_WARN_BYTES = 50 * 1024 * 1024 // 50MB
 
 export interface FileDropZoneProps {
   /** Currently selected file (controlled). */
-  file: File | null;
+  file: File | null
   /** Called when a valid file is selected. Invalid files invoke onError instead. */
-  onFileSelected: (file: File) => void;
+  onFileSelected: (file: File) => void
   /** Allowed extensions, leading dot required (e.g. ['.tar.gz', '.tgz']). */
-  acceptedExtensions: string[];
+  acceptedExtensions: string[]
   /** Optional callback fired on clear. */
-  onClear?: () => void;
+  onClear?: () => void
   /** Disables interaction (e.g., during upload). */
-  disabled?: boolean;
+  disabled?: boolean
   /** Visual label on idle state. Defaults to 'Drop file here or click to browse'. */
-  idlePrompt?: string;
+  idlePrompt?: string
   /** Test id for the outer drop zone element. */
-  'data-testid'?: string;
+  'data-testid'?: string
 }
 
 function formatBytes(bytes: number): string {
-  if (bytes < 1024) return `${bytes} B`;
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+  if (bytes < 1024) return `${bytes} B`
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
 }
 
 function matchesExtension(name: string, allowed: string[]): boolean {
-  const lower = name.toLowerCase();
-  return allowed.some((ext) => lower.endsWith(ext.toLowerCase()));
+  const lower = name.toLowerCase()
+  return allowed.some((ext) => lower.endsWith(ext.toLowerCase()))
 }
 
 const FileDropZone: React.FC<FileDropZoneProps> = ({
@@ -43,85 +43,81 @@ const FileDropZone: React.FC<FileDropZoneProps> = ({
   idlePrompt,
   'data-testid': testId = 'file-drop-zone',
 }) => {
-  const [dragOver, setDragOver] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [warning, setWarning] = useState<string | null>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
+  const [dragOver, setDragOver] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [warning, setWarning] = useState<string | null>(null)
+  const inputRef = useRef<HTMLInputElement>(null)
 
   const validateAndSelect = useCallback(
     (candidate: File) => {
-      setError(null);
-      setWarning(null);
+      setError(null)
+      setWarning(null)
       if (!matchesExtension(candidate.name, acceptedExtensions)) {
-        setError(
-          `Invalid file type. Expected ${acceptedExtensions.join(' or ')}.`,
-        );
-        return;
+        setError(`Invalid file type. Expected ${acceptedExtensions.join(' or ')}.`)
+        return
       }
       if (candidate.size > HARD_MAX_BYTES) {
         setError(
           `File is too large (${formatBytes(candidate.size)}). Maximum allowed size is ${formatBytes(HARD_MAX_BYTES)}.`,
-        );
-        return;
+        )
+        return
       }
       if (candidate.size > SOFT_WARN_BYTES) {
-        setWarning(
-          `Large file (${formatBytes(candidate.size)}). Uploads may take a while.`,
-        );
+        setWarning(`Large file (${formatBytes(candidate.size)}). Uploads may take a while.`)
       }
-      onFileSelected(candidate);
+      onFileSelected(candidate)
     },
     [acceptedExtensions, onFileSelected],
-  );
+  )
 
   const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setDragOver(false);
-    if (disabled) return;
-    const dropped = e.dataTransfer.files?.[0];
-    if (dropped) validateAndSelect(dropped);
-  };
+    e.preventDefault()
+    e.stopPropagation()
+    setDragOver(false)
+    if (disabled) return
+    const dropped = e.dataTransfer.files?.[0]
+    if (dropped) validateAndSelect(dropped)
+  }
 
   const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    e.stopPropagation();
-    if (!disabled) setDragOver(true);
-  };
+    e.preventDefault()
+    e.stopPropagation()
+    if (!disabled) setDragOver(true)
+  }
 
   const handleDragLeave = (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setDragOver(false);
-  };
+    e.preventDefault()
+    e.stopPropagation()
+    setDragOver(false)
+  }
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const picked = e.target.files?.[0];
-    if (picked) validateAndSelect(picked);
+    const picked = e.target.files?.[0]
+    if (picked) validateAndSelect(picked)
     // Allow re-selecting the same file later
-    e.target.value = '';
-  };
+    e.target.value = ''
+  }
 
   const handleClick = () => {
-    if (!disabled) inputRef.current?.click();
-  };
+    if (!disabled) inputRef.current?.click()
+  }
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
-    if (disabled) return;
+    if (disabled) return
     if (e.key === 'Enter' || e.key === ' ') {
-      e.preventDefault();
-      inputRef.current?.click();
+      e.preventDefault()
+      inputRef.current?.click()
     }
-  };
+  }
 
   const handleReplace = () => {
-    setError(null);
-    setWarning(null);
-    onClear?.();
-    if (!disabled) inputRef.current?.click();
-  };
+    setError(null)
+    setWarning(null)
+    onClear?.()
+    if (!disabled) inputRef.current?.click()
+  }
 
-  const prompt = idlePrompt ?? `Drop ${acceptedExtensions.join(' / ')} file here or click to browse`;
+  const prompt = idlePrompt ?? `Drop ${acceptedExtensions.join(' / ')} file here or click to browse`
 
   return (
     <Stack spacing={1}>
@@ -202,7 +198,7 @@ const FileDropZone: React.FC<FileDropZoneProps> = ({
         </Alert>
       )}
     </Stack>
-  );
-};
+  )
+}
 
-export default FileDropZone;
+export default FileDropZone

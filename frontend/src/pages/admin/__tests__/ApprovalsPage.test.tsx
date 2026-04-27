@@ -78,7 +78,7 @@ describe('ApprovalsPage', () => {
       expect(screen.getByText('Approval Requests')).toBeInTheDocument()
     })
     expect(
-      screen.getByText('Review and manage mirror provider approval requests')
+      screen.getByText('Review and manage mirror provider approval requests'),
     ).toBeInTheDocument()
   })
 
@@ -215,7 +215,12 @@ describe('ApprovalsPage', () => {
     await waitFor(() => expect(screen.getByRole('dialog')).toBeInTheDocument())
     const dialogBtns = screen.getAllByRole('button', { name: /^approve$/i })
     await user.click(dialogBtns[dialogBtns.length - 1])
-    await waitFor(() => expect(reviewApprovalMock).toHaveBeenCalledWith('apr-1', expect.objectContaining({ status: 'approved' })))
+    await waitFor(() =>
+      expect(reviewApprovalMock).toHaveBeenCalledWith(
+        'apr-1',
+        expect.objectContaining({ status: 'approved' }),
+      ),
+    )
   })
 
   it('opens review dialog and rejects a pending request', async () => {
@@ -228,7 +233,12 @@ describe('ApprovalsPage', () => {
     await waitFor(() => expect(screen.getByRole('dialog')).toBeInTheDocument())
     const dialogBtns = screen.getAllByRole('button', { name: /^reject$/i })
     await user.click(dialogBtns[dialogBtns.length - 1])
-    await waitFor(() => expect(reviewApprovalMock).toHaveBeenCalledWith('apr-1', expect.objectContaining({ status: 'rejected' })))
+    await waitFor(() =>
+      expect(reviewApprovalMock).toHaveBeenCalledWith(
+        'apr-1',
+        expect.objectContaining({ status: 'rejected' }),
+      ),
+    )
   })
 
   it('cancels create dialog', async () => {
@@ -239,7 +249,9 @@ describe('ApprovalsPage', () => {
     await user.click(screen.getByText('Create Request'))
     await waitFor(() => expect(screen.getByText('Create Approval Request')).toBeInTheDocument())
     await user.click(screen.getByRole('button', { name: /^cancel$/i }))
-    await waitFor(() => expect(screen.queryByText('Create Approval Request')).not.toBeInTheDocument())
+    await waitFor(() =>
+      expect(screen.queryByText('Create Approval Request')).not.toBeInTheDocument(),
+    )
   })
 
   it('refresh button re-fetches approvals', async () => {

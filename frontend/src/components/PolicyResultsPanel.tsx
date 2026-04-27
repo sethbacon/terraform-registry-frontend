@@ -1,14 +1,5 @@
 import React, { useState } from 'react'
-import {
-  Box,
-  Paper,
-  Typography,
-  Divider,
-  Chip,
-  Stack,
-  Collapse,
-  IconButton,
-} from '@mui/material'
+import { Box, Paper, Typography, Divider, Chip, Stack, Collapse, IconButton } from '@mui/material'
 import PolicyIcon from '@mui/icons-material/Policy'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import ExpandLessIcon from '@mui/icons-material/ExpandLess'
@@ -56,20 +47,13 @@ const PolicyResultsPanel: React.FC<PolicyResultsPanelProps> = ({ policyResult })
               {policyResult.violations.length !== 1 ? 's' : ''}
             </Typography>
             <IconButton size="small" sx={{ ml: 'auto' }}>
-              {expanded ? (
-                <ExpandLessIcon fontSize="small" />
-              ) : (
-                <ExpandMoreIcon fontSize="small" />
-              )}
+              {expanded ? <ExpandLessIcon fontSize="small" /> : <ExpandMoreIcon fontSize="small" />}
             </IconButton>
           </Box>
           <Collapse in={expanded}>
             <Stack spacing={1} sx={{ mt: 1 }}>
               {policyResult.violations.map((v, i) => (
-                <Box
-                  key={i}
-                  sx={{ pl: 1.5, borderLeft: 2, borderColor: `${statusColor}.main` }}
-                >
+                <Box key={i} sx={{ pl: 1.5, borderLeft: 2, borderColor: `${statusColor}.main` }}>
                   <Typography variant="caption" fontWeight="medium" display="block">
                     {v.rule}
                   </Typography>

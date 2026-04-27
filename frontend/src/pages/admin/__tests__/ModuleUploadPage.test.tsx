@@ -130,14 +130,12 @@ describe('ModuleUploadPage — upload form (roadmap 2.5)', () => {
       .getAllByRole('textbox')
       .map((el) => (el as HTMLInputElement | HTMLTextAreaElement).getAttribute('aria-label') || '')
       .concat(
-        screen
-          .getAllByRole('textbox')
-          .map((el) => {
-            const id = el.getAttribute('id')
-            if (!id) return ''
-            const lbl = document.querySelector(`label[for="${id}"]`)
-            return lbl?.textContent ?? ''
-          }),
+        screen.getAllByRole('textbox').map((el) => {
+          const id = el.getAttribute('id')
+          if (!id) return ''
+          const lbl = document.querySelector(`label[for="${id}"]`)
+          return lbl?.textContent ?? ''
+        }),
       )
     // Namespace must appear before Module Name which must appear before Provider
     const joined = labels.join('|')
@@ -161,10 +159,12 @@ describe('ModuleUploadPage — upload form (roadmap 2.5)', () => {
 
   it('shows upload progress bar and preserves field state after upload failure', async () => {
     const user = userEvent.setup()
-    api.uploadModule.mockImplementationOnce(async (_fd: FormData, opts?: { onUploadProgress?: (p: number) => void }) => {
-      opts?.onUploadProgress?.(42)
-      throw new Error('boom')
-    })
+    api.uploadModule.mockImplementationOnce(
+      async (_fd: FormData, opts?: { onUploadProgress?: (p: number) => void }) => {
+        opts?.onUploadProgress?.(42)
+        throw new Error('boom')
+      },
+    )
 
     await openUploadForm(user)
     const inputs = screen.getAllByRole('textbox') as HTMLInputElement[]

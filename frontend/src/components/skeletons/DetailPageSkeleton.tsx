@@ -1,7 +1,7 @@
-import { Box, Container, Paper, Skeleton, Stack } from '@mui/material';
+import { Box, Container, Paper, Skeleton, Stack } from '@mui/material'
 
 export interface DetailPageSkeletonProps {
-  'data-testid'?: string;
+  'data-testid'?: string
 }
 
 /** Skeleton matching the overall layout of ModuleDetailPage / ProviderDetailPage. */
@@ -42,5 +42,5 @@ export default function DetailPageSkeleton({
         </Box>
       </Box>
     </Container>
-  );
+  )
 }

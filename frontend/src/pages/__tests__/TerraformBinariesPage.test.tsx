@@ -15,7 +15,8 @@ const listPublicTerraformMirrorConfigsMock = vi.fn()
 const listPublicTerraformVersionsMock = vi.fn()
 vi.mock('../../services/api', () => ({
   default: {
-    listPublicTerraformMirrorConfigs: (...args: unknown[]) => listPublicTerraformMirrorConfigsMock(...args),
+    listPublicTerraformMirrorConfigs: (...args: unknown[]) =>
+      listPublicTerraformMirrorConfigsMock(...args),
     listPublicTerraformVersions: (...args: unknown[]) => listPublicTerraformVersionsMock(...args),
   },
 }))

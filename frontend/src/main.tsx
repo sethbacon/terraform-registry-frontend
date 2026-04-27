@@ -17,9 +17,9 @@ window.addEventListener('unhandledrejection', (event) => {
 })
 
 if (import.meta.env.DEV) {
-  import('@axe-core/react').then(axe => {
-    axe.default(React, ReactDOM, 1000);
-  });
+  import('@axe-core/react').then((axe) => {
+    axe.default(React, ReactDOM, 1000)
+  })
 }
 
 // Read CSP nonce from meta tag (injected by nginx sub_filter)
@@ -39,5 +39,5 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
     <CacheProvider value={emotionCache}>
       <App />
     </CacheProvider>
-  </React.StrictMode>
+  </React.StrictMode>,
 )

@@ -54,7 +54,7 @@ describe('DevUserSwitcher', () => {
   })
 
   it('renders nothing while loading', () => {
-    getDevStatusMock.mockReturnValue(new Promise(() => { }))
+    getDevStatusMock.mockReturnValue(new Promise(() => {}))
     const { container } = render(<DevUserSwitcher />)
     expect(container.innerHTML).toBe('')
   })
@@ -89,9 +89,7 @@ describe('DevUserSwitcher', () => {
     mockAuth.user = { id: 'u999', email: 'other@example.com', name: 'Other', primary_role: 'admin' }
     getDevStatusMock.mockResolvedValue({ dev_mode: true })
     listUsersForImpersonationMock.mockResolvedValue({
-      users: [
-        { id: 'u1', email: 'admin@example.com', name: 'Admin', primary_role: 'admin' },
-      ],
+      users: [{ id: 'u1', email: 'admin@example.com', name: 'Admin', primary_role: 'admin' }],
     })
     render(<DevUserSwitcher />)
     await waitFor(() => {

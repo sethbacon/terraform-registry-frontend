@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import React, { useState, useEffect } from 'react'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import {
   Container,
   Typography,
@@ -31,48 +31,50 @@ import {
   MenuItem,
   Divider,
   SelectChangeEvent,
-} from '@mui/material';
-import EditIcon from '@mui/icons-material/Edit';
-import DeleteIcon from '@mui/icons-material/Delete';
-import AddIcon from '@mui/icons-material/Add';
-import SearchIcon from '@mui/icons-material/Search';
-import BusinessIcon from '@mui/icons-material/Business';
-import PersonIcon from '@mui/icons-material/Person';
-import EmptyState from '../../components/EmptyState';
-import api from '../../services/api';
-import { User, UserMembership, Organization } from '../../types';
-import { RoleTemplate } from '../../types/rbac';
-import { getErrorMessage } from '../../utils/errors';
-import { queryKeys } from '../../services/queryKeys';
+} from '@mui/material'
+import EditIcon from '@mui/icons-material/Edit'
+import DeleteIcon from '@mui/icons-material/Delete'
+import AddIcon from '@mui/icons-material/Add'
+import SearchIcon from '@mui/icons-material/Search'
+import BusinessIcon from '@mui/icons-material/Business'
+import PersonIcon from '@mui/icons-material/Person'
+import EmptyState from '../../components/EmptyState'
+import api from '../../services/api'
+import { User, UserMembership, Organization } from '../../types'
+import { RoleTemplate } from '../../types/rbac'
+import { getErrorMessage } from '../../utils/errors'
+import { queryKeys } from '../../services/queryKeys'
 
 interface UserWithMemberships extends User {
-  memberships?: UserMembership[];
-  membershipsLoading?: boolean;
+  memberships?: UserMembership[]
+  membershipsLoading?: boolean
 }
 
 const UsersPage: React.FC = () => {
-  const queryClient = useQueryClient();
-  const [error, setError] = useState<string | null>(null);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(10);
+  const queryClient = useQueryClient()
+  const [error, setError] = useState<string | null>(null)
+  const [searchQuery, setSearchQuery] = useState('')
+  const [page, setPage] = useState(0)
+  const [rowsPerPage, setRowsPerPage] = useState(10)
 
   // Local memberships state (per-user enrichment)
-  const [userMemberships, setUserMemberships] = useState<Record<string, { memberships?: UserMembership[]; loading: boolean }>>({});
+  const [userMemberships, setUserMemberships] = useState<
+    Record<string, { memberships?: UserMembership[]; loading: boolean }>
+  >({})
 
   // Dialog state
-  const [openDialog, setOpenDialog] = useState(false);
-  const [editingUser, setEditingUser] = useState<UserWithMemberships | null>(null);
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [userToDelete, setUserToDelete] = useState<User | null>(null);
+  const [openDialog, setOpenDialog] = useState(false)
+  const [editingUser, setEditingUser] = useState<UserWithMemberships | null>(null)
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
+  const [userToDelete, setUserToDelete] = useState<User | null>(null)
 
   // Organizations for selection
-  const [organizations, setOrganizations] = useState<Organization[]>([]);
-  const [orgsLoading, setOrgsLoading] = useState(false);
+  const [organizations, setOrganizations] = useState<Organization[]>([])
+  const [orgsLoading, setOrgsLoading] = useState(false)
 
   // Role templates for selection
-  const [roleTemplates, setRoleTemplates] = useState<RoleTemplate[]>([]);
-  const [roleTemplatesLoading, setRoleTemplatesLoading] = useState(false);
+  const [roleTemplates, setRoleTemplates] = useState<RoleTemplate[]>([])
+  const [roleTemplatesLoading, setRoleTemplatesLoading] = useState(false)
 
   // Form state
   const [formData, setFormData] = useState({
@@ -80,121 +82,129 @@ const UsersPage: React.FC = () => {
     name: '',
     organizationId: '',
     roleTemplateId: '', // Role template for org membership
-  });
+  })
 
   // User memberships being edited
-  const [editMemberships, setEditMemberships] = useState<UserMembership[]>([]);
+  const [editMemberships, setEditMemberships] = useState<UserMembership[]>([])
 
   const {
     data: usersData,
     isLoading: loading,
     error: queryError,
   } = useQuery({
-    queryKey: queryKeys.users.list({ page: page + 1, perPage: rowsPerPage, search: searchQuery || undefined }),
+    queryKey: queryKeys.users.list({
+      page: page + 1,
+      perPage: rowsPerPage,
+      search: searchQuery || undefined,
+    }),
     queryFn: async () => {
       if (searchQuery) {
-        return api.searchUsers(searchQuery, page + 1, rowsPerPage);
+        return api.searchUsers(searchQuery, page + 1, rowsPerPage)
       }
-      return api.listUsers(page + 1, rowsPerPage);
+      return api.listUsers(page + 1, rowsPerPage)
     },
-  });
+  })
 
-  const rawUsers = usersData?.users || [];
-  const totalUsers = usersData?.pagination?.total || 0;
+  const rawUsers = usersData?.users || []
+  const totalUsers = usersData?.pagination?.total || 0
 
   // Merge memberships into users
   const users: UserWithMemberships[] = rawUsers.map((u: User) => ({
     ...u,
     memberships: userMemberships[u.id]?.memberships,
     membershipsLoading: userMemberships[u.id]?.loading ?? true,
-  }));
+  }))
 
   if (queryError && !error) {
-    setError('Failed to load users. Please try again.');
+    setError('Failed to load users. Please try again.')
   }
 
   // Load memberships whenever rawUsers changes
   useEffect(() => {
     for (const user of rawUsers) {
       if (userMemberships[user.id] === undefined) {
-        setUserMemberships(prev => ({ ...prev, [user.id]: { loading: true } }));
-        api.getUserMemberships(user.id)
-          .then(memberships => {
-            setUserMemberships(prev => ({ ...prev, [user.id]: { memberships, loading: false } }));
+        setUserMemberships((prev) => ({ ...prev, [user.id]: { loading: true } }))
+        api
+          .getUserMemberships(user.id)
+          .then((memberships) => {
+            setUserMemberships((prev) => ({ ...prev, [user.id]: { memberships, loading: false } }))
           })
           .catch(() => {
-            setUserMemberships(prev => ({ ...prev, [user.id]: { memberships: [], loading: false } }));
-          });
+            setUserMemberships((prev) => ({
+              ...prev,
+              [user.id]: { memberships: [], loading: false },
+            }))
+          })
       }
     }
-  }, [rawUsers]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [rawUsers]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const loadOrganizations = async () => {
     try {
-      setOrgsLoading(true);
-      const orgs = await api.listOrganizations();
-      setOrganizations(orgs || []);
+      setOrgsLoading(true)
+      const orgs = await api.listOrganizations()
+      setOrganizations(orgs || [])
     } catch (err) {
-      console.error('Failed to load organizations:', err);
-      setOrganizations([]);
+      console.error('Failed to load organizations:', err)
+      setOrganizations([])
     } finally {
-      setOrgsLoading(false);
+      setOrgsLoading(false)
     }
-  };
+  }
 
   const loadRoleTemplates = async () => {
     try {
-      setRoleTemplatesLoading(true);
-      const templates = await api.listRoleTemplates();
-      setRoleTemplates(templates || []);
+      setRoleTemplatesLoading(true)
+      const templates = await api.listRoleTemplates()
+      setRoleTemplates(templates || [])
     } catch (err) {
-      console.error('Failed to load role templates:', err);
-      setRoleTemplates([]);
+      console.error('Failed to load role templates:', err)
+      setRoleTemplates([])
     } finally {
-      setRoleTemplatesLoading(false);
+      setRoleTemplatesLoading(false)
     }
-  };
+  }
 
   const handleOpenDialog = async (user?: UserWithMemberships) => {
-    await Promise.all([loadOrganizations(), loadRoleTemplates()]);
+    await Promise.all([loadOrganizations(), loadRoleTemplates()])
 
     if (user) {
-      setEditingUser(user);
+      setEditingUser(user)
       setFormData({
         email: user.email,
         name: user.name || '',
         organizationId: '',
         roleTemplateId: '',
-      });
-      setEditMemberships(user.memberships || []);
+      })
+      setEditMemberships(user.memberships || [])
     } else {
-      setEditingUser(null);
+      setEditingUser(null)
       setFormData({
         email: '',
         name: '',
         organizationId: '',
         roleTemplateId: '',
-      });
-      setEditMemberships([]);
+      })
+      setEditMemberships([])
     }
-    setOpenDialog(true);
-  };
+    setOpenDialog(true)
+  }
 
   const handleCloseDialog = () => {
-    setOpenDialog(false);
-    setEditingUser(null);
-    setError(null);
-    setEditMemberships([]);
-  };
+    setOpenDialog(false)
+    setEditingUser(null)
+    setError(null)
+    setEditMemberships([])
+  }
 
   const saveUserMutation = useMutation({
     mutationFn: async () => {
-      let userId = editingUser?.id;
+      let userId = editingUser?.id
       if (editingUser) {
-        await api.updateUser(editingUser.id, { name: formData.name });
+        await api.updateUser(editingUser.id, { name: formData.name })
       } else {
-        const newUser = await api.createUser({ email: formData.email, name: formData.name });
-        userId = newUser.id;
+        const newUser = await api.createUser({ email: formData.email, name: formData.name })
+        userId = newUser.id
       }
       // Add to organization if selected (for new users)
       if (!editingUser && formData.organizationId && userId) {
@@ -202,138 +212,140 @@ const UsersPage: React.FC = () => {
           await api.addOrganizationMember(formData.organizationId, {
             user_id: userId,
             role_template_id: formData.roleTemplateId || undefined,
-          });
+          })
         } catch (err) {
-          console.error('Failed to add user to organization:', err);
+          console.error('Failed to add user to organization:', err)
         }
       }
     },
     onSuccess: () => {
-      handleCloseDialog();
-      setUserMemberships({});
-      queryClient.invalidateQueries({ queryKey: queryKeys.users._def });
+      handleCloseDialog()
+      setUserMemberships({})
+      queryClient.invalidateQueries({ queryKey: queryKeys.users._def })
     },
     onError: (err: unknown) => {
-      setError(getErrorMessage(err, 'Failed to save user. Please try again.'));
+      setError(getErrorMessage(err, 'Failed to save user. Please try again.'))
     },
-  });
+  })
 
   const deleteUserMutation = useMutation({
     mutationFn: (id: string) => api.deleteUser(id),
     onSuccess: () => {
-      setDeleteDialogOpen(false);
-      setUserToDelete(null);
-      setError(null);
-      setUserMemberships({});
-      queryClient.invalidateQueries({ queryKey: queryKeys.users._def });
+      setDeleteDialogOpen(false)
+      setUserToDelete(null)
+      setError(null)
+      setUserMemberships({})
+      queryClient.invalidateQueries({ queryKey: queryKeys.users._def })
     },
     onError: (err: unknown) => {
-      setError(getErrorMessage(err, 'Failed to delete user. Please try again.'));
+      setError(getErrorMessage(err, 'Failed to delete user. Please try again.'))
     },
-  });
+  })
 
   const handleSaveUser = () => {
-    setError(null);
-    saveUserMutation.mutate();
-  };
+    setError(null)
+    saveUserMutation.mutate()
+  }
 
   const handleAddMembership = async () => {
-    if (!editingUser || !formData.organizationId) return;
+    if (!editingUser || !formData.organizationId) return
 
     try {
-      setError(null);
+      setError(null)
       await api.addOrganizationMember(formData.organizationId, {
         user_id: editingUser.id,
         role_template_id: formData.roleTemplateId || undefined,
-      });
+      })
 
       // Refresh memberships
-      const memberships = await api.getUserMemberships(editingUser.id);
-      setEditMemberships(memberships);
+      const memberships = await api.getUserMemberships(editingUser.id)
+      setEditMemberships(memberships)
 
       // Reset selection
-      setFormData(prev => ({ ...prev, organizationId: '', roleTemplateId: '' }));
+      setFormData((prev) => ({ ...prev, organizationId: '', roleTemplateId: '' }))
     } catch (err: unknown) {
-      console.error('Failed to add membership:', err);
-      setError(getErrorMessage(err, 'Failed to add organization membership'));
+      console.error('Failed to add membership:', err)
+      setError(getErrorMessage(err, 'Failed to add organization membership'))
     }
-  };
+  }
 
   const handleUpdateMembershipRole = async (orgId: string, newRoleTemplateId: string | null) => {
-    if (!editingUser) return;
+    if (!editingUser) return
 
     try {
-      setError(null);
+      setError(null)
       await api.updateOrganizationMember(orgId, editingUser.id, {
-        role_template_id: newRoleTemplateId || undefined
-      });
+        role_template_id: newRoleTemplateId || undefined,
+      })
 
       // Refresh memberships to get updated role template info
-      const memberships = await api.getUserMemberships(editingUser.id);
-      setEditMemberships(memberships);
+      const memberships = await api.getUserMemberships(editingUser.id)
+      setEditMemberships(memberships)
     } catch (err: unknown) {
-      console.error('Failed to update membership role:', err);
-      setError(getErrorMessage(err, 'Failed to update role'));
+      console.error('Failed to update membership role:', err)
+      setError(getErrorMessage(err, 'Failed to update role'))
     }
-  };
+  }
 
   const handleRemoveMembership = async (orgId: string) => {
-    if (!editingUser) return;
+    if (!editingUser) return
 
     try {
-      setError(null);
-      await api.removeOrganizationMember(orgId, editingUser.id);
+      setError(null)
+      await api.removeOrganizationMember(orgId, editingUser.id)
 
       // Update local state
-      setEditMemberships(prev => prev.filter(m => m.organization_id !== orgId));
+      setEditMemberships((prev) => prev.filter((m) => m.organization_id !== orgId))
     } catch (err: unknown) {
-      console.error('Failed to remove membership:', err);
-      setError(getErrorMessage(err, 'Failed to remove from organization'));
+      console.error('Failed to remove membership:', err)
+      setError(getErrorMessage(err, 'Failed to remove from organization'))
     }
-  };
+  }
 
   const handleDeleteClick = (user: User) => {
-    setUserToDelete(user);
-    setDeleteDialogOpen(true);
-  };
+    setUserToDelete(user)
+    setDeleteDialogOpen(true)
+  }
 
   const handleDeleteConfirm = () => {
-    if (!userToDelete) return;
-    setError(null);
-    deleteUserMutation.mutate(userToDelete.id);
-  };
+    if (!userToDelete) return
+    setError(null)
+    deleteUserMutation.mutate(userToDelete.id)
+  }
 
   const handleChangePage = (_event: unknown, newPage: number) => {
-    setPage(newPage);
-  };
+    setPage(newPage)
+  }
 
   const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setRowsPerPage(parseInt(event.target.value, 10));
-    setPage(0);
-  };
+    setRowsPerPage(parseInt(event.target.value, 10))
+    setPage(0)
+  }
 
-  const getRoleTemplateColor = (templateName?: string): 'error' | 'warning' | 'primary' | 'info' | 'success' | 'default' => {
+  const getRoleTemplateColor = (
+    templateName?: string,
+  ): 'error' | 'warning' | 'primary' | 'info' | 'success' | 'default' => {
     switch (templateName) {
       case 'admin':
-        return 'error';
+        return 'error'
       case 'devops':
       case 'user_manager':
-        return 'warning';
+        return 'warning'
       case 'publisher':
-        return 'primary';
+        return 'primary'
       case 'viewer':
-        return 'info';
+        return 'info'
       case 'auditor':
-        return 'success';
+        return 'success'
       default:
-        return 'default';
+        return 'default'
     }
-  };
+  }
 
   // Get organizations not already assigned to the user
   const availableOrganizations = organizations.filter(
-    org => !editMemberships.some(m => m.organization_id === org.id)
-  );
+    (org) => !editMemberships.some((m) => m.organization_id === org.id),
+  )
 
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
@@ -346,11 +358,7 @@ const UsersPage: React.FC = () => {
             Manage user accounts and permissions
           </Typography>
         </Box>
-        <Button
-          variant="contained"
-          startIcon={<AddIcon />}
-          onClick={() => handleOpenDialog()}
-        >
+        <Button variant="contained" startIcon={<AddIcon />} onClick={() => handleOpenDialog()}>
           Add User
         </Button>
       </Box>
@@ -367,8 +375,8 @@ const UsersPage: React.FC = () => {
         placeholder="Search users..."
         value={searchQuery}
         onChange={(e) => {
-          setSearchQuery(e.target.value);
-          setPage(0);
+          setSearchQuery(e.target.value)
+          setPage(0)
         }}
         sx={{ mb: 3 }}
         InputProps={{
@@ -420,9 +428,10 @@ const UsersPage: React.FC = () => {
                           {user.memberships.map((m) => (
                             <Tooltip
                               key={m.organization_id}
-                              title={m.role_template_display_name
-                                ? `${m.organization_name}: ${m.role_template_display_name}`
-                                : `${m.organization_name}: No role assigned`
+                              title={
+                                m.role_template_display_name
+                                  ? `${m.organization_name}: ${m.role_template_display_name}`
+                                  : `${m.organization_name}: No role assigned`
                               }
                             >
                               <Chip
@@ -523,7 +532,8 @@ const UsersPage: React.FC = () => {
                         alignItems: 'center',
                         gap: 1,
                         p: 1,
-                        bgcolor: (theme) => theme.palette.mode === 'dark' ? 'grey.800' : 'grey.50',
+                        bgcolor: (theme) =>
+                          theme.palette.mode === 'dark' ? 'grey.800' : 'grey.50',
                         borderRadius: 1,
                       }}
                     >
@@ -586,7 +596,9 @@ const UsersPage: React.FC = () => {
                     </MenuItem>
                   ))}
                 </Select>
-                <FormHelperText>Assign this user to an organization to control which resources they can access.</FormHelperText>
+                <FormHelperText>
+                  Assign this user to an organization to control which resources they can access.
+                </FormHelperText>
               </FormControl>
               <FormControl size="small" sx={{ minWidth: 150 }}>
                 <InputLabel>Role Template</InputLabel>
@@ -607,7 +619,10 @@ const UsersPage: React.FC = () => {
                     </MenuItem>
                   ))}
                 </Select>
-                <FormHelperText>Defines the permissions granted within the selected organization. Manage templates under Admin → Roles.</FormHelperText>
+                <FormHelperText>
+                  Defines the permissions granted within the selected organization. Manage templates
+                  under Admin → Roles.
+                </FormHelperText>
               </FormControl>
               {editingUser && (
                 <Button
@@ -647,7 +662,7 @@ const UsersPage: React.FC = () => {
         </DialogActions>
       </Dialog>
     </Container>
-  );
-};
+  )
+}
 
-export default UsersPage;
+export default UsersPage

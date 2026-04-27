@@ -93,7 +93,7 @@ describe('ProviderDetailPage', () => {
   })
 
   it('shows loading spinner initially', () => {
-    searchProvidersMock.mockReturnValue(new Promise(() => { }))
+    searchProvidersMock.mockReturnValue(new Promise(() => {}))
     renderPage()
     expect(screen.getByRole('progressbar')).toBeInTheDocument()
   })
@@ -241,7 +241,9 @@ describe('ProviderDetailPage', () => {
     await waitFor(() => expect(screen.getByRole('dialog')).toBeInTheDocument())
     const dlgButtons = screen.getAllByRole('button', { name: /^delete version$/i })
     await userEvent.click(dlgButtons[dlgButtons.length - 1])
-    await waitFor(() => expect(deleteProviderVersionMock).toHaveBeenCalledWith('hashicorp', 'aws', '5.0.0'))
+    await waitFor(() =>
+      expect(deleteProviderVersionMock).toHaveBeenCalledWith('hashicorp', 'aws', '5.0.0'),
+    )
   })
 
   it('renders Publish New Version button for non-mirrored providers', async () => {

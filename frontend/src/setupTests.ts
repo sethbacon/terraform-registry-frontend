@@ -11,12 +11,24 @@ import './i18n'
 // Replace it with a spec-compliant in-memory implementation.
 const store: Record<string, string> = {}
 const webStorage: Storage = {
-  getItem(key: string) { return store[key] ?? null },
-  setItem(key: string, value: string) { store[key] = String(value) },
-  removeItem(key: string) { delete store[key] },
-  clear() { Object.keys(store).forEach(k => delete store[k]) },
-  key(index: number) { return Object.keys(store)[index] ?? null },
-  get length() { return Object.keys(store).length },
+  getItem(key: string) {
+    return store[key] ?? null
+  },
+  setItem(key: string, value: string) {
+    store[key] = String(value)
+  },
+  removeItem(key: string) {
+    delete store[key]
+  },
+  clear() {
+    Object.keys(store).forEach((k) => delete store[k])
+  },
+  key(index: number) {
+    return Object.keys(store)[index] ?? null
+  },
+  get length() {
+    return Object.keys(store).length
+  },
 }
 
 Object.defineProperty(globalThis, 'localStorage', {

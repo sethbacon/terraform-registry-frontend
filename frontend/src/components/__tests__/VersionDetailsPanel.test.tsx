@@ -29,30 +29,27 @@ describe('VersionDetailsPanel', () => {
   }
 
   it('returns null when selectedVersion is null', () => {
-    const { container } = render(
-      <VersionDetailsPanel {...defaultProps} selectedVersion={null} />
-    )
+    const { container } = render(<VersionDetailsPanel {...defaultProps} selectedVersion={null} />)
     expect(container.innerHTML).toBe('')
   })
 
   it('renders version number heading', () => {
-    render(
-      <VersionDetailsPanel {...defaultProps} selectedVersion={makeVersion()} />
-    )
+    render(<VersionDetailsPanel {...defaultProps} selectedVersion={makeVersion()} />)
     expect(screen.getByText('Version 1.0.0 Details')).toBeInTheDocument()
   })
 
   it('renders published date', () => {
-    render(
-      <VersionDetailsPanel {...defaultProps} selectedVersion={makeVersion()} />
-    )
+    render(<VersionDetailsPanel {...defaultProps} selectedVersion={makeVersion()} />)
     // Should contain a date string
     expect(screen.getByText(/Published:/)).toBeInTheDocument()
   })
 
   it('renders download count', () => {
     render(
-      <VersionDetailsPanel {...defaultProps} selectedVersion={makeVersion({ download_count: 100 })} />
+      <VersionDetailsPanel
+        {...defaultProps}
+        selectedVersion={makeVersion({ download_count: 100 })}
+      />,
     )
     expect(screen.getByText(/100/)).toBeInTheDocument()
   })
@@ -62,7 +59,7 @@ describe('VersionDetailsPanel', () => {
       <VersionDetailsPanel
         {...defaultProps}
         selectedVersion={makeVersion({ published_at: undefined, created_at: undefined })}
-      />
+      />,
     )
     expect(screen.getByText(/N\/A/)).toBeInTheDocument()
   })
@@ -72,7 +69,7 @@ describe('VersionDetailsPanel', () => {
       <VersionDetailsPanel
         {...defaultProps}
         selectedVersion={makeVersion({ published_by_name: 'John Doe' })}
-      />
+      />,
     )
     expect(screen.getByText('John Doe')).toBeInTheDocument()
   })
@@ -86,7 +83,7 @@ describe('VersionDetailsPanel', () => {
           deprecated_at: '2025-06-01T00:00:00Z',
           deprecation_message: 'Use v2 instead',
         })}
-      />
+      />,
     )
     expect(screen.getByText(/Deprecated/)).toBeInTheDocument()
     expect(screen.getByText('Use v2 instead')).toBeInTheDocument()
@@ -94,11 +91,7 @@ describe('VersionDetailsPanel', () => {
 
   it('shows deprecate button when canManage and not deprecated', () => {
     render(
-      <VersionDetailsPanel
-        {...defaultProps}
-        canManage={true}
-        selectedVersion={makeVersion()}
-      />
+      <VersionDetailsPanel {...defaultProps} canManage={true} selectedVersion={makeVersion()} />,
     )
     expect(screen.getByText('Deprecate Version')).toBeInTheDocument()
   })
@@ -109,7 +102,7 @@ describe('VersionDetailsPanel', () => {
         {...defaultProps}
         canManage={true}
         selectedVersion={makeVersion({ deprecated: true })}
-      />
+      />,
     )
     expect(screen.getByText('Remove Deprecation')).toBeInTheDocument()
   })
@@ -121,26 +114,20 @@ describe('VersionDetailsPanel', () => {
         canManage={true}
         deprecating={true}
         selectedVersion={makeVersion({ deprecated: true })}
-      />
+      />,
     )
     expect(screen.getByText('Removing Deprecation...')).toBeInTheDocument()
   })
 
   it('shows delete button when canManage', () => {
     render(
-      <VersionDetailsPanel
-        {...defaultProps}
-        canManage={true}
-        selectedVersion={makeVersion()}
-      />
+      <VersionDetailsPanel {...defaultProps} canManage={true} selectedVersion={makeVersion()} />,
     )
     expect(screen.getByText('Delete This Version')).toBeInTheDocument()
   })
 
   it('hides manage buttons when canManage is false', () => {
-    render(
-      <VersionDetailsPanel {...defaultProps} selectedVersion={makeVersion()} />
-    )
+    render(<VersionDetailsPanel {...defaultProps} selectedVersion={makeVersion()} />)
     expect(screen.queryByText('Deprecate Version')).not.toBeInTheDocument()
     expect(screen.queryByText('Delete This Version')).not.toBeInTheDocument()
   })
@@ -154,7 +141,7 @@ describe('VersionDetailsPanel', () => {
         canManage={true}
         onOpenDeprecateDialog={onOpenDeprecateDialog}
         selectedVersion={makeVersion()}
-      />
+      />,
     )
     await user.click(screen.getByText('Deprecate Version'))
     expect(onOpenDeprecateDialog).toHaveBeenCalled()
@@ -169,7 +156,7 @@ describe('VersionDetailsPanel', () => {
         canManage={true}
         onOpenDeleteVersionDialog={onOpenDeleteVersionDialog}
         selectedVersion={makeVersion({ version: '2.0.0' })}
-      />
+      />,
     )
     await user.click(screen.getByText('Delete This Version'))
     expect(onOpenDeleteVersionDialog).toHaveBeenCalledWith('2.0.0')
@@ -184,7 +171,7 @@ describe('VersionDetailsPanel', () => {
         canManage={true}
         onUndeprecate={onUndeprecate}
         selectedVersion={makeVersion({ deprecated: true })}
-      />
+      />,
     )
     await user.click(screen.getByText('Remove Deprecation'))
     expect(onUndeprecate).toHaveBeenCalled()

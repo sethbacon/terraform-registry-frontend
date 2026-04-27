@@ -11,7 +11,7 @@ import ComponentShowcase from '../ComponentShowcase'
 // defined in the vitest environment. Provide a fallback.
 beforeAll(() => {
   if (typeof (globalThis as Record<string, unknown>).__APP_VERSION__ === 'undefined') {
-    (globalThis as Record<string, unknown>).__APP_VERSION__ = '0.0.0-test';
+    ;(globalThis as Record<string, unknown>).__APP_VERSION__ = '0.0.0-test'
   }
 })
 
@@ -20,7 +20,9 @@ beforeAll(() => {
 // AboutModal calls apiClient.getVersionInfo on open — mock the API module
 vi.mock('../../../services/api', () => ({
   default: {
-    getVersionInfo: vi.fn().mockResolvedValue({ version: '0.0.0-test', api_version: 'v1', build_date: 'unknown' }),
+    getVersionInfo: vi
+      .fn()
+      .mockResolvedValue({ version: '0.0.0-test', api_version: 'v1', build_date: 'unknown' }),
     planStorageMigration: vi.fn(),
     startStorageMigration: vi.fn(),
     cancelStorageMigration: vi.fn(),

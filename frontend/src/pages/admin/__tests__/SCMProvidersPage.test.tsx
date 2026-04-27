@@ -71,7 +71,13 @@ const fakeProviders = [
 ]
 
 const fakeMemberships = [
-  { organization_id: 'org-1', organization_name: 'Acme', role_template_id: 'rt', role_template_name: 'admin', role_template_display_name: 'Admin' },
+  {
+    organization_id: 'org-1',
+    organization_name: 'Acme',
+    role_template_id: 'rt',
+    role_template_name: 'admin',
+    role_template_display_name: 'Admin',
+  },
 ]
 
 describe('SCMProvidersPage', () => {
@@ -82,7 +88,7 @@ describe('SCMProvidersPage', () => {
   })
 
   it('shows loading spinner initially', () => {
-    listSCMProvidersMock.mockReturnValue(new Promise(() => { }))
+    listSCMProvidersMock.mockReturnValue(new Promise(() => {}))
     renderPage()
     expect(screen.getByRole('progressbar')).toBeInTheDocument()
   })
@@ -136,7 +142,11 @@ describe('SCMProvidersPage', () => {
 
   it('shows Connected status when token is connected', async () => {
     listSCMProvidersMock.mockResolvedValue(fakeProviders)
-    getSCMTokenStatusMock.mockResolvedValue({ connected: true, token_type: 'oauth', connected_at: '2025-06-01T00:00:00Z' })
+    getSCMTokenStatusMock.mockResolvedValue({
+      connected: true,
+      token_type: 'oauth',
+      connected_at: '2025-06-01T00:00:00Z',
+    })
     renderPage()
     await waitFor(() => expect(screen.getByText('Connected')).toBeInTheDocument())
     expect(screen.getByText('OAuth')).toBeInTheDocument()
@@ -153,7 +163,9 @@ describe('SCMProvidersPage', () => {
     listSCMProvidersMock.mockResolvedValue([])
     getCurrentUserMembershipsMock.mockResolvedValue(fakeMemberships)
     renderPage()
-    await waitFor(() => expect(screen.getByRole('button', { name: /add provider/i })).toBeInTheDocument())
+    await waitFor(() =>
+      expect(screen.getByRole('button', { name: /add provider/i })).toBeInTheDocument(),
+    )
     await userEvent.click(screen.getByRole('button', { name: /add provider/i }))
     await waitFor(() => expect(screen.getByText('Add SCM Provider')).toBeInTheDocument())
   })
@@ -202,7 +214,9 @@ describe('SCMProvidersPage', () => {
   })
 
   it('opens PAT dialog for Bitbucket Data Center provider', async () => {
-    const bbProvider = [{ ...fakeProviders[0], provider_type: 'bitbucket_dc' as const, name: 'BB DC' }]
+    const bbProvider = [
+      { ...fakeProviders[0], provider_type: 'bitbucket_dc' as const, name: 'BB DC' },
+    ]
     listSCMProvidersMock.mockResolvedValue(bbProvider)
     renderPage()
     await waitFor(() => expect(screen.getByText('BB DC')).toBeInTheDocument())
@@ -223,7 +237,9 @@ describe('SCMProvidersPage', () => {
     listSCMProvidersMock.mockResolvedValue([])
     getCurrentUserMembershipsMock.mockResolvedValue(fakeMemberships)
     renderPage()
-    await waitFor(() => expect(screen.getByRole('button', { name: /add provider/i })).toBeInTheDocument())
+    await waitFor(() =>
+      expect(screen.getByRole('button', { name: /add provider/i })).toBeInTheDocument(),
+    )
     await userEvent.click(screen.getByRole('button', { name: /add provider/i }))
     await waitFor(() => expect(screen.getByText('Add SCM Provider')).toBeInTheDocument())
     await userEvent.click(screen.getByRole('button', { name: /^cancel$/i }))
@@ -267,14 +283,10 @@ describe('SCMProvidersPage', () => {
     renderPage()
     await waitFor(() => expect(screen.getByText('BB DC')).toBeInTheDocument())
     await userEvent.click(screen.getByRole('button', { name: /connect scm provider/i }))
-    await waitFor(() =>
-      expect(screen.getByLabelText(/Personal Access Token/i)).toBeInTheDocument(),
-    )
+    await waitFor(() => expect(screen.getByLabelText(/Personal Access Token/i)).toBeInTheDocument())
     await userEvent.type(screen.getByLabelText(/Personal Access Token/i), 'bbdc-pat')
     await userEvent.click(screen.getByRole('button', { name: /save token/i }))
-    await waitFor(() =>
-      expect(saveSCMTokenMock).toHaveBeenCalledWith('scm-1', 'bbdc-pat'),
-    )
+    await waitFor(() => expect(saveSCMTokenMock).toHaveBeenCalledWith('scm-1', 'bbdc-pat'))
   })
 
   it('cancels the PAT dialog', async () => {
@@ -285,9 +297,7 @@ describe('SCMProvidersPage', () => {
     renderPage()
     await waitFor(() => expect(screen.getByText('BB DC')).toBeInTheDocument())
     await userEvent.click(screen.getByRole('button', { name: /connect scm provider/i }))
-    await waitFor(() =>
-      expect(screen.getByLabelText(/Personal Access Token/i)).toBeInTheDocument(),
-    )
+    await waitFor(() => expect(screen.getByLabelText(/Personal Access Token/i)).toBeInTheDocument())
     await userEvent.click(screen.getByRole('button', { name: /^cancel$/i }))
     await waitFor(() =>
       expect(screen.queryByLabelText(/Personal Access Token/i)).not.toBeInTheDocument(),
@@ -305,9 +315,7 @@ describe('SCMProvidersPage', () => {
     revokeSCMTokenMock.mockResolvedValue({})
     renderPage()
     await waitFor(() => expect(screen.getByText('Connected')).toBeInTheDocument())
-    await userEvent.click(
-      screen.getByRole('button', { name: /disconnect scm provider/i }),
-    )
+    await userEvent.click(screen.getByRole('button', { name: /disconnect scm provider/i }))
     await waitFor(() => expect(revokeSCMTokenMock).toHaveBeenCalledWith('scm-1'))
   })
 
@@ -332,9 +340,7 @@ describe('SCMProvidersPage', () => {
     await userEvent.click(screen.getByRole('button', { name: /edit scm provider/i }))
     await waitFor(() => expect(screen.getByText('Edit Provider')).toBeInTheDocument())
     await userEvent.click(screen.getByRole('button', { name: /^cancel$/i }))
-    await waitFor(() =>
-      expect(screen.queryByText('Edit Provider')).not.toBeInTheDocument(),
-    )
+    await waitFor(() => expect(screen.queryByText('Edit Provider')).not.toBeInTheDocument())
     expect(updateSCMProviderMock).not.toHaveBeenCalled()
   })
 
@@ -346,9 +352,7 @@ describe('SCMProvidersPage', () => {
     await userEvent.click(screen.getByRole('button', { name: /connect scm provider/i }))
     await waitFor(() => expect(screen.getByText(/oauth boom/i)).toBeInTheDocument())
     await userEvent.click(screen.getByRole('button', { name: /close/i }))
-    await waitFor(() =>
-      expect(screen.queryByText(/oauth boom/i)).not.toBeInTheDocument(),
-    )
+    await waitFor(() => expect(screen.queryByText(/oauth boom/i)).not.toBeInTheDocument())
   })
 
   it('renders Bitbucket / GitLab / Azure DevOps provider cards', async () => {

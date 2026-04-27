@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { useParams, useNavigate, Link as RouterLink } from 'react-router-dom';
+import React, { useState, useEffect, useCallback } from 'react'
+import { useParams, useNavigate, Link as RouterLink } from 'react-router-dom'
 import {
   Container,
   Typography,
@@ -25,30 +25,30 @@ import {
   DialogContent,
   DialogActions,
   TextField,
-} from '@mui/material';
-import ArrowBack from '@mui/icons-material/ArrowBack';
-import DeleteIcon from '@mui/icons-material/Delete';
-import WarningIcon from '@mui/icons-material/Warning';
-import RestoreIcon from '@mui/icons-material/Restore';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import ExpandLessIcon from '@mui/icons-material/ExpandLess';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import ErrorIcon from '@mui/icons-material/Error';
-import OpenInNewIcon from '@mui/icons-material/OpenInNew';
-import api from '../services/api';
-import { getErrorMessage } from '../utils/errors';
+} from '@mui/material'
+import ArrowBack from '@mui/icons-material/ArrowBack'
+import DeleteIcon from '@mui/icons-material/Delete'
+import WarningIcon from '@mui/icons-material/Warning'
+import RestoreIcon from '@mui/icons-material/Restore'
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
+import ExpandLessIcon from '@mui/icons-material/ExpandLess'
+import CheckCircleIcon from '@mui/icons-material/CheckCircle'
+import ErrorIcon from '@mui/icons-material/Error'
+import OpenInNewIcon from '@mui/icons-material/OpenInNew'
+import api from '../services/api'
+import { getErrorMessage } from '../utils/errors'
 import {
   type TerraformVersion,
   type TerraformVersionPlatform,
   syncStatusColor,
-} from '../types/terraform_mirror';
-import { useAuth } from '../contexts/AuthContext';
+} from '../types/terraform_mirror'
+import { useAuth } from '../contexts/AuthContext'
 
 // Minimal config shape returned by the public endpoint
 interface PublicMirrorSummary {
-  name: string;
-  description?: string | null;
-  tool: string;
+  name: string
+  description?: string | null
+  tool: string
 }
 
 // ---------------------------------------------------------------------------
@@ -61,27 +61,27 @@ const PlatformRows: React.FC<{ mirrorName: string; version: string }> = ({
   mirrorName,
   version,
 }) => {
-  const [platforms, setPlatforms] = useState<TerraformVersionPlatform[] | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [platforms, setPlatforms] = useState<TerraformVersionPlatform[] | null>(null)
+  const [loading, setLoading] = useState(false)
 
   useEffect(() => {
-    let cancelled = false;
-    setLoading(true);
+    let cancelled = false
+    setLoading(true)
     api
       .getPublicTerraformVersion(mirrorName, version)
       .then((data) => {
-        if (!cancelled) setPlatforms(data.platforms ?? []);
+        if (!cancelled) setPlatforms(data.platforms ?? [])
       })
       .catch(() => {
-        if (!cancelled) setPlatforms([]);
+        if (!cancelled) setPlatforms([])
       })
       .finally(() => {
-        if (!cancelled) setLoading(false);
-      });
+        if (!cancelled) setLoading(false)
+      })
     return () => {
-      cancelled = true;
-    };
-  }, [mirrorName, version]);
+      cancelled = true
+    }
+  }, [mirrorName, version])
 
   if (loading) {
     return (
@@ -90,7 +90,7 @@ const PlatformRows: React.FC<{ mirrorName: string; version: string }> = ({
           <CircularProgress size={16} />
         </TableCell>
       </TableRow>
-    );
+    )
   }
 
   if (!platforms || platforms.length === 0) {
@@ -102,7 +102,7 @@ const PlatformRows: React.FC<{ mirrorName: string; version: string }> = ({
           </Typography>
         </TableCell>
       </TableRow>
-    );
+    )
   }
 
   return (
@@ -139,8 +139,8 @@ const PlatformRows: React.FC<{ mirrorName: string; version: string }> = ({
         </TableRow>
       ))}
     </>
-  );
-};
+  )
+}
 
 // ---------------------------------------------------------------------------
 // Version row
@@ -148,25 +148,25 @@ const PlatformRows: React.FC<{ mirrorName: string; version: string }> = ({
 
 /** Derive the upstream release-notes URL for known tools. Returns null for custom/unknown tools. */
 function getChangelogUrl(tool: string, version: string): string | null {
-  const v = version.startsWith('v') ? version : `v${version}`;
+  const v = version.startsWith('v') ? version : `v${version}`
   switch (tool) {
     case 'terraform':
-      return `https://github.com/hashicorp/terraform/releases/tag/${v}`;
+      return `https://github.com/hashicorp/terraform/releases/tag/${v}`
     case 'opentofu':
-      return `https://github.com/opentofu/opentofu/releases/tag/${v}`;
+      return `https://github.com/opentofu/opentofu/releases/tag/${v}`
     default:
-      return null;
+      return null
   }
 }
 
 interface VersionRowProps {
-  version: TerraformVersion;
-  mirrorName: string;
-  tool: string;
-  canManage: boolean;
-  onDeprecate: (v: TerraformVersion) => void;
-  onUndeprecate: (v: TerraformVersion) => void;
-  onDelete: (v: TerraformVersion) => void;
+  version: TerraformVersion
+  mirrorName: string
+  tool: string
+  canManage: boolean
+  onDeprecate: (v: TerraformVersion) => void
+  onUndeprecate: (v: TerraformVersion) => void
+  onDelete: (v: TerraformVersion) => void
 }
 
 const VersionRow: React.FC<VersionRowProps> = ({
@@ -178,8 +178,8 @@ const VersionRow: React.FC<VersionRowProps> = ({
   onUndeprecate,
   onDelete,
 }) => {
-  const [open, setOpen] = useState(false);
-  const changelogUrl = getChangelogUrl(tool, version.version);
+  const [open, setOpen] = useState(false)
+  const changelogUrl = getChangelogUrl(tool, version.version)
 
   return (
     <>
@@ -191,7 +191,11 @@ const VersionRow: React.FC<VersionRowProps> = ({
         }}
       >
         <TableCell width={48}>
-          <IconButton size="small" aria-label="Toggle version details" onClick={() => setOpen((p) => !p)}>
+          <IconButton
+            size="small"
+            aria-label="Toggle version details"
+            onClick={() => setOpen((p) => !p)}
+          >
             {open ? <ExpandLessIcon /> : <ExpandMoreIcon />}
           </IconButton>
         </TableCell>
@@ -235,7 +239,11 @@ const VersionRow: React.FC<VersionRowProps> = ({
             <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 0.5 }}>
               {version.is_deprecated ? (
                 <Tooltip title="Remove deprecation (re-enable syncing)">
-                  <IconButton size="small" aria-label="Undeprecate version" onClick={() => onUndeprecate(version)}>
+                  <IconButton
+                    size="small"
+                    aria-label="Undeprecate version"
+                    onClick={() => onUndeprecate(version)}
+                  >
                     <RestoreIcon fontSize="small" />
                   </IconButton>
                 </Tooltip>
@@ -299,136 +307,139 @@ const VersionRow: React.FC<VersionRowProps> = ({
         </TableCell>
       </TableRow>
     </>
-  );
-};
+  )
+}
 
 // ---------------------------------------------------------------------------
 // Main page
 // ---------------------------------------------------------------------------
 
 const TerraformBinaryDetailPage: React.FC = () => {
-  const { name } = useParams<{ name: string }>();
-  const navigate = useNavigate();
-  const { isAuthenticated, allowedScopes } = useAuth();
-  const canManage = isAuthenticated && (allowedScopes.includes('admin') || allowedScopes.includes('mirrors:manage'));
+  const { name } = useParams<{ name: string }>()
+  const navigate = useNavigate()
+  const { isAuthenticated, allowedScopes } = useAuth()
+  const canManage =
+    isAuthenticated && (allowedScopes.includes('admin') || allowedScopes.includes('mirrors:manage'))
 
-  const [config, setConfig] = useState<PublicMirrorSummary | null>(null);
+  const [config, setConfig] = useState<PublicMirrorSummary | null>(null)
   // configId is the UUID needed for admin actions (deprecate/delete)
-  const [configId, setConfigId] = useState<string | null>(null);
-  const [versions, setVersions] = useState<TerraformVersion[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [actionError, setActionError] = useState<string | null>(null);
-  const [actionSuccess, setActionSuccess] = useState<string | null>(null);
+  const [configId, setConfigId] = useState<string | null>(null)
+  const [versions, setVersions] = useState<TerraformVersion[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [actionError, setActionError] = useState<string | null>(null)
+  const [actionSuccess, setActionSuccess] = useState<string | null>(null)
 
   // Deprecate dialog
-  const [deprecateTarget, setDeprecateTarget] = useState<TerraformVersion | null>(null);
-  const [deprecateMessage, setDeprecateMessage] = useState('');
-  const [deprecating, setDeprecating] = useState(false);
+  const [deprecateTarget, setDeprecateTarget] = useState<TerraformVersion | null>(null)
+  const [deprecateMessage, setDeprecateMessage] = useState('')
+  const [deprecating, setDeprecating] = useState(false)
 
   // Undeprecate
-  const [undeprecating, setUndeprecating] = useState(false);
+  const [undeprecating, setUndeprecating] = useState(false)
 
   // Delete dialog
-  const [deleteTarget, setDeleteTarget] = useState<TerraformVersion | null>(null);
-  const [deleting, setDeleting] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<TerraformVersion | null>(null)
+  const [deleting, setDeleting] = useState(false)
 
   // ---------------------------------------------------------------------------
   // Load
   // ---------------------------------------------------------------------------
 
   const loadData = useCallback(async () => {
-    if (!name) return;
-    setLoading(true);
-    setError(null);
+    if (!name) return
+    setLoading(true)
+    setError(null)
     try {
       // Both endpoints are public — no auth required.
       // The versions response includes config_id (UUID) which we need for admin actions.
       const [publicConfigs, versionsData] = await Promise.all([
         api.listPublicTerraformMirrorConfigs(),
         api.listPublicTerraformVersions(name),
-      ]);
-      const found = publicConfigs.find((c) => c.name === name);
+      ])
+      const found = publicConfigs.find((c) => c.name === name)
       if (!found) {
-        setError(`Mirror config "${name}" not found.`);
-        return;
+        setError(`Mirror config "${name}" not found.`)
+        return
       }
-      setConfig(found);
+      setConfig(found)
       // Extract the config UUID from the first version record so we can call
       // admin actions (deprecate / delete / platforms) without hitting admin list.
-      const versionRows = versionsData.versions ?? [];
+      const versionRows = versionsData.versions ?? []
       if (versionRows.length > 0) {
-        setConfigId(versionRows[0].config_id);
+        setConfigId(versionRows[0].config_id)
       }
       // Sort: latest first, then by version desc
       const sorted = [...versionRows].sort((a, b) => {
-        if (a.is_latest !== b.is_latest) return a.is_latest ? -1 : 1;
-        return b.version.localeCompare(a.version, undefined, { numeric: true });
-      });
-      setVersions(sorted);
+        if (a.is_latest !== b.is_latest) return a.is_latest ? -1 : 1
+        return b.version.localeCompare(a.version, undefined, { numeric: true })
+      })
+      setVersions(sorted)
     } catch {
-      setError(`Failed to load details for "${name}".`);
+      setError(`Failed to load details for "${name}".`)
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  }, [name]);
+  }, [name])
 
   useEffect(() => {
-    loadData();
-  }, [loadData]);
+    loadData()
+  }, [loadData])
 
   // ---------------------------------------------------------------------------
   // Deprecate
   // ---------------------------------------------------------------------------
 
   const handleDeprecate = async () => {
-    if (!configId || !deprecateTarget) return;
-    setDeprecating(true);
+    if (!configId || !deprecateTarget) return
+    setDeprecating(true)
     try {
-      await api.deprecateTerraformVersion(configId, deprecateTarget.version);
-      setActionSuccess(`Version ${deprecateTarget.version} marked as deprecated. It will not be re-synced.`);
-      setDeprecateTarget(null);
-      setDeprecateMessage('');
-      loadData();
+      await api.deprecateTerraformVersion(configId, deprecateTarget.version)
+      setActionSuccess(
+        `Version ${deprecateTarget.version} marked as deprecated. It will not be re-synced.`,
+      )
+      setDeprecateTarget(null)
+      setDeprecateMessage('')
+      loadData()
     } catch (err: unknown) {
-      setActionError(getErrorMessage(err, 'Failed to deprecate version'));
+      setActionError(getErrorMessage(err, 'Failed to deprecate version'))
     } finally {
-      setDeprecating(false);
+      setDeprecating(false)
     }
-  };
+  }
 
   const handleUndeprecate = async (version: TerraformVersion) => {
-    if (!configId) return;
-    setUndeprecating(true);
+    if (!configId) return
+    setUndeprecating(true)
     try {
-      await api.undeprecateTerraformVersion(configId, version.version);
-      setActionSuccess(`Deprecation removed from version ${version.version}.`);
-      loadData();
+      await api.undeprecateTerraformVersion(configId, version.version)
+      setActionSuccess(`Deprecation removed from version ${version.version}.`)
+      loadData()
     } catch (err: unknown) {
-      setActionError(getErrorMessage(err, 'Failed to remove deprecation'));
+      setActionError(getErrorMessage(err, 'Failed to remove deprecation'))
     } finally {
-      setUndeprecating(false);
+      setUndeprecating(false)
     }
-  };
+  }
 
   // ---------------------------------------------------------------------------
   // Delete
   // ---------------------------------------------------------------------------
 
   const handleDelete = async () => {
-    if (!configId || !deleteTarget) return;
-    setDeleting(true);
+    if (!configId || !deleteTarget) return
+    setDeleting(true)
     try {
-      await api.deleteTerraformVersion(configId, deleteTarget.version);
-      setActionSuccess(`Version ${deleteTarget.version} deleted.`);
-      setDeleteTarget(null);
-      loadData();
+      await api.deleteTerraformVersion(configId, deleteTarget.version)
+      setActionSuccess(`Version ${deleteTarget.version} deleted.`)
+      setDeleteTarget(null)
+      loadData()
     } catch (err: unknown) {
-      setActionError(getErrorMessage(err, 'Failed to delete version'));
+      setActionError(getErrorMessage(err, 'Failed to delete version'))
     } finally {
-      setDeleting(false);
+      setDeleting(false)
     }
-  };
+  }
 
   // ---------------------------------------------------------------------------
   // Render
@@ -439,10 +450,10 @@ const TerraformBinaryDetailPage: React.FC = () => {
       ? 'Terraform (HashiCorp)'
       : config?.tool === 'opentofu'
         ? 'OpenTofu'
-        : config?.tool ?? '';
+        : (config?.tool ?? '')
 
   const toolColor =
-    config?.tool === 'terraform' ? 'primary' : config?.tool === 'opentofu' ? 'secondary' : 'default';
+    config?.tool === 'terraform' ? 'primary' : config?.tool === 'opentofu' ? 'secondary' : 'default'
 
   return (
     <Box aria-busy={loading} aria-live="polite">
@@ -455,7 +466,11 @@ const TerraformBinaryDetailPage: React.FC = () => {
       ) : error ? (
         <Container sx={{ py: 4 }}>
           <Alert severity="error">{error}</Alert>
-          <Button sx={{ mt: 2 }} startIcon={<ArrowBack />} onClick={() => navigate('/terraform-binaries')}>
+          <Button
+            sx={{ mt: 2 }}
+            startIcon={<ArrowBack />}
+            onClick={() => navigate('/terraform-binaries')}
+          >
             Back to Mirrors
           </Button>
         </Container>
@@ -474,14 +489,23 @@ const TerraformBinaryDetailPage: React.FC = () => {
           {/* Back button + title */}
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
             <Tooltip title="Back to mirrors">
-              <IconButton size="small" aria-label="Back to binaries" onClick={() => navigate('/terraform-binaries')}>
+              <IconButton
+                size="small"
+                aria-label="Back to binaries"
+                onClick={() => navigate('/terraform-binaries')}
+              >
                 <ArrowBack />
               </IconButton>
             </Tooltip>
             <Typography variant="h4" fontFamily="monospace">
               {name}
             </Typography>
-            <Chip label={toolLabel} color={toolColor as 'primary' | 'secondary' | 'default'} size="small" variant="outlined" />
+            <Chip
+              label={toolLabel}
+              color={toolColor as 'primary' | 'secondary' | 'default'}
+              size="small"
+              variant="outlined"
+            />
             {/* Public endpoint only returns enabled configs; no disabled chip needed */}
           </Box>
 
@@ -495,7 +519,10 @@ const TerraformBinaryDetailPage: React.FC = () => {
           <Alert severity="info" sx={{ mb: 3 }}>
             <Typography variant="body2">
               <strong>Mirror download URL: </strong>
-              <code>{window.location.origin}/terraform/binaries/{name}/versions/&#123;version&#125;/&#123;os&#125;/&#123;arch&#125;</code>
+              <code>
+                {window.location.origin}/terraform/binaries/{name}
+                /versions/&#123;version&#125;/&#123;os&#125;/&#123;arch&#125;
+              </code>
             </Typography>
           </Alert>
 
@@ -550,7 +577,10 @@ const TerraformBinaryDetailPage: React.FC = () => {
           {/* ---- Deprecate Dialog ---- */}
           <Dialog
             open={!!deprecateTarget}
-            onClose={() => { setDeprecateTarget(null); setDeprecateMessage(''); }}
+            onClose={() => {
+              setDeprecateTarget(null)
+              setDeprecateMessage('')
+            }}
             maxWidth="sm"
             fullWidth
           >
@@ -571,7 +601,12 @@ const TerraformBinaryDetailPage: React.FC = () => {
               />
             </DialogContent>
             <DialogActions>
-              <Button onClick={() => { setDeprecateTarget(null); setDeprecateMessage(''); }}>
+              <Button
+                onClick={() => {
+                  setDeprecateTarget(null)
+                  setDeprecateMessage('')
+                }}
+              >
                 Cancel
               </Button>
               <Button
@@ -590,9 +625,9 @@ const TerraformBinaryDetailPage: React.FC = () => {
             <DialogTitle>Delete Version {deleteTarget?.version}</DialogTitle>
             <DialogContent>
               <Typography>
-                Are you sure you want to delete version{' '}
-                <strong>{deleteTarget?.version}</strong>? This removes the version record and cannot
-                be undone. Any synced binaries in storage will also be removed.
+                Are you sure you want to delete version <strong>{deleteTarget?.version}</strong>?
+                This removes the version record and cannot be undone. Any synced binaries in storage
+                will also be removed.
               </Typography>
               {deleteTarget?.is_deprecated === false && (
                 <Alert severity="info" sx={{ mt: 2 }}>
@@ -611,7 +646,7 @@ const TerraformBinaryDetailPage: React.FC = () => {
         </Container>
       )}
     </Box>
-  );
-};
+  )
+}
 
-export default TerraformBinaryDetailPage;
+export default TerraformBinaryDetailPage

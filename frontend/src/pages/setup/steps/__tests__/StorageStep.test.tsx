@@ -3,7 +3,11 @@ import userEvent from '@testing-library/user-event'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 
 const mockCtx = {
-  storageForm: { backend_type: 'local' as string, local_base_path: '/data', local_serve_directly: true } as Record<string, unknown>,
+  storageForm: {
+    backend_type: 'local' as string,
+    local_base_path: '/data',
+    local_serve_directly: true,
+  } as Record<string, unknown>,
   setStorageForm: vi.fn(),
   changeStorageBackend: vi.fn(),
   storageTesting: false,
@@ -23,7 +27,11 @@ import StorageStep from '../StorageStep'
 
 beforeEach(() => {
   vi.clearAllMocks()
-  mockCtx.storageForm = { backend_type: 'local', local_base_path: '/data', local_serve_directly: true }
+  mockCtx.storageForm = {
+    backend_type: 'local',
+    local_base_path: '/data',
+    local_serve_directly: true,
+  }
   mockCtx.storageTesting = false
   mockCtx.storageTestResult = null
   mockCtx.storageSaving = false
@@ -108,7 +116,7 @@ describe('StorageStep', () => {
     render(<StorageStep />)
     fireEvent.change(screen.getByLabelText('Base Path'), { target: { value: '/new/path' } })
     expect(mockCtx.setStorageForm).toHaveBeenCalledWith(
-      expect.objectContaining({ local_base_path: '/new/path' })
+      expect.objectContaining({ local_base_path: '/new/path' }),
     )
   })
 
@@ -125,7 +133,9 @@ describe('StorageStep', () => {
     fireEvent.change(screen.getByLabelText(/Account Name/), { target: { value: 'acct' } })
     fireEvent.change(screen.getByLabelText(/Account Key/), { target: { value: 'key' } })
     fireEvent.change(screen.getByLabelText(/Container Name/), { target: { value: 'cont' } })
-    fireEvent.change(screen.getByLabelText(/CDN URL/), { target: { value: 'https://cdn.example.com' } })
+    fireEvent.change(screen.getByLabelText(/CDN URL/), {
+      target: { value: 'https://cdn.example.com' },
+    })
     expect(mockCtx.setStorageForm).toHaveBeenCalledTimes(4)
   })
 
@@ -144,7 +154,9 @@ describe('StorageStep', () => {
     render(<StorageStep />)
     fireEvent.change(screen.getByLabelText(/Region/), { target: { value: 'us-west-2' } })
     fireEvent.change(screen.getByLabelText(/^Bucket/), { target: { value: 'my-bucket' } })
-    fireEvent.change(screen.getByLabelText(/Endpoint/), { target: { value: 'https://s3.example.com' } })
+    fireEvent.change(screen.getByLabelText(/Endpoint/), {
+      target: { value: 'https://s3.example.com' },
+    })
     fireEvent.change(screen.getByLabelText(/Access Key ID/), { target: { value: 'AKIA...' } })
     fireEvent.change(screen.getByLabelText(/Secret Access Key/), { target: { value: 'secret' } })
     expect(mockCtx.setStorageForm).toHaveBeenCalledTimes(5)
@@ -156,7 +168,9 @@ describe('StorageStep', () => {
     expect(screen.getByLabelText(/Credentials File Path/)).toBeInTheDocument()
     fireEvent.change(screen.getByLabelText(/^Bucket/), { target: { value: 'gcs-b' } })
     fireEvent.change(screen.getByLabelText(/Project ID/), { target: { value: 'proj-1' } })
-    fireEvent.change(screen.getByLabelText(/Credentials File Path/), { target: { value: '/path/sa.json' } })
+    fireEvent.change(screen.getByLabelText(/Credentials File Path/), {
+      target: { value: '/path/sa.json' },
+    })
     expect(mockCtx.setStorageForm).toHaveBeenCalledTimes(3)
   })
 
