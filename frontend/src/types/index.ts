@@ -554,6 +554,9 @@ export interface ModuleScan {
   low_count: number
   raw_results: Record<string, unknown> | null
   error_message: string | null
+  // Scanner stderr/stdout captured during execution. Added in backend #264;
+  // optional because older scans predate the column.
+  execution_log?: string | null
   created_at: string
   updated_at: string
 }
@@ -589,6 +592,10 @@ export interface RecentScanEntry {
   low_count: number
   scanned_at: string | null
   created_at: string
+  // Diagnostic fields — optional; only populated by recent backends (>= #264).
+  // Surfaced in the admin Recent Scans table for troubleshooting failed scans.
+  error_message?: string | null
+  execution_log?: string | null
 }
 
 export interface ScanningStats {

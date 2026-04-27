@@ -190,4 +190,68 @@ describe('SecurityScanPanel', () => {
     )
     expect(screen.queryByTestId('rescan-button')).not.toBeInTheDocument()
   })
+
+  // Diagnostics — added in #199
+  describe('scanner output diagnostics', () => {
+    it('does not show the toggle when no execution_log or raw_results are present', () => {
+      render(
+        <SecurityScanPanel
+          canManage={true}
+          selectedVersion={fakeVersion}
+          moduleScan={{ ...baseScan, status: 'clean' }}
+          scanLoading={false}
+          scanNotFound={false}
+        />,
+      )
+      expect(screen.queryByTestId('scan-diagnostics-toggle')).not.toBeInTheDocument()
+    })
+
+    it('shows the toggle and reveals scanner output on click when execution_log is present', async () => {
+      const user = userEvent.setup()
+      render(
+        <SecurityScanPanel
+          canManage={true}
+          selectedVersion={fakeVersion}
+          moduleScan={{
+            ...baseScan,
+            status: 'error',
+            error_message: 'exit 1',
+            execution_log: 'fatal: cannot read tfconfig',
+          }}
+          scanLoading={false}
+          scanNotFound={false}
+        />,
+      )
+
+      // Error alert is always shown immediately for an error status
+      expect(screen.getByTestId('scan-error-alert')).toBeInTheDocument()
+
+      // Diagnostics start collapsed
+      expect(screen.queryByText('fatal: cannot read tfconfig')).not.toBeInTheDocument()
+
+      // Expand
+      await user.click(screen.getByTestId('scan-diagnostics-toggle'))
+      expect(screen.getByTestId('scan-diagnostics-log')).toBeInTheDocument()
+      expect(screen.getByText('fatal: cannot read tfconfig')).toBeInTheDocument()
+    })
+
+    it('reveals raw scanner JSON when raw_results has content', async () => {
+      const user = userEvent.setup()
+      render(
+        <SecurityScanPanel
+          canManage={true}
+          selectedVersion={fakeVersion}
+          moduleScan={{
+            ...baseScan,
+            status: 'findings',
+            raw_results: { Results: [{ id: 'CVE-2026-0001' }] },
+          }}
+          scanLoading={false}
+          scanNotFound={false}
+        />,
+      )
+      await user.click(screen.getByTestId('scan-diagnostics-toggle'))
+      expect(screen.getByText(/CVE-2026-0001/)).toBeInTheDocument()
+    })
+  })
 })
