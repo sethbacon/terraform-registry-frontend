@@ -68,7 +68,23 @@ import SessionExpiryWarning from './SessionExpiryWarning';
 
 const drawerWidth = 240;
 
-const SUPPORTED_LANGUAGES = ['en', 'es', 'fr', 'de', 'ja', 'pt', 'nl', 'nb', 'zh', 'it'] as const;
+// Native names are intentionally hardcoded (not translated) so each language is
+// always shown in its own script, making the picker usable even when the active
+// locale is one the user does not read.
+const LANGUAGE_NATIVE_NAMES = {
+  en: 'English',
+  es: 'Español',
+  fr: 'Français',
+  de: 'Deutsch',
+  ja: '日本語',
+  pt: 'Português',
+  nl: 'Nederlands',
+  nb: 'Norsk bokmål',
+  zh: '简体中文',
+  it: 'Italiano',
+} as const;
+
+const SUPPORTED_LANGUAGES = Object.keys(LANGUAGE_NATIVE_NAMES) as Array<keyof typeof LANGUAGE_NATIVE_NAMES>;
 
 const Layout = () => {
   const { t } = useTranslation();
@@ -523,7 +539,7 @@ const Layout = () => {
                 selected={i18n.language.startsWith(lang)}
                 onClick={() => handleChangeLanguage(lang)}
               >
-                {t(`language.${lang}`)}
+                {LANGUAGE_NATIVE_NAMES[lang]}
               </MenuItem>
             ))}
           </Menu>

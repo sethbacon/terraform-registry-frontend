@@ -162,18 +162,6 @@
     "success": "Suksess",
     "warning": "Advarsel"
   },
-  "language": {
-    "en": "engelsk",
-    "es": "Spansk",
-    "fr": "Fransk",
-    "de": "Tysk",
-    "ja": "Japansk",
-    "pt": "Portugisisk",
-    "nl": "Nederlandsk",
-    "nb": "Norsk bokmål",
-    "zh": "Forenklet kinesisk",
-    "it": "Italiensk"
-  },
   "help": {
     "default": {
       "title": "Hjelp",

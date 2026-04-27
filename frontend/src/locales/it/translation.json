@@ -162,18 +162,6 @@
     "success": "Successo",
     "warning": "Avviso"
   },
-  "language": {
-    "en": "Italiano",
-    "es": "Spagnolo",
-    "fr": "Francese",
-    "de": "Tedesco",
-    "ja": "Giapponese",
-    "pt": "Portoghese",
-    "nl": "Olandese",
-    "nb": "Bokmål",
-    "zh": "Cinese semplificato",
-    "it": "Italiano"
-  },
   "help": {
     "default": {
       "title": "Aiuto",

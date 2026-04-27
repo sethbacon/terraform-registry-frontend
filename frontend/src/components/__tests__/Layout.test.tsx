@@ -38,6 +38,7 @@ vi.mock('../AboutModal', () => ({
 }))
 
 import Layout from '../Layout'
+import i18n from '../../i18n'
 
 // ── Helpers ────────────────────────────────────────────────────────────────
 
@@ -416,6 +417,50 @@ describe('Layout', () => {
       await vi.waitFor(() => {
         expect(screen.getByTestId('command-palette-input')).toBeInTheDocument()
       })
+    })
+  })
+
+  // 21. Language picker — native names regardless of active locale (#229)
+  describe('language picker', () => {
+    const NATIVE_NAMES = [
+      'English',
+      'Español',
+      'Français',
+      'Deutsch',
+      '日本語',
+      'Português',
+      'Nederlands',
+      'Norsk bokmål',
+      '简体中文',
+      'Italiano',
+    ]
+
+    async function openSettingsMenu() {
+      const user = userEvent.setup()
+      renderLayout()
+      // The settings button's aria-label is itself translated, so look it up
+      // through i18n rather than hardcoding the English string.
+      await user.click(screen.getByLabelText(i18n.t('header.settings')))
+      return user
+    }
+
+    it.each(['en', 'es', 'fr', 'de', 'ja', 'pt', 'nl', 'nb', 'zh', 'it'])(
+      'shows all language names in their native script when active locale is %s',
+      async (locale) => {
+        await i18n.changeLanguage(locale)
+        await openSettingsMenu()
+
+        const menu = screen.getByRole('menu')
+        for (const name of NATIVE_NAMES) {
+          expect(within(menu).getByText(name)).toBeInTheDocument()
+        }
+      },
+    )
+
+    it('always shows English as an option in non-English locales', async () => {
+      await i18n.changeLanguage('de')
+      await openSettingsMenu()
+      expect(within(screen.getByRole('menu')).getByText('English')).toBeInTheDocument()
     })
   })
 })
