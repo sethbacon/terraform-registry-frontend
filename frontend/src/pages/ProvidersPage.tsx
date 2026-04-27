@@ -1,6 +1,7 @@
-import React, { useState, useCallback, useEffect, useRef } from 'react'
+import React, { useState, useCallback, useEffect, useMemo, useRef } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
+import { useTranslation } from 'react-i18next'
 import { useDebounce } from '../hooks/useDebounce'
 import {
   Container,
@@ -28,14 +29,6 @@ import { useAuth } from '../contexts/AuthContext'
 import RegistryItemCard from '../components/RegistryItemCard'
 import { RegistryItemGridSkeleton } from '../components/skeletons/RegistryItemCardSkeleton'
 
-/** Sort option value encodes both API sort field and order, separated by a colon. */
-const SORT_OPTIONS = [
-  { value: 'relevance', label: 'Relevance' },
-  { value: 'name:asc', label: 'Name A-Z' },
-  { value: 'name:desc', label: 'Name Z-A' },
-  { value: 'created_at:desc', label: 'Newest' },
-] as const
-
 /** Parse a combined sort value into separate sort/order strings for the API. */
 function parseSortValue(value: string): { sort?: string; order?: string } {
   if (value === 'relevance') return {}
@@ -51,9 +44,21 @@ function buildSortValue(sort?: string | null, order?: string | null): string {
 }
 
 const ProvidersPage: React.FC = () => {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const { isAuthenticated } = useAuth()
   const [searchParams, setSearchParams] = useSearchParams()
+
+  /** Sort option value encodes both API sort field and order, separated by a colon. */
+  const sortOptions = useMemo(
+    () => [
+      { value: 'relevance', label: t('providers.sortRelevance') },
+      { value: 'name:asc', label: t('providers.sortNameAsc') },
+      { value: 'name:desc', label: t('providers.sortNameDesc') },
+      { value: 'created_at:desc', label: t('providers.sortNewest') },
+    ],
+    [t],
+  )
 
   // Derive state from URL params
   const urlQuery = searchParams.get('q') ?? ''
@@ -125,7 +130,7 @@ const ProvidersPage: React.FC = () => {
 
   const providers: Provider[] = queryData?.providers ?? []
   const totalPages = queryData ? Math.ceil(queryData.meta.total / limit) : 1
-  const error = queryError ? 'Failed to load providers. Please try again.' : null
+  const error = queryError ? t('providers.loadError') : null
 
   const handleInputChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
     setInputValue(event.target.value)
@@ -199,10 +204,10 @@ const ProvidersPage: React.FC = () => {
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
         <Box>
           <Typography variant="h4" gutterBottom>
-            Terraform Providers
+            {t('providers.pageTitle')}
           </Typography>
           <Typography variant="body1" color="text.secondary">
-            Browse and discover Terraform providers in your organization
+            {t('providers.pageSubtitle')}
           </Typography>
         </Box>
         {isAuthenticated && (
@@ -212,7 +217,7 @@ const ProvidersPage: React.FC = () => {
             startIcon={<CloudUpload />}
             onClick={() => navigate('/admin/upload/provider')}
           >
-            Publish Provider
+            {t('providers.publishProvider')}
           </Button>
         )}
       </Box>
@@ -222,7 +227,7 @@ const ProvidersPage: React.FC = () => {
       <Box sx={{ display: 'flex', gap: 2, mb: 4, alignItems: 'flex-start' }}>
         <TextField
           fullWidth
-          placeholder="Search providers..."
+          placeholder={t('providers.searchPlaceholder')}
           value={inputValue}
           onChange={handleInputChange}
           InputProps={{
@@ -234,15 +239,15 @@ const ProvidersPage: React.FC = () => {
           }}
         />
         <FormControl sx={{ minWidth: 180 }} size="medium">
-          <InputLabel id="providers-sort-label">Sort By</InputLabel>
+          <InputLabel id="providers-sort-label">{t('providers.sortBy')}</InputLabel>
           <Select
             labelId="providers-sort-label"
             id="providers-sort-select"
             value={sortValue}
-            label="Sort By"
+            label={t('providers.sortBy')}
             onChange={handleSortChange}
           >
-            {SORT_OPTIONS.map((opt) => (
+            {sortOptions.map((opt) => (
               <MenuItem key={opt.value} value={opt.value}>
                 {opt.label}
               </MenuItem>
@@ -264,16 +269,16 @@ const ProvidersPage: React.FC = () => {
       ) : providers.length === 0 ? (
         <Box sx={{ textAlign: 'center', py: 8 }}>
           <Typography variant="h6" color="text.secondary">
-            No providers found
+            {t('providers.noResultsTitle')}
           </Typography>
           <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
             {urlQuery || urlSort
-              ? 'Try a different search query or sort option'
-              : 'Upload your first provider to get started'}
+              ? t('providers.noResultsTryDifferent')
+              : t('providers.noResultsUploadFirst')}
           </Typography>
           {(urlQuery || urlSort) && (
             <Button variant="outlined" sx={{ mt: 2 }} onClick={handleClearSearch}>
-              Clear filters
+              {t('providers.clearFilters')}
             </Button>
           )}
         </Box>
@@ -289,19 +294,28 @@ const ProvidersPage: React.FC = () => {
                   description={provider.description}
                   badge={
                     provider.source ? (
-                      <Chip label="Network Mirrored" size="small" color="info" variant="outlined" />
+                      <Chip
+                        label={t('providers.networkMirroredBadge')}
+                        size="small"
+                        color="info"
+                        variant="outlined"
+                      />
                     ) : undefined
                   }
                   chips={
                     <>
                       <Chip
-                        label={`Latest: ${provider.latest_version || 'N/A'}`}
+                        label={t('providers.latestVersion', {
+                          version: provider.latest_version || t('providers.latestVersionUnknown'),
+                        })}
                         size="small"
                         color="secondary"
                         variant="outlined"
                       />
                       <Chip
-                        label={`${provider.download_count ?? 0} downloads`}
+                        label={t('providers.downloadsCount', {
+                          count: provider.download_count ?? 0,
+                        })}
                         size="small"
                         sx={{ ml: 1 }}
                       />

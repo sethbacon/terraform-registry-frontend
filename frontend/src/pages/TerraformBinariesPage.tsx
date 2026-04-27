@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { Container, Typography, Box, Grid, Chip, CircularProgress, Alert } from '@mui/material'
 import api from '../services/api'
 import RegistryItemCard from '../components/RegistryItemCard'
@@ -21,6 +22,7 @@ const ToolChip: React.FC<{ tool: string }> = ({ tool }) => {
 }
 
 const TerraformBinariesPage: React.FC = () => {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const [configs, setConfigs] = useState<MirrorSummary[]>([])
   const [statsMap, setStatsMap] = useState<Record<string, MirrorStats>>({})
@@ -60,7 +62,7 @@ const TerraformBinariesPage: React.FC = () => {
         })
       })
       .catch(() => {
-        if (!cancelled) setError('Failed to load Terraform binary mirrors.')
+        if (!cancelled) setError(t('terraformBinaries.loadError'))
       })
       .finally(() => {
         if (!cancelled) setLoading(false)
@@ -69,17 +71,16 @@ const TerraformBinariesPage: React.FC = () => {
     return () => {
       cancelled = true
     }
-  }, [])
+  }, [t])
 
   return (
     <Container maxWidth="lg" sx={{ py: 4 }} aria-busy={loading} aria-live="polite">
       <Box sx={{ mb: 2 }}>
         <Typography variant="h4" gutterBottom>
-          Terraform Binary Mirrors
+          {t('terraformBinaries.pageTitle')}
         </Typography>
         <Typography variant="body1" color="text.secondary">
-          Download Terraform and OpenTofu binaries from your organisation's internal mirror.
-          Configure your CLI or CI toolchain to point at the mirror URL shown on each detail page.
+          {t('terraformBinaries.pageSubtitle')}
         </Typography>
       </Box>
       <Box sx={{ mb: 4 }} />
@@ -97,10 +98,10 @@ const TerraformBinariesPage: React.FC = () => {
       ) : configs.length === 0 ? (
         <Box sx={{ textAlign: 'center', py: 8 }}>
           <Typography variant="h6" color="text.secondary">
-            No binary mirrors configured
+            {t('terraformBinaries.noMirrorsTitle')}
           </Typography>
           <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-            Ask an administrator to set up a Terraform or OpenTofu binary mirror.
+            {t('terraformBinaries.noMirrorsBody')}
           </Typography>
         </Box>
       ) : (
@@ -117,13 +118,20 @@ const TerraformBinariesPage: React.FC = () => {
                     stats ? (
                       <>
                         <Chip
-                          label={`${stats.versionCount} version${stats.versionCount !== 1 ? 's' : ''}`}
+                          label={t(
+                            stats.versionCount === 1
+                              ? 'terraformBinaries.versionCountOne'
+                              : 'terraformBinaries.versionCountOther',
+                            { count: stats.versionCount },
+                          )}
                           size="small"
                           variant="outlined"
                         />
                         {stats.latestVersion && (
                           <Chip
-                            label={`Latest: ${stats.latestVersion}`}
+                            label={t('terraformBinaries.latestVersion', {
+                              version: stats.latestVersion,
+                            })}
                             size="small"
                             color="primary"
                             variant="outlined"
@@ -132,7 +140,11 @@ const TerraformBinariesPage: React.FC = () => {
                         )}
                       </>
                     ) : (
-                      <Chip label="Loading…" size="small" variant="outlined" />
+                      <Chip
+                        label={t('terraformBinaries.loadingVersions')}
+                        size="small"
+                        variant="outlined"
+                      />
                     )
                   }
                   onClick={() => navigate(`/terraform-binaries/${cfg.name}`)}
