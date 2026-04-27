@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.15.1](https://github.com/sethbacon/terraform-registry-frontend/compare/v0.15.0...v0.15.1) (2026-04-27)
+
+
+### Bug Fixes
+
+* **i18n:** update translations and decode HTML entities from DeepL ([#237](https://github.com/sethbacon/terraform-registry-frontend/issues/237)) ([4c9d96d](https://github.com/sethbacon/terraform-registry-frontend/commit/4c9d96dccbb79f66423b4bca1d48742218579781))
+
 ## [0.15.0](https://github.com/sethbacon/terraform-registry-frontend/compare/v0.14.2...v0.15.0) (2026-04-27)
 
 
