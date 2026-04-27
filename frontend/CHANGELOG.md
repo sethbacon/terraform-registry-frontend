@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.14.2](https://github.com/sethbacon/terraform-registry-frontend/compare/v0.14.1...v0.14.2) (2026-04-27)
+
+
+### Bug Fixes
+
+* **i18n:** show native language names in language picker ([#230](https://github.com/sethbacon/terraform-registry-frontend/issues/230)) ([4669b35](https://github.com/sethbacon/terraform-registry-frontend/commit/4669b35a710e4d421bf7b5fb1e216a2a30e1859f)), closes [#229](https://github.com/sethbacon/terraform-registry-frontend/issues/229)
+
 ## [0.14.1](https://github.com/sethbacon/terraform-registry-frontend/compare/v0.14.0...v0.14.1) (2026-04-26)
 
 
