@@ -202,8 +202,13 @@ jobs:
 
       - name: Run Playwright tests
         working-directory: e2e
+        # workers=2 (not 4) — under heavier parallelism, Firefox occasionally
+        # hangs `waitForLoadState('networkidle')` on /modules and /providers,
+        # exhausting the single retry and tripping --max-failures=1. Same
+        # mitigation that PR #182 originally applied; see #233 post-merge run
+        # 25007086815 for the regression that prompted reverting to 2.
         run: >-
-          npx playwright test --workers=4 --max-failures=1 --retries=1
+          npx playwright test --workers=2 --max-failures=1 --retries=1
           --reporter=list --grep-invert="Visual regression"
 
       - name: Upload Playwright artifacts
