@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useMemo, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import {
   Container,
@@ -17,12 +17,18 @@ import {
   TableRow,
   Tooltip,
   Grid,
+  IconButton,
+  Collapse,
 } from '@mui/material'
 import CheckCircle from '@mui/icons-material/CheckCircle'
 import Error from '@mui/icons-material/Error'
 import HourglassEmpty from '@mui/icons-material/HourglassEmpty'
 import WarningAmber from '@mui/icons-material/WarningAmber'
+import KeyboardArrowDown from '@mui/icons-material/KeyboardArrowDown'
+import KeyboardArrowRight from '@mui/icons-material/KeyboardArrowRight'
+import ScanDiagnostics from '../../components/ScanDiagnostics'
 import api from '../../services/api'
+import type { RecentScanEntry } from '../../types'
 
 function statusChip(status: string) {
   switch (status) {
@@ -51,6 +57,33 @@ function timeAgo(iso: string): string {
   return `${Math.floor(hrs / 24)}d ago`
 }
 
+interface ScannerHealth {
+  lastSuccess: RecentScanEntry | null
+  lastError: RecentScanEntry | null
+  errorRatePct: number
+  windowSize: number
+}
+
+function computeScannerHealth(scans: RecentScanEntry[]): ScannerHealth {
+  // Health is computed from the last 20 scans the API returns. Pending and
+  // in-progress scans are excluded from the error-rate denominator since
+  // they have no terminal outcome yet.
+  const window = scans.slice(0, 20)
+  const terminal = window.filter(
+    (s) => s.status === 'clean' || s.status === 'findings' || s.status === 'error',
+  )
+  const errors = terminal.filter((s) => s.status === 'error').length
+  const lastSuccess =
+    window.find((s) => (s.status === 'clean' || s.status === 'findings') && s.scanned_at) ?? null
+  const lastError = window.find((s) => s.status === 'error') ?? null
+  return {
+    lastSuccess,
+    lastError,
+    errorRatePct: terminal.length === 0 ? 0 : Math.round((errors / terminal.length) * 100),
+    windowSize: terminal.length,
+  }
+}
+
 const SecurityScanningPage: React.FC = () => {
   const {
     data: config,
@@ -69,6 +102,13 @@ const SecurityScanningPage: React.FC = () => {
     queryKey: ['scanning', 'stats'],
     queryFn: () => api.getScanningStats(),
   })
+
+  const [expandedScanId, setExpandedScanId] = useState<string | null>(null)
+
+  const health = useMemo(
+    () => computeScannerHealth(stats?.recent_scans ?? []),
+    [stats?.recent_scans],
+  )
 
   const loading = configLoading || statsLoading
   const error = configError || statsError
@@ -223,6 +263,70 @@ const SecurityScanningPage: React.FC = () => {
             </Box>
           )}
 
+          {/* Scanner Health */}
+          {stats && stats.recent_scans.length > 0 && (
+            <Paper sx={{ p: 3, mb: 3 }} data-testid="scanner-health">
+              <Typography variant="h6" gutterBottom>
+                Scanner Health
+              </Typography>
+              <Divider sx={{ mb: 2 }} />
+              <Grid container spacing={2}>
+                <Grid size={{ xs: 12, sm: 4 }}>
+                  <Typography variant="caption" color="text.secondary">
+                    Last successful scan
+                  </Typography>
+                  {health.lastSuccess?.scanned_at ? (
+                    <Tooltip title={new Date(health.lastSuccess.scanned_at).toLocaleString()}>
+                      <Typography variant="body1">
+                        {timeAgo(health.lastSuccess.scanned_at)}
+                      </Typography>
+                    </Tooltip>
+                  ) : (
+                    <Typography variant="body2" color="text.disabled">
+                      No successful scans in window
+                    </Typography>
+                  )}
+                </Grid>
+                <Grid size={{ xs: 12, sm: 4 }}>
+                  <Typography variant="caption" color="text.secondary">
+                    Error rate (last {health.windowSize || 0} scans)
+                  </Typography>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, mt: 0.5 }}>
+                    <Typography
+                      variant="h6"
+                      sx={{ color: health.errorRatePct > 0 ? 'error.main' : 'success.main' }}
+                    >
+                      {health.errorRatePct}%
+                    </Typography>
+                    {health.errorRatePct > 0 && <WarningAmber fontSize="small" color="warning" />}
+                  </Box>
+                </Grid>
+                <Grid size={{ xs: 12, sm: 4 }}>
+                  <Typography variant="caption" color="text.secondary">
+                    Last error
+                  </Typography>
+                  {health.lastError ? (
+                    <Box>
+                      <Typography variant="body2" fontFamily="monospace" noWrap>
+                        {health.lastError.namespace}/{health.lastError.module_name}/
+                        {health.lastError.system}
+                      </Typography>
+                      <Typography variant="caption" color="text.secondary">
+                        {health.lastError.scanned_at
+                          ? timeAgo(health.lastError.scanned_at)
+                          : timeAgo(health.lastError.created_at)}
+                      </Typography>
+                    </Box>
+                  ) : (
+                    <Typography variant="body2" color="success.main">
+                      No errors in window
+                    </Typography>
+                  )}
+                </Grid>
+              </Grid>
+            </Paper>
+          )}
+
           {/* Recent Scans */}
           <Paper sx={{ p: 3 }}>
             <Typography variant="h6" gutterBottom>
@@ -238,6 +342,7 @@ const SecurityScanningPage: React.FC = () => {
                 <Table size="small">
                   <TableHead>
                     <TableRow>
+                      <TableCell sx={{ width: 40 }} />
                       <TableCell>Module</TableCell>
                       <TableCell>Version</TableCell>
                       <TableCell>Scanner</TableCell>
@@ -250,35 +355,70 @@ const SecurityScanningPage: React.FC = () => {
                     </TableRow>
                   </TableHead>
                   <TableBody>
-                    {stats.recent_scans.map((scan) => (
-                      <TableRow key={scan.id} hover>
-                        <TableCell>
-                          <Typography variant="body2" fontFamily="monospace" noWrap>
-                            {scan.namespace}/{scan.module_name}/{scan.system}
-                          </Typography>
-                        </TableCell>
-                        <TableCell>{scan.module_version}</TableCell>
-                        <TableCell>{scan.scanner}</TableCell>
-                        <TableCell>{statusChip(scan.status)}</TableCell>
-                        <TableCell align="right">{scan.critical_count}</TableCell>
-                        <TableCell align="right">{scan.high_count}</TableCell>
-                        <TableCell align="right">{scan.medium_count}</TableCell>
-                        <TableCell align="right">{scan.low_count}</TableCell>
-                        <TableCell align="right">
-                          <Tooltip
-                            title={
-                              scan.scanned_at
-                                ? new Date(scan.scanned_at).toLocaleString()
-                                : 'Not scanned yet'
-                            }
-                          >
-                            <Typography variant="caption" color="text.secondary">
-                              {scan.scanned_at ? timeAgo(scan.scanned_at) : '—'}
-                            </Typography>
-                          </Tooltip>
-                        </TableCell>
-                      </TableRow>
-                    ))}
+                    {stats.recent_scans.map((scan) => {
+                      const hasDiagnostics =
+                        Boolean(scan.error_message) || Boolean(scan.execution_log)
+                      const isExpanded = expandedScanId === scan.id
+                      return (
+                        <React.Fragment key={scan.id}>
+                          <TableRow hover>
+                            <TableCell sx={{ p: 0.5 }}>
+                              {hasDiagnostics && (
+                                <IconButton
+                                  size="small"
+                                  aria-label={
+                                    isExpanded ? 'Hide scan details' : 'Show scan details'
+                                  }
+                                  onClick={() => setExpandedScanId(isExpanded ? null : scan.id)}
+                                  data-testid={`scan-row-toggle-${scan.id}`}
+                                >
+                                  {isExpanded ? <KeyboardArrowDown /> : <KeyboardArrowRight />}
+                                </IconButton>
+                              )}
+                            </TableCell>
+                            <TableCell>
+                              <Typography variant="body2" fontFamily="monospace" noWrap>
+                                {scan.namespace}/{scan.module_name}/{scan.system}
+                              </Typography>
+                            </TableCell>
+                            <TableCell>{scan.module_version}</TableCell>
+                            <TableCell>{scan.scanner}</TableCell>
+                            <TableCell>{statusChip(scan.status)}</TableCell>
+                            <TableCell align="right">{scan.critical_count}</TableCell>
+                            <TableCell align="right">{scan.high_count}</TableCell>
+                            <TableCell align="right">{scan.medium_count}</TableCell>
+                            <TableCell align="right">{scan.low_count}</TableCell>
+                            <TableCell align="right">
+                              <Tooltip
+                                title={
+                                  scan.scanned_at
+                                    ? new Date(scan.scanned_at).toLocaleString()
+                                    : 'Not scanned yet'
+                                }
+                              >
+                                <Typography variant="caption" color="text.secondary">
+                                  {scan.scanned_at ? timeAgo(scan.scanned_at) : '—'}
+                                </Typography>
+                              </Tooltip>
+                            </TableCell>
+                          </TableRow>
+                          {hasDiagnostics && (
+                            <TableRow>
+                              <TableCell colSpan={10} sx={{ py: 0, border: 0 }}>
+                                <Collapse in={isExpanded} unmountOnExit>
+                                  <Box sx={{ py: 2, px: 1 }}>
+                                    <ScanDiagnostics
+                                      errorMessage={scan.error_message}
+                                      executionLog={scan.execution_log}
+                                    />
+                                  </Box>
+                                </Collapse>
+                              </TableCell>
+                            </TableRow>
+                          )}
+                        </React.Fragment>
+                      )
+                    })}
                   </TableBody>
                 </Table>
               </TableContainer>

@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import {
   Box,
   Paper,
@@ -9,9 +9,13 @@ import {
   Alert,
   Stack,
   Button,
+  Collapse,
 } from '@mui/material'
 import SecurityIcon from '@mui/icons-material/Security'
 import RefreshIcon from '@mui/icons-material/Refresh'
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
+import ExpandLessIcon from '@mui/icons-material/ExpandLess'
+import ScanDiagnostics from './ScanDiagnostics'
 import { ModuleVersion, ModuleScan } from '../types'
 
 interface SecurityScanPanelProps {
@@ -35,10 +39,17 @@ const SecurityScanPanel: React.FC<SecurityScanPanelProps> = ({
   onRescan,
   rescanPending = false,
 }) => {
+  const [diagnosticsOpen, setDiagnosticsOpen] = useState(false)
+
   if (!canManage || !selectedVersion) return null
 
   const scanInProgress =
     moduleScan?.status === 'pending' || moduleScan?.status === 'scanning' || rescanPending
+
+  const hasDiagnostics = Boolean(
+    moduleScan?.execution_log ||
+      (moduleScan?.raw_results && Object.keys(moduleScan.raw_results).length > 0),
+  )
 
   return (
     <Paper sx={{ p: 3, mb: 3 }}>
@@ -91,7 +102,7 @@ const SecurityScanPanel: React.FC<SecurityScanPanelProps> = ({
             />
           </Box>
           {moduleScan.status === 'error' && moduleScan.error_message && (
-            <Alert severity="error" sx={{ mb: 1.5 }}>
+            <Alert severity="error" sx={{ mb: 1.5 }} data-testid="scan-error-alert">
               {moduleScan.error_message}
             </Alert>
           )}
@@ -127,6 +138,27 @@ const SecurityScanPanel: React.FC<SecurityScanPanelProps> = ({
             <Typography variant="caption" color="text.secondary" display="block">
               Scanned: {new Date(moduleScan.scanned_at).toLocaleString()}
             </Typography>
+          )}
+          {hasDiagnostics && (
+            <Box sx={{ mt: 1.5 }}>
+              <Button
+                size="small"
+                variant="text"
+                onClick={() => setDiagnosticsOpen((prev) => !prev)}
+                startIcon={diagnosticsOpen ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+                data-testid="scan-diagnostics-toggle"
+                sx={{ textTransform: 'none', mb: 1 }}
+              >
+                {diagnosticsOpen ? 'Hide' : 'Show'} scanner output
+              </Button>
+              <Collapse in={diagnosticsOpen} unmountOnExit>
+                <ScanDiagnostics
+                  errorMessage={null}
+                  executionLog={moduleScan.execution_log}
+                  rawResults={moduleScan.raw_results}
+                />
+              </Collapse>
+            </Box>
           )}
         </Box>
       ) : null}

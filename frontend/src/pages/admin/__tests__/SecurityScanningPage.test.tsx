@@ -1,4 +1,5 @@
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, screen, waitFor, within } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 
@@ -133,6 +134,89 @@ describe('SecurityScanningPage', () => {
     renderPage()
     await waitFor(() => {
       expect(screen.getByText('No scans recorded yet.')).toBeInTheDocument()
+    })
+  })
+
+  // Scanner Health + diagnostics — added in #199
+  describe('scanner health and diagnostics', () => {
+    const failedScan = {
+      id: 's-err',
+      namespace: 'acme',
+      module_name: 'vpc',
+      system: 'aws',
+      module_version: '2.0.0',
+      scanner: 'trivy',
+      status: 'error',
+      critical_count: 0,
+      high_count: 0,
+      medium_count: 0,
+      low_count: 0,
+      scanned_at: new Date(Date.now() - 5 * 60_000).toISOString(),
+      created_at: new Date(Date.now() - 5 * 60_000).toISOString(),
+      error_message: 'scanner exited 1',
+      execution_log: 'panic: runtime error: invalid memory address',
+    }
+
+    it('renders Scanner Health card when scans are present', async () => {
+      getScanningConfigMock.mockResolvedValue(fakeConfig)
+      getScanningStatsMock.mockResolvedValue(fakeStats)
+      renderPage()
+      await waitFor(() => {
+        expect(screen.getByTestId('scanner-health')).toBeInTheDocument()
+      })
+      expect(screen.getByText('Scanner Health')).toBeInTheDocument()
+      expect(screen.getByText('Last successful scan')).toBeInTheDocument()
+    })
+
+    it('hides Scanner Health card when there are no scans', async () => {
+      getScanningConfigMock.mockResolvedValue(fakeConfig)
+      getScanningStatsMock.mockResolvedValue({ ...fakeStats, recent_scans: [] })
+      renderPage()
+      await waitFor(() => {
+        expect(screen.getByText('No scans recorded yet.')).toBeInTheDocument()
+      })
+      expect(screen.queryByTestId('scanner-health')).not.toBeInTheDocument()
+    })
+
+    it('reports a non-zero error rate when window contains errors', async () => {
+      getScanningConfigMock.mockResolvedValue(fakeConfig)
+      getScanningStatsMock.mockResolvedValue({
+        ...fakeStats,
+        recent_scans: [failedScan, fakeStats.recent_scans[0]],
+      })
+      renderPage()
+      const health = await screen.findByTestId('scanner-health')
+      // 1 error out of 2 terminal scans = 50%
+      expect(within(health).getByText('50%')).toBeInTheDocument()
+    })
+
+    it('does not render an expand toggle for scans with no diagnostics', async () => {
+      getScanningConfigMock.mockResolvedValue(fakeConfig)
+      getScanningStatsMock.mockResolvedValue(fakeStats)
+      renderPage()
+      await waitFor(() => {
+        expect(screen.getByText('hashicorp/consul/aws')).toBeInTheDocument()
+      })
+      expect(screen.queryByTestId('scan-row-toggle-s-1')).not.toBeInTheDocument()
+    })
+
+    it('expands a failed scan row to show execution_log on toggle click', async () => {
+      const user = userEvent.setup()
+      getScanningConfigMock.mockResolvedValue(fakeConfig)
+      getScanningStatsMock.mockResolvedValue({
+        ...fakeStats,
+        recent_scans: [failedScan],
+      })
+      renderPage()
+
+      const toggle = await screen.findByTestId('scan-row-toggle-s-err')
+
+      // Collapsed initially
+      expect(screen.queryByText(/panic: runtime error/)).not.toBeInTheDocument()
+
+      await user.click(toggle)
+      expect(await screen.findByText(/panic: runtime error/)).toBeInTheDocument()
+      expect(screen.getByText('scanner exited 1')).toBeInTheDocument()
     })
   })
 })
