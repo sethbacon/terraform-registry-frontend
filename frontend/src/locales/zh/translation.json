@@ -184,7 +184,7 @@
     "noResultsTryDifferent": "请尝试其他搜索词或排序选项",
     "noResultsUploadFirst": "上传您的第一个模块，开始吧",
     "clearFilters": "清除筛选条件",
-    "latestVersion": "最新消息：{{version}}",
+    "latestVersion": "最新版本：{{version}}",
     "latestVersionUnknown": "不适用",
     "downloadsCount": "{{count}} 下载"
   },
@@ -204,7 +204,7 @@
     "noResultsUploadFirst": "上传您的首个服务提供商，开始使用",
     "clearFilters": "清除筛选条件",
     "networkMirroredBadge": "网络镜像",
-    "latestVersion": "最新消息：{{version}}",
+    "latestVersion": "最新版本：{{version}}",
     "latestVersionUnknown": "不适用",
     "downloadsCount": "{{count}} 下载"
   },
@@ -216,7 +216,7 @@
     "noMirrorsBody": "请管理员设置一个 Terraform 或 OpenTofu 二进制镜像。",
     "versionCountOne": "{{count}} 版本",
     "versionCountOther": "{{count}} 版本",
-    "latestVersion": "最新消息：{{version}}",
+    "latestVersion": "最新版本：{{version}}",
     "loadingVersions": "正在加载……"
   },
   "help": {

@@ -112,11 +112,27 @@ async function translateDeepL(texts, targetLang, apiKey) {
 
     const data = await res.json();
     for (const t of data.translations) {
-      // Strip the wrapper tags we added
-      results.push(t.text.replace(/<\/?keep>/g, ''));
+      // Strip wrapper tags and decode HTML entities. DeepL's html tag_handling
+      // mode encodes ASCII punctuation (most commonly the apostrophe in French
+      // and Italian) as &#x27; — without this decode it leaks into the UI.
+      let text = t.text.replace(/<\/?keep>/g, '');
+      text = decodeHtmlEntities(text);
+      results.push(text);
     }
   }
   return results;
+}
+
+function decodeHtmlEntities(text) {
+  return text
+    .replace(/&#x27;/gi, "'")
+    .replace(/&#39;/g, "'")
+    .replace(/&quot;/g, '"')
+    .replace(/&apos;/g, "'")
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    // &amp; must be last so we don't double-decode entities like &amp;quot;
+    .replace(/&amp;/g, '&');
 }
 
 async function translateGoogle(texts, targetLang, apiKey) {
@@ -146,14 +162,10 @@ async function translateGoogle(texts, targetLang, apiKey) {
 
     const data = await res.json();
     for (const t of data.data.translations) {
-      // Decode HTML entities that Google returns and strip wrapper spans
-      let text = t.translatedText;
-      text = text.replace(/<span translate="no">(.*?)<\/span>/gi, '$1');
-      text = text.replace(/&quot;/g, '"');
-      text = text.replace(/&#39;/g, "'");
-      text = text.replace(/&amp;/g, '&');
-      text = text.replace(/&lt;/g, '<');
-      text = text.replace(/&gt;/g, '>');
+      // Strip wrapper spans, then decode HTML entities (Google translates in
+      // html mode and re-encodes punctuation in the output).
+      let text = t.translatedText.replace(/<span translate="no">(.*?)<\/span>/gi, '$1');
+      text = decodeHtmlEntities(text);
       results.push(text);
     }
   }

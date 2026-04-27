@@ -184,7 +184,7 @@
     "noResultsTryDifferent": "Probeer een andere zoekopdracht of sorteeroptie",
     "noResultsUploadFirst": "Upload je eerste module om aan de slag te gaan",
     "clearFilters": "Filters wissen",
-    "latestVersion": "Laatste nieuws: {{version}}",
+    "latestVersion": "Laatste versie: {{version}}",
     "latestVersionUnknown": "n.v.t.",
     "downloadsCount": "{{count}} downloads"
   },
@@ -204,7 +204,7 @@
     "noResultsUploadFirst": "Upload je eerste leverancier om aan de slag te gaan",
     "clearFilters": "Filters wissen",
     "networkMirroredBadge": "Netwerkgespiegeld",
-    "latestVersion": "Laatste nieuws: {{version}}",
+    "latestVersion": "Laatste versie: {{version}}",
     "latestVersionUnknown": "n.v.t.",
     "downloadsCount": "{{count}} downloads"
   },
@@ -216,7 +216,7 @@
     "noMirrorsBody": "Vraag een beheerder om een Terraform- of OpenTofu-binaire mirror in te stellen.",
     "versionCountOne": "{{count}} versie",
     "versionCountOther": "{{count}} versies",
-    "latestVersion": "Laatste nieuws: {{version}}",
+    "latestVersion": "Laatste versie: {{version}}",
     "loadingVersions": "Bezig met laden…"
   },
   "help": {
@@ -236,11 +236,11 @@
       "actions": {
         "browseModules": {
           "heading": "Modules bekijken",
-          "text": "Klik op &#x27;Modules&#x27; in de zijbalk om gepubliceerde Terraform-modules te zoeken en te bekijken."
+          "text": "Klik op 'Modules' in de zijbalk om gepubliceerde Terraform-modules te zoeken en te bekijken."
         },
         "browseProviders": {
           "heading": "Bekijk aanbieders",
-          "text": "Klik op &quot;Providers&quot; om de beschikbare provider-binaire bestanden in dit register te bekijken."
+          "text": "Klik op \"Providers\" om de beschikbare provider-binaire bestanden in dit register te bekijken."
         },
         "adminAccess": {
           "heading": "Beheerdersrechten",
@@ -362,7 +362,7 @@
       "actions": {
         "createUser": {
           "heading": "Gebruiker aanmaken",
-          "text": "Klik op &quot;Gebruiker toevoegen&quot; om een nieuw account aan te maken met een e-mailadres en een weergavenaam."
+          "text": "Klik op \"Gebruiker toevoegen\" om een nieuw account aan te maken met een e-mailadres en een weergavenaam."
         },
         "editUser": {
           "heading": "Gebruiker bewerken",
@@ -380,7 +380,7 @@
       "actions": {
         "createOrganization": {
           "heading": "Organisatie aanmaken",
-          "text": "Klik op &quot;Organisatie toevoegen&quot; om een nieuwe naamruimte aan te maken met een URL-veilige naam."
+          "text": "Klik op \"Organisatie toevoegen\" om een nieuwe naamruimte aan te maken met een URL-veilige naam."
         },
         "manageMembers": {
           "heading": "Leden beheren",
@@ -412,7 +412,7 @@
       "actions": {
         "groupClaimName": {
           "heading": "Naam van de collectieve vordering",
-          "text": "Stel dit in op de claim-sleutel in uw OIDC-ID-token die de groepslijst van de gebruiker bevat (bijvoorbeeld &quot;groups&quot;). Dit moet overeenkomen met de protocolmapper die in uw identiteitsprovider is geconfigureerd."
+          "text": "Stel dit in op de claim-sleutel in uw OIDC-ID-token die de groepslijst van de gebruiker bevat (bijvoorbeeld \"groups\"). Dit moet overeenkomen met de protocolmapper die in uw identiteitsprovider is geconfigureerd."
         },
         "defaultRole": {
           "heading": "Standaardrol",
@@ -420,7 +420,7 @@
         },
         "addMapping": {
           "heading": "Een koppeling toevoegen",
-          "text": "Klik op &quot;Toewijzing toevoegen&quot; om een IdP-groepsnaam te koppelen aan een registratieorganisatie en een rol-sjabloon. De groepsnaam moet exact overeenkomen met de waarde zoals deze in de claim van het ID-token staat vermeld."
+          "text": "Klik op \"Toewijzing toevoegen\" om een IdP-groepsnaam te koppelen aan een registratieorganisatie en een rol-sjabloon. De groepsnaam moet exact overeenkomen met de waarde zoals deze in de claim van het ID-token staat vermeld."
         },
         "roleTemplates": {
           "heading": "Rolmodellen",
@@ -428,7 +428,7 @@
         },
         "saveChanges": {
           "heading": "Wijzigingen opslaan",
-          "text": "Klik op &quot;Wijzigingen opslaan&quot; om je groepsclaim en toewijzingsconfiguratie op te slaan. Bestaande sessies worden pas beïnvloed wanneer de gebruiker zich opnieuw aanmeldt."
+          "text": "Klik op \"Wijzigingen opslaan\" om je groepsclaim en toewijzingsconfiguratie op te slaan. Bestaande sessies worden pas beïnvloed wanneer de gebruiker zich opnieuw aanmeldt."
         }
       }
     },
@@ -438,7 +438,7 @@
       "actions": {
         "createKey": {
           "heading": "Sleutel aanmaken",
-          "text": "Klik op &quot;API-sleutel aanmaken&quot; om een nieuwe sleutel te genereren. Kopieer deze meteen — hij wordt niet nogmaals weergegeven."
+          "text": "Klik op \"API-sleutel aanmaken\" om een nieuwe sleutel te genereren. Kopieer deze meteen — hij wordt niet nogmaals weergegeven."
         },
         "revokeKey": {
           "heading": "Sleutel intrekken",
@@ -456,11 +456,11 @@
       "actions": {
         "uploadModule": {
           "heading": "Uploadmodule",
-          "text": "Selecteer het tabblad &quot;Module&quot;, voer de naamruimte, naam, systeem en versie in en voeg het .tar.gz-archief toe."
+          "text": "Selecteer het tabblad \"Module\", voer de naamruimte, naam, systeem en versie in en voeg het .tar.gz-archief toe."
         },
         "uploadProvider": {
           "heading": "Upload-provider",
-          "text": "Selecteer het tabblad &quot;Provider&quot;, vul de gegevens voor naamruimte/type/versie/platform in en voeg de binaire bestanden en de checksum-bestanden toe."
+          "text": "Selecteer het tabblad \"Provider\", vul de gegevens voor naamruimte/type/versie/platform in en voeg de binaire bestanden en de checksum-bestanden toe."
         },
         "scmLinking": {
           "heading": "SCM-koppeling",
@@ -474,11 +474,11 @@
       "actions": {
         "addProvider": {
           "heading": "Aanbieder toevoegen",
-          "text": "Klik op &quot;SCM-provider toevoegen&quot;, selecteer het platform, voer de OAuth-app-client-ID en het geheim in en voltooi vervolgens de OAuth-autorisatieprocedure."
+          "text": "Klik op \"SCM-provider toevoegen\", selecteer het platform, voer de OAuth-app-client-ID en het geheim in en voltooi vervolgens de OAuth-autorisatieprocedure."
         },
         "reconnect": {
           "heading": "Opnieuw verbinden",
-          "text": "Als OAuth-tokens verlopen, gebruik dan de knop &#x27;Opnieuw verbinden&#x27; om opnieuw toestemming te verlenen."
+          "text": "Als OAuth-tokens verlopen, gebruik dan de knop 'Opnieuw verbinden' om opnieuw toestemming te verlenen."
         },
         "linkModule": {
           "heading": "Een module koppelen",
@@ -492,7 +492,7 @@
       "actions": {
         "createMirror": {
           "heading": "Spiegel aanmaken",
-          "text": "Klik op &quot;Spiegel toevoegen&quot; om een upstream-register-URL en filterregels in te stellen voor de providers die moeten worden gesynchroniseerd."
+          "text": "Klik op \"Spiegel toevoegen\" om een upstream-register-URL en filterregels in te stellen voor de providers die moeten worden gesynchroniseerd."
         },
         "triggerSync": {
           "heading": "Trigger Sync",
@@ -510,11 +510,11 @@
       "actions": {
         "switchBackend": {
           "heading": "Backend wisselen",
-          "text": "Kies een backend-type, vul de inloggegevens in en klik op &quot;Activeren&quot; om naar de nieuwe opslag te migreren."
+          "text": "Kies een backend-type, vul de inloggegevens in en klik op \"Activeren\" om naar de nieuwe opslag te migreren."
         },
         "testConnection": {
           "heading": "Verbinding testen",
-          "text": "Gebruik de knop &quot;Test&quot; om de inloggegevens te controleren voordat u ze activeert."
+          "text": "Gebruik de knop \"Test\" om de inloggegevens te controleren voordat u ze activeert."
         },
         "localStorage": {
           "heading": "Lokale opslag",
@@ -572,7 +572,7 @@
       "actions": {
         "createMirrorConfig": {
           "heading": "Een spiegelconfiguratie aanmaken",
-          "text": "Klik op &quot;Spiegel toevoegen&quot; om een nieuwe spiegel aan te maken. Geef deze een naam, selecteer het type tool (terraform, opentofu of aangepast) en geef de upstream-URL op waarvan je wilt synchroniseren."
+          "text": "Klik op \"Spiegel toevoegen\" om een nieuwe spiegel aan te maken. Geef deze een naam, selecteer het type tool (terraform, opentofu of aangepast) en geef de upstream-URL op waarvan je wilt synchroniseren."
         },
         "syncVersions": {
           "heading": "Versies synchroniseren",
@@ -598,11 +598,11 @@
       "actions": {
         "reviewRequest": {
           "heading": "Een verzoek bekijken",
-          "text": "Klik op de knop &#x27;Goedkeuren&#x27; of &#x27;Afwijzen&#x27; op een kaart met een verzoek in behandeling om het beoordelingsvenster te openen. Voeg opmerkingen toe om de beslissing toe te lichten en bevestig vervolgens."
+          "text": "Klik op de knop 'Goedkeuren' of 'Afwijzen' op een kaart met een verzoek in behandeling om het beoordelingsvenster te openen. Voeg opmerkingen toe om de beslissing toe te lichten en bevestig vervolgens."
         },
         "createRequest": {
           "heading": "Een verzoek indienen",
-          "text": "Klik op &quot;Verzoek aanmaken&quot; om handmatig een goedkeuring aan te vragen voor een provider-naamruimte. Dit is handig om inhoud vooraf goed te keuren voordat je een mirrorbeleid configureert."
+          "text": "Klik op \"Verzoek aanmaken\" om handmatig een goedkeuring aan te vragen voor een provider-naamruimte. Dit is handig om inhoud vooraf goed te keuren voordat je een mirrorbeleid configureert."
         },
         "filterByStatus": {
           "heading": "Filter op status",
@@ -620,15 +620,15 @@
       "actions": {
         "createPolicy": {
           "heading": "Een beleid opstellen",
-          "text": "Klik op &quot;Beleid aanmaken&quot; en vul de velden voor naam, type (toestaan of weigeren) en patroon in. Gebruik glob-achtige jokertekens (bijv. hashicorp/* ) in de velden voor naamruimte en provider om meerdere providers tegelijk te selecteren."
+          "text": "Klik op \"Beleid aanmaken\" en vul de velden voor naam, type (toestaan of weigeren) en patroon in. Gebruik glob-achtige jokertekens (bijv. hashicorp/* ) in de velden voor naamruimte en provider om meerdere providers tegelijk te selecteren."
         },
         "allowVsDeny": {
           "heading": "Toestaan vs. Weigeren",
-          "text": "Een &quot;toestaan&quot;-beleid staat toe dat overeenkomende providers worden gespiegeld. Een &quot;weigeren&quot;-beleid blokkeert ze. Weigeren-beleidsregels hebben voorrang op toestaan-beleidsregels met hetzelfde prioriteitsniveau."
+          "text": "Een \"toestaan\"-beleid staat toe dat overeenkomende providers worden gespiegeld. Een \"weigeren\"-beleid blokkeert ze. Weigeren-beleidsregels hebben voorrang op toestaan-beleidsregels met hetzelfde prioriteitsniveau."
         },
         "requireApproval": {
           "heading": "Goedkeuring vereist",
-          "text": "Schakel &quot;Goedkeuring vereist&quot; in bij een toelatingsbeleid om aan de criteria beantwoordende providers vóór de synchronisatie door de goedkeuringsworkflow te leiden. Goedgekeurde verzoeken worden weergegeven in Beheer → Goedkeuringsverzoeken."
+          "text": "Schakel \"Goedkeuring vereist\" in bij een toelatingsbeleid om aan de criteria beantwoordende providers vóór de synchronisatie door de goedkeuringsworkflow te leiden. Goedgekeurde verzoeken worden weergegeven in Beheer → Goedkeuringsverzoeken."
         },
         "priority": {
           "heading": "Prioriteit",
@@ -636,7 +636,7 @@
         },
         "evaluatePolicy": {
           "heading": "Een beleid evalueren",
-          "text": "Gebruik de knop &quot;Evaluate&quot; om te testen hoe een specifieke naamruimte/naam van een provider zou worden vergeleken met de huidige beleidsregels, zonder dat er een daadwerkelijke synchronisatie wordt gestart."
+          "text": "Gebruik de knop \"Evaluate\" om te testen hoe een specifieke naamruimte/naam van een provider zou worden vergeleken met de huidige beleidsregels, zonder dat er een daadwerkelijke synchronisatie wordt gestart."
         },
         "enableDisable": {
           "heading": "Inschakelen / Uitschakelen",
@@ -654,7 +654,7 @@
         },
         "filterByAction": {
           "heading": "Filter op actie",
-          "text": "Typ een actienaam (bijv. &quot;aanmaken&quot;, &quot;verwijderen&quot;, &quot;inloggen&quot;) in het veld Actie om alleen de overeenkomende gebeurtenissen weer te geven."
+          "text": "Typ een actienaam (bijv. \"aanmaken\", \"verwijderen\", \"inloggen\") in het veld Actie om alleen de overeenkomende gebeurtenissen weer te geven."
         },
         "filterByUser": {
           "heading": "Filteren op gebruiker",
@@ -670,7 +670,7 @@
         },
         "export": {
           "heading": "Exporteren",
-          "text": "Gebruik de knop &#x27;Exporteren&#x27; om de huidige gefilterde resultaten te downloaden als CSV- of JSON-bestand."
+          "text": "Gebruik de knop 'Exporteren' om de huidige gefilterde resultaten te downloaden als CSV- of JSON-bestand."
         }
       }
     },
@@ -715,7 +715,7 @@
       "overview": "Met SCIM 2.0 kunt u gebruikers en groepen automatisch aanmaken vanuit uw identiteitsprovider (bijvoorbeeld Azure AD of Okta). Op deze pagina vindt u de URL’s van de SCIM-eindpunten en de authenticatievereisten die nodig zijn om uw identiteitsprovider te configureren.",
       "actions": {
         "endpointUrls": {
-          "heading": "URL&#x27;s van eindpunten",
+          "heading": "URL's van eindpunten",
           "text": "Kopieer de SCIM-basis-URL, het eindpunt voor gebruikers en het eindpunt voor groepen naar de SCIM-configuratie van uw identiteitsprovider."
         },
         "authentication": {

@@ -184,7 +184,7 @@
     "noResultsTryDifferent": "Prueba con otra búsqueda u otra opción de ordenación",
     "noResultsUploadFirst": "Sube tu primer módulo para empezar",
     "clearFilters": "Borrar filtros",
-    "latestVersion": "Últimas noticias: {{version}}",
+    "latestVersion": "Última versión: {{version}}",
     "latestVersionUnknown": "N/A",
     "downloadsCount": "{{count}} descargas"
   },
@@ -204,7 +204,7 @@
     "noResultsUploadFirst": "Sube tu primer proveedor para empezar",
     "clearFilters": "Borrar filtros",
     "networkMirroredBadge": "Replicado en red",
-    "latestVersion": "Últimas noticias: {{version}}",
+    "latestVersion": "Última versión: {{version}}",
     "latestVersionUnknown": "N/A",
     "downloadsCount": "{{count}} descargas"
   },
@@ -216,7 +216,7 @@
     "noMirrorsBody": "Pide a un administrador que configure un servidor de réplicas de los binarios de Terraform u OpenTofu.",
     "versionCountOne": "{{count}} versión",
     "versionCountOther": "{{count}} versiones",
-    "latestVersion": "Últimas noticias: {{version}}",
+    "latestVersion": "Última versión: {{version}}",
     "loadingVersions": "Cargando…"
   },
   "help": {

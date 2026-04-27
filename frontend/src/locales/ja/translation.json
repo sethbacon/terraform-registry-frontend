@@ -184,7 +184,7 @@
     "noResultsTryDifferent": "別の検索語句や並べ替えオプションを試してみてください",
     "noResultsUploadFirst": "まずは最初のモジュールをアップロードして始めましょう",
     "clearFilters": "フィルターを解除",
-    "latestVersion": "最新情報：{{version}}",
+    "latestVersion": "最新バージョン：{{version}}",
     "latestVersionUnknown": "該当なし",
     "downloadsCount": "{{count}} ダウンロード数"
   },
@@ -204,7 +204,7 @@
     "noResultsUploadFirst": "まずは最初のプロバイダーを登録して始めましょう",
     "clearFilters": "フィルターを解除",
     "networkMirroredBadge": "ネットワークミラーリング",
-    "latestVersion": "最新情報：{{version}}",
+    "latestVersion": "最新バージョン：{{version}}",
     "latestVersionUnknown": "該当なし",
     "downloadsCount": "{{count}} ダウンロード数"
   },
@@ -216,7 +216,7 @@
     "noMirrorsBody": "管理者にTerraformまたはOpenTofuのバイナリミラーの設定を依頼してください。",
     "versionCountOne": "{{count}} バージョン",
     "versionCountOther": "{{count}} バージョン",
-    "latestVersion": "最新情報：{{version}}",
+    "latestVersion": "最新バージョン：{{version}}",
     "loadingVersions": "読み込み中…"
   },
   "help": {

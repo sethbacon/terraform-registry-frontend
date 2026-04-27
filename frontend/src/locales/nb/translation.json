@@ -184,7 +184,7 @@
     "noResultsTryDifferent": "Prøv et annet søkeord eller en annen sorteringsalternativ",
     "noResultsUploadFirst": "Last opp din første modul for å komme i gang",
     "clearFilters": "Fjern filtre",
-    "latestVersion": "Siste nytt: {{version}}",
+    "latestVersion": "Siste versjon: {{version}}",
     "latestVersionUnknown": "Ikke relevant",
     "downloadsCount": "{{count}} nedlastinger"
   },
@@ -204,7 +204,7 @@
     "noResultsUploadFirst": "Last opp din første leverandør for å komme i gang",
     "clearFilters": "Fjern filtre",
     "networkMirroredBadge": "Nettverksspeilet",
-    "latestVersion": "Siste nytt: {{version}}",
+    "latestVersion": "Siste versjon: {{version}}",
     "latestVersionUnknown": "Ikke relevant",
     "downloadsCount": "{{count}} nedlastinger"
   },
@@ -216,7 +216,7 @@
     "noMirrorsBody": "Be en administrator om å sette opp et binært speil for Terraform eller OpenTofu.",
     "versionCountOne": "{{count}} versjon",
     "versionCountOther": "{{count}} versjoner",
-    "latestVersion": "Siste nytt: {{version}}",
+    "latestVersion": "Siste versjon: {{version}}",
     "loadingVersions": "Laster…"
   },
   "help": {

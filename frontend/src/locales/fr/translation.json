@@ -1,15 +1,15 @@
 {
   "nav": {
     "home": "Accueil",
-    "homeTooltip": "Page d&#x27;accueil",
+    "homeTooltip": "Page d'accueil",
     "modules": "Modules",
     "modulesTooltip": "Afficher les modules Terraform",
     "providers": "Prestataires",
     "providersTooltip": "Afficher les fournisseurs Terraform",
     "terraformBinaries": "Binaires Terraform",
     "terraformBinariesTooltip": "Afficher les binaires Terraform",
-    "apiDocs": "Documentation de l&#x27;API",
-    "apiDocsTooltip": "Documentation de l&#x27;API",
+    "apiDocs": "Documentation de l'API",
+    "apiDocsTooltip": "Documentation de l'API",
     "admin": {
       "dashboard": "Tableau de bord",
       "dashboardTooltip": "Tableau de bord administrateur",
@@ -21,7 +21,7 @@
       "users": "Utilisateurs",
       "usersTooltip": "Afficher et gérer les utilisateurs du registre",
       "oidcGroups": "Groupes OIDC",
-      "oidcGroupsTooltip": "Mapper les groupes de fournisseurs d&#x27;identité aux rôles du registre",
+      "oidcGroupsTooltip": "Mapper les groupes de fournisseurs d'identité aux rôles du registre",
       "scim": "SCIM",
       "scimTooltip": "Configuration de la gestion des utilisateurs et des groupes dans SCIM 2.0",
       "mtlsCerts": "Certificats mTLS",
@@ -43,9 +43,9 @@
       "storage": "Stockage",
       "storageTooltip": "Configurer le stockage en arrière-plan pour les fichiers binaires et les fournisseurs",
       "securityScanning": "Analyse de sécurité",
-      "securityScanningTooltip": "Afficher la configuration et l&#x27;état de l&#x27;analyse de sécurité",
-      "auditLogs": "Journaux d&#x27;audit",
-      "auditLogsTooltip": "Afficher les journaux d&#x27;audit du système",
+      "securityScanningTooltip": "Afficher la configuration et l'état de l'analyse de sécurité",
+      "auditLogs": "Journaux d'audit",
+      "auditLogsTooltip": "Afficher les journaux d'audit du système",
       "componentsDev": "Composants",
       "componentsDevTooltip": "Présentation des composants (réservé aux développeurs)"
     }
@@ -62,20 +62,20 @@
     "about": "À propos",
     "settings": "Paramètres",
     "support": "Assistance",
-    "accountMenu": "compte de l&#x27;utilisateur actuel",
+    "accountMenu": "compte de l'utilisateur actuel",
     "logout": "Se déconnecter",
     "login": "Connexion",
     "language": "Langue"
   },
   "about": {
-    "title": "À propos d&#x27;{{productName}}",
-    "description": "Un registre de modules et de fournisseurs Terraform auto-hébergé, prenant en charge l&#x27;intégration SCM, la mise en miroir des fournisseurs, la distribution des binaires Terraform et la multi-location.",
+    "title": "À propos d'{{productName}}",
+    "description": "Un registre de modules et de fournisseurs Terraform auto-hébergé, prenant en charge l'intégration SCM, la mise en miroir des fournisseurs, la distribution des binaires Terraform et la multi-location.",
     "versions": "Versions",
     "frontendVersion": "Frontend contre{{version}}",
     "backendVersion": "Backend contre{{version}}",
     "loadingBackendVersion": "Chargement de la version du backend…",
     "backendUnavailable": "Serveur indisponible",
-    "apiVersion": "Version de l&#x27;API : {{version}}",
+    "apiVersion": "Version de l'API : {{version}}",
     "built": "Conçu par : {{date}}",
     "license": "Licence",
     "licenseIntro": "Publié sous la licence",
@@ -87,21 +87,21 @@
   },
   "auth": {
     "signInToContinue": "Connectez-vous pour continuer",
-    "signInWithSSO": "Se connecter via l&#x27;authentification unique (SSO)",
+    "signInWithSSO": "Se connecter via l'authentification unique (SSO)",
     "signInWithAzureAD": "Se connecter avec Azure AD",
     "signInWith": "Se connecter avec {{name}}",
     "devLogin": "Connexion développeur (Admin)",
     "devModeNotice": "Mode développement - Cliquez ci-dessous pour vous connecter sans OAuth",
-    "orUseProductionAuth": "OU UTILISER L&#x27;AUTORISATION DE PRODUCTION",
+    "orUseProductionAuth": "OU UTILISER L'AUTORISATION DE PRODUCTION",
     "orSignInWithLdap": "OU SE CONNECTER AVEC LDAP",
     "or": "OU",
     "signInWithLdap": "Se connecter via LDAP",
-    "username": "Nom d&#x27;utilisateur",
+    "username": "Nom d'utilisateur",
     "password": "Mot de passe",
     "signIn": "Se connecter",
-    "noProviders": "Aucun fournisseur SSO n&#x27;est configuré. Contactez votre administrateur.",
-    "ssoInfo": "Cette application utilise l&#x27;authentification unique.",
-    "ssoContact": "Si vous avez besoin d&#x27;un accès, veuillez contacter votre administrateur.",
+    "noProviders": "Aucun fournisseur SSO n'est configuré. Contactez votre administrateur.",
+    "ssoInfo": "Cette application utilise l'authentification unique.",
+    "ssoContact": "Si vous avez besoin d'un accès, veuillez contacter votre administrateur.",
     "devLoginFailed": "Échec de la connexion au serveur de développement. Vérifiez les journaux du serveur.",
     "ldapLoginFailed": "Échec de la connexion LDAP. Vérifiez vos identifiants."
   },
@@ -112,7 +112,7 @@
     "browseProviders": "Parcourir les prestataires",
     "terraformBinaries": "Binaires Terraform",
     "available": "disponible",
-    "findWhatYouNeed": "Trouvez ce qu&#x27;il vous faut",
+    "findWhatYouNeed": "Trouvez ce qu'il vous faut",
     "searchAcross": "Rechercher parmi les modules et les prestataires de ce registre",
     "search": "Rechercher",
     "searchPlaceholder": "Rechercher {{type}}…",
@@ -122,30 +122,30 @@
     "providersDescription": "Accédez à des fournisseurs Terraform personnalisés et en miroir pour vos ressources cloud.",
     "browseAllProviders": "Parcourir tous les prestataires →",
     "terraformBinariesDescription": "Téléchargez les binaires Terraform et OpenTofu à partir des miroirs internes.",
-    "noBinaryMirrors": "Aucun miroir binaire n&#x27;est configuré",
+    "noBinaryMirrors": "Aucun miroir binaire n'est configuré",
     "viewBinaries": "Afficher les fichiers binaires →",
     "gettingStarted": "Pour commencer",
     "step1Title": "1. Se connecter",
-    "step1Desc": "Connectez-vous à l&#x27;aide des identifiants OIDC ou Azure AD de votre organisation pour accéder au registre.",
+    "step1Desc": "Connectez-vous à l'aide des identifiants OIDC ou Azure AD de votre organisation pour accéder au registre.",
     "step2Title": "2. Obtenir une clé API",
-    "step2DescAuth": "Générez une clé API et ajoutez-la à votre fichier d&#x27;identifiants Terraform CLI :",
-    "step2DescUnauth": "Connectez-vous pour générer une clé API, puis ajoutez-la à votre fichier d&#x27;identifiants Terraform CLI :",
+    "step2DescAuth": "Générez une clé API et ajoutez-la à votre fichier d'identifiants Terraform CLI :",
+    "step2DescUnauth": "Connectez-vous pour générer une clé API, puis ajoutez-la à votre fichier d'identifiants Terraform CLI :",
     "signInToGenerate": "Connectez-vous pour générer une clé",
     "createApiKey": "Créer une clé API",
     "manageAllKeys": "Gérer toutes les clés →",
-    "copied": "C&#x27;est noté !",
+    "copied": "C'est noté !",
     "copyToClipboard": "Copier dans le presse-papiers",
-    "copyUsageExample": "Exemple d&#x27;utilisation",
-    "credentialsCopied": "Extrait des informations d&#x27;identification copié dans le presse-papiers",
+    "copyUsageExample": "Exemple d'utilisation",
+    "credentialsCopied": "Extrait des informations d'identification copié dans le presse-papiers",
     "step3Title": "3. Commencez à utiliser",
-    "step3Desc": "Parcourez les modules et les fournisseurs, puis référencez-les directement dans votre configuration Terraform en utilisant le nom d&#x27;hôte de ce registre.",
+    "step3Desc": "Parcourez les modules et les fournisseurs, puis référencez-les directement dans votre configuration Terraform en utilisant le nom d'hôte de ce registre.",
     "protocolSupport": "Prise en charge du protocole de registre",
-    "protocolDesc": "Compatibilité totale avec le protocole Terraform Registry v1 : utilisez ce registre directement dans l&#x27;interface CLI de Terraform et dans les configurations des fournisseurs, sans avoir besoin de plugins ni de proxys.",
-    "viewApiDocs": "Consulter la documentation de l&#x27;API",
+    "protocolDesc": "Compatibilité totale avec le protocole Terraform Registry v1 : utilisez ce registre directement dans l'interface CLI de Terraform et dans les configurations des fournisseurs, sans avoir besoin de plugins ni de proxys.",
+    "viewApiDocs": "Consulter la documentation de l'API",
     "setupRequired": "Configuration requise",
     "featureSetupRequired": "Configuration requise",
-    "setupRequiredDesc": "Ce registre n&#x27;a pas encore été configuré. Suivez l&#x27;assistant de configuration pour configurer l&#x27;authentification, le stockage et le compte administrateur initial.",
-    "featureSetupDesc": "De nouvelles fonctionnalités ont été ajoutées et nécessitent une configuration. Suivez les étapes de l&#x27;assistant de configuration pour les activer.",
+    "setupRequiredDesc": "Ce registre n'a pas encore été configuré. Suivez l'assistant de configuration pour configurer l'authentification, le stockage et le compte administrateur initial.",
+    "featureSetupDesc": "De nouvelles fonctionnalités ont été ajoutées et nécessitent une configuration. Suivez les étapes de l'assistant de configuration pour les activer.",
     "startSetup": "Lancer la configuration",
     "configureFeatures": "Configurer les fonctionnalités"
   },
@@ -174,7 +174,7 @@
     "sortDownloads": "Les plus téléchargés",
     "sortNewest": "Les plus récents",
     "sortRecentlyUpdated": "Mise à jour récente",
-    "viewModeAriaLabel": "mode d&#x27;affichage",
+    "viewModeAriaLabel": "mode d'affichage",
     "viewGrid": "Grille",
     "viewGridAriaLabel": "affichage en grille",
     "viewByProvider": "Par prestataire",
@@ -184,7 +184,7 @@
     "noResultsTryDifferent": "Essayez une autre requête de recherche ou une autre option de tri",
     "noResultsUploadFirst": "Téléchargez votre premier module pour commencer",
     "clearFilters": "Effacer les filtres",
-    "latestVersion": "Dernières nouvelles : {{version}}",
+    "latestVersion": "Dernière version : {{version}}",
     "latestVersionUnknown": "N/A",
     "downloadsCount": "{{count}} téléchargements"
   },
@@ -204,35 +204,35 @@
     "noResultsUploadFirst": "Ajoutez votre premier fournisseur pour commencer",
     "clearFilters": "Effacer les filtres",
     "networkMirroredBadge": "Mise en miroir réseau",
-    "latestVersion": "Dernières nouvelles : {{version}}",
+    "latestVersion": "Dernière version : {{version}}",
     "latestVersionUnknown": "N/A",
     "downloadsCount": "{{count}} téléchargements"
   },
   "terraformBinaries": {
     "pageTitle": "Miroirs binaires Terraform",
-    "pageSubtitle": "Téléchargez les binaires Terraform et OpenTofu depuis le miroir interne de votre organisation. Configurez votre interface en ligne de commande (CLI) ou votre chaîne d&#x27;outils d&#x27;intégration continue (CI) pour qu&#x27;elle pointe vers l&#x27;URL du miroir indiquée sur chaque page de détails.",
+    "pageSubtitle": "Téléchargez les binaires Terraform et OpenTofu depuis le miroir interne de votre organisation. Configurez votre interface en ligne de commande (CLI) ou votre chaîne d'outils d'intégration continue (CI) pour qu'elle pointe vers l'URL du miroir indiquée sur chaque page de détails.",
     "loadError": "Échec du chargement des miroirs binaires Terraform.",
-    "noMirrorsTitle": "Aucun miroir binaire n&#x27;est configuré",
+    "noMirrorsTitle": "Aucun miroir binaire n'est configuré",
     "noMirrorsBody": "Demandez à un administrateur de mettre en place un miroir des binaires Terraform ou OpenTofu.",
     "versionCountOne": "{{count}} version",
     "versionCountOther": "{{count}} versions",
-    "latestVersion": "Dernières nouvelles : {{version}}",
+    "latestVersion": "Dernière version : {{version}}",
     "loadingVersions": "Chargement en cours…"
   },
   "help": {
     "default": {
       "title": "Aide",
-      "overview": "Accédez à une page via la barre latérale pour consulter l&#x27;aide contextuelle relative à cette section.",
+      "overview": "Accédez à une page via la barre latérale pour consulter l'aide contextuelle relative à cette section.",
       "actions": {
         "apiReference": {
           "heading": "Référence API",
-          "text": "Consultez la page de la documentation de l&#x27;API pour obtenir une référence interactive complète de tous les points de terminaison du registre."
+          "text": "Consultez la page de la documentation de l'API pour obtenir une référence interactive complète de tous les points de terminaison du registre."
         }
       }
     },
     "home": {
       "title": "Accueil",
-      "overview": "La page d&#x27;accueil offre un aperçu rapide du registre, avec notamment l&#x27;état en temps réel des modules, des fournisseurs et des miroirs disponibles. Utilisez-la comme point de départ pour parcourir le contenu publié ou accéder à l&#x27;espace d&#x27;administration.",
+      "overview": "La page d'accueil offre un aperçu rapide du registre, avec notamment l'état en temps réel des modules, des fournisseurs et des miroirs disponibles. Utilisez-la comme point de départ pour parcourir le contenu publié ou accéder à l'espace d'administration.",
       "actions": {
         "browseModules": {
           "heading": "Parcourir les modules",
@@ -244,13 +244,13 @@
         },
         "adminAccess": {
           "heading": "Accès administrateur",
-          "text": "Si vous disposez de droits d&#x27;administrateur, utilisez les liens de la barre latérale pour gérer les utilisateurs, télécharger du contenu ou configurer le stockage."
+          "text": "Si vous disposez de droits d'administrateur, utilisez les liens de la barre latérale pour gérer les utilisateurs, télécharger du contenu ou configurer le stockage."
         }
       }
     },
     "modules": {
       "title": "Modules",
-      "overview": "Répertorie tous les modules Terraform publiés dans ce registre. Vous pouvez rechercher les modules par nom et les filtrer par espace de noms. Cliquez sur la fiche d&#x27;un module pour afficher les versions, la documentation et les instructions d&#x27;utilisation.",
+      "overview": "Répertorie tous les modules Terraform publiés dans ce registre. Vous pouvez rechercher les modules par nom et les filtrer par espace de noms. Cliquez sur la fiche d'un module pour afficher les versions, la documentation et les instructions d'utilisation.",
       "actions": {
         "search": {
           "heading": "Rechercher",
@@ -258,7 +258,7 @@
         },
         "viewModule": {
           "heading": "Afficher le module",
-          "text": "Cliquez sur la fiche d&#x27;un module pour ouvrir la page de détails contenant l&#x27;historique des versions et le fichier README."
+          "text": "Cliquez sur la fiche d'un module pour ouvrir la page de détails contenant l'historique des versions et le fichier README."
         },
         "uploadModule": {
           "heading": "Télécharger un module",
@@ -268,7 +268,7 @@
     },
     "moduleDetail": {
       "title": "Détails du module",
-      "overview": "Affiche toutes les versions publiées d&#x27;un module spécifique, sa documentation README et le bloc de code Terraform nécessaire pour l&#x27;utiliser. La dernière version stable est mise en évidence.",
+      "overview": "Affiche toutes les versions publiées d'un module spécifique, sa documentation README et le bloc de code Terraform nécessaire pour l'utiliser. La dernière version stable est mise en évidence.",
       "actions": {
         "copySourceBlock": {
           "heading": "Copier le bloc de code",
@@ -276,21 +276,21 @@
         },
         "selectVersion": {
           "heading": "Sélectionner une version",
-          "text": "Utilisez le sélecteur de version pour consulter la documentation et les entrées/sorties d&#x27;une version spécifique."
+          "text": "Utilisez le sélecteur de version pour consulter la documentation et les entrées/sorties d'une version spécifique."
         },
         "deprecateDelete": {
           "heading": "Marquer comme obsolète / Supprimer",
-          "text": "Les administrateurs peuvent marquer une version comme obsolète ou la supprimer à l&#x27;aide des boutons d&#x27;action situés sur chaque ligne de version."
+          "text": "Les administrateurs peuvent marquer une version comme obsolète ou la supprimer à l'aide des boutons d'action situés sur chaque ligne de version."
         }
       }
     },
     "providers": {
       "title": "Prestataires",
-      "overview": "Répertorie tous les fournisseurs Terraform publiés ou répliqués dans ce registre. Les fournisseurs peuvent être recherchés par type et par espace de noms. Cliquez sur la fiche d&#x27;un fournisseur pour afficher les versions et les binaires pour chaque plateforme.",
+      "overview": "Répertorie tous les fournisseurs Terraform publiés ou répliqués dans ce registre. Les fournisseurs peuvent être recherchés par type et par espace de noms. Cliquez sur la fiche d'un fournisseur pour afficher les versions et les binaires pour chaque plateforme.",
       "actions": {
         "search": {
           "heading": "Rechercher",
-          "text": "Filtrez les fournisseurs par nom ou par espace de noms à l&#x27;aide du champ de recherche."
+          "text": "Filtrez les fournisseurs par nom ou par espace de noms à l'aide du champ de recherche."
         },
         "viewProvider": {
           "heading": "Afficher le prestataire",
@@ -304,7 +304,7 @@
     },
     "providerDetail": {
       "title": "Informations sur le prestataire",
-      "overview": "Affiche toutes les versions publiées d&#x27;un fournisseur spécifique ainsi que les binaires de la plateforme disponibles pour chaque version. Comprend le bloc `required_providers` de Terraform pour faciliter le copier-coller.",
+      "overview": "Affiche toutes les versions publiées d'un fournisseur spécifique ainsi que les binaires de la plateforme disponibles pour chaque version. Comprend le bloc `required_providers` de Terraform pour faciliter le copier-coller.",
       "actions": {
         "copyRequiredProviders": {
           "heading": "Copier le bloc « Fournisseurs requis »",
@@ -312,7 +312,7 @@
         },
         "selectVersion": {
           "heading": "Sélectionner une version",
-          "text": "Parcourir les binaires de la plateforme (combinaisons système d&#x27;exploitation/architecture) par version."
+          "text": "Parcourir les binaires de la plateforme (combinaisons système d'exploitation/architecture) par version."
         },
         "deprecateDelete": {
           "heading": "Marquer comme obsolète / Supprimer",
@@ -326,21 +326,21 @@
       "actions": {
         "authenticate": {
           "heading": "Se connecter",
-          "text": "Collez votre clé API sous forme de jeton Bearer à l&#x27;aide du bouton « Autoriser » situé en haut de la page."
+          "text": "Collez votre clé API sous forme de jeton Bearer à l'aide du bouton « Autoriser » situé en haut de la page."
         },
         "browseEndpoints": {
           "heading": "Parcourir les points de terminaison",
-          "text": "Utilisez l&#x27;arborescence située à gauche pour naviguer par groupe de ressources."
+          "text": "Utilisez l'arborescence située à gauche pour naviguer par groupe de ressources."
         }
       }
     },
     "dashboard": {
       "title": "Tableau de bord",
-      "overview": "Un aperçu en temps réel de l&#x27;état de votre registre. La barre supérieure permet de visualiser d&#x27;un seul coup d&#x27;œil l&#x27;état des miroirs. Les fiches statistiques ci-dessous présentent le détail des modules (avec le nombre par système), des fournisseurs (manuels ou en miroir), des miroirs binaires Terraform et du nombre total de téléchargements.",
+      "overview": "Un aperçu en temps réel de l'état de votre registre. La barre supérieure permet de visualiser d'un seul coup d'œil l'état des miroirs. Les fiches statistiques ci-dessous présentent le détail des modules (avec le nombre par système), des fournisseurs (manuels ou en miroir), des miroirs binaires Terraform et du nombre total de téléchargements.",
       "actions": {
         "healthBar": {
           "heading": "Barre de santé",
-          "text": "Les icônes « Binary Mirrors », « Provider Mirrors » et « Storage » s&#x27;affichent en rouge en cas de dysfonctionnement. Cliquez sur n&#x27;importe quelle icône pour accéder à la section correspondante."
+          "text": "Les icônes « Binary Mirrors », « Provider Mirrors » et « Storage » s'affichent en rouge en cas de dysfonctionnement. Cliquez sur n'importe quelle icône pour accéder à la section correspondante."
         },
         "statCards": {
           "heading": "Fiches de statistiques",
@@ -352,21 +352,21 @@
         },
         "quickLinks": {
           "heading": "Liens rapides",
-          "text": "Les opérations d&#x27;administration courantes — téléchargement, gestion des utilisateurs, configuration des miroirs — sont accessibles en un clic depuis le panneau « Liens rapides »."
+          "text": "Les opérations d'administration courantes — téléchargement, gestion des utilisateurs, configuration des miroirs — sont accessibles en un clic depuis le panneau « Liens rapides »."
         }
       }
     },
     "users": {
       "title": "Utilisateurs",
-      "overview": "Gérer les comptes d&#x27;utilisateurs du registre. Les utilisateurs peuvent être créés manuellement pour une authentification locale ou via une clé API, ou créés automatiquement lors de la première connexion OIDC. Attribuez ici les utilisateurs à des organisations et attribuez-leur des modèles de rôle.",
+      "overview": "Gérer les comptes d'utilisateurs du registre. Les utilisateurs peuvent être créés manuellement pour une authentification locale ou via une clé API, ou créés automatiquement lors de la première connexion OIDC. Attribuez ici les utilisateurs à des organisations et attribuez-leur des modèles de rôle.",
       "actions": {
         "createUser": {
           "heading": "Créer un utilisateur",
-          "text": "Cliquez sur « Ajouter un utilisateur » pour créer un nouveau compte en indiquant une adresse e-mail et un nom d&#x27;affichage."
+          "text": "Cliquez sur « Ajouter un utilisateur » pour créer un nouveau compte en indiquant une adresse e-mail et un nom d'affichage."
         },
         "editUser": {
-          "heading": "Modifier l&#x27;utilisateur",
-          "text": "Cliquez sur l&#x27;icône de modification dans n&#x27;importe quelle ligne pour mettre à jour le nom, l&#x27;organisation ou le rôle de l&#x27;utilisateur."
+          "heading": "Modifier l'utilisateur",
+          "text": "Cliquez sur l'icône de modification dans n'importe quelle ligne pour mettre à jour le nom, l'organisation ou le rôle de l'utilisateur."
         },
         "deleteUser": {
           "heading": "Supprimer un utilisateur",
@@ -376,7 +376,7 @@
     },
     "organizations": {
       "title": "Organisations",
-      "overview": "Les organisations sont des conteneurs d&#x27;espaces de noms : les modules et les fournisseurs sont publiés sous l&#x27;espace de noms d&#x27;une organisation. Les membres d&#x27;une organisation héritent des autorisations définies dans le modèle de rôle de celle-ci.",
+      "overview": "Les organisations sont des conteneurs d'espaces de noms : les modules et les fournisseurs sont publiés sous l'espace de noms d'une organisation. Les membres d'une organisation héritent des autorisations définies dans le modèle de rôle de celle-ci.",
       "actions": {
         "createOrganization": {
           "heading": "Créer une organisation",
@@ -384,43 +384,43 @@
         },
         "manageMembers": {
           "heading": "Gérer les membres",
-          "text": "Développez la ligne d&#x27;une organisation pour afficher et modifier la liste de ses membres."
+          "text": "Développez la ligne d'une organisation pour afficher et modifier la liste de ses membres."
         },
         "deleteOrganization": {
-          "heading": "Supprimer l&#x27;organisation",
-          "text": "Ceci n&#x27;est possible que si l&#x27;organisation n&#x27;a publié aucun contenu."
+          "heading": "Supprimer l'organisation",
+          "text": "Ceci n'est possible que si l'organisation n'a publié aucun contenu."
         }
       }
     },
     "roles": {
       "title": "Rôles et autorisations",
-      "overview": "Cette page présente les modèles de rôles prédéfinis disponibles dans le registre. Les modèles de rôles définissent les étendues d&#x27;autorisation accordées aux utilisateurs au sein d&#x27;une organisation. Ces modèles sont définis par le système et sont en lecture seule.",
+      "overview": "Cette page présente les modèles de rôles prédéfinis disponibles dans le registre. Les modèles de rôles définissent les étendues d'autorisation accordées aux utilisateurs au sein d'une organisation. Ces modèles sont définis par le système et sont en lecture seule.",
       "actions": {
         "viewScopes": {
-          "heading": "Afficher les champs d&#x27;application",
-          "text": "Développez un modèle de rôle pour afficher la liste complète des domaines d&#x27;autorisation qu&#x27;il accorde."
+          "heading": "Afficher les champs d'application",
+          "text": "Développez un modèle de rôle pour afficher la liste complète des domaines d'autorisation qu'il accorde."
         },
         "assignToUser": {
           "heading": "Attribuer à un utilisateur",
-          "text": "Accédez à Admin → Utilisateurs pour attribuer un modèle de rôle à l&#x27;appartenance d&#x27;un utilisateur à une organisation."
+          "text": "Accédez à Admin → Utilisateurs pour attribuer un modèle de rôle à l'appartenance d'un utilisateur à une organisation."
         }
       }
     },
     "oidcGroups": {
       "title": "Groupes OIDC",
-      "overview": "Maps associe les revendications de groupe du fournisseur d&#x27;identité aux organisations et aux rôles du registre. Lorsqu&#x27;un utilisateur se connecte via OIDC, ses appartenances à des groupes sont lues à partir du jeton d&#x27;identité et utilisées pour provisionner ou mettre à jour automatiquement son appartenance à une organisation. Les modifications prennent effet lors de la connexion suivante, sans nécessiter de redémarrage du serveur.",
+      "overview": "Maps associe les revendications de groupe du fournisseur d'identité aux organisations et aux rôles du registre. Lorsqu'un utilisateur se connecte via OIDC, ses appartenances à des groupes sont lues à partir du jeton d'identité et utilisées pour provisionner ou mettre à jour automatiquement son appartenance à une organisation. Les modifications prennent effet lors de la connexion suivante, sans nécessiter de redémarrage du serveur.",
       "actions": {
         "groupClaimName": {
           "heading": "Nom de la demande collective",
-          "text": "Définissez ici la clé de revendication de votre jeton d&#x27;identité OIDC qui contient la liste des groupes de l&#x27;utilisateur (par exemple, « groups »). Celle-ci doit correspondre au mappeur de protocole configuré dans votre fournisseur d&#x27;identité."
+          "text": "Définissez ici la clé de revendication de votre jeton d'identité OIDC qui contient la liste des groupes de l'utilisateur (par exemple, « groups »). Celle-ci doit correspondre au mappeur de protocole configuré dans votre fournisseur d'identité."
         },
         "defaultRole": {
           "heading": "Rôle par défaut",
-          "text": "Vous pouvez, si vous le souhaitez, attribuer un rôle de secours aux utilisateurs dont les groupes ne correspondent à aucun mappage. Laissez ce champ vide pour ne pas accorder automatiquement l&#x27;adhésion aux utilisateurs non correspondants."
+          "text": "Vous pouvez, si vous le souhaitez, attribuer un rôle de secours aux utilisateurs dont les groupes ne correspondent à aucun mappage. Laissez ce champ vide pour ne pas accorder automatiquement l'adhésion aux utilisateurs non correspondants."
         },
         "addMapping": {
           "heading": "Ajouter un mappage",
-          "text": "Cliquez sur « Ajouter un mappage » pour associer le nom d&#x27;un groupe IdP à une organisation du registre et à un modèle de rôle. Le nom du groupe doit correspondre exactement à la valeur telle qu&#x27;elle apparaît dans la revendication du jeton d&#x27;identification."
+          "text": "Cliquez sur « Ajouter un mappage » pour associer le nom d'un groupe IdP à une organisation du registre et à un modèle de rôle. Le nom du groupe doit correspondre exactement à la valeur telle qu'elle apparaît dans la revendication du jeton d'identification."
         },
         "roleTemplates": {
           "heading": "Modèles de rôles",
@@ -428,21 +428,21 @@
         },
         "saveChanges": {
           "heading": "Enregistrer les modifications",
-          "text": "Cliquez sur « Enregistrer les modifications » pour enregistrer votre configuration de revendication de groupe et de mappage. Les sessions en cours ne sont pas affectées tant que l&#x27;utilisateur ne s&#x27;est pas reconnecté."
+          "text": "Cliquez sur « Enregistrer les modifications » pour enregistrer votre configuration de revendication de groupe et de mappage. Les sessions en cours ne sont pas affectées tant que l'utilisateur ne s'est pas reconnecté."
         }
       }
     },
     "apiKeys": {
       "title": "Clés API",
-      "overview": "Les clés API permettent un accès programmatique aux points de terminaison authentifiés du registre. Chaque clé s&#x27;affiche une seule fois lors de sa création et est stockée uniquement sous forme de hachage bcrypt ; elle ne peut pas être récupérée une fois créée.",
+      "overview": "Les clés API permettent un accès programmatique aux points de terminaison authentifiés du registre. Chaque clé s'affiche une seule fois lors de sa création et est stockée uniquement sous forme de hachage bcrypt ; elle ne peut pas être récupérée une fois créée.",
       "actions": {
         "createKey": {
           "heading": "Créer une clé",
-          "text": "Cliquez sur « Créer une clé API » pour générer une nouvelle clé. Copiez-la immédiatement : elle ne s&#x27;affichera plus par la suite."
+          "text": "Cliquez sur « Créer une clé API » pour générer une nouvelle clé. Copiez-la immédiatement : elle ne s'affichera plus par la suite."
         },
         "revokeKey": {
           "heading": "Révoquer la clé",
-          "text": "Supprimez une clé pour invalider immédiatement toutes les requêtes qui l&#x27;utilisent."
+          "text": "Supprimez une clé pour invalider immédiatement toutes les requêtes qui l'utilisent."
         },
         "useKey": {
           "heading": "Utilisez la clé",
@@ -452,33 +452,33 @@
     },
     "upload": {
       "title": "Télécharger",
-      "overview": "Téléchargez des archives de modules (.tar.gz) ou des binaires de fournisseurs pour les publier dans le registre. L&#x27;assistant de téléchargement valide la structure de l&#x27;archive, les sommes de contrôle et les signatures GPG avant la publication.",
+      "overview": "Téléchargez des archives de modules (.tar.gz) ou des binaires de fournisseurs pour les publier dans le registre. L'assistant de téléchargement valide la structure de l'archive, les sommes de contrôle et les signatures GPG avant la publication.",
       "actions": {
         "uploadModule": {
           "heading": "Module de téléchargement",
-          "text": "Sélectionnez l&#x27;onglet « Module », indiquez l&#x27;espace de noms, le nom, le système et la version, puis joignez l&#x27;archive .tar.gz."
+          "text": "Sélectionnez l'onglet « Module », indiquez l'espace de noms, le nom, le système et la version, puis joignez l'archive .tar.gz."
         },
         "uploadProvider": {
           "heading": "Fournisseur de services de téléchargement",
-          "text": "Sélectionnez l&#x27;onglet « Fournisseur », renseignez les informations relatives à l&#x27;espace de noms, au type, à la version et à la plate-forme, puis joignez le fichier binaire et les fichiers de somme de contrôle."
+          "text": "Sélectionnez l'onglet « Fournisseur », renseignez les informations relatives à l'espace de noms, au type, à la version et à la plate-forme, puis joignez le fichier binaire et les fichiers de somme de contrôle."
         },
         "scmLinking": {
           "heading": "Liaison SCM",
-          "text": "Vous pouvez également associer un module à un dépôt SCM afin qu&#x27;il se publie automatiquement à partir des balises Git."
+          "text": "Vous pouvez également associer un module à un dépôt SCM afin qu'il se publie automatiquement à partir des balises Git."
         }
       }
     },
     "scmProviders": {
       "title": "Prestataires de services de gestion de la chaîne logistique",
-      "overview": "Les configurations du fournisseur SCM permettent de connecter le registre à GitHub, GitLab, Bitbucket ou Azure DevOps afin d&#x27;automatiser la publication des modules via des webhooks de balises Git. Chaque connexion utilise des identifiants OAuth.",
+      "overview": "Les configurations du fournisseur SCM permettent de connecter le registre à GitHub, GitLab, Bitbucket ou Azure DevOps afin d'automatiser la publication des modules via des webhooks de balises Git. Chaque connexion utilise des identifiants OAuth.",
       "actions": {
         "addProvider": {
           "heading": "Ajouter un fournisseur",
-          "text": "Cliquez sur « Ajouter un fournisseur SCM », sélectionnez la plateforme, saisissez l&#x27;ID client et la clé secrète de l&#x27;application OAuth, puis suivez la procédure d&#x27;autorisation OAuth."
+          "text": "Cliquez sur « Ajouter un fournisseur SCM », sélectionnez la plateforme, saisissez l'ID client et la clé secrète de l'application OAuth, puis suivez la procédure d'autorisation OAuth."
         },
         "reconnect": {
           "heading": "Se reconnecter",
-          "text": "Si les jetons OAuth expirent, utilisez le bouton « Se reconnecter » pour renouveler l&#x27;autorisation."
+          "text": "Si les jetons OAuth expirent, utilisez le bouton « Se reconnecter » pour renouveler l'autorisation."
         },
         "linkModule": {
           "heading": "Lier un module",
@@ -492,14 +492,14 @@
       "actions": {
         "createMirror": {
           "heading": "Créer un miroir",
-          "text": "Cliquez sur « Ajouter un miroir » pour définir l&#x27;URL d&#x27;un registre en amont et les règles de filtrage permettant de déterminer les fournisseurs à synchroniser."
+          "text": "Cliquez sur « Ajouter un miroir » pour définir l'URL d'un registre en amont et les règles de filtrage permettant de déterminer les fournisseurs à synchroniser."
         },
         "triggerSync": {
           "heading": "Synchronisation du déclencheur",
-          "text": "Utilisez le bouton « sync » d&#x27;un miroir pour récupérer immédiatement les dernières versions depuis le dépôt principal."
+          "text": "Utilisez le bouton « sync » d'un miroir pour récupérer immédiatement les dernières versions depuis le dépôt principal."
         },
         "viewSyncHistory": {
-          "heading": "Afficher l&#x27;historique de synchronisation",
+          "heading": "Afficher l'historique de synchronisation",
           "text": "Développez la ligne « mirror » pour afficher le journal des dernières synchronisations et les éventuelles erreurs."
         }
       }
@@ -514,47 +514,47 @@
         },
         "testConnection": {
           "heading": "Tester la connexion",
-          "text": "Utilisez le bouton « Tester » pour vérifier les identifiants avant l&#x27;activation."
+          "text": "Utilisez le bouton « Tester » pour vérifier les identifiants avant l'activation."
         },
         "localStorage": {
           "heading": "Stockage local",
-          "text": "En mode développement, le backend du système de fichiers local ne nécessite aucune information d&#x27;identification."
+          "text": "En mode développement, le backend du système de fichiers local ne nécessite aucune information d'identification."
         }
       }
     },
     "terraformBinaries": {
       "title": "Miroirs binaires Terraform",
-      "overview": "Répertorie les miroirs binaires Terraform et OpenTofu disponibles hébergés par ce registre. Chaque miroir met en cache un ensemble de versions binaires provenant d&#x27;une source en amont afin que vos pipelines d&#x27;intégration continue et vos machines de développement puissent les télécharger sans avoir besoin d&#x27;un accès direct à Internet.",
+      "overview": "Répertorie les miroirs binaires Terraform et OpenTofu disponibles hébergés par ce registre. Chaque miroir met en cache un ensemble de versions binaires provenant d'une source en amont afin que vos pipelines d'intégration continue et vos machines de développement puissent les télécharger sans avoir besoin d'un accès direct à Internet.",
       "actions": {
         "viewVersions": {
           "heading": "Afficher les versions",
-          "text": "Cliquez sur une carte miroir pour ouvrir sa page de détails, qui affiche toutes les versions disponibles ainsi que les binaires de plate-forme (système d&#x27;exploitation/architecture) synchronisés pour chacune d&#x27;entre elles."
+          "text": "Cliquez sur une carte miroir pour ouvrir sa page de détails, qui affiche toutes les versions disponibles ainsi que les binaires de plate-forme (système d'exploitation/architecture) synchronisés pour chacune d'entre elles."
         },
         "downloadUrl": {
           "heading": "Lien de téléchargement",
-          "text": "La page de détails affiche l&#x27;URL de téléchargement complète. Indiquez cette URL à votre CLI Terraform ou à votre chaîne d&#x27;outils CI à la place du registre en amont."
+          "text": "La page de détails affiche l'URL de téléchargement complète. Indiquez cette URL à votre CLI Terraform ou à votre chaîne d'outils CI à la place du registre en amont."
         },
         "adminConfiguration": {
-          "heading": "Configuration de l&#x27;administrateur",
+          "heading": "Configuration de l'administrateur",
           "text": "Pour ajouter ou gérer des configurations de miroir, rendez-vous dans Admin → Binaires Terraform."
         }
       }
     },
     "terraformBinaryDetail": {
       "title": "Détails du miroir binaire",
-      "overview": "Affiche toutes les versions synchronisées pour ce miroir binaire ainsi que les binaires de plate-forme disponibles pour chaque version. Développez une ligne de version pour consulter les combinaisons système d&#x27;exploitation/architecture, l&#x27;état de la vérification de la somme de contrôle et l&#x27;état de la signature GPG.",
+      "overview": "Affiche toutes les versions synchronisées pour ce miroir binaire ainsi que les binaires de plate-forme disponibles pour chaque version. Développez une ligne de version pour consulter les combinaisons système d'exploitation/architecture, l'état de la vérification de la somme de contrôle et l'état de la signature GPG.",
       "actions": {
         "expandPlatforms": {
           "heading": "Développer les plateformes",
-          "text": "Cliquez sur la flèche d&#x27;expansion d&#x27;une ligne de version pour afficher les détails par plateforme, notamment le système d&#x27;exploitation, l&#x27;architecture, le nom du fichier, ainsi que les résultats de la vérification de la somme de contrôle et de la signature GPG."
+          "text": "Cliquez sur la flèche d'expansion d'une ligne de version pour afficher les détails par plateforme, notamment le système d'exploitation, l'architecture, le nom du fichier, ainsi que les résultats de la vérification de la somme de contrôle et de la signature GPG."
         },
         "downloadUrl": {
           "heading": "Lien de téléchargement",
-          "text": "Utilisez le modèle d&#x27;URL indiqué dans la bannière d&#x27;information pour télécharger une version et une plateforme spécifiques : /terraform/binaries/{name}/versions/{version}/{os}/{arch}."
+          "text": "Utilisez le modèle d'URL indiqué dans la bannière d'information pour télécharger une version et une plateforme spécifiques : /terraform/binaries/{name}/versions/{version}/{os}/{arch}."
         },
         "deprecateVersion": {
           "heading": "Marquer une version comme obsolète",
-          "text": "Les administrateurs peuvent cliquer sur l&#x27;icône d&#x27;avertissement pour marquer une version comme obsolète. Les versions obsolètes restent disponibles au téléchargement, mais ne seront plus synchronisées lors des prochaines synchronisations."
+          "text": "Les administrateurs peuvent cliquer sur l'icône d'avertissement pour marquer une version comme obsolète. Les versions obsolètes restent disponibles au téléchargement, mais ne seront plus synchronisées lors des prochaines synchronisations."
         },
         "deleteVersion": {
           "heading": "Supprimer une version",
@@ -562,25 +562,25 @@
         },
         "restoreDeprecatedVersion": {
           "heading": "Restaurer une version obsolète",
-          "text": "Cliquez sur l&#x27;icône de restauration d&#x27;une version obsolète pour supprimer le marqueur d&#x27;obsolescence et permettre sa resynchronisation."
+          "text": "Cliquez sur l'icône de restauration d'une version obsolète pour supprimer le marqueur d'obsolescence et permettre sa resynchronisation."
         }
       }
     },
     "terraformMirror": {
       "title": "Miroir binaire Terraform",
-      "overview": "Gère les configurations de miroirs qui mettent en cache les distributions binaires Terraform et OpenTofu provenant des sources en amont. Une fois mis en miroir, les binaires peuvent être mis à la disposition des ingénieurs ne disposant pas d&#x27;un accès direct à Internet, ce qui permet de prendre en charge les environnements isolés ou soumis à des contraintes de bande passante.",
+      "overview": "Gère les configurations de miroirs qui mettent en cache les distributions binaires Terraform et OpenTofu provenant des sources en amont. Une fois mis en miroir, les binaires peuvent être mis à la disposition des ingénieurs ne disposant pas d'un accès direct à Internet, ce qui permet de prendre en charge les environnements isolés ou soumis à des contraintes de bande passante.",
       "actions": {
         "createMirrorConfig": {
           "heading": "Créer une configuration de miroir",
-          "text": "Cliquez sur « Ajouter un miroir » pour définir un nouveau miroir. Donnez-lui un nom, sélectionnez le type d&#x27;outil (Terraform, OpenTofu ou personnalisé), puis indiquez l&#x27;URL en amont à partir de laquelle effectuer la synchronisation."
+          "text": "Cliquez sur « Ajouter un miroir » pour définir un nouveau miroir. Donnez-lui un nom, sélectionnez le type d'outil (Terraform, OpenTofu ou personnalisé), puis indiquez l'URL en amont à partir de laquelle effectuer la synchronisation."
         },
         "syncVersions": {
           "heading": "Versions synchronisées",
-          "text": "Développez une configuration de miroir et cliquez sur le bouton « Synchro » pour récupérer immédiatement le dernier index binaire depuis le serveur en amont. L&#x27;historique des synchronisations affiche le résultat de chaque opération."
+          "text": "Développez une configuration de miroir et cliquez sur le bouton « Synchro » pour récupérer immédiatement le dernier index binaire depuis le serveur en amont. L'historique des synchronisations affiche le résultat de chaque opération."
         },
         "inspectPlatforms": {
           "heading": "Inspecter les plateformes",
-          "text": "Cliquez sur une version pour voir quelles combinaisons de système d&#x27;exploitation et d&#x27;architecture ont été téléchargées et sont disponibles localement."
+          "text": "Cliquez sur une version pour voir quelles combinaisons de système d'exploitation et d'architecture ont été téléchargées et sont disponibles localement."
         },
         "enableDisable": {
           "heading": "Activer / Désactiver",
@@ -593,30 +593,30 @@
       }
     },
     "approvals": {
-      "title": "Demandes d&#x27;autorisation",
-      "overview": "Des demandes d&#x27;approbation sont générées lorsqu&#x27;une politique de mise en miroir exige une validation manuelle avant la mise en miroir d&#x27;un espace de noms de fournisseur ou d&#x27;un fichier binaire. Un administrateur doit approuver ou rejeter chaque demande. Les demandes approuvées permettent à la synchronisation de la mise en miroir de se poursuivre ; les demandes rejetées la bloquent.",
+      "title": "Demandes d'autorisation",
+      "overview": "Des demandes d'approbation sont générées lorsqu'une politique de mise en miroir exige une validation manuelle avant la mise en miroir d'un espace de noms de fournisseur ou d'un fichier binaire. Un administrateur doit approuver ou rejeter chaque demande. Les demandes approuvées permettent à la synchronisation de la mise en miroir de se poursuivre ; les demandes rejetées la bloquent.",
       "actions": {
         "reviewRequest": {
           "heading": "Examiner une demande",
-          "text": "Cliquez sur le bouton « Approuver » ou « Refuser » sur la fiche d&#x27;une demande en attente pour ouvrir la boîte de dialogue d&#x27;examen. Ajoutez des remarques pour justifier votre décision, puis confirmez."
+          "text": "Cliquez sur le bouton « Approuver » ou « Refuser » sur la fiche d'une demande en attente pour ouvrir la boîte de dialogue d'examen. Ajoutez des remarques pour justifier votre décision, puis confirmez."
         },
         "createRequest": {
           "heading": "Créer une demande",
-          "text": "Cliquez sur « Créer une demande » pour lancer manuellement une procédure d&#x27;approbation d&#x27;un espace de noms de fournisseur. Cette fonction est utile pour pré-approuver du contenu avant de configurer une politique de miroir."
+          "text": "Cliquez sur « Créer une demande » pour lancer manuellement une procédure d'approbation d'un espace de noms de fournisseur. Cette fonction est utile pour pré-approuver du contenu avant de configurer une politique de miroir."
         },
         "filterByStatus": {
           "heading": "Filtrer par statut",
-          "text": "Les demandes en attente, approuvées et rejetées sont toutes affichées ensemble. Observez l&#x27;icône de statut sur chaque fiche pour les distinguer d&#x27;un seul coup d&#x27;œil."
+          "text": "Les demandes en attente, approuvées et rejetées sont toutes affichées ensemble. Observez l'icône de statut sur chaque fiche pour les distinguer d'un seul coup d'œil."
         },
         "mirrorPolicyLink": {
           "heading": "Lien vers la politique de mise en miroir",
-          "text": "Chaque requête fait référence à la configuration du miroir qui l&#x27;a déclenchée. Accédez à Admin → Miroirs du fournisseur pour consulter ou modifier la configuration du miroir associée."
+          "text": "Chaque requête fait référence à la configuration du miroir qui l'a déclenchée. Accédez à Admin → Miroirs du fournisseur pour consulter ou modifier la configuration du miroir associée."
         }
       }
     },
     "mirrorPolicies": {
       "title": "Politiques relatives aux miroirs",
-      "overview": "Les politiques de mise en miroir déterminent quels fournisseurs peuvent ou ne peuvent pas faire l&#x27;objet d&#x27;une mise en miroir, et si cette opération nécessite une demande d&#x27;autorisation. Les politiques sont appliquées en fonction de l&#x27;URL du registre en amont, du modèle d&#x27;espace de noms et du modèle de nom du fournisseur. En cas de correspondance avec plusieurs règles, les politiques ayant la priorité la plus élevée prévalent.",
+      "overview": "Les politiques de mise en miroir déterminent quels fournisseurs peuvent ou ne peuvent pas faire l'objet d'une mise en miroir, et si cette opération nécessite une demande d'autorisation. Les politiques sont appliquées en fonction de l'URL du registre en amont, du modèle d'espace de noms et du modèle de nom du fournisseur. En cas de correspondance avec plusieurs règles, les politiques ayant la priorité la plus élevée prévalent.",
       "actions": {
         "createPolicy": {
           "heading": "Créer une politique",
@@ -624,41 +624,41 @@
         },
         "allowVsDeny": {
           "heading": "Autoriser ou Refuser",
-          "text": "Une politique « d&#x27;autorisation » permet la réplication des fournisseurs correspondants. Une politique « de refus » les bloque. Les politiques de refus prévalent sur les politiques d&#x27;autorisation au même niveau de priorité."
+          "text": "Une politique « d'autorisation » permet la réplication des fournisseurs correspondants. Une politique « de refus » les bloque. Les politiques de refus prévalent sur les politiques d'autorisation au même niveau de priorité."
         },
         "requireApproval": {
           "heading": "Soumettre à approbation",
-          "text": "Activez l&#x27;option « Approuvé » dans une politique d&#x27;autorisation afin que les fournisseurs correspondants soient soumis au processus d&#x27;approbation avant la synchronisation. Les demandes approuvées apparaissent dans Admin → Demandes d&#x27;approbation."
+          "text": "Activez l'option « Approuvé » dans une politique d'autorisation afin que les fournisseurs correspondants soient soumis au processus d'approbation avant la synchronisation. Les demandes approuvées apparaissent dans Admin → Demandes d'approbation."
         },
         "priority": {
           "heading": "Priorité",
-          "text": "Les règles sont évaluées par ordre croissant de priorité (un chiffre plus bas correspond à une priorité plus élevée). Définissez soigneusement la priorité lorsque des règles d&#x27;autorisation et de refus se chevauchent."
+          "text": "Les règles sont évaluées par ordre croissant de priorité (un chiffre plus bas correspond à une priorité plus élevée). Définissez soigneusement la priorité lorsque des règles d'autorisation et de refus se chevauchent."
         },
         "evaluatePolicy": {
           "heading": "Évaluer une politique",
-          "text": "Utilisez le bouton « Évaluer » pour vérifier comment un espace de noms ou un nom de fournisseur spécifique serait mis en correspondance avec l&#x27;ensemble de règles actuel sans déclencher de synchronisation réelle."
+          "text": "Utilisez le bouton « Évaluer » pour vérifier comment un espace de noms ou un nom de fournisseur spécifique serait mis en correspondance avec l'ensemble de règles actuel sans déclencher de synchronisation réelle."
         },
         "enableDisable": {
           "heading": "Activer / Désactiver",
-          "text": "Désactivez une stratégie pour la suspendre temporairement sans la supprimer. Les stratégies désactivées sont ignorées lors de l&#x27;évaluation."
+          "text": "Désactivez une stratégie pour la suspendre temporairement sans la supprimer. Les stratégies désactivées sont ignorées lors de l'évaluation."
         }
       }
     },
     "auditLogs": {
-      "title": "Journaux d&#x27;audit",
-      "overview": "Un journal inviolable de toutes les actions importantes effectuées dans le registre : ajouts, suppressions, modifications de configuration, connexions et synchronisations des miroirs. Utilisez-le pour les contrôles de conformité, les enquêtes sur les incidents ou la surveillance générale de l&#x27;activité.",
+      "title": "Journaux d'audit",
+      "overview": "Un journal inviolable de toutes les actions importantes effectuées dans le registre : ajouts, suppressions, modifications de configuration, connexions et synchronisations des miroirs. Utilisez-le pour les contrôles de conformité, les enquêtes sur les incidents ou la surveillance générale de l'activité.",
       "actions": {
         "filterByResourceType": {
           "heading": "Filtrer par type de ressource",
-          "text": "Utilisez le menu déroulant « Type de ressource » pour affiner les résultats et les limiter à une classe d&#x27;entité spécifique (par exemple : module, fournisseur, utilisateur, miroir)."
+          "text": "Utilisez le menu déroulant « Type de ressource » pour affiner les résultats et les limiter à une classe d'entité spécifique (par exemple : module, fournisseur, utilisateur, miroir)."
         },
         "filterByAction": {
           "heading": "Filtrer par action",
-          "text": "Saisissez le nom d&#x27;une action (par exemple « créer », « supprimer », « se connecter ») dans le champ Action pour n&#x27;afficher que les événements correspondants."
+          "text": "Saisissez le nom d'une action (par exemple « créer », « supprimer », « se connecter ») dans le champ Action pour n'afficher que les événements correspondants."
         },
         "filterByUser": {
           "heading": "Filtrer par utilisateur",
-          "text": "Saisissez l&#x27;adresse e-mail d&#x27;un utilisateur pour afficher toutes les actions effectuées par ce compte."
+          "text": "Saisissez l'adresse e-mail d'un utilisateur pour afficher toutes les actions effectuées par ce compte."
         },
         "dateRange": {
           "heading": "Période",
@@ -666,7 +666,7 @@
         },
         "viewDetail": {
           "heading": "Voir les détails",
-          "text": "Cliquez sur n&#x27;importe quelle ligne pour ouvrir un panneau de détails affichant l&#x27;entrée de journal complète, y compris l&#x27;ID de la ressource, l&#x27;acteur et les métadonnées."
+          "text": "Cliquez sur n'importe quelle ligne pour ouvrir un panneau de détails affichant l'entrée de journal complète, y compris l'ID de la ressource, l'acteur et les métadonnées."
         },
         "export": {
           "heading": "Exporter",
@@ -676,33 +676,33 @@
     },
     "securityScanning": {
       "title": "Analyse de sécurité",
-      "overview": "Affiche la configuration actuelle et les résultats de l&#x27;analyseur de vulnérabilités des modules. L&#x27;analyseur examine les archives de modules téléchargées à la recherche de failles de sécurité connues à l&#x27;aide d&#x27;un outil d&#x27;analyse externe configuré par l&#x27;administrateur du serveur.",
+      "overview": "Affiche la configuration actuelle et les résultats de l'analyseur de vulnérabilités des modules. L'analyseur examine les archives de modules téléchargées à la recherche de failles de sécurité connues à l'aide d'un outil d'analyse externe configuré par l'administrateur du serveur.",
       "actions": {
         "viewConfiguration": {
           "heading": "Afficher la configuration",
-          "text": "La partie supérieure indique si l&#x27;analyse est activée, ainsi que l&#x27;outil et la version du scanner, le seuil de gravité, le délai d&#x27;expiration et les paramètres relatifs aux processus et aux intervalles."
+          "text": "La partie supérieure indique si l'analyse est activée, ainsi que l'outil et la version du scanner, le seuil de gravité, le délai d'expiration et les paramètres relatifs aux processus et aux intervalles."
         },
         "summaryStatistics": {
           "heading": "Statistiques de synthèse",
-          "text": "Les chiffres globaux permettent de visualiser d&#x27;un seul coup d&#x27;œil le nombre total d&#x27;analyses, celles en attente, celles qui n&#x27;ont rien révélé, les anomalies détectées et les erreurs."
+          "text": "Les chiffres globaux permettent de visualiser d'un seul coup d'œil le nombre total d'analyses, celles en attente, celles qui n'ont rien révélé, les anomalies détectées et les erreurs."
         },
         "reviewScanResults": {
-          "heading": "Consulter les résultats de l&#x27;analyse",
-          "text": "Le tableau des analyses récentes répertorie chaque module avec son statut d&#x27;analyse et le nombre de vulnérabilités, classées par niveau de gravité (critique, élevé, moyen, faible)."
+          "heading": "Consulter les résultats de l'analyse",
+          "text": "Le tableau des analyses récentes répertorie chaque module avec son statut d'analyse et le nombre de vulnérabilités, classées par niveau de gravité (critique, élevé, moyen, faible)."
         }
       }
     },
     "mtls": {
       "title": "Certificats mTLS",
-      "overview": "Affiche la configuration actuelle du protocole TLS mutuel (mTLS), notamment si l&#x27;authentification par certificat client est activée et quels sujets de certificat sont associés à des périmètres d&#x27;autorisation. Tous les paramètres mTLS sont en lecture seule dans l&#x27;interface utilisateur ; la configuration est gérée via le fichier de configuration du serveur.",
+      "overview": "Affiche la configuration actuelle du protocole TLS mutuel (mTLS), notamment si l'authentification par certificat client est activée et quels sujets de certificat sont associés à des périmètres d'autorisation. Tous les paramètres mTLS sont en lecture seule dans l'interface utilisateur ; la configuration est gérée via le fichier de configuration du serveur.",
       "actions": {
         "viewStatus": {
           "heading": "Afficher le statut",
-          "text": "L&#x27;indicateur d&#x27;état indique si le mTLS est activé ou désactivé, ainsi que le chemin d&#x27;accès au fichier de certificat de l&#x27;autorité de certification utilisé pour vérifier les certificats des clients."
+          "text": "L'indicateur d'état indique si le mTLS est activé ou désactivé, ainsi que le chemin d'accès au fichier de certificat de l'autorité de certification utilisé pour vérifier les certificats des clients."
         },
         "certificateMappings": {
           "heading": "Correspondances de certificats",
-          "text": "Le tableau de mappage répertorie chaque sujet de certificat et les domaines d&#x27;application qu&#x27;il est autorisé à utiliser. Les clients présentant un certificat correspondant se voient automatiquement attribuer ces domaines d&#x27;application."
+          "text": "Le tableau de mappage répertorie chaque sujet de certificat et les domaines d'application qu'il est autorisé à utiliser. Les clients présentant un certificat correspondant se voient automatiquement attribuer ces domaines d'application."
         },
         "configurationSource": {
           "heading": "Source de configuration",
@@ -712,15 +712,15 @@
     },
     "scim": {
       "title": "Provisionnement SCIM",
-      "overview": "SCIM 2.0 permet la création automatique d&#x27;utilisateurs et de groupes à partir de votre fournisseur d&#x27;identité (par exemple, Azure AD, Okta). Cette page présente les URL des points de terminaison SCIM et les exigences d&#x27;authentification nécessaires à la configuration de votre fournisseur d&#x27;identité.",
+      "overview": "SCIM 2.0 permet la création automatique d'utilisateurs et de groupes à partir de votre fournisseur d'identité (par exemple, Azure AD, Okta). Cette page présente les URL des points de terminaison SCIM et les exigences d'authentification nécessaires à la configuration de votre fournisseur d'identité.",
       "actions": {
         "endpointUrls": {
           "heading": "URL des points de terminaison",
-          "text": "Copiez l&#x27;URL de base SCIM, le point de terminaison « Users » et le point de terminaison « Groups » dans la configuration SCIM de votre fournisseur d&#x27;identité."
+          "text": "Copiez l'URL de base SCIM, le point de terminaison « Users » et le point de terminaison « Groups » dans la configuration SCIM de votre fournisseur d'identité."
         },
         "authentication": {
           "heading": "Authentification",
-          "text": "Les requêtes SCIM nécessitent un jeton « Bearer » avec la portée « scim:provision ». Créez-en un sur la page « Clés API » et collez-le dans le champ « Jeton SCIM » de votre fournisseur d&#x27;identité (IdP)."
+          "text": "Les requêtes SCIM nécessitent un jeton « Bearer » avec la portée « scim:provision ». Créez-en un sur la page « Clés API » et collez-le dans le champ « Jeton SCIM » de votre fournisseur d'identité (IdP)."
         },
         "supportedOperations": {
           "heading": "Opérations prises en charge",

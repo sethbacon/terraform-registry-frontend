@@ -184,7 +184,7 @@
     "noResultsTryDifferent": "Try a different search query or sort option",
     "noResultsUploadFirst": "Upload your first module to get started",
     "clearFilters": "Clear filters",
-    "latestVersion": "Latest: {{version}}",
+    "latestVersion": "Latest version: {{version}}",
     "latestVersionUnknown": "N/A",
     "downloadsCount": "{{count}} downloads"
   },
@@ -204,7 +204,7 @@
     "noResultsUploadFirst": "Upload your first provider to get started",
     "clearFilters": "Clear filters",
     "networkMirroredBadge": "Network Mirrored",
-    "latestVersion": "Latest: {{version}}",
+    "latestVersion": "Latest version: {{version}}",
     "latestVersionUnknown": "N/A",
     "downloadsCount": "{{count}} downloads"
   },
@@ -216,7 +216,7 @@
     "noMirrorsBody": "Ask an administrator to set up a Terraform or OpenTofu binary mirror.",
     "versionCountOne": "{{count}} version",
     "versionCountOther": "{{count}} versions",
-    "latestVersion": "Latest: {{version}}",
+    "latestVersion": "Latest version: {{version}}",
     "loadingVersions": "Loading…"
   },
   "help": {
