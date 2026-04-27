@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.15.0](https://github.com/sethbacon/terraform-registry-frontend/compare/v0.14.2...v0.15.0) (2026-04-27)
+
+
+### Features
+
+* **i18n:** translate public registry list pages ([#235](https://github.com/sethbacon/terraform-registry-frontend/issues/235)) ([8e8cc81](https://github.com/sethbacon/terraform-registry-frontend/commit/8e8cc81a95ca29aecb7a5729377240f80f41f21b)), closes [#196](https://github.com/sethbacon/terraform-registry-frontend/issues/196)
+* **scanning:** surface security scanner logs and diagnostics ([#233](https://github.com/sethbacon/terraform-registry-frontend/issues/233)) ([7e7a3cf](https://github.com/sethbacon/terraform-registry-frontend/commit/7e7a3cfdcf192928bd231b786df963f72cef2426)), closes [#199](https://github.com/sethbacon/terraform-registry-frontend/issues/199)
+
 ## [0.14.2](https://github.com/sethbacon/terraform-registry-frontend/compare/v0.14.1...v0.14.2) (2026-04-27)
 
 
