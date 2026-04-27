@@ -1,6 +1,7 @@
 import React, { useState, useCallback, useMemo, useEffect, useRef } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
+import { useTranslation } from 'react-i18next'
 import { useDebounce } from '../hooks/useDebounce'
 import {
   Container,
@@ -36,16 +37,6 @@ import { RegistryItemGridSkeleton } from '../components/skeletons/RegistryItemCa
 
 type ViewMode = 'grid' | 'grouped'
 
-/** Sort option value encodes both API sort field and order, separated by a colon. */
-const SORT_OPTIONS = [
-  { value: 'relevance', label: 'Relevance' },
-  { value: 'name:asc', label: 'Name A-Z' },
-  { value: 'name:desc', label: 'Name Z-A' },
-  { value: 'downloads:desc', label: 'Most Downloaded' },
-  { value: 'created_at:desc', label: 'Newest' },
-  { value: 'updated_at:desc', label: 'Recently Updated' },
-] as const
-
 /** Parse a combined sort value into separate sort/order strings for the API. */
 function parseSortValue(value: string): { sort?: string; order?: string } {
   if (value === 'relevance') return {}
@@ -78,9 +69,23 @@ function groupByProvider(modules: Module[]): [string, Module[]][] {
 }
 
 const ModulesPage: React.FC = () => {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const { isAuthenticated } = useAuth()
   const [searchParams, setSearchParams] = useSearchParams()
+
+  /** Sort option value encodes both API sort field and order, separated by a colon. */
+  const sortOptions = useMemo(
+    () => [
+      { value: 'relevance', label: t('modules.sortRelevance') },
+      { value: 'name:asc', label: t('modules.sortNameAsc') },
+      { value: 'name:desc', label: t('modules.sortNameDesc') },
+      { value: 'downloads:desc', label: t('modules.sortDownloads') },
+      { value: 'created_at:desc', label: t('modules.sortNewest') },
+      { value: 'updated_at:desc', label: t('modules.sortRecentlyUpdated') },
+    ],
+    [t],
+  )
 
   // Derive state from URL params
   const urlQuery = searchParams.get('q') ?? ''
@@ -159,7 +164,7 @@ const ModulesPage: React.FC = () => {
 
   const modules = useMemo(() => queryData?.modules ?? [], [queryData])
   const totalPages = queryData ? Math.ceil(queryData.meta.total / limit) : 1
-  const error = queryError ? 'Failed to load modules. Please try again.' : null
+  const error = queryError ? t('modules.loadError') : null
 
   const handleInputChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
     setInputValue(event.target.value)
@@ -262,19 +267,25 @@ const ModulesPage: React.FC = () => {
           chips={
             <>
               <Chip
-                label={`Latest: ${module.latest_version || 'N/A'}`}
+                label={t('modules.latestVersion', {
+                  version: module.latest_version || t('modules.latestVersionUnknown'),
+                })}
                 size="small"
                 color="primary"
                 variant="outlined"
               />
-              <Chip label={`${module.download_count ?? 0} downloads`} size="small" sx={{ ml: 1 }} />
+              <Chip
+                label={t('modules.downloadsCount', { count: module.download_count ?? 0 })}
+                size="small"
+                sx={{ ml: 1 }}
+              />
             </>
           }
           onClick={() => navigate(`/modules/${module.namespace}/${module.name}/${module.system}`)}
         />
       </Grid>
     ),
-    [navigate],
+    [navigate, t],
   )
 
   const groupedModules = useMemo(() => groupByProvider(modules), [modules])
@@ -285,10 +296,10 @@ const ModulesPage: React.FC = () => {
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
         <Box>
           <Typography variant="h4" gutterBottom>
-            Terraform Modules
+            {t('modules.pageTitle')}
           </Typography>
           <Typography variant="body1" color="text.secondary">
-            Browse and discover Terraform modules in your organization
+            {t('modules.pageSubtitle')}
           </Typography>
         </Box>
         {isAuthenticated && (
@@ -298,7 +309,7 @@ const ModulesPage: React.FC = () => {
             startIcon={<CloudUpload />}
             onClick={() => navigate('/admin/upload/module')}
           >
-            Publish Module
+            {t('modules.publishModule')}
           </Button>
         )}
       </Box>
@@ -308,7 +319,7 @@ const ModulesPage: React.FC = () => {
       <Box sx={{ display: 'flex', gap: 2, mb: 4, alignItems: 'flex-start' }}>
         <TextField
           fullWidth
-          placeholder="Search modules..."
+          placeholder={t('modules.searchPlaceholder')}
           value={inputValue}
           onChange={handleInputChange}
           InputProps={{
@@ -320,15 +331,15 @@ const ModulesPage: React.FC = () => {
           }}
         />
         <FormControl sx={{ minWidth: 180 }} size="medium">
-          <InputLabel id="modules-sort-label">Sort By</InputLabel>
+          <InputLabel id="modules-sort-label">{t('modules.sortBy')}</InputLabel>
           <Select
             labelId="modules-sort-label"
             id="modules-sort-select"
             value={sortValue}
-            label="Sort By"
+            label={t('modules.sortBy')}
             onChange={handleSortChange}
           >
-            {SORT_OPTIONS.map((opt) => (
+            {sortOptions.map((opt) => (
               <MenuItem key={opt.value} value={opt.value}>
                 {opt.label}
               </MenuItem>
@@ -339,16 +350,16 @@ const ModulesPage: React.FC = () => {
           value={viewMode}
           exclusive
           onChange={handleViewModeChange}
-          aria-label="view mode"
+          aria-label={t('modules.viewModeAriaLabel')}
           sx={{ flexShrink: 0 }}
         >
-          <ToggleButton value="grid" aria-label="grid view">
+          <ToggleButton value="grid" aria-label={t('modules.viewGridAriaLabel')}>
             <ViewModuleIcon sx={{ mr: 0.5 }} />
-            Grid
+            {t('modules.viewGrid')}
           </ToggleButton>
-          <ToggleButton value="grouped" aria-label="grouped by provider">
+          <ToggleButton value="grouped" aria-label={t('modules.viewByProviderAriaLabel')}>
             <CategoryIcon sx={{ mr: 0.5 }} />
-            By Provider
+            {t('modules.viewByProvider')}
           </ToggleButton>
         </ToggleButtonGroup>
       </Box>
@@ -366,16 +377,16 @@ const ModulesPage: React.FC = () => {
       ) : modules.length === 0 ? (
         <Box sx={{ textAlign: 'center', py: 8 }}>
           <Typography variant="h6" color="text.secondary">
-            No modules found
+            {t('modules.noResultsTitle')}
           </Typography>
           <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
             {urlQuery || urlSort
-              ? 'Try a different search query or sort option'
-              : 'Upload your first module to get started'}
+              ? t('modules.noResultsTryDifferent')
+              : t('modules.noResultsUploadFirst')}
           </Typography>
           {(urlQuery || urlSort) && (
             <Button variant="outlined" sx={{ mt: 2 }} onClick={handleClearSearch}>
-              Clear filters
+              {t('modules.clearFilters')}
             </Button>
           )}
         </Box>
