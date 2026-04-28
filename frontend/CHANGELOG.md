@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.16.0](https://github.com/sethbacon/terraform-registry-frontend/compare/v0.15.1...v0.16.0) (2026-04-28)
+
+
+### Features
+
+* **scanning:** add clickable findings modal with parsed results table ([#240](https://github.com/sethbacon/terraform-registry-frontend/issues/240)) ([b9c7536](https://github.com/sethbacon/terraform-registry-frontend/commit/b9c7536122e7a351f153ef35e5ca6d09e5edb404)), closes [#239](https://github.com/sethbacon/terraform-registry-frontend/issues/239)
+
 ## [0.15.1](https://github.com/sethbacon/terraform-registry-frontend/compare/v0.15.0...v0.15.1) (2026-04-27)
 
 
