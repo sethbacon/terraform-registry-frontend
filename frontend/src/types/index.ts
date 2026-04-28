@@ -608,6 +608,17 @@ export interface ScanningStats {
   recent_scans: RecentScanEntry[]
 }
 
+// ---- Scan findings (parsed from raw_results) ----
+
+export interface FindingRow {
+  severity: 'CRITICAL' | 'HIGH' | 'MEDIUM' | 'LOW'
+  ruleId: string
+  title: string
+  resource: string
+  file: string
+  resolution: string
+}
+
 // ---- Module terraform-docs ----
 
 export interface ModuleInputVar {

@@ -848,6 +848,11 @@ class ApiClient {
     return response.data
   }
 
+  async getScanByID(scanID: string): Promise<import('../types').ModuleScan> {
+    const response = await this.client.get(`/api/v1/admin/scanning/scans/${scanID}`)
+    return response.data
+  }
+
   async getModuleDocs(
     namespace: string,
     name: string,

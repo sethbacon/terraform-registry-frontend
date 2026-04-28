@@ -254,4 +254,51 @@ describe('SecurityScanPanel', () => {
       expect(screen.getByText(/CVE-2026-0001/)).toBeInTheDocument()
     })
   })
+
+  describe('findings modal', () => {
+    it('opens findings modal when clicking findings status chip', async () => {
+      const user = userEvent.setup()
+      render(
+        <SecurityScanPanel
+          canManage={true}
+          selectedVersion={fakeVersion}
+          moduleScan={{
+            ...baseScan,
+            status: 'findings',
+            critical_count: 1,
+            raw_results: {
+              Results: [
+                {
+                  Target: 'main.tf',
+                  Misconfigurations: [
+                    { ID: 'AVD-001', Title: 'Test finding', Severity: 'CRITICAL' },
+                  ],
+                },
+              ],
+            },
+          }}
+          scanLoading={false}
+          scanNotFound={false}
+        />,
+      )
+      await user.click(screen.getByTestId('scan-status-chip'))
+      expect(screen.getByText('Scan Findings')).toBeInTheDocument()
+      expect(screen.getByText('AVD-001')).toBeInTheDocument()
+    })
+
+    it('does not open modal when clicking clean status chip', async () => {
+      const user = userEvent.setup()
+      render(
+        <SecurityScanPanel
+          canManage={true}
+          selectedVersion={fakeVersion}
+          moduleScan={{ ...baseScan, status: 'clean' }}
+          scanLoading={false}
+          scanNotFound={false}
+        />,
+      )
+      await user.click(screen.getByTestId('scan-status-chip'))
+      expect(screen.queryByText('Scan Findings')).not.toBeInTheDocument()
+    })
+  })
 })
