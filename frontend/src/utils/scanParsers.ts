@@ -177,6 +177,18 @@ export function parseScanFindings(
     rows = parseSnyk(rawResults)
   } else if (rawResults.runs) {
     rows = parseSarif(rawResults)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } else if (Array.isArray((rawResults as any)?.Results)) {
+    rows = parseTrivy(rawResults)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } else if (Array.isArray((rawResults as any)?.results?.failed_checks)) {
+    rows = parseCheckov(rawResults)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } else if (Array.isArray((rawResults as any)?.results?.violations)) {
+    rows = parseTerrascan(rawResults)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } else if (Array.isArray((rawResults as any)?.vulnerabilities)) {
+    rows = parseSnyk(rawResults)
   } else {
     rows = []
   }
