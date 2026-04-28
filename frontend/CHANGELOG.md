@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.16.1](https://github.com/sethbacon/terraform-registry-frontend/compare/v0.16.0...v0.16.1) (2026-04-28)
+
+
+### Bug Fixes
+
+* **scanning:** add format auto-detection for unknown scanner names ([#243](https://github.com/sethbacon/terraform-registry-frontend/issues/243)) ([ecf2ce3](https://github.com/sethbacon/terraform-registry-frontend/commit/ecf2ce373fa2cc92431b70ce25f8b919623a30ba)), closes [#242](https://github.com/sethbacon/terraform-registry-frontend/issues/242)
+
 ## [0.16.0](https://github.com/sethbacon/terraform-registry-frontend/compare/v0.15.1...v0.16.0) (2026-04-28)
 
 
