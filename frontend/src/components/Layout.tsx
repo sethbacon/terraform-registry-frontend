@@ -65,6 +65,7 @@ import AdminBreadcrumbs from './AdminBreadcrumbs'
 import CommandPalette from './CommandPalette'
 import { useHotkey } from '../hooks/useHotkey'
 import SessionExpiryWarning from './SessionExpiryWarning'
+import AdvisoryBanner from './AdvisoryBanner'
 
 const drawerWidth = 240
 
@@ -408,11 +409,11 @@ const Layout = () => {
     () =>
       isAuthenticated
         ? adminNavGroups
-            .map((group) => ({
-              ...group,
-              items: group.items.filter((item) => item.scope === null || hasScope(item.scope)),
-            }))
-            .filter((group) => group.items.length > 0)
+          .map((group) => ({
+            ...group,
+            items: group.items.filter((item) => item.scope === null || hasScope(item.scope)),
+          }))
+          .filter((group) => group.items.length > 0)
         : [],
     [isAuthenticated, adminNavGroups, hasScope],
   )
@@ -838,6 +839,7 @@ const Layout = () => {
         }}
       >
         <Toolbar />
+        <AdvisoryBanner />
         <AdminBreadcrumbs />
         <Outlet />
       </Box>

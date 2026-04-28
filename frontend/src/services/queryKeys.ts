@@ -121,4 +121,9 @@ export const queryKeys = {
     history: (configId: string) =>
       [...queryKeys.terraformMirrors._def, 'history', configId] as const,
   },
+  advisories: {
+    _def: ['advisories'] as const,
+    active: () => [...queryKeys.advisories._def, 'active'] as const,
+    adminList: (kind?: string) => [...queryKeys.advisories._def, 'admin', kind] as const,
+  },
 } as const

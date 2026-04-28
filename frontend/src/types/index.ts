@@ -691,3 +691,46 @@ export interface StorageMigration {
   completed_at?: string
   created_at: string
 }
+
+// ---- CVE Advisories ----
+
+export type CVESeverity = 'critical' | 'high' | 'medium' | 'low' | 'unknown'
+export type CVETargetKind = 'binary' | 'provider' | 'scanner'
+
+export interface CVEAdvisory {
+  id: string
+  source_id: string
+  severity: CVESeverity
+  summary: string
+  references: string[]
+  target_kind: CVETargetKind
+  targets: CVEAffectedTarget[]
+}
+
+export interface CVEAffectedTarget {
+  id: string
+  advisory_id: string
+  target_kind: CVETargetKind
+  target_ref: {
+    tool?: string
+    version?: string
+    namespace?: string
+    type?: string
+    mirror_config_id?: string
+    provider_id?: string
+  }
+  terraform_version_id?: string
+  provider_version_id?: string
+  created_at: string
+}
+
+// Admin-only full advisory list entry
+export interface CVEAdvisoryAdmin {
+  id: string
+  source_id: string
+  severity: CVESeverity
+  summary: string
+  references: string[]
+  withdrawn: boolean
+  target_count: number
+}

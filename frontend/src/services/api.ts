@@ -55,7 +55,7 @@ class ApiClient {
         }
 
         // Stamp the request start time for breadcrumb duration tracking
-        ;(config as InternalAxiosRequestConfig & { _startTime?: number })._startTime = Date.now()
+        ; (config as InternalAxiosRequestConfig & { _startTime?: number })._startTime = Date.now()
         return config
       },
       (error) => Promise.reject(error),
@@ -253,11 +253,11 @@ class ApiClient {
       },
       onUploadProgress: options?.onUploadProgress
         ? (event) => {
-            if (event.total && event.total > 0) {
-              const percent = Math.round((event.loaded / event.total) * 100)
-              options.onUploadProgress?.(percent)
-            }
+          if (event.total && event.total > 0) {
+            const percent = Math.round((event.loaded / event.total) * 100)
+            options.onUploadProgress?.(percent)
           }
+        }
         : undefined,
     })
     return response.data
@@ -371,11 +371,11 @@ class ApiClient {
       },
       onUploadProgress: options?.onUploadProgress
         ? (event) => {
-            if (event.total && event.total > 0) {
-              const percent = Math.round((event.loaded / event.total) * 100)
-              options.onUploadProgress?.(percent)
-            }
+          if (event.total && event.total > 0) {
+            const percent = Math.round((event.loaded / event.total) * 100)
+            options.onUploadProgress?.(percent)
           }
+        }
         : undefined,
     })
     return response.data
@@ -1667,6 +1667,32 @@ class ApiClient {
   ): Promise<import('../types').UIThemeConfig> {
     const response = await this.client.put('/api/v1/admin/ui-theme', config)
     return response.data as import('../types').UIThemeConfig
+  }
+
+  // ============================================================================
+  // CVE Advisories
+  // ============================================================================
+
+  /** Public endpoint — returns active advisories; cached 5 min by the backend. */
+  async getActiveAdvisories(): Promise<import('../types').CVEAdvisory[]> {
+    const response = await this.client.get('/api/v1/advisories/active')
+    return Array.isArray(response.data) ? response.data : []
+  }
+
+  /** Admin endpoint — returns all advisories (including withdrawn), with optional kind filter. */
+  async listAdminAdvisories(
+    kind?: 'binary' | 'provider' | 'scanner',
+  ): Promise<{ advisories: import('../types').CVEAdvisoryAdmin[]; total: number }> {
+    const response = await this.client.get('/api/v1/admin/advisories', {
+      params: kind ? { kind } : undefined,
+    })
+    return response.data
+  }
+
+  /** Admin endpoint — queues an immediate CVE poll outside the normal schedule. */
+  async triggerAdvisoryPoll(): Promise<{ message: string }> {
+    const response = await this.client.post('/api/v1/admin/advisories/poll')
+    return response.data
   }
 }
 
