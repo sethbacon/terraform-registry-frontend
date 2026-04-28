@@ -27,15 +27,19 @@ import WarningAmber from '@mui/icons-material/WarningAmber'
 import KeyboardArrowDown from '@mui/icons-material/KeyboardArrowDown'
 import KeyboardArrowRight from '@mui/icons-material/KeyboardArrowRight'
 import ScanDiagnostics from '../../components/ScanDiagnostics'
+import ScanFindingsModal from '../../components/ScanFindingsModal'
 import api from '../../services/api'
-import type { RecentScanEntry } from '../../types'
+import type { ModuleScan, RecentScanEntry } from '../../types'
 
-function statusChip(status: string) {
+function statusChip(status: string, onClick?: () => void) {
+  const clickProps = onClick ? { onClick, sx: { cursor: 'pointer' } } : {}
   switch (status) {
     case 'clean':
       return <Chip label="Clean" size="small" color="success" variant="outlined" />
     case 'findings':
-      return <Chip label="Findings" size="small" color="warning" variant="outlined" />
+      return (
+        <Chip label="Findings" size="small" color="warning" variant="outlined" {...clickProps} />
+      )
     case 'error':
       return <Chip label="Error" size="small" color="error" variant="outlined" />
     case 'pending':
@@ -104,6 +108,38 @@ const SecurityScanningPage: React.FC = () => {
   })
 
   const [expandedScanId, setExpandedScanId] = useState<string | null>(null)
+  const [findingsModalOpen, setFindingsModalOpen] = useState(false)
+  const [findingsModalScan, setFindingsModalScan] = useState<ModuleScan | null>(null)
+  const [findingsModalLoading, setFindingsModalLoading] = useState(false)
+  const [findingsModalLabel, setFindingsModalLabel] = useState('')
+
+  const handleFindingsClick = async (scan: RecentScanEntry) => {
+    setFindingsModalLabel(
+      `${scan.namespace}/${scan.module_name}/${scan.system} v${scan.module_version}`,
+    )
+    setFindingsModalScan(null)
+    setFindingsModalLoading(true)
+    setFindingsModalOpen(true)
+    try {
+      const full = await api.getScanByID(scan.id)
+      setFindingsModalScan(full)
+    } catch {
+      // Fallback: try the module version endpoint
+      try {
+        const full = await api.getModuleScan(
+          scan.namespace,
+          scan.module_name,
+          scan.system,
+          scan.module_version,
+        )
+        setFindingsModalScan(full)
+      } catch {
+        // Leave scan null — modal will show "no data" message
+      }
+    } finally {
+      setFindingsModalLoading(false)
+    }
+  }
 
   const health = useMemo(
     () => computeScannerHealth(stats?.recent_scans ?? []),
@@ -383,7 +419,14 @@ const SecurityScanningPage: React.FC = () => {
                             </TableCell>
                             <TableCell>{scan.module_version}</TableCell>
                             <TableCell>{scan.scanner}</TableCell>
-                            <TableCell>{statusChip(scan.status)}</TableCell>
+                            <TableCell>
+                              {statusChip(
+                                scan.status,
+                                scan.status === 'findings'
+                                  ? () => handleFindingsClick(scan)
+                                  : undefined,
+                              )}
+                            </TableCell>
                             <TableCell align="right">{scan.critical_count}</TableCell>
                             <TableCell align="right">{scan.high_count}</TableCell>
                             <TableCell align="right">{scan.medium_count}</TableCell>
@@ -426,6 +469,13 @@ const SecurityScanningPage: React.FC = () => {
           </Paper>
         </>
       )}
+      <ScanFindingsModal
+        open={findingsModalOpen}
+        onClose={() => setFindingsModalOpen(false)}
+        scan={findingsModalScan}
+        loading={findingsModalLoading}
+        moduleLabel={findingsModalLabel}
+      />
     </Container>
   )
 }

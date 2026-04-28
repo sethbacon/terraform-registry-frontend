@@ -16,6 +16,7 @@ import RefreshIcon from '@mui/icons-material/Refresh'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import ExpandLessIcon from '@mui/icons-material/ExpandLess'
 import ScanDiagnostics from './ScanDiagnostics'
+import ScanFindingsModal from './ScanFindingsModal'
 import { ModuleVersion, ModuleScan } from '../types'
 
 interface SecurityScanPanelProps {
@@ -40,6 +41,7 @@ const SecurityScanPanel: React.FC<SecurityScanPanelProps> = ({
   rescanPending = false,
 }) => {
   const [diagnosticsOpen, setDiagnosticsOpen] = useState(false)
+  const [findingsOpen, setFindingsOpen] = useState(false)
 
   if (!canManage || !selectedVersion) return null
 
@@ -48,7 +50,7 @@ const SecurityScanPanel: React.FC<SecurityScanPanelProps> = ({
 
   const hasDiagnostics = Boolean(
     moduleScan?.execution_log ||
-      (moduleScan?.raw_results && Object.keys(moduleScan.raw_results).length > 0),
+    (moduleScan?.raw_results && Object.keys(moduleScan.raw_results).length > 0),
   )
 
   return (
@@ -99,6 +101,9 @@ const SecurityScanPanel: React.FC<SecurityScanPanelProps> = ({
                       ? 'error'
                       : 'info'
               }
+              onClick={moduleScan.status === 'findings' ? () => setFindingsOpen(true) : undefined}
+              sx={moduleScan.status === 'findings' ? { cursor: 'pointer' } : {}}
+              data-testid="scan-status-chip"
             />
           </Box>
           {moduleScan.status === 'error' && moduleScan.error_message && (
@@ -162,6 +167,11 @@ const SecurityScanPanel: React.FC<SecurityScanPanelProps> = ({
           )}
         </Box>
       ) : null}
+      <ScanFindingsModal
+        open={findingsOpen}
+        onClose={() => setFindingsOpen(false)}
+        scan={moduleScan}
+      />
     </Paper>
   )
 }

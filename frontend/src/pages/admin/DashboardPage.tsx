@@ -531,40 +531,40 @@ const DashboardPage: React.FC = () => {
   // Normalise: backend may not yet have mirror fields on older builds.
   const data: DashboardData | null = raw
     ? {
-        modules: raw.modules ?? { total: 0, versions: 0, downloads: 0, by_system: [] },
-        providers: raw.providers ?? {
-          total: 0,
-          manual: 0,
-          mirrored: 0,
-          total_versions: 0,
-          manual_versions: 0,
-          mirrored_versions: 0,
-          downloads: 0,
-        },
-        users: raw.users ?? 0,
-        organizations: raw.organizations ?? 0,
-        downloads: raw.downloads ?? 0,
-        scm_providers: raw.scm_providers ?? 0,
-        binary_mirrors: raw.binary_mirrors ?? {
-          total: 0,
-          healthy: 0,
-          failed: 0,
-          syncing: 0,
-          platforms: 0,
-          downloads: 0,
-          by_tool: [],
-        },
-        provider_mirrors: raw.provider_mirrors ?? { total: 0, healthy: 0, failed: 0 },
-        scanning: raw.scanning ?? {
-          enabled: false,
-          total: 0,
-          pending: 0,
-          clean: 0,
-          findings: 0,
-          error: 0,
-        },
-        recent_syncs: raw.recent_syncs ?? [],
-      }
+      modules: raw.modules ?? { total: 0, versions: 0, downloads: 0, by_system: [] },
+      providers: raw.providers ?? {
+        total: 0,
+        manual: 0,
+        mirrored: 0,
+        total_versions: 0,
+        manual_versions: 0,
+        mirrored_versions: 0,
+        downloads: 0,
+      },
+      users: raw.users ?? 0,
+      organizations: raw.organizations ?? 0,
+      downloads: raw.downloads ?? 0,
+      scm_providers: raw.scm_providers ?? 0,
+      binary_mirrors: raw.binary_mirrors ?? {
+        total: 0,
+        healthy: 0,
+        failed: 0,
+        syncing: 0,
+        platforms: 0,
+        downloads: 0,
+        by_tool: [],
+      },
+      provider_mirrors: raw.provider_mirrors ?? { total: 0, healthy: 0, failed: 0 },
+      scanning: raw.scanning ?? {
+        enabled: false,
+        total: 0,
+        pending: 0,
+        clean: 0,
+        findings: 0,
+        error: 0,
+      },
+      recent_syncs: raw.recent_syncs ?? [],
+    }
     : null
 
   const hasScope = (scope: string) =>
@@ -579,77 +579,77 @@ const DashboardPage: React.FC = () => {
   const statCards: (StatCardProps & { scope: string | null; gridMd: number })[] = !data
     ? []
     : [
-        // Row 1 — content cards (each md=6)
-        {
-          title: 'Modules',
-          value: data.modules.total,
-          sub: `${data.modules.versions} versions`,
-          icon: <ViewModule sx={{ fontSize: 36 }} />,
-          accentColor: '#5C4EE5',
-          route: '/modules',
-          scope: 'modules:read',
-          gridMd: 6,
-          aside:
-            data.modules.by_system?.length > 0 ? (
-              <SystemBreakdown
-                items={data.modules.by_system}
-                total={data.modules.total}
-                color="#5C4EE5"
-              />
-            ) : undefined,
-        },
-        {
-          title: 'Providers',
-          value: data.providers.total,
-          sub: `${data.providers.total_versions} versions`,
-          icon: <Extension sx={{ fontSize: 36 }} />,
-          accentColor: '#00D9C0',
-          route: '/providers',
-          scope: 'providers:read',
-          gridMd: 6,
-          aside:
-            data.providers.total > 0 ? (
-              <ProviderBreakdown
-                manual={data.providers.manual}
-                mirrored={data.providers.mirrored}
-                manualVersions={data.providers.manual_versions}
-                mirroredVersions={data.providers.mirrored_versions}
-                color="#00D9C0"
-              />
-            ) : undefined,
-        },
-        // Row 2 — mirror/download summary (each md=6)
-        {
-          title: 'Terraform Binaries',
-          value: data.binary_mirrors.platforms,
-          sub: `across ${data.binary_mirrors.total} mirror${data.binary_mirrors.total !== 1 ? 's' : ''}`,
-          icon: <GetApp sx={{ fontSize: 36 }} />,
-          accentColor: '#FF7043',
-          route: '/admin/terraform-mirror',
-          scope: 'mirrors:read',
-          gridMd: 6,
-          aside:
-            data.binary_mirrors.by_tool?.length > 0 ? (
-              <BinaryToolBreakdown items={data.binary_mirrors.by_tool} color="#FF7043" />
-            ) : undefined,
-        },
-        {
-          title: 'Total Downloads',
-          value: data.downloads,
-          icon: <Download sx={{ fontSize: 36 }} />,
-          accentColor: '#FFB74D',
-          route: '/modules',
-          scope: null,
-          gridMd: 6,
-          aside: (
-            <DownloadBreakdown
-              moduleDownloads={data.modules.downloads}
-              providerDownloads={data.providers.downloads}
-              binaryDownloads={data.binary_mirrors.downloads}
+      // Row 1 — content cards (each md=6)
+      {
+        title: 'Modules',
+        value: data.modules.total,
+        sub: `${data.modules.versions} versions`,
+        icon: <ViewModule sx={{ fontSize: 36 }} />,
+        accentColor: '#5C4EE5',
+        route: '/modules',
+        scope: 'modules:read',
+        gridMd: 6,
+        aside:
+          data.modules.by_system?.length > 0 ? (
+            <SystemBreakdown
+              items={data.modules.by_system}
+              total={data.modules.total}
+              color="#5C4EE5"
             />
-          ),
-        },
-      ].filter((c) => c.scope === null || hasScope(c.scope))
+          ) : undefined,
+      },
+      {
+        title: 'Providers',
+        value: data.providers.total,
+        sub: `${data.providers.total_versions} versions`,
+        icon: <Extension sx={{ fontSize: 36 }} />,
+        accentColor: '#00D9C0',
+        route: '/providers',
+        scope: 'providers:read',
+        gridMd: 6,
+        aside:
+          data.providers.total > 0 ? (
+            <ProviderBreakdown
+              manual={data.providers.manual}
+              mirrored={data.providers.mirrored}
+              manualVersions={data.providers.manual_versions}
+              mirroredVersions={data.providers.mirrored_versions}
+              color="#00D9C0"
+            />
+          ) : undefined,
+      },
+      // Row 2 — mirror/download summary (each md=6)
+      {
+        title: 'Terraform Binaries',
+        value: data.binary_mirrors.platforms,
+        sub: `across ${data.binary_mirrors.total} mirror${data.binary_mirrors.total !== 1 ? 's' : ''}`,
+        icon: <GetApp sx={{ fontSize: 36 }} />,
+        accentColor: '#FF7043',
+        route: '/admin/terraform-mirror',
+        scope: 'mirrors:read',
+        gridMd: 6,
+        aside:
+          data.binary_mirrors.by_tool?.length > 0 ? (
+            <BinaryToolBreakdown items={data.binary_mirrors.by_tool} color="#FF7043" />
+          ) : undefined,
+      },
+      {
+        title: 'Total Downloads',
+        value: data.downloads,
+        icon: <Download sx={{ fontSize: 36 }} />,
+        accentColor: '#FFB74D',
+        route: '/modules',
+        scope: null,
+        gridMd: 6,
+        aside: (
+          <DownloadBreakdown
+            moduleDownloads={data.modules.downloads}
+            providerDownloads={data.providers.downloads}
+            binaryDownloads={data.binary_mirrors.downloads}
+          />
+        ),
+      },
+    ].filter((c) => c.scope === null || hasScope(c.scope))
 
   // ---- Zone 3 left: recent syncs -------------------------------------------
   const recentSyncs = data ? data.recent_syncs.slice(0, 8) : []
@@ -836,7 +836,16 @@ const DashboardPage: React.FC = () => {
                             size="small"
                             color="warning"
                             variant="outlined"
-                            sx={{ height: 20, fontSize: '0.7rem' }}
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              navigate('/admin/security-scanning')
+                            }}
+                            sx={{
+                              height: 20,
+                              fontSize: '0.7rem',
+                              cursor: 'pointer',
+                              '&:hover': { textDecoration: 'underline' },
+                            }}
                           />
                         )}
                         {data.scanning.pending > 0 && (
