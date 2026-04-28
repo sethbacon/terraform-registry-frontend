@@ -188,4 +188,74 @@ describe('parseScanFindings', () => {
     const rows = parseScanFindings('trivy', raw)
     expect(rows.map((r) => r.severity)).toEqual(['CRITICAL', 'HIGH', 'MEDIUM', 'LOW'])
   })
+
+  describe('format auto-detection (unknown scanner name)', () => {
+    it('detects Trivy format by Results array', () => {
+      const raw = {
+        Results: [
+          {
+            Target: 'main.tf',
+            Misconfigurations: [
+              { ID: 'AVD-001', Title: 'Issue', Severity: 'HIGH', Resolution: 'Fix it' },
+            ],
+          },
+        ],
+      }
+      const rows = parseScanFindings('pending', raw)
+      expect(rows).toHaveLength(1)
+      expect(rows[0].ruleId).toBe('AVD-001')
+      expect(rows[0].severity).toBe('HIGH')
+    })
+
+    it('detects Checkov format by results.failed_checks', () => {
+      const raw = {
+        results: {
+          failed_checks: [
+            {
+              check: { id: 'CKV_AWS_18', name: 'S3 logging', severity: 'medium' },
+              resource: 'aws_s3_bucket.example',
+            },
+          ],
+        },
+      }
+      const rows = parseScanFindings('unknown', raw)
+      expect(rows).toHaveLength(1)
+      expect(rows[0].ruleId).toBe('CKV_AWS_18')
+    })
+
+    it('detects Terrascan format by results.violations', () => {
+      const raw = {
+        results: {
+          violations: [
+            { rule_id: 'AC_001', rule_name: 'test', severity: 'high', resource_name: 'r1' },
+          ],
+        },
+      }
+      const rows = parseScanFindings('pending', raw)
+      expect(rows).toHaveLength(1)
+      expect(rows[0].ruleId).toBe('AC_001')
+    })
+
+    it('detects Snyk format by vulnerabilities array', () => {
+      const raw = {
+        vulnerabilities: [{ id: 'SNYK-001', title: 'Issue', severity: 'critical' }],
+      }
+      const rows = parseScanFindings('pending', raw)
+      expect(rows).toHaveLength(1)
+      expect(rows[0].ruleId).toBe('SNYK-001')
+    })
+
+    it('detects SARIF format by runs array', () => {
+      const raw = {
+        runs: [
+          {
+            results: [{ ruleId: 'R1', level: 'error', message: { text: 'Desc' } }],
+          },
+        ],
+      }
+      const rows = parseScanFindings('pending', raw)
+      expect(rows).toHaveLength(1)
+      expect(rows[0].severity).toBe('HIGH')
+    })
+  })
 })
