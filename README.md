@@ -192,7 +192,7 @@ The CI pipeline is defined in `.github/workflows/ci.yml` and runs on pushes to `
 | **build**     | Production build, uploads `dist/` artifact                                                  |
 | **e2e-gated** | Playwright against the Docker Compose test stack (main branch, manual dispatch, or release) |
 
-Additional workflows: `release-please.yml` (automated versioning + release PR), `release.yml` (tag-triggered image build + GHCR push), `weekly-security.yml` (weekly security checks), `crowdin.yml` (translation sync), `dependabot-automerge.yml`, `pr-checks.yml`, `update-wiki-manual.yml`.
+Additional workflows: `release-please.yml` (automated versioning + release PR), `release.yml` (tag-triggered image build + GHCR push), `weekly-security.yml` (weekly security checks), `translate.yml` (DeepL/Google Translate sync of new i18n strings), `dependabot-automerge.yml`, `pr-checks.yml`, `update-wiki-manual.yml`.
 
 ## Documentation
 

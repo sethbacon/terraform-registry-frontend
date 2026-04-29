@@ -262,18 +262,27 @@ The UI is internationalized using [react-i18next](https://react.i18next.com/). T
 ```
 frontend/src/locales/
   en/translation.json   ← Reference locale (English) — edit this directly in PRs
-  es/translation.json   ← Spanish (machine-translated baseline; flagged for human review)
-  fr/translation.json   ← French  (machine-translated baseline)
-  de/translation.json   ← German  (machine-translated baseline)
+  de/translation.json   ← German   (machine-translated baseline; flagged for human review)
+  es/translation.json   ← Spanish  (machine-translated baseline)
+  fr/translation.json   ← French   (machine-translated baseline)
+  it/translation.json   ← Italian  (machine-translated baseline)
   ja/translation.json   ← Japanese (machine-translated baseline)
+  nb/translation.json   ← Norwegian Bokmål (machine-translated baseline)
+  nl/translation.json   ← Dutch    (machine-translated baseline)
+  pt/translation.json   ← Portuguese (machine-translated baseline)
+  zh/translation.json   ← Chinese (Simplified, machine-translated baseline)
 ```
+
+The canonical list of supported locales lives in `frontend/src/i18n.ts` (`supportedLngs`)
+and `LANGUAGE_NATIVE_NAMES` in `frontend/src/components/Layout.tsx`.
 
 ### Adding or updating English strings
 
 1. Edit `frontend/src/locales/en/translation.json` and add your new key(s).
 2. Add `useTranslation()` in the component and replace any hardcoded string with `t('your.key')`.
-3. When your PR merges, the CI workflow (`.github/workflows/translate.yml`) will automatically
-   translate new strings via DeepL (es/fr/de) and Google Translate (ja) and open a follow-up PR.
+3. When your PR merges, the CI workflow (`.github/workflows/translate.yml`) automatically
+   translates new strings (DeepL is the default provider for all locales; Google Translate
+   is available as a fallback) and opens a follow-up PR.
 
 ### Running translations locally
 
@@ -281,13 +290,13 @@ frontend/src/locales/
 # Dry run — estimate character usage without calling any API
 node scripts/translate.mjs --dry-run
 
-# Translate European languages via DeepL
+# Translate a specific subset via DeepL (default provider for all locales)
 DEEPL_API_KEY=<key> node scripts/translate.mjs --provider deepl --langs es,fr,de
 
-# Translate Japanese via Google Translate
+# Translate via Google Translate (fallback provider)
 GOOGLE_TRANSLATE_API_KEY=<key> node scripts/translate.mjs --provider google --langs ja
 
-# Translate all languages with default provider mapping
+# Translate all supported languages with their default provider mapping
 DEEPL_API_KEY=<key> GOOGLE_TRANSLATE_API_KEY=<key> node scripts/translate.mjs --all
 
 # Force re-translate everything (ignore change detection)
