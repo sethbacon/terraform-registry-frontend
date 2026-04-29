@@ -1,3 +1,4 @@
+<!-- markdownlint-disable MD013 -->
 # Testing Guide
 
 This document covers testing patterns, conventions, and how to run the test suites for the Terraform Registry frontend.
@@ -70,6 +71,7 @@ vi.mock('../../services/api', () => ({
 ```
 
 This pattern is used consistently across:
+
 - `services/__tests__/api.test.ts` -- mocks `axios` to test interceptors
 - `hooks/__tests__/useModuleDetail.test.ts` -- mocks api methods
 - `contexts/__tests__/AuthContext.test.tsx` -- mocks `api.getCurrentUserWithRole`, `api.login`, etc.
@@ -247,7 +249,7 @@ Configuration: `e2e/playwright.config.ts`
 
 ### E2E Test Files
 
-```
+```text
 e2e/tests/
   accessibility.spec.ts        # axe-core a11y scan across key pages
   admin.spec.ts                # Admin dashboard
@@ -269,6 +271,7 @@ e2e/tests/
 ### Running E2E Tests Locally
 
 1. Start the test stack:
+
    ```bash
    cd deployments
    docker compose -f docker-compose.test.yml up -d --build
@@ -277,6 +280,7 @@ e2e/tests/
 2. Wait for the frontend to be ready on `https://localhost:3000`.
 
 3. Install Playwright and run:
+
    ```bash
    cd e2e
    npm ci
@@ -285,11 +289,13 @@ e2e/tests/
    ```
 
 4. View the HTML report:
+
    ```bash
    npx playwright show-report
    ```
 
 5. Tear down:
+
    ```bash
    cd deployments
    docker compose -f docker-compose.test.yml down --volumes

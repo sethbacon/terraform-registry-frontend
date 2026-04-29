@@ -1,3 +1,4 @@
+<!-- markdownlint-disable MD013 -->
 # Releasing
 
 Releases are automated by [release-please](https://github.com/googleapis/release-please).
@@ -58,12 +59,15 @@ cosign verify \
 2. If the manifest is stale, update `.release-please-manifest.json` to the
    current released version and re-run the `Release Please` workflow dispatch.
 3. To tag and release manually:
+
    ```bash
    git tag -a vX.Y.Z origin/main -m "Release vX.Y.Z"
    git push origin vX.Y.Z
    # release.yml fires from the tag push
    ```
+
 4. If release.yml did not fire (e.g., tag was pushed by GITHUB_TOKEN):
+
    ```bash
    gh workflow run release.yml -f tag=vX.Y.Z --ref vX.Y.Z
    ```

@@ -1,7 +1,7 @@
+<!-- markdownlint-disable MD013 MD024 MD041 -->
 # Changelog
 
 ## [0.17.0](https://github.com/sethbacon/terraform-registry-frontend/compare/v0.16.1...v0.17.0) (2026-04-29)
-
 
 ### Features
 
@@ -9,13 +9,11 @@
 
 ## [0.16.1](https://github.com/sethbacon/terraform-registry-frontend/compare/v0.16.0...v0.16.1) (2026-04-28)
 
-
 ### Bug Fixes
 
 * **scanning:** add format auto-detection for unknown scanner names ([#243](https://github.com/sethbacon/terraform-registry-frontend/issues/243)) ([ecf2ce3](https://github.com/sethbacon/terraform-registry-frontend/commit/ecf2ce373fa2cc92431b70ce25f8b919623a30ba)), closes [#242](https://github.com/sethbacon/terraform-registry-frontend/issues/242)
 
 ## [0.16.0](https://github.com/sethbacon/terraform-registry-frontend/compare/v0.15.1...v0.16.0) (2026-04-28)
-
 
 ### Features
 
@@ -23,13 +21,11 @@
 
 ## [0.15.1](https://github.com/sethbacon/terraform-registry-frontend/compare/v0.15.0...v0.15.1) (2026-04-27)
 
-
 ### Bug Fixes
 
 * **i18n:** update translations and decode HTML entities from DeepL ([#237](https://github.com/sethbacon/terraform-registry-frontend/issues/237)) ([4c9d96d](https://github.com/sethbacon/terraform-registry-frontend/commit/4c9d96dccbb79f66423b4bca1d48742218579781))
 
 ## [0.15.0](https://github.com/sethbacon/terraform-registry-frontend/compare/v0.14.2...v0.15.0) (2026-04-27)
-
 
 ### Features
 
@@ -38,13 +34,11 @@
 
 ## [0.14.2](https://github.com/sethbacon/terraform-registry-frontend/compare/v0.14.1...v0.14.2) (2026-04-27)
 
-
 ### Bug Fixes
 
 * **i18n:** show native language names in language picker ([#230](https://github.com/sethbacon/terraform-registry-frontend/issues/230)) ([4669b35](https://github.com/sethbacon/terraform-registry-frontend/commit/4669b35a710e4d421bf7b5fb1e216a2a30e1859f)), closes [#229](https://github.com/sethbacon/terraform-registry-frontend/issues/229)
 
 ## [0.14.1](https://github.com/sethbacon/terraform-registry-frontend/compare/v0.14.0...v0.14.1) (2026-04-26)
-
 
 ### Bug Fixes
 
@@ -52,13 +46,11 @@
 
 ## [0.14.0](https://github.com/sethbacon/terraform-registry-frontend/compare/v0.13.0...v0.14.0) (2026-04-26)
 
-
 ### Features
 
 * replace Crowdin with DeepL + Google Translate for i18n ([#222](https://github.com/sethbacon/terraform-registry-frontend/issues/222)) ([93285d5](https://github.com/sethbacon/terraform-registry-frontend/commit/93285d501f20a1bbc890cc3843f1da5c4e327d5d))
 
 ## [0.13.0](https://github.com/sethbacon/terraform-registry-frontend/compare/v0.12.3...v0.13.0) (2026-04-25)
-
 
 ### Features
 

@@ -1,3 +1,4 @@
+<!-- markdownlint-disable MD013 -->
 # Enterprise Terraform Registry — Frontend
 
 React 19 TypeScript SPA for the [Enterprise Terraform Registry](https://github.com/sethbacon/terraform-registry-backend).
@@ -106,7 +107,7 @@ For Docker / production builds served through nginx, the bundled nginx config pr
 
 The frontend follows a layered architecture: routes render pages, pages compose components, and components consume data via hooks.
 
-```
+```text
 App
  +-- ThemeProvider / AuthProvider / HelpProvider / QueryClientProvider
       +-- Router

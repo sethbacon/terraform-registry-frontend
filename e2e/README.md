@@ -1,3 +1,4 @@
+<!-- markdownlint-disable MD013 -->
 <!-- E2E Test README -->
 # Playwright E2E — Developer Notes
 

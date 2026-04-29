@@ -1,10 +1,11 @@
+<!-- markdownlint-disable MD013 -->
 # Architecture
 
 This document describes the frontend architecture for the Terraform Registry, covering component hierarchy, routing, data fetching, authentication, and state management.
 
 ## Component Hierarchy
 
-```
+```text
 App
  |
  +-- ThemeProvider          (contexts/ThemeContext.tsx)
@@ -107,7 +108,7 @@ The catch-all route (`*`) redirects to `/`.
 
 ### Overview
 
-```
+```text
   Component
      |
      v

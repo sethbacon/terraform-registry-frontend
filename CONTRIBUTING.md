@@ -1,10 +1,11 @@
+<!-- markdownlint-disable MD013 -->
 # Contributing to Terraform Registry — Frontend
 
 Thank you for your interest in contributing to the frontend UI and E2E test suite.
 
 ## Table of Contents
 
-- [Contributing to Terraform Registry — Frontend](#contributing-to-terraform-registry-%E2%80%94-frontend)
+- [Contributing to Terraform Registry — Frontend](#contributing-to-terraform-registry--frontend)
   - [Table of Contents](#table-of-contents)
   - [Code of Conduct](#code-of-conduct)
   - [Getting Started](#getting-started)
@@ -14,7 +15,7 @@ Thank you for your interest in contributing to the frontend UI and E2E test suit
   - [Development Workflow](#development-workflow)
     - [Branch Naming](#branch-naming)
     - [Conventional Commits](#conventional-commits)
-  - [Frontend (TypeScript) Standards](#frontend-(typescript)-standards)
+  - [Frontend (TypeScript) Standards](#frontend-typescript-standards)
     - [Linting](#linting)
     - [Conventions](#conventions)
   - [Testing Requirements](#testing-requirements)
@@ -217,7 +218,7 @@ Some older admin pages still use this pattern and are being migrated. New code s
 
 ## Component File Organization
 
-```
+```text
 frontend/src/
   components/          # Shared, reusable UI components
     __tests__/         # Component unit tests
@@ -240,6 +241,7 @@ frontend/src/
 ```
 
 **Conventions**:
+
 - One component per file. File name matches the exported component/function.
 - Tests live in a `__tests__/` directory alongside the source, named `SourceFile.test.ts(x)`.
 - New pages go in `pages/` (public) or `pages/admin/` (admin). Register the route in `App.tsx`.
@@ -262,7 +264,7 @@ frontend/src/
 
 The UI is internationalized using [react-i18next](https://react.i18next.com/). Translation source files live in:
 
-```
+```text
 frontend/src/locales/
   en/translation.json   ← Reference locale (English) — edit this directly in PRs
   de/translation.json   ← German   (machine-translated baseline; flagged for human review)
@@ -323,6 +325,7 @@ in `scripts/.translation-hashes.json` to detect changes.
 
 Languages with right-to-left scripts (Arabic `ar`, Hebrew `he`, Persian `fa`, Urdu `ur`,
 Yiddish `yi`) are automatically detected by `ThemeContext`. When active:
+
 - The `<html dir="rtl">` attribute is set.
 - The MUI theme `direction` is set to `'rtl'`, enabling MUI's built-in mirroring.
 
@@ -344,6 +347,7 @@ provider. To use it locally, export `GOOGLE_TRANSLATE_API_KEY` and pass
 `--provider google`. It is intentionally not wired into CI.
 
 Once `DEEPL_API_KEY` is configured, the workflow:
+
 - Triggers automatically on pushes to `main` that change `frontend/src/locales/en/translation.json`.
 - Translates new/changed keys for every supported locale via DeepL.
 - Opens a PR (`i18n/auto-translate`) titled `i18n: update translations` for review.

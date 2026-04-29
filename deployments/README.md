@@ -1,3 +1,4 @@
+<!-- markdownlint-disable MD013 MD060 -->
 # Terraform Registry – Local Deployments
 
 ## Standard Dev Stack (no OIDC)
@@ -126,7 +127,7 @@ docker compose -f docker-compose.yml -f docker-compose.oidc.yml down -v
 | `docker-compose.prod.yml`    | Production overrides (pre-built images, no DEV_MODE)                |
 | `docker-compose.test.yml`    | E2E test stack (Playwright)                                         |
 | `keycloak/realm-export.json` | Keycloak realm definition: client, users, mappers                   |
-| `keycloak/seed-oidc-dev.sql` | SQL seed: marks setup complete, provisions admin@example.com        |
+| `keycloak/seed-oidc-dev.sql` | SQL seed: marks setup complete, provisions <admin@example.com>        |
 | `create-dev-admin-user.sql`  | SQL to seed a dev admin user for the standard dev stack             |
 
 ---

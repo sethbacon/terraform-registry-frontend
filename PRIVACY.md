@@ -1,6 +1,7 @@
+<!-- markdownlint-disable MD013 -->
 # Privacy Policy
 
-_Last updated: 2025-01-01_
+> Last updated: 2025-01-01
 
 ## 1. Introduction
 
