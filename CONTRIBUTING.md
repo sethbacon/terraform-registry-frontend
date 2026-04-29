@@ -89,7 +89,10 @@ PR titles **must** follow [Conventional Commits](https://www.conventionalcommits
 <type>(<optional scope>): <description>
 ```
 
-Common types: `feat`, `fix`, `docs`, `refactor`, `perf`, `test`, `ci`, `chore`, `deps`, `security`, `revert`.
+Common types: `feat`, `fix`, `docs`, `style`, `refactor`, `perf`, `test`, `build`, `ci`, `chore`, `revert`, `deps`, `security`.
+
+> The full accepted set is enforced by `.github/workflows/pr-checks.yml`
+> (the `Conventional PR Title` job).
 
 Breaking changes use `feat!:` or include a `BREAKING CHANGE:` footer.
 
@@ -281,8 +284,9 @@ and `LANGUAGE_NATIVE_NAMES` in `frontend/src/components/Layout.tsx`.
 1. Edit `frontend/src/locales/en/translation.json` and add your new key(s).
 2. Add `useTranslation()` in the component and replace any hardcoded string with `t('your.key')`.
 3. When your PR merges, the CI workflow (`.github/workflows/translate.yml`) automatically
-   translates new strings (DeepL is the default provider for all locales; Google Translate
-   is available as a fallback) and opens a follow-up PR.
+   translates new strings via DeepL (the only provider wired into CI) and opens a
+   follow-up PR. Google Translate is available as a local-only fallback in
+   `scripts/translate.mjs` (see [Translation API setup](#translation-api-setup)).
 
 ### Running translations locally
 
@@ -327,16 +331,22 @@ For correct property flipping of custom CSS, install and configure `stylis-plugi
 
 ### Translation API setup
 
-The `.github/workflows/translate.yml` workflow requires the following repository secrets:
+The `.github/workflows/translate.yml` workflow runs DeepL only (it invokes
+`scripts/translate.mjs --all`, and every locale's `DEFAULT_PROVIDER` is `deepl`).
+The single repository secret it needs is:
 
-| Secret                     | Description                               |
-| -------------------------- | ----------------------------------------- |
-| `DEEPL_API_KEY`            | DeepL API key (free or pro tier)          |
-| `GOOGLE_TRANSLATE_API_KEY` | Google Cloud Translation API key          |
+| Secret          | Description                      | Required by         |
+| --------------- | -------------------------------- | ------------------- |
+| `DEEPL_API_KEY` | DeepL API key (free or pro tier) | `translate.yml` CI  |
 
-Once configured, the workflow:
-- Translates new/changed keys whenever `en/translation.json` changes on `main`.
-- Opens a PR with the updated translation files for review.
+Google Translate is supported by `scripts/translate.mjs` as a manual fallback
+provider. To use it locally, export `GOOGLE_TRANSLATE_API_KEY` and pass
+`--provider google`. It is intentionally not wired into CI.
+
+Once `DEEPL_API_KEY` is configured, the workflow:
+- Triggers automatically on pushes to `main` that change `frontend/src/locales/en/translation.json`.
+- Translates new/changed keys for every supported locale via DeepL.
+- Opens a PR (`i18n/auto-translate`) titled `i18n: update translations` for review.
 
 ---
 
