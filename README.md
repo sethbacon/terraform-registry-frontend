@@ -91,14 +91,17 @@ BACKEND_IMAGE=deployments-backend docker compose -f docker-compose.test.yml up -
 
 ## Configuration
 
-The frontend reads the backend API base URL from the `VITE_API_URL` environment variable at build time.
+Frontend configuration is provided via Vite environment variables. All variables are optional; defaults are listed below. See [`frontend/.env.example`](frontend/.env.example) for the complete annotated template.
 
-| Variable       | Default                  | Description                                |
-| -------------- | ------------------------ | ------------------------------------------ |
-| `VITE_API_URL` | (proxied by Vite in dev) | Backend API base URL for production builds |
+| Variable                   | Default                  | Description                                                                                                                                                          |
+| -------------------------- | ------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `VITE_API_URL`             | (proxied by Vite in dev) | Backend API base URL for production builds. Example: `https://registry.example.com` or `https://registry.example.com/api/v1` depending on your reverse-proxy layout. |
+| `VITE_PROXY_TARGET`        | `http://localhost:8080`  | Backend URL the Vite dev server proxies `/api/*` to. Override for TLS or non-local backend during development.                                                       |
+| `VITE_USE_MOCK_DATA`       | `false`                  | When `true`, the API client returns static mock data instead of calling the backend (offline development).                                                           |
+| `VITE_ERROR_REPORTING_DSN` | _(unset)_                | URL for batched browser error reports (Sentry-compatible DSN or any HTTP endpoint). When unset, errors log to console only.                                          |
 
 In development the Vite proxy handles `/api/*` routing, so no env var is needed locally.
-For Docker / production builds, set `VITE_API_URL=http://your-backend-host:8080`.
+For Docker / production builds served through nginx, the bundled nginx config proxies `/api/*` to the backend, so `VITE_API_URL` only needs to be set when the frontend is served from a different origin than the backend.
 
 ## Tech Stack
 
@@ -165,7 +168,7 @@ npm run test:watch    # Run in watch mode
 npm run test:coverage # Run with V8 coverage report
 ```
 
-Coverage thresholds are enforced in `vitest.config.ts`: statements 70%, branches 60%, functions 60%, lines 70%. These are ratcheted up as coverage grows.
+Coverage thresholds are enforced in `vitest.config.ts`: statements 80%, branches 70%, functions 70%, lines 80% (the v1.0.0 floor). These are ratcheted up as coverage grows.
 
 **E2E tests** use Playwright and require the full stack (backend + postgres + frontend):
 
@@ -212,7 +215,6 @@ Additional workflows: `release-please.yml` (automated versioning + release PR), 
 - [Testing](TESTING.md) - Test patterns, running tests, coverage
 - [Contributing](CONTRIBUTING.md) - How to contribute
 - [Changelog](CHANGELOG.md) - Version history
-- [Roadmap](ROADMAP.md) - Planned improvements and phases
 - [Backend Repository](https://github.com/sethbacon/terraform-registry-backend) - API, architecture, and configuration
 - [Backend API Reference](https://github.com/sethbacon/terraform-registry-backend/blob/main/docs/api-reference.md)
 - [Backend Architecture](https://github.com/sethbacon/terraform-registry-backend/blob/main/docs/architecture.md)

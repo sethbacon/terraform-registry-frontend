@@ -4,8 +4,12 @@
 
 | Version | Supported          |
 | ------- | ------------------ |
-| 0.3.x   | :white_check_mark: |
-| < 0.3   | :x:                |
+| 1.0.x   | :white_check_mark: |
+| < 1.0   | :x:                |
+
+The frontend is released as a matched pair with the backend. See the
+[backend compatibility matrix](https://github.com/sethbacon/terraform-registry-backend/blob/main/deployments/COMPATIBILITY.md)
+for the canonical version pairings.
 
 ## Reporting a Vulnerability
 
