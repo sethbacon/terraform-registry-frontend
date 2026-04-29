@@ -52,42 +52,28 @@ npm run dev
 Make sure the backend is running at `http://localhost:8080` before starting the dev server.
 See [terraform-registry-backend](https://github.com/sethbacon/terraform-registry-backend) for backend setup.
 
-### Docker Compose environments
+### Docker Compose stacks
 
-| Compose file                                     | Purpose           | Frontend mode                     | Backend DEV_MODE |
-| ------------------------------------------------ | ----------------- | --------------------------------- | ---------------- |
-| `docker-compose.yml`                             | Local development | `development` (Dev Login enabled) | `true`           |
-| `docker-compose.test.yml`                        | E2E testing / CI  | `development` (Dev Login enabled) | `true`           |
-| `docker-compose.yml` + `docker-compose.prod.yml` | Production        | `production` (published image)    | `false`          |
+Three compose stacks are provided in [`deployments/`](deployments/) for local
+development, end-to-end testing, and production:
 
-**Local development** — backend + frontend via Docker, frontend also accessible via `npm run dev`:
+| Compose file                                     | Purpose           | Frontend mode                     | Backend `DEV_MODE` |
+| ------------------------------------------------ | ----------------- | --------------------------------- | ------------------ |
+| `docker-compose.yml`                             | Local development | `development` (Dev Login enabled) | `true`             |
+| `docker-compose.test.yml`                        | E2E testing / CI  | `development` (Dev Login enabled) | `true`             |
+| `docker-compose.yml` + `docker-compose.prod.yml` | Production        | `production` (published image)    | `false`            |
+
+Quick start (local dev — backend + frontend in Docker):
 
 ```bash
 cd deployments
 docker compose up -d
-# Frontend (dockerised): https://localhost:3000 (self-signed cert — accept the browser warning once)
-# Backend API: http://localhost:8080
-
-# Or run just the frontend dev server against the dockerised backend:
-cd frontend && npm run dev
-# App: http://localhost:5173
-```
-
-**E2E / CI test stack** — pulls backend from ghcr.io, builds frontend with HTTPS for Playwright:
-
-```bash
-cd deployments
-docker compose -f docker-compose.test.yml up -d --build
-# Frontend (HTTPS): https://localhost:3000
+# Frontend: https://localhost:3000 (self-signed cert — accept the browser warning once)
 # Backend API: http://localhost:8080
 ```
 
-To use a locally built backend (e.g. testing an unpublished migration):
-
-```bash
-cd ../../terraform-registry-backend/deployments && docker compose build backend
-BACKEND_IMAGE=deployments-backend docker compose -f docker-compose.test.yml up -d --build
-```
+For the Keycloak/OIDC stack, the production overlay, test users, and stack
+maintenance procedures, see [`deployments/README.md`](deployments/README.md).
 
 ## Configuration
 

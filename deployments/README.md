@@ -128,3 +128,28 @@ docker compose -f docker-compose.yml -f docker-compose.oidc.yml down -v
 | `keycloak/realm-export.json`   | Keycloak realm definition: client, users, mappers                   |
 | `keycloak/seed-oidc-dev.sql`   | SQL seed: marks setup complete, provisions admin@example.com        |
 | `create-dev-admin-user.sql`    | SQL to seed a dev admin user for the standard dev stack             |
+
+---
+
+## E2E / CI Test Stack
+
+`docker-compose.test.yml` pulls the published backend image from GHCR and builds
+the frontend with HTTPS for Playwright. The base compose file is included via
+the `extends` directive — no `-f` chaining required:
+
+```bash
+cd deployments
+docker compose -f docker-compose.test.yml up -d --build
+# Frontend (HTTPS): https://localhost:3000
+# Backend API:      http://localhost:8080
+```
+
+To exercise an unpublished backend change (e.g. a new migration), build the
+backend locally and override `BACKEND_IMAGE`:
+
+```bash
+cd ../../terraform-registry-backend/deployments
+docker compose build backend
+cd ../../terraform-registry-frontend/deployments
+BACKEND_IMAGE=deployments-backend docker compose -f docker-compose.test.yml up -d --build
+```
