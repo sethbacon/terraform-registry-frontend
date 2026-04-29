@@ -25,8 +25,10 @@ commits land. Merging it is the release action.
    - Attests SLSA provenance and signs with cosign (keyless).
    - Creates the GitHub Release with generated release notes.
    - Updates the wiki version badge (opens an issue if this step fails).
-4. After the release, update deployment configs in the backend repo — see
-   [CLAUDE.md](CLAUDE.md#releasing-a-version).
+4. After the release, update deployment configs in the backend repo:
+   - **Helm chart** (in `deployments/helm/`): update `frontend.image.tag` in `values.yaml`, `values-aks.yaml`, `values-eks.yaml`, and `values-gke.yaml`.
+   - **Kustomize overlays** (in `deployments/kubernetes/overlays/`): update the frontend `newTag` in `eks/kustomization.yaml` and `gke/kustomization.yaml`.
+   - Add a row to `deployments/COMPATIBILITY.md` recording the new backend/frontend pair.
 
 ## Hotfix flow
 

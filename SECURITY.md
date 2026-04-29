@@ -50,6 +50,64 @@ The following are out of scope:
 - Vulnerabilities that require physical access to the server
 - Social engineering attacks
 
+## Repository Hardening
+
+The following GitHub repository controls are configured for `main` to protect
+the release pipeline and supply chain:
+
+### Branch Protection (`main`)
+
+- Required status checks (strict — branch must be up-to-date): `Lint`, `Typecheck`, `Unit Tests`, `Contract Check`, `Build`, `Conventional PR Title`
+- Required pull request reviews: 1 approving review, dismiss stale reviews, require code-owner review
+- Required conversation resolution: yes
+- Force pushes: blocked; branch deletion: blocked
+
+### Merge Strategy
+
+- **Squash merge only** — rebase merges and merge commits are disabled
+- Delete branch on merge: enabled
+- Allow update branch: enabled
+- Web commit signoff (DCO) required for web-based commits
+
+### Tag Protection
+
+Release tags matching `v*.*.*` are protected from deletion via a repository
+ruleset. To re-apply via the GitHub CLI:
+
+```bash
+gh api repos/{owner}/{repo}/rulesets --method POST \
+  --field name="Protect release tags" \
+  --field target=tag \
+  --field enforcement=active \
+  --field 'conditions[ref_name][include][]=refs/tags/v*.*.*' \
+  --field 'rules[][type]=deletion'
+```
+
+Or in the UI: **Settings → Rules → Rulesets → New ruleset** targeting tags
+matching `v*.*.*` with a "Restrict deletions" rule.
+
+### Dependency Management
+
+- Dependabot vulnerability alerts: enabled
+- Dependabot automated security fixes: enabled
+- Dependabot version updates configured via `.github/dependabot.yml` for npm
+  (frontend + e2e) and GitHub Actions (biweekly)
+
+### Code Ownership
+
+- `.github/CODEOWNERS` requires explicit owner review for `frontend/`,
+  `.github/`, `deployments/`, and `e2e/`
+
+### Supply-Chain Security
+
+- All GitHub Actions pinned to full commit SHAs
+- Secret scanning + push protection: enabled
+- `npm audit --audit-level=high` in Dockerfile and the scheduled security workflow
+- `rehype-sanitize` for Markdown rendering (XSS mitigation)
+- Scheduled weekly security workflow with auto-issue on failure
+- **SLSA provenance attestation** on Docker images via `actions/attest-build-provenance`
+- **Cosign keyless signing** on Docker images via Sigstore (verify with `cosign verify`)
+
 ## License
 
 This project is licensed under the [Apache License 2.0](LICENSE).
