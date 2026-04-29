@@ -185,26 +185,43 @@ mockUseAuth.mockReturnValue({
 });
 ```
 
-## Unit Test Files
+## Unit Test Inventory
 
-| File                                             | What it tests                                                                                                           |
-| ------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------- |
-| `services/__tests__/api.test.ts`                 | Axios interceptors (auth header, 401 handling, SCM OAuth exception), SetupToken header, representative API method calls |
-| `services/__tests__/errorReporting.test.ts`      | Error batching, flush, breadcrumbs, Sentry fallback                                                                     |
-| `services/__tests__/queryKeys.test.ts`           | Query key uniqueness and hierarchy stability                                                                            |
-| `hooks/__tests__/useModuleDetail.test.ts`        | Loading state, data fetch, version selection, error states, SCM/scan loading, Terraform example generation              |
-| `hooks/__tests__/useDebounce.test.ts`            | Debounce timing, value updates, cleanup                                                                                 |
-| `contexts/__tests__/AuthContext.test.tsx`        | Initial state, login flows (OIDC/dev), logout, refreshToken, fetchUser on mount, expired token                          |
-| `contexts/__tests__/ThemeContext.test.tsx`       | Default mode, toggle, localStorage persistence                                                                          |
-| `contexts/__tests__/HelpContext.test.tsx`        | Open/close panel state                                                                                                  |
-| `components/__tests__/ProtectedRoute.test.tsx`   | Loading spinner, unauthenticated redirect, scope checking, admin bypass                                                 |
-| `components/__tests__/ErrorBoundary.test.tsx`    | Renders children, catches errors, fallback UI                                                                           |
-| `components/__tests__/MarkdownRenderer.test.tsx` | Markdown rendering, HTML sanitization, GFM features                                                                     |
-| `components/__tests__/RegistryItemCard.test.tsx` | Module/provider card rendering, navigation                                                                              |
-| `utils/__tests__/errors.test.ts`                 | Error message extraction from AxiosError, native Error, string                                                          |
-| `utils/__tests__/formatting.test.ts`             | Formatting utility functions                                                                                            |
-| `pages/__tests__/ModulesPage.test.tsx`           | Module listing page                                                                                                     |
-| `pages/__tests__/SetupWizardPage.test.tsx`       | Setup wizard flow                                                                                                       |
+The suite contains **~95 Vitest spec files** (count it with
+`Get-ChildItem frontend/src -Recurse -Filter *.test.* | Measure-Object`). They
+are organised by domain under `frontend/src/`:
+
+| Directory                          | Coverage focus                                                                                                                |
+| ---------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| `services/__tests__/`              | API client interceptors (auth header, 401 handling, SCM OAuth exception), error/performance reporting, query-key stability    |
+| `hooks/__tests__/`                 | `useModuleDetail`, `useDebounce`, `useHotkey`, `useRouteFocus` — React Query state, debouncing, focus management              |
+| `contexts/__tests__/`              | `AuthContext`, `ThemeContext`, `HelpContext`, `SetupWizardContext`, `ConsentContext`, `AnnouncerContext`                      |
+| `components/__tests__/`            | ~35 component specs covering layout, dialogs, panels (security/scan/SCM/policy), wizards, registry cards, markdown, focus mgr |
+| `components/skeletons/__tests__/`  | Loading skeleton variants                                                                                                     |
+| `pages/__tests__/`                 | Public pages: Home, Modules, Module/Provider Detail, Login, Callback, Settings, Setup Wizard, API docs, Terraform binaries    |
+| `pages/admin/__tests__/`           | Every admin page — Dashboard, Users, Roles, Organizations, SCM Providers, Storage, Mirrors, Mirror Policies, Approvals, Audit Log, OIDC, mTLS, SCIM, Security Scanning, Terraform Mirror, API Keys, Module/Provider Upload |
+| `pages/setup/steps/__tests__/`     | Each first-run setup step (Authenticate, AdminUser, Storage, OIDC, Scanning, Review)                                          |
+| `pages/dev/__tests__/`             | Dev-only `ComponentShowcase`                                                                                                  |
+| `types/__tests__/`                 | RBAC scopes, mirror types, terraform_mirror types                                                                             |
+| `utils/__tests__/`                 | `errors`, `formatting`, `scopes`, `scanParsers`, `terraformExample`                                                           |
+
+> The directory layout is the source of truth — every component, hook,
+> context, page, and util added under `frontend/src/` must ship with a
+> sibling spec in `__tests__/`. The CI coverage gate (80/70/70/80) is the
+> mechanism that enforces this; an unmoved or untested file will pull the
+> totals below threshold.
+
+### Notable suites
+
+| File                                             | Why it is interesting                                                                                                            |
+| ------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------- |
+| `services/__tests__/api.test.ts`                 | Captures Axios interceptor callbacks via the mock pattern below; exercises auth header, 401 handling, SCM OAuth exception, etc. |
+| `services/__tests__/errorReporting.test.ts`      | Error batching, flush, breadcrumbs, Sentry fallback                                                                              |
+| `services/__tests__/performanceReporting.test.ts`| Web-vitals batching and consent gating                                                                                           |
+| `services/__tests__/queryKeys.test.ts`           | Query-key uniqueness and hierarchy stability (refactor guard)                                                                    |
+| `contexts/__tests__/AuthContext.test.tsx`        | Login flows (OIDC + dev), logout, refreshToken, fetchUser on mount, expired token                                                |
+| `components/__tests__/ProtectedRoute.test.tsx`   | Loading spinner, unauthenticated redirect, scope checking, admin bypass                                                          |
+| `components/__tests__/MarkdownRenderer.test.tsx` | Markdown rendering, HTML sanitisation, GFM features (XSS guard)                                                                  |
 
 ## E2E Tests
 
@@ -214,32 +231,39 @@ E2E tests use [Playwright](https://playwright.dev/) and run against the full app
 
 Configuration: `e2e/playwright.config.ts`
 
-| Setting  | Value                                                         |
-| -------- | ------------------------------------------------------------- |
-| Base URL | `https://localhost:3000` (overridable via `BASE_URL` env var) |
-| Browsers | Chromium (always), Firefox (CI only)                          |
-| Timeout  | 60 seconds per test                                           |
-| Retries  | 0 (failures are visible immediately)                          |
-| Traces   | Always recorded                                               |
-| Video    | Always recorded                                               |
+| Setting       | Value (config)                                                          | CI override                                                       |
+| ------------- | ----------------------------------------------------------------------- | ----------------------------------------------------------------- |
+| Base URL      | `https://localhost:3000` (overridable via `BASE_URL` env var)           | —                                                                 |
+| Browsers      | Chromium always; Firefox **and** WebKit only when `process.env.CI`      | CI installs `chromium firefox webkit` and runs all three projects |
+| Timeout       | 60 s per test, 5 s per `expect`                                          | —                                                                 |
+| Retries       | `0` (config) — failures surface immediately locally                     | `--retries=1` on the CI command line                              |
+| Max failures  | `1` (stops the run after the first failure for fast feedback)            | `--max-failures=1` (matches config)                               |
+| Workers       | `process.env.CI ? 4 : undefined` (local uses available CPU)              | CI command line pins `--workers=2` (Firefox flake mitigation, see #233) |
+| Excluded specs| —                                                                       | `--grep-invert="Visual regression"` keeps `visual-regression.spec.ts` out of the gating run (run it manually with `npx playwright test visual-regression`) |
+| Traces        | `on` (always recorded)                                                   | —                                                                 |
+| Video         | `on` (always recorded)                                                   | —                                                                 |
+| Screenshots   | `only-on-failure`                                                        | —                                                                 |
+| Storage state | Pre-seeded `terraform-registry-consent` in localStorage so the consent banner does not block pointer events | —                |
 
 ### E2E Test Files
 
 ```
 e2e/tests/
-  admin.spec.ts              # Admin dashboard
-  approvals.spec.ts          # Mirror approval flows
-  audit.spec.ts              # Audit log page
-  auth.spec.ts               # Login/logout flows
-  home.spec.ts               # Home page
-  modules.spec.ts            # Module browsing
-  oidc-settings.spec.ts      # OIDC configuration page
-  policies.spec.ts           # Mirror policies
-  providers.spec.ts          # Provider browsing
-  setup-wizard.spec.ts       # First-run setup wizard
-  terraform-binaries.spec.ts # Terraform binary mirror browsing
+  accessibility.spec.ts        # axe-core a11y scan across key pages
+  admin.spec.ts                # Admin dashboard
+  approvals.spec.ts            # Mirror approval flows
+  audit.spec.ts                # Audit log page
+  auth.spec.ts                 # Login/logout flows
+  home.spec.ts                 # Home page
+  modules.spec.ts              # Module browsing
+  oidc-settings.spec.ts        # OIDC configuration page
+  policies.spec.ts             # Mirror policies
+  providers.spec.ts            # Provider browsing
+  setup-wizard.spec.ts         # First-run setup wizard
+  terraform-binaries.spec.ts   # Terraform binary mirror browsing
   terraform-mirror-admin.spec.ts # Terraform mirror admin
-  upload.spec.ts             # Module/provider upload
+  upload.spec.ts               # Module/provider upload
+  visual-regression.spec.ts    # Pixel-diff snapshots (excluded from CI gate; run on demand)
 ```
 
 ### Running E2E Tests Locally

@@ -153,7 +153,7 @@ npm run build
 | New page / user flow | E2E spec in `e2e/tests/feature-name.spec.ts`                                                      |
 | Bug fix              | Regression test covering the fixed behavior                                                       |
 
-Tests must pass with `npm test`. Coverage thresholds are enforced at 40% (statements, branches, functions, lines) via `vitest.config.ts` and will increase over time.
+Tests must pass with `npm test`. The coverage thresholds enforced by `vitest.config.ts` for v1.0.0 are **80% statements / 70% branches / 70% functions / 80% lines**. CI fails the build if any threshold is not met. See [TESTING.md](TESTING.md#coverage) for the ratchet history.
 
 For detailed test patterns and examples, see [TESTING.md](TESTING.md).
 
@@ -335,9 +335,9 @@ The `.github/workflows/translate.yml` workflow runs DeepL only (it invokes
 `scripts/translate.mjs --all`, and every locale's `DEFAULT_PROVIDER` is `deepl`).
 The single repository secret it needs is:
 
-| Secret          | Description                      | Required by         |
-| --------------- | -------------------------------- | ------------------- |
-| `DEEPL_API_KEY` | DeepL API key (free or pro tier) | `translate.yml` CI  |
+| Secret          | Description                      | Required by        |
+| --------------- | -------------------------------- | ------------------ |
+| `DEEPL_API_KEY` | DeepL API key (free or pro tier) | `translate.yml` CI |
 
 Google Translate is supported by `scripts/translate.mjs` as a manual fallback
 provider. To use it locally, export `GOOGLE_TRANSLATE_API_KEY` and pass
