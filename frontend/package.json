@@ -1,6 +1,6 @@
 {
   "name": "terraform-registry-frontend",
-  "version": "0.17.0",
+  "version": "1.0.0",
   "private": true,
   "type": "module",
   "scripts": {

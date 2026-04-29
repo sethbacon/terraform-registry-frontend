@@ -1,6 +1,13 @@
 <!-- markdownlint-disable MD013 MD024 MD041 -->
 # Changelog
 
+## [1.0.0](https://github.com/sethbacon/terraform-registry-frontend/compare/v0.17.0...v1.0.0) (2026-04-29)
+
+
+### Documentation
+
+* 1.0.0 release prep (Release-As: 1.0.0) ([#247](https://github.com/sethbacon/terraform-registry-frontend/issues/247)) ([2451166](https://github.com/sethbacon/terraform-registry-frontend/commit/2451166ac3fc4d3beb8e137391f82448a5a47129))
+
 ## [0.17.0](https://github.com/sethbacon/terraform-registry-frontend/compare/v0.16.1...v0.17.0) (2026-04-29)
 
 ### Features
