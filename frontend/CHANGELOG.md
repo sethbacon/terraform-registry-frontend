@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.17.0](https://github.com/sethbacon/terraform-registry-frontend/compare/v0.16.1...v0.17.0) (2026-04-29)
+
+
+### Features
+
+* **cve:** add advisory banner for active CVE advisories ([#245](https://github.com/sethbacon/terraform-registry-frontend/issues/245)) ([45d8528](https://github.com/sethbacon/terraform-registry-frontend/commit/45d85286879b3f71705e42df623317653ae2ff23))
+
 ## [0.16.1](https://github.com/sethbacon/terraform-registry-frontend/compare/v0.16.0...v0.16.1) (2026-04-28)
 
 
