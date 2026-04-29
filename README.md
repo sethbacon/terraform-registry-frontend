@@ -1,4 +1,5 @@
-# Terraform Registry — Frontend
+<!-- markdownlint-disable MD013 -->
+# Enterprise Terraform Registry — Frontend
 
 React 19 TypeScript SPA for the [Enterprise Terraform Registry](https://github.com/sethbacon/terraform-registry-backend).
 
@@ -7,28 +8,26 @@ React 19 TypeScript SPA for the [Enterprise Terraform Registry](https://github.c
 [![TypeScript](https://img.shields.io/badge/TypeScript-5+-3178C6?logo=typescript)](https://www.typescriptlang.org/)
 [![Coverage](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/sethbacon/59239e8575b4f784f875647e2b344b41/raw/frontend-coverage.json)](https://github.com/sethbacon/terraform-registry-frontend/actions/workflows/ci.yml)
 
-## Overview
-
-This repository contains the frontend UI and Playwright E2E test suite for the Enterprise Terraform Registry.
-
-The backend API, database, and deployment infrastructure live in [terraform-registry-backend](https://github.com/sethbacon/terraform-registry-backend).
+This repository contains the frontend UI and Playwright E2E test suite for the Enterprise Terraform Registry. The backend API, database, and deployment infrastructure live in **[terraform-registry-backend](https://github.com/sethbacon/terraform-registry-backend)**.
 
 ## Features
 
-- **Module Browser** — Search, filter, and explore modules with pagination and README rendering; toggle between grid and grouped-by-provider views; collapsible webhook events panel on module detail pages
-- **Provider Browser** — Discover and manage provider versions with platform information; mirrored providers include a direct link to the matching `registry.terraform.io` documentation page
-- **Admin Dashboard** — Refreshed card-based layout with summary stats (modules, providers, mirrors, users), binary mirror health (per-tool download counts and platform counts), provider mirror health, SCM provider count, and a unified recent sync activity feed
-- **Upload Interface** — Easy module and provider publishing with SCM linking
-- **SCM Management** — Connect GitHub, Azure DevOps, GitLab, and Bitbucket repositories
-- **Mirror Management** — Configure and trigger provider synchronization from upstream registries
-- **Terraform Binary Mirror** — Manage multiple named Terraform/OpenTofu binary mirror configs; per-config version management, platform-level inspection (SHA256 / GPG columns), on-demand sync trigger, and sync history; `version_filter` regex and `stable_only` flag supported
-- **Terraform Binaries Browser** — Public `/terraform-binaries` listing of all active mirror configurations with tool badge, description, and latest synced version; drill into per-config version and platform asset pages
-- **Mirror Approvals** — `/admin/approvals` page to review and action pending mirror sync approval requests (approve or reject with optional reason)
-- **Mirror Policies** — `/admin/policies` CRUD interface for mirror policy rules: platform filters, version constraints, enabled/disabled toggle
-- **Grouped Sidebar Navigation** — Admin nav items organized into collapsible sections (Identity, Source Control, Mirroring, Registry) for improved discoverability
+- **Module Browser** — Search, filter, and explore modules; grid and grouped-by-provider views; collapsible webhook events panel on detail pages
+- **Provider Browser** — Browse provider versions with platform info; mirrored providers link to upstream `registry.terraform.io` docs
+- **Admin Dashboard** — Card-based layout with summary stats (modules, providers, mirrors, users), mirror health, SCM provider count, recent sync activity
+- **Upload Interface** — Module and provider publishing with SCM linking
+- **SCM Management** — GitHub, Azure DevOps, GitLab, and Bitbucket repository integration
+- **Mirror Management** — Provider mirror configuration and sync triggers
+- **Terraform Binary Mirror** — Multiple named Terraform/OpenTofu mirror configs; per-platform inspection; `version_filter` regex and `stable_only` flag
+- **Terraform Binaries Browser** — Public `/terraform-binaries` listing with drill-down to per-config version and platform pages
+- **Mirror Approvals** — Review and action pending mirror sync approval requests at `/admin/approvals`
+- **Mirror Policies** — CRUD for mirror policy rules at `/admin/policies` (platform filters, version constraints, enabled/disabled toggle)
+- **Grouped Sidebar Navigation** — Admin nav items grouped into Identity, Source Control, Mirroring, and Registry sections
 - **API Key Management** — Create, edit, rotate, and expire API keys with scope controls
-- **Interactive API Docs** — Full Swagger UI and ReDoc-based API reference at `/api-docs`
-- **Responsive Design** — Works on desktop, tablet, and mobile
+- **Interactive API Docs** — Swagger UI and ReDoc-based API reference at `/api-docs`
+- **Internationalisation** — 10 locales (en, de, es, fr, it, ja, nb, nl, pt, zh) via react-i18next; auto-translation pipeline (DeepL)
+- **Accessibility** — WCAG 2.1 AA target; axe-core E2E coverage; RTL-aware theme
+- **Responsive Design** — Desktop, tablet, and mobile layouts
 
 ## Prerequisites
 
@@ -52,53 +51,42 @@ npm run dev
 Make sure the backend is running at `http://localhost:8080` before starting the dev server.
 See [terraform-registry-backend](https://github.com/sethbacon/terraform-registry-backend) for backend setup.
 
-### Docker Compose environments
+### Docker Compose stacks
 
-| Compose file                                     | Purpose           | Frontend mode                     | Backend DEV_MODE |
-| ------------------------------------------------ | ----------------- | --------------------------------- | ---------------- |
-| `docker-compose.yml`                             | Local development | `development` (Dev Login enabled) | `true`           |
-| `docker-compose.test.yml`                        | E2E testing / CI  | `development` (Dev Login enabled) | `true`           |
-| `docker-compose.yml` + `docker-compose.prod.yml` | Production        | `production` (published image)    | `false`          |
+Three compose stacks are provided in [`deployments/`](deployments/) for local
+development, end-to-end testing, and production:
 
-**Local development** — backend + frontend via Docker, frontend also accessible via `npm run dev`:
+| Compose file                                     | Purpose           | Frontend mode                     | Backend `DEV_MODE` |
+| ------------------------------------------------ | ----------------- | --------------------------------- | ------------------ |
+| `docker-compose.yml`                             | Local development | `development` (Dev Login enabled) | `true`             |
+| `docker-compose.test.yml`                        | E2E testing / CI  | `development` (Dev Login enabled) | `true`             |
+| `docker-compose.yml` + `docker-compose.prod.yml` | Production        | `production` (published image)    | `false`            |
+
+Quick start (local dev — backend + frontend in Docker):
 
 ```bash
 cd deployments
 docker compose up -d
-# Frontend (dockerised): https://localhost:3000 (self-signed cert — accept the browser warning once)
-# Backend API: http://localhost:8080
-
-# Or run just the frontend dev server against the dockerised backend:
-cd frontend && npm run dev
-# App: http://localhost:5173
-```
-
-**E2E / CI test stack** — pulls backend from ghcr.io, builds frontend with HTTPS for Playwright:
-
-```bash
-cd deployments
-docker compose -f docker-compose.test.yml up -d --build
-# Frontend (HTTPS): https://localhost:3000
+# Frontend: https://localhost:3000 (self-signed cert — accept the browser warning once)
 # Backend API: http://localhost:8080
 ```
 
-To use a locally built backend (e.g. testing an unpublished migration):
-
-```bash
-cd ../../terraform-registry-backend/deployments && docker compose build backend
-BACKEND_IMAGE=deployments-backend docker compose -f docker-compose.test.yml up -d --build
-```
+For the Keycloak/OIDC stack, the production overlay, test users, and stack
+maintenance procedures, see [`deployments/README.md`](deployments/README.md).
 
 ## Configuration
 
-The frontend reads the backend API base URL from the `VITE_API_URL` environment variable at build time.
+Frontend configuration is provided via Vite environment variables. All variables are optional; defaults are listed below. See [`frontend/.env.example`](frontend/.env.example) for the complete annotated template.
 
-| Variable       | Default                  | Description                                |
-| -------------- | ------------------------ | ------------------------------------------ |
-| `VITE_API_URL` | (proxied by Vite in dev) | Backend API base URL for production builds |
+| Variable                   | Default                  | Description                                                                                                                                                          |
+| -------------------------- | ------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `VITE_API_URL`             | (proxied by Vite in dev) | Backend API base URL for production builds. Example: `https://registry.example.com` or `https://registry.example.com/api/v1` depending on your reverse-proxy layout. |
+| `VITE_PROXY_TARGET`        | `http://localhost:8080`  | Backend URL the Vite dev server proxies `/api/*` to. Override for TLS or non-local backend during development.                                                       |
+| `VITE_USE_MOCK_DATA`       | `false`                  | When `true`, the API client returns static mock data instead of calling the backend (offline development).                                                           |
+| `VITE_ERROR_REPORTING_DSN` | _(unset)_                | URL for batched browser error reports (Sentry-compatible DSN or any HTTP endpoint). When unset, errors log to console only.                                          |
 
 In development the Vite proxy handles `/api/*` routing, so no env var is needed locally.
-For Docker / production builds, set `VITE_API_URL=http://your-backend-host:8080`.
+For Docker / production builds served through nginx, the bundled nginx config proxies `/api/*` to the backend, so `VITE_API_URL` only needs to be set when the frontend is served from a different origin than the backend.
 
 ## Tech Stack
 
@@ -119,7 +107,7 @@ For Docker / production builds, set `VITE_API_URL=http://your-backend-host:8080`
 
 The frontend follows a layered architecture: routes render pages, pages compose components, and components consume data via hooks.
 
-```
+```text
 App
  +-- ThemeProvider / AuthProvider / HelpProvider / QueryClientProvider
       +-- Router
@@ -165,7 +153,7 @@ npm run test:watch    # Run in watch mode
 npm run test:coverage # Run with V8 coverage report
 ```
 
-Coverage thresholds are enforced in `vitest.config.ts`: statements 70%, branches 60%, functions 60%, lines 70%. These are ratcheted up as coverage grows.
+Coverage thresholds are enforced in `vitest.config.ts`: statements 80%, branches 70%, functions 70%, lines 80% (the v1.0.0 floor). These are ratcheted up as coverage grows.
 
 **E2E tests** use Playwright and require the full stack (backend + postgres + frontend):
 
@@ -203,17 +191,20 @@ The CI pipeline is defined in `.github/workflows/ci.yml` and runs on pushes to `
 | **build**     | Production build, uploads `dist/` artifact                                                  |
 | **e2e-gated** | Playwright against the Docker Compose test stack (main branch, manual dispatch, or release) |
 
-Additional workflows: `release-please.yml` (automated versioning + release PR), `release.yml` (tag-triggered image build + GHCR push), `weekly-security.yml` (weekly security checks), `crowdin.yml` (translation sync), `dependabot-automerge.yml`, `pr-checks.yml`, `update-wiki-manual.yml`.
+Additional workflows: `release-please.yml` (automated versioning + release PR), `release.yml` (tag-triggered image build + GHCR push), `weekly-security.yml` (weekly security checks), `translate.yml` (DeepL/Google Translate sync of new i18n strings), `dependabot-automerge.yml`, `pr-checks.yml`, `update-wiki-manual.yml`.
 
 ## Documentation
 
-- [Architecture](ARCHITECTURE.md) - Component hierarchy, data flow, auth flow
-- [Accessibility](ACCESSIBILITY.md) - WCAG 2.1 AA compliance, testing tools
-- [Testing](TESTING.md) - Test patterns, running tests, coverage
-- [Contributing](CONTRIBUTING.md) - How to contribute
-- [Changelog](CHANGELOG.md) - Version history
-- [Roadmap](ROADMAP.md) - Planned improvements and phases
-- [Backend Repository](https://github.com/sethbacon/terraform-registry-backend) - API, architecture, and configuration
+- [Architecture](ARCHITECTURE.md) — Component hierarchy, data flow, auth flow
+- [Accessibility](ACCESSIBILITY.md) — WCAG 2.1 AA compliance, testing tools
+- [Testing](TESTING.md) — Test patterns, running tests, coverage
+- [Privacy](PRIVACY.md) — Browser data collection and consent model
+- [Releasing](RELEASING.md) — Release process and supply-chain verification
+- [Security](SECURITY.md) — Reporting vulnerabilities and supported versions
+- [Contributing](CONTRIBUTING.md) — How to contribute
+- [Code of Conduct](CODE_OF_CONDUCT.md) — Community standards
+- [Changelog](CHANGELOG.md) — Version history
+- [Backend Repository](https://github.com/sethbacon/terraform-registry-backend) — API, architecture, configuration, deployment
 - [Backend API Reference](https://github.com/sethbacon/terraform-registry-backend/blob/main/docs/api-reference.md)
 - [Backend Architecture](https://github.com/sethbacon/terraform-registry-backend/blob/main/docs/architecture.md)
 

@@ -1,6 +1,7 @@
+<!-- markdownlint-disable MD013 -->
 # Privacy Policy
 
-_Last updated: 2025-01-01_
+> Last updated: 2025-01-01
 
 ## 1. Introduction
 
@@ -94,7 +95,8 @@ No third-party tracking cookies are used.
 ## 8. Data Transfers
 
 Data residency depends on where this instance is deployed. For multi-region
-deployments, see [docs/data-residency.md](docs/data-residency.md).
+deployments, see the backend's
+[data residency guide](https://github.com/sethbacon/terraform-registry-backend/blob/main/docs/data-residency.md).
 
 ## 9. Security
 

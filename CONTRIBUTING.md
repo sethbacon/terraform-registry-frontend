@@ -1,10 +1,11 @@
+<!-- markdownlint-disable MD013 -->
 # Contributing to Terraform Registry — Frontend
 
 Thank you for your interest in contributing to the frontend UI and E2E test suite.
 
 ## Table of Contents
 
-- [Contributing to Terraform Registry — Frontend](#contributing-to-terraform-registry-%E2%80%94-frontend)
+- [Contributing to Terraform Registry — Frontend](#contributing-to-terraform-registry--frontend)
   - [Table of Contents](#table-of-contents)
   - [Code of Conduct](#code-of-conduct)
   - [Getting Started](#getting-started)
@@ -14,7 +15,7 @@ Thank you for your interest in contributing to the frontend UI and E2E test suit
   - [Development Workflow](#development-workflow)
     - [Branch Naming](#branch-naming)
     - [Conventional Commits](#conventional-commits)
-  - [Frontend (TypeScript) Standards](#frontend-(typescript)-standards)
+  - [Frontend (TypeScript) Standards](#frontend-typescript-standards)
     - [Linting](#linting)
     - [Conventions](#conventions)
   - [Testing Requirements](#testing-requirements)
@@ -89,7 +90,10 @@ PR titles **must** follow [Conventional Commits](https://www.conventionalcommits
 <type>(<optional scope>): <description>
 ```
 
-Common types: `feat`, `fix`, `docs`, `refactor`, `perf`, `test`, `ci`, `chore`, `deps`, `security`, `revert`.
+Common types: `feat`, `fix`, `docs`, `style`, `refactor`, `perf`, `test`, `build`, `ci`, `chore`, `revert`, `deps`, `security`.
+
+> The full accepted set is enforced by `.github/workflows/pr-checks.yml`
+> (the `Conventional PR Title` job).
 
 Breaking changes use `feat!:` or include a `BREAKING CHANGE:` footer.
 
@@ -150,7 +154,7 @@ npm run build
 | New page / user flow | E2E spec in `e2e/tests/feature-name.spec.ts`                                                      |
 | Bug fix              | Regression test covering the fixed behavior                                                       |
 
-Tests must pass with `npm test`. Coverage thresholds are enforced at 40% (statements, branches, functions, lines) via `vitest.config.ts` and will increase over time.
+Tests must pass with `npm test`. The coverage thresholds enforced by `vitest.config.ts` for v1.0.0 are **80% statements / 70% branches / 70% functions / 80% lines**. CI fails the build if any threshold is not met. See [TESTING.md](TESTING.md#coverage) for the ratchet history.
 
 For detailed test patterns and examples, see [TESTING.md](TESTING.md).
 
@@ -214,7 +218,7 @@ Some older admin pages still use this pattern and are being migrated. New code s
 
 ## Component File Organization
 
-```
+```text
 frontend/src/
   components/          # Shared, reusable UI components
     __tests__/         # Component unit tests
@@ -237,6 +241,7 @@ frontend/src/
 ```
 
 **Conventions**:
+
 - One component per file. File name matches the exported component/function.
 - Tests live in a `__tests__/` directory alongside the source, named `SourceFile.test.ts(x)`.
 - New pages go in `pages/` (public) or `pages/admin/` (admin). Register the route in `App.tsx`.
@@ -259,21 +264,31 @@ frontend/src/
 
 The UI is internationalized using [react-i18next](https://react.i18next.com/). Translation source files live in:
 
-```
+```text
 frontend/src/locales/
   en/translation.json   ← Reference locale (English) — edit this directly in PRs
-  es/translation.json   ← Spanish (machine-translated baseline; flagged for human review)
-  fr/translation.json   ← French  (machine-translated baseline)
-  de/translation.json   ← German  (machine-translated baseline)
+  de/translation.json   ← German   (machine-translated baseline; flagged for human review)
+  es/translation.json   ← Spanish  (machine-translated baseline)
+  fr/translation.json   ← French   (machine-translated baseline)
+  it/translation.json   ← Italian  (machine-translated baseline)
   ja/translation.json   ← Japanese (machine-translated baseline)
+  nb/translation.json   ← Norwegian Bokmål (machine-translated baseline)
+  nl/translation.json   ← Dutch    (machine-translated baseline)
+  pt/translation.json   ← Portuguese (machine-translated baseline)
+  zh/translation.json   ← Chinese (Simplified, machine-translated baseline)
 ```
+
+The canonical list of supported locales lives in `frontend/src/i18n.ts` (`supportedLngs`)
+and `LANGUAGE_NATIVE_NAMES` in `frontend/src/components/Layout.tsx`.
 
 ### Adding or updating English strings
 
 1. Edit `frontend/src/locales/en/translation.json` and add your new key(s).
 2. Add `useTranslation()` in the component and replace any hardcoded string with `t('your.key')`.
-3. When your PR merges, the CI workflow (`.github/workflows/translate.yml`) will automatically
-   translate new strings via DeepL (es/fr/de) and Google Translate (ja) and open a follow-up PR.
+3. When your PR merges, the CI workflow (`.github/workflows/translate.yml`) automatically
+   translates new strings via DeepL (the only provider wired into CI) and opens a
+   follow-up PR. Google Translate is available as a local-only fallback in
+   `scripts/translate.mjs` (see [Translation API setup](#translation-api-setup)).
 
 ### Running translations locally
 
@@ -281,13 +296,13 @@ frontend/src/locales/
 # Dry run — estimate character usage without calling any API
 node scripts/translate.mjs --dry-run
 
-# Translate European languages via DeepL
+# Translate a specific subset via DeepL (default provider for all locales)
 DEEPL_API_KEY=<key> node scripts/translate.mjs --provider deepl --langs es,fr,de
 
-# Translate Japanese via Google Translate
+# Translate via Google Translate (fallback provider)
 GOOGLE_TRANSLATE_API_KEY=<key> node scripts/translate.mjs --provider google --langs ja
 
-# Translate all languages with default provider mapping
+# Translate all supported languages with their default provider mapping
 DEEPL_API_KEY=<key> GOOGLE_TRANSLATE_API_KEY=<key> node scripts/translate.mjs --all
 
 # Force re-translate everything (ignore change detection)
@@ -310,6 +325,7 @@ in `scripts/.translation-hashes.json` to detect changes.
 
 Languages with right-to-left scripts (Arabic `ar`, Hebrew `he`, Persian `fa`, Urdu `ur`,
 Yiddish `yi`) are automatically detected by `ThemeContext`. When active:
+
 - The `<html dir="rtl">` attribute is set.
 - The MUI theme `direction` is set to `'rtl'`, enabling MUI's built-in mirroring.
 
@@ -318,16 +334,23 @@ For correct property flipping of custom CSS, install and configure `stylis-plugi
 
 ### Translation API setup
 
-The `.github/workflows/translate.yml` workflow requires the following repository secrets:
+The `.github/workflows/translate.yml` workflow runs DeepL only (it invokes
+`scripts/translate.mjs --all`, and every locale's `DEFAULT_PROVIDER` is `deepl`).
+The single repository secret it needs is:
 
-| Secret                     | Description                               |
-| -------------------------- | ----------------------------------------- |
-| `DEEPL_API_KEY`            | DeepL API key (free or pro tier)          |
-| `GOOGLE_TRANSLATE_API_KEY` | Google Cloud Translation API key          |
+| Secret          | Description                      | Required by        |
+| --------------- | -------------------------------- | ------------------ |
+| `DEEPL_API_KEY` | DeepL API key (free or pro tier) | `translate.yml` CI |
 
-Once configured, the workflow:
-- Translates new/changed keys whenever `en/translation.json` changes on `main`.
-- Opens a PR with the updated translation files for review.
+Google Translate is supported by `scripts/translate.mjs` as a manual fallback
+provider. To use it locally, export `GOOGLE_TRANSLATE_API_KEY` and pass
+`--provider google`. It is intentionally not wired into CI.
+
+Once `DEEPL_API_KEY` is configured, the workflow:
+
+- Triggers automatically on pushes to `main` that change `frontend/src/locales/en/translation.json`.
+- Translates new/changed keys for every supported locale via DeepL.
+- Opens a PR (`i18n/auto-translate`) titled `i18n: update translations` for review.
 
 ---
 

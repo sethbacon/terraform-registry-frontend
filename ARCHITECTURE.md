@@ -1,10 +1,11 @@
+<!-- markdownlint-disable MD013 -->
 # Architecture
 
 This document describes the frontend architecture for the Terraform Registry, covering component hierarchy, routing, data fetching, authentication, and state management.
 
 ## Component Hierarchy
 
-```
+```text
 App
  |
  +-- ThemeProvider          (contexts/ThemeContext.tsx)
@@ -107,7 +108,7 @@ The catch-all route (`*`) redirects to `/`.
 
 ### Overview
 
-```
+```text
   Component
      |
      v
@@ -281,7 +282,7 @@ Enhanced error reporter with:
 - **Retry**: Exponential backoff (up to 3 retries) on send failure.
 - **Breadcrumbs**: Records the last 20 events (navigation, API calls, console errors) for debugging context.
 - **Session tracking**: Random `sessionId` generated per page load, included with all reports.
-- **Sentry integration**: If `VITE_SENTRY_DSN` is set, delegates to `@sentry/react`. Otherwise falls back to `VITE_ERROR_REPORTING_DSN` (custom endpoint) or console-only.
+- **Error reporting**: If `VITE_ERROR_REPORTING_DSN` is set (e.g. a Sentry DSN or custom HTTP endpoint), batched error reports are POSTed to that URL. Otherwise errors are logged to the console only.
 
 ### API Error Utilities (`utils/errors.ts`)
 

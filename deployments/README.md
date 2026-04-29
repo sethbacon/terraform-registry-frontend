@@ -1,3 +1,4 @@
+<!-- markdownlint-disable MD013 MD060 -->
 # Terraform Registry – Local Deployments
 
 ## Standard Dev Stack (no OIDC)
@@ -50,7 +51,7 @@ The `db-seed` service runs after the backend is healthy, then exits.
 ### Access points
 
 | Service             | URL                                                                               |
-|---------------------|-----------------------------------------------------------------------------------|
+| ------------------- | --------------------------------------------------------------------------------- |
 | Registry (frontend) | <https://registry.local:3000> (accept self-signed cert warning once)              |
 | Keycloak admin      | <http://keycloak:8180/admin> (admin / admin)                                      |
 | OIDC discovery      | <http://keycloak:8180/realms/terraform-registry/.well-known/openid-configuration> |
@@ -62,15 +63,15 @@ All users share the password **`TestPass123!`**
 `admin.user` is pre-provisioned as a registry admin. The other users authenticate successfully
 but have no registry role assigned until an admin grants them one.
 
-| Username      | Email                 | Name          | Registry role    |
-|---------------|-----------------------|---------------|------------------|
-| admin.user    | <admin@example.com>   | Admin User    | admin            |
-| alice.dev     | <alice@example.com>   | Alice Dev     | none (see below) |
-| bob.ops       | <bob@example.com>     | Bob Ops       | none             |
-| carol.qa      | <carol@example.com>   | Carol QA      | none             |
-| dave.readonly | <dave@example.com>    | Dave Readonly | none             |
-| eve.viewer    | <eve@example.com>     | Eve Viewer    | none             |
-| frank.test    | <frank@example.com>   | Frank Test    | none             |
+| Username      | Email               | Name          | Registry role    |
+| ------------- | ------------------- | ------------- | ---------------- |
+| admin.user    | <admin@example.com> | Admin User    | admin            |
+| alice.dev     | <alice@example.com> | Alice Dev     | none (see below) |
+| bob.ops       | <bob@example.com>   | Bob Ops       | none             |
+| carol.qa      | <carol@example.com> | Carol QA      | none             |
+| dave.readonly | <dave@example.com>  | Dave Readonly | none             |
+| eve.viewer    | <eve@example.com>   | Eve Viewer    | none             |
+| frank.test    | <frank@example.com> | Frank Test    | none             |
 
 To assign a role to a non-admin user: log in as `admin.user`, go to **Admin → Users**,
 find the user, and assign a role template.
@@ -109,22 +110,47 @@ docker compose -f docker-compose.yml -f docker-compose.oidc.yml down -v
 
 ## Dev workflow: setup wizard
 
-| Stack                                  | Setup wizard shown | How                                            |
-|----------------------------------------|--------------------|------------------------------------------------|
-| Standard dev (`docker-compose.yml`)    | No                 | DEV_MODE=true skips setup check                |
-| OIDC test (`docker-compose.oidc.yml`)  | No                 | `db-seed` marks setup complete automatically   |
-| Production (`docker-compose.prod.yml`) | On first boot      | Run wizard once; completion persisted in DB    |
+| Stack                                  | Setup wizard shown | How                                          |
+| -------------------------------------- | ------------------ | -------------------------------------------- |
+| Standard dev (`docker-compose.yml`)    | No                 | DEV_MODE=true skips setup check              |
+| OIDC test (`docker-compose.oidc.yml`)  | No                 | `db-seed` marks setup complete automatically |
+| Production (`docker-compose.prod.yml`) | On first boot      | Run wizard once; completion persisted in DB  |
 
 ---
 
 ## Configuration files
 
-| File                           | Purpose                                                             |
-|--------------------------------|---------------------------------------------------------------------|
-| `docker-compose.yml`           | Base stack: postgres, backend, frontend                             |
-| `docker-compose.oidc.yml`      | OIDC overlay: adds Keycloak, db-seed, reconfigures backend for OIDC |
-| `docker-compose.prod.yml`      | Production overrides (pre-built images, no DEV_MODE)                |
-| `docker-compose.test.yml`      | E2E test stack (Playwright)                                         |
-| `keycloak/realm-export.json`   | Keycloak realm definition: client, users, mappers                   |
-| `keycloak/seed-oidc-dev.sql`   | SQL seed: marks setup complete, provisions admin@example.com        |
-| `create-dev-admin-user.sql`    | SQL to seed a dev admin user for the standard dev stack             |
+| File                         | Purpose                                                             |
+| ---------------------------- | ------------------------------------------------------------------- |
+| `docker-compose.yml`         | Base stack: postgres, backend, frontend                             |
+| `docker-compose.oidc.yml`    | OIDC overlay: adds Keycloak, db-seed, reconfigures backend for OIDC |
+| `docker-compose.prod.yml`    | Production overrides (pre-built images, no DEV_MODE)                |
+| `docker-compose.test.yml`    | E2E test stack (Playwright)                                         |
+| `keycloak/realm-export.json` | Keycloak realm definition: client, users, mappers                   |
+| `keycloak/seed-oidc-dev.sql` | SQL seed: marks setup complete, provisions <admin@example.com>        |
+| `create-dev-admin-user.sql`  | SQL to seed a dev admin user for the standard dev stack             |
+
+---
+
+## E2E / CI Test Stack
+
+`docker-compose.test.yml` pulls the published backend image from GHCR and builds
+the frontend with HTTPS for Playwright. The base compose file is included via
+the `extends` directive — no `-f` chaining required:
+
+```bash
+cd deployments
+docker compose -f docker-compose.test.yml up -d --build
+# Frontend (HTTPS): https://localhost:3000
+# Backend API:      http://localhost:8080
+```
+
+To exercise an unpublished backend change (e.g. a new migration), build the
+backend locally and override `BACKEND_IMAGE`:
+
+```bash
+cd ../../terraform-registry-backend/deployments
+docker compose build backend
+cd ../../terraform-registry-frontend/deployments
+BACKEND_IMAGE=deployments-backend docker compose -f docker-compose.test.yml up -d --build
+```

@@ -1,10 +1,16 @@
 # Production overrides for Docker Compose
 # Usage: docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
 #
+# Environment variables (override on the command line or in a .env file alongside
+# this compose file):
+#   FRONTEND_IMAGE  Container image to deploy (default: ghcr.io/sethbacon/terraform-registry-frontend)
+#   REGISTRY_TAG    Image tag, e.g. v1.0.0 (default: latest — pin to an immutable tag in production)
+#
 # Prerequisites:
-#   1. Copy .env.production.example to .env.production and fill in secrets
-#   2. Pull or build production images
-#   3. Place a reverse proxy (Traefik, Caddy, nginx) in front for TLS termination
+#   1. Pull or build the production frontend image
+#   2. Place a reverse proxy (Traefik, Caddy, nginx) in front of port 80 for TLS termination
+#   3. Ensure the backend stack is reachable; configure VITE_API_URL at build time
+#      if the frontend is served from a different origin than the backend.
 
 services:
   frontend:

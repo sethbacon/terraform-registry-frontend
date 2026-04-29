@@ -1,3 +1,4 @@
+<!-- markdownlint-disable MD013 -->
 # Releasing
 
 Releases are automated by [release-please](https://github.com/googleapis/release-please).
@@ -25,8 +26,24 @@ commits land. Merging it is the release action.
    - Attests SLSA provenance and signs with cosign (keyless).
    - Creates the GitHub Release with generated release notes.
    - Updates the wiki version badge (opens an issue if this step fails).
-4. After the release, update deployment configs in the backend repo — see
-   [CLAUDE.md](CLAUDE.md#releasing-a-version).
+4. After the release, update deployment configs in the backend repo:
+   - **Helm chart** (in `deployments/helm/`): update `frontend.image.tag` in `values.yaml`, `values-aks.yaml`, `values-eks.yaml`, and `values-gke.yaml`.
+   - **Kustomize overlays** (in `deployments/kubernetes/overlays/`): update the frontend `newTag` in `eks/kustomization.yaml` and `gke/kustomization.yaml`.
+   - Add a row to `deployments/COMPATIBILITY.md` recording the new backend/frontend pair.
+
+## Verifying supply-chain attestations
+
+```bash
+# Verify container provenance
+gh attestation verify oci://ghcr.io/sethbacon/terraform-registry-frontend:vX.Y.Z \
+  --repo sethbacon/terraform-registry-frontend
+
+# Verify cosign signature
+cosign verify \
+  --certificate-identity-regexp 'https://github\.com/sethbacon/terraform-registry-frontend/' \
+  --certificate-oidc-issuer https://token.actions.githubusercontent.com \
+  ghcr.io/sethbacon/terraform-registry-frontend:vX.Y.Z
+```
 
 ## Hotfix flow
 
@@ -42,12 +59,15 @@ commits land. Merging it is the release action.
 2. If the manifest is stale, update `.release-please-manifest.json` to the
    current released version and re-run the `Release Please` workflow dispatch.
 3. To tag and release manually:
+
    ```bash
    git tag -a vX.Y.Z origin/main -m "Release vX.Y.Z"
    git push origin vX.Y.Z
    # release.yml fires from the tag push
    ```
+
 4. If release.yml did not fire (e.g., tag was pushed by GITHUB_TOKEN):
+
    ```bash
    gh workflow run release.yml -f tag=vX.Y.Z --ref vX.Y.Z
    ```
