@@ -290,6 +290,34 @@ describe('queryKeys', () => {
     })
   })
 
+  describe('advisories', () => {
+    it('has a stable _def key', () => {
+      expect(queryKeys.advisories._def).toEqual(['advisories'])
+    })
+
+    it('active key is stable', () => {
+      expect(queryKeys.advisories.active()).toEqual(['advisories', 'active'])
+    })
+
+    it('adminList key without kind', () => {
+      expect(queryKeys.advisories.adminList()).toEqual(['advisories', 'admin', undefined])
+    })
+
+    it('adminList key includes kind when provided', () => {
+      expect(queryKeys.advisories.adminList('binary')).toEqual([
+        'advisories',
+        'admin',
+        'binary',
+      ])
+    })
+
+    it('adminList produces different keys for different kinds', () => {
+      const a = queryKeys.advisories.adminList('binary')
+      const b = queryKeys.advisories.adminList('provider')
+      expect(a).not.toEqual(b)
+    })
+  })
+
   describe('key uniqueness across all domains', () => {
     it('all top-level _def keys are unique', () => {
       const allDefs = [
@@ -309,6 +337,7 @@ describe('queryKeys', () => {
         queryKeys.policies._def,
         queryKeys.oidcConfig._def,
         queryKeys.terraformMirrors._def,
+        queryKeys.advisories._def,
       ]
       const prefixes = allDefs.map((d) => d[0])
       expect(new Set(prefixes).size).toBe(prefixes.length)

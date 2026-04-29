@@ -41,6 +41,12 @@ vi.mock('../AboutModal', () => ({
     ) : null,
 }))
 
+// AdvisoryBanner fetches data via useQuery; stub it out so Layout tests
+// don't need a QueryClientProvider and don't hit the network.
+vi.mock('../AdvisoryBanner', () => ({
+  default: () => null,
+}))
+
 import Layout from '../Layout'
 import i18n from '../../i18n'
 
