@@ -191,19 +191,19 @@ The suite contains **~95 Vitest spec files** (count it with
 `Get-ChildItem frontend/src -Recurse -Filter *.test.* | Measure-Object`). They
 are organised by domain under `frontend/src/`:
 
-| Directory                          | Coverage focus                                                                                                                |
-| ---------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
-| `services/__tests__/`              | API client interceptors (auth header, 401 handling, SCM OAuth exception), error/performance reporting, query-key stability    |
-| `hooks/__tests__/`                 | `useModuleDetail`, `useDebounce`, `useHotkey`, `useRouteFocus` — React Query state, debouncing, focus management              |
-| `contexts/__tests__/`              | `AuthContext`, `ThemeContext`, `HelpContext`, `SetupWizardContext`, `ConsentContext`, `AnnouncerContext`                      |
-| `components/__tests__/`            | ~35 component specs covering layout, dialogs, panels (security/scan/SCM/policy), wizards, registry cards, markdown, focus mgr |
-| `components/skeletons/__tests__/`  | Loading skeleton variants                                                                                                     |
-| `pages/__tests__/`                 | Public pages: Home, Modules, Module/Provider Detail, Login, Callback, Settings, Setup Wizard, API docs, Terraform binaries    |
-| `pages/admin/__tests__/`           | Every admin page — Dashboard, Users, Roles, Organizations, SCM Providers, Storage, Mirrors, Mirror Policies, Approvals, Audit Log, OIDC, mTLS, SCIM, Security Scanning, Terraform Mirror, API Keys, Module/Provider Upload |
-| `pages/setup/steps/__tests__/`     | Each first-run setup step (Authenticate, AdminUser, Storage, OIDC, Scanning, Review)                                          |
-| `pages/dev/__tests__/`             | Dev-only `ComponentShowcase`                                                                                                  |
-| `types/__tests__/`                 | RBAC scopes, mirror types, terraform_mirror types                                                                             |
-| `utils/__tests__/`                 | `errors`, `formatting`, `scopes`, `scanParsers`, `terraformExample`                                                           |
+| Directory                         | Coverage focus                                                                                                                                                                                                             |
+| --------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `services/__tests__/`             | API client interceptors (auth header, 401 handling, SCM OAuth exception), error/performance reporting, query-key stability                                                                                                 |
+| `hooks/__tests__/`                | `useModuleDetail`, `useDebounce`, `useHotkey`, `useRouteFocus` — React Query state, debouncing, focus management                                                                                                           |
+| `contexts/__tests__/`             | `AuthContext`, `ThemeContext`, `HelpContext`, `SetupWizardContext`, `ConsentContext`, `AnnouncerContext`                                                                                                                   |
+| `components/__tests__/`           | ~35 component specs covering layout, dialogs, panels (security/scan/SCM/policy), wizards, registry cards, markdown, focus mgr                                                                                              |
+| `components/skeletons/__tests__/` | Loading skeleton variants                                                                                                                                                                                                  |
+| `pages/__tests__/`                | Public pages: Home, Modules, Module/Provider Detail, Login, Callback, Settings, Setup Wizard, API docs, Terraform binaries                                                                                                 |
+| `pages/admin/__tests__/`          | Every admin page — Dashboard, Users, Roles, Organizations, SCM Providers, Storage, Mirrors, Mirror Policies, Approvals, Audit Log, OIDC, mTLS, SCIM, Security Scanning, Terraform Mirror, API Keys, Module/Provider Upload |
+| `pages/setup/steps/__tests__/`    | Each first-run setup step (Authenticate, AdminUser, Storage, OIDC, Scanning, Review)                                                                                                                                       |
+| `pages/dev/__tests__/`            | Dev-only `ComponentShowcase`                                                                                                                                                                                               |
+| `types/__tests__/`                | RBAC scopes, mirror types, terraform_mirror types                                                                                                                                                                          |
+| `utils/__tests__/`                | `errors`, `formatting`, `scopes`, `scanParsers`, `terraformExample`                                                                                                                                                        |
 
 > The directory layout is the source of truth — every component, hook,
 > context, page, and util added under `frontend/src/` must ship with a
@@ -213,15 +213,15 @@ are organised by domain under `frontend/src/`:
 
 ### Notable suites
 
-| File                                             | Why it is interesting                                                                                                            |
-| ------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------- |
-| `services/__tests__/api.test.ts`                 | Captures Axios interceptor callbacks via the mock pattern below; exercises auth header, 401 handling, SCM OAuth exception, etc. |
-| `services/__tests__/errorReporting.test.ts`      | Error batching, flush, breadcrumbs, Sentry fallback                                                                              |
-| `services/__tests__/performanceReporting.test.ts`| Web-vitals batching and consent gating                                                                                           |
-| `services/__tests__/queryKeys.test.ts`           | Query-key uniqueness and hierarchy stability (refactor guard)                                                                    |
-| `contexts/__tests__/AuthContext.test.tsx`        | Login flows (OIDC + dev), logout, refreshToken, fetchUser on mount, expired token                                                |
-| `components/__tests__/ProtectedRoute.test.tsx`   | Loading spinner, unauthenticated redirect, scope checking, admin bypass                                                          |
-| `components/__tests__/MarkdownRenderer.test.tsx` | Markdown rendering, HTML sanitisation, GFM features (XSS guard)                                                                  |
+| File                                              | Why it is interesting                                                                                                           |
+| ------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| `services/__tests__/api.test.ts`                  | Captures Axios interceptor callbacks via the mock pattern below; exercises auth header, 401 handling, SCM OAuth exception, etc. |
+| `services/__tests__/errorReporting.test.ts`       | Error batching, flush, breadcrumbs, Sentry fallback                                                                             |
+| `services/__tests__/performanceReporting.test.ts` | Web-vitals batching and consent gating                                                                                          |
+| `services/__tests__/queryKeys.test.ts`            | Query-key uniqueness and hierarchy stability (refactor guard)                                                                   |
+| `contexts/__tests__/AuthContext.test.tsx`         | Login flows (OIDC + dev), logout, refreshToken, fetchUser on mount, expired token                                               |
+| `components/__tests__/ProtectedRoute.test.tsx`    | Loading spinner, unauthenticated redirect, scope checking, admin bypass                                                         |
+| `components/__tests__/MarkdownRenderer.test.tsx`  | Markdown rendering, HTML sanitisation, GFM features (XSS guard)                                                                 |
 
 ## E2E Tests
 
@@ -231,19 +231,19 @@ E2E tests use [Playwright](https://playwright.dev/) and run against the full app
 
 Configuration: `e2e/playwright.config.ts`
 
-| Setting       | Value (config)                                                          | CI override                                                       |
-| ------------- | ----------------------------------------------------------------------- | ----------------------------------------------------------------- |
-| Base URL      | `https://localhost:3000` (overridable via `BASE_URL` env var)           | —                                                                 |
-| Browsers      | Chromium always; Firefox **and** WebKit only when `process.env.CI`      | CI installs `chromium firefox webkit` and runs all three projects |
-| Timeout       | 60 s per test, 5 s per `expect`                                          | —                                                                 |
-| Retries       | `0` (config) — failures surface immediately locally                     | `--retries=1` on the CI command line                              |
-| Max failures  | `1` (stops the run after the first failure for fast feedback)            | `--max-failures=1` (matches config)                               |
-| Workers       | `process.env.CI ? 4 : undefined` (local uses available CPU)              | CI command line pins `--workers=2` (Firefox flake mitigation, see #233) |
-| Excluded specs| —                                                                       | `--grep-invert="Visual regression"` keeps `visual-regression.spec.ts` out of the gating run (run it manually with `npx playwright test visual-regression`) |
-| Traces        | `on` (always recorded)                                                   | —                                                                 |
-| Video         | `on` (always recorded)                                                   | —                                                                 |
-| Screenshots   | `only-on-failure`                                                        | —                                                                 |
-| Storage state | Pre-seeded `terraform-registry-consent` in localStorage so the consent banner does not block pointer events | —                |
+| Setting        | Value (config)                                                                                              | CI override                                                                                                                                                |
+| -------------- | ----------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Base URL       | `https://localhost:3000` (overridable via `BASE_URL` env var)                                               | —                                                                                                                                                          |
+| Browsers       | Chromium always; Firefox **and** WebKit only when `process.env.CI`                                          | CI installs `chromium firefox webkit` and runs all three projects                                                                                          |
+| Timeout        | 60 s per test, 5 s per `expect`                                                                             | —                                                                                                                                                          |
+| Retries        | `0` (config) — failures surface immediately locally                                                         | `--retries=1` on the CI command line                                                                                                                       |
+| Max failures   | `1` (stops the run after the first failure for fast feedback)                                               | `--max-failures=1` (matches config)                                                                                                                        |
+| Workers        | `process.env.CI ? 4 : undefined` (local uses available CPU)                                                 | CI command line pins `--workers=2` (Firefox flake mitigation, see #233)                                                                                    |
+| Excluded specs | —                                                                                                           | `--grep-invert="Visual regression"` keeps `visual-regression.spec.ts` out of the gating run (run it manually with `npx playwright test visual-regression`) |
+| Traces         | `on` (always recorded)                                                                                      | —                                                                                                                                                          |
+| Video          | `on` (always recorded)                                                                                      | —                                                                                                                                                          |
+| Screenshots    | `only-on-failure`                                                                                           | —                                                                                                                                                          |
+| Storage state  | Pre-seeded `terraform-registry-consent` in localStorage so the consent banner does not block pointer events | —                                                                                                                                                          |
 
 ### E2E Test Files
 

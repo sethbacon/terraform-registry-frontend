@@ -1,4 +1,4 @@
-# Terraform Registry — Frontend
+# Enterprise Terraform Registry — Frontend
 
 React 19 TypeScript SPA for the [Enterprise Terraform Registry](https://github.com/sethbacon/terraform-registry-backend).
 
@@ -7,28 +7,26 @@ React 19 TypeScript SPA for the [Enterprise Terraform Registry](https://github.c
 [![TypeScript](https://img.shields.io/badge/TypeScript-5+-3178C6?logo=typescript)](https://www.typescriptlang.org/)
 [![Coverage](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/sethbacon/59239e8575b4f784f875647e2b344b41/raw/frontend-coverage.json)](https://github.com/sethbacon/terraform-registry-frontend/actions/workflows/ci.yml)
 
-## Overview
-
-This repository contains the frontend UI and Playwright E2E test suite for the Enterprise Terraform Registry.
-
-The backend API, database, and deployment infrastructure live in [terraform-registry-backend](https://github.com/sethbacon/terraform-registry-backend).
+This repository contains the frontend UI and Playwright E2E test suite for the Enterprise Terraform Registry. The backend API, database, and deployment infrastructure live in **[terraform-registry-backend](https://github.com/sethbacon/terraform-registry-backend)**.
 
 ## Features
 
-- **Module Browser** — Search, filter, and explore modules with pagination and README rendering; toggle between grid and grouped-by-provider views; collapsible webhook events panel on module detail pages
-- **Provider Browser** — Discover and manage provider versions with platform information; mirrored providers include a direct link to the matching `registry.terraform.io` documentation page
-- **Admin Dashboard** — Refreshed card-based layout with summary stats (modules, providers, mirrors, users), binary mirror health (per-tool download counts and platform counts), provider mirror health, SCM provider count, and a unified recent sync activity feed
-- **Upload Interface** — Easy module and provider publishing with SCM linking
-- **SCM Management** — Connect GitHub, Azure DevOps, GitLab, and Bitbucket repositories
-- **Mirror Management** — Configure and trigger provider synchronization from upstream registries
-- **Terraform Binary Mirror** — Manage multiple named Terraform/OpenTofu binary mirror configs; per-config version management, platform-level inspection (SHA256 / GPG columns), on-demand sync trigger, and sync history; `version_filter` regex and `stable_only` flag supported
-- **Terraform Binaries Browser** — Public `/terraform-binaries` listing of all active mirror configurations with tool badge, description, and latest synced version; drill into per-config version and platform asset pages
-- **Mirror Approvals** — `/admin/approvals` page to review and action pending mirror sync approval requests (approve or reject with optional reason)
-- **Mirror Policies** — `/admin/policies` CRUD interface for mirror policy rules: platform filters, version constraints, enabled/disabled toggle
-- **Grouped Sidebar Navigation** — Admin nav items organized into collapsible sections (Identity, Source Control, Mirroring, Registry) for improved discoverability
+- **Module Browser** — Search, filter, and explore modules; grid and grouped-by-provider views; collapsible webhook events panel on detail pages
+- **Provider Browser** — Browse provider versions with platform info; mirrored providers link to upstream `registry.terraform.io` docs
+- **Admin Dashboard** — Card-based layout with summary stats (modules, providers, mirrors, users), mirror health, SCM provider count, recent sync activity
+- **Upload Interface** — Module and provider publishing with SCM linking
+- **SCM Management** — GitHub, Azure DevOps, GitLab, and Bitbucket repository integration
+- **Mirror Management** — Provider mirror configuration and sync triggers
+- **Terraform Binary Mirror** — Multiple named Terraform/OpenTofu mirror configs; per-platform inspection; `version_filter` regex and `stable_only` flag
+- **Terraform Binaries Browser** — Public `/terraform-binaries` listing with drill-down to per-config version and platform pages
+- **Mirror Approvals** — Review and action pending mirror sync approval requests at `/admin/approvals`
+- **Mirror Policies** — CRUD for mirror policy rules at `/admin/policies` (platform filters, version constraints, enabled/disabled toggle)
+- **Grouped Sidebar Navigation** — Admin nav items grouped into Identity, Source Control, Mirroring, and Registry sections
 - **API Key Management** — Create, edit, rotate, and expire API keys with scope controls
-- **Interactive API Docs** — Full Swagger UI and ReDoc-based API reference at `/api-docs`
-- **Responsive Design** — Works on desktop, tablet, and mobile
+- **Interactive API Docs** — Swagger UI and ReDoc-based API reference at `/api-docs`
+- **Internationalisation** — 10 locales (en, de, es, fr, it, ja, nb, nl, pt, zh) via react-i18next; auto-translation pipeline (DeepL)
+- **Accessibility** — WCAG 2.1 AA target; axe-core E2E coverage; RTL-aware theme
+- **Responsive Design** — Desktop, tablet, and mobile layouts
 
 ## Prerequisites
 
@@ -196,12 +194,16 @@ Additional workflows: `release-please.yml` (automated versioning + release PR), 
 
 ## Documentation
 
-- [Architecture](ARCHITECTURE.md) - Component hierarchy, data flow, auth flow
-- [Accessibility](ACCESSIBILITY.md) - WCAG 2.1 AA compliance, testing tools
-- [Testing](TESTING.md) - Test patterns, running tests, coverage
-- [Contributing](CONTRIBUTING.md) - How to contribute
-- [Changelog](CHANGELOG.md) - Version history
-- [Backend Repository](https://github.com/sethbacon/terraform-registry-backend) - API, architecture, and configuration
+- [Architecture](ARCHITECTURE.md) — Component hierarchy, data flow, auth flow
+- [Accessibility](ACCESSIBILITY.md) — WCAG 2.1 AA compliance, testing tools
+- [Testing](TESTING.md) — Test patterns, running tests, coverage
+- [Privacy](PRIVACY.md) — Browser data collection and consent model
+- [Releasing](RELEASING.md) — Release process and supply-chain verification
+- [Security](SECURITY.md) — Reporting vulnerabilities and supported versions
+- [Contributing](CONTRIBUTING.md) — How to contribute
+- [Code of Conduct](CODE_OF_CONDUCT.md) — Community standards
+- [Changelog](CHANGELOG.md) — Version history
+- [Backend Repository](https://github.com/sethbacon/terraform-registry-backend) — API, architecture, configuration, deployment
 - [Backend API Reference](https://github.com/sethbacon/terraform-registry-backend/blob/main/docs/api-reference.md)
 - [Backend Architecture](https://github.com/sethbacon/terraform-registry-backend/blob/main/docs/architecture.md)
 

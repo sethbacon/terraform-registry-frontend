@@ -30,6 +30,20 @@ commits land. Merging it is the release action.
    - **Kustomize overlays** (in `deployments/kubernetes/overlays/`): update the frontend `newTag` in `eks/kustomization.yaml` and `gke/kustomization.yaml`.
    - Add a row to `deployments/COMPATIBILITY.md` recording the new backend/frontend pair.
 
+## Verifying supply-chain attestations
+
+```bash
+# Verify container provenance
+gh attestation verify oci://ghcr.io/sethbacon/terraform-registry-frontend:vX.Y.Z \
+  --repo sethbacon/terraform-registry-frontend
+
+# Verify cosign signature
+cosign verify \
+  --certificate-identity-regexp 'https://github\.com/sethbacon/terraform-registry-frontend/' \
+  --certificate-oidc-issuer https://token.actions.githubusercontent.com \
+  ghcr.io/sethbacon/terraform-registry-frontend:vX.Y.Z
+```
+
 ## Hotfix flow
 
 1. Create a `fix/` branch from `main`.

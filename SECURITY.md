@@ -50,6 +50,17 @@ The following are out of scope:
 - Vulnerabilities that require physical access to the server
 - Social engineering attacks
 
+We follow [coordinated disclosure](https://en.wikipedia.org/wiki/Coordinated_vulnerability_disclosure).
+We will credit reporters in the release notes unless anonymity is requested.
+
+## Security Practices
+
+- All releases are signed with [cosign](https://github.com/sigstore/cosign) (keyless, Sigstore) and include SLSA build provenance attestations
+- Dependencies are monitored by Dependabot (npm — frontend + e2e — and GitHub Actions)
+- `npm audit --audit-level=high` runs in the Docker build and the scheduled security workflow
+- Markdown rendering is sanitised with `rehype-sanitize` (XSS mitigation)
+- The frontend follows OWASP Top 10 mitigations applicable to SPAs (output encoding, strict CSP via nginx, no `dangerouslySetInnerHTML` outside the sanitised renderer, JWT stored with conservative defaults)
+
 ## Repository Hardening
 
 The following GitHub repository controls are configured for `main` to protect
@@ -107,7 +118,3 @@ matching `v*.*.*` with a "Restrict deletions" rule.
 - Scheduled weekly security workflow with auto-issue on failure
 - **SLSA provenance attestation** on Docker images via `actions/attest-build-provenance`
 - **Cosign keyless signing** on Docker images via Sigstore (verify with `cosign verify`)
-
-## License
-
-This project is licensed under the [Apache License 2.0](LICENSE).
