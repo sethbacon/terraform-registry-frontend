@@ -81,8 +81,8 @@ const ModulesPage: React.FC = () => {
       { value: 'name:asc', label: t('modules.sortNameAsc') },
       { value: 'name:desc', label: t('modules.sortNameDesc') },
       { value: 'downloads:desc', label: t('modules.sortDownloads') },
-      { value: 'created_at:desc', label: t('modules.sortNewest') },
-      { value: 'updated_at:desc', label: t('modules.sortRecentlyUpdated') },
+      { value: 'created:desc', label: t('modules.sortNewest') },
+      { value: 'updated:desc', label: t('modules.sortRecentlyUpdated') },
     ],
     [t],
   )
