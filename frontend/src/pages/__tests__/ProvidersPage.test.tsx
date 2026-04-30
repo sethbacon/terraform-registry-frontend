@@ -236,7 +236,7 @@ describe('ProvidersPage', () => {
     fireEvent.click(opt)
     await waitFor(() => {
       expect(searchProvidersMock).toHaveBeenCalledWith(
-        expect.objectContaining({ sort: 'created_at', order: 'desc' }),
+        expect.objectContaining({ sort: 'created', order: 'desc' }),
       )
     })
   })
@@ -288,10 +288,10 @@ describe('ProvidersPage', () => {
 
   it('reflects a sort URL param on initial render', async () => {
     searchProvidersMock.mockResolvedValue({ providers: fakeProviders, meta: { total: 2 } })
-    renderPage('/providers?sort=created_at&order=desc')
+    renderPage('/providers?sort=created&order=desc')
     await waitFor(() => {
       expect(searchProvidersMock).toHaveBeenCalledWith(
-        expect.objectContaining({ sort: 'created_at', order: 'desc' }),
+        expect.objectContaining({ sort: 'created', order: 'desc' }),
       )
     })
   })

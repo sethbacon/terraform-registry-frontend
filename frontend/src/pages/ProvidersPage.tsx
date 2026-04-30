@@ -55,7 +55,7 @@ const ProvidersPage: React.FC = () => {
       { value: 'relevance', label: t('providers.sortRelevance') },
       { value: 'name:asc', label: t('providers.sortNameAsc') },
       { value: 'name:desc', label: t('providers.sortNameDesc') },
-      { value: 'created_at:desc', label: t('providers.sortNewest') },
+      { value: 'created:desc', label: t('providers.sortNewest') },
     ],
     [t],
   )
