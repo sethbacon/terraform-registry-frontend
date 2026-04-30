@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi, beforeEach } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import ScanFindingsModal from '../ScanFindingsModal'
@@ -99,5 +99,66 @@ describe('ScanFindingsModal', () => {
     expect(
       screen.getByText('Could not parse individual findings from scanner output.'),
     ).toBeInTheDocument()
+  })
+
+  describe('CSV export', () => {
+    let mockLink: { href: string; download: string; click: ReturnType<typeof vi.fn> }
+
+    beforeEach(() => {
+      mockLink = { href: '', download: '', click: vi.fn() }
+      vi.spyOn(document, 'createElement').mockImplementation((tag: string) => {
+        if (tag === 'a') return mockLink as unknown as HTMLElement
+        return document.createElement(tag)
+      })
+      vi.spyOn(URL, 'createObjectURL').mockReturnValue('blob:mock')
+      vi.spyOn(URL, 'revokeObjectURL').mockImplementation(() => {})
+    })
+
+    it('shows Export CSV button when findings are present', () => {
+      render(<ScanFindingsModal open={true} onClose={() => { }} scan={baseScan} />)
+      expect(screen.getByTestId('findings-csv-download')).toBeInTheDocument()
+    })
+
+    it('does not show Export CSV button when findings cannot be parsed', () => {
+      const scan = { ...baseScan, raw_results: { unknown_format: true } }
+      render(<ScanFindingsModal open={true} onClose={() => { }} scan={scan} />)
+      expect(screen.queryByTestId('findings-csv-download')).not.toBeInTheDocument()
+    })
+
+    it('triggers CSV download with correct filename when Export CSV is clicked', async () => {
+      const user = userEvent.setup()
+      render(
+        <ScanFindingsModal
+          open={true}
+          onClose={() => { }}
+          scan={baseScan}
+          moduleLabel="hashicorp/vpc/aws v1.0.0"
+        />,
+      )
+      await user.click(screen.getByTestId('findings-csv-download'))
+      expect(mockLink.click).toHaveBeenCalledOnce()
+      expect(mockLink.download).toMatch(/^scan-findings-hashicorp-vpc-aws-v1-0-0-\d{4}-\d{2}-\d{2}\.csv$/)
+      expect(URL.createObjectURL).toHaveBeenCalledOnce()
+      expect(URL.revokeObjectURL).toHaveBeenCalledWith('blob:mock')
+    })
+
+    it('CSV content contains header and finding rows', async () => {
+      const user = userEvent.setup()
+      let capturedCsv = ''
+      vi.spyOn(URL, 'createObjectURL').mockImplementation((blob: Blob | MediaSource) => {
+        if (blob instanceof Blob) blob.text().then((text) => { capturedCsv = text })
+        return 'blob:mock'
+      })
+
+      render(<ScanFindingsModal open={true} onClose={() => { }} scan={baseScan} />)
+      await user.click(screen.getByTestId('findings-csv-download'))
+
+      // Allow the blob.text() promise to resolve
+      await new Promise((r) => setTimeout(r, 0))
+      expect(capturedCsv).toContain('Severity,Rule ID,Title,Resource,File,Resolution')
+      expect(capturedCsv).toContain('CRITICAL')
+      expect(capturedCsv).toContain('AVD-AWS-0001')
+      expect(capturedCsv).toContain('S3 bucket unencrypted')
+    })
   })
 })
