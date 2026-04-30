@@ -17,13 +17,43 @@ import {
   Stack,
   Button,
   Collapse,
+  Tooltip,
 } from '@mui/material'
 import CloseIcon from '@mui/icons-material/Close'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import ExpandLessIcon from '@mui/icons-material/ExpandLess'
-import type { ModuleScan } from '../types'
+import DownloadIcon from '@mui/icons-material/Download'
+import type { FindingRow, ModuleScan } from '../types'
 import { parseScanFindings } from '../utils/scanParsers'
 import ScanDiagnostics from './ScanDiagnostics'
+
+/** Escape a single CSV field value (RFC 4180). */
+function csvEscape(value: string): string {
+  if (value.includes('"') || value.includes(',') || value.includes('\n')) {
+    return `"${value.replace(/"/g, '""')}"`
+  }
+  return value
+}
+
+/** Convert an array of FindingRow records to a CSV string. */
+function findingsToCsv(findings: FindingRow[]): string {
+  const header = ['Severity', 'Rule ID', 'Title', 'Resource', 'File', 'Resolution']
+  const rows = findings.map((f) =>
+    [f.severity, f.ruleId, f.title, f.resource, f.file, f.resolution].map(csvEscape).join(','),
+  )
+  return [header.join(','), ...rows].join('\r\n')
+}
+
+/** Trigger a CSV download in the browser. */
+function downloadCsv(csv: string, filename: string): void {
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
+  const url = URL.createObjectURL(blob)
+  const link = document.createElement('a')
+  link.href = url
+  link.download = filename
+  link.click()
+  URL.revokeObjectURL(url)
+}
 
 interface ScanFindingsModalProps {
   open: boolean
@@ -58,6 +88,15 @@ const ScanFindingsModal: React.FC<ScanFindingsModalProps> = ({
   const [rawOpen, setRawOpen] = useState(false)
 
   const findings = scan ? parseScanFindings(scan.scanner, scan.raw_results) : []
+
+  const handleDownloadCsv = () => {
+    if (findings.length === 0) return
+    const date = new Date().toISOString().slice(0, 10)
+    const slug = moduleLabel
+      ? moduleLabel.replace(/[^a-z0-9]+/gi, '-').toLowerCase()
+      : 'scan'
+    downloadCsv(findingsToCsv(findings), `scan-findings-${slug}-${date}.csv`)
+  }
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="lg" fullWidth>
@@ -110,6 +149,19 @@ const ScanFindingsModal: React.FC<ScanFindingsModalProps> = ({
               )}
               {scan.low_count > 0 && (
                 <Chip label={`Low: ${scan.low_count}`} size="small" color="info" />
+              )}
+              {findings.length > 0 && (
+                <Tooltip title="Download findings as CSV">
+                  <Button
+                    size="small"
+                    variant="outlined"
+                    startIcon={<DownloadIcon />}
+                    onClick={handleDownloadCsv}
+                    data-testid="findings-csv-download"
+                  >
+                    Export CSV
+                  </Button>
+                </Tooltip>
               )}
             </Stack>
 
