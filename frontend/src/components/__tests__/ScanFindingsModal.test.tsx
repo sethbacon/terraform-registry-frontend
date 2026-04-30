@@ -106,9 +106,10 @@ describe('ScanFindingsModal', () => {
 
     beforeEach(() => {
       mockLink = { href: '', download: '', click: vi.fn() }
+      const originalCreateElement = document.createElement.bind(document)
       vi.spyOn(document, 'createElement').mockImplementation((tag: string) => {
         if (tag === 'a') return mockLink as unknown as HTMLElement
-        return document.createElement(tag)
+        return originalCreateElement(tag)
       })
       vi.spyOn(URL, 'createObjectURL').mockReturnValue('blob:mock')
       vi.spyOn(URL, 'revokeObjectURL').mockImplementation(() => {})
