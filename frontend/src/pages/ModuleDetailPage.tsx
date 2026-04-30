@@ -123,14 +123,14 @@ const ModuleDetailPage: React.FC = () => {
       {loading ? (
         <DetailPageSkeleton />
       ) : error || !module ? (
-        <Container maxWidth="lg" sx={{ py: 4 }}>
+        <Container maxWidth="xl" sx={{ py: 4 }}>
           <Alert severity="error">{error || 'Module not found'}</Alert>
           <Button startIcon={<ArrowBack />} onClick={() => navigate('/modules')} sx={{ mt: 2 }}>
             Back to Modules
           </Button>
         </Container>
       ) : (
-        <Container maxWidth="lg" sx={{ py: 4 }}>
+        <Container maxWidth="xl" sx={{ py: 4 }}>
           {/* Breadcrumbs */}
           <Breadcrumbs sx={{ mb: 3 }}>
             <Link
