@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import {
+  Autocomplete,
   Box,
   Button,
   Card,
@@ -32,6 +33,22 @@ import {
   Collapse,
   Tooltip,
 } from '@mui/material'
+
+/** Known Terraform provider platform combinations (os/arch). */
+const KNOWN_PLATFORMS = [
+  'linux/amd64',
+  'linux/arm64',
+  'linux/386',
+  'linux/arm',
+  'darwin/amd64',
+  'darwin/arm64',
+  'windows/amd64',
+  'windows/386',
+  'windows/arm64',
+  'freebsd/amd64',
+  'freebsd/386',
+  'freebsd/arm',
+] as const
 import AddIcon from '@mui/icons-material/Add'
 import EditIcon from '@mui/icons-material/Edit'
 import DeleteIcon from '@mui/icons-material/Delete'
@@ -257,7 +274,7 @@ const MirrorsPage: React.FC = () => {
   const [namespaceFilterInput, setNamespaceFilterInput] = useState('')
   const [providerFilterInput, setProviderFilterInput] = useState('')
   const [versionFilterInput, setVersionFilterInput] = useState('')
-  const [platformFilterInput, setPlatformFilterInput] = useState('')
+  const [platformFilterInput, setPlatformFilterInput] = useState<string[]>([])
 
   const [searchParams] = useSearchParams()
 
@@ -341,10 +358,7 @@ const MirrorsPage: React.FC = () => {
         .map((s) => s.trim())
         .filter(Boolean),
       version_filter: versionFilterInput.trim() || undefined,
-      platform_filter: platformFilterInput
-        .split(',')
-        .map((s) => s.trim())
-        .filter(Boolean),
+      platform_filter: platformFilterInput.length > 0 ? platformFilterInput : undefined,
     }
     createMutation.mutate(data as CreateMirrorConfigRequest)
   }
@@ -365,10 +379,7 @@ const MirrorsPage: React.FC = () => {
         .map((s) => s.trim())
         .filter(Boolean),
       version_filter: versionFilterInput.trim() || undefined,
-      platform_filter: platformFilterInput
-        .split(',')
-        .map((s) => s.trim())
-        .filter(Boolean),
+      platform_filter: platformFilterInput.length > 0 ? platformFilterInput : undefined,
       enabled: formData.enabled,
       sync_interval_hours: formData.sync_interval_hours,
     }
@@ -434,7 +445,7 @@ const MirrorsPage: React.FC = () => {
     setNamespaceFilterInput('')
     setProviderFilterInput('')
     setVersionFilterInput('')
-    setPlatformFilterInput('')
+    setPlatformFilterInput([])
   }
 
   const openEditDialog = (mirror: MirrorConfiguration) => {
@@ -450,7 +461,7 @@ const MirrorsPage: React.FC = () => {
     setNamespaceFilterInput(parsed.namespaceFilters.join(', '))
     setProviderFilterInput(parsed.providerFilters.join(', '))
     setVersionFilterInput(mirror.version_filter || '')
-    setPlatformFilterInput(parsed.platformFilters.join(', '))
+    setPlatformFilterInput(parsed.platformFilters)
   }
 
   const getStatusChip = (mirror: MirrorConfiguration) => {
@@ -785,13 +796,29 @@ const MirrorsPage: React.FC = () => {
                   placeholder="e.g., 3. or latest:5 or >=3.0.0"
                 />
 
-                <TextField
-                  label="Platform Filter"
-                  fullWidth
+                <Autocomplete
+                  multiple
+                  options={KNOWN_PLATFORMS}
                   value={platformFilterInput}
-                  onChange={(e) => setPlatformFilterInput(e.target.value)}
-                  helperText="Comma-separated list of platforms to sync in 'os/arch' format. Leave empty for all platforms."
-                  placeholder="e.g., linux/amd64, windows/amd64, darwin/arm64"
+                  onChange={(_event, newValue) => setPlatformFilterInput(newValue)}
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      label="Platform Filter"
+                      placeholder={platformFilterInput.length === 0 ? 'All platforms' : ''}
+                      helperText="Select platforms to sync. Leave empty to sync all platforms."
+                    />
+                  )}
+                  renderTags={(value, getTagProps) =>
+                    value.map((option, index) => (
+                      <Chip
+                        label={option}
+                        size="small"
+                        {...getTagProps({ index })}
+                        key={option}
+                      />
+                    ))
+                  }
                 />
 
                 <TextField
