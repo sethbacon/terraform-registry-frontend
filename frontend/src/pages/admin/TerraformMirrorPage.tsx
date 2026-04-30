@@ -673,7 +673,7 @@ const TerraformMirrorPage: React.FC = () => {
                 onClick={() => {
                   setCreateForm(emptyCreate())
                   setCreateVersionFilter('')
-                  setCreatePlatformFilter('')
+                  setCreatePlatformFilter([])
                   setCreateOpen(true)
                 }}
               >
