@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { queryKeys } from '../../services/queryKeys'
 import {
+  Autocomplete,
   Alert,
   Box,
   Button,
@@ -32,6 +33,22 @@ import {
   Tooltip,
   Typography,
 } from '@mui/material'
+
+/** Known Terraform binary platform combinations (os/arch). */
+const KNOWN_PLATFORMS = [
+  'linux/amd64',
+  'linux/arm64',
+  'linux/386',
+  'linux/arm',
+  'darwin/amd64',
+  'darwin/arm64',
+  'windows/amd64',
+  'windows/386',
+  'windows/arm64',
+  'freebsd/amd64',
+  'freebsd/386',
+  'freebsd/arm',
+] as const
 import AddIcon from '@mui/icons-material/Add'
 import CheckCircleIcon from '@mui/icons-material/CheckCircle'
 import DeleteIcon from '@mui/icons-material/Delete'
@@ -385,13 +402,13 @@ const TerraformMirrorPage: React.FC = () => {
   const [createOpen, setCreateOpen] = useState(false)
   const [createForm, setCreateForm] = useState<CreateTerraformMirrorConfigRequest>(emptyCreate())
   const [createVersionFilter, setCreateVersionFilter] = useState('')
-  const [createPlatformFilter, setCreatePlatformFilter] = useState('')
+  const [createPlatformFilter, setCreatePlatformFilter] = useState<string[]>([])
 
   // ---- edit dialog ----
   const [editConfig, setEditConfig] = useState<TerraformMirrorConfig | null>(null)
   const [editForm, setEditForm] = useState<UpdateTerraformMirrorConfigRequest>({})
   const [editVersionFilter, setEditVersionFilter] = useState('')
-  const [editPlatformFilter, setEditPlatformFilter] = useState('')
+  const [editPlatformFilter, setEditPlatformFilter] = useState<string[]>([])
 
   // ---- delete dialog ----
   const [deleteConfig, setDeleteConfig] = useState<TerraformMirrorConfig | null>(null)
@@ -450,13 +467,9 @@ const TerraformMirrorPage: React.FC = () => {
   // ---------------------------------------------------------------------------
   const createMutation = useMutation({
     mutationFn: async () => {
-      const platformFilter = createPlatformFilter
-        .split(',')
-        .map((s) => s.trim())
-        .filter(Boolean)
       await api.createTerraformMirrorConfig({
         ...createForm,
-        platform_filter: platformFilter.length > 0 ? platformFilter : undefined,
+        platform_filter: createPlatformFilter.length > 0 ? createPlatformFilter : undefined,
         version_filter: createVersionFilter.trim() || undefined,
       })
     },
@@ -465,7 +478,7 @@ const TerraformMirrorPage: React.FC = () => {
       setCreateOpen(false)
       setCreateForm(emptyCreate())
       setCreateVersionFilter('')
-      setCreatePlatformFilter('')
+      setCreatePlatformFilter([])
       queryClient.invalidateQueries({ queryKey: queryKeys.terraformMirrors._def })
     },
     onError: (err: unknown) => {
@@ -483,7 +496,7 @@ const TerraformMirrorPage: React.FC = () => {
   const openEdit = (config: TerraformMirrorConfig) => {
     setEditConfig(config)
     setEditVersionFilter(config.version_filter ?? '')
-    setEditPlatformFilter(parsePlatformFilter(config.platform_filter).join(', '))
+    setEditPlatformFilter(parsePlatformFilter(config.platform_filter))
     setEditForm({
       name: config.name,
       description: config.description ?? '',
@@ -499,13 +512,9 @@ const TerraformMirrorPage: React.FC = () => {
   const editMutation = useMutation({
     mutationFn: async () => {
       if (!editConfig) throw new Error('No config to edit')
-      const platformFilter = editPlatformFilter
-        .split(',')
-        .map((s) => s.trim())
-        .filter(Boolean)
       await api.updateTerraformMirrorConfig(editConfig.id, {
         ...editForm,
-        platform_filter: platformFilter.length > 0 ? platformFilter : [],
+        platform_filter: editPlatformFilter.length > 0 ? editPlatformFilter : [],
         version_filter: editVersionFilter.trim() || '',
       })
     },
@@ -842,12 +851,30 @@ const TerraformMirrorPage: React.FC = () => {
                   helperText='Limit versions to sync: "1.9." (prefix), "latest:5", ">=1.5.0" (semver), "1.5.0,1.6.0" (list). Leave blank for all.'
                   fullWidth
                 />
-                <TextField
-                  label="Platform Filter"
+                <Autocomplete
+                  multiple
+                  options={KNOWN_PLATFORMS}
                   value={createPlatformFilter}
-                  onChange={(e) => setCreatePlatformFilter(e.target.value)}
-                  helperText='Comma-separated os/arch pairs, e.g. "linux/amd64, darwin/arm64, windows/amd64". Leave blank for all platforms.'
-                  fullWidth
+                  onChange={(_event, newValue) => setCreatePlatformFilter(newValue)}
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      label="Platform Filter"
+                      placeholder={createPlatformFilter.length === 0 ? 'All platforms' : ''}
+                      helperText="Select platforms to sync. Leave empty to sync all platforms."
+                      fullWidth
+                    />
+                  )}
+                  renderTags={(value, getTagProps) =>
+                    value.map((option, index) => (
+                      <Chip
+                        label={option}
+                        size="small"
+                        {...getTagProps({ index })}
+                        key={option}
+                      />
+                    ))
+                  }
                 />
               </Box>
             </DialogContent>
@@ -978,12 +1005,30 @@ const TerraformMirrorPage: React.FC = () => {
                   helperText='Limit versions to sync: "1.9." (prefix), "latest:5", ">=1.5.0" (semver), "1.5.0,1.6.0" (list). Leave blank for all.'
                   fullWidth
                 />
-                <TextField
-                  label="Platform Filter"
+                <Autocomplete
+                  multiple
+                  options={KNOWN_PLATFORMS}
                   value={editPlatformFilter}
-                  onChange={(e) => setEditPlatformFilter(e.target.value)}
-                  helperText='Comma-separated os/arch pairs, e.g. "linux/amd64, darwin/arm64, windows/amd64". Leave blank for all platforms.'
-                  fullWidth
+                  onChange={(_event, newValue) => setEditPlatformFilter(newValue)}
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      label="Platform Filter"
+                      placeholder={editPlatformFilter.length === 0 ? 'All platforms' : ''}
+                      helperText="Select platforms to sync. Leave empty to sync all platforms."
+                      fullWidth
+                    />
+                  )}
+                  renderTags={(value, getTagProps) =>
+                    value.map((option, index) => (
+                      <Chip
+                        label={option}
+                        size="small"
+                        {...getTagProps({ index })}
+                        key={option}
+                      />
+                    ))
+                  }
                 />
               </Box>
             </DialogContent>

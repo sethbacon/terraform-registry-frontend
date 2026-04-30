@@ -260,7 +260,9 @@ describe('MirrorsPage', () => {
     expect(screen.getByLabelText('Namespace Filter')).toHaveValue('hashicorp')
     expect(screen.getByLabelText('Provider Filter')).toHaveValue('aws, google')
     expect(screen.getByLabelText('Version Filter')).toHaveValue('>=3.0.0')
-    expect(screen.getByLabelText('Platform Filter')).toHaveValue('linux/amd64, darwin/arm64')
+    // Platform filter is now a multi-select — check chips are rendered
+    expect(screen.getByText('linux/amd64')).toBeInTheDocument()
+    expect(screen.getByText('darwin/arm64')).toBeInTheDocument()
     expect(screen.getByText('Update')).toBeInTheDocument()
   })
 
