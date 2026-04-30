@@ -1,6 +1,16 @@
 <!-- markdownlint-disable MD013 MD024 MD041 -->
 # Changelog
 
+## [1.0.1](https://github.com/sethbacon/terraform-registry-frontend/compare/v1.0.0...v1.0.1) (2026-04-30)
+
+
+### Bug Fixes
+
+* add CSV export to scanning findings modal ([#256](https://github.com/sethbacon/terraform-registry-frontend/issues/256)) ([8202642](https://github.com/sethbacon/terraform-registry-frontend/commit/8202642bbc9a3e3a07755fd8cd52698e5e0fa7dc))
+* correct sort field names sent to backend for newest/recently-updated ([#254](https://github.com/sethbacon/terraform-registry-frontend/issues/254)) ([7cd75d6](https://github.com/sethbacon/terraform-registry-frontend/commit/7cd75d6a3f8a07de57f91f1a2fa2b0dd1a957892))
+* replace free-text platform filter with structured os/arch multi-select ([#257](https://github.com/sethbacon/terraform-registry-frontend/issues/257)) ([22b5959](https://github.com/sethbacon/terraform-registry-frontend/commit/22b595989cc4b2eeecf8bcc678a07c40013c6a98))
+* widen module detail page to match provider detail width ([#255](https://github.com/sethbacon/terraform-registry-frontend/issues/255)) ([de56600](https://github.com/sethbacon/terraform-registry-frontend/commit/de56600280f818e6cb665b64440876a06a79e883)), closes [#252](https://github.com/sethbacon/terraform-registry-frontend/issues/252)
+
 ## [1.0.0](https://github.com/sethbacon/terraform-registry-frontend/compare/v0.17.0...v1.0.0) (2026-04-29)
 
 
