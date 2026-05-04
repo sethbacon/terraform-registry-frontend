@@ -348,4 +348,26 @@ describe('UsersPage', () => {
       expect(listUsersMock).toHaveBeenCalledWith(1, 25)
     })
   })
+
+  it('uses inline memberships and skips individual getUserMemberships calls', async () => {
+    // When the list response already includes memberships on each user,
+    // the page must NOT fire individual GET /users/{id}/memberships requests.
+    const responseWithInlineMemberships = {
+      ...fakeUsersResponse,
+      users: fakeUsersResponse.users.map((u) => ({
+        ...u,
+        memberships: [fakeMembership],
+      })),
+    }
+    listUsersMock.mockResolvedValue(responseWithInlineMemberships)
+
+    renderPage()
+
+    await waitFor(() => {
+      expect(screen.getAllByText(/Acme/).length).toBeGreaterThan(0)
+    })
+
+    // The individual membership fetches must not have been called
+    expect(getUserMembershipsMock).not.toHaveBeenCalled()
+  })
 })

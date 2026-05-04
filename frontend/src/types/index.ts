@@ -8,6 +8,7 @@ export interface User {
   oidc_sub?: string
   created_at: string
   updated_at: string
+  memberships?: UserMembership[] // Included inline when fetched via list/search endpoints
 }
 
 export type { RoleTemplate } from './rbac'
