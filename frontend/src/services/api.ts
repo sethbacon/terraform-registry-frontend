@@ -465,6 +465,9 @@ class ApiClient {
         user.role_template_display_name) as string | undefined,
       created_at: (user.CreatedAt || user.created_at) as string,
       updated_at: (user.UpdatedAt || user.updated_at) as string,
+      memberships: (user.memberships || user.Memberships) as
+        | import('../types').UserMembership[]
+        | undefined,
     }
   }
 

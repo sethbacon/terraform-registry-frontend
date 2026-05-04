@@ -833,6 +833,35 @@ describe('ApiClient', () => {
       expect(result.email).toBe('a@b.com')
       expect(result.role_template_id).toBe('r1')
     })
+
+    it('listUsers passes through inline memberships on each user', async () => {
+      const client = await getApiClient()
+      const inlineMembership = {
+        organization_id: 'org-1',
+        organization_name: 'Acme',
+        role_template_name: 'admin',
+        created_at: '2025-01-01',
+      }
+        ; (mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+          data: {
+            users: [
+              {
+                id: 'u1',
+                email: 'a@b.com',
+                name: 'A',
+                created_at: '2025-01-01',
+                updated_at: '2025-01-01',
+                memberships: [inlineMembership],
+              },
+            ],
+            pagination: { total: 1, page: 1, per_page: 20 },
+          },
+        })
+      const result = await client.listUsers(1, 20)
+      expect(result.users).toHaveLength(1)
+      expect(result.users[0].memberships).toHaveLength(1)
+      expect(result.users[0].memberships![0].organization_name).toBe('Acme')
+    })
   })
 
   // ─── Organizations ────────────────────────────────────────────────────────

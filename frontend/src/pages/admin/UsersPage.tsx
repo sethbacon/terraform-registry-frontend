@@ -123,18 +123,30 @@ const UsersPage: React.FC = () => {
   useEffect(() => {
     for (const user of rawUsers) {
       if (userMemberships[user.id] === undefined) {
-        setUserMemberships((prev) => ({ ...prev, [user.id]: { loading: true } }))
-        api
-          .getUserMemberships(user.id)
-          .then((memberships) => {
-            setUserMemberships((prev) => ({ ...prev, [user.id]: { memberships, loading: false } }))
-          })
-          .catch(() => {
-            setUserMemberships((prev) => ({
-              ...prev,
-              [user.id]: { memberships: [], loading: false },
-            }))
-          })
+        // If the list response already includes memberships inline, use them directly
+        // to avoid N+1 individual GET /api/v1/users/{id}/memberships requests.
+        if (user.memberships !== undefined) {
+          setUserMemberships((prev) => ({
+            ...prev,
+            [user.id]: { memberships: user.memberships, loading: false },
+          }))
+        } else {
+          setUserMemberships((prev) => ({ ...prev, [user.id]: { loading: true } }))
+          api
+            .getUserMemberships(user.id)
+            .then((memberships) => {
+              setUserMemberships((prev) => ({
+                ...prev,
+                [user.id]: { memberships, loading: false },
+              }))
+            })
+            .catch(() => {
+              setUserMemberships((prev) => ({
+                ...prev,
+                [user.id]: { memberships: [], loading: false },
+              }))
+            })
+        }
       }
     }
   }, [rawUsers]) // eslint-disable-line react-hooks/exhaustive-deps
