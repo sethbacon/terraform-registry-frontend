@@ -1,6 +1,13 @@
 <!-- markdownlint-disable MD013 MD024 MD041 -->
 # Changelog
 
+## [1.0.2](https://github.com/sethbacon/terraform-registry-frontend/compare/v1.0.1...v1.0.2) (2026-05-04)
+
+
+### Bug Fixes
+
+* **users:** use inline memberships from list response to eliminate N+1 requests ([#260](https://github.com/sethbacon/terraform-registry-frontend/issues/260)) ([22e2ed3](https://github.com/sethbacon/terraform-registry-frontend/commit/22e2ed3016cb2de61598454c81256e78100b919a)), closes [#259](https://github.com/sethbacon/terraform-registry-frontend/issues/259)
+
 ## [1.0.1](https://github.com/sethbacon/terraform-registry-frontend/compare/v1.0.0...v1.0.1) (2026-04-30)
 
 
