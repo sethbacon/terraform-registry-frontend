@@ -1,6 +1,13 @@
 <!-- markdownlint-disable MD013 MD024 MD041 -->
 # Changelog
 
+## [1.0.3](https://github.com/sethbacon/terraform-registry-frontend/compare/v1.0.2...v1.0.3) (2026-05-05)
+
+
+### Bug Fixes
+
+* stable provider version sorts before pre-release in detail page ([#263](https://github.com/sethbacon/terraform-registry-frontend/issues/263)) ([c3bd3ac](https://github.com/sethbacon/terraform-registry-frontend/commit/c3bd3ac6a297e129d2ff58ba3d3542ff3a6d0f4f)), closes [#262](https://github.com/sethbacon/terraform-registry-frontend/issues/262)
+
 ## [1.0.2](https://github.com/sethbacon/terraform-registry-frontend/compare/v1.0.1...v1.0.2) (2026-05-04)
 
 
