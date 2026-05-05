@@ -122,7 +122,14 @@ const ProviderDetailPage: React.FC = () => {
         }
         const [aMaj, aMin, aPat] = parseParts(a.version)
         const [bMaj, bMin, bPat] = parseParts(b.version)
-        return bMaj !== aMaj ? bMaj - aMaj : bMin !== aMin ? bMin - aMin : bPat - aPat
+        if (bMaj !== aMaj) return bMaj - aMaj
+        if (bMin !== aMin) return bMin - aMin
+        if (bPat !== aPat) return bPat - aPat
+        // Same numeric version: stable releases (no pre-release suffix) sort before pre-releases
+        const aStable = !a.version.replace(/^v/, '').includes('-')
+        const bStable = !b.version.replace(/^v/, '').includes('-')
+        if (aStable !== bStable) return aStable ? -1 : 1
+        return 0
       })
       setVersions(sortedVersions)
 
