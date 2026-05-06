@@ -13,10 +13,7 @@
     "test:coverage": "vitest run --coverage",
     "visualize": "VITE_ANALYZE=true vite build",
     "format": "prettier --write 'src/**/*.{ts,tsx,css,json}'",
-    "format:check": "prettier --check 'src/**/*.{ts,tsx,css,json}'",
-    "generate:api": "bash scripts/generate-api-client.sh",
-    "generate:swagger-snapshot": "bash scripts/update-swagger-snapshot.sh",
-    "contract:check": "npx openapi-typescript openapi/swagger.json --output src/services/generated/api.ts && tsc --noEmit"
+    "format:check": "prettier --check 'src/**/*.{ts,tsx,css,json}'"
   },
   "dependencies": {
     "@emotion/cache": "^11.14.0",
@@ -70,8 +67,7 @@
     "rollup-plugin-visualizer": "^5.14.0",
     "typescript": "^5.9.3",
     "vite": "^6.4.2",
-    "vitest": "^4.1.4",
-    "openapi-typescript": "^7.4.4"
+    "vitest": "^4.1.4"
   },
   "browserslist": [
     ">0.2%",
