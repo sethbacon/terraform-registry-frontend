@@ -2,16 +2,6 @@
   "_comment": "Allowlist for contract-check.ts. Each entry is a (method, normalized-path) tuple the check skips. The 'reason' field MUST link to a tracked issue or document the rationale. Stale entries fail the check, so this list stays honest.",
   "entries": [
     {
-      "method": "POST",
-      "path": "/api/v1/admin/terraform-mirrors/{}/versions/{}/deprecate",
-      "reason": "https://github.com/sethbacon/terraform-registry-frontend/issues/275 — frontend calls a backend route that does not exist; resolve by either implementing on the backend or removing the frontend caller."
-    },
-    {
-      "method": "DELETE",
-      "path": "/api/v1/admin/terraform-mirrors/{}/versions/{}/deprecate",
-      "reason": "https://github.com/sethbacon/terraform-registry-frontend/issues/275 — frontend calls a backend route that does not exist; resolve by either implementing on the backend or removing the frontend caller."
-    },
-    {
       "method": "GET",
       "path": "/api/v1/admin/quotas",
       "reason": "https://github.com/sethbacon/terraform-registry-frontend/issues/276 — frontend calls a backend route that does not exist; resolve by either implementing on the backend or removing the frontend caller."
