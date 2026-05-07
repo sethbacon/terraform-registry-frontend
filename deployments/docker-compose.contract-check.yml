@@ -20,7 +20,7 @@ services:
     # Pinned backend image. Bump this tag in lockstep with backend releases
     # whose API surface the frontend wants to depend on. The contract check
     # validates that every route api.ts calls exists on this exact backend.
-    image: ${BACKEND_IMAGE:-ghcr.io/sethbacon/terraform-registry-backend:1.1.0}
+    image: ${BACKEND_IMAGE:-ghcr.io/sethbacon/terraform-registry-backend:1.1.2}
     environment:
       - TFR_DATABASE_HOST=postgres
       - TFR_DATABASE_PORT=5432
