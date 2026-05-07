@@ -1303,7 +1303,18 @@ describe('ApiClient', () => {
           data: { total: 10 },
         })
       await client.getScanningStats()
-      expect(mockAxiosInstance.get).toHaveBeenCalledWith('/api/v1/admin/scanning/stats')
+      expect(mockAxiosInstance.get).toHaveBeenCalledWith('/api/v1/admin/scanning/stats', { params: undefined })
+    })
+
+    it('getScanningStats with params', async () => {
+      const client = await getApiClient()
+        ; (mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+          data: { total: 5, total_filtered: 5 },
+        })
+      await client.getScanningStats({ status: 'failed', limit: 10, offset: 0 })
+      expect(mockAxiosInstance.get).toHaveBeenCalledWith('/api/v1/admin/scanning/stats', {
+        params: { status: 'failed', limit: 10, offset: 0 },
+      })
     })
   })
 
