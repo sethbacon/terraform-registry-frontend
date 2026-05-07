@@ -117,11 +117,64 @@ jobs:
           name: frontend-dist
           path: frontend/dist
 
+  # ── Contract check ────────────────────────────────────
+  # Spin up the backend at a pinned image tag, fetch live /swagger.json, and
+  # verify every route api.ts calls actually exists on that backend. Catches
+  # the "frontend calls a route that does not exist" bug class before merge.
+  contract-check:
+    name: Contract Check
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+      - uses: ./.github/actions/setup-frontend
+
+      - name: Log in to GHCR
+        uses: docker/login-action@b45d80f862d83dbcd57f89517bcf500b2ab88fb2 # v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Start contract-check stack
+        run: >-
+          docker compose -f deployments/docker-compose.contract-check.yml up -d
+
+      - name: Wait for backend /health
+        run: |
+          for i in $(seq 1 30); do
+            if curl -sf http://localhost:8080/health > /dev/null; then
+              echo "Backend ready"
+              exit 0
+            fi
+            echo "  attempt $i/30 — retrying in 3s"
+            sleep 3
+          done
+          echo "Backend did not become ready in time"
+          docker compose -f deployments/docker-compose.contract-check.yml logs backend
+          exit 1
+
+      - name: Run contract check
+        working-directory: frontend
+        env:
+          BACKEND_URL: http://localhost:8080
+        run: npm run contract:check
+
+      - name: Dump backend logs on failure
+        if: failure()
+        run: >-
+          docker compose -f deployments/docker-compose.contract-check.yml logs backend
+
+      - name: Tear down stack
+        if: always()
+        run: >-
+          docker compose -f deployments/docker-compose.contract-check.yml down --volumes
+
   # ── E2E (gated) ───────────────────────────────────────
   e2e-gated:
     name: E2E (gated/manual)
     runs-on: ubuntu-latest
-    needs: [lint, typecheck, unit-test, build]
+    needs: [lint, typecheck, unit-test, build, contract-check]
     # E2E is a required gate: failures block the release pipeline.
     if: >-
       github.event_name == 'workflow_dispatch' || github.event_name ==

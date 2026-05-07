@@ -1,0 +1,54 @@
+# Minimal stack for the contract-check CI job. Brings up postgres + backend
+# only — no frontend build, no seed-db (no auth needed for /swagger.json or
+# /health). Pin the backend image at a known-good tag; bump via PR when
+# the frontend wants to use a newer backend API surface.
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: terraform_registry
+      POSTGRES_USER: registry
+      POSTGRES_PASSWORD: registry
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U registry -d terraform_registry"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 5s
+
+  backend:
+    # Pinned backend image. Bump this tag in lockstep with backend releases
+    # whose API surface the frontend wants to depend on. The contract check
+    # validates that every route api.ts calls exists on this exact backend.
+    image: ${BACKEND_IMAGE:-ghcr.io/sethbacon/terraform-registry-backend:1.1.0}
+    environment:
+      - TFR_DATABASE_HOST=postgres
+      - TFR_DATABASE_PORT=5432
+      - TFR_DATABASE_NAME=terraform_registry
+      - TFR_DATABASE_USER=registry
+      - TFR_DATABASE_PASSWORD=registry
+      - TFR_DATABASE_SSL_MODE=disable
+      - TFR_SERVER_HOST=0.0.0.0
+      - TFR_SERVER_PORT=8080
+      # Test-only secrets; never used in production.
+      - TFR_JWT_SECRET=test-jwt-secret-for-contract-check-only
+      - ENCRYPTION_KEY=00000000000000000000000000000000
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "wget",
+          "--no-verbose",
+          "--tries=1",
+          "--spider",
+          "http://localhost:8080/health",
+        ]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 5s
