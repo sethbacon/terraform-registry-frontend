@@ -1,9 +1,16 @@
 {
   "packages": {
-    "frontend": {
-      "release-type": "node",
+    ".": {
+      "release-type": "simple",
       "package-name": "terraform-registry-frontend",
       "include-component-in-tag": false,
+      "extra-files": [
+        {
+          "type": "json",
+          "path": "frontend/package.json",
+          "jsonpath": "$.version"
+        }
+      ],
       "changelog-sections": [
         {"type": "feat", "section": "Features"},
         {"type": "fix", "section": "Bug Fixes"},
