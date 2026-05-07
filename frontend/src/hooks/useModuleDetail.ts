@@ -472,6 +472,23 @@ export function useModuleDetail() {
     updateDescriptionMutation.mutate(newDescription)
   }
 
+  const updateNamespaceMutation = useMutation({
+    mutationFn: (newNamespace: string) => api.updateModule(module!.id, { namespace: newNamespace }),
+    onSuccess: (_data, newNamespace) => {
+      // Navigate to the new namespace URL since it has changed
+      navigate(`/modules/${newNamespace}/${name}/${system}`)
+      queryClient.invalidateQueries({ queryKey: queryKeys.modules.detail(newNamespace, name ?? '', system ?? '') })
+    },
+    onError: (err: unknown) => {
+      setError(getErrorMessage(err, 'Failed to update namespace'))
+    },
+  })
+
+  const handleUpdateNamespace = (newNamespace: string) => {
+    if (!module?.id) return
+    updateNamespaceMutation.mutate(newNamespace)
+  }
+
   const handleDeprecateModule = () => {
     if (!namespace || !name || !system) return
     deprecateModuleMutation.mutate({
@@ -580,6 +597,7 @@ export function useModuleDetail() {
     handleDeprecateModule,
     handleUndeprecateModule,
     handleUpdateDescription,
+    handleUpdateNamespace,
     getTerraformExample,
   }
 }

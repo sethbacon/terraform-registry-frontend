@@ -19,6 +19,7 @@ import {
   Grid,
   IconButton,
   Collapse,
+  TablePagination,
 } from '@mui/material'
 import CheckCircle from '@mui/icons-material/CheckCircle'
 import Error from '@mui/icons-material/Error'
@@ -98,13 +99,22 @@ const SecurityScanningPage: React.FC = () => {
     queryFn: () => api.getScanningConfig(),
   })
 
+  const [statusFilter, setStatusFilter] = useState<string | undefined>(undefined)
+  const [page, setPage] = useState(0)
+  const [rowsPerPage, setRowsPerPage] = useState(20)
+
   const {
     data: stats,
     isLoading: statsLoading,
     error: statsError,
   } = useQuery({
-    queryKey: ['scanning', 'stats'],
-    queryFn: () => api.getScanningStats(),
+    queryKey: ['scanning', 'stats', statusFilter, page, rowsPerPage],
+    queryFn: () =>
+      api.getScanningStats({
+        status: statusFilter,
+        limit: rowsPerPage,
+        offset: page * rowsPerPage,
+      }),
   })
 
   const [expandedScanId, setExpandedScanId] = useState<string | null>(null)
@@ -277,17 +287,46 @@ const SecurityScanningPage: React.FC = () => {
                   label: 'Total Scans',
                   value: stats.total,
                   icon: <CheckCircle fontSize="small" />,
+                  filterValue: undefined as string | undefined,
                 },
                 {
                   label: 'Pending',
                   value: stats.pending,
                   icon: <HourglassEmpty fontSize="small" />,
+                  filterValue: 'pending',
                 },
-                { label: 'Clean', value: stats.clean, color: 'success.main' },
-                { label: 'Findings', value: stats.findings, color: 'warning.main' },
-                { label: 'Errors', value: stats.error, color: 'error.main' },
+                { label: 'Clean', value: stats.clean, color: 'success.main', filterValue: 'clean' },
+                {
+                  label: 'Findings',
+                  value: stats.findings,
+                  color: 'warning.main',
+                  filterValue: 'findings',
+                },
+                { label: 'Errors', value: stats.error, color: 'error.main', filterValue: 'error' },
               ].map((item) => (
-                <Paper key={item.label} sx={{ px: 2, py: 1.5, flex: 1, minWidth: 120 }}>
+                <Paper
+                  key={item.label}
+                  sx={{
+                    px: 2,
+                    py: 1.5,
+                    flex: 1,
+                    minWidth: 120,
+                    cursor: 'pointer',
+                    outline:
+                      statusFilter === item.filterValue
+                        ? '2px solid'
+                        : statusFilter === undefined && item.filterValue === undefined
+                          ? '2px solid'
+                          : 'none',
+                    outlineColor: 'primary.main',
+                    '&:hover': { bgcolor: 'action.hover' },
+                  }}
+                  onClick={() => {
+                    setStatusFilter(item.filterValue)
+                    setPage(0)
+                  }}
+                  data-testid={`stat-card-${item.label.toLowerCase().replace(/\s/g, '-')}`}
+                >
                   <Typography variant="caption" color="text.secondary">
                     {item.label}
                   </Typography>
@@ -374,7 +413,8 @@ const SecurityScanningPage: React.FC = () => {
                 No scans recorded yet.
               </Typography>
             ) : (
-              <TableContainer>
+              <>
+                <TableContainer>
                 <Table size="small">
                   <TableHead>
                     <TableRow>
@@ -465,6 +505,19 @@ const SecurityScanningPage: React.FC = () => {
                   </TableBody>
                 </Table>
               </TableContainer>
+              <TablePagination
+                component="div"
+                count={stats.total_filtered}
+                page={page}
+                onPageChange={(_, newPage) => setPage(newPage)}
+                rowsPerPage={rowsPerPage}
+                onRowsPerPageChange={(e) => {
+                  setRowsPerPage(parseInt(e.target.value, 10))
+                  setPage(0)
+                }}
+                rowsPerPageOptions={[10, 20, 50, 100]}
+              />
+              </>
             )}
           </Paper>
         </>

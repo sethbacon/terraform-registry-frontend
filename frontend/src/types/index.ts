@@ -607,6 +607,7 @@ export interface ScanningStats {
   findings: number
   error: number
   recent_scans: RecentScanEntry[]
+  total_filtered: number
 }
 
 // ---- Scan findings (parsed from raw_results) ----

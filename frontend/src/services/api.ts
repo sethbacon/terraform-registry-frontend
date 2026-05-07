@@ -824,7 +824,7 @@ class ApiClient {
     return response.data
   }
 
-  async updateModule(id: string, data: { description?: string; source?: string }) {
+  async updateModule(id: string, data: { description?: string; source?: string; namespace?: string }) {
     const response = await this.client.put(`/api/v1/admin/modules/${id}`, data)
     return response.data
   }
@@ -846,8 +846,12 @@ class ApiClient {
     return response.data
   }
 
-  async getScanningStats(): Promise<import('../types').ScanningStats> {
-    const response = await this.client.get('/api/v1/admin/scanning/stats')
+  async getScanningStats(params?: {
+    status?: string
+    limit?: number
+    offset?: number
+  }): Promise<import('../types').ScanningStats> {
+    const response = await this.client.get('/api/v1/admin/scanning/stats', { params })
     return response.data
   }
 
