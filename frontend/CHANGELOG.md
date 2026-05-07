@@ -1,6 +1,18 @@
 <!-- markdownlint-disable MD013 MD024 MD041 -->
 # Changelog
 
+## [1.1.0](https://github.com/sethbacon/terraform-registry-frontend/compare/v1.0.3...v1.1.0) (2026-05-07)
+
+
+### Features
+
+* add scan status filtering with pagination and namespace editing ([#271](https://github.com/sethbacon/terraform-registry-frontend/issues/271)) ([78f779d](https://github.com/sethbacon/terraform-registry-frontend/commit/78f779d7deae020ebdfdae3b05a0664caaaea3e3))
+
+
+### Bug Fixes
+
+* **tests:** update getScanningStats test to match new params signature ([#274](https://github.com/sethbacon/terraform-registry-frontend/issues/274)) ([133b2f9](https://github.com/sethbacon/terraform-registry-frontend/commit/133b2f914af0947aa607e0cd122c1b113dd1ae96))
+
 ## [1.0.3](https://github.com/sethbacon/terraform-registry-frontend/compare/v1.0.2...v1.0.3) (2026-05-05)
 
 
