@@ -115,8 +115,12 @@ const ModuleDetailPage: React.FC = () => {
     handleDeprecateModule,
     handleUndeprecateModule,
     handleUpdateDescription,
+    handleUpdateNamespace,
     ociEnabled,
   } = useModuleDetail()
+
+  const [editingNamespace, setEditingNamespace] = React.useState(false)
+  const [editNamespace, setEditNamespace] = React.useState('')
 
   return (
     <Box aria-busy={loading} aria-live="polite">
@@ -323,9 +327,69 @@ const ModuleDetailPage: React.FC = () => {
                 </Typography>
                 <Divider sx={{ mb: 2 }} />
                 <Box sx={{ '& > *': { mb: 1 } }}>
-                  <Typography variant="body2">
-                    <strong>Namespace:</strong> {namespace}
-                  </Typography>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                    <Typography variant="body2">
+                      <strong>Namespace:</strong>
+                    </Typography>
+                    {editingNamespace ? (
+                      <>
+                        <TextField
+                          size="small"
+                          value={editNamespace}
+                          onChange={(e) => setEditNamespace(e.target.value)}
+                          placeholder="Namespace"
+                          autoFocus
+                          sx={{ ml: 0.5, flex: 1 }}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter' && editNamespace.trim()) {
+                              handleUpdateNamespace(editNamespace.trim())
+                              setEditingNamespace(false)
+                            } else if (e.key === 'Escape') {
+                              setEditingNamespace(false)
+                            }
+                          }}
+                        />
+                        <IconButton
+                          size="small"
+                          color="primary"
+                          onClick={() => {
+                            if (editNamespace.trim()) {
+                              handleUpdateNamespace(editNamespace.trim())
+                              setEditingNamespace(false)
+                            }
+                          }}
+                          aria-label="Save namespace"
+                        >
+                          <Check fontSize="small" />
+                        </IconButton>
+                        <IconButton
+                          size="small"
+                          onClick={() => setEditingNamespace(false)}
+                          aria-label="Cancel editing namespace"
+                        >
+                          <Close fontSize="small" />
+                        </IconButton>
+                      </>
+                    ) : (
+                      <>
+                        <Typography variant="body2">{namespace}</Typography>
+                        {canManage && (
+                          <Tooltip title="Edit namespace">
+                            <IconButton
+                              size="small"
+                              onClick={() => {
+                                setEditNamespace(namespace || '')
+                                setEditingNamespace(true)
+                              }}
+                              aria-label="Edit namespace"
+                            >
+                              <EditIcon fontSize="small" />
+                            </IconButton>
+                          </Tooltip>
+                        )}
+                      </>
+                    )}
+                  </Box>
                   <Typography variant="body2">
                     <strong>Name:</strong> {name}
                   </Typography>
