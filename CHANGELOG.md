@@ -1,6 +1,13 @@
 <!-- markdownlint-disable MD013 MD024 MD041 -->
 # Changelog
 
+## [1.1.1](https://github.com/sethbacon/terraform-registry-frontend/compare/v1.1.0...v1.1.1) (2026-05-07)
+
+
+### Bug Fixes
+
+* **ci:** drop terraform-mirror deprecate allowlist entries; bump pinned backend to v1.1.2 ([#280](https://github.com/sethbacon/terraform-registry-frontend/issues/280)) ([449894c](https://github.com/sethbacon/terraform-registry-frontend/commit/449894c8e9ea6cd0d97a3582d40327951674d36f))
+
 ## [1.1.0](https://github.com/sethbacon/terraform-registry-frontend/compare/v1.0.3...v1.1.0) (2026-05-07)
 
 
