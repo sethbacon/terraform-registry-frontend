@@ -1,6 +1,13 @@
 <!-- markdownlint-disable MD013 MD024 MD041 -->
 # Changelog
 
+## [1.2.0](https://github.com/sethbacon/terraform-registry-frontend/compare/v1.1.2...v1.2.0) (2026-05-08)
+
+
+### Features
+
+* **admin:** UI for GDPR user data export and erasure ([#285](https://github.com/sethbacon/terraform-registry-frontend/issues/285)) ([1d35b64](https://github.com/sethbacon/terraform-registry-frontend/commit/1d35b64b533d7b6047f27efe37e5b454fd744388))
+
 ## [1.1.2](https://github.com/sethbacon/terraform-registry-frontend/compare/v1.1.1...v1.1.2) (2026-05-08)
 
 
