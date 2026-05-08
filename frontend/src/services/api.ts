@@ -514,6 +514,33 @@ class ApiClient {
     return response.data
   }
 
+  // GDPR Article 15/20 — full data export.
+  // Returns the response Blob directly so the caller can let the browser
+  // download it via Content-Disposition. Do not parse as JSON: the backend
+  // sets `Content-Disposition: attachment; filename=user-data-{id}.json`
+  // and we want that filename hint to flow to the browser.
+  async exportUserData(id: string): Promise<{ blob: Blob; filename: string }> {
+    const response = await this.client.get(`/api/v1/admin/users/${id}/export`, {
+      responseType: 'blob',
+    })
+    // Default to user-data-{id}.json; override if the server provided a Content-Disposition.
+    let filename = `user-data-${id}.json`
+    const disposition = response.headers['content-disposition']
+    if (disposition) {
+      const match = /filename\s*=\s*"?([^";]+)"?/i.exec(disposition)
+      if (match && match[1]) {
+        filename = match[1].trim()
+      }
+    }
+    return { blob: response.data as Blob, filename }
+  }
+
+  // GDPR Article 17 — anonymize user PII while preserving audit trail.
+  async eraseUser(id: string): Promise<{ message: string; user_id: string }> {
+    const response = await this.client.post(`/api/v1/admin/users/${id}/erase`)
+    return response.data as { message: string; user_id: string }
+  }
+
   // Helper to transform organization from API format to frontend format
   private transformOrganization(org: Record<string, unknown>) {
     if (!org) {

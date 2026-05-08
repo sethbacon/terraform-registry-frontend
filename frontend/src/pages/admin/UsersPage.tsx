@@ -38,8 +38,11 @@ import AddIcon from '@mui/icons-material/Add'
 import SearchIcon from '@mui/icons-material/Search'
 import BusinessIcon from '@mui/icons-material/Business'
 import PersonIcon from '@mui/icons-material/Person'
+import DownloadIcon from '@mui/icons-material/Download'
+import PrivacyTipIcon from '@mui/icons-material/PrivacyTip'
 import EmptyState from '../../components/EmptyState'
 import api from '../../services/api'
+import { useAuth } from '../../contexts/AuthContext'
 import { User, UserMembership, Organization } from '../../types'
 import { RoleTemplate } from '../../types/rbac'
 import { getErrorMessage } from '../../utils/errors'
@@ -52,10 +55,19 @@ interface UserWithMemberships extends User {
 
 const UsersPage: React.FC = () => {
   const queryClient = useQueryClient()
+  const { allowedScopes } = useAuth()
+  const isAdmin = allowedScopes.includes('admin')
   const [error, setError] = useState<string | null>(null)
+  const [info, setInfo] = useState<string | null>(null)
   const [searchQuery, setSearchQuery] = useState('')
   const [page, setPage] = useState(0)
   const [rowsPerPage, setRowsPerPage] = useState(10)
+
+  // GDPR action state
+  const [exportingUserId, setExportingUserId] = useState<string | null>(null)
+  const [eraseDialogOpen, setEraseDialogOpen] = useState(false)
+  const [userToErase, setUserToErase] = useState<User | null>(null)
+  const [eraseConfirmText, setEraseConfirmText] = useState('')
 
   // Local memberships state (per-user enrichment)
   const [userMemberships, setUserMemberships] = useState<
@@ -254,6 +266,59 @@ const UsersPage: React.FC = () => {
     },
   })
 
+  // GDPR Article 17 — anonymize user PII while preserving the audit trail.
+  const eraseUserMutation = useMutation({
+    mutationFn: (id: string) => api.eraseUser(id),
+    onSuccess: (data) => {
+      setEraseDialogOpen(false)
+      setUserToErase(null)
+      setEraseConfirmText('')
+      setError(null)
+      setInfo(data.message || 'User data erased.')
+      setUserMemberships({})
+      queryClient.invalidateQueries({ queryKey: queryKeys.users._def })
+    },
+    onError: (err: unknown) => {
+      setError(getErrorMessage(err, 'Failed to erase user data. Please try again.'))
+    },
+  })
+
+  // GDPR Articles 15/20 — full data export. Triggers a browser download
+  // by creating a temporary blob URL; cleaned up after the click is dispatched.
+  const handleExportClick = async (user: User) => {
+    setError(null)
+    setInfo(null)
+    setExportingUserId(user.id)
+    try {
+      const { blob, filename } = await api.exportUserData(user.id)
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = filename
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+      URL.revokeObjectURL(url)
+      setInfo(`Exported user data for ${user.email}.`)
+    } catch (err) {
+      setError(getErrorMessage(err, 'Failed to export user data.'))
+    } finally {
+      setExportingUserId(null)
+    }
+  }
+
+  const handleEraseClick = (user: User) => {
+    setUserToErase(user)
+    setEraseConfirmText('')
+    setEraseDialogOpen(true)
+  }
+
+  const handleEraseConfirm = () => {
+    if (!userToErase) return
+    if (eraseConfirmText !== userToErase.email) return
+    eraseUserMutation.mutate(userToErase.id)
+  }
+
   const handleSaveUser = () => {
     setError(null)
     saveUserMutation.mutate()
@@ -381,6 +446,12 @@ const UsersPage: React.FC = () => {
         </Alert>
       )}
 
+      {info && (
+        <Alert severity="success" sx={{ mb: 3 }} onClose={() => setInfo(null)}>
+          {info}
+        </Alert>
+      )}
+
       {/* Search Bar */}
       <TextField
         fullWidth
@@ -473,6 +544,36 @@ const UsersPage: React.FC = () => {
                       >
                         <EditIcon />
                       </IconButton>
+                      {isAdmin && (
+                        <>
+                          <Tooltip title="Export user data (GDPR Article 15/20)">
+                            <span>
+                              <IconButton
+                                size="small"
+                                aria-label="Export user data"
+                                onClick={() => handleExportClick(user)}
+                                disabled={exportingUserId === user.id}
+                              >
+                                {exportingUserId === user.id ? (
+                                  <CircularProgress size={20} />
+                                ) : (
+                                  <DownloadIcon />
+                                )}
+                              </IconButton>
+                            </span>
+                          </Tooltip>
+                          <Tooltip title="Erase user data (GDPR Article 17)">
+                            <IconButton
+                              size="small"
+                              aria-label="Erase user data"
+                              onClick={() => handleEraseClick(user)}
+                              color="warning"
+                            >
+                              <PrivacyTipIcon />
+                            </IconButton>
+                          </Tooltip>
+                        </>
+                      )}
                       <IconButton
                         size="small"
                         aria-label="Delete user"
@@ -670,6 +771,66 @@ const UsersPage: React.FC = () => {
           <Button onClick={() => setDeleteDialogOpen(false)}>Cancel</Button>
           <Button onClick={handleDeleteConfirm} color="error" variant="contained">
             Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* GDPR Erase Confirmation Dialog */}
+      <Dialog
+        open={eraseDialogOpen}
+        onClose={() => {
+          if (!eraseUserMutation.isPending) {
+            setEraseDialogOpen(false)
+            setEraseConfirmText('')
+          }
+        }}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle>Erase user data (GDPR Article 17)</DialogTitle>
+        <DialogContent>
+          <Stack spacing={2} sx={{ mt: 1 }}>
+            <Alert severity="warning">
+              This permanently anonymizes <strong>{userToErase?.email}</strong>'s personal data.
+              The user record is tombstoned, API keys and organization memberships are deleted,
+              and all sessions are revoked. Audit log entries are preserved with anonymized
+              identifiers. <strong>This action cannot be undone.</strong>
+            </Alert>
+            <Typography variant="body2">
+              To confirm, type the user's email address (
+              <code>{userToErase?.email}</code>) below.
+            </Typography>
+            <TextField
+              autoFocus
+              fullWidth
+              size="small"
+              value={eraseConfirmText}
+              onChange={(e) => setEraseConfirmText(e.target.value)}
+              placeholder={userToErase?.email}
+              disabled={eraseUserMutation.isPending}
+              inputProps={{ 'aria-label': 'Confirm erasure by typing the user email' }}
+            />
+          </Stack>
+        </DialogContent>
+        <DialogActions>
+          <Button
+            onClick={() => {
+              setEraseDialogOpen(false)
+              setEraseConfirmText('')
+            }}
+            disabled={eraseUserMutation.isPending}
+          >
+            Cancel
+          </Button>
+          <Button
+            onClick={handleEraseConfirm}
+            color="error"
+            variant="contained"
+            disabled={
+              eraseUserMutation.isPending || eraseConfirmText !== (userToErase?.email ?? '')
+            }
+          >
+            {eraseUserMutation.isPending ? <CircularProgress size={20} /> : 'Erase'}
           </Button>
         </DialogActions>
       </Dialog>
