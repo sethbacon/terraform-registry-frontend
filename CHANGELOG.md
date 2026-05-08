@@ -1,6 +1,13 @@
 <!-- markdownlint-disable MD013 MD024 MD041 -->
 # Changelog
 
+## [1.1.2](https://github.com/sethbacon/terraform-registry-frontend/compare/v1.1.1...v1.1.2) (2026-05-08)
+
+
+### Bug Fixes
+
+* **ci:** drop swagger-gap allowlist entries; bump pinned backend to v1.1.3 ([#282](https://github.com/sethbacon/terraform-registry-frontend/issues/282)) ([cf55b3b](https://github.com/sethbacon/terraform-registry-frontend/commit/cf55b3b9d10256658865f009b608684dbc4b98b6))
+
 ## [1.1.1](https://github.com/sethbacon/terraform-registry-frontend/compare/v1.1.0...v1.1.1) (2026-05-07)
 
 
