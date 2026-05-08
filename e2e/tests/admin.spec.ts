@@ -43,6 +43,69 @@ test.describe('Admin: Users', () => {
     const actionBtns = page.locator('[class*="MuiButton"], [class*="MuiIconButton"]');
     expect(await actionBtns.count()).toBeGreaterThan(0);
   });
+
+  test('admin sees GDPR export and erase action buttons per user', async ({
+    loggedInPage: page,
+  }) => {
+    await page.goto('/admin/users');
+    await page.waitForSelector('table, h6:has-text("No users")', { timeout: 10_000 });
+
+    // If empty state, skip the assertion — there's nothing to act on.
+    const hasUsers = await page.locator('table tbody tr').count();
+    if (hasUsers === 0) {
+      test.skip(true, 'No users present to test GDPR action buttons');
+      return;
+    }
+
+    // Each row should expose Export and Erase buttons in addition to Edit/Delete.
+    await expect(page.getByLabel('Export user data').first()).toBeVisible();
+    await expect(page.getByLabel('Erase user data').first()).toBeVisible();
+  });
+
+  test('clicking Export user data triggers a JSON file download', async ({
+    loggedInPage: page,
+  }) => {
+    await page.goto('/admin/users');
+    await page.waitForSelector('table, h6:has-text("No users")', { timeout: 10_000 });
+
+    const hasUsers = await page.locator('table tbody tr').count();
+    if (hasUsers === 0) {
+      test.skip(true, 'No users present to export');
+      return;
+    }
+
+    // Listen for the download event before clicking.
+    const downloadPromise = page.waitForEvent('download', { timeout: 15_000 });
+    await page.getByLabel('Export user data').first().click();
+    const download = await downloadPromise;
+
+    // Filename pattern: user-data-{uuid}.json (set by backend Content-Disposition).
+    expect(download.suggestedFilename()).toMatch(/user-data-.+\.json$/);
+  });
+
+  test('Erase confirmation requires typing the user email', async ({ loggedInPage: page }) => {
+    await page.goto('/admin/users');
+    await page.waitForSelector('table, h6:has-text("No users")', { timeout: 10_000 });
+
+    const hasUsers = await page.locator('table tbody tr').count();
+    if (hasUsers === 0) {
+      test.skip(true, 'No users present to test erase dialog');
+      return;
+    }
+
+    await page.getByLabel('Erase user data').first().click();
+
+    // Dialog opens with the GDPR Article 17 heading.
+    await expect(page.getByText(/Erase user data \(GDPR Article 17\)/i)).toBeVisible();
+
+    // Erase button should start disabled.
+    const eraseBtn = page.getByRole('button', { name: /^Erase$/ });
+    await expect(eraseBtn).toBeDisabled();
+
+    // Cancel without erasing.
+    await page.getByRole('button', { name: 'Cancel' }).click();
+    await expect(page.getByText(/Erase user data \(GDPR Article 17\)/i)).toBeHidden();
+  });
 });
 
 test.describe('Admin: Organizations', () => {

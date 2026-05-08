@@ -17,6 +17,8 @@ const deleteUserMock = vi.fn()
 const addOrganizationMemberMock = vi.fn()
 const updateOrganizationMemberMock = vi.fn()
 const removeOrganizationMemberMock = vi.fn()
+const exportUserDataMock = vi.fn()
+const eraseUserMock = vi.fn()
 
 vi.mock('../../../services/api', () => ({
   default: {
@@ -31,7 +33,20 @@ vi.mock('../../../services/api', () => ({
     addOrganizationMember: (...args: unknown[]) => addOrganizationMemberMock(...args),
     updateOrganizationMember: (...args: unknown[]) => updateOrganizationMemberMock(...args),
     removeOrganizationMember: (...args: unknown[]) => removeOrganizationMemberMock(...args),
+    exportUserData: (...args: unknown[]) => exportUserDataMock(...args),
+    eraseUser: (...args: unknown[]) => eraseUserMock(...args),
   },
+}))
+
+// Default to admin scope so existing tests pass; individual tests can override.
+const useAuthMock = vi.fn(() => ({
+  allowedScopes: ['admin'],
+  roleTemplate: { display_name: 'Administrator' },
+  user: { id: 'user-1' },
+}))
+
+vi.mock('../../../contexts/AuthContext', () => ({
+  useAuth: () => useAuthMock(),
 }))
 
 import UsersPage from '../../admin/UsersPage'
@@ -369,5 +384,165 @@ describe('UsersPage', () => {
 
     // The individual membership fetches must not have been called
     expect(getUserMembershipsMock).not.toHaveBeenCalled()
+  })
+
+  // ---- GDPR actions (admin-scoped) ----
+
+  describe('GDPR actions', () => {
+    beforeEach(() => {
+      // Reset to admin for this group; individual tests can override.
+      useAuthMock.mockReturnValue({
+        allowedScopes: ['admin'],
+        roleTemplate: { display_name: 'Administrator' },
+        user: { id: 'user-1' },
+      })
+      listUsersMock.mockResolvedValue(fakeUsersResponse)
+      getUserMembershipsMock.mockResolvedValue([])
+    })
+
+    it('shows export and erase buttons for admin users', async () => {
+      renderPage()
+      await waitFor(() => screen.getByText('alice@example.com'))
+
+      // Two users x two GDPR buttons each = 4 admin-only icon buttons.
+      expect(screen.getAllByLabelText('Export user data')).toHaveLength(2)
+      expect(screen.getAllByLabelText('Erase user data')).toHaveLength(2)
+    })
+
+    it('hides GDPR buttons for non-admin users', async () => {
+      useAuthMock.mockReturnValue({
+        allowedScopes: ['users:read', 'users:write'],
+        roleTemplate: { display_name: 'User Manager' },
+        user: { id: 'user-1' },
+      })
+      renderPage()
+      await waitFor(() => screen.getByText('alice@example.com'))
+
+      expect(screen.queryByLabelText('Export user data')).not.toBeInTheDocument()
+      expect(screen.queryByLabelText('Erase user data')).not.toBeInTheDocument()
+      // Edit is still available to non-admins (it's the existing behavior).
+      expect(screen.getAllByLabelText('Edit user').length).toBeGreaterThan(0)
+    })
+
+    it('triggers a browser download when export succeeds', async () => {
+      const blob = new Blob(['{"user":"data"}'], { type: 'application/json' })
+      exportUserDataMock.mockResolvedValue({ blob, filename: 'user-data-u1.json' })
+
+      // Stub URL APIs that JSDOM doesn't implement.
+      const createURL = vi.fn(() => 'blob:mock-url')
+      const revokeURL = vi.fn()
+      const origCreate = (URL as unknown as { createObjectURL?: typeof createURL }).createObjectURL
+      const origRevoke = (URL as unknown as { revokeObjectURL?: typeof revokeURL }).revokeObjectURL
+      ;(URL as unknown as { createObjectURL: typeof createURL }).createObjectURL = createURL
+      ;(URL as unknown as { revokeObjectURL: typeof revokeURL }).revokeObjectURL = revokeURL
+
+      try {
+        renderPage()
+        await waitFor(() => screen.getByText('alice@example.com'))
+
+        const exportButtons = screen.getAllByLabelText('Export user data')
+        fireEvent.click(exportButtons[0])
+
+        await waitFor(() => expect(exportUserDataMock).toHaveBeenCalledWith('u1'))
+        expect(createURL).toHaveBeenCalledWith(blob)
+        expect(revokeURL).toHaveBeenCalledWith('blob:mock-url')
+        await waitFor(() =>
+          expect(screen.getByText(/Exported user data for alice@example\.com/)).toBeInTheDocument(),
+        )
+      } finally {
+        if (origCreate) {
+          ;(URL as unknown as { createObjectURL: typeof origCreate }).createObjectURL = origCreate
+        }
+        if (origRevoke) {
+          ;(URL as unknown as { revokeObjectURL: typeof origRevoke }).revokeObjectURL = origRevoke
+        }
+      }
+    })
+
+    it('shows an error alert when export fails', async () => {
+      exportUserDataMock.mockRejectedValue(new Error('export blew up'))
+
+      renderPage()
+      await waitFor(() => screen.getByText('alice@example.com'))
+
+      const exportButtons = screen.getAllByLabelText('Export user data')
+      fireEvent.click(exportButtons[0])
+
+      await waitFor(() =>
+        expect(screen.getByText(/export blew up/)).toBeInTheDocument(),
+      )
+    })
+
+    it('opens the erase confirmation dialog and requires email match', async () => {
+      const user = userEvent.setup()
+      renderPage()
+      await waitFor(() => screen.getByText('alice@example.com'))
+
+      const eraseButtons = screen.getAllByLabelText('Erase user data')
+      fireEvent.click(eraseButtons[0])
+
+      // Dialog should be open with destructive copy referencing the email.
+      await waitFor(() =>
+        expect(screen.getByText(/permanently anonymizes/i)).toBeInTheDocument(),
+      )
+
+      // Erase button starts disabled because confirm text is empty.
+      const confirm = screen.getByRole('button', { name: /^Erase$/ })
+      expect(confirm).toBeDisabled()
+
+      // Wrong email keeps it disabled.
+      const input = screen.getByLabelText('Confirm erasure by typing the user email')
+      await user.type(input, 'wrong@example.com')
+      expect(confirm).toBeDisabled()
+
+      // Correct email enables it.
+      await user.clear(input)
+      await user.type(input, 'alice@example.com')
+      expect(confirm).not.toBeDisabled()
+    })
+
+    it('calls eraseUser and shows success when confirmed', async () => {
+      const user = userEvent.setup()
+      eraseUserMock.mockResolvedValue({
+        message: 'User data has been erased.',
+        user_id: 'u1',
+      })
+
+      renderPage()
+      await waitFor(() => screen.getByText('alice@example.com'))
+
+      const eraseButtons = screen.getAllByLabelText('Erase user data')
+      fireEvent.click(eraseButtons[0])
+
+      const input = await screen.findByLabelText('Confirm erasure by typing the user email')
+      await user.type(input, 'alice@example.com')
+
+      fireEvent.click(screen.getByRole('button', { name: /^Erase$/ }))
+
+      await waitFor(() => expect(eraseUserMock).toHaveBeenCalledWith('u1'))
+      await waitFor(() =>
+        expect(screen.getByText(/User data has been erased/)).toBeInTheDocument(),
+      )
+    })
+
+    it('surfaces backend error when erase fails', async () => {
+      const user = userEvent.setup()
+      eraseUserMock.mockRejectedValue(new Error('erase blew up'))
+
+      renderPage()
+      await waitFor(() => screen.getByText('alice@example.com'))
+
+      const eraseButtons = screen.getAllByLabelText('Erase user data')
+      fireEvent.click(eraseButtons[0])
+
+      const input = await screen.findByLabelText('Confirm erasure by typing the user email')
+      await user.type(input, 'alice@example.com')
+
+      fireEvent.click(screen.getByRole('button', { name: /^Erase$/ }))
+
+      await waitFor(() =>
+        expect(screen.getByText(/erase blew up/)).toBeInTheDocument(),
+      )
+    })
   })
 })
