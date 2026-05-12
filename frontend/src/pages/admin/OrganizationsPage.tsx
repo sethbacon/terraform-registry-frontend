@@ -30,6 +30,9 @@ import {
   Chip,
   Tooltip,
 } from '@mui/material'
+
+/** Regex matching Terraform registry identifier rules (namespace / org name). */
+const REGISTRY_SEGMENT_RE = /^[a-z0-9][a-z0-9_-]{0,63}$/
 import EditIcon from '@mui/icons-material/Edit'
 import DeleteIcon from '@mui/icons-material/Delete'
 import AddIcon from '@mui/icons-material/Add'
@@ -121,6 +124,7 @@ const OrganizationsPage: React.FC = () => {
     mutationFn: async () => {
       if (editingOrg) {
         await api.updateOrganization(editingOrg.id, {
+          ...(formData.name !== editingOrg.name ? { name: formData.name } : {}),
           display_name: formData.display_name,
           idp_type: formData.idp_type || null,
           idp_name: formData.idp_name || null,
@@ -153,6 +157,13 @@ const OrganizationsPage: React.FC = () => {
 
   const handleSaveOrganization = () => {
     setError(null)
+    if (!REGISTRY_SEGMENT_RE.test(formData.name)) {
+      setError(
+        'Organization name must be 1–64 characters, start with a lowercase letter or digit, ' +
+          'and contain only lowercase letters, digits, hyphens, or underscores.',
+      )
+      return
+    }
     saveOrgMutation.mutate()
   }
 
@@ -382,8 +393,22 @@ const OrganizationsPage: React.FC = () => {
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
               required
               fullWidth
-              helperText="Organization name (e.g., myorg)"
+              error={!!formData.name && !REGISTRY_SEGMENT_RE.test(formData.name)}
+              helperText={
+                formData.name && !REGISTRY_SEGMENT_RE.test(formData.name)
+                  ? 'Must start with a lowercase letter or digit; only lowercase letters, digits, hyphens, and underscores allowed (max 64 chars)'
+                  : 'Organization name used in registry URLs (e.g., myorg)'
+              }
             />
+            {editingOrg && formData.name !== editingOrg.name && REGISTRY_SEGMENT_RE.test(formData.name) && (
+              <Alert severity="warning">
+                Renaming this organization will update all module and provider namespaces that
+                currently use <strong>{editingOrg.name}</strong> to{' '}
+                <strong>{formData.name}</strong>. User memberships are linked by ID and will not
+                be affected. Ensure any Terraform configurations referencing the old name are
+                updated.
+              </Alert>
+            )}
             <TextField
               label="Display Name"
               value={formData.display_name}
