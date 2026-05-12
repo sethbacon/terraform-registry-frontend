@@ -591,7 +591,7 @@ class ApiClient {
 
   async updateOrganization(
     id: string,
-    data: { display_name: string; idp_type?: string | null; idp_name?: string | null },
+    data: { name?: string; display_name: string; idp_type?: string | null; idp_name?: string | null },
   ) {
     const response = await this.client.put(`/api/v1/organizations/${id}`, data)
     return this.transformOrganization(response.data.organization)

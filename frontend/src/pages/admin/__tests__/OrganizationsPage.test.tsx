@@ -379,4 +379,87 @@ describe('OrganizationsPage', () => {
     await waitFor(() => expect(screen.getByText('acme-corp')).toBeInTheDocument())
     expect(screen.getByText('LDAP')).toBeInTheDocument()
   })
+
+  // ── Rename tests ──────────────────────────────────────────────────────────
+
+  it('includes name in update payload when org name is changed', async () => {
+    listOrganizationsMock.mockResolvedValue(fakeOrgs)
+    updateOrganizationMock.mockResolvedValue({})
+    renderPage()
+    await waitFor(() => expect(screen.getByText('acme-corp')).toBeInTheDocument())
+    const editBtns = screen.getAllByRole('button', { name: /edit organization/i })
+    await userEvent.click(editBtns[0])
+    await waitFor(() => expect(screen.getByText('Edit Organization')).toBeInTheDocument())
+
+    const nameInput = screen.getByLabelText(/^Name/i)
+    await userEvent.clear(nameInput)
+    await userEvent.type(nameInput, 'acme-renamed')
+
+    const saveBtn = screen.getByRole('button', { name: /^save$/i })
+    await userEvent.click(saveBtn)
+
+    await waitFor(() =>
+      expect(updateOrganizationMock).toHaveBeenCalledWith(
+        'org-1',
+        expect.objectContaining({ name: 'acme-renamed' }),
+      ),
+    )
+  })
+
+  it('shows rename cascade warning when name is changed to a valid value', async () => {
+    listOrganizationsMock.mockResolvedValue(fakeOrgs)
+    renderPage()
+    await waitFor(() => expect(screen.getByText('acme-corp')).toBeInTheDocument())
+    const editBtns = screen.getAllByRole('button', { name: /edit organization/i })
+    await userEvent.click(editBtns[0])
+    await waitFor(() => expect(screen.getByText('Edit Organization')).toBeInTheDocument())
+
+    const nameInput = screen.getByLabelText(/^Name/i)
+    await userEvent.clear(nameInput)
+    await userEvent.type(nameInput, 'new-name')
+
+    await waitFor(() =>
+      expect(screen.getByText(/Renaming this organization will update all module/i)).toBeInTheDocument(),
+    )
+  })
+
+  it('does not include name in update payload when name is unchanged', async () => {
+    listOrganizationsMock.mockResolvedValue(fakeOrgs)
+    updateOrganizationMock.mockResolvedValue({})
+    renderPage()
+    await waitFor(() => expect(screen.getByText('acme-corp')).toBeInTheDocument())
+    const editBtns = screen.getAllByRole('button', { name: /edit organization/i })
+    await userEvent.click(editBtns[0])
+    await waitFor(() => expect(screen.getByText('Edit Organization')).toBeInTheDocument())
+
+    const saveBtn = screen.getByRole('button', { name: /^save$/i })
+    await userEvent.click(saveBtn)
+
+    await waitFor(() => expect(updateOrganizationMock).toHaveBeenCalled())
+    const callArg = updateOrganizationMock.mock.calls[0][1]
+    expect(callArg).not.toHaveProperty('name')
+  })
+
+  it('blocks save and shows field error when name format is invalid', async () => {
+    listOrganizationsMock.mockResolvedValue(fakeOrgs)
+    renderPage()
+    await waitFor(() => expect(screen.getByText('acme-corp')).toBeInTheDocument())
+
+    // Open Add dialog (create path) to test name validation
+    await userEvent.click(screen.getByRole('button', { name: /add organization/i }))
+    await waitFor(() => expect(screen.getByRole('dialog')).toBeInTheDocument())
+
+    const nameInput = screen.getByLabelText(/^Name/i)
+    await userEvent.type(nameInput, 'Bad Name!')
+    const dnInput = screen.getByLabelText(/Display Name/i)
+    await userEvent.type(dnInput, 'Something')
+    const saveBtn = screen.getByRole('button', { name: /^create$/i })
+    await userEvent.click(saveBtn)
+
+    await waitFor(() =>
+      expect(screen.getByText(/must start with a lowercase letter or digit/i)).toBeInTheDocument(),
+    )
+    expect(updateOrganizationMock).not.toHaveBeenCalled()
+    expect(createOrganizationMock).not.toHaveBeenCalled()
+  })
 })
