@@ -1,6 +1,13 @@
 <!-- markdownlint-disable MD013 MD024 MD041 -->
 # Changelog
 
+## [1.2.1](https://github.com/sethbacon/terraform-registry-frontend/compare/v1.2.0...v1.2.1) (2026-05-12)
+
+
+### Bug Fixes
+
+* **admin:** add tooltips to edit and delete user buttons ([#287](https://github.com/sethbacon/terraform-registry-frontend/issues/287)) ([6c458e1](https://github.com/sethbacon/terraform-registry-frontend/commit/6c458e15fc11218f2d5a6021267f485ce449ce8f))
+
 ## [1.2.0](https://github.com/sethbacon/terraform-registry-frontend/compare/v1.1.2...v1.2.0) (2026-05-08)
 
 
