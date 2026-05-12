@@ -606,12 +606,14 @@ const APIKeysPage: React.FC = () => {
                   readOnly: true,
                   endAdornment: (
                     <InputAdornment position="end">
-                      <IconButton
-                        aria-label="Copy API key"
-                        onClick={() => handleCopyKey(newKeyValue)}
-                      >
-                        <CopyIcon />
-                      </IconButton>
+                      <Tooltip title="Copy API key">
+                        <IconButton
+                          aria-label="Copy API key"
+                          onClick={() => handleCopyKey(newKeyValue)}
+                        >
+                          <CopyIcon />
+                        </IconButton>
+                      </Tooltip>
                     </InputAdornment>
                   ),
                   sx: { fontFamily: 'monospace' },
@@ -783,12 +785,14 @@ const APIKeysPage: React.FC = () => {
                   readOnly: true,
                   endAdornment: (
                     <InputAdornment position="end">
-                      <IconButton
-                        aria-label="Copy rotated key"
-                        onClick={() => handleCopyKey(rotatedKeyValue)}
-                      >
-                        <CopyIcon />
-                      </IconButton>
+                      <Tooltip title="Copy API key">
+                        <IconButton
+                          aria-label="Copy rotated key"
+                          onClick={() => handleCopyKey(rotatedKeyValue)}
+                        >
+                          <CopyIcon />
+                        </IconButton>
+                      </Tooltip>
                     </InputAdornment>
                   ),
                   sx: { fontFamily: 'monospace' },

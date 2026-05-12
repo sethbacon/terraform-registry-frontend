@@ -28,6 +28,7 @@ import {
   Autocomplete,
   SelectChangeEvent,
   Chip,
+  Tooltip,
 } from '@mui/material'
 import EditIcon from '@mui/icons-material/Edit'
 import DeleteIcon from '@mui/icons-material/Delete'
@@ -341,22 +342,26 @@ const OrganizationsPage: React.FC = () => {
                     </TableCell>
                     <TableCell>{new Date(org.created_at).toLocaleDateString()}</TableCell>
                     <TableCell align="right">
-                      <IconButton
-                        size="small"
-                        aria-label="Edit organization"
-                        onClick={() => handleOpenDialog(org)}
-                        color="primary"
-                      >
-                        <EditIcon />
-                      </IconButton>
-                      <IconButton
-                        size="small"
-                        aria-label="Delete organization"
-                        onClick={() => handleDeleteClick(org)}
-                        color="error"
-                      >
-                        <DeleteIcon />
-                      </IconButton>
+                      <Tooltip title="Edit organization">
+                        <IconButton
+                          size="small"
+                          aria-label="Edit organization"
+                          onClick={() => handleOpenDialog(org)}
+                          color="primary"
+                        >
+                          <EditIcon />
+                        </IconButton>
+                      </Tooltip>
+                      <Tooltip title="Delete organization">
+                        <IconButton
+                          size="small"
+                          aria-label="Delete organization"
+                          onClick={() => handleDeleteClick(org)}
+                          color="error"
+                        >
+                          <DeleteIcon />
+                        </IconButton>
+                      </Tooltip>
                     </TableCell>
                   </TableRow>
                 ))}
@@ -541,15 +546,16 @@ const OrganizationsPage: React.FC = () => {
                       </TableCell>
                       {canManage && (
                         <TableCell align="right">
-                          <IconButton
-                            size="small"
-                            aria-label="Remove member"
-                            onClick={() => handleRemoveMember(member.user_id)}
-                            color="error"
-                            title="Remove member"
-                          >
-                            <DeleteIcon />
-                          </IconButton>
+                          <Tooltip title="Remove member">
+                            <IconButton
+                              size="small"
+                              aria-label="Remove member"
+                              onClick={() => handleRemoveMember(member.user_id)}
+                              color="error"
+                            >
+                              <DeleteIcon />
+                            </IconButton>
+                          </Tooltip>
                         </TableCell>
                       )}
                     </TableRow>

@@ -215,24 +215,28 @@ const ModuleDetailPage: React.FC = () => {
                       }
                     }}
                   />
-                  <IconButton
-                    size="small"
-                    color="primary"
-                    onClick={() => {
-                      handleUpdateDescription(editDescription)
-                      setEditingDescription(false)
-                    }}
-                    aria-label="Save description"
-                  >
-                    <Check fontSize="small" />
-                  </IconButton>
-                  <IconButton
-                    size="small"
-                    onClick={() => setEditingDescription(false)}
-                    aria-label="Cancel editing"
-                  >
-                    <Close fontSize="small" />
-                  </IconButton>
+                  <Tooltip title="Save description">
+                    <IconButton
+                      size="small"
+                      color="primary"
+                      onClick={() => {
+                        handleUpdateDescription(editDescription)
+                        setEditingDescription(false)
+                      }}
+                      aria-label="Save description"
+                    >
+                      <Check fontSize="small" />
+                    </IconButton>
+                  </Tooltip>
+                  <Tooltip title="Cancel editing">
+                    <IconButton
+                      size="small"
+                      onClick={() => setEditingDescription(false)}
+                      aria-label="Cancel editing"
+                    >
+                      <Close fontSize="small" />
+                    </IconButton>
+                  </Tooltip>
                 </>
               ) : (
                 <>
@@ -349,26 +353,30 @@ const ModuleDetailPage: React.FC = () => {
                             }
                           }}
                         />
-                        <IconButton
-                          size="small"
-                          color="primary"
-                          onClick={() => {
-                            if (editNamespace.trim()) {
-                              handleUpdateNamespace(editNamespace.trim())
-                              setEditingNamespace(false)
-                            }
-                          }}
-                          aria-label="Save namespace"
-                        >
-                          <Check fontSize="small" />
-                        </IconButton>
-                        <IconButton
-                          size="small"
-                          onClick={() => setEditingNamespace(false)}
-                          aria-label="Cancel editing namespace"
-                        >
-                          <Close fontSize="small" />
-                        </IconButton>
+                        <Tooltip title="Save namespace">
+                          <IconButton
+                            size="small"
+                            color="primary"
+                            onClick={() => {
+                              if (editNamespace.trim()) {
+                                handleUpdateNamespace(editNamespace.trim())
+                                setEditingNamespace(false)
+                              }
+                            }}
+                            aria-label="Save namespace"
+                          >
+                            <Check fontSize="small" />
+                          </IconButton>
+                        </Tooltip>
+                        <Tooltip title="Cancel editing namespace">
+                          <IconButton
+                            size="small"
+                            onClick={() => setEditingNamespace(false)}
+                            aria-label="Cancel editing namespace"
+                          >
+                            <Close fontSize="small" />
+                          </IconButton>
+                        </Tooltip>
                       </>
                     ) : (
                       <>

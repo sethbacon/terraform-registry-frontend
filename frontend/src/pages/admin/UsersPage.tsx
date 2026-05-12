@@ -536,14 +536,16 @@ const UsersPage: React.FC = () => {
                     </TableCell>
                     <TableCell>{new Date(user.created_at).toLocaleDateString()}</TableCell>
                     <TableCell align="right">
-                      <IconButton
-                        size="small"
-                        aria-label="Edit user"
-                        onClick={() => handleOpenDialog(user)}
-                        color="primary"
-                      >
-                        <EditIcon />
-                      </IconButton>
+                      <Tooltip title="Edit user">
+                        <IconButton
+                          size="small"
+                          aria-label="Edit user"
+                          onClick={() => handleOpenDialog(user)}
+                          color="primary"
+                        >
+                          <EditIcon />
+                        </IconButton>
+                      </Tooltip>
                       {isAdmin && (
                         <>
                           <Tooltip title="Export user data (GDPR Article 15/20)">
@@ -574,14 +576,16 @@ const UsersPage: React.FC = () => {
                           </Tooltip>
                         </>
                       )}
-                      <IconButton
-                        size="small"
-                        aria-label="Delete user"
-                        onClick={() => handleDeleteClick(user)}
-                        color="error"
-                      >
-                        <DeleteIcon />
-                      </IconButton>
+                      <Tooltip title="Delete user">
+                        <IconButton
+                          size="small"
+                          aria-label="Delete user"
+                          onClick={() => handleDeleteClick(user)}
+                          color="error"
+                        >
+                          <DeleteIcon />
+                        </IconButton>
+                      </Tooltip>
                     </TableCell>
                   </TableRow>
                 ))
