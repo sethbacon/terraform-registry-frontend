@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { Box, Paper, Typography, Divider, Chip, Stack, Collapse, IconButton } from '@mui/material'
+import { Box, Paper, Typography, Divider, Chip, Stack, Collapse, IconButton, Tooltip } from '@mui/material'
 import PolicyIcon from '@mui/icons-material/Policy'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import ExpandLessIcon from '@mui/icons-material/ExpandLess'
@@ -46,9 +46,11 @@ const PolicyResultsPanel: React.FC<PolicyResultsPanelProps> = ({ policyResult })
               {policyResult.violations.length} violation
               {policyResult.violations.length !== 1 ? 's' : ''}
             </Typography>
-            <IconButton size="small" sx={{ ml: 'auto' }}>
-              {expanded ? <ExpandLessIcon fontSize="small" /> : <ExpandMoreIcon fontSize="small" />}
-            </IconButton>
+            <Tooltip title={expanded ? 'Collapse' : 'Expand'}>
+              <IconButton size="small" aria-label={expanded ? 'Collapse' : 'Expand'} sx={{ ml: 'auto' }}>
+                {expanded ? <ExpandLessIcon fontSize="small" /> : <ExpandMoreIcon fontSize="small" />}
+              </IconButton>
+            </Tooltip>
           </Box>
           <Collapse in={expanded}>
             <Stack spacing={1} sx={{ mt: 1 }}>

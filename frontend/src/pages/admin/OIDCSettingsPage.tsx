@@ -29,6 +29,7 @@ import {
   Chip,
   Divider,
   SelectChangeEvent,
+  Tooltip,
 } from '@mui/material'
 import AddIcon from '@mui/icons-material/Add'
 import EditIcon from '@mui/icons-material/Edit'
@@ -343,21 +344,25 @@ const OIDCSettingsPage: React.FC = () => {
                               />
                             </TableCell>
                             <TableCell align="right">
-                              <IconButton
-                                size="small"
-                                aria-label="Edit claim mapping"
-                                onClick={() => openEditDialog(i)}
-                              >
-                                <EditIcon fontSize="small" />
-                              </IconButton>
-                              <IconButton
-                                size="small"
-                                aria-label="Delete claim mapping"
-                                color="error"
-                                onClick={() => setDeleteIndex(i)}
-                              >
-                                <DeleteIcon fontSize="small" />
-                              </IconButton>
+                              <Tooltip title="Edit claim mapping">
+                                <IconButton
+                                  size="small"
+                                  aria-label="Edit claim mapping"
+                                  onClick={() => openEditDialog(i)}
+                                >
+                                  <EditIcon fontSize="small" />
+                                </IconButton>
+                              </Tooltip>
+                              <Tooltip title="Delete claim mapping">
+                                <IconButton
+                                  size="small"
+                                  aria-label="Delete claim mapping"
+                                  color="error"
+                                  onClick={() => setDeleteIndex(i)}
+                                >
+                                  <DeleteIcon fontSize="small" />
+                                </IconButton>
+                              </Tooltip>
                             </TableCell>
                           </TableRow>
                         ))}
