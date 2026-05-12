@@ -1,6 +1,13 @@
 <!-- markdownlint-disable MD013 MD024 MD041 -->
 # Changelog
 
+## [1.2.2](https://github.com/sethbacon/terraform-registry-frontend/compare/v1.2.1...v1.2.2) (2026-05-12)
+
+
+### Bug Fixes
+
+* enable org rename with cascade warning and name format validation ([32683b0](https://github.com/sethbacon/terraform-registry-frontend/commit/32683b08b582dc3e3975b4235abaa86ac20e9004)), closes [#289](https://github.com/sethbacon/terraform-registry-frontend/issues/289)
+
 ## [1.2.1](https://github.com/sethbacon/terraform-registry-frontend/compare/v1.2.0...v1.2.1) (2026-05-12)
 
 
