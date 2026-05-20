@@ -31,8 +31,7 @@ import {
   Tooltip,
 } from '@mui/material'
 
-/** Regex matching Terraform registry identifier rules (namespace / org name). */
-const REGISTRY_SEGMENT_RE = /^[a-z0-9][a-z0-9_-]{0,63}$/
+import { REGISTRY_SEGMENT_RE } from '../../utils/registrySegment'
 import EditIcon from '@mui/icons-material/Edit'
 import DeleteIcon from '@mui/icons-material/Delete'
 import AddIcon from '@mui/icons-material/Add'
