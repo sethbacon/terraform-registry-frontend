@@ -3,21 +3,6 @@
   "entries": [
     {
       "method": "GET",
-      "path": "/api/v1/admin/quotas",
-      "reason": "https://github.com/sethbacon/terraform-registry-frontend/issues/276 — frontend calls a backend route that does not exist; resolve by either implementing on the backend or removing the frontend caller."
-    },
-    {
-      "method": "GET",
-      "path": "/api/v1/ui/theme",
-      "reason": "https://github.com/sethbacon/terraform-registry-frontend/issues/277 — frontend calls a backend route that does not exist; resolve by either implementing on the backend or removing the frontend caller."
-    },
-    {
-      "method": "PUT",
-      "path": "/api/v1/admin/ui-theme",
-      "reason": "https://github.com/sethbacon/terraform-registry-frontend/issues/277 — frontend calls a backend route that does not exist; resolve by either implementing on the backend or removing the frontend caller."
-    },
-    {
-      "method": "GET",
       "path": "/api/v1/dev/status",
       "reason": "Backend route is registered conditionally under DEV_MODE=true and is intentionally undocumented in production swagger. Permanent allowlist entry."
     },
