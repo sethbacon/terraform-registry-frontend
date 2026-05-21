@@ -20,6 +20,10 @@ import SCMIcon from '@mui/icons-material/AccountTree'
 import ArrowBack from '@mui/icons-material/ArrowBack'
 import api from '../../services/api'
 import { getErrorMessage } from '../../utils/errors'
+import {
+  isValidRegistrySegment,
+  REGISTRY_SEGMENT_HELP,
+} from '../../utils/registrySegment'
 import PublishFromSCMWizard from '../../components/PublishFromSCMWizard'
 import FileDropZone from '../../components/FileDropZone'
 import PolicyResultsPanel from '../../components/PolicyResultsPanel'
@@ -71,6 +75,16 @@ const ModuleUploadPage: React.FC = () => {
       setError('Please fill in all required fields')
       return
     }
+    for (const [label, val] of [
+      ['Namespace', moduleNamespace],
+      ['Module Name', moduleName],
+      ['Provider', moduleProvider],
+    ] as const) {
+      if (!isValidRegistrySegment(val)) {
+        setError(`${label} is not a valid Terraform registry segment. ${REGISTRY_SEGMENT_HELP}`)
+        return
+      }
+    }
 
     try {
       setUploading(true)
@@ -113,6 +127,16 @@ const ModuleUploadPage: React.FC = () => {
     if (!scmNamespace || !scmName || !scmSystem) {
       setScmError('Namespace, name, and provider are required')
       return
+    }
+    for (const [label, val] of [
+      ['Namespace', scmNamespace],
+      ['Module Name', scmName],
+      ['Provider', scmSystem],
+    ] as const) {
+      if (!isValidRegistrySegment(val)) {
+        setScmError(`${label} is not a valid Terraform registry segment. ${REGISTRY_SEGMENT_HELP}`)
+        return
+      }
     }
     try {
       setScmCreating(true)
@@ -223,7 +247,12 @@ const ModuleUploadPage: React.FC = () => {
               placeholder="e.g., bconline"
               required
               fullWidth
-              helperText="Your organization identifier"
+              error={!!scmNamespace && !isValidRegistrySegment(scmNamespace)}
+              helperText={
+                scmNamespace && !isValidRegistrySegment(scmNamespace)
+                  ? REGISTRY_SEGMENT_HELP
+                  : 'Your organization identifier'
+              }
             />
             <TextField
               label="Module Name"
@@ -232,6 +261,10 @@ const ModuleUploadPage: React.FC = () => {
               placeholder="e.g., networking-vpc"
               required
               fullWidth
+              error={!!scmName && !isValidRegistrySegment(scmName)}
+              helperText={
+                scmName && !isValidRegistrySegment(scmName) ? REGISTRY_SEGMENT_HELP : undefined
+              }
             />
             <TextField
               label="Provider"
@@ -240,7 +273,12 @@ const ModuleUploadPage: React.FC = () => {
               placeholder="e.g., aws"
               required
               fullWidth
-              helperText="Cloud provider this module targets (aws, azure, google, etc.)"
+              error={!!scmSystem && !isValidRegistrySegment(scmSystem)}
+              helperText={
+                scmSystem && !isValidRegistrySegment(scmSystem)
+                  ? REGISTRY_SEGMENT_HELP
+                  : 'Cloud provider this module targets (aws, azure, google, etc.)'
+              }
             />
             <TextField
               label="Description (optional)"
@@ -256,7 +294,15 @@ const ModuleUploadPage: React.FC = () => {
             <Button
               variant="contained"
               onClick={handleScmProceed}
-              disabled={scmCreating || !scmNamespace || !scmName || !scmSystem}
+              disabled={
+                scmCreating ||
+                !scmNamespace ||
+                !scmName ||
+                !scmSystem ||
+                !isValidRegistrySegment(scmNamespace) ||
+                !isValidRegistrySegment(scmName) ||
+                !isValidRegistrySegment(scmSystem)
+              }
               startIcon={scmCreating ? <CircularProgress size={18} /> : <SCMIcon />}
               size="large"
             >
@@ -315,7 +361,12 @@ const ModuleUploadPage: React.FC = () => {
             required
             fullWidth
             disabled={uploading}
-            helperText="Your organization identifier"
+            error={!!moduleNamespace && !isValidRegistrySegment(moduleNamespace)}
+            helperText={
+              moduleNamespace && !isValidRegistrySegment(moduleNamespace)
+                ? REGISTRY_SEGMENT_HELP
+                : 'Your organization identifier'
+            }
           />
           <TextField
             label="Module Name"
@@ -325,7 +376,12 @@ const ModuleUploadPage: React.FC = () => {
             required
             fullWidth
             disabled={uploading}
-            helperText="Descriptive name for what the module does"
+            error={!!moduleName && !isValidRegistrySegment(moduleName)}
+            helperText={
+              moduleName && !isValidRegistrySegment(moduleName)
+                ? REGISTRY_SEGMENT_HELP
+                : 'Descriptive name for what the module does'
+            }
           />
           <TextField
             label="Provider"
@@ -335,7 +391,12 @@ const ModuleUploadPage: React.FC = () => {
             required
             fullWidth
             disabled={uploading}
-            helperText="Target cloud (aws, azure, google, etc.)"
+            error={!!moduleProvider && !isValidRegistrySegment(moduleProvider)}
+            helperText={
+              moduleProvider && !isValidRegistrySegment(moduleProvider)
+                ? REGISTRY_SEGMENT_HELP
+                : 'Target cloud (aws, azure, google, etc.)'
+            }
           />
         </Stack>
         <TextField
@@ -389,7 +450,12 @@ const ModuleUploadPage: React.FC = () => {
             variant="contained"
             onClick={handleModuleUpload}
             disabled={
-              uploading || !moduleFile || (policyResult?.mode === 'block' && !policyResult?.allowed)
+              uploading ||
+              !moduleFile ||
+              (policyResult?.mode === 'block' && !policyResult?.allowed) ||
+              !isValidRegistrySegment(moduleNamespace) ||
+              !isValidRegistrySegment(moduleName) ||
+              !isValidRegistrySegment(moduleProvider)
             }
             startIcon={uploading ? <CircularProgress size={20} /> : <CloudUpload />}
             size="large"

@@ -157,6 +157,34 @@ describe('ModuleUploadPage — upload form (roadmap 2.5)', () => {
     expect(screen.getByText('mod.tar.gz')).toBeInTheDocument()
   })
 
+  it('disables Upload Module when a registry segment is invalid', async () => {
+    const user = userEvent.setup()
+    await openUploadForm(user)
+    const byLabel = (t: RegExp) => screen.getByLabelText(t) as HTMLInputElement
+    await user.type(byLabel(/Namespace/), 'My Org') // space + uppercase
+    await user.type(byLabel(/Module Name/), 'vpc')
+    await user.type(byLabel(/^Provider/), 'aws')
+    await user.type(byLabel(/Version/), '1.0.0')
+    const dropInput = screen.getByTestId('module-upload-dropzone-input') as HTMLInputElement
+    await user.upload(dropInput, new File(['x'], 'm.tar.gz'))
+    expect(screen.getByRole('button', { name: /Upload Module/i })).toBeDisabled()
+    // Inline helper switches to the segment-format hint
+    expect(screen.getAllByText(/1.{0,4}64 chars/i).length).toBeGreaterThan(0)
+  })
+
+  it('disables SCM Continue when any segment is invalid', async () => {
+    const user = userEvent.setup()
+    renderPage()
+    await user.click(screen.getByText('Link from SCM Repository'))
+    const byLabel = (t: RegExp) => screen.getByLabelText(t) as HTMLInputElement
+    await user.type(byLabel(/Namespace/), 'myns')
+    await user.type(byLabel(/Module Name/), 'BAD NAME')
+    await user.type(byLabel(/^Provider/), 'aws')
+    expect(
+      screen.getByRole('button', { name: /Continue to Repository Selection/i }),
+    ).toBeDisabled()
+  })
+
   it('shows upload progress bar and preserves field state after upload failure', async () => {
     const user = userEvent.setup()
     api.uploadModule.mockImplementationOnce(
