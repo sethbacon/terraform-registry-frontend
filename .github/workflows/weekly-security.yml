@@ -14,10 +14,17 @@ permissions:
 
 jobs:
   # ── Full CI ────────────────────────────────────────────
+  # Calls ci.yml, which requests `packages: read` to pull the ghcr.io
+  # backend image used by the Contract Check job. A reusable workflow can
+  # only request permissions the caller has already granted, so we elevate
+  # explicitly here.
   ci:
     name: CI
     uses: ./.github/workflows/ci.yml
     secrets: inherit
+    permissions:
+      contents: read
+      packages: read
 
   # ── Dependency Audit ──────────────────────────────────
   npm-audit:
