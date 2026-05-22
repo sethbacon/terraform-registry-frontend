@@ -38,8 +38,17 @@ const CallbackPage: React.FC = () => {
       // Navigate to the return URL; AuthContext handles the rest.
       const raw = sessionStorage.getItem('returnUrl') || '/'
       sessionStorage.removeItem('returnUrl')
-      // Reject absolute URLs and protocol-relative paths to prevent open redirect.
-      const safeReturnUrl = /^\/(?!\/)/.test(raw) ? raw : '/'
+      // Reject absolute and protocol-relative URLs to prevent open redirect.
+      // Use URL parsing to catch backslash normalisation bypasses (/\\ → //).
+      let safeReturnUrl = '/'
+      try {
+        const resolved = new URL(raw, window.location.origin)
+        if (resolved.origin === window.location.origin) {
+          safeReturnUrl = resolved.pathname + resolved.search + resolved.hash
+        }
+      } catch {
+        // malformed URL — fall back to '/'
+      }
       window.location.replace(safeReturnUrl)
     }
 
