@@ -31,7 +31,7 @@ This repository contains the frontend UI and Playwright E2E test suite for the E
 
 ## Prerequisites
 
-- Node.js 22+ (LTS) and npm
+- Node.js 24+ (LTS) and npm
 - A running backend API — see [terraform-registry-backend](https://github.com/sethbacon/terraform-registry-backend) for setup
 - Docker & Docker Compose (for the full stack via compose)
 
