@@ -9,7 +9,7 @@ inputs:
   node-version:
     description: Node.js version.
     required: false
-    default: "22"
+    default: "24"
   install-deps:
     description: Run `npm ci` in frontend/.
     required: false
