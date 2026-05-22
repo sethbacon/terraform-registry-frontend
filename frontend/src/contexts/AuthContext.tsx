@@ -245,6 +245,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       // Cookie-only session: no token in body, but backend renewed the HttpOnly cookie.
       // Use expires_in (seconds) to reschedule the warning timer.
       scheduleSessionWarning(null, new Date(Date.now() + response.expires_in * 1000))
+    } else {
+      // Backend returned neither a token nor expires_in — session state is unknown.
+      clearWarningTimer()
+      setSessionExpiresAt(null)
     }
   }
   silentRefreshRef.current = silentRefresh
