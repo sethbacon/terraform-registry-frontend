@@ -1,6 +1,13 @@
 <!-- markdownlint-disable MD013 MD024 MD041 -->
 # Changelog
 
+## [2.0.1](https://github.com/sethbacon/terraform-registry-frontend/compare/v2.0.0...v2.0.1) (2026-05-22)
+
+
+### Bug Fixes
+
+* **docker:** copy .npmrc before npm install to support legacy-peer-deps ([#319](https://github.com/sethbacon/terraform-registry-frontend/issues/319)) ([38c28c3](https://github.com/sethbacon/terraform-registry-frontend/commit/38c28c3cf27abe0c5dfb567f11bc910e900f4a30))
+
 ## [2.0.0](https://github.com/sethbacon/terraform-registry-frontend/compare/v1.2.5...v2.0.0) (2026-05-22)
 
 
