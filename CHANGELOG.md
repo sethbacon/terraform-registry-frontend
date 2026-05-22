@@ -1,6 +1,16 @@
 <!-- markdownlint-disable MD013 MD024 MD041 -->
 # Changelog
 
+## [1.2.4](https://github.com/sethbacon/terraform-registry-frontend/compare/v1.2.3...v1.2.4) (2026-05-22)
+
+
+### Bug Fixes
+
+* **auth:** clear role_template and allowed_scopes in 401 interceptor ([#305](https://github.com/sethbacon/terraform-registry-frontend/issues/305)) ([6c96ad2](https://github.com/sethbacon/terraform-registry-frontend/commit/6c96ad20b02cd6a697c7db5e428ee08aba531a72)), closes [#302](https://github.com/sethbacon/terraform-registry-frontend/issues/302)
+* **auth:** schedule session expiry warning for cookie-based OIDC sessions ([#307](https://github.com/sethbacon/terraform-registry-frontend/issues/307)) ([c91cc37](https://github.com/sethbacon/terraform-registry-frontend/commit/c91cc372825720e3f08c655c7cdb3d391cbdee8e))
+* **auth:** validate returnUrl before redirect in CallbackPage ([#304](https://github.com/sethbacon/terraform-registry-frontend/issues/304)) ([7cd0778](https://github.com/sethbacon/terraform-registry-frontend/commit/7cd0778e517c8e4197d360b9e214c0e64399b719))
+* **ui:** cancel SCM sync timers on unmount; stabilise SetupWizard callbacks ([#306](https://github.com/sethbacon/terraform-registry-frontend/issues/306)) ([a1fd6d7](https://github.com/sethbacon/terraform-registry-frontend/commit/a1fd6d7bc4dc163b3bce95c2dc80d1b5c257dd08))
+
 ## [1.2.3](https://github.com/sethbacon/terraform-registry-frontend/compare/v1.2.2...v1.2.3) (2026-05-22)
 
 
