@@ -15,7 +15,7 @@ import api from '../../../services/api'
 import { getErrorMessage } from '../../../utils/errors'
 
 const BrandingStep: React.FC = () => {
-  const { goToStep, setError, setSuccess } = useSetupWizard()
+  const { goToStep, setError, setSuccess, setupToken } = useSetupWizard()
 
   const [saving, setSaving] = useState(false)
   const [form, setForm] = useState({
@@ -35,7 +35,7 @@ const BrandingStep: React.FC = () => {
       setSaving(true)
       setError(null)
       const payload = Object.fromEntries(Object.entries(form).filter(([, v]) => v.trim() !== ''))
-      await api.updateAdminUITheme(payload)
+      await api.saveSetupUITheme(setupToken, payload)
       setSuccess('Branding saved successfully')
       goToStep(5)
     } catch (err: unknown) {

@@ -1703,6 +1703,23 @@ class ApiClient {
     return response.data as import('../types').UIThemeConfig
   }
 
+  /**
+   * Setup-wizard write path. Authenticated by the one-time setup token (not
+   * admin scope), so BrandingStep can persist branding before any user is
+   * configured. Backed by PUT /api/v1/setup/ui-theme on the backend.
+   */
+  async saveSetupUITheme(
+    setupToken: string,
+    config: import('../types').UIThemeConfig,
+  ): Promise<import('../types').UIThemeConfig> {
+    const response = await this.client.put(
+      '/api/v1/setup/ui-theme',
+      config,
+      this.setupRequest(setupToken),
+    )
+    return response.data as import('../types').UIThemeConfig
+  }
+
   // ============================================================================
   // CVE Advisories
   // ============================================================================
