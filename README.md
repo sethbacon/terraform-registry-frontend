@@ -99,7 +99,7 @@ For Docker / production builds served through nginx, the bundled nginx config pr
 | HTTP Client | Axios 1.6.7                         |
 | Router      | React Router v6                     |
 | Markdown    | react-markdown + remark-gfm         |
-| Linting     | ESLint 9 with TypeScript ESLint     |
+| Linting     | ESLint 10 with TypeScript ESLint    |
 | Formatting  | Prettier 3 (eslint-config-prettier) |
 | E2E Tests   | Playwright                          |
 
