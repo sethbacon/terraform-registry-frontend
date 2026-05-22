@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo } from 'react'
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import api from '../services/api'
@@ -359,18 +359,22 @@ export function useModuleDetail() {
     },
   })
 
+  const syncTimersRef = useRef<ReturnType<typeof setTimeout>[]>([])
+
   const scmSyncMutation = useMutation({
     mutationFn: () => api.triggerManualSync(module!.id),
     onSuccess: () => {
       setError(null)
       // Poll for updated versions after an async sync (202) at 2s, 5s, and 12s.
-      ;[2000, 5000, 12000].forEach((delay) => {
+      // Timers are tracked so they can be cancelled on unmount or re-sync.
+      syncTimersRef.current.forEach(clearTimeout)
+      syncTimersRef.current = [2000, 5000, 12000].map((delay) =>
         setTimeout(() => {
           queryClient.invalidateQueries({
             queryKey: queryKeys.modules.detail(namespace ?? '', name ?? '', system ?? ''),
           })
-        }, delay)
-      })
+        }, delay),
+      )
     },
     onError: (err: unknown) => {
       setError(getErrorMessage(err, 'Failed to trigger sync'))
@@ -391,13 +395,14 @@ export function useModuleDetail() {
   )
 
   const pollForVersions = useCallback(() => {
-    ;[2000, 5000, 12000].forEach((delay) => {
+    syncTimersRef.current.forEach(clearTimeout)
+    syncTimersRef.current = [2000, 5000, 12000].map((delay) =>
       setTimeout(() => {
         queryClient.invalidateQueries({
           queryKey: queryKeys.modules.detail(namespace ?? '', name ?? '', system ?? ''),
         })
-      }, delay)
-    })
+      }, delay),
+    )
   }, [queryClient, namespace, name, system])
 
   const handleRescan = () => {
@@ -412,6 +417,12 @@ export function useModuleDetail() {
     }
     scmSyncMutation.mutate()
   }
+
+  useEffect(() => {
+    return () => {
+      syncTimersRef.current.forEach(clearTimeout)
+    }
+  }, [])
 
   const handleSCMUnlink = () => {
     if (!module?.id) return
