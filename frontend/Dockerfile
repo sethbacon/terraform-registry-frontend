@@ -11,7 +11,7 @@ ARG VITE_MODE=production
 WORKDIR /app
 
 # Copy package files
-COPY package.json package-lock.json ./
+COPY package.json package-lock.json .npmrc ./
 
 # Install dependencies (use npm install so lockfile mismatches don't fail in CI for dev)
 RUN npm install --no-audit --no-fund
