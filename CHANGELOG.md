@@ -1,6 +1,13 @@
 <!-- markdownlint-disable MD013 MD024 MD041 -->
 # Changelog
 
+## [1.2.5](https://github.com/sethbacon/terraform-registry-frontend/compare/v1.2.4...v1.2.5) (2026-05-22)
+
+
+### Bug Fixes
+
+* **deps:** override ws to 8.20.1 and update in-range patches ([#309](https://github.com/sethbacon/terraform-registry-frontend/issues/309)) ([4d2ab94](https://github.com/sethbacon/terraform-registry-frontend/commit/4d2ab94bf2c02fa610089dd215086a2dc102d9fa))
+
 ## [1.2.4](https://github.com/sethbacon/terraform-registry-frontend/compare/v1.2.3...v1.2.4) (2026-05-22)
 
 
