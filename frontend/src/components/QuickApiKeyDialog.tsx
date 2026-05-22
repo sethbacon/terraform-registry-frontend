@@ -154,8 +154,10 @@ const QuickApiKeyDialog: React.FC<QuickApiKeyDialogProps> = ({
                 fullWidth
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                inputProps={{ 'aria-label': 'API key name' }}
                 disabled={submitting}
+                slotProps={{
+                  htmlInput: { 'aria-label': 'API key name' }
+                }}
               />
               <TextField
                 label="Description (optional)"
@@ -265,7 +267,7 @@ const QuickApiKeyDialog: React.FC<QuickApiKeyDialogProps> = ({
         )}
       </DialogActions>
     </Dialog>
-  )
+  );
 }
 
 export default QuickApiKeyDialog

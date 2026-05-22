@@ -298,7 +298,9 @@ const ModulesPage: React.FC = () => {
           <Typography variant="h4" gutterBottom>
             {t('modules.pageTitle')}
           </Typography>
-          <Typography variant="body1" color="text.secondary">
+          <Typography variant="body1" sx={{
+            color: "text.secondary"
+          }}>
             {t('modules.pageSubtitle')}
           </Typography>
         </Box>
@@ -314,7 +316,6 @@ const ModulesPage: React.FC = () => {
         )}
       </Box>
       <Box sx={{ mb: 4 }} />
-
       {/* Search Bar + Sort + View Toggle */}
       <Box sx={{ display: 'flex', gap: 2, mb: 4, alignItems: 'flex-start' }}>
         <TextField
@@ -322,12 +323,14 @@ const ModulesPage: React.FC = () => {
           placeholder={t('modules.searchPlaceholder')}
           value={inputValue}
           onChange={handleInputChange}
-          InputProps={{
-            startAdornment: (
-              <InputAdornment position="start">
-                <SearchIcon />
-              </InputAdornment>
-            ),
+          slotProps={{
+            input: {
+              startAdornment: (
+                <InputAdornment position="start">
+                  <SearchIcon />
+                </InputAdornment>
+              ),
+            }
           }}
         />
         <FormControl sx={{ minWidth: 180 }} size="medium">
@@ -363,23 +366,28 @@ const ModulesPage: React.FC = () => {
           </ToggleButton>
         </ToggleButtonGroup>
       </Box>
-
       {/* Error Alert */}
       {error && (
         <Alert severity="error" sx={{ mb: 3 }}>
           {error}
         </Alert>
       )}
-
       {/* Loading State */}
       {loading ? (
         <RegistryItemGridSkeleton />
       ) : modules.length === 0 ? (
         <Box sx={{ textAlign: 'center', py: 8 }}>
-          <Typography variant="h6" color="text.secondary">
+          <Typography variant="h6" sx={{
+            color: "text.secondary"
+          }}>
             {t('modules.noResultsTitle')}
           </Typography>
-          <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+          <Typography
+            variant="body2"
+            sx={{
+              color: "text.secondary",
+              mt: 1
+            }}>
             {urlQuery || urlSort
               ? t('modules.noResultsTryDifferent')
               : t('modules.noResultsUploadFirst')}
@@ -392,7 +400,7 @@ const ModulesPage: React.FC = () => {
         </Box>
       ) : viewMode === 'grouped' ? (
         /* ---- Grouped by provider ---- */
-        <>
+        (<>
           {groupedModules.map(([provider, providerModules]) => (
             <Box key={provider} sx={{ mb: 5 }}>
               {/* Provider section header */}
@@ -414,7 +422,6 @@ const ModulesPage: React.FC = () => {
               </Grid>
             </Box>
           ))}
-
           {totalPages > 1 && (
             <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
               <Pagination
@@ -426,14 +433,13 @@ const ModulesPage: React.FC = () => {
               />
             </Box>
           )}
-        </>
+        </>)
       ) : (
         /* ---- Flat paginated grid ---- */
-        <>
+        (<>
           <Grid container spacing={3}>
             {modules.map(renderModuleCard)}
           </Grid>
-
           {totalPages > 1 && (
             <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
               <Pagination
@@ -445,10 +451,10 @@ const ModulesPage: React.FC = () => {
               />
             </Box>
           )}
-        </>
+        </>)
       )}
     </Container>
-  )
+  );
 }
 
 export default ModulesPage

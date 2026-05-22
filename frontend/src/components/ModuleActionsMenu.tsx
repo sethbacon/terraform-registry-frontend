@@ -70,7 +70,9 @@ export default function ModuleActionsMenu({
         open={open}
         onClose={handleClose}
         data-testid={`${testId}-menu`}
-        MenuListProps={{ 'aria-label': 'Module actions' }}
+        slotProps={{
+          list: { 'aria-label': 'Module actions' }
+        }}
       >
         {includePublishAction && onPublishNewVersion && (
           <MenuItem onClick={wrap(onPublishNewVersion)} data-testid={`${testId}-publish`}>
@@ -119,5 +121,5 @@ export default function ModuleActionsMenu({
         )}
       </Menu>
     </>
-  )
+  );
 }

@@ -15,17 +15,20 @@ const AdminUserStep: React.FC = () => {
           Initial Admin User
         </Typography>
       </Box>
-      <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+      <Typography
+        variant="body2"
+        sx={{
+          color: "text.secondary",
+          mb: 3
+        }}>
         Specify the email address of the first admin user. This must match the email in your OIDC
         provider. When this user logs in via OIDC for the first time, they will automatically
         receive admin privileges.
       </Typography>
-
       <Alert severity="info" sx={{ mb: 2 }}>
         The admin user will be added to the default organization with the &quot;admin&quot; role
         template, granting full access to all registry features.
       </Alert>
-
       <Stack spacing={2}>
         <TextField
           fullWidth
@@ -61,7 +64,7 @@ const AdminUserStep: React.FC = () => {
         )}
       </Stack>
     </Box>
-  )
+  );
 }
 
 export default AdminUserStep

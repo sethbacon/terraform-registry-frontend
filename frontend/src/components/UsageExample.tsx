@@ -115,13 +115,16 @@ const UsageExample: React.FC<UsageExampleProps> = ({
     <Paper sx={{ p: 3, mb: 3 }} data-testid={testId}>
       <Stack
         direction={{ xs: 'column', sm: 'row' }}
-        justifyContent="space-between"
-        alignItems={{ xs: 'flex-start', sm: 'center' }}
         spacing={1}
-        sx={{ mb: 2 }}
-      >
+        sx={{
+          justifyContent: "space-between",
+          alignItems: { xs: 'flex-start', sm: 'center' },
+          mb: 2
+        }}>
         <Typography variant="h6">Usage Example</Typography>
-        <Stack direction="row" spacing={1} alignItems="center">
+        <Stack direction="row" spacing={1} sx={{
+          alignItems: "center"
+        }}>
           <ToggleButtonGroup
             size="small"
             exclusive
@@ -154,7 +157,6 @@ const UsageExample: React.FC<UsageExampleProps> = ({
           </Tooltip>
         </Stack>
       </Stack>
-
       {showInputsTab && (
         <Tabs
           value={tab}
@@ -166,7 +168,6 @@ const UsageExample: React.FC<UsageExampleProps> = ({
           <Tab label="With required inputs" />
         </Tabs>
       )}
-
       <Box
         component="pre"
         data-testid={`${testId}-code`}
@@ -182,9 +183,14 @@ const UsageExample: React.FC<UsageExampleProps> = ({
       >
         <code>{visible}</code>
       </Box>
-
       {showInputsTab && activeTab === 1 && (
-        <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 1 }}>
+        <Typography
+          variant="caption"
+          sx={{
+            color: "text.secondary",
+            display: 'block',
+            mt: 1
+          }}>
           Placeholders are the zero-value for each type — fill them before running
           <code style={{ marginLeft: 4 }}>
             {tool === 'opentofu' ? 'tofu apply' : 'terraform apply'}
@@ -193,12 +199,18 @@ const UsageExample: React.FC<UsageExampleProps> = ({
         </Typography>
       )}
       {isOci && (
-        <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 1 }}>
+        <Typography
+          variant="caption"
+          sx={{
+            color: "text.secondary",
+            display: 'block',
+            mt: 1
+          }}>
           Requires <code>oras</code> CLI. Pull the module archive directly from the OCI registry.
         </Typography>
       )}
     </Paper>
-  )
+  );
 }
 
 export default UsageExample

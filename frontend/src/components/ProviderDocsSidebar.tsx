@@ -164,21 +164,25 @@ const ProviderDocsSidebar: React.FC<ProviderDocsSidebarProps> = ({
   if (loading) {
     return (
       <Box sx={{ p: 2, fontFamily: sidebarFont }}>
-        <Typography variant="body2" color="text.secondary">
+        <Typography variant="body2" sx={{
+          color: "text.secondary"
+        }}>
           Loading documentation...
         </Typography>
       </Box>
-    )
+    );
   }
 
   if (docs.length === 0) {
     return (
       <Box sx={{ p: 2, fontFamily: sidebarFont }}>
-        <Typography variant="body2" color="text.secondary">
+        <Typography variant="body2" sx={{
+          color: "text.secondary"
+        }}>
           No documentation available for this provider.
         </Typography>
       </Box>
-    )
+    );
   }
 
   const isSelected = (cat: string, slug: string) =>
@@ -254,17 +258,18 @@ const ProviderDocsSidebar: React.FC<ProviderDocsSidebarProps> = ({
           placeholder="Filter docs..."
           value={filter}
           onChange={(e) => setFilter(e.target.value)}
-          InputProps={{
-            startAdornment: (
-              <InputAdornment position="start">
-                <Search fontSize="small" />
-              </InputAdornment>
-            ),
-            sx: { fontFamily: sidebarFont, fontSize: '0.875rem' },
+          slotProps={{
+            input: {
+              startAdornment: (
+                <InputAdornment position="start">
+                  <Search fontSize="small" />
+                </InputAdornment>
+              ),
+              sx: { fontFamily: sidebarFont, fontSize: '0.875rem' },
+            }
           }}
         />
       </Box>
-
       <Box sx={{ overflowY: 'auto', flex: 1, pt: 0.5 }}>
         {/* Overview docs — show provider name for index doc, title for others */}
         <List dense disablePadding>
@@ -417,7 +422,7 @@ const ProviderDocsSidebar: React.FC<ProviderDocsSidebarProps> = ({
         })}
       </Box>
     </Box>
-  )
+  );
 }
 
 export default ProviderDocsSidebar

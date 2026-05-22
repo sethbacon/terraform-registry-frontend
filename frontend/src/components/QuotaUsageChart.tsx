@@ -21,10 +21,14 @@ function QuotaRow({ label, used, limit, ratio, formatUsed, formatLimit }: QuotaR
   return (
     <Box>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
-        <Typography variant="body2" color="text.secondary">
+        <Typography variant="body2" sx={{
+          color: "text.secondary"
+        }}>
           {label}
         </Typography>
-        <Typography variant="body2" fontWeight={500}>
+        <Typography variant="body2" sx={{
+          fontWeight: 500
+        }}>
           {unlimited ? (
             <Box component="span" sx={{ color: 'text.secondary' }}>
               {formatUsed(used)} / Unlimited
@@ -48,7 +52,7 @@ function QuotaRow({ label, used, limit, ratio, formatUsed, formatLimit }: QuotaR
         />
       </Tooltip>
     </Box>
-  )
+  );
 }
 
 function formatBytes(bytes: number): string {
@@ -67,7 +71,9 @@ const QuotaUsageChart: React.FC<QuotaUsageChartProps> = ({ quota, orgName }) => 
   return (
     <Paper variant="outlined" sx={{ p: 2 }}>
       {orgName && (
-        <Typography variant="subtitle2" fontWeight={600} gutterBottom>
+        <Typography variant="subtitle2" gutterBottom sx={{
+          fontWeight: 600
+        }}>
           {orgName}
         </Typography>
       )}
@@ -98,7 +104,7 @@ const QuotaUsageChart: React.FC<QuotaUsageChartProps> = ({ quota, orgName }) => 
         />
       </Box>
     </Paper>
-  )
+  );
 }
 
 export default QuotaUsageChart

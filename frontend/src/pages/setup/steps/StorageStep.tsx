@@ -41,10 +41,14 @@ const StorageStep: React.FC = () => {
           Storage Backend Configuration
         </Typography>
       </Box>
-      <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+      <Typography
+        variant="body2"
+        sx={{
+          color: "text.secondary",
+          mb: 3
+        }}>
         Configure where Terraform modules and providers will be stored.
       </Typography>
-
       <Stack spacing={2}>
         <Stack direction="row" spacing={1} sx={{ mb: 1 }}>
           {(['local', 'azure', 's3', 'gcs'] as StorageBackendType[]).map((type) => (
@@ -290,7 +294,7 @@ const StorageStep: React.FC = () => {
         )}
       </Stack>
     </Box>
-  )
+  );
 }
 
 export default StorageStep

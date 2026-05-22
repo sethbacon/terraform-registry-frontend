@@ -187,45 +187,56 @@ const HelpPanel = () => {
           py: 1.5,
         }}
       >
-        <Typography variant="subtitle1" fontWeight="bold">
+        <Typography variant="subtitle1" sx={{
+          fontWeight: "bold"
+        }}>
           {content.title}
         </Typography>
         <IconButton size="small" onClick={closeHelp} aria-label="Close help panel">
           <Close fontSize="small" />
         </IconButton>
       </Box>
-
       <Divider />
-
       {/* Body */}
       <Box sx={{ px: 2, py: 2, overflowY: 'auto', flexGrow: 1 }}>
-        <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+        <Typography
+          variant="body2"
+          sx={{
+            color: "text.secondary",
+            mb: 2
+          }}>
           {content.overview}
         </Typography>
 
-        <Typography variant="overline" color="text.secondary">
+        <Typography variant="overline" sx={{
+          color: "text.secondary"
+        }}>
           What you can do
         </Typography>
 
         <List disablePadding sx={{ mt: 0.5 }}>
           {content.actions.map((action) => (
             <ListItem key={action.heading} disablePadding sx={{ display: 'block', mb: 1.5 }}>
-              <Typography variant="body2" fontWeight="bold">
+              <Typography variant="body2" sx={{
+                fontWeight: "bold"
+              }}>
                 {action.heading}
               </Typography>
-              <Typography variant="body2" color="text.secondary">
+              <Typography variant="body2" sx={{
+                color: "text.secondary"
+              }}>
                 {action.text}
               </Typography>
             </ListItem>
           ))}
         </List>
       </Box>
-
       <Divider />
-
       {/* Footer */}
       <Box sx={{ px: 2, py: 1.5 }}>
-        <Typography variant="caption" color="text.secondary">
+        <Typography variant="caption" sx={{
+          color: "text.secondary"
+        }}>
           Full API reference:{' '}
           <MuiLink component={RouterLink} to="/api-docs" onClick={isMobile ? closeHelp : undefined}>
             API Docs
@@ -233,7 +244,7 @@ const HelpPanel = () => {
         </Typography>
       </Box>
     </Drawer>
-  )
+  );
 }
 
 export default HelpPanel

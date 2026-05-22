@@ -11,7 +11,13 @@ export default function DetailPageSkeleton({
   return (
     <Container maxWidth="xl" sx={{ py: 4 }} data-testid={testId}>
       <Skeleton variant="text" width={220} height={20} sx={{ mb: 2 }} />
-      <Stack direction="row" alignItems="center" spacing={2} sx={{ mb: 2 }}>
+      <Stack
+        direction="row"
+        spacing={2}
+        sx={{
+          alignItems: "center",
+          mb: 2
+        }}>
         <Skeleton variant="circular" width={40} height={40} />
         <Skeleton variant="text" width={280} height={40} />
       </Stack>
@@ -42,5 +48,5 @@ export default function DetailPageSkeleton({
         </Box>
       </Box>
     </Container>
-  )
+  );
 }

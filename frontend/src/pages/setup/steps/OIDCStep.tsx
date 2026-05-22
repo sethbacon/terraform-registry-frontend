@@ -57,7 +57,6 @@ const OIDCFields: React.FC = () => {
           <MenuItem value="azuread">Azure AD / Entra ID</MenuItem>
         </Select>
       </FormControl>
-
       <TextField
         fullWidth
         label="Issuer URL"
@@ -67,7 +66,6 @@ const OIDCFields: React.FC = () => {
         helperText="The OIDC issuer URL. Must serve a .well-known/openid-configuration document."
         required
       />
-
       <TextField
         fullWidth
         label="Client ID"
@@ -75,7 +73,6 @@ const OIDCFields: React.FC = () => {
         onChange={(e) => setOidcForm({ ...oidcForm, client_id: e.target.value })}
         required
       />
-
       <TextField
         fullWidth
         label="Client Secret"
@@ -83,21 +80,22 @@ const OIDCFields: React.FC = () => {
         onChange={(e) => setOidcForm({ ...oidcForm, client_secret: e.target.value })}
         type={showClientSecret ? 'text' : 'password'}
         required
-        InputProps={{
-          endAdornment: (
-            <InputAdornment position="end">
-              <IconButton
-                onClick={() => setShowClientSecret(!showClientSecret)}
-                edge="end"
-                aria-label="Toggle password visibility"
-              >
-                {showClientSecret ? <VisibilityOffIcon /> : <VisibilityIcon />}
-              </IconButton>
-            </InputAdornment>
-          ),
+        slotProps={{
+          input: {
+            endAdornment: (
+              <InputAdornment position="end">
+                <IconButton
+                  onClick={() => setShowClientSecret(!showClientSecret)}
+                  edge="end"
+                  aria-label="Toggle password visibility"
+                >
+                  {showClientSecret ? <VisibilityOffIcon /> : <VisibilityIcon />}
+                </IconButton>
+              </InputAdornment>
+            ),
+          }
         }}
       />
-
       <TextField
         fullWidth
         label="Redirect URL"
@@ -106,7 +104,6 @@ const OIDCFields: React.FC = () => {
         helperText="The OAuth callback URL. Typically: https://your-registry/api/v1/auth/callback"
         required
       />
-
       <TextField
         fullWidth
         label="Scopes"
@@ -116,13 +113,11 @@ const OIDCFields: React.FC = () => {
         }
         helperText="Space-separated OIDC scopes. Must include 'openid'. Defaults: openid email profile"
       />
-
       {oidcTestResult && (
         <Alert severity={oidcTestResult.success ? 'success' : 'error'} sx={{ mt: 1 }}>
           {oidcTestResult.message}
         </Alert>
       )}
-
       <Stack direction="row" spacing={2}>
         <Button
           variant="outlined"
@@ -149,14 +144,13 @@ const OIDCFields: React.FC = () => {
           Save OIDC Configuration
         </Button>
       </Stack>
-
       {oidcSaved && (
         <Alert severity="success" sx={{ mt: 1 }}>
           OIDC provider configured successfully.
         </Alert>
       )}
     </Stack>
-  )
+  );
 }
 
 // === LDAP sub-form ===
@@ -175,7 +169,9 @@ const LDAPFields: React.FC = () => {
 
   return (
     <Stack spacing={2}>
-      <Typography variant="subtitle2" color="text.secondary">
+      <Typography variant="subtitle2" sx={{
+        color: "text.secondary"
+      }}>
         Connection
       </Typography>
       <Stack direction="row" spacing={2}>
@@ -196,7 +192,6 @@ const LDAPFields: React.FC = () => {
           helperText="389 or 636"
         />
       </Stack>
-
       <Stack direction="row" spacing={2}>
         <FormControlLabel
           control={
@@ -226,12 +221,12 @@ const LDAPFields: React.FC = () => {
           label="Skip TLS Verify"
         />
       </Stack>
-
       <Divider />
-      <Typography variant="subtitle2" color="text.secondary">
+      <Typography variant="subtitle2" sx={{
+        color: "text.secondary"
+      }}>
         Service Account
       </Typography>
-
       <TextField
         fullWidth
         label="Bind DN"
@@ -240,7 +235,6 @@ const LDAPFields: React.FC = () => {
         placeholder="cn=svc-registry,ou=service-accounts,dc=example,dc=com"
         required
       />
-
       <TextField
         fullWidth
         label="Bind Password"
@@ -248,26 +242,28 @@ const LDAPFields: React.FC = () => {
         onChange={(e) => setLdapForm({ ...ldapForm, bind_password: e.target.value })}
         type={showBindPassword ? 'text' : 'password'}
         required
-        InputProps={{
-          endAdornment: (
-            <InputAdornment position="end">
-              <IconButton
-                onClick={() => setShowBindPassword(!showBindPassword)}
-                edge="end"
-                aria-label="Toggle password visibility"
-              >
-                {showBindPassword ? <VisibilityOffIcon /> : <VisibilityIcon />}
-              </IconButton>
-            </InputAdornment>
-          ),
+        slotProps={{
+          input: {
+            endAdornment: (
+              <InputAdornment position="end">
+                <IconButton
+                  onClick={() => setShowBindPassword(!showBindPassword)}
+                  edge="end"
+                  aria-label="Toggle password visibility"
+                >
+                  {showBindPassword ? <VisibilityOffIcon /> : <VisibilityIcon />}
+                </IconButton>
+              </InputAdornment>
+            ),
+          }
         }}
       />
-
       <Divider />
-      <Typography variant="subtitle2" color="text.secondary">
+      <Typography variant="subtitle2" sx={{
+        color: "text.secondary"
+      }}>
         User Search
       </Typography>
-
       <TextField
         fullWidth
         label="Base DN"
@@ -276,7 +272,6 @@ const LDAPFields: React.FC = () => {
         placeholder="dc=example,dc=com"
         required
       />
-
       <TextField
         fullWidth
         label="User Filter"
@@ -286,7 +281,6 @@ const LDAPFields: React.FC = () => {
         helperText="LDAP search filter. %s is replaced with the username."
         required
       />
-
       <Stack direction="row" spacing={2}>
         <TextField
           sx={{ flex: 1 }}
@@ -303,12 +297,12 @@ const LDAPFields: React.FC = () => {
           placeholder="displayName"
         />
       </Stack>
-
       <Divider />
-      <Typography variant="subtitle2" color="text.secondary">
+      <Typography variant="subtitle2" sx={{
+        color: "text.secondary"
+      }}>
         Group Lookup (Optional)
       </Typography>
-
       <TextField
         fullWidth
         label="Group Base DN"
@@ -316,7 +310,6 @@ const LDAPFields: React.FC = () => {
         onChange={(e) => setLdapForm({ ...ldapForm, group_base_dn: e.target.value })}
         placeholder="ou=groups,dc=example,dc=com"
       />
-
       <Stack direction="row" spacing={2}>
         <TextField
           sx={{ flex: 1 }}
@@ -332,13 +325,11 @@ const LDAPFields: React.FC = () => {
           placeholder="member"
         />
       </Stack>
-
       {ldapTestResult && (
         <Alert severity={ldapTestResult.success ? 'success' : 'error'} sx={{ mt: 1 }}>
           {ldapTestResult.message}
         </Alert>
       )}
-
       <Stack direction="row" spacing={2}>
         <Button
           variant="outlined"
@@ -371,14 +362,13 @@ const LDAPFields: React.FC = () => {
           Save LDAP Configuration
         </Button>
       </Stack>
-
       {ldapSaved && (
         <Alert severity="success" sx={{ mt: 1 }}>
           LDAP configuration saved successfully.
         </Alert>
       )}
     </Stack>
-  )
+  );
 }
 
 // === Main step component ===
@@ -394,10 +384,14 @@ const OIDCStep: React.FC = () => {
           Identity Provider
         </Typography>
       </Box>
-      <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+      <Typography
+        variant="body2"
+        sx={{
+          color: "text.secondary",
+          mb: 3
+        }}>
         Choose how users will authenticate to the registry. Select one method below.
       </Typography>
-
       <ToggleButtonGroup
         value={authMethod}
         exclusive
@@ -410,16 +404,16 @@ const OIDCStep: React.FC = () => {
         <ToggleButton value="oidc">OpenID Connect (OIDC)</ToggleButton>
         <ToggleButton value="ldap">LDAP / Active Directory</ToggleButton>
       </ToggleButtonGroup>
-
       <Collapse in={authMethod === 'oidc'}>
         <OIDCFields />
       </Collapse>
       <Collapse in={authMethod === 'ldap'}>
         <LDAPFields />
       </Collapse>
-
       <Box sx={{ mt: 3 }}>
-        <Stack direction="row" spacing={2} justifyContent="space-between">
+        <Stack direction="row" spacing={2} sx={{
+          justifyContent: "space-between"
+        }}>
           <Button variant="text" onClick={() => goToStep(0)}>
             ← Back
           </Button>
@@ -431,7 +425,7 @@ const OIDCStep: React.FC = () => {
         </Stack>
       </Box>
     </Box>
-  )
+  );
 }
 
 export default OIDCStep

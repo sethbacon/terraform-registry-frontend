@@ -196,10 +196,14 @@ const HealthPill: React.FC<HealthPillProps> = ({
       >
         <Box sx={{ color: 'text.secondary', display: 'flex' }}>{icon}</Box>
         <Box sx={{ flex: 1, minWidth: 0 }}>
-          <Typography variant="caption" color="text.secondary" noWrap>
+          <Typography variant="caption" noWrap sx={{
+            color: "text.secondary"
+          }}>
             {label}
           </Typography>
-          <Typography variant="body2" fontWeight={600} noWrap>
+          <Typography variant="body2" noWrap sx={{
+            fontWeight: 600
+          }}>
             {total === 0 ? 'None' : `${total - failed} / ${total} OK`}
           </Typography>
         </Box>
@@ -208,7 +212,7 @@ const HealthPill: React.FC<HealthPillProps> = ({
         </Box>
       </Paper>
     </Tooltip>
-  )
+  );
 }
 
 interface StatCardProps {
@@ -258,21 +262,29 @@ const StatCard: React.FC<StatCardProps> = ({
           minWidth: 0,
         }}
       >
-        <Typography variant={compact ? 'h5' : 'h4'} fontWeight={700} lineHeight={1.1}>
+        <Typography
+          variant={compact ? 'h5' : 'h4'}
+          sx={{
+            fontWeight: 700,
+            lineHeight: 1.1
+          }}>
           {fmtNumber(value)}
         </Typography>
-        <Typography variant="body2" color="text.secondary" noWrap>
+        <Typography variant="body2" noWrap sx={{
+          color: "text.secondary"
+        }}>
           {title}
         </Typography>
         {/* Reserve space for sub-line even when absent so all cards stay the same height */}
         <Typography
           variant="caption"
-          color="text.disabled"
-          display="block"
-          mt={0.25}
-          sx={{ minHeight: '1.2em' }}
           noWrap
-        >
+          sx={{
+            color: "text.disabled",
+            display: "block",
+            mt: 0.25,
+            minHeight: '1.2em'
+          }}>
           {sub ?? ''}
         </Typography>
       </Box>
@@ -293,7 +305,7 @@ const StatCard: React.FC<StatCardProps> = ({
         </>
       )}
     </Paper>
-  )
+  );
 }
 
 // Two-row breakdown for provider manual vs mirrored.
@@ -333,7 +345,13 @@ const ProviderBreakdown: React.FC<ProviderBreakdownProps> = ({
               <Typography variant="caption" sx={{ lineHeight: 1.2 }}>
                 {row.label}
               </Typography>
-              <Typography variant="caption" fontWeight={600} sx={{ lineHeight: 1.2, ml: 0.5 }}>
+              <Typography
+                variant="caption"
+                sx={{
+                  fontWeight: 600,
+                  lineHeight: 1.2,
+                  ml: 0.5
+                }}>
                 {row.count}
               </Typography>
             </Box>
@@ -344,7 +362,7 @@ const ProviderBreakdown: React.FC<ProviderBreakdownProps> = ({
         </Tooltip>
       ))}
     </Box>
-  )
+  );
 }
 
 // Compact vertical list of system → count with a proportional bar.
@@ -364,7 +382,13 @@ const SystemBreakdown: React.FC<{ items: ModuleSystemCount[]; total: number; col
               <Typography variant="caption" noWrap sx={{ maxWidth: 66, lineHeight: 1.2 }}>
                 {item.system}
               </Typography>
-              <Typography variant="caption" fontWeight={600} sx={{ lineHeight: 1.2, ml: 0.5 }}>
+              <Typography
+                variant="caption"
+                sx={{
+                  fontWeight: 600,
+                  lineHeight: 1.2,
+                  ml: 0.5
+                }}>
                 {item.count}
               </Typography>
             </Box>
@@ -382,7 +406,7 @@ const SystemBreakdown: React.FC<{ items: ModuleSystemCount[]; total: number; col
         </Tooltip>
       ))}
     </Box>
-  )
+  );
 }
 
 // Per-tool platform count (terraform vs opentofu).
@@ -403,7 +427,13 @@ const BinaryToolBreakdown: React.FC<{ items: BinaryToolCount[]; color: string }>
               <Typography variant="caption" noWrap sx={{ lineHeight: 1.2 }}>
                 {labelFor(item.tool)}
               </Typography>
-              <Typography variant="caption" fontWeight={600} sx={{ lineHeight: 1.2, ml: 0.5 }}>
+              <Typography
+                variant="caption"
+                sx={{
+                  fontWeight: 600,
+                  lineHeight: 1.2,
+                  ml: 0.5
+                }}>
                 {item.platforms}
               </Typography>
             </Box>
@@ -421,7 +451,7 @@ const BinaryToolBreakdown: React.FC<{ items: BinaryToolCount[]; color: string }>
         </Tooltip>
       ))}
     </Box>
-  )
+  );
 }
 
 // Downloads split by source type.
@@ -433,10 +463,11 @@ const DownloadBreakdown: React.FC<{
   const total = moduleDownloads + providerDownloads + binaryDownloads
   if (total === 0)
     return (
-      <Typography variant="caption" color="text.disabled">
-        No downloads yet
-      </Typography>
-    )
+      <Typography variant="caption" sx={{
+        color: "text.disabled"
+      }}>No downloads yet
+              </Typography>
+    );
   const rows = [
     { label: 'Modules', count: moduleDownloads, color: '#5C4EE5' },
     { label: 'Providers', count: providerDownloads, color: '#00D9C0' },
@@ -450,7 +481,13 @@ const DownloadBreakdown: React.FC<{
             <Typography variant="caption" sx={{ lineHeight: 1.2 }}>
               {row.label}
             </Typography>
-            <Typography variant="caption" fontWeight={600} sx={{ lineHeight: 1.2, ml: 0.5 }}>
+            <Typography
+              variant="caption"
+              sx={{
+                fontWeight: 600,
+                lineHeight: 1.2,
+                ml: 0.5
+              }}>
               {fmtNumber(row.count)}
             </Typography>
           </Box>
@@ -467,7 +504,7 @@ const DownloadBreakdown: React.FC<{
         </Box>
       ))}
     </Box>
-  )
+  );
 }
 
 interface QuickLinkProps {
@@ -493,12 +530,17 @@ const QuickLink: React.FC<QuickLinkProps> = ({ label, icon, route, color }) => {
       }}
     >
       <Box sx={{ color, display: 'flex' }}>{icon}</Box>
-      <Typography variant="body2" fontWeight={500} sx={{ flex: 1 }}>
+      <Typography
+        variant="body2"
+        sx={{
+          fontWeight: 500,
+          flex: 1
+        }}>
         {label}
       </Typography>
       <ArrowForward fontSize="small" sx={{ color: 'text.disabled' }} />
     </Paper>
-  )
+  );
 }
 
 // ---------------------------------------------------------------------------
@@ -729,10 +771,14 @@ const DashboardPage: React.FC = () => {
             sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}
           >
             <Box>
-              <Typography variant="h4" fontWeight={700}>
+              <Typography variant="h4" sx={{
+                fontWeight: 700
+              }}>
                 Dashboard
               </Typography>
-              <Typography variant="body2" color="text.secondary">
+              <Typography variant="body2" sx={{
+                color: "text.secondary"
+              }}>
                 Registry health at a glance
               </Typography>
             </Box>
@@ -811,10 +857,14 @@ const DashboardPage: React.FC = () => {
                     <Security fontSize="small" />
                   </Box>
                   <Box sx={{ flex: 1, minWidth: 0 }}>
-                    <Typography variant="caption" color="text.secondary" noWrap>
+                    <Typography variant="caption" noWrap sx={{
+                      color: "text.secondary"
+                    }}>
                       Security Scanning
                     </Typography>
-                    <Typography variant="body2" fontWeight={600} noWrap>
+                    <Typography variant="body2" noWrap sx={{
+                      fontWeight: 600
+                    }}>
                       {data.scanning.total === 0
                         ? 'None'
                         : `${data.scanning.total - data.scanning.error} / ${data.scanning.total} OK`}
@@ -909,7 +959,9 @@ const DashboardPage: React.FC = () => {
           {/* Zone 2.5 — Quota usage (only shown when quotas are configured) */}
           {quotas && quotas.length > 0 && (
             <>
-              <Typography variant="h6" fontWeight={600} gutterBottom>
+              <Typography variant="h6" gutterBottom sx={{
+                fontWeight: 600
+              }}>
                 Resource Quotas
               </Typography>
               <Grid container spacing={2} sx={{ mb: 4 }}>
@@ -927,12 +979,16 @@ const DashboardPage: React.FC = () => {
           <Grid container spacing={3}>
             {/* Recent sync activity */}
             <Grid size={{ xs: 12, md: 8 }}>
-              <Typography variant="h6" fontWeight={600} gutterBottom>
+              <Typography variant="h6" gutterBottom sx={{
+                fontWeight: 600
+              }}>
                 Recent Sync Activity
               </Typography>
               {recentSyncs.length === 0 ? (
                 <Paper sx={{ p: 3, textAlign: 'center' }}>
-                  <Typography variant="body2" color="text.secondary">
+                  <Typography variant="body2" sx={{
+                    color: "text.secondary"
+                  }}>
                     No sync history yet. Trigger a sync from the mirror pages.
                   </Typography>
                 </Paper>
@@ -953,7 +1009,9 @@ const DashboardPage: React.FC = () => {
                       {recentSyncs.map((s, i) => (
                         <TableRow key={i} hover>
                           <TableCell>
-                            <Typography variant="body2" fontFamily="monospace" noWrap>
+                            <Typography variant="body2" noWrap sx={{
+                              fontFamily: "monospace"
+                            }}>
                               {s.mirror_name}
                             </Typography>
                           </TableCell>
@@ -976,7 +1034,9 @@ const DashboardPage: React.FC = () => {
                           </TableCell>
                           <TableCell align="right">
                             <Tooltip title={new Date(s.started_at).toLocaleString()}>
-                              <Typography variant="caption" color="text.secondary">
+                              <Typography variant="caption" sx={{
+                                color: "text.secondary"
+                              }}>
                                 {timeAgo(s.started_at)}
                               </Typography>
                             </Tooltip>
@@ -991,7 +1051,9 @@ const DashboardPage: React.FC = () => {
 
             {/* Quick links */}
             <Grid size={{ xs: 12, md: 4 }}>
-              <Typography variant="h6" fontWeight={600} gutterBottom>
+              <Typography variant="h6" gutterBottom sx={{
+                fontWeight: 600
+              }}>
                 Quick Links
               </Typography>
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
@@ -1004,7 +1066,7 @@ const DashboardPage: React.FC = () => {
         </>
       )}
     </Container>
-  )
+  );
 }
 
 export default DashboardPage

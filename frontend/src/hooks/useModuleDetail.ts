@@ -22,7 +22,7 @@ function sortVersionsDesc(raw: ModuleVersion[]): ModuleVersion[] {
     const [aMaj, aMin, aPat] = parseParts(a.version)
     const [bMaj, bMin, bPat] = parseParts(b.version)
     return bMaj !== aMaj ? bMaj - aMaj : bMin !== aMin ? bMin - aMin : bPat - aPat
-  })
+  });
 }
 
 const POLL_DELAYS = [2000, 5000, 12000] as const

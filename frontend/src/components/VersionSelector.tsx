@@ -82,7 +82,14 @@ function VersionSelector<V extends VersionSelectorItem>({
   const latestNonDeprecated = useMemo(() => versions.find((v) => !v.deprecated), [versions])
 
   return (
-    <Stack direction="row" spacing={2} alignItems="center" flexWrap="wrap" data-testid={testId}>
+    <Stack
+      direction="row"
+      spacing={2}
+      data-testid={testId}
+      sx={{
+        alignItems: "center",
+        flexWrap: "wrap"
+      }}>
       <FormControl size="small" sx={{ minWidth: 220 }}>
         <Select
           value={
@@ -116,10 +123,12 @@ function VersionSelector<V extends VersionSelectorItem>({
             size="small"
             checked={showDeprecated}
             onChange={(e) => setShowDeprecated(e.target.checked)}
-            inputProps={{
-              'aria-label': 'Show deprecated versions',
-              // @ts-expect-error data-testid is accepted by native input
-              'data-testid': `${testId}-toggle`,
+            slotProps={{
+              input: {
+                'aria-label': 'Show deprecated versions',
+                // @ts-expect-error data-testid is accepted by native input
+                'data-testid': `${testId}-toggle`,
+              }
             }}
           />
         }
@@ -131,7 +140,7 @@ function VersionSelector<V extends VersionSelectorItem>({
         </Alert>
       )}
     </Stack>
-  )
+  );
 }
 
 export default VersionSelector

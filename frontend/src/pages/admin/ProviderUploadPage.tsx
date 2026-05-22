@@ -104,7 +104,12 @@ const ProviderUploadPage: React.FC = () => {
       <Typography variant="h6" gutterBottom>
         How would you like to add this provider?
       </Typography>
-      <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+      <Typography
+        variant="body2"
+        sx={{
+          color: "text.secondary",
+          mb: 3
+        }}>
         Upload a provider binary directly, or configure a mirror to automatically sync providers
         from the public Terraform Registry.
       </Typography>
@@ -119,7 +124,9 @@ const ProviderUploadPage: React.FC = () => {
               <Typography variant="h6" gutterBottom>
                 Manual Upload
               </Typography>
-              <Typography variant="body2" color="text.secondary">
+              <Typography variant="body2" sx={{
+                color: "text.secondary"
+              }}>
                 Package a provider binary as a <strong>.zip</strong> file and upload it directly.
                 Best for private or custom providers.
               </Typography>
@@ -140,7 +147,9 @@ const ProviderUploadPage: React.FC = () => {
               <Typography variant="h6" gutterBottom>
                 Provider Mirror
               </Typography>
-              <Typography variant="body2" color="text.secondary">
+              <Typography variant="body2" sx={{
+                color: "text.secondary"
+              }}>
                 Configure a mirror to automatically sync one or more providers from the public
                 Terraform Registry on a schedule.
               </Typography>
@@ -175,10 +184,14 @@ const ProviderUploadPage: React.FC = () => {
           borderRadius: 1,
         }}
       >
-        <Typography variant="body2" color="text.secondary" gutterBottom>
+        <Typography variant="body2" gutterBottom sx={{
+          color: "text.secondary"
+        }}>
           <strong>Requirements:</strong>
         </Typography>
-        <Typography variant="body2" color="text.secondary" component="div">
+        <Typography variant="body2" component="div" sx={{
+          color: "text.secondary"
+        }}>
           • Package provider binary as a <strong>.zip</strong> file
           <br />
           • Upload each OS/Architecture combination separately
@@ -229,7 +242,13 @@ const ProviderUploadPage: React.FC = () => {
             <MenuItem value="darwin">macOS (Darwin)</MenuItem>
             <MenuItem value="windows">Windows</MenuItem>
           </Select>
-          <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5, ml: 1.75 }}>
+          <Typography
+            variant="caption"
+            sx={{
+              color: "text.secondary",
+              mt: 0.5,
+              ml: 1.75
+            }}>
             Target operating system for this provider binary
           </Typography>
         </FormControl>
@@ -245,7 +264,13 @@ const ProviderUploadPage: React.FC = () => {
             <MenuItem value="arm64">ARM64</MenuItem>
             <MenuItem value="386">386 (x86)</MenuItem>
           </Select>
-          <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5, ml: 1.75 }}>
+          <Typography
+            variant="caption"
+            sx={{
+              color: "text.secondary",
+              mt: 0.5,
+              ml: 1.75
+            }}>
             CPU architecture for this provider binary (most common: amd64)
           </Typography>
         </FormControl>
@@ -262,7 +287,9 @@ const ProviderUploadPage: React.FC = () => {
         {uploading && uploadPercent !== null && (
           <Box data-testid="provider-upload-progress">
             <LinearProgress variant="determinate" value={uploadPercent} />
-            <Typography variant="caption" color="text.secondary">
+            <Typography variant="caption" sx={{
+              color: "text.secondary"
+            }}>
               Uploading… {uploadPercent}%
             </Typography>
           </Box>
@@ -289,16 +316,20 @@ const ProviderUploadPage: React.FC = () => {
       <Typography variant="h4" gutterBottom>
         Upload Provider
       </Typography>
-      <Typography variant="body1" color="text.secondary" sx={{ mb: 4 }}>
+      <Typography
+        variant="body1"
+        sx={{
+          color: "text.secondary",
+          mb: 4
+        }}>
         Add a Terraform provider to your registry
       </Typography>
-
       <Paper sx={{ width: '100%' }}>
         {providerMethod === 'choose' && renderProviderMethodChooser()}
         {providerMethod === 'upload' && renderFileUploadForm()}
       </Paper>
     </Container>
-  )
+  );
 }
 
 export default ProviderUploadPage

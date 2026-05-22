@@ -15,11 +15,15 @@ const SCIMProvisioningPage: React.FC = () => {
       <Typography variant="h5" gutterBottom>
         SCIM Provisioning
       </Typography>
-      <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+      <Typography
+        variant="body2"
+        sx={{
+          color: "text.secondary",
+          mb: 3
+        }}>
         SCIM 2.0 endpoints allow external identity providers to automatically provision and
         de-provision users and groups.
       </Typography>
-
       <Stack spacing={3}>
         <Paper sx={{ p: 3 }}>
           <Typography variant="h6" gutterBottom>
@@ -61,7 +65,12 @@ const SCIMProvisioningPage: React.FC = () => {
           <Typography variant="h6" gutterBottom>
             Authentication
           </Typography>
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+          <Typography
+            variant="body2"
+            sx={{
+              color: "text.secondary",
+              mb: 2
+            }}>
             SCIM requests must include a Bearer token in the Authorization header. Create an API key
             with the <strong>scim:provision</strong> scope on the{' '}
             <a href="/admin/apikeys">API Keys</a> page.
@@ -95,7 +104,7 @@ const SCIMProvisioningPage: React.FC = () => {
         </Paper>
       </Stack>
     </Box>
-  )
+  );
 }
 
 export default SCIMProvisioningPage

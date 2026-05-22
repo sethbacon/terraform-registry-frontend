@@ -515,11 +515,12 @@ const ApiDocumentation: React.FC = () => {
       {/* Page title */}
       <Box sx={{ mb: 3 }}>
         <Typography variant="h4">API Swagger Documentation</Typography>
-        <Typography variant="body2" color="text.secondary">
+        <Typography variant="body2" sx={{
+          color: "text.secondary"
+        }}>
           Interactive API reference — use the Authorize button to authenticate with an API key
         </Typography>
       </Box>
-
       {/* Layout: sticky left nav + Swagger UI content */}
       <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 0 }}>
         {/* ---- Left navigation panel ---- */}
@@ -582,18 +583,20 @@ const ApiDocumentation: React.FC = () => {
                       >
                         <ListItemText
                           primary={label}
-                          primaryTypographyProps={{
-                            sx: {
-                              fontSize: '0.78rem',
-                              fontWeight: isActive ? 600 : 400,
-                              color: isActive ? activeText : navText,
-                              lineHeight: 1.4,
-                            },
+                          slotProps={{
+                            primary: {
+                              sx: {
+                                fontSize: '0.78rem',
+                                fontWeight: isActive ? 600 : 400,
+                                color: isActive ? activeText : navText,
+                                lineHeight: 1.4,
+                              },
+                            }
                           }}
                         />
                       </ListItemButton>
                     </ListItem>
-                  )
+                  );
                 })}
               </List>
             </Paper>
@@ -617,7 +620,7 @@ const ApiDocumentation: React.FC = () => {
         </Box>
       </Box>
     </Box>
-  )
+  );
 }
 
 export default ApiDocumentation

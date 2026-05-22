@@ -88,10 +88,12 @@ export default function AdminBreadcrumbs({
           const isLast = i === crumbs.length - 1
           if (isLast || !c.to) {
             return (
-              <Typography key={i} color="text.primary" variant="body2">
+              <Typography key={i} variant="body2" sx={{
+                color: "text.primary"
+              }}>
                 {c.label}
               </Typography>
-            )
+            );
           }
           return (
             <Link
@@ -108,5 +110,5 @@ export default function AdminBreadcrumbs({
         })}
       </Breadcrumbs>
     </Box>
-  )
+  );
 }
