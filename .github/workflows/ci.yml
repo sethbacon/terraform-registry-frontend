@@ -54,9 +54,15 @@ jobs:
 
       - name: Run tests (shard ${{ matrix.shard }}/${{ strategy.job-total }})
         working-directory: frontend
+        # Thresholds zeroed here — each shard only covers ~25% of the suite.
+        # Real thresholds are enforced by the unit-test-coverage merge job.
         run: >-
           npx vitest run --coverage --reporter=blob
           --shard=${{ matrix.shard }}/${{ strategy.job-total }}
+          --coverage.thresholds.statements=0
+          --coverage.thresholds.branches=0
+          --coverage.thresholds.functions=0
+          --coverage.thresholds.lines=0
 
       - name: Upload blob report
         if: always()
