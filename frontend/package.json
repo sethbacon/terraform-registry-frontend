@@ -75,5 +75,8 @@
     ">0.2%",
     "not dead",
     "not op_mini all"
-  ]
+  ],
+  "overrides": {
+    "ws": "^8.20.1"
+  }
 }
