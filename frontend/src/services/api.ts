@@ -91,6 +91,8 @@ class ApiClient {
               !!localStorage.getItem('auth_token') || !!localStorage.getItem('user')
             localStorage.removeItem('auth_token')
             localStorage.removeItem('user')
+            localStorage.removeItem('role_template')
+            localStorage.removeItem('allowed_scopes')
             if (hadSession) {
               window.location.href = '/login'
             }
