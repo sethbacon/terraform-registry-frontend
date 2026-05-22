@@ -36,9 +36,20 @@ const CallbackPage: React.FC = () => {
       // New flow: The backend set an HttpOnly cookie during the OIDC callback
       // redirect. AuthContext will detect the session via /auth/me on mount.
       // Navigate to the return URL; AuthContext handles the rest.
-      const returnUrl = sessionStorage.getItem('returnUrl') || '/'
+      const raw = sessionStorage.getItem('returnUrl') || '/'
       sessionStorage.removeItem('returnUrl')
-      window.location.replace(returnUrl)
+      // Reject absolute and protocol-relative URLs to prevent open redirect.
+      // Use URL parsing to catch backslash normalisation bypasses (/\\ → //).
+      let safeReturnUrl = '/'
+      try {
+        const resolved = new URL(raw, window.location.origin)
+        if (resolved.origin === window.location.origin) {
+          safeReturnUrl = resolved.pathname + resolved.search + resolved.hash
+        }
+      } catch {
+        // malformed URL — fall back to '/'
+      }
+      window.location.replace(safeReturnUrl)
     }
 
     handleCallback()

@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useCallback } from 'react'
 import {
   Box,
   Container,
@@ -132,10 +132,18 @@ const SetupWizardShell: React.FC = () => {
 
 const SetupWizardPage: React.FC = () => {
   const navigate = useNavigate()
+  const handleSetupCompleted = useCallback(
+    () => navigate('/', { replace: true }),
+    [navigate],
+  )
+  const handleSetupFinalized = useCallback(
+    () => navigate('/login', { replace: true }),
+    [navigate],
+  )
   return (
     <SetupWizardProvider
-      onSetupCompleted={() => navigate('/', { replace: true })}
-      onSetupFinalized={() => navigate('/login', { replace: true })}
+      onSetupCompleted={handleSetupCompleted}
+      onSetupFinalized={handleSetupFinalized}
     >
       <SetupWizardShell />
     </SetupWizardProvider>

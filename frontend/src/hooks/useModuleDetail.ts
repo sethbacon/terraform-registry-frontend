@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo } from 'react'
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import api from '../services/api'
@@ -24,6 +24,8 @@ function sortVersionsDesc(raw: ModuleVersion[]): ModuleVersion[] {
     return bMaj !== aMaj ? bMaj - aMaj : bMin !== aMin ? bMin - aMin : bPat - aPat
   })
 }
+
+const POLL_DELAYS = [2000, 5000, 12000] as const
 
 export function useModuleDetail() {
   const { namespace, name, system } = useParams<{
@@ -359,18 +361,24 @@ export function useModuleDetail() {
     },
   })
 
+  const syncTimersRef = useRef<ReturnType<typeof setTimeout>[]>([])
+
+  const pollForVersions = useCallback(() => {
+    syncTimersRef.current.forEach(clearTimeout)
+    syncTimersRef.current = POLL_DELAYS.map((delay) =>
+      setTimeout(() => {
+        queryClient.invalidateQueries({
+          queryKey: queryKeys.modules.detail(namespace ?? '', name ?? '', system ?? ''),
+        })
+      }, delay),
+    )
+  }, [queryClient, namespace, name, system])
+
   const scmSyncMutation = useMutation({
     mutationFn: () => api.triggerManualSync(module!.id),
     onSuccess: () => {
       setError(null)
-      // Poll for updated versions after an async sync (202) at 2s, 5s, and 12s.
-      ;[2000, 5000, 12000].forEach((delay) => {
-        setTimeout(() => {
-          queryClient.invalidateQueries({
-            queryKey: queryKeys.modules.detail(namespace ?? '', name ?? '', system ?? ''),
-          })
-        }, delay)
-      })
+      pollForVersions()
     },
     onError: (err: unknown) => {
       setError(getErrorMessage(err, 'Failed to trigger sync'))
@@ -390,16 +398,6 @@ export function useModuleDetail() {
     [queryClient],
   )
 
-  const pollForVersions = useCallback(() => {
-    ;[2000, 5000, 12000].forEach((delay) => {
-      setTimeout(() => {
-        queryClient.invalidateQueries({
-          queryKey: queryKeys.modules.detail(namespace ?? '', name ?? '', system ?? ''),
-        })
-      }, delay)
-    })
-  }, [queryClient, namespace, name, system])
-
   const handleRescan = () => {
     if (!namespace || !name || !system || !selectedVersion) return
     rescanMutation.mutate()
@@ -412,6 +410,12 @@ export function useModuleDetail() {
     }
     scmSyncMutation.mutate()
   }
+
+  useEffect(() => {
+    return () => {
+      syncTimersRef.current.forEach(clearTimeout)
+    }
+  }, [])
 
   const handleSCMUnlink = () => {
     if (!module?.id) return

@@ -1,5 +1,6 @@
 import axios, { AxiosInstance, AxiosError, InternalAxiosRequestConfig } from 'axios'
 import { addApiBreadcrumb } from './errorReporting'
+import { clearAuthStorage } from '../utils/authStorage'
 
 // In dev mode, use empty baseURL to use relative paths (goes through Vite proxy)
 // In production, use the configured URL or default to current origin
@@ -89,8 +90,7 @@ class ApiClient {
             // NOT trigger a redirect so public pages remain accessible.
             const hadSession =
               !!localStorage.getItem('auth_token') || !!localStorage.getItem('user')
-            localStorage.removeItem('auth_token')
-            localStorage.removeItem('user')
+            clearAuthStorage()
             if (hadSession) {
               window.location.href = '/login'
             }
@@ -195,12 +195,14 @@ class ApiClient {
     user: import('../types').User
     role_template: import('../types').RoleTemplateInfo | null
     allowed_scopes: string[]
+    session_expires_at: string | null
   }> {
     const response = await this.client.get('/api/v1/auth/me')
     return {
       user: response.data.user,
       role_template: response.data.role_template || null,
       allowed_scopes: response.data.allowed_scopes || [],
+      session_expires_at: response.data.session_expires_at || null,
     }
   }
 

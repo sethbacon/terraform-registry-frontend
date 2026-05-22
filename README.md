@@ -31,7 +31,7 @@ This repository contains the frontend UI and Playwright E2E test suite for the E
 
 ## Prerequisites
 
-- Node.js 22+ (LTS) and npm
+- Node.js 24+ (LTS) and npm
 - A running backend API — see [terraform-registry-backend](https://github.com/sethbacon/terraform-registry-backend) for setup
 - Docker & Docker Compose (for the full stack via compose)
 
@@ -94,7 +94,7 @@ For Docker / production builds served through nginx, the bundled nginx config pr
 | ----------- | ----------------------------------- |
 | Language    | TypeScript 5.7.2 (strict mode)      |
 | Framework   | React 19                            |
-| Build Tool  | Vite 6.1.11                         |
+| Build Tool  | Vite 8.0.14                         |
 | UI          | Material-UI v7 + Emotion            |
 | HTTP Client | Axios 1.6.7                         |
 | Router      | React Router v6                     |
