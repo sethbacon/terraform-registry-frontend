@@ -10,6 +10,7 @@ import React, {
 import { jwtDecode } from 'jwt-decode'
 import { User, AuthContextType, RoleTemplateInfo } from '../types'
 import api from '../services/api'
+import { clearAuthStorage } from '../utils/authStorage'
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
@@ -93,15 +94,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     clearWarningTimer()
     setSessionExpiresAt(null)
     setSessionExpiresSoon(false)
-    // Remove legacy token (migration period) and cached UI state
-    localStorage.removeItem('auth_token')
-    localStorage.removeItem('user')
-    localStorage.removeItem('role_template')
-    localStorage.removeItem('allowed_scopes')
-    // Clear any API key authorised in the Swagger UI "Authorize" dialog.
-    // swagger-ui-react persists this under the key "authorized" when persistAuthorization
-    // is enabled; leaving it in localStorage would expose the key across sessions.
-    localStorage.removeItem('authorized')
+    clearAuthStorage()
     // Redirect to the backend logout endpoint, which terminates the OIDC SSO session
     // at the identity provider level and clears the HttpOnly auth cookie.
     api.logout()
