@@ -1,6 +1,17 @@
 <!-- markdownlint-disable MD013 MD024 MD041 -->
 # Changelog
 
+## [2.0.0](https://github.com/sethbacon/terraform-registry-frontend/compare/v1.2.5...v2.0.0) (2026-05-22)
+
+
+### ⚠ BREAKING CHANGES
+
+* **mui:** MUI upgraded from v7 to v9 (no v8 was released). Adds @mui/material-pigment-css peer. All components updated via @mui/codemod preset-safe plus manual fixes.
+
+### Features
+
+* **mui:** upgrade to Material UI v9 ([#314](https://github.com/sethbacon/terraform-registry-frontend/issues/314)) ([22f8991](https://github.com/sethbacon/terraform-registry-frontend/commit/22f8991dbb24fdb3db64bfbee62292223eb2f34b))
+
 ## [1.2.5](https://github.com/sethbacon/terraform-registry-frontend/compare/v1.2.4...v1.2.5) (2026-05-22)
 
 
