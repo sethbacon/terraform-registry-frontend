@@ -50,7 +50,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [sessionExpiresSoon, setSessionExpiresSoon] = useState(false)
   const warningTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   // Ref to break the circular dependency between scheduleSessionWarning and refreshToken.
-  const silentRefreshRef = useRef<() => Promise<void>>(async () => {})
+  const silentRefreshRef = useRef<() => Promise<void>>(async () => { })
 
   const clearWarningTimer = useCallback(() => {
     if (warningTimerRef.current !== null) {
@@ -60,10 +60,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   }, [])
 
   const scheduleSessionWarning = useCallback(
-    (token: string | null | undefined) => {
+    (token: string | null | undefined, expiresAt?: Date) => {
       clearWarningTimer()
       setSessionExpiresSoon(false)
-      const exp = parseTokenExpiry(token)
+      const exp = expiresAt ?? parseTokenExpiry(token)
       setSessionExpiresAt(exp)
       if (!exp) return
       const delay = exp.getTime() - Date.now() - SESSION_WARNING_LEAD_MS
@@ -116,11 +116,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       localStorage.setItem('user', JSON.stringify(response.user))
       localStorage.setItem('role_template', JSON.stringify(response.role_template))
       localStorage.setItem('allowed_scopes', JSON.stringify(response.allowed_scopes))
+      if (response.session_expires_at) {
+        scheduleSessionWarning(null, new Date(response.session_expires_at))
+      }
     } catch (error) {
       console.error('Failed to fetch current user:', error)
       logout()
     }
-  }, [logout])
+  }, [logout, scheduleSessionWarning])
 
   useEffect(() => {
     // Check if user is already logged in.
@@ -189,6 +192,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           localStorage.setItem('user', JSON.stringify(response.user))
           localStorage.setItem('role_template', JSON.stringify(response.role_template))
           localStorage.setItem('allowed_scopes', JSON.stringify(response.allowed_scopes))
+          if (response.session_expires_at) {
+            scheduleSessionWarning(null, new Date(response.session_expires_at))
+          }
         })
         .catch(() => {
           // No valid session — remain unauthenticated
@@ -235,6 +241,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     if (response.token) {
       localStorage.setItem('auth_token', response.token)
       scheduleSessionWarning(response.token)
+    } else if (response.expires_in) {
+      // Cookie-only session: no token in body, but backend renewed the HttpOnly cookie.
+      // Use expires_in (seconds) to reschedule the warning timer.
+      scheduleSessionWarning(null, new Date(Date.now() + response.expires_in * 1000))
     }
   }
   silentRefreshRef.current = silentRefresh
