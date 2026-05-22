@@ -141,14 +141,16 @@ export const ProviderIcon: React.FC<ProviderIconProps> = ({ provider, size = 28 
         component="svg"
         role="img"
         viewBox="0 0 24 24"
-        width={size}
-        height={size}
         aria-label={config.displayName}
-        sx={{ fill: `#${strategy.icon.hex}`, flexShrink: 0 }}
-      >
+        sx={{
+          width: size,
+          height: size,
+          fill: `#${strategy.icon.hex}`,
+          flexShrink: 0
+        }}>
         <path d={strategy.icon.path} />
       </Box>
-    )
+    );
   }
 
   // avatar fallback

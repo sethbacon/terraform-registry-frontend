@@ -14,7 +14,7 @@ import {
   CircularProgress,
 } from '@mui/material'
 import WarningAmberIcon from '@mui/icons-material/WarningAmber'
-import ErrorOutlineIcon from '@mui/icons-material/ErrorOutline'
+import ErrorOutlineIcon from '@mui/icons-material/ErrorOutlined'
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined'
 
 export type ConfirmDialogSeverity = 'info' | 'warning' | 'error'
@@ -170,7 +170,9 @@ const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
                 rows={f.rows ?? (f.multiline ? 3 : undefined)}
                 disabled={loading}
                 fullWidth
-                inputProps={{ 'data-testid': `confirm-dialog-field-${f.id}` }}
+                slotProps={{
+                  htmlInput: { 'data-testid': `confirm-dialog-field-${f.id}` }
+                }}
               />
             ))}
           </Stack>
@@ -178,7 +180,12 @@ const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
 
         {typeToConfirmText && (
           <Box sx={{ mt: fields && fields.length > 0 ? 2 : 0 }}>
-            <Typography variant="body2" sx={{ mb: 1 }} color="text.secondary">
+            <Typography
+              variant="body2"
+              sx={{
+                color: "text.secondary",
+                mb: 1
+              }}>
               Type <code>{typeToConfirmText}</code> to confirm.
             </Typography>
             <TextField
@@ -194,9 +201,11 @@ const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
                   ? 'Input does not match. The comparison is case-sensitive.'
                   : undefined
               }
-              inputProps={{
-                'aria-label': 'Type-to-confirm input',
-                'data-testid': 'confirm-dialog-type-input',
+              slotProps={{
+                htmlInput: {
+                  'aria-label': 'Type-to-confirm input',
+                  'data-testid': 'confirm-dialog-type-input',
+                }
               }}
             />
           </Box>
@@ -224,7 +233,7 @@ const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
         </Button>
       </DialogActions>
     </Dialog>
-  )
+  );
 }
 
 export default ConfirmDialog

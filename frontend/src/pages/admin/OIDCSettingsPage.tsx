@@ -189,11 +189,19 @@ const OIDCSettingsPage: React.FC = () => {
         <>
           {/* Header */}
           <Box sx={{ mb: 4 }}>
-            <Stack direction="row" alignItems="center" spacing={2} sx={{ mb: 1 }}>
+            <Stack
+              direction="row"
+              spacing={2}
+              sx={{
+                alignItems: "center",
+                mb: 1
+              }}>
               <ManageAccountsIcon sx={{ fontSize: 32, color: 'primary.main' }} />
               <Typography variant="h4">OIDC Groups</Typography>
             </Stack>
-            <Typography variant="body1" color="text.secondary">
+            <Typography variant="body1" sx={{
+              color: "text.secondary"
+            }}>
               Configure group claim mapping from your identity provider to registry organizations
               and roles. Changes take effect on the next login without requiring a server restart.
             </Typography>
@@ -216,30 +224,40 @@ const OIDCSettingsPage: React.FC = () => {
               <Typography variant="h6" gutterBottom>
                 Active OIDC Provider
               </Typography>
-              <Stack direction="row" spacing={2} flexWrap="wrap" useFlexGap>
+              <Stack direction="row" spacing={2} useFlexGap sx={{
+                flexWrap: "wrap"
+              }}>
                 <Box>
-                  <Typography variant="caption" color="text.secondary">
+                  <Typography variant="caption" sx={{
+                    color: "text.secondary"
+                  }}>
                     Provider
                   </Typography>
                   <Typography variant="body2">{config.provider_type}</Typography>
                 </Box>
                 <Divider orientation="vertical" flexItem />
                 <Box>
-                  <Typography variant="caption" color="text.secondary">
+                  <Typography variant="caption" sx={{
+                    color: "text.secondary"
+                  }}>
                     Issuer
                   </Typography>
                   <Typography variant="body2">{config.issuer_url}</Typography>
                 </Box>
                 <Divider orientation="vertical" flexItem />
                 <Box>
-                  <Typography variant="caption" color="text.secondary">
+                  <Typography variant="caption" sx={{
+                    color: "text.secondary"
+                  }}>
                     Client ID
                   </Typography>
                   <Typography variant="body2">{config.client_id}</Typography>
                 </Box>
                 <Divider orientation="vertical" flexItem />
                 <Box>
-                  <Typography variant="caption" color="text.secondary">
+                  <Typography variant="caption" sx={{
+                    color: "text.secondary"
+                  }}>
                     Status
                   </Typography>
                   <Box>
@@ -259,7 +277,12 @@ const OIDCSettingsPage: React.FC = () => {
             <Typography variant="h6" gutterBottom>
               Group Claim Mapping
             </Typography>
-            <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+            <Typography
+              variant="body2"
+              sx={{
+                color: "text.secondary",
+                mb: 3
+              }}>
               Map IdP group claims to registry organizations and roles. The group claim name must
               match the claim key in your OIDC ID token (e.g. <code>groups</code>).
             </Typography>
@@ -298,10 +321,11 @@ const OIDCSettingsPage: React.FC = () => {
               <Box>
                 <Stack
                   direction="row"
-                  justifyContent="space-between"
-                  alignItems="center"
-                  sx={{ mb: 1 }}
-                >
+                  sx={{
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    mb: 1
+                  }}>
                   <Typography variant="subtitle1">Group Mappings</Typography>
                   <Button
                     startIcon={<AddIcon />}
@@ -314,7 +338,12 @@ const OIDCSettingsPage: React.FC = () => {
                 </Stack>
 
                 {mappings.length === 0 ? (
-                  <Typography variant="body2" color="text.secondary" sx={{ py: 2 }}>
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      color: "text.secondary",
+                      py: 2
+                    }}>
                     No group mappings configured. Click "Add Mapping" to create one.
                   </Typography>
                 ) : (
@@ -424,14 +453,18 @@ const OIDCSettingsPage: React.FC = () => {
                       placeholder="e.g. my-org"
                       helperText="Registry organization name the user will be added to"
                       fullWidth
-                      InputProps={{
-                        ...params.InputProps,
-                        endAdornment: (
-                          <>
-                            {orgLoading ? <CircularProgress color="inherit" size={16} /> : null}
-                            {params.InputProps.endAdornment}
-                          </>
-                        ),
+                      slotProps={{
+                        ...params.slotProps,
+
+                        input: {
+                          ...params.slotProps.input,
+                          endAdornment: (
+                            <>
+                              {orgLoading ? <CircularProgress color="inherit" size={16} /> : null}
+                              {params.slotProps.input.endAdornment}
+                            </>
+                          ),
+                        }
                       }}
                     />
                   )}
@@ -486,7 +519,6 @@ const OIDCSettingsPage: React.FC = () => {
           </Dialog>
         </>
       )}
-
       {/* SAML Group Mappings (read-only from server config) */}
       {identityMappings?.saml && (
         <Paper sx={{ p: 3, mt: 4 }}>
@@ -529,11 +561,12 @@ const OIDCSettingsPage: React.FC = () => {
               </Table>
             </TableContainer>
           ) : (
-            <Typography color="text.secondary">No SAML group mappings configured.</Typography>
+            <Typography sx={{
+              color: "text.secondary"
+            }}>No SAML group mappings configured.</Typography>
           )}
         </Paper>
       )}
-
       {/* LDAP Group Mappings (read-only from server config) */}
       {identityMappings?.ldap && (
         <Paper sx={{ p: 3, mt: 4 }}>
@@ -573,12 +606,14 @@ const OIDCSettingsPage: React.FC = () => {
               </Table>
             </TableContainer>
           ) : (
-            <Typography color="text.secondary">No LDAP group mappings configured.</Typography>
+            <Typography sx={{
+              color: "text.secondary"
+            }}>No LDAP group mappings configured.</Typography>
           )}
         </Paper>
       )}
     </Container>
-  )
+  );
 }
 
 export default OIDCSettingsPage

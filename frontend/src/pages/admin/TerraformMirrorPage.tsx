@@ -139,7 +139,9 @@ const VersionRow: React.FC<{
         </TableCell>
         <TableCell>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <Typography variant="body2" fontFamily="monospace">
+            <Typography variant="body2" sx={{
+              fontFamily: "monospace"
+            }}>
               {version.version}
             </Typography>
             {version.is_latest && <Chip label="latest" color="primary" size="small" />}
@@ -168,7 +170,6 @@ const VersionRow: React.FC<{
           </Tooltip>
         </TableCell>
       </TableRow>
-
       <TableRow>
         <TableCell colSpan={5} sx={{ pb: 0, pt: 0 }}>
           <Collapse in={open} unmountOnExit>
@@ -195,9 +196,10 @@ const VersionRow: React.FC<{
                         <TableCell>
                           <Typography
                             variant="caption"
-                            fontFamily="monospace"
-                            sx={{ wordBreak: 'break-all' }}
-                          >
+                            sx={{
+                              fontFamily: "monospace",
+                              wordBreak: 'break-all'
+                            }}>
                             {p.filename}
                           </Typography>
                         </TableCell>
@@ -223,7 +225,9 @@ const VersionRow: React.FC<{
                   </TableBody>
                 </Table>
               ) : (
-                <Typography variant="body2" color="text.secondary">
+                <Typography variant="body2" sx={{
+                  color: "text.secondary"
+                }}>
                   No platforms synced yet.
                 </Typography>
               )}
@@ -232,7 +236,7 @@ const VersionRow: React.FC<{
         </TableCell>
       </TableRow>
     </>
-  )
+  );
 }
 
 // ---------------------------------------------------------------------------
@@ -268,17 +272,30 @@ const ConfigCard: React.FC<{
       </Box>
 
       {config.description && (
-        <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+        <Typography
+          variant="body2"
+          sx={{
+            color: "text.secondary",
+            mb: 1
+          }}>
           {config.description}
         </Typography>
       )}
 
-      <Typography variant="body2" color="text.secondary" noWrap>
+      <Typography variant="body2" noWrap sx={{
+        color: "text.secondary"
+      }}>
         {config.upstream_url}
       </Typography>
 
       {status && (
-        <Box display="flex" gap={1} flexWrap="wrap" sx={{ mt: 1 }}>
+        <Box
+          sx={{
+            display: "flex",
+            gap: 1,
+            flexWrap: "wrap",
+            mt: 1
+          }}>
           <Chip size="small" label={`${status.version_count} versions`} variant="outlined" />
           <Chip size="small" label={`${status.platform_count} platforms`} variant="outlined" />
           {status.pending_count > 0 && (
@@ -297,13 +314,17 @@ const ConfigCard: React.FC<{
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
             <SyncStatusChip status={config.last_sync_status} />
             {config.last_sync_at && (
-              <Typography variant="caption" color="text.secondary">
+              <Typography variant="caption" sx={{
+                color: "text.secondary"
+              }}>
                 {new Date(config.last_sync_at).toLocaleString()}
               </Typography>
             )}
           </Box>
         ) : (
-          <Typography variant="caption" color="text.secondary">
+          <Typography variant="caption" sx={{
+            color: "text.secondary"
+          }}>
             Never synced
           </Typography>
         )}
@@ -806,8 +827,10 @@ const TerraformMirrorPage: React.FC = () => {
                       sync_interval_hours: parseInt(e.target.value, 10),
                     }))
                   }
-                  inputProps={{ min: 1 }}
                   fullWidth
+                  slotProps={{
+                    htmlInput: { min: 1 }
+                  }}
                 />
                 <Box sx={{ display: 'flex', gap: 2 }}>
                   <FormControlLabel
@@ -865,12 +888,12 @@ const TerraformMirrorPage: React.FC = () => {
                       fullWidth
                     />
                   )}
-                  renderTags={(value, getTagProps) =>
+                  renderValue={(value, getItemProps) =>
                     value.map((option, index) => (
                       <Chip
                         label={option}
                         size="small"
-                        {...getTagProps({ index })}
+                        {...getItemProps({ index })}
                         key={option}
                       />
                     ))
@@ -960,8 +983,10 @@ const TerraformMirrorPage: React.FC = () => {
                       sync_interval_hours: parseInt(e.target.value, 10),
                     }))
                   }
-                  inputProps={{ min: 1 }}
                   fullWidth
+                  slotProps={{
+                    htmlInput: { min: 1 }
+                  }}
                 />
                 <Box sx={{ display: 'flex', gap: 2 }}>
                   <FormControlLabel
@@ -1019,12 +1044,12 @@ const TerraformMirrorPage: React.FC = () => {
                       fullWidth
                     />
                   )}
-                  renderTags={(value, getTagProps) =>
+                  renderValue={(value, getItemProps) =>
                     value.map((option, index) => (
                       <Chip
                         label={option}
                         size="small"
-                        {...getTagProps({ index })}
+                        {...getItemProps({ index })}
                         key={option}
                       />
                     ))
@@ -1192,7 +1217,7 @@ const TerraformMirrorPage: React.FC = () => {
         </Container>
       )}
     </Box>
-  )
+  );
 }
 
 export default TerraformMirrorPage

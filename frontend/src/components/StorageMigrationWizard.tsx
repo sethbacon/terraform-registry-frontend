@@ -256,7 +256,9 @@ const StorageMigrationWizard: React.FC<StorageMigrationWizardProps> = ({
                 </Typography>
                 <Grid container spacing={2}>
                   <Grid size={6}>
-                    <Typography variant="body2" color="text.secondary">
+                    <Typography variant="body2" sx={{
+                      color: "text.secondary"
+                    }}>
                       Source
                     </Typography>
                     <Typography variant="body1">
@@ -266,7 +268,9 @@ const StorageMigrationWizard: React.FC<StorageMigrationWizardProps> = ({
                     </Typography>
                   </Grid>
                   <Grid size={6}>
-                    <Typography variant="body2" color="text.secondary">
+                    <Typography variant="body2" sx={{
+                      color: "text.secondary"
+                    }}>
                       Target
                     </Typography>
                     <Typography variant="body1">
@@ -276,25 +280,33 @@ const StorageMigrationWizard: React.FC<StorageMigrationWizardProps> = ({
                     </Typography>
                   </Grid>
                   <Grid size={4}>
-                    <Typography variant="body2" color="text.secondary">
+                    <Typography variant="body2" sx={{
+                      color: "text.secondary"
+                    }}>
                       Total Artifacts
                     </Typography>
                     <Typography variant="h6">{plan.total_artifacts}</Typography>
                   </Grid>
                   <Grid size={4}>
-                    <Typography variant="body2" color="text.secondary">
+                    <Typography variant="body2" sx={{
+                      color: "text.secondary"
+                    }}>
                       Modules
                     </Typography>
                     <Typography variant="h6">{plan.total_modules}</Typography>
                   </Grid>
                   <Grid size={4}>
-                    <Typography variant="body2" color="text.secondary">
+                    <Typography variant="body2" sx={{
+                      color: "text.secondary"
+                    }}>
                       Providers
                     </Typography>
                     <Typography variant="h6">{plan.total_providers}</Typography>
                   </Grid>
                   <Grid size={12}>
-                    <Typography variant="body2" color="text.secondary">
+                    <Typography variant="body2" sx={{
+                      color: "text.secondary"
+                    }}>
                       Estimated Size
                     </Typography>
                     <Typography variant="h6">{formatBytes(plan.estimated_size_bytes)}</Typography>
@@ -302,13 +314,12 @@ const StorageMigrationWizard: React.FC<StorageMigrationWizardProps> = ({
                 </Grid>
               </Paper>
             )}
-
             <Alert severity="warning" sx={{ mt: 2 }}>
               Starting this migration will copy all artifacts from the source to the target storage.
               This may take a while depending on the number and size of artifacts.
             </Alert>
           </Box>
-        )
+        );
 
       case 2:
         return (
@@ -317,14 +328,17 @@ const StorageMigrationWizard: React.FC<StorageMigrationWizardProps> = ({
           >
             <CircularProgress size={48} />
             <Typography variant="h6">Migration in Progress</Typography>
-
             {migration && (
               <Box sx={{ width: '100%' }}>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                  <Typography variant="body2" color="text.secondary">
+                  <Typography variant="body2" sx={{
+                    color: "text.secondary"
+                  }}>
                     {migration.migrated_artifacts} / {migration.total_artifacts} artifacts
                   </Typography>
-                  <Typography variant="body2" color="text.secondary">
+                  <Typography variant="body2" sx={{
+                    color: "text.secondary"
+                  }}>
                     {migration.total_artifacts > 0
                       ? Math.round((migration.migrated_artifacts / migration.total_artifacts) * 100)
                       : 0}
@@ -347,7 +361,6 @@ const StorageMigrationWizard: React.FC<StorageMigrationWizardProps> = ({
                 )}
               </Box>
             )}
-
             <Button
               variant="outlined"
               color="warning"
@@ -357,7 +370,7 @@ const StorageMigrationWizard: React.FC<StorageMigrationWizardProps> = ({
               Cancel Migration
             </Button>
           </Box>
-        )
+        );
 
       case 3:
         return (
@@ -368,7 +381,9 @@ const StorageMigrationWizard: React.FC<StorageMigrationWizardProps> = ({
               <>
                 <CheckCircleIcon color="success" sx={{ fontSize: 64 }} />
                 <Typography variant="h6">Migration Complete</Typography>
-                <Typography variant="body2" color="text.secondary">
+                <Typography variant="body2" sx={{
+                  color: "text.secondary"
+                }}>
                   Successfully migrated {migration.migrated_artifacts} of{' '}
                   {migration.total_artifacts} artifacts.
                 </Typography>
@@ -388,14 +403,16 @@ const StorageMigrationWizard: React.FC<StorageMigrationWizardProps> = ({
                     {migration.error_message}
                   </Alert>
                 )}
-                <Typography variant="body2" color="text.secondary">
+                <Typography variant="body2" sx={{
+                  color: "text.secondary"
+                }}>
                   Migrated {migration?.migrated_artifacts ?? 0} of {migration?.total_artifacts ?? 0}{' '}
                   artifacts before failure.
                 </Typography>
               </>
             )}
           </Box>
-        )
+        );
 
       default:
         return null

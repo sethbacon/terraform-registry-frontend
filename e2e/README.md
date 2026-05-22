@@ -4,7 +4,7 @@
 
 ## Prerequisites
 
-- Node 20+ and npm
+- Node 24+ and npm
 - npx available
 - Playwright browsers installed: `npx playwright install chromium`
 - Backend and frontend reachable at the `baseURL` configured in `e2e/playwright.config.ts` (default <https://localhost:3000>)

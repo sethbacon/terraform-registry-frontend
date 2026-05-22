@@ -27,7 +27,7 @@ export function formatTerraformDefault(type: string, def: unknown): string {
   }
 
   if (typeof def === 'string') {
-    return `"${def.replace(/\\/g, '\\\\').replace(/"/g, '\\"')}"`
+    return `"${def.replace(/\\/g, '\\\\').replace(/"/g, '\\"')}"`;
   }
   if (typeof def === 'boolean' || typeof def === 'number') {
     return String(def)

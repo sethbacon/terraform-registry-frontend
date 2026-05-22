@@ -31,7 +31,12 @@ const ScanDiagnostics: React.FC<ScanDiagnosticsProps> = ({
     <Stack spacing={2} data-testid="scan-diagnostics">
       {hasErrorMessage && (
         <Section title="Error message" testId="scan-diagnostics-error">
-          <Typography variant="body2" color="error.main" sx={{ whiteSpace: 'pre-wrap' }}>
+          <Typography
+            variant="body2"
+            sx={{
+              color: "error.main",
+              whiteSpace: 'pre-wrap'
+            }}>
             {errorMessage}
           </Typography>
         </Section>
@@ -50,7 +55,7 @@ const ScanDiagnostics: React.FC<ScanDiagnosticsProps> = ({
         </Section>
       )}
     </Stack>
-  )
+  );
 }
 
 const Section: React.FC<{
@@ -59,7 +64,13 @@ const Section: React.FC<{
   children: React.ReactNode
 }> = ({ title, testId, children }) => (
   <Box data-testid={testId}>
-    <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.5 }}>
+    <Typography
+      variant="caption"
+      sx={{
+        color: "text.secondary",
+        display: 'block',
+        mb: 0.5
+      }}>
       {title}
     </Typography>
     {children}

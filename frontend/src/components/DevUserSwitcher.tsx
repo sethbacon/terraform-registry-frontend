@@ -129,7 +129,9 @@ const DevUserSwitcher = () => {
             <MenuItem key={u.id} value={u.id}>
               <Box sx={{ display: 'flex', flexDirection: 'column' }}>
                 <Typography variant="body2">{u.name || u.email}</Typography>
-                <Typography variant="caption" color="text.secondary">
+                <Typography variant="caption" sx={{
+                  color: "text.secondary"
+                }}>
                   {u.email} - {u.primary_role}
                 </Typography>
               </Box>
@@ -138,7 +140,7 @@ const DevUserSwitcher = () => {
         </Select>
       </FormControl>
     </Box>
-  )
+  );
 }
 
 export default DevUserSwitcher

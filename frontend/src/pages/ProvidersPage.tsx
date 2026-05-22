@@ -206,7 +206,9 @@ const ProvidersPage: React.FC = () => {
           <Typography variant="h4" gutterBottom>
             {t('providers.pageTitle')}
           </Typography>
-          <Typography variant="body1" color="text.secondary">
+          <Typography variant="body1" sx={{
+            color: "text.secondary"
+          }}>
             {t('providers.pageSubtitle')}
           </Typography>
         </Box>
@@ -222,7 +224,6 @@ const ProvidersPage: React.FC = () => {
         )}
       </Box>
       <Box sx={{ mb: 4 }} />
-
       {/* Search Bar + Sort */}
       <Box sx={{ display: 'flex', gap: 2, mb: 4, alignItems: 'flex-start' }}>
         <TextField
@@ -230,12 +231,14 @@ const ProvidersPage: React.FC = () => {
           placeholder={t('providers.searchPlaceholder')}
           value={inputValue}
           onChange={handleInputChange}
-          InputProps={{
-            startAdornment: (
-              <InputAdornment position="start">
-                <SearchIcon />
-              </InputAdornment>
-            ),
+          slotProps={{
+            input: {
+              startAdornment: (
+                <InputAdornment position="start">
+                  <SearchIcon />
+                </InputAdornment>
+              ),
+            }
           }}
         />
         <FormControl sx={{ minWidth: 180 }} size="medium">
@@ -255,23 +258,28 @@ const ProvidersPage: React.FC = () => {
           </Select>
         </FormControl>
       </Box>
-
       {/* Error Alert */}
       {error && (
         <Alert severity="error" sx={{ mb: 3 }}>
           {error}
         </Alert>
       )}
-
       {/* Loading State */}
       {loading ? (
         <RegistryItemGridSkeleton />
       ) : providers.length === 0 ? (
         <Box sx={{ textAlign: 'center', py: 8 }}>
-          <Typography variant="h6" color="text.secondary">
+          <Typography variant="h6" sx={{
+            color: "text.secondary"
+          }}>
             {t('providers.noResultsTitle')}
           </Typography>
-          <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+          <Typography
+            variant="body2"
+            sx={{
+              color: "text.secondary",
+              mt: 1
+            }}>
             {urlQuery || urlSort
               ? t('providers.noResultsTryDifferent')
               : t('providers.noResultsUploadFirst')}
@@ -343,7 +351,7 @@ const ProvidersPage: React.FC = () => {
         </>
       )}
     </Container>
-  )
+  );
 }
 
 export default ProvidersPage

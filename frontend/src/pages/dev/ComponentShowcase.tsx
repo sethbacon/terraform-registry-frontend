@@ -188,11 +188,15 @@ const ComponentShowcase = () => {
       <Typography variant="h3" gutterBottom>
         Component Showcase
       </Typography>
-      <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
+      <Typography
+        variant="body1"
+        sx={{
+          color: "text.secondary",
+          mb: 3
+        }}>
         Development-only style guide showing all key UI components with representative sample data.
         This page is only available when <code>import.meta.env.DEV</code> is true.
       </Typography>
-
       {/* Table of Contents */}
       <Paper variant="outlined" sx={{ p: 2, mb: 4 }}>
         <Typography variant="h6" gutterBottom>
@@ -212,12 +216,10 @@ const ComponentShowcase = () => {
           ))}
         </Box>
       </Paper>
-
       {/* ----------------------------------------------------------------- */}
       {/* Cards */}
       {/* ----------------------------------------------------------------- */}
       <SectionHeader id="registry-item-card" title="RegistryItemCard" category="Cards" />
-
       <Typography variant="subtitle2" sx={{ mb: 2 }}>
         Module variant
       </Typography>
@@ -257,7 +259,6 @@ const ComponentShowcase = () => {
           />
         </Grid>
       </Grid>
-
       <Typography variant="subtitle2" sx={{ mb: 2 }}>
         Provider variant
       </Typography>
@@ -297,14 +298,11 @@ const ComponentShowcase = () => {
           />
         </Grid>
       </Grid>
-
       <Divider sx={{ my: 4 }} />
-
       {/* ----------------------------------------------------------------- */}
       {/* Provider Icons */}
       {/* ----------------------------------------------------------------- */}
       <SectionHeader id="provider-icon" title="ProviderIcon" category="Utilities" />
-
       <Paper variant="outlined" sx={{ p: 3, mb: 3 }}>
         <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 3 }}>
           {providerSlugs.map((slug) => (
@@ -314,7 +312,9 @@ const ComponentShowcase = () => {
             >
               <ProviderIcon provider={slug} size={36} />
               <Typography variant="caption">{providerDisplayName(slug)}</Typography>
-              <Typography variant="caption" color="text.secondary">
+              <Typography variant="caption" sx={{
+                color: "text.secondary"
+              }}>
                 {slug}
               </Typography>
             </Box>
@@ -329,37 +329,40 @@ const ComponentShowcase = () => {
                 justifyContent: 'center',
               }}
             >
-              <Typography variant="caption" color="text.secondary">
+              <Typography variant="caption" sx={{
+                color: "text.secondary"
+              }}>
                 (null)
               </Typography>
             </Box>
             <Typography variant="caption">Unknown</Typography>
-            <Typography variant="caption" color="text.secondary">
+            <Typography variant="caption" sx={{
+              color: "text.secondary"
+            }}>
               unknown-provider
             </Typography>
           </Box>
         </Box>
       </Paper>
-
       <Divider sx={{ my: 4 }} />
-
       {/* ----------------------------------------------------------------- */}
       {/* Markdown Renderer */}
       {/* ----------------------------------------------------------------- */}
       <SectionHeader id="markdown-renderer" title="MarkdownRenderer" category="Content" />
-
       <Paper variant="outlined" sx={{ p: 3, mb: 3 }}>
         <MarkdownRenderer>{sampleMarkdown}</MarkdownRenderer>
       </Paper>
-
       <Divider sx={{ my: 4 }} />
-
       {/* ----------------------------------------------------------------- */}
       {/* ErrorBoundary */}
       {/* ----------------------------------------------------------------- */}
       <SectionHeader id="error-boundary" title="ErrorBoundary" category="Utilities" />
-
-      <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+      <Typography
+        variant="body2"
+        sx={{
+          color: "text.secondary",
+          mb: 2
+        }}>
         The ErrorBoundary component renders a fallback UI when a child component throws. Below is a
         static recreation of the fallback UI (triggering a real error would be destructive to the
         showcase page).
@@ -369,14 +372,11 @@ const ComponentShowcase = () => {
           <ErrorBoundaryFallbackPreview />
         </ErrorBoundary>
       </Paper>
-
       <Divider sx={{ my: 4 }} />
-
       {/* ----------------------------------------------------------------- */}
       {/* SecurityScanPanel */}
       {/* ----------------------------------------------------------------- */}
       <SectionHeader id="security-scan-panel" title="SecurityScanPanel" category="Detail Panels" />
-
       <Typography variant="subtitle2" sx={{ mb: 1 }}>
         Clean scan
       </Typography>
@@ -387,7 +387,6 @@ const ComponentShowcase = () => {
         scanLoading={false}
         scanNotFound={false}
       />
-
       <Typography variant="subtitle2" sx={{ mb: 1 }}>
         Scan with findings
       </Typography>
@@ -398,7 +397,6 @@ const ComponentShowcase = () => {
         scanLoading={false}
         scanNotFound={false}
       />
-
       <Typography variant="subtitle2" sx={{ mb: 1 }}>
         No scan available
       </Typography>
@@ -409,9 +407,7 @@ const ComponentShowcase = () => {
         scanLoading={false}
         scanNotFound
       />
-
       <Divider sx={{ my: 4 }} />
-
       {/* ----------------------------------------------------------------- */}
       {/* VersionDetailsPanel */}
       {/* ----------------------------------------------------------------- */}
@@ -420,7 +416,6 @@ const ComponentShowcase = () => {
         title="VersionDetailsPanel"
         category="Detail Panels"
       />
-
       <Grid container spacing={2} sx={{ mb: 3 }}>
         <Grid size={{ xs: 12, md: 6 }}>
           <Typography variant="subtitle2" sx={{ mb: 1 }}>
@@ -449,16 +444,18 @@ const ComponentShowcase = () => {
           />
         </Grid>
       </Grid>
-
       <Divider sx={{ my: 4 }} />
-
       {/* ----------------------------------------------------------------- */}
       {/* AboutModal */}
       {/* ----------------------------------------------------------------- */}
       <SectionHeader id="about-modal" title="AboutModal" category="Dialogs" />
-
       <Box sx={{ mb: 3 }}>
-        <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+        <Typography
+          variant="body2"
+          sx={{
+            color: "text.secondary",
+            mb: 1
+          }}>
           Click the button below to open the About dialog.
         </Typography>
         <Chip
@@ -469,9 +466,7 @@ const ComponentShowcase = () => {
         />
         <AboutModal open={aboutOpen} onClose={() => setAboutOpen(false)} />
       </Box>
-
       <Divider sx={{ my: 4 }} />
-
       {/* ----------------------------------------------------------------- */}
       {/* StorageMigrationWizard */}
       {/* ----------------------------------------------------------------- */}
@@ -480,9 +475,13 @@ const ComponentShowcase = () => {
         title="StorageMigrationWizard"
         category="Dialogs"
       />
-
       <Box sx={{ mb: 3 }}>
-        <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+        <Typography
+          variant="body2"
+          sx={{
+            color: "text.secondary",
+            mb: 1
+          }}>
           Click the button below to open the Storage Migration Wizard dialog. Note: API calls will
           fail in this showcase context, but the UI flow is visible.
         </Typography>
@@ -498,7 +497,6 @@ const ComponentShowcase = () => {
           configs={sampleStorageConfigs}
         />
       </Box>
-
       {/* Footer note */}
       <Divider sx={{ my: 4 }} />
       <Alert severity="info" sx={{ mb: 2 }}>
@@ -507,11 +505,13 @@ const ComponentShowcase = () => {
         this showcase because they depend on live backend services or deep context providers. See
         the component source files for their prop interfaces.
       </Alert>
-      <Typography variant="caption" color="text.secondary">
+      <Typography variant="caption" sx={{
+        color: "text.secondary"
+      }}>
         Route: <code>/dev/components</code> &mdash; available only in development mode.
       </Typography>
     </Container>
-  )
+  );
 }
 
 // ---------------------------------------------------------------------------
@@ -522,7 +522,9 @@ const ComponentShowcase = () => {
 function SectionHeader({ id, title, category }: { id: string; title: string; category: string }) {
   return (
     <Box id={id} sx={{ scrollMarginTop: '80px', mb: 2 }}>
-      <Typography variant="overline" color="text.secondary">
+      <Typography variant="overline" sx={{
+        color: "text.secondary"
+      }}>
         {category}
       </Typography>
       <Typography variant="h5">
@@ -531,14 +533,16 @@ function SectionHeader({ id, title, category }: { id: string; title: string; cat
         </Link>
       </Typography>
     </Box>
-  )
+  );
 }
 
 /** Static recreation of the ErrorBoundary fallback so we do not crash the page. */
 function ErrorBoundaryFallbackPreview() {
   return (
     <Alert severity="error">
-      <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
+      <Typography variant="subtitle1" gutterBottom sx={{
+        fontWeight: "bold"
+      }}>
         Something went wrong
       </Typography>
       <Typography variant="body2" sx={{ mb: 1 }}>
@@ -563,7 +567,7 @@ function ErrorBoundaryFallbackPreview() {
         <Chip label="Reload Page" size="small" color="primary" />
       </Box>
     </Alert>
-  )
+  );
 }
 
 export default ComponentShowcase

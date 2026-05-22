@@ -5,7 +5,7 @@ React 19 TypeScript SPA for the [Enterprise Terraform Registry](https://github.c
 
 [![License: Apache 2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 [![React](https://img.shields.io/badge/React-19+-61DAFB?logo=react)](https://react.dev/)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5+-3178C6?logo=typescript)](https://www.typescriptlang.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-6+-3178C6?logo=typescript)](https://www.typescriptlang.org/)
 [![Coverage](https://img.shields.io/endpoint?url=https://gist.githubusercontent.com/sethbacon/59239e8575b4f784f875647e2b344b41/raw/frontend-coverage.json)](https://github.com/sethbacon/terraform-registry-frontend/actions/workflows/ci.yml)
 
 This repository contains the frontend UI and Playwright E2E test suite for the Enterprise Terraform Registry. The backend API, database, and deployment infrastructure live in **[terraform-registry-backend](https://github.com/sethbacon/terraform-registry-backend)**.
@@ -31,7 +31,7 @@ This repository contains the frontend UI and Playwright E2E test suite for the E
 
 ## Prerequisites
 
-- Node.js 22+ (LTS) and npm
+- Node.js 24+ (LTS) and npm
 - A running backend API — see [terraform-registry-backend](https://github.com/sethbacon/terraform-registry-backend) for setup
 - Docker & Docker Compose (for the full stack via compose)
 
@@ -92,14 +92,14 @@ For Docker / production builds served through nginx, the bundled nginx config pr
 
 | Concern     | Technology                          |
 | ----------- | ----------------------------------- |
-| Language    | TypeScript 5.7.2 (strict mode)      |
+| Language    | TypeScript 6.0.3 (strict mode)      |
 | Framework   | React 19                            |
-| Build Tool  | Vite 6.1.11                         |
-| UI          | Material-UI v7 + Emotion            |
+| Build Tool  | Vite 8.0.14                         |
+| UI          | Material-UI v9 + Emotion            |
 | HTTP Client | Axios 1.6.7                         |
 | Router      | React Router v6                     |
 | Markdown    | react-markdown + remark-gfm         |
-| Linting     | ESLint 9 with TypeScript ESLint     |
+| Linting     | ESLint 10 with TypeScript ESLint    |
 | Formatting  | Prettier 3 (eslint-config-prettier) |
 | E2E Tests   | Playwright                          |
 

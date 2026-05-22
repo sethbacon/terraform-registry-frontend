@@ -79,28 +79,35 @@ const TerraformBinariesPage: React.FC = () => {
         <Typography variant="h4" gutterBottom>
           {t('terraformBinaries.pageTitle')}
         </Typography>
-        <Typography variant="body1" color="text.secondary">
+        <Typography variant="body1" sx={{
+          color: "text.secondary"
+        }}>
           {t('terraformBinaries.pageSubtitle')}
         </Typography>
       </Box>
       <Box sx={{ mb: 4 }} />
-
       {error && (
         <Alert severity="error" sx={{ mb: 3 }}>
           {error}
         </Alert>
       )}
-
       {loading ? (
         <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
           <CircularProgress />
         </Box>
       ) : configs.length === 0 ? (
         <Box sx={{ textAlign: 'center', py: 8 }}>
-          <Typography variant="h6" color="text.secondary">
+          <Typography variant="h6" sx={{
+            color: "text.secondary"
+          }}>
             {t('terraformBinaries.noMirrorsTitle')}
           </Typography>
-          <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+          <Typography
+            variant="body2"
+            sx={{
+              color: "text.secondary",
+              mt: 1
+            }}>
             {t('terraformBinaries.noMirrorsBody')}
           </Typography>
         </Box>
@@ -155,7 +162,7 @@ const TerraformBinariesPage: React.FC = () => {
         </Grid>
       )}
     </Container>
-  )
+  );
 }
 
 export default TerraformBinariesPage

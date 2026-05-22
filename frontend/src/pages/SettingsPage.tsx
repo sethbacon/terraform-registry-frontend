@@ -13,12 +13,13 @@ export default function SettingsPage() {
       <Typography variant="h4" component="h1" gutterBottom>
         Settings
       </Typography>
-
       <Paper sx={{ p: 3, mb: 3 }}>
         <Typography variant="h6" gutterBottom>
           Telemetry &amp; Privacy
         </Typography>
-        <Typography variant="body2" color="text.secondary" gutterBottom>
+        <Typography variant="body2" gutterBottom sx={{
+          color: "text.secondary"
+        }}>
           Control which data you share. Essential cookies required for the site to function cannot
           be disabled. Changes take effect immediately.
         </Typography>
@@ -57,8 +58,9 @@ export default function SettingsPage() {
           />
         </Box>
       </Paper>
-
-      <Typography variant="body2" color="text.secondary">
+      <Typography variant="body2" sx={{
+        color: "text.secondary"
+      }}>
         For more information, see our{' '}
         <a href="/privacy" style={{ color: 'inherit' }}>
           Privacy Policy
@@ -66,5 +68,5 @@ export default function SettingsPage() {
         .
       </Typography>
     </Container>
-  )
+  );
 }

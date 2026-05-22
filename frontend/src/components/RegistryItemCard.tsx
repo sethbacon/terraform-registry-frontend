@@ -83,14 +83,16 @@ const RegistryItemCard: React.FC<RegistryItemCardProps> = ({
         {title}
       </Typography>
       {subtitle && (
-        <Typography variant="body2" color="text.secondary" gutterBottom>
+        <Typography variant="body2" gutterBottom sx={{
+          color: "text.secondary"
+        }}>
           {subtitle}
         </Typography>
       )}
       <Typography
         variant="body2"
-        color="text.secondary"
         sx={{
+          color: "text.secondary",
           mt: 2,
           mb: 2,
           overflow: 'hidden',
@@ -98,9 +100,8 @@ const RegistryItemCard: React.FC<RegistryItemCardProps> = ({
           display: '-webkit-box',
           WebkitLineClamp: 3,
           WebkitBoxOrient: 'vertical',
-          minHeight: '3.6em',
-        }}
-      >
+          minHeight: '3.6em'
+        }}>
         {description || 'No description available'}
       </Typography>
       <Box sx={{ mt: 'auto' }}>

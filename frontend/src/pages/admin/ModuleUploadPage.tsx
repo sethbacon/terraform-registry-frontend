@@ -160,7 +160,12 @@ const ModuleUploadPage: React.FC = () => {
       <Typography variant="h6" gutterBottom>
         How would you like to publish this module?
       </Typography>
-      <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+      <Typography
+        variant="body2"
+        sx={{
+          color: "text.secondary",
+          mb: 3
+        }}>
         Upload a packaged archive directly, or connect a git repository for automated publishing via
         webhooks.
       </Typography>
@@ -175,7 +180,9 @@ const ModuleUploadPage: React.FC = () => {
               <Typography variant="h6" gutterBottom>
                 Upload from File
               </Typography>
-              <Typography variant="body2" color="text.secondary">
+              <Typography variant="body2" sx={{
+                color: "text.secondary"
+              }}>
                 Package your module as a <strong>.tar.gz</strong> archive and upload it directly.
                 Best for one-off or manual releases.
               </Typography>
@@ -193,7 +200,9 @@ const ModuleUploadPage: React.FC = () => {
               <Typography variant="h6" gutterBottom>
                 Link from SCM Repository
               </Typography>
-              <Typography variant="body2" color="text.secondary">
+              <Typography variant="body2" sx={{
+                color: "text.secondary"
+              }}>
                 Connect a GitHub, Azure DevOps, GitLab, or Bitbucket repository. New versions
                 publish automatically when tags are pushed.
               </Typography>
@@ -235,7 +244,12 @@ const ModuleUploadPage: React.FC = () => {
         />
       ) : (
         <>
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+          <Typography
+            variant="body2"
+            sx={{
+              color: "text.secondary",
+              mb: 3
+            }}>
             First, define the module identity. Then you'll choose a repository and configure
             publishing settings.
           </Typography>
@@ -338,10 +352,14 @@ const ModuleUploadPage: React.FC = () => {
           borderRadius: 1,
         }}
       >
-        <Typography variant="body2" color="text.secondary" gutterBottom>
+        <Typography variant="body2" gutterBottom sx={{
+          color: "text.secondary"
+        }}>
           <strong>Requirements:</strong>
         </Typography>
-        <Typography variant="body2" color="text.secondary" component="div">
+        <Typography variant="body2" component="div" sx={{
+          color: "text.secondary"
+        }}>
           • Package your module as a <strong>.tar.gz</strong> or <strong>.tgz</strong> file
           <br />• Include all <strong>.tf</strong> files (main.tf, variables.tf, outputs.tf)
           <br />• Add a <strong>README.md</strong> with usage documentation
@@ -352,7 +370,9 @@ const ModuleUploadPage: React.FC = () => {
       </Box>
 
       <Stack spacing={3}>
-        <Stack direction={{ xs: 'column', md: 'row' }} spacing={2} alignItems="flex-start">
+        <Stack direction={{ xs: 'column', md: 'row' }} spacing={2} sx={{
+          alignItems: "flex-start"
+        }}>
           <TextField
             label="Namespace"
             value={moduleNamespace}
@@ -434,7 +454,9 @@ const ModuleUploadPage: React.FC = () => {
         {uploading && uploadPercent !== null && (
           <Box data-testid="module-upload-progress">
             <LinearProgress variant="determinate" value={uploadPercent} />
-            <Typography variant="caption" color="text.secondary">
+            <Typography variant="caption" sx={{
+              color: "text.secondary"
+            }}>
               Uploading… {uploadPercent}%
             </Typography>
           </Box>
@@ -483,17 +505,21 @@ const ModuleUploadPage: React.FC = () => {
       <Typography variant="h4" gutterBottom>
         Upload Module
       </Typography>
-      <Typography variant="body1" color="text.secondary" sx={{ mb: 4 }}>
+      <Typography
+        variant="body1"
+        sx={{
+          color: "text.secondary",
+          mb: 4
+        }}>
         Publish a Terraform module to your registry
       </Typography>
-
       <Paper sx={{ width: '100%' }}>
         {moduleMethod === 'choose' && renderModuleMethodChooser()}
         {moduleMethod === 'upload' && renderFileUploadForm()}
         {moduleMethod === 'scm' && renderScmMetadataForm()}
       </Paper>
     </Container>
-  )
+  );
 }
 
 export default ModuleUploadPage

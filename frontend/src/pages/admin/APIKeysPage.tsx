@@ -334,20 +334,22 @@ const APIKeysPage: React.FC = () => {
       case 'never':
       default:
         return (
-          <Typography variant="body2" color="text.secondary">
-            Never
-          </Typography>
-        )
+          <Typography variant="body2" sx={{
+            color: "text.secondary"
+          }}>Never
+                      </Typography>
+        );
     }
   }
 
   const renderScopeChips = (scopes: string[]) => {
     if (!scopes || scopes.length === 0)
       return (
-        <Typography variant="body2" color="text.secondary">
-          None
-        </Typography>
-      )
+        <Typography variant="body2" sx={{
+          color: "text.secondary"
+        }}>None
+                  </Typography>
+      );
     const maxVisible = 2
     const visible = scopes.slice(0, maxVisible)
     const remaining = scopes.length - maxVisible
@@ -385,7 +387,13 @@ const APIKeysPage: React.FC = () => {
       <Typography variant="subtitle2" gutterBottom>
         Scopes
       </Typography>
-      <Typography variant="caption" color="text.secondary" sx={{ mb: 1, display: 'block' }}>
+      <Typography
+        variant="caption"
+        sx={{
+          color: "text.secondary",
+          mb: 1,
+          display: 'block'
+        }}>
         Select the permissions for this API key. You can only select scopes within your role's
         permissions.
       </Typography>
@@ -447,7 +455,9 @@ const APIKeysPage: React.FC = () => {
           <Typography variant="h4" gutterBottom>
             API Keys
           </Typography>
-          <Typography variant="body1" color="text.secondary">
+          <Typography variant="body1" sx={{
+            color: "text.secondary"
+          }}>
             Manage API keys for Terraform CLI authentication
           </Typography>
         </Box>
@@ -455,20 +465,17 @@ const APIKeysPage: React.FC = () => {
           Create API Key
         </Button>
       </Box>
-
       {error && (
         <Alert severity="error" sx={{ mb: 3 }} onClose={() => setError(null)}>
           {error}
         </Alert>
       )}
-
       {!membershipsLoading && memberships.length === 0 && (
         <Alert severity="warning" sx={{ mb: 3 }}>
           You are not a member of any organization. Contact an administrator to add you to an
           organization before creating API keys.
         </Alert>
       )}
-
       {/* API Keys Table */}
       <Paper>
         {loading ? (
@@ -510,13 +517,16 @@ const APIKeysPage: React.FC = () => {
                       sx={expStatus === 'expired' ? { opacity: 0.5 } : undefined}
                     >
                       <TableCell>
-                        <Typography fontWeight="medium">{apiKey.name || '-'}</Typography>
+                        <Typography sx={{
+                          fontWeight: "medium"
+                        }}>{apiKey.name || '-'}</Typography>
                         {apiKey.description && (
                           <Typography
                             variant="caption"
-                            color="text.secondary"
-                            sx={{ display: 'block' }}
-                          >
+                            sx={{
+                              color: "text.secondary",
+                              display: 'block'
+                            }}>
                             {apiKey.description}
                           </Typography>
                         )}
@@ -574,19 +584,17 @@ const APIKeysPage: React.FC = () => {
                         </Box>
                       </TableCell>
                     </TableRow>
-                  )
+                  );
                 })}
               </TableBody>
             </Table>
           </TableContainer>
         )}
       </Paper>
-
       {/* Create API Key Dialog */}
       <Dialog
         open={openDialog}
         onClose={newKeyValue ? undefined : handleCloseDialog}
-        disableEscapeKeyDown={!!newKeyValue}
         maxWidth="sm"
         fullWidth
       >
@@ -602,25 +610,33 @@ const APIKeysPage: React.FC = () => {
                 label="API Key"
                 value={newKeyValue}
                 fullWidth
-                InputProps={{
-                  readOnly: true,
-                  endAdornment: (
-                    <InputAdornment position="end">
-                      <Tooltip title="Copy API key">
-                        <IconButton
-                          aria-label="Copy API key"
-                          onClick={() => handleCopyKey(newKeyValue)}
-                        >
-                          <CopyIcon />
-                        </IconButton>
-                      </Tooltip>
-                    </InputAdornment>
-                  ),
-                  sx: { fontFamily: 'monospace' },
+                slotProps={{
+                  input: {
+                    readOnly: true,
+                    endAdornment: (
+                      <InputAdornment position="end">
+                        <Tooltip title="Copy API key">
+                          <IconButton
+                            aria-label="Copy API key"
+                            onClick={() => handleCopyKey(newKeyValue)}
+                          >
+                            <CopyIcon />
+                          </IconButton>
+                        </Tooltip>
+                      </InputAdornment>
+                    ),
+                    sx: { fontFamily: 'monospace' },
+                  }
                 }}
               />
               {copiedKey && (
-                <Typography variant="caption" color="success.main" sx={{ mt: 1, display: 'block' }}>
+                <Typography
+                  variant="caption"
+                  sx={{
+                    color: "success.main",
+                    mt: 1,
+                    display: 'block'
+                  }}>
                   Copied to clipboard!
                 </Typography>
               )}
@@ -689,8 +705,10 @@ const APIKeysPage: React.FC = () => {
                 value={formData.expires_at}
                 onChange={(e) => setFormData({ ...formData, expires_at: e.target.value })}
                 fullWidth
-                InputLabelProps={{ shrink: true }}
                 helperText="Leave empty for a key that never expires"
+                slotProps={{
+                  inputLabel: { shrink: true }
+                }}
               />
               {renderScopeCheckboxes(formData.scopes, handleScopeToggle)}
             </Stack>
@@ -720,7 +738,6 @@ const APIKeysPage: React.FC = () => {
           )}
         </DialogActions>
       </Dialog>
-
       {/* Edit API Key Dialog */}
       <Dialog
         open={editDialogOpen}
@@ -744,8 +761,10 @@ const APIKeysPage: React.FC = () => {
               value={editFormData.expires_at}
               onChange={(e) => setEditFormData({ ...editFormData, expires_at: e.target.value })}
               fullWidth
-              InputLabelProps={{ shrink: true }}
               helperText="Leave empty for a key that never expires"
+              slotProps={{
+                inputLabel: { shrink: true }
+              }}
             />
             {renderScopeCheckboxes(editFormData.scopes, handleEditScopeToggle)}
           </Stack>
@@ -761,12 +780,10 @@ const APIKeysPage: React.FC = () => {
           </Button>
         </DialogActions>
       </Dialog>
-
       {/* Rotate API Key Dialog */}
       <Dialog
         open={rotateDialogOpen}
         onClose={rotatedKeyValue ? undefined : handleCloseRotateDialog}
-        disableEscapeKeyDown={!!rotatedKeyValue}
         maxWidth="sm"
         fullWidth
       >
@@ -781,25 +798,33 @@ const APIKeysPage: React.FC = () => {
                 label="New API Key"
                 value={rotatedKeyValue}
                 fullWidth
-                InputProps={{
-                  readOnly: true,
-                  endAdornment: (
-                    <InputAdornment position="end">
-                      <Tooltip title="Copy API key">
-                        <IconButton
-                          aria-label="Copy rotated key"
-                          onClick={() => handleCopyKey(rotatedKeyValue)}
-                        >
-                          <CopyIcon />
-                        </IconButton>
-                      </Tooltip>
-                    </InputAdornment>
-                  ),
-                  sx: { fontFamily: 'monospace' },
+                slotProps={{
+                  input: {
+                    readOnly: true,
+                    endAdornment: (
+                      <InputAdornment position="end">
+                        <Tooltip title="Copy API key">
+                          <IconButton
+                            aria-label="Copy rotated key"
+                            onClick={() => handleCopyKey(rotatedKeyValue)}
+                          >
+                            <CopyIcon />
+                          </IconButton>
+                        </Tooltip>
+                      </InputAdornment>
+                    ),
+                    sx: { fontFamily: 'monospace' },
+                  }
                 }}
               />
               {copiedKey && (
-                <Typography variant="caption" color="success.main" sx={{ mt: 1, display: 'block' }}>
+                <Typography
+                  variant="caption"
+                  sx={{
+                    color: "success.main",
+                    mt: 1,
+                    display: 'block'
+                  }}>
                   Copied to clipboard!
                 </Typography>
               )}
@@ -854,7 +879,9 @@ const APIKeysPage: React.FC = () => {
                     valueLabelDisplay="auto"
                     valueLabelFormat={(v) => `${v}h`}
                   />
-                  <Typography variant="caption" color="text.secondary">
+                  <Typography variant="caption" sx={{
+                    color: "text.secondary"
+                  }}>
                     The old key will continue to work during the grace period, giving you time to
                     update integrations.
                   </Typography>
@@ -878,7 +905,6 @@ const APIKeysPage: React.FC = () => {
           )}
         </DialogActions>
       </Dialog>
-
       {/* Delete Confirmation Dialog */}
       <Dialog open={deleteDialogOpen} onClose={() => setDeleteDialogOpen(false)}>
         <DialogTitle>Delete API Key</DialogTitle>
@@ -895,13 +921,14 @@ const APIKeysPage: React.FC = () => {
           </Button>
         </DialogActions>
       </Dialog>
-
       {/* Usage Instructions */}
       <Paper sx={{ p: 3, mt: 3 }}>
         <Typography variant="h6" gutterBottom>
           Using API Keys
         </Typography>
-        <Typography variant="body2" color="text.secondary" component="div">
+        <Typography variant="body2" component="div" sx={{
+          color: "text.secondary"
+        }}>
           To use an API key with Terraform CLI, add it to your Terraform CLI configuration:
           <Box
             component="pre"
@@ -923,7 +950,7 @@ credentials "${REGISTRY_HOST}" {
         </Typography>
       </Paper>
     </Container>
-  )
+  );
 }
 
 export default APIKeysPage

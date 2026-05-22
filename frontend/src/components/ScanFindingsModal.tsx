@@ -30,7 +30,7 @@ import ScanDiagnostics from './ScanDiagnostics'
 /** Escape a single CSV field value (RFC 4180). */
 function csvEscape(value: string): string {
   if (value.includes('"') || value.includes(',') || value.includes('\n')) {
-    return `"${value.replace(/"/g, '""')}"`
+    return `"${value.replace(/"/g, '""')}"`;
   }
   return value
 }
@@ -105,7 +105,13 @@ const ScanFindingsModal: React.FC<ScanFindingsModalProps> = ({
           Scan Findings
         </Typography>
         {moduleLabel && (
-          <Typography variant="body2" color="text.secondary" component="span" sx={{ ml: 1 }}>
+          <Typography
+            variant="body2"
+            component="span"
+            sx={{
+              color: "text.secondary",
+              ml: 1
+            }}>
             {moduleLabel}
           </Typography>
         )}
@@ -120,20 +126,38 @@ const ScanFindingsModal: React.FC<ScanFindingsModalProps> = ({
       </DialogTitle>
       <DialogContent dividers>
         {loading ? (
-          <Box display="flex" justifyContent="center" py={4}>
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "center",
+              py: 4
+            }}>
             <CircularProgress data-testid="findings-loading" />
           </Box>
         ) : !scan ? (
-          <Typography color="text.secondary">No scan data available.</Typography>
+          <Typography sx={{
+            color: "text.secondary"
+          }}>No scan data available.</Typography>
         ) : (
           <>
-            <Stack direction="row" spacing={1} sx={{ mb: 2 }} alignItems="center" flexWrap="wrap">
-              <Typography variant="body2" color="text.secondary">
+            <Stack
+              direction="row"
+              spacing={1}
+              sx={{
+                alignItems: "center",
+                flexWrap: "wrap",
+                mb: 2
+              }}>
+              <Typography variant="body2" sx={{
+                color: "text.secondary"
+              }}>
                 {scan.scanner}
                 {scan.scanner_version ? ` ${scan.scanner_version}` : ''}
               </Typography>
               {scan.scanned_at && (
-                <Typography variant="body2" color="text.secondary">
+                <Typography variant="body2" sx={{
+                  color: "text.secondary"
+                }}>
                   {new Date(scan.scanned_at).toLocaleString()}
                 </Typography>
               )}
@@ -206,7 +230,12 @@ const ScanFindingsModal: React.FC<ScanFindingsModalProps> = ({
                 </Table>
               </TableContainer>
             ) : (
-              <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+              <Typography
+                variant="body2"
+                sx={{
+                  color: "text.secondary",
+                  mb: 2
+                }}>
                 Could not parse individual findings from scanner output.
               </Typography>
             )}
@@ -232,7 +261,7 @@ const ScanFindingsModal: React.FC<ScanFindingsModalProps> = ({
         )}
       </DialogContent>
     </Dialog>
-  )
+  );
 }
 
 export default ScanFindingsModal

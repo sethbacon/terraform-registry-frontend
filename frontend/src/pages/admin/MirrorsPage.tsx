@@ -96,7 +96,9 @@ const VersionPlatformRow: React.FC<{ version: MirroredProviderVersion }> = ({ ve
           </IconButton>
         </TableCell>
         <TableCell>
-          <Typography variant="caption" fontFamily="monospace">
+          <Typography variant="caption" sx={{
+            fontFamily: "monospace"
+          }}>
             {version.upstream_version}
           </Typography>
         </TableCell>
@@ -117,7 +119,6 @@ const VersionPlatformRow: React.FC<{ version: MirroredProviderVersion }> = ({ ve
         </TableCell>
         <TableCell>{platforms.length}</TableCell>
       </TableRow>
-
       <TableRow>
         <TableCell colSpan={6} sx={{ pb: 0, pt: 0 }}>
           <Collapse in={open} unmountOnExit>
@@ -139,14 +140,17 @@ const VersionPlatformRow: React.FC<{ version: MirroredProviderVersion }> = ({ ve
                       <TableCell>
                         <Typography
                           variant="caption"
-                          fontFamily="monospace"
-                          sx={{ wordBreak: 'break-all' }}
-                        >
+                          sx={{
+                            fontFamily: "monospace",
+                            wordBreak: 'break-all'
+                          }}>
                           {p.filename}
                         </Typography>
                       </TableCell>
                       <TableCell>
-                        <Typography variant="caption" fontFamily="monospace">
+                        <Typography variant="caption" sx={{
+                          fontFamily: "monospace"
+                        }}>
                           {p.shasum ? p.shasum.slice(0, 12) + '…' : '—'}
                         </Typography>
                       </TableCell>
@@ -159,7 +163,7 @@ const VersionPlatformRow: React.FC<{ version: MirroredProviderVersion }> = ({ ve
         </TableCell>
       </TableRow>
     </>
-  )
+  );
 }
 
 // ---------------------------------------------------------------------------
@@ -185,7 +189,9 @@ const ProviderRow: React.FC<{ provider: MirroredProvider }> = ({ provider }) => 
         <TableCell>{provider.upstream_namespace}</TableCell>
         <TableCell>{provider.upstream_type}</TableCell>
         <TableCell>
-          <Typography variant="body2" fontFamily="monospace">
+          <Typography variant="body2" sx={{
+            fontFamily: "monospace"
+          }}>
             {provider.last_sync_version ?? '—'}
           </Typography>
         </TableCell>
@@ -201,13 +207,14 @@ const ProviderRow: React.FC<{ provider: MirroredProvider }> = ({ provider }) => 
           />
         </TableCell>
       </TableRow>
-
       <TableRow>
         <TableCell colSpan={7} sx={{ pb: 0, pt: 0 }}>
           <Collapse in={open} unmountOnExit>
             <Box sx={{ mx: 2, mb: 2 }}>
               {versions.length === 0 ? (
-                <Typography variant="caption" color="text.secondary">
+                <Typography variant="caption" sx={{
+                  color: "text.secondary"
+                }}>
                   No versions synced.
                 </Typography>
               ) : (
@@ -234,7 +241,7 @@ const ProviderRow: React.FC<{ provider: MirroredProvider }> = ({ provider }) => 
         </TableCell>
       </TableRow>
     </>
-  )
+  );
 }
 
 const MirrorsPage: React.FC = () => {
@@ -500,7 +507,9 @@ const MirrorsPage: React.FC = () => {
           >
             <Box>
               <Typography variant="h4">Mirroring — Provider Config</Typography>
-              <Typography variant="body2" color="text.secondary">
+              <Typography variant="body2" sx={{
+                color: "text.secondary"
+              }}>
                 Configure upstream registry mirroring for providers
               </Typography>
             </Box>
@@ -551,20 +560,28 @@ const MirrorsPage: React.FC = () => {
                   <Grid size={{ xs: 12, md: 6 }} key={mirror.id}>
                     <Card>
                       <CardContent>
-                        <Box display="flex" alignItems="center" mb={2}>
+                        <Box
+                          sx={{
+                            display: "flex",
+                            alignItems: "center",
+                            mb: 2
+                          }}>
                           <CloudDownloadIcon sx={{ mr: 2, color: 'primary.main' }} />
-                          <Box flexGrow={1}>
+                          <Box sx={{
+                            flexGrow: 1
+                          }}>
                             <Typography variant="h6">{mirror.name}</Typography>
                             <Typography variant="body2" color="textSecondary" noWrap>
                               {mirror.upstream_registry_url}
                             </Typography>
                           </Box>
                           <Box
-                            display="flex"
-                            flexDirection="column"
-                            alignItems="flex-end"
-                            gap={0.5}
-                          >
+                            sx={{
+                              display: "flex",
+                              flexDirection: "column",
+                              alignItems: "flex-end",
+                              gap: 0.5
+                            }}>
                             <Chip
                               label={mirror.enabled ? 'Enabled' : 'Disabled'}
                               color={mirror.enabled ? 'success' : 'default'}
@@ -575,12 +592,20 @@ const MirrorsPage: React.FC = () => {
                         </Box>
 
                         {mirror.description && (
-                          <Typography variant="body2" color="textSecondary" paragraph>
+                          <Typography variant="body2" color="textSecondary" sx={{
+                            marginBottom: "16px"
+                          }}>
                             {mirror.description}
                           </Typography>
                         )}
 
-                        <Box display="flex" gap={1} flexWrap="wrap" mb={1}>
+                        <Box
+                          sx={{
+                            display: "flex",
+                            gap: 1,
+                            flexWrap: "wrap",
+                            mb: 1
+                          }}>
                           {parsed.namespaceFilters.length > 0 && (
                             <Tooltip title="Namespace filters">
                               <Chip
@@ -621,11 +646,15 @@ const MirrorsPage: React.FC = () => {
                           )}
                         </Box>
 
-                        <Typography variant="caption" color="textSecondary" display="block">
+                        <Typography variant="caption" color="textSecondary" sx={{
+                          display: "block"
+                        }}>
                           <ScheduleIcon sx={{ fontSize: 14, verticalAlign: 'middle', mr: 0.5 }} />
                           Sync interval: {mirror.sync_interval_hours} hours
                         </Typography>
-                        <Typography variant="caption" color="textSecondary" display="block">
+                        <Typography variant="caption" color="textSecondary" sx={{
+                          display: "block"
+                        }}>
                           Last sync: {formatDate(mirror.last_sync_at, 'Never')}
                         </Typography>
 
@@ -695,7 +724,7 @@ const MirrorsPage: React.FC = () => {
                       </CardActions>
                     </Card>
                   </Grid>
-                )
+                );
               })}
 
             {mirrors.length === 0 && !loading && (
@@ -809,12 +838,12 @@ const MirrorsPage: React.FC = () => {
                       helperText="Select platforms to sync. Leave empty to sync all platforms."
                     />
                   )}
-                  renderTags={(value, getTagProps) =>
+                  renderValue={(value, getItemProps) =>
                     value.map((option, index) => (
                       <Chip
                         label={option}
                         size="small"
-                        {...getTagProps({ index })}
+                        {...getItemProps({ index })}
                         key={option}
                       />
                     ))
@@ -832,8 +861,10 @@ const MirrorsPage: React.FC = () => {
                       sync_interval_hours: parseInt(e.target.value) || 24,
                     })
                   }
-                  inputProps={{ min: 1 }}
                   helperText="How often to check for updates"
+                  slotProps={{
+                    htmlInput: { min: 1 }
+                  }}
                 />
 
                 <FormControlLabel
@@ -897,7 +928,12 @@ const MirrorsPage: React.FC = () => {
             <DialogTitle>Sync History — {historyMirrorName}</DialogTitle>
             <DialogContent>
               {historyLoading ? (
-                <Box display="flex" justifyContent="center" p={4}>
+                <Box
+                  sx={{
+                    display: "flex",
+                    justifyContent: "center",
+                    p: 4
+                  }}>
                   <CircularProgress />
                 </Box>
               ) : mirrorHistory.length === 0 ? (
@@ -988,7 +1024,12 @@ const MirrorsPage: React.FC = () => {
             <DialogTitle>Providers — {providersDialogName}</DialogTitle>
             <DialogContent>
               {providersLoading ? (
-                <Box display="flex" justifyContent="center" py={4}>
+                <Box
+                  sx={{
+                    display: "flex",
+                    justifyContent: "center",
+                    py: 4
+                  }}>
                   <CircularProgress />
                 </Box>
               ) : mirrorProviders.length === 0 ? (
@@ -1030,7 +1071,7 @@ const MirrorsPage: React.FC = () => {
         </>
       )}
     </Container>
-  )
+  );
 }
 
 export default MirrorsPage

@@ -382,9 +382,18 @@ const SCMProvidersPage: React.FC = () => {
               <Grid size={{ xs: 12, md: 6, lg: 4 }} key={provider.id}>
                 <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
                   <CardContent sx={{ flexGrow: 1 }}>
-                    <Box display="flex" alignItems="center" mb={2}>
-                      <Box mr={2}>{getProviderIcon(provider.provider_type)}</Box>
-                      <Box flexGrow={1}>
+                    <Box
+                      sx={{
+                        display: "flex",
+                        alignItems: "center",
+                        mb: 2
+                      }}>
+                      <Box sx={{
+                        mr: 2
+                      }}>{getProviderIcon(provider.provider_type)}</Box>
+                      <Box sx={{
+                        flexGrow: 1
+                      }}>
                         <Typography variant="h6">{provider.name}</Typography>
                         <Typography variant="body2" color="textSecondary">
                           {getProviderLabel(provider.provider_type)}
@@ -415,25 +424,33 @@ const SCMProvidersPage: React.FC = () => {
 
                     {provider.provider_type !== 'bitbucket_dc' && (
                       <Box
-                        mt={2}
-                        p={1.5}
                         sx={{
+                          mt: 2,
+                          p: 1.5,
+
                           backgroundColor: (theme) =>
                             theme.palette.mode === 'dark' ? '#2a2a2a' : '#f5f5f5',
+
                           borderRadius: 1,
+
                           border: (theme) =>
-                            `1px solid ${theme.palette.mode === 'dark' ? '#404040' : '#e0e0e0'}`,
-                        }}
-                      >
+                            `1px solid ${theme.palette.mode === 'dark' ? '#404040' : '#e0e0e0'}`
+                        }}>
                         <Typography
                           variant="caption"
                           color="textSecondary"
-                          display="block"
-                          mb={0.5}
-                        >
+                          sx={{
+                            display: "block",
+                            mb: 0.5
+                          }}>
                           OAuth Callback URL:
                         </Typography>
-                        <Box display="flex" alignItems="center" gap={1}>
+                        <Box
+                          sx={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: 1
+                          }}>
                           <Typography
                             variant="caption"
                             sx={{
@@ -465,16 +482,31 @@ const SCMProvidersPage: React.FC = () => {
 
                     <Divider sx={{ my: 1.5 }} />
 
-                    <Box display="flex" alignItems="flex-start" gap={1}>
-                      <Box flex={1}>
-                        <Typography variant="caption" color="textSecondary" display="block">
+                    <Box
+                      sx={{
+                        display: "flex",
+                        alignItems: "flex-start",
+                        gap: 1
+                      }}>
+                      <Box sx={{
+                        flex: 1
+                      }}>
+                        <Typography variant="caption" color="textSecondary" sx={{
+                          display: "block"
+                        }}>
                           Created: {new Date(provider.created_at).toLocaleDateString()}
                         </Typography>
                         {(() => {
                           const status = tokenStatuses[provider.id]
                           if (!status) return null
                           return status.connected ? (
-                            <Box display="flex" alignItems="center" gap={0.5} mt={0.5}>
+                            <Box
+                              sx={{
+                                display: "flex",
+                                alignItems: "center",
+                                gap: 0.5,
+                                mt: 0.5
+                              }}>
                               <CheckCircleIcon sx={{ fontSize: '0.9rem', color: 'success.main' }} />
                               <Box>
                                 <Typography
@@ -500,7 +532,13 @@ const SCMProvidersPage: React.FC = () => {
                               </Box>
                             </Box>
                           ) : (
-                            <Box display="flex" alignItems="center" gap={0.5} mt={0.5}>
+                            <Box
+                              sx={{
+                                display: "flex",
+                                alignItems: "center",
+                                gap: 0.5,
+                                mt: 0.5
+                              }}>
                               <LinkOffIcon sx={{ fontSize: '0.9rem', color: 'text.disabled' }} />
                               <Typography
                                 variant="caption"
@@ -510,7 +548,7 @@ const SCMProvidersPage: React.FC = () => {
                                 Not connected
                               </Typography>
                             </Box>
-                          )
+                          );
                         })()}
                       </Box>
                       {tokenStatuses[provider.id]?.connected && (
@@ -828,7 +866,7 @@ const SCMProvidersPage: React.FC = () => {
         </>
       )}
     </Container>
-  )
+  );
 }
 
 export default SCMProvidersPage

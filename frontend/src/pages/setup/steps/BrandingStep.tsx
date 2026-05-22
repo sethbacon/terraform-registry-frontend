@@ -53,17 +53,20 @@ const BrandingStep: React.FC = () => {
           White-Label Branding
         </Typography>
       </Box>
-      <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+      <Typography
+        variant="body2"
+        sx={{
+          color: "text.secondary",
+          mb: 3
+        }}>
         Customize the registry's appearance for your organization. All fields are optional — leave
         any blank to keep the built-in defaults. You can change these settings later from the admin
         panel.
       </Typography>
-
       <Alert severity="info" sx={{ mb: 3 }}>
         Branding changes take effect immediately. Logo and hero images must be publicly accessible
         URLs (HTTPS recommended).
       </Alert>
-
       <Stack spacing={2}>
         <TextField
           fullWidth
@@ -81,21 +84,23 @@ const BrandingStep: React.FC = () => {
           onChange={handleChange('primary_color')}
           placeholder="#5C4EE5"
           helperText="Hex color code for buttons, links, and accent elements"
-          InputProps={{
-            startAdornment: form.primary_color?.match(/^#[0-9A-Fa-f]{6}$/) ? (
-              <InputAdornment position="start">
-                <Box
-                  sx={{
-                    width: 16,
-                    height: 16,
-                    borderRadius: '50%',
-                    bgcolor: form.primary_color,
-                    border: '1px solid',
-                    borderColor: 'divider',
-                  }}
-                />
-              </InputAdornment>
-            ) : undefined,
+          slotProps={{
+            input: {
+              startAdornment: form.primary_color?.match(/^#[0-9A-Fa-f]{6}$/) ? (
+                <InputAdornment position="start">
+                  <Box
+                    sx={{
+                      width: 16,
+                      height: 16,
+                      borderRadius: '50%',
+                      bgcolor: form.primary_color,
+                      border: '1px solid',
+                      borderColor: 'divider',
+                    }}
+                  />
+                </InputAdornment>
+              ) : undefined,
+            }
           }}
         />
 
@@ -126,7 +131,9 @@ const BrandingStep: React.FC = () => {
           helperText="Browser tab icon (.ico or .png, 32×32 or 64×64)"
         />
 
-        <Stack direction="row" spacing={2} justifyContent="space-between">
+        <Stack direction="row" spacing={2} sx={{
+          justifyContent: "space-between"
+        }}>
           <Button variant="text" onClick={() => goToStep(3)}>
             ← Back
           </Button>
@@ -146,7 +153,7 @@ const BrandingStep: React.FC = () => {
         </Stack>
       </Stack>
     </Box>
-  )
+  );
 }
 
 export default BrandingStep

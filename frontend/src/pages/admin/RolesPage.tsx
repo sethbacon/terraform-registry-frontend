@@ -70,19 +70,33 @@ const RolesPage: React.FC = () => {
   return (
     <Container maxWidth="lg" aria-busy={loading} aria-live="polite">
       {loading ? (
-        <Box display="flex" justifyContent="center" alignItems="center" minHeight="400px">
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            minHeight: "400px"
+          }}>
           <CircularProgress />
         </Box>
       ) : (
         <>
           <Box sx={{ mb: 4 }}>
-            <Stack direction="row" alignItems="center" spacing={2} sx={{ mb: 2 }}>
+            <Stack
+              direction="row"
+              spacing={2}
+              sx={{
+                alignItems: "center",
+                mb: 2
+              }}>
               <ShieldIcon sx={{ fontSize: 32, color: 'primary.main' }} />
               <Typography variant="h4" component="h1">
                 Roles & Permissions
               </Typography>
             </Stack>
-            <Typography variant="body1" color="text.secondary">
+            <Typography variant="body1" sx={{
+              color: "text.secondary"
+            }}>
               View the available roles and their associated permission scopes. System roles are
               predefined and cannot be modified.
             </Typography>
@@ -99,7 +113,12 @@ const RolesPage: React.FC = () => {
             <Typography variant="h6" gutterBottom>
               Available Scopes Reference
             </Typography>
-            <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+            <Typography
+              variant="body2"
+              sx={{
+                color: "text.secondary",
+                mb: 2
+              }}>
               Scopes define what actions a role can perform in the registry.
             </Typography>
             <TableContainer>
@@ -138,7 +157,12 @@ const RolesPage: React.FC = () => {
             <Typography variant="h6" gutterBottom>
               Role Templates
             </Typography>
-            <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+            <Typography
+              variant="body2"
+              sx={{
+                color: "text.secondary",
+                mb: 3
+              }}>
               Click on a role to see its full scope details.
             </Typography>
 
@@ -167,10 +191,12 @@ const RolesPage: React.FC = () => {
                     >
                       <Stack
                         direction="row"
-                        alignItems="center"
                         spacing={2}
-                        sx={{ width: '100%', pr: 2 }}
-                      >
+                        sx={{
+                          alignItems: "center",
+                          width: '100%',
+                          pr: 2
+                        }}>
                         {role.name === 'admin' ? (
                           <AdminIcon color="error" />
                         ) : role.is_system ? (
@@ -179,7 +205,9 @@ const RolesPage: React.FC = () => {
                           <ShieldIcon color="primary" />
                         )}
                         <Box sx={{ flexGrow: 1 }}>
-                          <Typography variant="subtitle1" component="span" fontWeight="medium">
+                          <Typography variant="subtitle1" component="span" sx={{
+                            fontWeight: "medium"
+                          }}>
                             {role.display_name}
                           </Typography>
                           {role.is_system && (
@@ -191,14 +219,21 @@ const RolesPage: React.FC = () => {
                             />
                           )}
                         </Box>
-                        <Typography variant="body2" color="text.secondary">
+                        <Typography variant="body2" sx={{
+                          color: "text.secondary"
+                        }}>
                           {role.scopes.length} scope{role.scopes.length !== 1 ? 's' : ''}
                         </Typography>
                       </Stack>
                     </AccordionSummary>
                     <AccordionDetails sx={{ pt: 2 }}>
                       {role.description && (
-                        <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                        <Typography
+                          variant="body2"
+                          sx={{
+                            color: "text.secondary",
+                            mb: 2
+                          }}>
                           {role.description}
                         </Typography>
                       )}
@@ -206,7 +241,14 @@ const RolesPage: React.FC = () => {
                       <Typography variant="subtitle2" gutterBottom>
                         Assigned Scopes:
                       </Typography>
-                      <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap sx={{ mb: 2 }}>
+                      <Stack
+                        direction="row"
+                        spacing={1}
+                        useFlexGap
+                        sx={{
+                          flexWrap: "wrap",
+                          mb: 2
+                        }}>
                         {role.scopes.map((scope) => {
                           const scopeInfo = getScopeInfo(scope)
                           return (
@@ -252,8 +294,10 @@ const RolesPage: React.FC = () => {
                                       <Stack
                                         direction="row"
                                         spacing={0.5}
-                                        flexWrap="wrap"
                                         useFlexGap
+                                        sx={{
+                                          flexWrap: "wrap"
+                                        }}
                                       >
                                         {matchingScopes.map((scope) => {
                                           const scopeInfo = getScopeInfo(scope)
@@ -269,13 +313,15 @@ const RolesPage: React.FC = () => {
                                         })}
                                       </Stack>
                                     ) : (
-                                      <Typography variant="body2" color="text.disabled">
+                                      <Typography variant="body2" sx={{
+                                        color: "text.disabled"
+                                      }}>
                                         No access
                                       </Typography>
                                     )}
                                   </TableCell>
                                 </TableRow>
-                              )
+                              );
                             })}
                           </TableBody>
                         </Table>
@@ -283,7 +329,9 @@ const RolesPage: React.FC = () => {
 
                       {/* Metadata */}
                       <Box sx={{ mt: 2, pt: 2, borderTop: 1, borderColor: 'divider' }}>
-                        <Typography variant="caption" color="text.secondary">
+                        <Typography variant="caption" sx={{
+                          color: "text.secondary"
+                        }}>
                           Role ID: {role.id} | Created:{' '}
                           {new Date(role.created_at).toLocaleDateString()}
                           {role.updated_at !== role.created_at && (
@@ -300,7 +348,7 @@ const RolesPage: React.FC = () => {
         </>
       )}
     </Container>
-  )
+  );
 }
 
 export default RolesPage

@@ -54,13 +54,19 @@ const WebhookEventsPanel: React.FC<WebhookEventsPanelProps> = ({
   return (
     <Paper sx={{ p: 3, mb: 3 }}>
       <Box
-        display="flex"
-        alignItems="center"
-        justifyContent="space-between"
-        sx={{ cursor: 'pointer' }}
         onClick={handleToggle}
-      >
-        <Box display="flex" alignItems="center" gap={1}>
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          cursor: 'pointer'
+        }}>
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            gap: 1
+          }}>
           <WebhookIcon fontSize="small" color="action" />
           <Typography variant="h6">Webhook Events</Typography>
         </Box>
@@ -68,15 +74,21 @@ const WebhookEventsPanel: React.FC<WebhookEventsPanelProps> = ({
           {webhookEventsExpanded ? <ExpandLessIcon /> : <ExpandMoreIcon />}
         </IconButton>
       </Box>
-
       <Collapse in={webhookEventsExpanded}>
         <Divider sx={{ my: 2 }} />
         {webhookEventsLoading ? (
-          <Box display="flex" justifyContent="center" py={2}>
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "center",
+              py: 2
+            }}>
             <CircularProgress size={24} />
           </Box>
         ) : webhookEvents.length === 0 ? (
-          <Typography variant="body2" color="text.secondary">
+          <Typography variant="body2" sx={{
+            color: "text.secondary"
+          }}>
             No webhook events recorded yet.
           </Typography>
         ) : (
@@ -85,7 +97,12 @@ const WebhookEventsPanel: React.FC<WebhookEventsPanelProps> = ({
               <ListItem key={event.id} disableGutters sx={{ py: 0.5 }}>
                 <ListItemText
                   primary={
-                    <Box display="flex" alignItems="center" gap={1}>
+                    <Box
+                      sx={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 1
+                      }}>
                       <Chip
                         label={event.state}
                         size="small"
@@ -106,11 +123,18 @@ const WebhookEventsPanel: React.FC<WebhookEventsPanelProps> = ({
                   }
                   secondary={
                     <Box>
-                      <Typography variant="caption" color="text.secondary" display="block">
+                      <Typography
+                        variant="caption"
+                        sx={{
+                          color: "text.secondary",
+                          display: "block"
+                        }}>
                         {new Date(event.created_at).toLocaleString()}
                       </Typography>
                       {event.error_message && (
-                        <Typography variant="caption" color="error" display="block">
+                        <Typography variant="caption" color="error" sx={{
+                          display: "block"
+                        }}>
                           {event.error_message}
                         </Typography>
                       )}
@@ -122,16 +146,21 @@ const WebhookEventsPanel: React.FC<WebhookEventsPanelProps> = ({
             {webhookEvents.length > 10 && (
               <Typography
                 variant="caption"
-                color="text.secondary"
-                sx={{ pl: 0, mt: 1, display: 'block' }}
-              >
+                sx={{
+                  color: "text.secondary",
+                  pl: 0,
+                  mt: 1,
+                  display: 'block'
+                }}>
                 Showing 10 of {webhookEvents.length} events
               </Typography>
             )}
           </List>
         )}
         {webhookEventsLoaded && (
-          <Box mt={1}>
+          <Box sx={{
+            mt: 1
+          }}>
             <Button
               size="small"
               startIcon={<SyncIcon />}
@@ -147,7 +176,7 @@ const WebhookEventsPanel: React.FC<WebhookEventsPanelProps> = ({
         )}
       </Collapse>
     </Paper>
-  )
+  );
 }
 
 export default WebhookEventsPanel

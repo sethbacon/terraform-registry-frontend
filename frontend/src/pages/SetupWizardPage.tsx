@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useCallback } from 'react'
 import {
   Box,
   Container,
@@ -77,7 +77,9 @@ const SetupWizardShell: React.FC = () => {
               <Typography variant="h4" component="h1" gutterBottom>
                 {isPending ? 'Configure New Features' : 'Terraform Registry Setup'}
               </Typography>
-              <Typography variant="body1" color="text.secondary">
+              <Typography variant="body1" sx={{
+                color: "text.secondary"
+              }}>
                 {isPending
                   ? 'New features have been added that require configuration. Your existing OIDC, storage, and admin settings are preserved.'
                   : 'Configure your registry for first-time use. This wizard will guide you through setting up OIDC authentication, storage backend, and the initial admin user.'}
@@ -115,7 +117,9 @@ const SetupWizardShell: React.FC = () => {
             <Typography variant="subtitle2" gutterBottom>
               Prefer using the command line?
             </Typography>
-            <Typography variant="body2" color="text.secondary">
+            <Typography variant="body2" sx={{
+              color: "text.secondary"
+            }}>
               All setup steps can also be performed via curl or any HTTP client. See the{' '}
               <a href="/api-docs/" target="_blank" rel="noopener noreferrer">
                 API documentation
@@ -127,15 +131,23 @@ const SetupWizardShell: React.FC = () => {
         </Container>
       )}
     </Box>
-  )
+  );
 }
 
 const SetupWizardPage: React.FC = () => {
   const navigate = useNavigate()
+  const handleSetupCompleted = useCallback(
+    () => navigate('/', { replace: true }),
+    [navigate],
+  )
+  const handleSetupFinalized = useCallback(
+    () => navigate('/login', { replace: true }),
+    [navigate],
+  )
   return (
     <SetupWizardProvider
-      onSetupCompleted={() => navigate('/', { replace: true })}
-      onSetupFinalized={() => navigate('/login', { replace: true })}
+      onSetupCompleted={handleSetupCompleted}
+      onSetupFinalized={handleSetupFinalized}
     >
       <SetupWizardShell />
     </SetupWizardProvider>
