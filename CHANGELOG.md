@@ -1,6 +1,15 @@
 <!-- markdownlint-disable MD013 MD024 MD041 -->
 # Changelog
 
+## [1.2.3](https://github.com/sethbacon/terraform-registry-frontend/compare/v1.2.2...v1.2.3) (2026-05-22)
+
+
+### Bug Fixes
+
+* **ci:** grant packages:read in weekly-security so the reused ci.yml can launch ([#297](https://github.com/sethbacon/terraform-registry-frontend/issues/297)) ([e9d7e5a](https://github.com/sethbacon/terraform-registry-frontend/commit/e9d7e5a9d0275122ab1a61ccca7893474c6a5aa2))
+* **module-upload:** validate namespace/name/provider against Terraform segment rules ([#290](https://github.com/sethbacon/terraform-registry-frontend/issues/290)) ([#294](https://github.com/sethbacon/terraform-registry-frontend/issues/294)) ([1d3c09d](https://github.com/sethbacon/terraform-registry-frontend/commit/1d3c09decdca4d51784afc98e9f4f1e51239ed8c))
+* **setup:** BrandingStep persists via /setup/ui-theme; remove backend-now-ships allowlist ([#277](https://github.com/sethbacon/terraform-registry-frontend/issues/277), [#276](https://github.com/sethbacon/terraform-registry-frontend/issues/276)) ([#296](https://github.com/sethbacon/terraform-registry-frontend/issues/296)) ([949e4a1](https://github.com/sethbacon/terraform-registry-frontend/commit/949e4a1022b70924e1d9bcad17012a319be561e1))
+
 ## [1.2.2](https://github.com/sethbacon/terraform-registry-frontend/compare/v1.2.1...v1.2.2) (2026-05-12)
 
 
