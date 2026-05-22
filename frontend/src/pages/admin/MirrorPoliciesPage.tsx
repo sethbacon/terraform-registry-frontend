@@ -226,7 +226,9 @@ const MirrorPoliciesPage: React.FC = () => {
           >
             <Box>
               <Typography variant="h4">Mirror Policies</Typography>
-              <Typography variant="body2" color="text.secondary">
+              <Typography variant="body2" sx={{
+                color: "text.secondary"
+              }}>
                 Define allow/deny rules for provider mirroring
               </Typography>
             </Box>
@@ -277,15 +279,22 @@ const MirrorPoliciesPage: React.FC = () => {
                 <Card sx={{ opacity: policy.is_active ? 1 : 0.6 }}>
                   <CardContent>
                     <Box
-                      display="flex"
-                      justifyContent="space-between"
-                      alignItems="flex-start"
-                      mb={1}
-                    >
+                      sx={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "flex-start",
+                        mb: 1
+                      }}>
                       <Typography variant="h6" sx={{ flex: 1, mr: 1 }}>
                         {policy.name}
                       </Typography>
-                      <Box display="flex" flexDirection="column" alignItems="flex-end" gap={0.5}>
+                      <Box
+                        sx={{
+                          display: "flex",
+                          flexDirection: "column",
+                          alignItems: "flex-end",
+                          gap: 0.5
+                        }}>
                         {getPolicyTypeChip(policy.policy_type)}
                         <Chip
                           label={policy.is_active ? 'Active' : 'Inactive'}
@@ -297,12 +306,20 @@ const MirrorPoliciesPage: React.FC = () => {
                     </Box>
 
                     {policy.description && (
-                      <Typography variant="body2" color="textSecondary" paragraph>
+                      <Typography variant="body2" color="textSecondary" sx={{
+                        marginBottom: "16px"
+                      }}>
                         {policy.description}
                       </Typography>
                     )}
 
-                    <Box display="flex" flexWrap="wrap" gap={0.5} mb={1}>
+                    <Box
+                      sx={{
+                        display: "flex",
+                        flexWrap: "wrap",
+                        gap: 0.5,
+                        mb: 1
+                      }}>
                       {policy.upstream_registry && (
                         <Chip
                           size="small"
@@ -330,7 +347,9 @@ const MirrorPoliciesPage: React.FC = () => {
                     </Box>
 
                     {policy.priority !== undefined && policy.priority !== 0 && (
-                      <Typography variant="caption" color="textSecondary" display="block">
+                      <Typography variant="caption" color="textSecondary" sx={{
+                        display: "block"
+                      }}>
                         Priority: {policy.priority}
                       </Typography>
                     )}
@@ -590,7 +609,7 @@ const MirrorPoliciesPage: React.FC = () => {
         </>
       )}
     </Container>
-  )
+  );
 }
 
 export default MirrorPoliciesPage

@@ -176,7 +176,9 @@ const ApprovalsPage: React.FC = () => {
           >
             <Box>
               <Typography variant="h4">Approval Requests</Typography>
-              <Typography variant="body2" color="text.secondary">
+              <Typography variant="body2" sx={{
+                color: "text.secondary"
+              }}>
                 Review and manage mirror provider approval requests
               </Typography>
             </Box>
@@ -231,11 +233,12 @@ const ApprovalsPage: React.FC = () => {
                 <Card>
                   <CardContent>
                     <Box
-                      display="flex"
-                      justifyContent="space-between"
-                      alignItems="flex-start"
-                      mb={1}
-                    >
+                      sx={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "flex-start",
+                        mb: 1
+                      }}>
                       <Typography variant="h6" sx={{ wordBreak: 'break-word', flex: 1, mr: 1 }}>
                         {approval.provider_namespace}
                         {approval.provider_name ? `/${approval.provider_name}` : ''}
@@ -244,25 +247,35 @@ const ApprovalsPage: React.FC = () => {
                     </Box>
 
                     {approval.reason && (
-                      <Typography variant="body2" color="textSecondary" paragraph>
+                      <Typography variant="body2" color="textSecondary" sx={{
+                        marginBottom: "16px"
+                      }}>
                         {approval.reason}
                       </Typography>
                     )}
 
-                    <Typography variant="caption" color="textSecondary" display="block">
+                    <Typography variant="caption" color="textSecondary" sx={{
+                      display: "block"
+                    }}>
                       <strong>Mirror Config ID:</strong> {approval.mirror_config_id}
                     </Typography>
-                    <Typography variant="caption" color="textSecondary" display="block">
+                    <Typography variant="caption" color="textSecondary" sx={{
+                      display: "block"
+                    }}>
                       <strong>Created:</strong> {formatDate(approval.created_at)}
                     </Typography>
 
                     {approval.reviewed_at && (
                       <>
-                        <Typography variant="caption" color="textSecondary" display="block">
+                        <Typography variant="caption" color="textSecondary" sx={{
+                          display: "block"
+                        }}>
                           <strong>Reviewed:</strong> {formatDate(approval.reviewed_at)}
                         </Typography>
                         {approval.review_notes && (
-                          <Typography variant="caption" color="textSecondary" display="block">
+                          <Typography variant="caption" color="textSecondary" sx={{
+                            display: "block"
+                          }}>
                             <strong>Notes:</strong> {approval.review_notes}
                           </Typography>
                         )}
@@ -439,7 +452,7 @@ const ApprovalsPage: React.FC = () => {
         </>
       )}
     </Container>
-  )
+  );
 }
 
 export default ApprovalsPage

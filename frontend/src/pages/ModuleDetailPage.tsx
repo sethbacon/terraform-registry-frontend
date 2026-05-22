@@ -145,11 +145,19 @@ const ModuleDetailPage: React.FC = () => {
             >
               Modules
             </Link>
-            <Typography color="text.primary">{namespace}</Typography>
-            <Typography color="text.primary">{name}</Typography>
-            <Typography color="text.primary">{system}</Typography>
+            <Typography sx={{
+              color: "text.primary"
+            }}>{namespace}</Typography>
+            <Typography sx={{
+              color: "text.primary"
+            }}>{name}</Typography>
+            <Typography sx={{
+              color: "text.primary"
+            }}>{system}</Typography>
             {selectedVersion && (
-              <Typography color="text.primary">v{selectedVersion.version}</Typography>
+              <Typography sx={{
+                color: "text.primary"
+              }}>v{selectedVersion.version}</Typography>
             )}
           </Breadcrumbs>
 
@@ -178,11 +186,14 @@ const ModuleDetailPage: React.FC = () => {
           <Box sx={{ mb: 4 }}>
             <Stack
               direction="row"
-              alignItems="center"
-              justifyContent="space-between"
-              sx={{ mb: 2 }}
-            >
-              <Stack direction="row" alignItems="center" spacing={2}>
+              sx={{
+                alignItems: "center",
+                justifyContent: "space-between",
+                mb: 2
+              }}>
+              <Stack direction="row" spacing={2} sx={{
+                alignItems: "center"
+              }}>
                 <IconButton aria-label="Back to modules" onClick={() => navigate('/modules')}>
                   <ArrowBack />
                 </IconButton>
@@ -196,7 +207,13 @@ const ModuleDetailPage: React.FC = () => {
                 </Button>
               )}
             </Stack>
-            <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 0 }}>
+            <Stack
+              direction="row"
+              spacing={1}
+              sx={{
+                alignItems: "center",
+                mb: 0
+              }}>
               {editingDescription ? (
                 <>
                   <TextField
@@ -240,7 +257,9 @@ const ModuleDetailPage: React.FC = () => {
                 </>
               ) : (
                 <>
-                  <Typography variant="body1" color="text.secondary">
+                  <Typography variant="body1" sx={{
+                    color: "text.secondary"
+                  }}>
                     {module.description || 'No description available'}
                   </Typography>
                   {canManage && (
@@ -260,7 +279,14 @@ const ModuleDetailPage: React.FC = () => {
                 </>
               )}
             </Stack>
-            <Stack direction="row" spacing={1} alignItems="center" sx={{ mt: 2 }} flexWrap="wrap">
+            <Stack
+              direction="row"
+              spacing={1}
+              sx={{
+                alignItems: "center",
+                flexWrap: "wrap",
+                mt: 2
+              }}>
               <Chip label={`${namespace}/${system}`} />
               <VersionSelector
                 versions={versions}
@@ -312,7 +338,9 @@ const ModuleDetailPage: React.FC = () => {
                   (selectedVersion && selectedVersion.readme ? (
                     <MarkdownRenderer>{selectedVersion.readme}</MarkdownRenderer>
                   ) : (
-                    <Typography variant="body2" color="text.secondary">
+                    <Typography variant="body2" sx={{
+                      color: "text.secondary"
+                    }}>
                       No README provided for this module version.
                     </Typography>
                   ))}
@@ -661,7 +689,7 @@ const ModuleDetailPage: React.FC = () => {
         </Container>
       )}
     </Box>
-  )
+  );
 }
 
 export default ModuleDetailPage

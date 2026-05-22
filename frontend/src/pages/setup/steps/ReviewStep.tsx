@@ -48,13 +48,13 @@ const ReviewStep: React.FC = () => {
         <Typography variant="h5" component="h2" gutterBottom>
           Ready to Complete Setup
         </Typography>
-        <Typography variant="body1" color="text.secondary">
+        <Typography variant="body1" sx={{
+          color: "text.secondary"
+        }}>
           Review your configuration below and finalize the setup.
         </Typography>
       </Box>
-
       <Divider sx={{ my: 2 }} />
-
       <Stack spacing={2} sx={{ mb: 3 }}>
         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <Typography variant="body1">
@@ -68,13 +68,23 @@ const ReviewStep: React.FC = () => {
           )}
         </Box>
         {authSaved && authMethod === 'oidc' && (
-          <Typography variant="body2" color="text.secondary" sx={{ pl: 4 }}>
+          <Typography
+            variant="body2"
+            sx={{
+              color: "text.secondary",
+              pl: 4
+            }}>
             {oidcForm.provider_type === 'azuread' ? 'Azure AD' : 'Generic OIDC'} —{' '}
             {oidcForm.issuer_url}
           </Typography>
         )}
         {authSaved && authMethod === 'ldap' && (
-          <Typography variant="body2" color="text.secondary" sx={{ pl: 4 }}>
+          <Typography
+            variant="body2"
+            sx={{
+              color: "text.secondary",
+              pl: 4
+            }}>
             LDAP — {ldapForm.host}:{ldapForm.port || 389}
           </Typography>
         )}
@@ -91,7 +101,12 @@ const ReviewStep: React.FC = () => {
           )}
         </Box>
         {storageSaved && (
-          <Typography variant="body2" color="text.secondary" sx={{ pl: 4 }}>
+          <Typography
+            variant="body2"
+            sx={{
+              color: "text.secondary",
+              pl: 4
+            }}>
             {storageForm.backend_type.toUpperCase()}
             {storageForm.backend_type === 'local' && ` — ${storageForm.local_base_path}`}
             {storageForm.backend_type === 's3' && ` — ${storageForm.s3_bucket}`}
@@ -117,7 +132,12 @@ const ReviewStep: React.FC = () => {
           )}
         </Box>
         {scanningSaved && scanningForm.enabled && (
-          <Typography variant="body2" color="text.secondary" sx={{ pl: 4 }}>
+          <Typography
+            variant="body2"
+            sx={{
+              color: "text.secondary",
+              pl: 4
+            }}>
             {scanningForm.tool}
             {scanningTestResult?.version ? ` v${scanningTestResult.version}` : ''}
           </Typography>
@@ -135,20 +155,25 @@ const ReviewStep: React.FC = () => {
           )}
         </Box>
         {adminSaved && (
-          <Typography variant="body2" color="text.secondary" sx={{ pl: 4 }}>
+          <Typography
+            variant="body2"
+            sx={{
+              color: "text.secondary",
+              pl: 4
+            }}>
             {adminEmail}
           </Typography>
         )}
       </Stack>
-
       <Alert severity="warning" sx={{ mb: 3 }}>
         <AlertTitle>This action is permanent</AlertTitle>
         After completing setup, the setup token will be invalidated and these endpoints will be
         permanently disabled. All future configuration changes must be made through the
         authenticated admin interface.
       </Alert>
-
-      <Stack direction="row" spacing={2} justifyContent="center">
+      <Stack direction="row" spacing={2} sx={{
+        justifyContent: "center"
+      }}>
         <Button variant="text" onClick={() => goToStep(isPending ? 3 : 4)}>
           ← Back
         </Button>
@@ -164,7 +189,7 @@ const ReviewStep: React.FC = () => {
         </Button>
       </Stack>
     </Box>
-  )
+  );
 }
 
 export default ReviewStep

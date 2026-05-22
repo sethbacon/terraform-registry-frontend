@@ -97,12 +97,14 @@ const PlatformRows: React.FC<{ mirrorName: string; version: string }> = ({
     return (
       <TableRow>
         <TableCell colSpan={6} sx={{ py: 1 }}>
-          <Typography variant="caption" color="text.secondary">
+          <Typography variant="caption" sx={{
+            color: "text.secondary"
+          }}>
             No platforms synced yet.
           </Typography>
         </TableCell>
       </TableRow>
-    )
+    );
   }
 
   return (
@@ -110,7 +112,9 @@ const PlatformRows: React.FC<{ mirrorName: string; version: string }> = ({
       {platforms.map((p) => (
         <TableRow key={p.id} sx={{ bgcolor: 'action.hover' }}>
           <TableCell sx={{ pl: 6 }} colSpan={2}>
-            <Typography variant="caption" fontFamily="monospace">
+            <Typography variant="caption" sx={{
+              fontFamily: "monospace"
+            }}>
               {p.os} / {p.arch}
             </Typography>
           </TableCell>
@@ -118,7 +122,12 @@ const PlatformRows: React.FC<{ mirrorName: string; version: string }> = ({
             <Chip label={p.sync_status} color={syncStatusColor(p.sync_status)} size="small" />
           </TableCell>
           <TableCell>
-            <Typography variant="caption" fontFamily="monospace" sx={{ wordBreak: 'break-all' }}>
+            <Typography
+              variant="caption"
+              sx={{
+                fontFamily: "monospace",
+                wordBreak: 'break-all'
+              }}>
               {p.filename}
             </Typography>
           </TableCell>
@@ -139,7 +148,7 @@ const PlatformRows: React.FC<{ mirrorName: string; version: string }> = ({
         </TableRow>
       ))}
     </>
-  )
+  );
 }
 
 // ---------------------------------------------------------------------------
@@ -201,7 +210,9 @@ const VersionRow: React.FC<VersionRowProps> = ({
         </TableCell>
         <TableCell>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
-            <Typography variant="body2" fontFamily="monospace">
+            <Typography variant="body2" sx={{
+              fontFamily: "monospace"
+            }}>
               {version.version}
             </Typography>
             {changelogUrl && (
@@ -277,7 +288,6 @@ const VersionRow: React.FC<VersionRowProps> = ({
           </TableCell>
         )}
       </TableRow>
-
       {/* Expandable platform detail */}
       <TableRow>
         <TableCell
@@ -307,7 +317,7 @@ const VersionRow: React.FC<VersionRowProps> = ({
         </TableCell>
       </TableRow>
     </>
-  )
+  );
 }
 
 // ---------------------------------------------------------------------------
@@ -481,7 +491,11 @@ const TerraformBinaryDetailPage: React.FC = () => {
             <Link component={RouterLink} to="/terraform-binaries" underline="hover" color="inherit">
               Terraform Binaries
             </Link>
-            <Typography color="text.primary" fontFamily="monospace">
+            <Typography
+              sx={{
+                color: "text.primary",
+                fontFamily: "monospace"
+              }}>
               {name}
             </Typography>
           </Breadcrumbs>
@@ -497,7 +511,9 @@ const TerraformBinaryDetailPage: React.FC = () => {
                 <ArrowBack />
               </IconButton>
             </Tooltip>
-            <Typography variant="h4" fontFamily="monospace">
+            <Typography variant="h4" sx={{
+              fontFamily: "monospace"
+            }}>
               {name}
             </Typography>
             <Chip
@@ -510,7 +526,12 @@ const TerraformBinaryDetailPage: React.FC = () => {
           </Box>
 
           {config?.description && (
-            <Typography variant="body1" color="text.secondary" sx={{ mb: 2 }}>
+            <Typography
+              variant="body1"
+              sx={{
+                color: "text.secondary",
+                mb: 2
+              }}>
               {config.description}
             </Typography>
           )}
@@ -646,7 +667,7 @@ const TerraformBinaryDetailPage: React.FC = () => {
         </Container>
       )}
     </Box>
-  )
+  );
 }
 
 export default TerraformBinaryDetailPage

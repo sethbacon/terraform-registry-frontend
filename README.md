@@ -95,7 +95,7 @@ For Docker / production builds served through nginx, the bundled nginx config pr
 | Language    | TypeScript 5.7.2 (strict mode)      |
 | Framework   | React 19                            |
 | Build Tool  | Vite 8.0.14                         |
-| UI          | Material-UI v7 + Emotion            |
+| UI          | Material-UI v9 + Emotion            |
 | HTTP Client | Axios 1.6.7                         |
 | Router      | React Router v6                     |
 | Markdown    | react-markdown + remark-gfm         |

@@ -263,7 +263,12 @@ const StoragePage: React.FC = () => {
             onClick={() => handleBackendChange(type)}
           >
             <CardContent>
-              <Box display="flex" alignItems="center" mb={1}>
+              <Box
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  mb: 1
+                }}>
                 {getBackendIcon(type)}
                 <Typography variant="h6" sx={{ ml: 1 }}>
                   {getBackendLabel(type)}
@@ -636,7 +641,11 @@ const StoragePage: React.FC = () => {
         </Grid>
       </Paper>
 
-      <Box display="flex" gap={2}>
+      <Box
+        sx={{
+          display: "flex",
+          gap: 2
+        }}>
         <Button
           variant="outlined"
           onClick={handleTestConfig}
@@ -654,7 +663,12 @@ const StoragePage: React.FC = () => {
       <Typography variant="h4" gutterBottom>
         {showAddWizard ? 'Add Storage Configuration' : 'Storage Configuration'}
       </Typography>
-      <Typography variant="body1" color="text.secondary" paragraph>
+      <Typography
+        variant="body1"
+        sx={{
+          color: "text.secondary",
+          marginBottom: "16px"
+        }}>
         {showAddWizard
           ? 'Add a second storage configuration. Once added, you can migrate data from the active backend to this one.'
           : 'Configure where the registry will store module and provider files. This is required before you can upload artifacts.'}
@@ -686,7 +700,11 @@ const StoragePage: React.FC = () => {
         {activeStep === 2 && renderReview()}
       </Paper>
 
-      <Box display="flex" justifyContent="space-between">
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "space-between"
+        }}>
         <Box sx={{ display: 'flex', gap: 1 }}>
           <Button disabled={activeStep === 0} onClick={() => setActiveStep((prev) => prev - 1)}>
             Back
@@ -774,7 +792,11 @@ const StoragePage: React.FC = () => {
       )}
 
       <Alert severity="info" sx={{ mb: 3 }}>
-        <Box display="flex" alignItems="center">
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center"
+          }}>
           <InfoIcon sx={{ mr: 1 }} />
           Storage has been configured. Changing storage backends after initial setup may result in
           data loss. Create a new configuration and activate it only after migrating existing data.
@@ -794,7 +816,12 @@ const StoragePage: React.FC = () => {
           <Grid size={{ xs: 12, md: 6 }} key={config.id}>
             <Card>
               <CardContent>
-                <Box display="flex" alignItems="center" mb={2}>
+                <Box
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    mb: 2
+                  }}>
                   {getBackendIcon(config.backend_type)}
                   <Typography variant="h6" sx={{ ml: 1, flexGrow: 1 }}>
                     {getBackendLabel(config.backend_type)}
@@ -850,7 +877,13 @@ const StoragePage: React.FC = () => {
                   </>
                 )}
 
-                <Typography variant="caption" color="textSecondary" display="block" mt={2}>
+                <Typography
+                  variant="caption"
+                  color="textSecondary"
+                  sx={{
+                    display: "block",
+                    mt: 2
+                  }}>
                   Updated: {new Date(config.updated_at).toLocaleString()}
                 </Typography>
               </CardContent>
@@ -909,7 +942,12 @@ const StoragePage: React.FC = () => {
       {migrations.length > 0 && (
         <Accordion sx={{ mt: 4 }}>
           <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-            <Box display="flex" alignItems="center" gap={1}>
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                gap: 1
+              }}>
               <HistoryIcon />
               <Typography variant="h6">Migration History</Typography>
             </Box>

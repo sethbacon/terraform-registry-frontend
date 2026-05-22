@@ -431,7 +431,9 @@ const UsersPage: React.FC = () => {
           <Typography variant="h4" gutterBottom>
             Users
           </Typography>
-          <Typography variant="body1" color="text.secondary">
+          <Typography variant="body1" sx={{
+            color: "text.secondary"
+          }}>
             Manage user accounts and permissions
           </Typography>
         </Box>
@@ -439,19 +441,16 @@ const UsersPage: React.FC = () => {
           Add User
         </Button>
       </Box>
-
       {error && (
         <Alert severity="error" sx={{ mb: 3 }} onClose={() => setError(null)}>
           {error}
         </Alert>
       )}
-
       {info && (
         <Alert severity="success" sx={{ mb: 3 }} onClose={() => setInfo(null)}>
           {info}
         </Alert>
       )}
-
       {/* Search Bar */}
       <TextField
         fullWidth
@@ -462,11 +461,12 @@ const UsersPage: React.FC = () => {
           setPage(0)
         }}
         sx={{ mb: 3 }}
-        InputProps={{
-          startAdornment: <SearchIcon sx={{ mr: 1, color: 'action.active' }} />,
+        slotProps={{
+          input: {
+            startAdornment: <SearchIcon sx={{ mr: 1, color: 'action.active' }} />,
+          }
         }}
       />
-
       {/* Users Table */}
       <Paper>
         <TableContainer>
@@ -507,7 +507,9 @@ const UsersPage: React.FC = () => {
                       {user.membershipsLoading ? (
                         <CircularProgress size={16} />
                       ) : user.memberships && user.memberships.length > 0 ? (
-                        <Stack direction="row" spacing={0.5} flexWrap="wrap" useFlexGap>
+                        <Stack direction="row" spacing={0.5} useFlexGap sx={{
+                          flexWrap: "wrap"
+                        }}>
                           {user.memberships.map((m) => (
                             <Tooltip
                               key={m.organization_id}
@@ -529,7 +531,9 @@ const UsersPage: React.FC = () => {
                           ))}
                         </Stack>
                       ) : (
-                        <Typography variant="body2" color="text.secondary">
+                        <Typography variant="body2" sx={{
+                          color: "text.secondary"
+                        }}>
                           No organizations
                         </Typography>
                       )}
@@ -603,7 +607,6 @@ const UsersPage: React.FC = () => {
           onRowsPerPageChange={handleChangeRowsPerPage}
         />
       </Paper>
-
       {/* Add/Edit User Dialog */}
       <Dialog open={openDialog} onClose={handleCloseDialog} maxWidth="sm" fullWidth>
         <DialogTitle>{editingUser ? 'Edit User' : 'Add User'}</DialogTitle>
@@ -630,14 +633,21 @@ const UsersPage: React.FC = () => {
 
             <Divider sx={{ my: 1 }} />
 
-            <Typography variant="subtitle2" color="text.secondary">
+            <Typography variant="subtitle2" sx={{
+              color: "text.secondary"
+            }}>
               Organization Membership
             </Typography>
 
             {/* Show existing memberships when editing */}
             {editingUser && editMemberships.length > 0 && (
               <Box>
-                <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                <Typography
+                  variant="body2"
+                  sx={{
+                    color: "text.secondary",
+                    mb: 1
+                  }}>
                   Current Organizations:
                 </Typography>
                 <Stack spacing={1}>
@@ -761,7 +771,6 @@ const UsersPage: React.FC = () => {
           </Button>
         </DialogActions>
       </Dialog>
-
       {/* Delete Confirmation Dialog */}
       <Dialog open={deleteDialogOpen} onClose={() => setDeleteDialogOpen(false)}>
         <DialogTitle>Delete User</DialogTitle>
@@ -778,7 +787,6 @@ const UsersPage: React.FC = () => {
           </Button>
         </DialogActions>
       </Dialog>
-
       {/* GDPR Erase Confirmation Dialog */}
       <Dialog
         open={eraseDialogOpen}
@@ -812,7 +820,9 @@ const UsersPage: React.FC = () => {
               onChange={(e) => setEraseConfirmText(e.target.value)}
               placeholder={userToErase?.email}
               disabled={eraseUserMutation.isPending}
-              inputProps={{ 'aria-label': 'Confirm erasure by typing the user email' }}
+              slotProps={{
+                htmlInput: { 'aria-label': 'Confirm erasure by typing the user email' }
+              }}
             />
           </Stack>
         </DialogContent>
@@ -839,7 +849,7 @@ const UsersPage: React.FC = () => {
         </DialogActions>
       </Dialog>
     </Container>
-  )
+  );
 }
 
 export default UsersPage

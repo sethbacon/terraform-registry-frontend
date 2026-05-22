@@ -275,7 +275,9 @@ const OrganizationsPage: React.FC = () => {
           <Typography variant="h4" gutterBottom>
             Organizations
           </Typography>
-          <Typography variant="body1" color="text.secondary">
+          <Typography variant="body1" sx={{
+            color: "text.secondary"
+          }}>
             Manage organizations and their members
           </Typography>
         </Box>
@@ -283,13 +285,11 @@ const OrganizationsPage: React.FC = () => {
           Add Organization
         </Button>
       </Box>
-
       {error && !import.meta.env.DEV && (
         <Alert severity="error" sx={{ mb: 3 }}>
           {error}
         </Alert>
       )}
-
       {/* Organizations Table */}
       <Paper>
         {loading ? (
@@ -298,7 +298,9 @@ const OrganizationsPage: React.FC = () => {
           </Box>
         ) : organizations.length === 0 ? (
           <Box sx={{ textAlign: 'center', py: 8 }}>
-            <Typography color="text.secondary">No organizations found</Typography>
+            <Typography sx={{
+              color: "text.secondary"
+            }}>No organizations found</Typography>
             <Button
               variant="outlined"
               startIcon={<AddIcon />}
@@ -325,7 +327,9 @@ const OrganizationsPage: React.FC = () => {
                 {organizations.map((org) => (
                   <TableRow key={org.id}>
                     <TableCell>
-                      <Typography fontWeight="medium">{org.name}</Typography>
+                      <Typography sx={{
+                        fontWeight: "medium"
+                      }}>{org.name}</Typography>
                     </TableCell>
                     <TableCell>{org.display_name || '-'}</TableCell>
                     <TableCell>
@@ -336,7 +340,9 @@ const OrganizationsPage: React.FC = () => {
                           color="info"
                         />
                       ) : (
-                        <Typography variant="body2" color="text.secondary">
+                        <Typography variant="body2" sx={{
+                          color: "text.secondary"
+                        }}>
                           Any
                         </Typography>
                       )}
@@ -380,7 +386,6 @@ const OrganizationsPage: React.FC = () => {
           </TableContainer>
         )}
       </Paper>
-
       {/* Add/Edit Organization Dialog */}
       <Dialog open={openDialog} onClose={handleCloseDialog} maxWidth="sm" fullWidth>
         <DialogTitle>{editingOrg ? 'Edit Organization' : 'Add Organization'}</DialogTitle>
@@ -461,7 +466,6 @@ const OrganizationsPage: React.FC = () => {
           </Button>
         </DialogActions>
       </Dialog>
-
       {/* Delete Confirmation Dialog */}
       <Dialog open={deleteDialogOpen} onClose={() => setDeleteDialogOpen(false)}>
         <DialogTitle>Delete Organization</DialogTitle>
@@ -478,7 +482,6 @@ const OrganizationsPage: React.FC = () => {
           </Button>
         </DialogActions>
       </Dialog>
-
       {/* Members Dialog */}
       <Dialog
         open={membersDialogOpen}
@@ -502,7 +505,12 @@ const OrganizationsPage: React.FC = () => {
           </Box>
         </DialogTitle>
         <DialogContent>
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+          <Typography
+            variant="body2"
+            sx={{
+              color: "text.secondary",
+              mb: 2
+            }}>
             {canManage
               ? 'Manage members and their roles in this organization'
               : 'View members and their roles in this organization'}
@@ -513,7 +521,9 @@ const OrganizationsPage: React.FC = () => {
             </Box>
           ) : members.length === 0 ? (
             <Paper variant="outlined" sx={{ p: 3, textAlign: 'center' }}>
-              <Typography color="text.secondary">No members in this organization yet</Typography>
+              <Typography sx={{
+                color: "text.secondary"
+              }}>No members in this organization yet</Typography>
               {canManage && (
                 <Button
                   variant="outlined"
@@ -593,7 +603,6 @@ const OrganizationsPage: React.FC = () => {
           <Button onClick={() => setMembersDialogOpen(false)}>Close</Button>
         </DialogActions>
       </Dialog>
-
       {/* Add Member Dialog */}
       <Dialog
         open={addMemberDialogOpen}
@@ -631,9 +640,10 @@ const OrganizationsPage: React.FC = () => {
                       <Typography
                         component="span"
                         variant="caption"
-                        color="text.secondary"
-                        sx={{ ml: 1 }}
-                      >
+                        sx={{
+                          color: "text.secondary",
+                          ml: 1
+                        }}>
                         - {template.description}
                       </Typography>
                     )}
@@ -651,7 +661,7 @@ const OrganizationsPage: React.FC = () => {
         </DialogActions>
       </Dialog>
     </Container>
-  )
+  );
 }
 
 export default OrganizationsPage

@@ -162,24 +162,37 @@ const RepositoryBrowser: React.FC<RepositoryBrowserProps> = ({
   return (
     <Box aria-busy={loading} aria-live="polite">
       {loading ? (
-        <Box display="flex" justifyContent="center" alignItems="center" minHeight="200px">
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            minHeight: "200px"
+          }}>
           <CircularProgress />
         </Box>
       ) : (
         <Box>
-          <Box mb={2} display="flex" gap={1}>
+          <Box
+            sx={{
+              mb: 2,
+              display: "flex",
+              gap: 1
+            }}>
             <TextField
               fullWidth
               size="small"
               placeholder="Search repositories..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <SearchIcon />
-                  </InputAdornment>
-                ),
+              slotProps={{
+                input: {
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <SearchIcon />
+                    </InputAdornment>
+                  ),
+                }
               }}
             />
             <Tooltip title="Refresh">
@@ -224,7 +237,12 @@ const RepositoryBrowser: React.FC<RepositoryBrowserProps> = ({
                   }}
                 >
                   <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-                    <Box display="flex" alignItems="center" width="100%">
+                    <Box
+                      sx={{
+                        display: "flex",
+                        alignItems: "center",
+                        width: "100%"
+                      }}>
                       <ListItemIcon sx={{ minWidth: 40 }}>
                         {selectedRepository?.full_name === repo.full_name ? (
                           <CheckCircleIcon color="primary" />
@@ -232,7 +250,9 @@ const RepositoryBrowser: React.FC<RepositoryBrowserProps> = ({
                           <FolderIcon />
                         )}
                       </ListItemIcon>
-                      <Box flexGrow={1}>
+                      <Box sx={{
+                        flexGrow: 1
+                      }}>
                         <Typography variant="subtitle1">{repo.full_name}</Typography>
                         {repo.description && (
                           <Typography variant="caption" color="textSecondary">
@@ -254,7 +274,12 @@ const RepositoryBrowser: React.FC<RepositoryBrowserProps> = ({
 
                   <AccordionDetails>
                     {loadingTags ? (
-                      <Box display="flex" justifyContent="center" py={2}>
+                      <Box
+                        sx={{
+                          display: "flex",
+                          justifyContent: "center",
+                          py: 2
+                        }}>
                         <CircularProgress size={24} />
                       </Box>
                     ) : (
@@ -334,7 +359,7 @@ const RepositoryBrowser: React.FC<RepositoryBrowserProps> = ({
         </Box>
       )}
     </Box>
-  )
+  );
 }
 
 export default RepositoryBrowser

@@ -43,7 +43,9 @@ export default function ConsentBanner() {
         <Typography variant="h6" gutterBottom>
           We value your privacy
         </Typography>
-        <Typography id="consent-description" variant="body2" color="text.secondary" gutterBottom>
+        <Typography id="consent-description" variant="body2" gutterBottom sx={{
+          color: "text.secondary"
+        }}>
           We use cookies and similar technologies. Essential cookies are always active. You may
           choose to enable additional categories below. See our{' '}
           <a href="/privacy" style={{ color: 'inherit' }}>
@@ -85,7 +87,13 @@ export default function ConsentBanner() {
           </Box>
         )}
 
-        <Stack direction="row" spacing={1} sx={{ mt: 2 }} justifyContent="flex-end">
+        <Stack
+          direction="row"
+          spacing={1}
+          sx={{
+            justifyContent: "flex-end",
+            mt: 2
+          }}>
           <Button variant="text" onClick={() => setShowDetails((v) => !v)}>
             {showDetails ? 'Hide details' : 'Customize'}
           </Button>
@@ -98,5 +106,5 @@ export default function ConsentBanner() {
         </Stack>
       </Paper>
     </Slide>
-  )
+  );
 }

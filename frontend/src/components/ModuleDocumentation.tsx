@@ -22,10 +22,11 @@ const ModuleDocumentation: React.FC<ModuleDocumentationProps> = ({ moduleDocs, d
 
   if (!moduleDocs) {
     return (
-      <Typography variant="body2" color="text.secondary">
-        No inputs, outputs, or provider requirements detected for this module version.
-      </Typography>
-    )
+      <Typography variant="body2" sx={{
+        color: "text.secondary"
+      }}>No inputs, outputs, or provider requirements detected for this module version.
+              </Typography>
+    );
   }
 
   const inputs = moduleDocs.inputs ?? []
@@ -39,27 +40,33 @@ const ModuleDocumentation: React.FC<ModuleDocumentationProps> = ({ moduleDocs, d
     !moduleDocs.requirements?.required_version
   ) {
     return (
-      <Typography variant="body2" color="text.secondary">
-        No inputs, outputs, or provider requirements detected for this module version.
-      </Typography>
-    )
+      <Typography variant="body2" sx={{
+        color: "text.secondary"
+      }}>No inputs, outputs, or provider requirements detected for this module version.
+              </Typography>
+    );
   }
 
   return (
     <Box>
       {moduleDocs.requirements?.required_version && (
-        <Box mb={2}>
+        <Box sx={{
+          mb: 2
+        }}>
           <Typography variant="subtitle2" gutterBottom>
             Terraform Version Requirement
           </Typography>
-          <Typography variant="body2" fontFamily="monospace">
+          <Typography variant="body2" sx={{
+            fontFamily: "monospace"
+          }}>
             {moduleDocs.requirements.required_version}
           </Typography>
         </Box>
       )}
-
       {inputs.length > 0 && (
-        <Box mb={3}>
+        <Box sx={{
+          mb: 3
+        }}>
           <Typography variant="subtitle2" gutterBottom>
             Inputs
           </Typography>
@@ -112,9 +119,10 @@ const ModuleDocumentation: React.FC<ModuleDocumentationProps> = ({ moduleDocs, d
           </TableContainer>
         </Box>
       )}
-
       {outputs.length > 0 && (
-        <Box mb={3}>
+        <Box sx={{
+          mb: 3
+        }}>
           <Typography variant="subtitle2" gutterBottom>
             Outputs
           </Typography>
@@ -144,7 +152,9 @@ const ModuleDocumentation: React.FC<ModuleDocumentationProps> = ({ moduleDocs, d
                       {out.sensitive ? (
                         <Chip label="Sensitive" size="small" color="warning" variant="outlined" />
                       ) : (
-                        <Typography variant="body2" color="text.secondary">
+                        <Typography variant="body2" sx={{
+                          color: "text.secondary"
+                        }}>
                           —
                         </Typography>
                       )}
@@ -156,7 +166,6 @@ const ModuleDocumentation: React.FC<ModuleDocumentationProps> = ({ moduleDocs, d
           </TableContainer>
         </Box>
       )}
-
       {providers.length > 0 && (
         <Box>
           <Typography variant="subtitle2" gutterBottom>
@@ -197,7 +206,7 @@ const ModuleDocumentation: React.FC<ModuleDocumentationProps> = ({ moduleDocs, d
         </Box>
       )}
     </Box>
-  )
+  );
 }
 
 export default ModuleDocumentation

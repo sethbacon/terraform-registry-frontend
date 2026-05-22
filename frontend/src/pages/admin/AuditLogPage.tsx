@@ -200,7 +200,9 @@ const AuditLogPage: React.FC = () => {
           <Typography variant="h4" component="h1" gutterBottom>
             Audit Logs
           </Typography>
-          <Typography variant="body2" color="text.secondary">
+          <Typography variant="body2" sx={{
+            color: "text.secondary"
+          }}>
             Track system activity across all resources and users
           </Typography>
         </Box>
@@ -222,7 +224,6 @@ const AuditLogPage: React.FC = () => {
           </Menu>
         </Box>
       </Box>
-
       {/* Filter Bar */}
       <Paper sx={{ p: 2, mb: 2 }}>
         <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, alignItems: 'center' }}>
@@ -230,19 +231,23 @@ const AuditLogPage: React.FC = () => {
             label="Start Date"
             type="datetime-local"
             size="small"
-            InputLabelProps={{ shrink: true }}
             value={startDate}
             onChange={(e) => handleStartDateChange(e.target.value)}
             sx={{ minWidth: 200 }}
+            slotProps={{
+              inputLabel: { shrink: true }
+            }}
           />
           <TextField
             label="End Date"
             type="datetime-local"
             size="small"
-            InputLabelProps={{ shrink: true }}
             value={endDate}
             onChange={(e) => handleEndDateChange(e.target.value)}
             sx={{ minWidth: 200 }}
+            slotProps={{
+              inputLabel: { shrink: true }
+            }}
           />
           <FormControl size="small" sx={{ minWidth: 180 }}>
             <InputLabel id="resource-type-label">Resource Type</InputLabel>
@@ -281,14 +286,12 @@ const AuditLogPage: React.FC = () => {
           </Button>
         </Box>
       </Paper>
-
       {/* Error */}
       {error && (
         <Alert severity="error" sx={{ mb: 2 }} onClose={() => setError(null)}>
           {error}
         </Alert>
       )}
-
       {/* Table */}
       <Paper>
         {loading ? (
@@ -367,7 +370,6 @@ const AuditLogPage: React.FC = () => {
           </>
         )}
       </Paper>
-
       {/* Detail Dialog */}
       <Dialog open={detailOpen} onClose={() => setDetailOpen(false)} maxWidth="md" fullWidth>
         <DialogTitle>Audit Log Detail</DialogTitle>
@@ -376,7 +378,9 @@ const AuditLogPage: React.FC = () => {
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
               <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2 }}>
                 <Box>
-                  <Typography variant="caption" color="text.secondary">
+                  <Typography variant="caption" sx={{
+                    color: "text.secondary"
+                  }}>
                     ID
                   </Typography>
                   <Typography
@@ -387,13 +391,17 @@ const AuditLogPage: React.FC = () => {
                   </Typography>
                 </Box>
                 <Box>
-                  <Typography variant="caption" color="text.secondary">
+                  <Typography variant="caption" sx={{
+                    color: "text.secondary"
+                  }}>
                     Timestamp
                   </Typography>
                   <Typography variant="body2">{formatTimestamp(selectedLog.created_at)}</Typography>
                 </Box>
                 <Box>
-                  <Typography variant="caption" color="text.secondary">
+                  <Typography variant="caption" sx={{
+                    color: "text.secondary"
+                  }}>
                     Action
                   </Typography>
                   <Typography variant="body2" sx={{ fontFamily: 'monospace' }}>
@@ -401,13 +409,17 @@ const AuditLogPage: React.FC = () => {
                   </Typography>
                 </Box>
                 <Box>
-                  <Typography variant="caption" color="text.secondary">
+                  <Typography variant="caption" sx={{
+                    color: "text.secondary"
+                  }}>
                     Resource Type
                   </Typography>
                   <Typography variant="body2">{selectedLog.resource_type ?? '—'}</Typography>
                 </Box>
                 <Box>
-                  <Typography variant="caption" color="text.secondary">
+                  <Typography variant="caption" sx={{
+                    color: "text.secondary"
+                  }}>
                     Resource ID
                   </Typography>
                   <Typography
@@ -418,13 +430,17 @@ const AuditLogPage: React.FC = () => {
                   </Typography>
                 </Box>
                 <Box>
-                  <Typography variant="caption" color="text.secondary">
+                  <Typography variant="caption" sx={{
+                    color: "text.secondary"
+                  }}>
                     IP Address
                   </Typography>
                   <Typography variant="body2">{selectedLog.ip_address ?? '—'}</Typography>
                 </Box>
                 <Box>
-                  <Typography variant="caption" color="text.secondary">
+                  <Typography variant="caption" sx={{
+                    color: "text.secondary"
+                  }}>
                     User
                   </Typography>
                   <Typography variant="body2">
@@ -434,7 +450,9 @@ const AuditLogPage: React.FC = () => {
                   </Typography>
                 </Box>
                 <Box>
-                  <Typography variant="caption" color="text.secondary">
+                  <Typography variant="caption" sx={{
+                    color: "text.secondary"
+                  }}>
                     Organization ID
                   </Typography>
                   <Typography variant="body2" sx={{ wordBreak: 'break-all' }}>
@@ -444,7 +462,9 @@ const AuditLogPage: React.FC = () => {
               </Box>
               {selectedLog.metadata && Object.keys(selectedLog.metadata).length > 0 && (
                 <Box>
-                  <Typography variant="caption" color="text.secondary">
+                  <Typography variant="caption" sx={{
+                    color: "text.secondary"
+                  }}>
                     Metadata
                   </Typography>
                   <Paper variant="outlined" sx={{ mt: 0.5, p: 1.5, bgcolor: 'grey.50' }}>
@@ -469,7 +489,7 @@ const AuditLogPage: React.FC = () => {
         </DialogActions>
       </Dialog>
     </Container>
-  )
+  );
 }
 
 export default AuditLogPage

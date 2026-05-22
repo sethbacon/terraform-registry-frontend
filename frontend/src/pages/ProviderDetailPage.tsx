@@ -406,10 +406,16 @@ provider "${name}" {
             >
               Providers
             </Link>
-            <Typography color="text.primary">{namespace}</Typography>
-            <Typography color="text.primary">{name}</Typography>
+            <Typography sx={{
+              color: "text.primary"
+            }}>{namespace}</Typography>
+            <Typography sx={{
+              color: "text.primary"
+            }}>{name}</Typography>
             {selectedVersion && (
-              <Typography color="text.primary">v{selectedVersion.version}</Typography>
+              <Typography sx={{
+                color: "text.primary"
+              }}>v{selectedVersion.version}</Typography>
             )}
           </Breadcrumbs>
 
@@ -417,12 +423,15 @@ provider "${name}" {
           <Box sx={{ mb: 3 }}>
             <Stack
               direction="row"
-              alignItems="center"
-              justifyContent="space-between"
               spacing={2}
-              sx={{ mb: 2 }}
-            >
-              <Stack direction="row" alignItems="center" spacing={2}>
+              sx={{
+                alignItems: "center",
+                justifyContent: "space-between",
+                mb: 2
+              }}>
+              <Stack direction="row" spacing={2} sx={{
+                alignItems: "center"
+              }}>
                 <IconButton aria-label="Back to providers" onClick={() => navigate('/providers')}>
                   <ArrowBack />
                 </IconButton>
@@ -436,10 +445,18 @@ provider "${name}" {
                 </Button>
               )}
             </Stack>
-            <Typography variant="body1" color="text.secondary" gutterBottom>
+            <Typography variant="body1" gutterBottom sx={{
+              color: "text.secondary"
+            }}>
               {provider.description || 'No description available'}
             </Typography>
-            <Stack direction="row" spacing={1} alignItems="center" sx={{ mt: 2 }}>
+            <Stack
+              direction="row"
+              spacing={1}
+              sx={{
+                alignItems: "center",
+                mt: 2
+              }}>
               <Chip label={namespace} />
               {provider.source && (
                 <Chip label="Network Mirrored" color="info" size="small" variant="outlined" />
@@ -503,10 +520,11 @@ provider "${name}" {
                 <Paper sx={{ p: 3, mb: 3 }}>
                   <Stack
                     direction="row"
-                    justifyContent="space-between"
-                    alignItems="center"
-                    sx={{ mb: 2 }}
-                  >
+                    sx={{
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                      mb: 2
+                    }}>
                     <Typography variant="h6">Usage Example</Typography>
                     <Tooltip title={copiedSource ? 'Copied!' : 'Copy source'}>
                       <IconButton
@@ -778,7 +796,9 @@ provider "${name}" {
                     />
                   ) : (
                     <Box sx={{ p: 4, textAlign: 'center' }}>
-                      <Typography color="text.secondary">
+                      <Typography sx={{
+                        color: "text.secondary"
+                      }}>
                         Select a document from the sidebar.
                       </Typography>
                     </Box>
@@ -1017,7 +1037,7 @@ provider "${name}" {
         </Container>
       )}
     </Box>
-  )
+  );
 }
 
 export default ProviderDetailPage

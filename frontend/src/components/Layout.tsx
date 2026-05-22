@@ -37,7 +37,7 @@ import CloudDownload from '@mui/icons-material/CloudDownload'
 import GetApp from '@mui/icons-material/GetApp'
 import Brightness4 from '@mui/icons-material/Brightness4'
 import Brightness7 from '@mui/icons-material/Brightness7'
-import HelpOutline from '@mui/icons-material/HelpOutline'
+import HelpOutline from '@mui/icons-material/HelpOutlined'
 import InfoOutlined from '@mui/icons-material/InfoOutlined'
 import SearchIcon from '@mui/icons-material/Search'
 import AdminPanelSettings from '@mui/icons-material/AdminPanelSettings'
@@ -467,12 +467,14 @@ const Layout = () => {
                   </ListItemIcon>
                   <ListItemText
                     primary={item.text}
-                    primaryTypographyProps={{ fontWeight: isActive ? 600 : 400 }}
+                    slotProps={{
+                      primary: { sx: { fontWeight: isActive ? 600 : 400 } }
+                    }}
                   />
                 </ListItemButton>
               </Tooltip>
             </ListItem>
-          )
+          );
         })}
       </List>
       {import.meta.env.DEV && (
@@ -502,9 +504,13 @@ const Layout = () => {
                   </ListItemIcon>
                   <ListItemText
                     primary={t('nav.admin.componentsDev')}
-                    primaryTypographyProps={{
-                      fontWeight: location.pathname === '/dev/components' ? 600 : 400,
-                      fontSize: '0.875rem',
+                    slotProps={{
+                      primary: {
+                        sx: {
+                          fontWeight: location.pathname === '/dev/components' ? 600 : 400,
+                          fontSize: '0.875rem',
+                        }
+                      }
                     }}
                   />
                   <Chip
@@ -548,11 +554,13 @@ const Layout = () => {
                       </ListItemIcon>
                       <ListItemText
                         primary={t('nav.admin.dashboard')}
-                        primaryTypographyProps={{ fontWeight: isActive ? 600 : 400 }}
+                        slotProps={{
+                          primary: { sx: { fontWeight: isActive ? 600 : 400 } }
+                        }}
                       />
                     </ListItemButton>
                   </Tooltip>
-                )
+                );
               })()}
             </ListItem>
           </List>
@@ -563,12 +571,16 @@ const Layout = () => {
                 <ListItemButton onClick={() => toggleGroup(group.key)} dense sx={{ py: 0.5 }}>
                   <ListItemText
                     primary={group.label}
-                    primaryTypographyProps={{
-                      variant: 'caption',
-                      fontWeight: 600,
-                      letterSpacing: '0.08em',
-                      textTransform: 'uppercase',
-                      color: 'text.secondary',
+                    slotProps={{
+                      primary: {
+                        variant: 'caption',
+                        sx: {
+                          fontWeight: 600,
+                          letterSpacing: '0.08em',
+                          textTransform: 'uppercase',
+                          color: 'text.secondary',
+                        }
+                      }
                     }}
                   />
                   {openGroups[group.key] ? (
@@ -608,12 +620,14 @@ const Layout = () => {
                               </ListItemIcon>
                               <ListItemText
                                 primary={item.text}
-                                primaryTypographyProps={{ fontWeight: isActive ? 600 : 400 }}
+                                slotProps={{
+                                  primary: { sx: { fontWeight: isActive ? 600 : 400 } }
+                                }}
                               />
                             </ListItemButton>
                           </Tooltip>
                         </ListItem>
-                      )
+                      );
                     })}
                   </List>
                 </Collapse>

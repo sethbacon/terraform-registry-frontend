@@ -173,10 +173,11 @@ const PublishFromSCMWizard: React.FC<PublishFromSCMWizardProps> = ({
             <Typography variant="h6" gutterBottom>
               Select SCM Provider
             </Typography>
-            <Typography variant="body2" color="textSecondary" paragraph>
+            <Typography variant="body2" color="textSecondary" sx={{
+              marginBottom: "16px"
+            }}>
               Choose the SCM provider where your module source code is hosted.
             </Typography>
-
             {providers.length === 0 ? (
               <Alert severity="warning">
                 No active SCM providers found. Please configure an SCM provider first.
@@ -201,7 +202,7 @@ const PublishFromSCMWizard: React.FC<PublishFromSCMWizardProps> = ({
               </FormControl>
             )}
           </Box>
-        )
+        );
 
       case 1:
         return (
@@ -209,11 +210,12 @@ const PublishFromSCMWizard: React.FC<PublishFromSCMWizardProps> = ({
             <Typography variant="h6" gutterBottom>
               Choose Repository
             </Typography>
-            <Typography variant="body2" color="textSecondary" paragraph>
+            <Typography variant="body2" color="textSecondary" sx={{
+              marginBottom: "16px"
+            }}>
               Select the repository that contains your Terraform module code. Optionally select a
               specific tag if you only want to publish one version.
             </Typography>
-
             {selectedProvider ? (
               <RepositoryBrowser
                 providerId={selectedProvider.id}
@@ -233,7 +235,7 @@ const PublishFromSCMWizard: React.FC<PublishFromSCMWizardProps> = ({
               <Alert severity="warning">Please select a provider first</Alert>
             )}
           </Box>
-        )
+        );
 
       case 2:
         return (
@@ -241,10 +243,11 @@ const PublishFromSCMWizard: React.FC<PublishFromSCMWizardProps> = ({
             <Typography variant="h6" gutterBottom>
               Configure Settings
             </Typography>
-            <Typography variant="body2" color="textSecondary" paragraph>
+            <Typography variant="body2" color="textSecondary" sx={{
+              marginBottom: "16px"
+            }}>
               Choose how versions will be published from this repository.
             </Typography>
-
             {/* Repository summary */}
             {selectedRepository && (
               <Paper variant="outlined" sx={{ p: 2, mb: 3, bgcolor: 'background.default' }}>
@@ -254,7 +257,6 @@ const PublishFromSCMWizard: React.FC<PublishFromSCMWizardProps> = ({
                 <Typography variant="body2">{selectedRepository.full_name}</Typography>
               </Paper>
             )}
-
             {/* Publishing mode selection */}
             <FormControl component="fieldset" sx={{ mb: 3, width: '100%' }}>
               <FormLabel component="legend" sx={{ mb: 1, fontWeight: 500 }}>
@@ -319,7 +321,6 @@ const PublishFromSCMWizard: React.FC<PublishFromSCMWizardProps> = ({
                 </Paper>
               </RadioGroup>
             </FormControl>
-
             {/* Mode-specific settings */}
             {publishMode === 'sync_all' ? (
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
@@ -374,7 +375,13 @@ const PublishFromSCMWizard: React.FC<PublishFromSCMWizardProps> = ({
                     <Typography variant="subtitle2" gutterBottom>
                       Tag to publish
                     </Typography>
-                    <Box display="flex" alignItems="center" gap={1} flexWrap="wrap">
+                    <Box
+                      sx={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 1,
+                        flexWrap: "wrap"
+                      }}>
                       <Chip label={selectedTag.tag_name} color="primary" size="small" />
                       <Chip
                         label={`Commit: ${selectedTag.target_commit.substring(0, 7)}`}
@@ -417,7 +424,7 @@ const PublishFromSCMWizard: React.FC<PublishFromSCMWizardProps> = ({
               </Box>
             )}
           </Box>
-        )
+        );
 
       default:
         return 'Unknown step'
@@ -433,15 +440,18 @@ const PublishFromSCMWizard: React.FC<PublishFromSCMWizardProps> = ({
           </Step>
         ))}
       </Stepper>
-
       {error && (
         <Alert severity="error" sx={{ mb: 2 }} onClose={() => setError(null)}>
           {error}
         </Alert>
       )}
-
       {loading ? (
-        <Box display="flex" justifyContent="center" py={4}>
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "center",
+            py: 4
+          }}>
           <CircularProgress />
         </Box>
       ) : (
@@ -476,7 +486,7 @@ const PublishFromSCMWizard: React.FC<PublishFromSCMWizardProps> = ({
         </>
       )}
     </Box>
-  )
+  );
 }
 
 export default PublishFromSCMWizard

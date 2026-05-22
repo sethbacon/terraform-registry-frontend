@@ -179,7 +179,7 @@ describe('ApiDocumentation', () => {
     const target = document.createElement('div')
     target.id = 'operations-tag-Providers'
     target.getBoundingClientRect = () =>
-      ({
+      (({
         top: 500,
         bottom: 0,
         left: 0,
@@ -188,8 +188,8 @@ describe('ApiDocumentation', () => {
         width: 0,
         x: 0,
         y: 0,
-        toJSON: () => ({}),
-      }) as DOMRect
+        toJSON: () => ({})
+      }) as DOMRect)
     document.body.appendChild(target)
 
     const scrollSpy = vi.fn()
@@ -337,7 +337,7 @@ describe('ApiDocumentation', () => {
     const target = document.createElement('div')
     target.id = 'operations-tag-Admin_Tools'
     target.getBoundingClientRect = () =>
-      ({
+      (({
         top: 100,
         bottom: 0,
         left: 0,
@@ -346,8 +346,8 @@ describe('ApiDocumentation', () => {
         width: 0,
         x: 0,
         y: 0,
-        toJSON: () => ({}),
-      }) as DOMRect
+        toJSON: () => ({})
+      }) as DOMRect)
     document.body.appendChild(target)
     const scrollSpy = vi.fn()
     window.scrollTo = scrollSpy as unknown as typeof window.scrollTo

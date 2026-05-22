@@ -23,26 +23,43 @@ const PolicyResultsPanel: React.FC<PolicyResultsPanelProps> = ({ policyResult })
 
   return (
     <Paper sx={{ p: 3 }}>
-      <Box display="flex" alignItems="center" gap={1} mb={1}>
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          gap: 1,
+          mb: 1
+        }}>
         <PolicyIcon fontSize="small" color="action" />
         <Typography variant="h6">Policy Evaluation</Typography>
       </Box>
       <Divider sx={{ mb: 2 }} />
-      <Box mb={hasViolations ? 1.5 : 0}>
+      <Box sx={{
+        mb: hasViolations ? 1.5 : 0
+      }}>
         <Chip label={statusLabel} size="small" color={statusColor} />
-        <Typography variant="caption" color="text.secondary" sx={{ ml: 1 }}>
+        <Typography
+          variant="caption"
+          sx={{
+            color: "text.secondary",
+            ml: 1
+          }}>
           mode: {policyResult.mode}
         </Typography>
       </Box>
       {hasViolations && (
         <>
           <Box
-            display="flex"
-            alignItems="center"
-            sx={{ cursor: 'pointer', mb: 0.5 }}
             onClick={() => setExpanded(!expanded)}
-          >
-            <Typography variant="body2" fontWeight="medium">
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              cursor: 'pointer',
+              mb: 0.5
+            }}>
+            <Typography variant="body2" sx={{
+              fontWeight: "medium"
+            }}>
               {policyResult.violations.length} violation
               {policyResult.violations.length !== 1 ? 's' : ''}
             </Typography>
@@ -56,10 +73,17 @@ const PolicyResultsPanel: React.FC<PolicyResultsPanelProps> = ({ policyResult })
             <Stack spacing={1} sx={{ mt: 1 }}>
               {policyResult.violations.map((v, i) => (
                 <Box key={i} sx={{ pl: 1.5, borderLeft: 2, borderColor: `${statusColor}.main` }}>
-                  <Typography variant="caption" fontWeight="medium" display="block">
+                  <Typography
+                    variant="caption"
+                    sx={{
+                      fontWeight: "medium",
+                      display: "block"
+                    }}>
                     {v.rule}
                   </Typography>
-                  <Typography variant="caption" color="text.secondary">
+                  <Typography variant="caption" sx={{
+                    color: "text.secondary"
+                  }}>
                     {v.message}
                   </Typography>
                 </Box>
@@ -69,7 +93,7 @@ const PolicyResultsPanel: React.FC<PolicyResultsPanelProps> = ({ policyResult })
         </>
       )}
     </Paper>
-  )
+  );
 }
 
 export default PolicyResultsPanel

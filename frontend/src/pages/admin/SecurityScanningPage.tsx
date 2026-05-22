@@ -161,13 +161,19 @@ const SecurityScanningPage: React.FC = () => {
 
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
-      <Typography variant="h4" fontWeight={700} gutterBottom>
+      <Typography variant="h4" gutterBottom sx={{
+        fontWeight: 700
+      }}>
         Security Scanning
       </Typography>
-      <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+      <Typography
+        variant="body2"
+        sx={{
+          color: "text.secondary",
+          mb: 3
+        }}>
         Module security scanning configuration and status
       </Typography>
-
       {loading ? (
         <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
           <CircularProgress />
@@ -184,7 +190,9 @@ const SecurityScanningPage: React.FC = () => {
             <Divider sx={{ mb: 2 }} />
             <Grid container spacing={2}>
               <Grid size={{ xs: 12, sm: 6, md: 4 }}>
-                <Typography variant="caption" color="text.secondary">
+                <Typography variant="caption" sx={{
+                  color: "text.secondary"
+                }}>
                   Status
                 </Typography>
                 <Box sx={{ mt: 0.5 }}>
@@ -197,70 +205,99 @@ const SecurityScanningPage: React.FC = () => {
                 </Box>
               </Grid>
               <Grid size={{ xs: 12, sm: 6, md: 4 }}>
-                <Typography variant="caption" color="text.secondary">
+                <Typography variant="caption" sx={{
+                  color: "text.secondary"
+                }}>
                   Scanner Tool
                 </Typography>
-                <Typography variant="body1" fontFamily="monospace">
+                <Typography variant="body1" sx={{
+                  fontFamily: "monospace"
+                }}>
                   {config?.tool || '—'}
                 </Typography>
               </Grid>
               <Grid size={{ xs: 12, sm: 6, md: 4 }}>
-                <Typography variant="caption" color="text.secondary">
+                <Typography variant="caption" sx={{
+                  color: "text.secondary"
+                }}>
                   Expected Version
                 </Typography>
-                <Typography variant="body1" fontFamily="monospace">
+                <Typography variant="body1" sx={{
+                  fontFamily: "monospace"
+                }}>
                   {config?.expected_version || 'Not pinned'}
                 </Typography>
               </Grid>
               <Grid size={{ xs: 12, sm: 6, md: 4 }}>
-                <Typography variant="caption" color="text.secondary">
+                <Typography variant="caption" sx={{
+                  color: "text.secondary"
+                }}>
                   Severity Threshold
                 </Typography>
-                <Typography variant="body1" fontFamily="monospace">
+                <Typography variant="body1" sx={{
+                  fontFamily: "monospace"
+                }}>
                   {config?.severity_threshold || '—'}
                 </Typography>
               </Grid>
               <Grid size={{ xs: 12, sm: 6, md: 4 }}>
-                <Typography variant="caption" color="text.secondary">
+                <Typography variant="caption" sx={{
+                  color: "text.secondary"
+                }}>
                   Timeout
                 </Typography>
-                <Typography variant="body1" fontFamily="monospace">
+                <Typography variant="body1" sx={{
+                  fontFamily: "monospace"
+                }}>
                   {config?.timeout || '—'}
                 </Typography>
               </Grid>
               <Grid size={{ xs: 12, sm: 6, md: 4 }}>
-                <Typography variant="caption" color="text.secondary">
+                <Typography variant="caption" sx={{
+                  color: "text.secondary"
+                }}>
                   Workers / Interval
                 </Typography>
-                <Typography variant="body1" fontFamily="monospace">
+                <Typography variant="body1" sx={{
+                  fontFamily: "monospace"
+                }}>
                   {config?.worker_count ?? '—'} workers, every {config?.scan_interval_mins ?? '—'}m
                 </Typography>
               </Grid>
               <Grid size={{ xs: 12, sm: 6, md: 4 }}>
-                <Typography variant="caption" color="text.secondary">
+                <Typography variant="caption" sx={{
+                  color: "text.secondary"
+                }}>
                   Binary Path
                 </Typography>
                 {config?.binary_path ? (
                   <Typography
                     variant="body1"
-                    fontFamily="monospace"
-                    sx={{ wordBreak: 'break-all' }}
-                  >
+                    sx={{
+                      fontFamily: "monospace",
+                      wordBreak: 'break-all'
+                    }}>
                     {config.binary_path}
                   </Typography>
                 ) : (
-                  <Typography variant="body2" color="text.disabled">
+                  <Typography variant="body2" sx={{
+                    color: "text.disabled"
+                  }}>
                     Not reported by backend
                   </Typography>
                 )}
               </Grid>
               <Grid size={{ xs: 12, sm: 6, md: 4 }}>
-                <Typography variant="caption" color="text.secondary">
+                <Typography variant="caption" sx={{
+                  color: "text.secondary"
+                }}>
                   Detected Version
                 </Typography>
                 {config?.detected_version ? (
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mt: 0.5 }}>
-                    <Typography variant="body1" fontFamily="monospace">
+                    <Typography variant="body1" sx={{
+                      fontFamily: "monospace"
+                    }}>
                       {config.detected_version}
                     </Typography>
                     {config.expected_version &&
@@ -271,7 +308,9 @@ const SecurityScanningPage: React.FC = () => {
                       )}
                   </Box>
                 ) : (
-                  <Typography variant="body2" color="text.disabled">
+                  <Typography variant="body2" sx={{
+                    color: "text.disabled"
+                  }}>
                     Not reported by backend
                   </Typography>
                 )}
@@ -327,10 +366,17 @@ const SecurityScanningPage: React.FC = () => {
                   }}
                   data-testid={`stat-card-${item.label.toLowerCase().replace(/\s/g, '-')}`}
                 >
-                  <Typography variant="caption" color="text.secondary">
+                  <Typography variant="caption" sx={{
+                    color: "text.secondary"
+                  }}>
                     {item.label}
                   </Typography>
-                  <Typography variant="h5" fontWeight={700} sx={{ color: item.color }}>
+                  <Typography
+                    variant="h5"
+                    sx={{
+                      fontWeight: 700,
+                      color: item.color
+                    }}>
                     {item.value}
                   </Typography>
                 </Paper>
@@ -347,7 +393,9 @@ const SecurityScanningPage: React.FC = () => {
               <Divider sx={{ mb: 2 }} />
               <Grid container spacing={2}>
                 <Grid size={{ xs: 12, sm: 4 }}>
-                  <Typography variant="caption" color="text.secondary">
+                  <Typography variant="caption" sx={{
+                    color: "text.secondary"
+                  }}>
                     Last successful scan
                   </Typography>
                   {health.lastSuccess?.scanned_at ? (
@@ -357,13 +405,17 @@ const SecurityScanningPage: React.FC = () => {
                       </Typography>
                     </Tooltip>
                   ) : (
-                    <Typography variant="body2" color="text.disabled">
+                    <Typography variant="body2" sx={{
+                      color: "text.disabled"
+                    }}>
                       No successful scans in window
                     </Typography>
                   )}
                 </Grid>
                 <Grid size={{ xs: 12, sm: 4 }}>
-                  <Typography variant="caption" color="text.secondary">
+                  <Typography variant="caption" sx={{
+                    color: "text.secondary"
+                  }}>
                     Error rate (last {health.windowSize || 0} scans)
                   </Typography>
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, mt: 0.5 }}>
@@ -377,23 +429,31 @@ const SecurityScanningPage: React.FC = () => {
                   </Box>
                 </Grid>
                 <Grid size={{ xs: 12, sm: 4 }}>
-                  <Typography variant="caption" color="text.secondary">
+                  <Typography variant="caption" sx={{
+                    color: "text.secondary"
+                  }}>
                     Last error
                   </Typography>
                   {health.lastError ? (
                     <Box>
-                      <Typography variant="body2" fontFamily="monospace" noWrap>
+                      <Typography variant="body2" noWrap sx={{
+                        fontFamily: "monospace"
+                      }}>
                         {health.lastError.namespace}/{health.lastError.module_name}/
                         {health.lastError.system}
                       </Typography>
-                      <Typography variant="caption" color="text.secondary">
+                      <Typography variant="caption" sx={{
+                        color: "text.secondary"
+                      }}>
                         {health.lastError.scanned_at
                           ? timeAgo(health.lastError.scanned_at)
                           : timeAgo(health.lastError.created_at)}
                       </Typography>
                     </Box>
                   ) : (
-                    <Typography variant="body2" color="success.main">
+                    <Typography variant="body2" sx={{
+                      color: "success.main"
+                    }}>
                       No errors in window
                     </Typography>
                   )}
@@ -409,7 +469,9 @@ const SecurityScanningPage: React.FC = () => {
             </Typography>
             <Divider sx={{ mb: 2 }} />
             {!stats?.recent_scans?.length ? (
-              <Typography variant="body2" color="text.secondary">
+              <Typography variant="body2" sx={{
+                color: "text.secondary"
+              }}>
                 No scans recorded yet.
               </Typography>
             ) : (
@@ -453,7 +515,9 @@ const SecurityScanningPage: React.FC = () => {
                               )}
                             </TableCell>
                             <TableCell>
-                              <Typography variant="body2" fontFamily="monospace" noWrap>
+                              <Typography variant="body2" noWrap sx={{
+                                fontFamily: "monospace"
+                              }}>
                                 {scan.namespace}/{scan.module_name}/{scan.system}
                               </Typography>
                             </TableCell>
@@ -479,7 +543,9 @@ const SecurityScanningPage: React.FC = () => {
                                     : 'Not scanned yet'
                                 }
                               >
-                                <Typography variant="caption" color="text.secondary">
+                                <Typography variant="caption" sx={{
+                                  color: "text.secondary"
+                                }}>
                                   {scan.scanned_at ? timeAgo(scan.scanned_at) : '—'}
                                 </Typography>
                               </Tooltip>
@@ -500,7 +566,7 @@ const SecurityScanningPage: React.FC = () => {
                             </TableRow>
                           )}
                         </React.Fragment>
-                      )
+                      );
                     })}
                   </TableBody>
                 </Table>
@@ -530,7 +596,7 @@ const SecurityScanningPage: React.FC = () => {
         moduleLabel={findingsModalLabel}
       />
     </Container>
-  )
+  );
 }
 
 export default SecurityScanningPage

@@ -43,7 +43,12 @@ const AboutModal = ({ open, onClose }: AboutModalProps) => {
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
       <DialogTitle>{t('about.title', { productName })}</DialogTitle>
       <DialogContent dividers>
-        <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+        <Typography
+          variant="body2"
+          sx={{
+            color: "text.secondary",
+            mb: 2
+          }}>
           {t('about.description')}
         </Typography>
 
@@ -62,7 +67,9 @@ const AboutModal = ({ open, onClose }: AboutModalProps) => {
           {loading ? (
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
               <CircularProgress size={14} />
-              <Typography variant="caption" color="text.secondary">
+              <Typography variant="caption" sx={{
+                color: "text.secondary"
+              }}>
                 {t('about.loadingBackendVersion')}
               </Typography>
             </Box>
@@ -85,11 +92,15 @@ const AboutModal = ({ open, onClose }: AboutModalProps) => {
 
         {backendVersion && (
           <Box sx={{ mb: 2 }}>
-            <Typography variant="body2" color="text.secondary">
+            <Typography variant="body2" sx={{
+              color: "text.secondary"
+            }}>
               {t('about.apiVersion', { version: backendVersion.api_version })}
             </Typography>
             {backendVersion.build_date && backendVersion.build_date !== 'unknown' && (
-              <Typography variant="body2" color="text.secondary">
+              <Typography variant="body2" sx={{
+                color: "text.secondary"
+              }}>
                 {t('about.built', {
                   date: new Intl.DateTimeFormat(i18n.language).format(
                     new Date(backendVersion.build_date),
@@ -105,7 +116,12 @@ const AboutModal = ({ open, onClose }: AboutModalProps) => {
         <Typography variant="subtitle2" gutterBottom>
           {t('about.license')}
         </Typography>
-        <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+        <Typography
+          variant="body2"
+          sx={{
+            color: "text.secondary",
+            mb: 2
+          }}>
           {t('about.licenseIntro')}{' '}
           <Link
             href="https://www.apache.org/licenses/LICENSE-2.0"
@@ -145,7 +161,7 @@ const AboutModal = ({ open, onClose }: AboutModalProps) => {
         <Button onClick={onClose}>{t('about.close')}</Button>
       </DialogActions>
     </Dialog>
-  )
+  );
 }
 
 export default AboutModal

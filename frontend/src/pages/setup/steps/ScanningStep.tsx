@@ -61,11 +61,15 @@ const ScanningStep: React.FC = () => {
           Security Scanning
         </Typography>
       </Box>
-      <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+      <Typography
+        variant="body2"
+        sx={{
+          color: "text.secondary",
+          mb: 3
+        }}>
         Optionally configure a security scanning tool to automatically scan Terraform modules and
         providers for vulnerabilities when they are published.
       </Typography>
-
       <Stack spacing={2}>
         <FormControlLabel
           control={
@@ -108,7 +112,12 @@ const ScanningStep: React.FC = () => {
                   <DownloadIcon sx={{ fontSize: 18, mr: 0.5, verticalAlign: 'text-bottom' }} />
                   Auto-Install
                 </Typography>
-                <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }}>
+                <Typography
+                  variant="body2"
+                  sx={{
+                    color: "text.secondary",
+                    mb: 1.5
+                  }}>
                   Download the official release, verify the SHA256 checksum, and install the binary
                   on the server.
                 </Typography>
@@ -247,7 +256,7 @@ const ScanningStep: React.FC = () => {
         )}
       </Stack>
     </Box>
-  )
+  );
 }
 
 export default ScanningStep

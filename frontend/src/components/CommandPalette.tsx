@@ -130,8 +130,10 @@ const CommandPalette: React.FC<CommandPaletteProps> = ({ open, onClose }) => {
       onClose={onClose}
       fullWidth
       maxWidth="sm"
-      PaperProps={{ sx: { overflow: 'hidden' } }}
       data-testid="command-palette"
+      slotProps={{
+        paper: { sx: { overflow: 'hidden' } }
+      }}
     >
       <Command label="Command Palette" shouldFilter>
         <Box
@@ -180,7 +182,9 @@ const CommandPalette: React.FC<CommandPaletteProps> = ({ open, onClose }) => {
           >
             <Command.Empty>
               <Box sx={{ p: 3, textAlign: 'center' }}>
-                <Typography variant="body2" color="text.secondary">
+                <Typography variant="body2" sx={{
+                  color: "text.secondary"
+                }}>
                   No results.
                 </Typography>
               </Box>
@@ -251,7 +255,7 @@ const CommandPalette: React.FC<CommandPaletteProps> = ({ open, onClose }) => {
         </Box>
       </Command>
     </Dialog>
-  )
+  );
 }
 
 interface PaletteItemProps {
@@ -279,13 +283,15 @@ const PaletteItem: React.FC<PaletteItemProps> = ({ value, label, hint, onSelect 
       >
         <Typography variant="body2">{label}</Typography>
         {hint && (
-          <Typography variant="caption" color="text.secondary">
+          <Typography variant="caption" sx={{
+            color: "text.secondary"
+          }}>
             {hint}
           </Typography>
         )}
       </Box>
     </Command.Item>
-  )
+  );
 }
 
 export default CommandPalette

@@ -34,33 +34,39 @@ const MTLSPage: React.FC = () => {
       <Typography variant="h4" gutterBottom>
         mTLS Client Certificate Mappings
       </Typography>
-      <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
+      <Typography
+        variant="body1"
+        sx={{
+          color: "text.secondary",
+          mb: 3
+        }}>
         Mutual TLS certificate-subject to scope mappings. These are configured in the server
         configuration file and are read-only.
       </Typography>
-
       {isLoading && (
         <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
           <CircularProgress />
         </Box>
       )}
-
       {error && (
         <Alert severity="error" sx={{ mb: 2 }}>
           Failed to load mTLS configuration.
         </Alert>
       )}
-
       {config && (
         <>
           <Paper sx={{ p: 3, mb: 3 }}>
-            <Stack direction="row" spacing={2} alignItems="center">
+            <Stack direction="row" spacing={2} sx={{
+              alignItems: "center"
+            }}>
               <Chip
                 label={config.enabled ? 'Enabled' : 'Disabled'}
                 color={config.enabled ? 'success' : 'default'}
               />
               {config.client_ca_file && (
-                <Typography variant="body2" color="text.secondary">
+                <Typography variant="body2" sx={{
+                  color: "text.secondary"
+                }}>
                   CA File: <code>{config.client_ca_file}</code>
                 </Typography>
               )}
@@ -80,12 +86,16 @@ const MTLSPage: React.FC = () => {
                   {config.mappings.map((mapping, i) => (
                     <TableRow key={i}>
                       <TableCell>
-                        <Typography variant="body2" fontFamily="monospace">
+                        <Typography variant="body2" sx={{
+                          fontFamily: "monospace"
+                        }}>
                           {mapping.subject}
                         </Typography>
                       </TableCell>
                       <TableCell>
-                        <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
+                        <Stack direction="row" spacing={1} useFlexGap sx={{
+                          flexWrap: "wrap"
+                        }}>
                           {mapping.scopes.map((scope) => (
                             <Chip key={scope} label={scope} size="small" variant="outlined" />
                           ))}
@@ -98,7 +108,9 @@ const MTLSPage: React.FC = () => {
             </TableContainer>
           ) : (
             <Paper sx={{ p: 3, textAlign: 'center' }}>
-              <Typography color="text.secondary">
+              <Typography sx={{
+                color: "text.secondary"
+              }}>
                 No mTLS certificate mappings configured.
               </Typography>
             </Paper>
@@ -106,7 +118,7 @@ const MTLSPage: React.FC = () => {
         </>
       )}
     </Container>
-  )
+  );
 }
 
 export default MTLSPage
