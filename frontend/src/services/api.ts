@@ -195,12 +195,14 @@ class ApiClient {
     user: import('../types').User
     role_template: import('../types').RoleTemplateInfo | null
     allowed_scopes: string[]
+    session_expires_at: string | null
   }> {
     const response = await this.client.get('/api/v1/auth/me')
     return {
       user: response.data.user,
       role_template: response.data.role_template || null,
       allowed_scopes: response.data.allowed_scopes || [],
+      session_expires_at: response.data.session_expires_at || null,
     }
   }
 
