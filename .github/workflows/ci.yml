@@ -110,7 +110,7 @@ jobs:
         # `--merge-reports=<path>` is a CLI flag in vitest v4 (the subcommand
         # form `vitest merge-reports` is parsed as a test name filter and
         # falls through to a "no test files found" error).
-        run: npx vitest --merge-reports=.vitest-reports --reporter=verbose
+        run: npx vitest --merge-reports=.vitest-reports --reporter=verbose --coverage
 
       - name: Upload coverage report
         if: always()
