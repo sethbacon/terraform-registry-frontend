@@ -76,7 +76,7 @@ jobs:
 
       - name: Upload blob report
         # v7
-        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
           name: vitest-blob-${{ matrix.shard }}
           path: frontend/.vitest-reports/blob-${{ matrix.shard }}.json
@@ -115,7 +115,7 @@ jobs:
       - name: Upload coverage report
         if: always()
         # v7
-        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
           name: coverage-report
           path: frontend/coverage/
@@ -148,7 +148,7 @@ jobs:
         # The action writes / overwrites 'frontend-coverage.json' in that gist, which the
         # shields.io endpoint badge in README.md reads.
         if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
-        uses: schneegans/dynamic-badges-action@e9a478b16159b4d31420099ba146cdc50f134483 # v1.7.0
+        uses: schneegans/dynamic-badges-action@0e50b8bad39e7e1afd3e4e9c2b7dd145fad07501 # v1.8.0
         with:
           auth: ${{ secrets.GIST_TOKEN }}
           gistID: ${{ vars.COVERAGE_GIST_ID }}
@@ -171,7 +171,7 @@ jobs:
 
       - name: Upload build artifact
         # v7
-        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
           name: frontend-dist
           path: frontend/dist
@@ -189,7 +189,7 @@ jobs:
       - uses: ./.github/actions/setup-frontend
 
       - name: Log in to GHCR
-        uses: docker/login-action@b45d80f862d83dbcd57f89517bcf500b2ab88fb2 # v4
+        uses: docker/login-action@650006c6eb7dba73a995cc03b0b2d7f5ca915bee # v4.2.0
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
@@ -249,7 +249,7 @@ jobs:
           playwright-browsers: "chromium firefox webkit"
 
       - name: Log in to GHCR
-        uses: docker/login-action@b45d80f862d83dbcd57f89517bcf500b2ab88fb2 # v4
+        uses: docker/login-action@650006c6eb7dba73a995cc03b0b2d7f5ca915bee # v4.2.0
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
@@ -293,7 +293,7 @@ jobs:
 
       - name: Upload Playwright artifacts
         # v7
-        uses: actions/upload-artifact@bbbca2ddaa5d8feaa63e36b76fdaad77386f024f
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
           name: playwright-report
           path: e2e/playwright-report
