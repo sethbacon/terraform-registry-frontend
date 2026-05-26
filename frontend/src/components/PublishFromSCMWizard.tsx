@@ -158,11 +158,11 @@ const PublishFromSCMWizard: React.FC<PublishFromSCMWizardProps> = ({
 
   const repoNameFilter: RegExp | undefined = moduleSystem
     ? new RegExp(
-        '^terraform-' +
-          moduleSystem.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') +
-          '-[a-z0-9][a-z0-9-]*$',
-        'i',
-      )
+      '^terraform-' +
+      moduleSystem.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') +
+      '-[a-z0-9][a-z0-9-]*$',
+      'i',
+    )
     : undefined
 
   const getStepContent = (step: number) => {
