@@ -461,7 +461,7 @@ const PublishFromSCMWizard: React.FC<PublishFromSCMWizardProps> = ({
           <Divider sx={{ my: 3 }} />
 
           <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-            <Button onClick={onCancel} disabled={loading}>
+            <Button onClick={onCancel}>
               Cancel
             </Button>
             <Box>
@@ -472,7 +472,7 @@ const PublishFromSCMWizard: React.FC<PublishFromSCMWizardProps> = ({
                 <Button
                   variant="contained"
                   onClick={handleComplete}
-                  disabled={loading || !canProceedToNext()}
+                  disabled={!canProceedToNext()}
                 >
                   Link Module
                 </Button>

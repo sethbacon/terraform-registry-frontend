@@ -37,11 +37,7 @@ const buffer: PerfEntry[] = []
 // ---------------------------------------------------------------------------
 
 function generateSessionId(): string {
-  if (typeof crypto !== 'undefined' && crypto.randomUUID) {
-    return crypto.randomUUID()
-  }
-  // Fallback for older browsers
-  return `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`
+  return crypto.randomUUID()
 }
 
 /** Send the buffered entries to the configured DSN. */
