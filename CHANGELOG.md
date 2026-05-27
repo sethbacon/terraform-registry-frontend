@@ -1,6 +1,13 @@
 <!-- markdownlint-disable MD013 MD024 MD041 -->
 # Changelog
 
+## [2.0.2](https://github.com/sethbacon/terraform-registry-frontend/compare/v2.0.1...v2.0.2) (2026-05-27)
+
+
+### Bug Fixes
+
+* resolve MUI v9 layout overflow and SCM provider state loss ([#328](https://github.com/sethbacon/terraform-registry-frontend/issues/328)) ([799389b](https://github.com/sethbacon/terraform-registry-frontend/commit/799389b568e879782025a5cb7434faba41afbff9))
+
 ## [2.0.1](https://github.com/sethbacon/terraform-registry-frontend/compare/v2.0.0...v2.0.1) (2026-05-22)
 
 
