@@ -1,6 +1,13 @@
 <!-- markdownlint-disable MD013 MD024 MD041 -->
 # Changelog
 
+## [2.0.3](https://github.com/sethbacon/terraform-registry-frontend/compare/v2.0.2...v2.0.3) (2026-05-27)
+
+
+### Bug Fixes
+
+* **types:** add shasums_url and shasums_signature_url to TerraformBinaryDownloadResponse ([#335](https://github.com/sethbacon/terraform-registry-frontend/issues/335)) ([7782708](https://github.com/sethbacon/terraform-registry-frontend/commit/77827084ec887776efa1323b296504a791c3bf99)), closes [#332](https://github.com/sethbacon/terraform-registry-frontend/issues/332)
+
 ## [2.0.2](https://github.com/sethbacon/terraform-registry-frontend/compare/v2.0.1...v2.0.2) (2026-05-27)
 
 
