@@ -455,13 +455,12 @@ const OIDCSettingsPage: React.FC = () => {
                       fullWidth
                       slotProps={{
                         ...params.slotProps,
-
                         input: {
-                          ...params.slotProps.input,
+                          ...params.slotProps?.input,
                           endAdornment: (
                             <>
                               {orgLoading ? <CircularProgress color="inherit" size={16} /> : null}
-                              {params.slotProps.input.endAdornment}
+                              {params.slotProps?.input?.endAdornment}
                             </>
                           ),
                         }
