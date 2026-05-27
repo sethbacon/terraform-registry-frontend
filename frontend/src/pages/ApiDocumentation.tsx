@@ -242,7 +242,10 @@ const BASE_CSS = `
   .swagger-ui .response-col_status { font-weight: 600; }
 
   /* remove the very wide left margin swagger-ui adds by default */
-  .swagger-ui .wrapper { padding: 0; }
+  .swagger-ui .wrapper { padding: 0; max-width: 100%; overflow: hidden; }
+
+  /* prevent tables and code blocks from pushing past the container */
+  .swagger-ui table { max-width: 100%; }
 `
 
 const LIGHT_EXTRA = `
@@ -511,7 +514,7 @@ const ApiDocumentation: React.FC = () => {
   const activeBg = isDark ? `${primaryColor}26` : `${primaryColor}14`
 
   return (
-    <Box>
+    <Box sx={{ overflow: 'hidden' }}>
       {/* Page title */}
       <Box sx={{ mb: 3 }}>
         <Typography variant="h4">API Swagger Documentation</Typography>

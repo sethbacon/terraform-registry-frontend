@@ -68,7 +68,7 @@ function App() {
           <HelpProvider>
             <AnnouncerProvider>
               <QueryClientProvider client={queryClient}>
-                <Router>
+                <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
                   <RouteFocusManager />
                   <ErrorBoundary>
                     <Routes>

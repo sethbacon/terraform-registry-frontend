@@ -314,7 +314,7 @@ const ModuleDetailPage: React.FC = () => {
 
           <Box sx={{ display: 'flex', gap: 3, flexDirection: { xs: 'column', md: 'row' } }}>
             {/* Main Content */}
-            <Box sx={{ flex: 1 }}>
+            <Box sx={{ flex: 1, minWidth: 0 }}>
               {/* Usage Example */}
               <UsageExample
                 registryHost={REGISTRY_HOST}
