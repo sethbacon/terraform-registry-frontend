@@ -52,7 +52,6 @@ interface TokenStatus {
 const SCMProvidersPage: React.FC = () => {
   const queryClient = useQueryClient()
   const { user } = useAuth()
-  const [tokenStatuses, setTokenStatuses] = useState<Record<string, TokenStatus>>({})
   const [error, setError] = useState<string | null>(null)
   const [createDialogOpen, setCreateDialogOpen] = useState(false)
   const [editingProvider, setEditingProvider] = useState<SCMProvider | null>(null)
@@ -103,11 +102,17 @@ const SCMProvidersPage: React.FC = () => {
     queryKey: queryKeys.scmProviders.list(),
     queryFn: async () => {
       const data = await api.listSCMProviders()
-      const providerList = Array.isArray(data) ? data : []
+      return Array.isArray(data) ? data : []
+    },
+  })
 
-      // Fetch token status for each provider in parallel
+  // Token statuses — separate query so React Query manages its own lifecycle
+  // and statuses are not lost when navigating away and back.
+  const { data: tokenStatuses = {} } = useQuery<Record<string, TokenStatus>>({
+    queryKey: [...queryKeys.scmProviders.list(), 'token-statuses', providers.map((p) => p.id)],
+    queryFn: async () => {
       const statusEntries = await Promise.allSettled(
-        providerList.map((p) => api.getSCMTokenStatus(p.id).then((s) => [p.id, s] as const)),
+        providers.map((p) => api.getSCMTokenStatus(p.id).then((s) => [p.id, s] as const)),
       )
       const statuses: Record<string, TokenStatus> = {}
       statusEntries.forEach((result) => {
@@ -116,10 +121,9 @@ const SCMProvidersPage: React.FC = () => {
           statuses[id] = status
         }
       })
-      setTokenStatuses(statuses)
-
-      return providerList
+      return statuses
     },
+    enabled: providers.length > 0,
   })
 
   if (queryError && !error) {
@@ -542,7 +546,7 @@ const SCMProvidersPage: React.FC = () => {
                               <LinkOffIcon sx={{ fontSize: '0.9rem', color: 'text.disabled' }} />
                               <Typography
                                 variant="caption"
-                                color="textDisabled"
+                                color="text.disabled"
                                 sx={{ fontStyle: 'italic' }}
                               >
                                 Not connected

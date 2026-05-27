@@ -11,7 +11,7 @@ const SCIMProvisioningPage: React.FC = () => {
   const scimBaseUrl = `${baseUrl}/scim/v2`
 
   return (
-    <Box>
+    <Box sx={{ pr: { xs: 2, sm: 3 } }}>
       <Typography variant="h5" gutterBottom>
         SCIM Provisioning
       </Typography>
