@@ -454,6 +454,7 @@ const OIDCSettingsPage: React.FC = () => {
                       helperText="Registry organization name the user will be added to"
                       fullWidth
                       slotProps={{
+                        ...params.slotProps,
                         input: {
                           ...params.slotProps?.input,
                           endAdornment: (
