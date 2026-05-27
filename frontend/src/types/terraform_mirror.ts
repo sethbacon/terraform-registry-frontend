@@ -108,6 +108,12 @@ export interface TerraformBinaryDownloadResponse {
   filename: string
   sha256: string
   download_url: string
+  /** Pre-signed URL to SHA256SUMS. Empty string when the version was synced
+   *  before signature persistence (backend PR #403). */
+  shasums_url: string
+  /** Pre-signed URL to the detached GPG signature of SHA256SUMS. Empty string
+   *  when GPG verification was disabled, failed, or the file was not stored. */
+  shasums_signature_url: string
 }
 
 // ---- Request types ----
