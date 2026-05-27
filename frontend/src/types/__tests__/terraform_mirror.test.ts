@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { parsePlatformFilter, syncStatusColor } from '../terraform_mirror'
+import type { TerraformBinaryDownloadResponse } from '../terraform_mirror'
 
 describe('parsePlatformFilter', () => {
   it('returns empty array for null', () => {
@@ -46,5 +47,37 @@ describe('syncStatusColor', () => {
   it('returns "default" for unknown status', () => {
     expect(syncStatusColor('unknown')).toBe('default')
     expect(syncStatusColor('')).toBe('default')
+  })
+})
+
+describe('TerraformBinaryDownloadResponse', () => {
+  it('includes shasums_url and shasums_signature_url fields', () => {
+    const response: TerraformBinaryDownloadResponse = {
+      os: 'linux',
+      arch: 'amd64',
+      version: '1.9.0',
+      filename: 'terraform_1.9.0_linux_amd64.zip',
+      sha256: 'abc123',
+      download_url: 'https://example.com/download',
+      shasums_url: 'https://example.com/SHA256SUMS',
+      shasums_signature_url: 'https://example.com/SHA256SUMS.sig',
+    }
+    expect(response.shasums_url).toBe('https://example.com/SHA256SUMS')
+    expect(response.shasums_signature_url).toBe('https://example.com/SHA256SUMS.sig')
+  })
+
+  it('allows empty string for shasums fields (pre-persistence versions)', () => {
+    const response: TerraformBinaryDownloadResponse = {
+      os: 'darwin',
+      arch: 'arm64',
+      version: '1.8.0',
+      filename: 'terraform_1.8.0_darwin_arm64.zip',
+      sha256: 'def456',
+      download_url: 'https://example.com/download',
+      shasums_url: '',
+      shasums_signature_url: '',
+    }
+    expect(response.shasums_url).toBe('')
+    expect(response.shasums_signature_url).toBe('')
   })
 })
