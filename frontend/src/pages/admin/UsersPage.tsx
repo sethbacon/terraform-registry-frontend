@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import {
   Container,
@@ -54,6 +55,7 @@ interface UserWithMemberships extends User {
 }
 
 const UsersPage: React.FC = () => {
+  const { t } = useTranslation()
   const queryClient = useQueryClient()
   const { allowedScopes } = useAuth()
   const isAdmin = allowedScopes.includes('admin')
@@ -128,7 +130,7 @@ const UsersPage: React.FC = () => {
   }))
 
   if (queryError && !error) {
-    setError('Failed to load users. Please try again.')
+    setError(t('admin.users.errLoad'))
   }
 
   // Load memberships whenever rawUsers changes
@@ -248,7 +250,7 @@ const UsersPage: React.FC = () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.users._def })
     },
     onError: (err: unknown) => {
-      setError(getErrorMessage(err, 'Failed to save user. Please try again.'))
+      setError(getErrorMessage(err, t('admin.users.errSave')))
     },
   })
 
@@ -262,7 +264,7 @@ const UsersPage: React.FC = () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.users._def })
     },
     onError: (err: unknown) => {
-      setError(getErrorMessage(err, 'Failed to delete user. Please try again.'))
+      setError(getErrorMessage(err, t('admin.users.errDelete')))
     },
   })
 
@@ -274,12 +276,12 @@ const UsersPage: React.FC = () => {
       setUserToErase(null)
       setEraseConfirmText('')
       setError(null)
-      setInfo(data.message || 'User data erased.')
+      setInfo(data.message || t('admin.users.userErased'))
       setUserMemberships({})
       queryClient.invalidateQueries({ queryKey: queryKeys.users._def })
     },
     onError: (err: unknown) => {
-      setError(getErrorMessage(err, 'Failed to erase user data. Please try again.'))
+      setError(getErrorMessage(err, t('admin.users.errErase')))
     },
   })
 
@@ -299,9 +301,9 @@ const UsersPage: React.FC = () => {
       a.click()
       document.body.removeChild(a)
       URL.revokeObjectURL(url)
-      setInfo(`Exported user data for ${user.email}.`)
+      setInfo(t('admin.users.exportedData', { email: user.email }))
     } catch (err) {
-      setError(getErrorMessage(err, 'Failed to export user data.'))
+      setError(getErrorMessage(err, t('admin.users.errExport')))
     } finally {
       setExportingUserId(null)
     }
@@ -342,7 +344,7 @@ const UsersPage: React.FC = () => {
       setFormData((prev) => ({ ...prev, organizationId: '', roleTemplateId: '' }))
     } catch (err: unknown) {
       console.error('Failed to add membership:', err)
-      setError(getErrorMessage(err, 'Failed to add organization membership'))
+      setError(getErrorMessage(err, t('admin.users.errAddMembership')))
     }
   }
 
@@ -360,7 +362,7 @@ const UsersPage: React.FC = () => {
       setEditMemberships(memberships)
     } catch (err: unknown) {
       console.error('Failed to update membership role:', err)
-      setError(getErrorMessage(err, 'Failed to update role'))
+      setError(getErrorMessage(err, t('admin.users.errUpdateRole')))
     }
   }
 
@@ -375,7 +377,7 @@ const UsersPage: React.FC = () => {
       setEditMemberships((prev) => prev.filter((m) => m.organization_id !== orgId))
     } catch (err: unknown) {
       console.error('Failed to remove membership:', err)
-      setError(getErrorMessage(err, 'Failed to remove from organization'))
+      setError(getErrorMessage(err, t('admin.users.errRemoveMembership')))
     }
   }
 
@@ -429,16 +431,19 @@ const UsersPage: React.FC = () => {
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
         <Box>
           <Typography variant="h4" gutterBottom>
-            Users
+            {t('admin.users.pageTitle')}
           </Typography>
-          <Typography variant="body1" sx={{
-            color: "text.secondary"
-          }}>
-            Manage user accounts and permissions
+          <Typography
+            variant="body1"
+            sx={{
+              color: 'text.secondary',
+            }}
+          >
+            {t('admin.users.pageSubtitle')}
           </Typography>
         </Box>
         <Button variant="contained" startIcon={<AddIcon />} onClick={() => handleOpenDialog()}>
-          Add User
+          {t('admin.users.addUser')}
         </Button>
       </Box>
       {error && (
@@ -454,7 +459,7 @@ const UsersPage: React.FC = () => {
       {/* Search Bar */}
       <TextField
         fullWidth
-        placeholder="Search users..."
+        placeholder={t('admin.users.searchPlaceholder')}
         value={searchQuery}
         onChange={(e) => {
           setSearchQuery(e.target.value)
@@ -464,7 +469,7 @@ const UsersPage: React.FC = () => {
         slotProps={{
           input: {
             startAdornment: <SearchIcon sx={{ mr: 1, color: 'action.active' }} />,
-          }
+          },
         }}
       />
       {/* Users Table */}
@@ -473,11 +478,11 @@ const UsersPage: React.FC = () => {
           <Table>
             <TableHead>
               <TableRow>
-                <TableCell>Name</TableCell>
-                <TableCell>Email</TableCell>
-                <TableCell>Organizations & Roles</TableCell>
-                <TableCell>Created</TableCell>
-                <TableCell align="right">Actions</TableCell>
+                <TableCell>{t('admin.users.thName')}</TableCell>
+                <TableCell>{t('admin.users.thEmail')}</TableCell>
+                <TableCell>{t('admin.users.thOrgRoles')}</TableCell>
+                <TableCell>{t('admin.users.thCreated')}</TableCell>
+                <TableCell align="right">{t('admin.users.thActions')}</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -491,8 +496,8 @@ const UsersPage: React.FC = () => {
                 <TableRow>
                   <TableCell colSpan={5} sx={{ p: 0, border: 0 }}>
                     <EmptyState
-                      title="No users found"
-                      description="Users appear here after they sign in for the first time. Invite teammates by sharing the registry URL and an OIDC or dev-login provider."
+                      title={t('admin.users.emptyTitle')}
+                      description={t('admin.users.emptyDescription')}
                       icon={<PersonIcon />}
                       data-testid="users-empty-state"
                     />
@@ -507,21 +512,34 @@ const UsersPage: React.FC = () => {
                       {user.membershipsLoading ? (
                         <CircularProgress size={16} />
                       ) : user.memberships && user.memberships.length > 0 ? (
-                        <Stack direction="row" spacing={0.5} useFlexGap sx={{
-                          flexWrap: "wrap"
-                        }}>
+                        <Stack
+                          direction="row"
+                          spacing={0.5}
+                          useFlexGap
+                          sx={{
+                            flexWrap: 'wrap',
+                          }}
+                        >
                           {user.memberships.map((m) => (
                             <Tooltip
                               key={m.organization_id}
                               title={
                                 m.role_template_display_name
-                                  ? `${m.organization_name}: ${m.role_template_display_name}`
-                                  : `${m.organization_name}: No role assigned`
+                                  ? t('admin.users.tooltipMembership', {
+                                      org: m.organization_name,
+                                      role: m.role_template_display_name,
+                                    })
+                                  : t('admin.users.tooltipMembershipNoRole', {
+                                      org: m.organization_name,
+                                    })
                               }
                             >
                               <Chip
                                 icon={<BusinessIcon />}
-                                label={`${m.organization_name} (${m.role_template_display_name || 'No role'})`}
+                                label={t('admin.users.chipMembership', {
+                                  org: m.organization_name,
+                                  role: m.role_template_display_name || t('admin.users.noRole'),
+                                })}
                                 size="small"
                                 color={getRoleTemplateColor(m.role_template_name || undefined)}
                                 variant="outlined"
@@ -531,19 +549,22 @@ const UsersPage: React.FC = () => {
                           ))}
                         </Stack>
                       ) : (
-                        <Typography variant="body2" sx={{
-                          color: "text.secondary"
-                        }}>
-                          No organizations
+                        <Typography
+                          variant="body2"
+                          sx={{
+                            color: 'text.secondary',
+                          }}
+                        >
+                          {t('admin.users.noOrganizations')}
                         </Typography>
                       )}
                     </TableCell>
                     <TableCell>{new Date(user.created_at).toLocaleDateString()}</TableCell>
                     <TableCell align="right">
-                      <Tooltip title="Edit user">
+                      <Tooltip title={t('admin.users.tooltipEdit')}>
                         <IconButton
                           size="small"
-                          aria-label="Edit user"
+                          aria-label={t('admin.users.ariaEdit')}
                           onClick={() => handleOpenDialog(user)}
                           color="primary"
                         >
@@ -552,11 +573,11 @@ const UsersPage: React.FC = () => {
                       </Tooltip>
                       {isAdmin && (
                         <>
-                          <Tooltip title="Export user data (GDPR Article 15/20)">
+                          <Tooltip title={t('admin.users.tooltipExport')}>
                             <span>
                               <IconButton
                                 size="small"
-                                aria-label="Export user data"
+                                aria-label={t('admin.users.ariaExport')}
                                 onClick={() => handleExportClick(user)}
                                 disabled={exportingUserId === user.id}
                               >
@@ -568,10 +589,10 @@ const UsersPage: React.FC = () => {
                               </IconButton>
                             </span>
                           </Tooltip>
-                          <Tooltip title="Erase user data (GDPR Article 17)">
+                          <Tooltip title={t('admin.users.tooltipErase')}>
                             <IconButton
                               size="small"
-                              aria-label="Erase user data"
+                              aria-label={t('admin.users.ariaErase')}
                               onClick={() => handleEraseClick(user)}
                               color="warning"
                             >
@@ -580,10 +601,10 @@ const UsersPage: React.FC = () => {
                           </Tooltip>
                         </>
                       )}
-                      <Tooltip title="Delete user">
+                      <Tooltip title={t('admin.users.tooltipDelete')}>
                         <IconButton
                           size="small"
-                          aria-label="Delete user"
+                          aria-label={t('admin.users.ariaDelete')}
                           onClick={() => handleDeleteClick(user)}
                           color="error"
                         >
@@ -609,34 +630,39 @@ const UsersPage: React.FC = () => {
       </Paper>
       {/* Add/Edit User Dialog */}
       <Dialog open={openDialog} onClose={handleCloseDialog} maxWidth="sm" fullWidth>
-        <DialogTitle>{editingUser ? 'Edit User' : 'Add User'}</DialogTitle>
+        <DialogTitle>
+          {editingUser ? t('admin.users.dialogTitleEdit') : t('admin.users.dialogTitleAdd')}
+        </DialogTitle>
         <DialogContent>
           <Stack spacing={3} sx={{ mt: 2 }}>
             <TextField
-              label="Email"
+              label={t('admin.users.labelEmail')}
               type="email"
               value={formData.email}
               onChange={(e) => setFormData({ ...formData, email: e.target.value })}
               required
               fullWidth
               disabled={!!editingUser}
-              helperText="User's email address. Used as the login identifier and cannot be changed after creation."
+              helperText={t('admin.users.helpEmail')}
             />
             <TextField
-              label="Name"
+              label={t('admin.users.labelName')}
               value={formData.name}
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
               required
               fullWidth
-              helperText="Full display name shown throughout the interface"
+              helperText={t('admin.users.helpName')}
             />
 
             <Divider sx={{ my: 1 }} />
 
-            <Typography variant="subtitle2" sx={{
-              color: "text.secondary"
-            }}>
-              Organization Membership
+            <Typography
+              variant="subtitle2"
+              sx={{
+                color: 'text.secondary',
+              }}
+            >
+              {t('admin.users.sectionOrgMembership')}
             </Typography>
 
             {/* Show existing memberships when editing */}
@@ -645,10 +671,11 @@ const UsersPage: React.FC = () => {
                 <Typography
                   variant="body2"
                   sx={{
-                    color: "text.secondary",
-                    mb: 1
-                  }}>
-                  Current Organizations:
+                    color: 'text.secondary',
+                    mb: 1,
+                  }}
+                >
+                  {t('admin.users.currentOrgs')}
                 </Typography>
                 <Stack spacing={1}>
                   {editMemberships.map((m) => (
@@ -677,7 +704,7 @@ const UsersPage: React.FC = () => {
                           }
                         >
                           <MenuItem value="">
-                            <em>No role</em>
+                            <em>{t('admin.users.noRole')}</em>
                           </MenuItem>
                           {roleTemplates.map((template) => (
                             <MenuItem key={template.id} value={template.id}>
@@ -688,7 +715,7 @@ const UsersPage: React.FC = () => {
                       </FormControl>
                       <IconButton
                         size="small"
-                        aria-label="Remove from organization"
+                        aria-label={t('admin.users.ariaRemoveFromOrg')}
                         onClick={() => handleRemoveMembership(m.organization_id)}
                         color="error"
                       >
@@ -704,18 +731,18 @@ const UsersPage: React.FC = () => {
             <Box sx={{ display: 'flex', gap: 1, alignItems: 'flex-start' }}>
               <FormControl fullWidth size="small">
                 <InputLabel>
-                  {editingUser ? 'Add to Organization' : 'Organization (Optional)'}
+                  {editingUser ? t('admin.users.addToOrg') : t('admin.users.orgOptional')}
                 </InputLabel>
                 <Select
                   value={formData.organizationId}
-                  label={editingUser ? 'Add to Organization' : 'Organization (Optional)'}
+                  label={editingUser ? t('admin.users.addToOrg') : t('admin.users.orgOptional')}
                   onChange={(e: SelectChangeEvent) =>
                     setFormData({ ...formData, organizationId: e.target.value })
                   }
                   disabled={orgsLoading}
                 >
                   <MenuItem value="">
-                    <em>None</em>
+                    <em>{t('admin.users.menuNone')}</em>
                   </MenuItem>
                   {availableOrganizations.map((org) => (
                     <MenuItem key={org.id} value={org.id}>
@@ -723,22 +750,20 @@ const UsersPage: React.FC = () => {
                     </MenuItem>
                   ))}
                 </Select>
-                <FormHelperText>
-                  Assign this user to an organization to control which resources they can access.
-                </FormHelperText>
+                <FormHelperText>{t('admin.users.helpAssignOrg')}</FormHelperText>
               </FormControl>
               <FormControl size="small" sx={{ minWidth: 150 }}>
-                <InputLabel>Role Template</InputLabel>
+                <InputLabel>{t('admin.users.labelRoleTemplate')}</InputLabel>
                 <Select
                   value={formData.roleTemplateId}
-                  label="Role Template"
+                  label={t('admin.users.labelRoleTemplate')}
                   onChange={(e: SelectChangeEvent) =>
                     setFormData({ ...formData, roleTemplateId: e.target.value })
                   }
                   disabled={!formData.organizationId || roleTemplatesLoading}
                 >
                   <MenuItem value="">
-                    <em>No role</em>
+                    <em>{t('admin.users.noRole')}</em>
                   </MenuItem>
                   {roleTemplates.map((template) => (
                     <MenuItem key={template.id} value={template.id}>
@@ -746,10 +771,7 @@ const UsersPage: React.FC = () => {
                     </MenuItem>
                   ))}
                 </Select>
-                <FormHelperText>
-                  Defines the permissions granted within the selected organization. Manage templates
-                  under Admin → Roles.
-                </FormHelperText>
+                <FormHelperText>{t('admin.users.helpRoleTemplate')}</FormHelperText>
               </FormControl>
               {editingUser && (
                 <Button
@@ -758,32 +780,29 @@ const UsersPage: React.FC = () => {
                   disabled={!formData.organizationId}
                   sx={{ minWidth: 'auto', px: 2 }}
                 >
-                  Add
+                  {t('admin.users.add')}
                 </Button>
               )}
             </Box>
           </Stack>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleCloseDialog}>Cancel</Button>
+          <Button onClick={handleCloseDialog}>{t('admin.users.cancel')}</Button>
           <Button onClick={handleSaveUser} variant="contained">
-            {editingUser ? 'Save' : 'Create'}
+            {editingUser ? t('admin.users.save') : t('admin.users.create')}
           </Button>
         </DialogActions>
       </Dialog>
       {/* Delete Confirmation Dialog */}
       <Dialog open={deleteDialogOpen} onClose={() => setDeleteDialogOpen(false)}>
-        <DialogTitle>Delete User</DialogTitle>
+        <DialogTitle>{t('admin.users.dialogTitleDelete')}</DialogTitle>
         <DialogContent>
-          <Typography>
-            Are you sure you want to delete user "{userToDelete?.name}"? This action cannot be
-            undone.
-          </Typography>
+          <Typography>{t('admin.users.confirmDelete', { name: userToDelete?.name })}</Typography>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setDeleteDialogOpen(false)}>Cancel</Button>
+          <Button onClick={() => setDeleteDialogOpen(false)}>{t('admin.users.cancel')}</Button>
           <Button onClick={handleDeleteConfirm} color="error" variant="contained">
-            Delete
+            {t('admin.users.delete')}
           </Button>
         </DialogActions>
       </Dialog>
@@ -799,18 +818,19 @@ const UsersPage: React.FC = () => {
         maxWidth="sm"
         fullWidth
       >
-        <DialogTitle>Erase user data (GDPR Article 17)</DialogTitle>
+        <DialogTitle>{t('admin.users.eraseTitle')}</DialogTitle>
         <DialogContent>
           <Stack spacing={2} sx={{ mt: 1 }}>
             <Alert severity="warning">
-              This permanently anonymizes <strong>{userToErase?.email}</strong>'s personal data.
-              The user record is tombstoned, API keys and organization memberships are deleted,
-              and all sessions are revoked. Audit log entries are preserved with anonymized
-              identifiers. <strong>This action cannot be undone.</strong>
+              {t('admin.users.eraseWarnPart1')}
+              <strong>{userToErase?.email}</strong>
+              {t('admin.users.eraseWarnPart2')}
+              <strong>{t('admin.users.eraseWarnCannotUndo')}</strong>
             </Alert>
             <Typography variant="body2">
-              To confirm, type the user's email address (
-              <code>{userToErase?.email}</code>) below.
+              {t('admin.users.eraseConfirmPart1')}
+              <code>{userToErase?.email}</code>
+              {t('admin.users.eraseConfirmPart2')}
             </Typography>
             <TextField
               autoFocus
@@ -821,7 +841,7 @@ const UsersPage: React.FC = () => {
               placeholder={userToErase?.email}
               disabled={eraseUserMutation.isPending}
               slotProps={{
-                htmlInput: { 'aria-label': 'Confirm erasure by typing the user email' }
+                htmlInput: { 'aria-label': t('admin.users.ariaConfirmErasure') },
               }}
             />
           </Stack>
@@ -834,7 +854,7 @@ const UsersPage: React.FC = () => {
             }}
             disabled={eraseUserMutation.isPending}
           >
-            Cancel
+            {t('admin.users.cancel')}
           </Button>
           <Button
             onClick={handleEraseConfirm}
@@ -844,12 +864,12 @@ const UsersPage: React.FC = () => {
               eraseUserMutation.isPending || eraseConfirmText !== (userToErase?.email ?? '')
             }
           >
-            {eraseUserMutation.isPending ? <CircularProgress size={20} /> : 'Erase'}
+            {eraseUserMutation.isPending ? <CircularProgress size={20} /> : t('admin.users.erase')}
           </Button>
         </DialogActions>
       </Dialog>
     </Container>
-  );
+  )
 }
 
 export default UsersPage

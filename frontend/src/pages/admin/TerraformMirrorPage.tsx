@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { queryKeys } from '../../services/queryKeys'
 import {
@@ -111,6 +112,7 @@ const VersionRow: React.FC<{
   configId: string
   onDelete: (v: TerraformVersion) => void
 }> = ({ version, configId, onDelete }) => {
+  const { t } = useTranslation()
   const [open, setOpen] = useState(false)
   const [platforms, setPlatforms] = useState<TerraformVersionPlatform[] | null>(null)
   const [loadingPlatforms, setLoadingPlatforms] = useState(false)
@@ -134,19 +136,34 @@ const VersionRow: React.FC<{
     <>
       <TableRow hover sx={{ '& > *': { borderBottom: 'unset' } }}>
         <TableCell>
-          <IconButton size="small" aria-label="Toggle version details" onClick={handleExpand}>
+          <IconButton
+            size="small"
+            aria-label={t('admin.terraformMirror.ariaToggleVersionDetails')}
+            onClick={handleExpand}
+          >
             {open ? <ExpandLessIcon /> : <ExpandMoreIcon />}
           </IconButton>
         </TableCell>
         <TableCell>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <Typography variant="body2" sx={{
-              fontFamily: "monospace"
-            }}>
+            <Typography
+              variant="body2"
+              sx={{
+                fontFamily: 'monospace',
+              }}
+            >
               {version.version}
             </Typography>
-            {version.is_latest && <Chip label="latest" color="primary" size="small" />}
-            {version.is_deprecated && <Chip label="deprecated" color="warning" size="small" />}
+            {version.is_latest && (
+              <Chip label={t('admin.terraformMirror.chipLatest')} color="primary" size="small" />
+            )}
+            {version.is_deprecated && (
+              <Chip
+                label={t('admin.terraformMirror.chipDeprecated')}
+                color="warning"
+                size="small"
+              />
+            )}
           </Box>
         </TableCell>
         <TableCell>
@@ -156,11 +173,11 @@ const VersionRow: React.FC<{
           {version.synced_at ? new Date(version.synced_at).toLocaleString() : '—'}
         </TableCell>
         <TableCell align="right">
-          <Tooltip title="Delete version and its binaries from storage">
+          <Tooltip title={t('admin.terraformMirror.tooltipDeleteVersion')}>
             <span>
               <IconButton
                 size="small"
-                aria-label="Delete version"
+                aria-label={t('admin.terraformMirror.ariaDeleteVersion')}
                 color="error"
                 onClick={() => onDelete(version)}
                 disabled={version.sync_status === 'syncing'}
@@ -183,8 +200,8 @@ const VersionRow: React.FC<{
                     <TableRow>
                       <TableCell>OS</TableCell>
                       <TableCell>Arch</TableCell>
-                      <TableCell>Filename</TableCell>
-                      <TableCell>Status</TableCell>
+                      <TableCell>{t('admin.terraformMirror.thFilename')}</TableCell>
+                      <TableCell>{t('admin.terraformMirror.thStatus')}</TableCell>
                       <TableCell>SHA256</TableCell>
                       <TableCell>GPG</TableCell>
                     </TableRow>
@@ -198,9 +215,10 @@ const VersionRow: React.FC<{
                           <Typography
                             variant="caption"
                             sx={{
-                              fontFamily: "monospace",
-                              wordBreak: 'break-all'
-                            }}>
+                              fontFamily: 'monospace',
+                              wordBreak: 'break-all',
+                            }}
+                          >
                             {p.filename}
                           </Typography>
                         </TableCell>
@@ -226,10 +244,13 @@ const VersionRow: React.FC<{
                   </TableBody>
                 </Table>
               ) : (
-                <Typography variant="body2" sx={{
-                  color: "text.secondary"
-                }}>
-                  No platforms synced yet.
+                <Typography
+                  variant="body2"
+                  sx={{
+                    color: 'text.secondary',
+                  }}
+                >
+                  {t('admin.terraformMirror.noPlatformsSynced')}
                 </Typography>
               )}
             </Box>
@@ -237,7 +258,7 @@ const VersionRow: React.FC<{
         </TableCell>
       </TableRow>
     </>
-  );
+  )
 }
 
 // ---------------------------------------------------------------------------
@@ -253,134 +274,165 @@ const ConfigCard: React.FC<{
   onViewVersions: (c: TerraformMirrorConfig) => void
   onViewHistory: (c: TerraformMirrorConfig) => void
   syncing: boolean
-}> = ({ config, status, onEdit, onDelete, onSync, onViewVersions, onViewHistory, syncing }) => (
-  <Card variant="outlined">
-    <CardContent>
-      <Box
-        sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1 }}
-      >
-        <Typography variant="h6" sx={{ wordBreak: 'break-word' }}>
-          {config.name}
-        </Typography>
-        <Box sx={{ display: 'flex', gap: 0.5, ml: 1, flexShrink: 0 }}>
-          <ToolChip tool={config.tool} />
-          <Chip
-            label={config.enabled ? 'enabled' : 'disabled'}
-            color={config.enabled ? 'success' : 'default'}
-            size="small"
-          />
-        </Box>
-      </Box>
-
-      {config.description && (
-        <Typography
-          variant="body2"
-          sx={{
-            color: "text.secondary",
-            mb: 1
-          }}>
-          {config.description}
-        </Typography>
-      )}
-
-      <Typography variant="body2" noWrap sx={{
-        color: "text.secondary"
-      }}>
-        {config.upstream_url}
-      </Typography>
-
-      {status && (
+}> = ({ config, status, onEdit, onDelete, onSync, onViewVersions, onViewHistory, syncing }) => {
+  const { t } = useTranslation()
+  return (
+    <Card variant="outlined">
+      <CardContent>
         <Box
-          sx={{
-            display: "flex",
-            gap: 1,
-            flexWrap: "wrap",
-            mt: 1
-          }}>
-          <Chip size="small" label={`${status.version_count} versions`} variant="outlined" />
-          <Chip size="small" label={`${status.platform_count} platforms`} variant="outlined" />
-          {status.pending_count > 0 && (
+          sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1 }}
+        >
+          <Typography variant="h6" sx={{ wordBreak: 'break-word' }}>
+            {config.name}
+          </Typography>
+          <Box sx={{ display: 'flex', gap: 0.5, ml: 1, flexShrink: 0 }}>
+            <ToolChip tool={config.tool} />
             <Chip
+              label={
+                config.enabled
+                  ? t('admin.terraformMirror.chipEnabled')
+                  : t('admin.terraformMirror.chipDisabled')
+              }
+              color={config.enabled ? 'success' : 'default'}
               size="small"
-              label={`${status.pending_count} pending`}
-              variant="outlined"
-              color="warning"
             />
-          )}
-        </Box>
-      )}
-
-      <Box sx={{ mt: 1.5 }}>
-        {config.last_sync_status ? (
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <SyncStatusChip status={config.last_sync_status} />
-            {config.last_sync_at && (
-              <Typography variant="caption" sx={{
-                color: "text.secondary"
-              }}>
-                {new Date(config.last_sync_at).toLocaleString()}
-              </Typography>
-            )}
           </Box>
-        ) : (
-          <Typography variant="caption" sx={{
-            color: "text.secondary"
-          }}>
-            Never synced
+        </Box>
+
+        {config.description && (
+          <Typography
+            variant="body2"
+            sx={{
+              color: 'text.secondary',
+              mb: 1,
+            }}
+          >
+            {config.description}
           </Typography>
         )}
-      </Box>
-    </CardContent>
 
-    <CardActions sx={{ justifyContent: 'space-between', flexWrap: 'wrap', gap: 0.5 }}>
-      <Box>
-        <Tooltip title="View details">
-          <Button size="small" onClick={() => onViewVersions(config)}>
-            View Details
-          </Button>
-        </Tooltip>
-        <Tooltip title="View sync history">
-          <IconButton
-            size="small"
-            aria-label="View sync history"
-            onClick={() => onViewHistory(config)}
+        <Typography
+          variant="body2"
+          noWrap
+          sx={{
+            color: 'text.secondary',
+          }}
+        >
+          {config.upstream_url}
+        </Typography>
+
+        {status && (
+          <Box
+            sx={{
+              display: 'flex',
+              gap: 1,
+              flexWrap: 'wrap',
+              mt: 1,
+            }}
           >
-            <HistoryIcon fontSize="small" />
-          </IconButton>
-        </Tooltip>
-      </Box>
-      <Box>
-        <Tooltip title="Trigger sync">
-          <span>
+            <Chip
+              size="small"
+              label={t('admin.terraformMirror.chipVersionCount', { count: status.version_count })}
+              variant="outlined"
+            />
+            <Chip
+              size="small"
+              label={t('admin.terraformMirror.chipPlatformCount', { count: status.platform_count })}
+              variant="outlined"
+            />
+            {status.pending_count > 0 && (
+              <Chip
+                size="small"
+                label={t('admin.terraformMirror.chipPendingCount', { count: status.pending_count })}
+                variant="outlined"
+                color="warning"
+              />
+            )}
+          </Box>
+        )}
+
+        <Box sx={{ mt: 1.5 }}>
+          {config.last_sync_status ? (
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <SyncStatusChip status={config.last_sync_status} />
+              {config.last_sync_at && (
+                <Typography
+                  variant="caption"
+                  sx={{
+                    color: 'text.secondary',
+                  }}
+                >
+                  {new Date(config.last_sync_at).toLocaleString()}
+                </Typography>
+              )}
+            </Box>
+          ) : (
+            <Typography
+              variant="caption"
+              sx={{
+                color: 'text.secondary',
+              }}
+            >
+              {t('admin.terraformMirror.neverSynced')}
+            </Typography>
+          )}
+        </Box>
+      </CardContent>
+
+      <CardActions sx={{ justifyContent: 'space-between', flexWrap: 'wrap', gap: 0.5 }}>
+        <Box>
+          <Tooltip title={t('admin.terraformMirror.tooltipViewDetails')}>
+            <Button size="small" onClick={() => onViewVersions(config)}>
+              {t('admin.terraformMirror.viewDetails')}
+            </Button>
+          </Tooltip>
+          <Tooltip title={t('admin.terraformMirror.tooltipViewHistory')}>
             <IconButton
               size="small"
-              aria-label="Sync mirror"
-              onClick={() => onSync(config)}
-              disabled={syncing || !config.enabled}
+              aria-label={t('admin.terraformMirror.ariaViewHistory')}
+              onClick={() => onViewHistory(config)}
             >
-              <SyncIcon fontSize="small" />
+              <HistoryIcon fontSize="small" />
             </IconButton>
-          </span>
-        </Tooltip>
-        <Tooltip title="Edit configuration">
-          <IconButton size="small" aria-label="Edit mirror" onClick={() => onEdit(config)}>
-            <EditIcon fontSize="small" />
-          </IconButton>
-        </Tooltip>
-        <Tooltip title="Delete mirror">
-          <IconButton
-            size="small"
-            aria-label="Delete mirror"
-            color="error"
-            onClick={() => onDelete(config)}
-          >
-            <DeleteIcon fontSize="small" />
-          </IconButton>
-        </Tooltip>
-      </Box>
-    </CardActions>
-  </Card>
-)
+          </Tooltip>
+        </Box>
+        <Box>
+          <Tooltip title={t('admin.terraformMirror.tooltipTriggerSync')}>
+            <span>
+              <IconButton
+                size="small"
+                aria-label={t('admin.terraformMirror.ariaSyncMirror')}
+                onClick={() => onSync(config)}
+                disabled={syncing || !config.enabled}
+              >
+                <SyncIcon fontSize="small" />
+              </IconButton>
+            </span>
+          </Tooltip>
+          <Tooltip title={t('admin.terraformMirror.tooltipEditConfig')}>
+            <IconButton
+              size="small"
+              aria-label={t('admin.terraformMirror.ariaEditMirror')}
+              onClick={() => onEdit(config)}
+            >
+              <EditIcon fontSize="small" />
+            </IconButton>
+          </Tooltip>
+          <Tooltip title={t('admin.terraformMirror.tooltipDeleteMirror')}>
+            <IconButton
+              size="small"
+              aria-label={t('admin.terraformMirror.ariaDeleteMirror')}
+              color="error"
+              onClick={() => onDelete(config)}
+            >
+              <DeleteIcon fontSize="small" />
+            </IconButton>
+          </Tooltip>
+        </Box>
+      </CardActions>
+    </Card>
+  )
+}
 
 // ---------------------------------------------------------------------------
 // Tool defaults
@@ -416,6 +468,7 @@ const emptyCreate = (): CreateTerraformMirrorConfigRequest => ({
 // ---------------------------------------------------------------------------
 
 const TerraformMirrorPage: React.FC = () => {
+  const { t } = useTranslation()
   const queryClient = useQueryClient()
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
@@ -469,7 +522,7 @@ const TerraformMirrorPage: React.FC = () => {
   })
 
   if (queryError && !error) {
-    setError(getErrorMessage(queryError, 'Failed to load Terraform mirror configurations'))
+    setError(getErrorMessage(queryError, t('admin.terraformMirror.errLoad')))
   }
 
   // Lazy-load status for each card when configs change
@@ -496,7 +549,7 @@ const TerraformMirrorPage: React.FC = () => {
       })
     },
     onSuccess: () => {
-      setSuccess(`Mirror "${createForm.name}" created`)
+      setSuccess(t('admin.terraformMirror.msgCreated', { name: createForm.name }))
       setCreateOpen(false)
       setCreateForm(emptyCreate())
       setCreateVersionFilter('')
@@ -504,7 +557,7 @@ const TerraformMirrorPage: React.FC = () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.terraformMirrors._def })
     },
     onError: (err: unknown) => {
-      setError(getErrorMessage(err, 'Failed to create mirror config'))
+      setError(getErrorMessage(err, t('admin.terraformMirror.errCreate')))
     },
   })
 
@@ -541,12 +594,12 @@ const TerraformMirrorPage: React.FC = () => {
       })
     },
     onSuccess: () => {
-      setSuccess(`Mirror "${editConfig?.name}" updated`)
+      setSuccess(t('admin.terraformMirror.msgUpdated', { name: editConfig?.name }))
       setEditConfig(null)
       queryClient.invalidateQueries({ queryKey: queryKeys.terraformMirrors._def })
     },
     onError: (err: unknown) => {
-      setError(getErrorMessage(err, 'Failed to update mirror config'))
+      setError(getErrorMessage(err, t('admin.terraformMirror.errUpdate')))
     },
   })
 
@@ -564,12 +617,12 @@ const TerraformMirrorPage: React.FC = () => {
       await api.deleteTerraformMirrorConfig(deleteConfig.id)
     },
     onSuccess: () => {
-      setSuccess(`Mirror "${deleteConfig?.name}" deleted`)
+      setSuccess(t('admin.terraformMirror.msgDeleted', { name: deleteConfig?.name }))
       setDeleteConfig(null)
       queryClient.invalidateQueries({ queryKey: queryKeys.terraformMirrors._def })
     },
     onError: (err: unknown) => {
-      setError(getErrorMessage(err, 'Failed to delete mirror config'))
+      setError(getErrorMessage(err, t('admin.terraformMirror.errDelete')))
     },
   })
 
@@ -585,9 +638,9 @@ const TerraformMirrorPage: React.FC = () => {
     setSyncingIds((prev) => new Set([...prev, config.id]))
     try {
       await api.triggerTerraformMirrorSync(config.id)
-      setSuccess(`Sync triggered for "${config.name}"`)
+      setSuccess(t('admin.terraformMirror.syncTriggered', { name: config.name }))
     } catch (err: unknown) {
-      setError(getErrorMessage(err, 'Failed to trigger sync'))
+      setError(getErrorMessage(err, t('admin.terraformMirror.errTriggerSync')))
     } finally {
       setSyncingIds((prev) => {
         const next = new Set(prev)
@@ -625,11 +678,11 @@ const TerraformMirrorPage: React.FC = () => {
     setDeletingVersion(true)
     try {
       await api.deleteTerraformVersion(versionsConfig.id, deleteVersion.version)
-      setSuccess(`Version ${deleteVersion.version} deleted`)
+      setSuccess(t('admin.terraformMirror.versionDeleted', { version: deleteVersion.version }))
       setDeleteVersion(null)
       openVersions(versionsConfig)
     } catch (err: unknown) {
-      setError(getErrorMessage(err, 'Failed to delete version'))
+      setError(getErrorMessage(err, t('admin.terraformMirror.errDeleteVersion')))
       setDeleteVersion(null)
     } finally {
       setDeletingVersion(false)
@@ -676,7 +729,7 @@ const TerraformMirrorPage: React.FC = () => {
             sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}
           >
             <Box>
-              <Typography variant="h4">Mirroring — Binaries Config</Typography>
+              <Typography variant="h4">{t('admin.terraformMirror.pageTitle')}</Typography>
             </Box>
             <Box sx={{ display: 'flex', gap: 1 }}>
               <Button
@@ -687,7 +740,7 @@ const TerraformMirrorPage: React.FC = () => {
                 }
                 disabled={loading}
               >
-                Refresh
+                {t('admin.terraformMirror.refresh')}
               </Button>
               <Button
                 variant="contained"
@@ -699,7 +752,7 @@ const TerraformMirrorPage: React.FC = () => {
                   setCreateOpen(true)
                 }}
               >
-                Add Mirror
+                {t('admin.terraformMirror.addMirror')}
               </Button>
             </Box>
           </Box>
@@ -707,12 +760,11 @@ const TerraformMirrorPage: React.FC = () => {
           {/* Help / info banner */}
           <Alert severity="info" sx={{ mb: 2 }}>
             <Typography variant="body2">
-              Clients download binaries at{' '}
+              {t('admin.terraformMirror.infoBannerBefore')}
               <code>
                 /terraform/binaries/&#123;name&#125;/versions/&#123;version&#125;/&#123;os&#125;/&#123;arch&#125;
               </code>
-              . This endpoint is unauthenticated — configure your CI or developer machines to point
-              at your registry host.
+              {t('admin.terraformMirror.infoBannerAfter')}
             </Typography>
           </Alert>
 
@@ -732,10 +784,7 @@ const TerraformMirrorPage: React.FC = () => {
 
           {/* Config cards */}
           {configs.length === 0 ? (
-            <Alert severity="info">
-              No Terraform binary mirror configurations exist yet. Create one to start mirroring
-              Terraform or OpenTofu binaries.
-            </Alert>
+            <Alert severity="info">{t('admin.terraformMirror.emptyState')}</Alert>
           ) : (
             <Grid container spacing={2} sx={{ mb: 3 }}>
               {configs.map((cfg) => {
@@ -762,19 +811,19 @@ const TerraformMirrorPage: React.FC = () => {
           Create Dialog
       ================================================================== */}
           <Dialog open={createOpen} onClose={() => setCreateOpen(false)} maxWidth="sm" fullWidth>
-            <DialogTitle>Add Terraform Binary Mirror</DialogTitle>
+            <DialogTitle>{t('admin.terraformMirror.dialogTitleCreate')}</DialogTitle>
             <DialogContent>
               <Box sx={{ pt: 1, display: 'flex', flexDirection: 'column', gap: 2 }}>
                 <TextField
-                  label="Name"
+                  label={t('admin.terraformMirror.labelName')}
                   value={createForm.name}
                   onChange={(e) => setCreateForm((prev) => ({ ...prev, name: e.target.value }))}
-                  helperText="Unique slug used in API paths (e.g. hashicorp-terraform)"
+                  helperText={t('admin.terraformMirror.helpName')}
                   required
                   fullWidth
                 />
                 <TextField
-                  label="Description"
+                  label={t('admin.terraformMirror.labelDescription')}
                   value={createForm.description ?? ''}
                   onChange={(e) =>
                     setCreateForm((prev) => ({ ...prev, description: e.target.value }))
@@ -783,7 +832,7 @@ const TerraformMirrorPage: React.FC = () => {
                 />
                 <TextField
                   select
-                  label="Tool"
+                  label={t('admin.terraformMirror.labelTool')}
                   value={createForm.tool}
                   onChange={(e) => {
                     const newTool = e.target.value
@@ -803,26 +852,26 @@ const TerraformMirrorPage: React.FC = () => {
                 >
                   <MenuItem value="terraform">Terraform (HashiCorp)</MenuItem>
                   <MenuItem value="opentofu">OpenTofu</MenuItem>
-                  <MenuItem value="custom">Custom</MenuItem>
+                  <MenuItem value="custom">{t('admin.terraformMirror.menuCustom')}</MenuItem>
                 </TextField>
                 <TextField
-                  label="Upstream URL"
+                  label={t('admin.terraformMirror.labelUpstreamUrl')}
                   value={createForm.upstream_url}
                   onChange={(e) =>
                     setCreateForm((prev) => ({ ...prev, upstream_url: e.target.value }))
                   }
                   helperText={
                     createForm.tool === 'opentofu'
-                      ? 'OpenTofu releases server (releases.opentofu.org) or a GitHub repo URL (e.g. https://github.com/opentofu/opentofu).'
+                      ? t('admin.terraformMirror.helpUrlOpentofu')
                       : createForm.tool === 'terraform'
-                        ? 'Terraform releases are sourced from releases.hashicorp.com.'
-                        : 'URL of the upstream source. Use a releases server URL or a GitHub repository URL.'
+                        ? t('admin.terraformMirror.helpUrlTerraform')
+                        : t('admin.terraformMirror.helpUrlCustom')
                   }
                   required
                   fullWidth
                 />
                 <TextField
-                  label="Sync Interval (hours)"
+                  label={t('admin.terraformMirror.labelSyncInterval')}
                   type="number"
                   value={createForm.sync_interval_hours ?? 24}
                   onChange={(e) =>
@@ -833,7 +882,7 @@ const TerraformMirrorPage: React.FC = () => {
                   }
                   fullWidth
                   slotProps={{
-                    htmlInput: { min: 1 }
+                    htmlInput: { min: 1 },
                   }}
                 />
                 <Box sx={{ display: 'flex', gap: 2 }}>
@@ -846,7 +895,7 @@ const TerraformMirrorPage: React.FC = () => {
                         }
                       />
                     }
-                    label="Enabled"
+                    label={t('admin.terraformMirror.labelEnabled')}
                   />
                   <FormControlLabel
                     control={
@@ -857,7 +906,7 @@ const TerraformMirrorPage: React.FC = () => {
                         }
                       />
                     }
-                    label="GPG Verify"
+                    label={t('admin.terraformMirror.labelGpgVerify')}
                   />
                   <FormControlLabel
                     control={
@@ -868,14 +917,14 @@ const TerraformMirrorPage: React.FC = () => {
                         }
                       />
                     }
-                    label="Stable Only"
+                    label={t('admin.terraformMirror.labelStableOnly')}
                   />
                 </Box>
                 <TextField
-                  label="Version Filter"
+                  label={t('admin.terraformMirror.labelVersionFilter')}
                   value={createVersionFilter}
                   onChange={(e) => setCreateVersionFilter(e.target.value)}
-                  helperText='Limit versions to sync: "1.9." (prefix), "latest:5", ">=1.5.0" (semver), "1.5.0,1.6.0" (list). Leave blank for all.'
+                  helperText={t('admin.terraformMirror.helpVersionFilter')}
                   fullWidth
                 />
                 <Autocomplete
@@ -886,33 +935,38 @@ const TerraformMirrorPage: React.FC = () => {
                   renderInput={(params) => (
                     <TextField
                       {...params}
-                      label="Platform Filter"
-                      placeholder={createPlatformFilter.length === 0 ? 'All platforms' : ''}
-                      helperText="Select platforms to sync. Leave empty to sync all platforms."
+                      label={t('admin.terraformMirror.labelPlatformFilter')}
+                      placeholder={
+                        createPlatformFilter.length === 0
+                          ? t('admin.terraformMirror.placeholderAllPlatforms')
+                          : ''
+                      }
+                      helperText={t('admin.terraformMirror.helpPlatformFilter')}
                       fullWidth
                     />
                   )}
                   renderValue={(value, getItemProps) =>
                     value.map((option, index) => (
-                      <Chip
-                        label={option}
-                        size="small"
-                        {...getItemProps({ index })}
-                        key={option}
-                      />
+                      <Chip label={option} size="small" {...getItemProps({ index })} key={option} />
                     ))
                   }
                 />
               </Box>
             </DialogContent>
             <DialogActions>
-              <Button onClick={() => setCreateOpen(false)}>Cancel</Button>
+              <Button onClick={() => setCreateOpen(false)}>
+                {t('admin.terraformMirror.cancel')}
+              </Button>
               <Button
                 onClick={handleCreate}
                 variant="contained"
                 disabled={createMutation.isPending || !createForm.name || !createForm.upstream_url}
               >
-                {createMutation.isPending ? <CircularProgress size={18} /> : 'Create'}
+                {createMutation.isPending ? (
+                  <CircularProgress size={18} />
+                ) : (
+                  t('admin.terraformMirror.create')
+                )}
               </Button>
             </DialogActions>
           </Dialog>
@@ -921,17 +975,19 @@ const TerraformMirrorPage: React.FC = () => {
           Edit Dialog
       ================================================================== */}
           <Dialog open={!!editConfig} onClose={() => setEditConfig(null)} maxWidth="sm" fullWidth>
-            <DialogTitle>Edit Mirror — {editConfig?.name}</DialogTitle>
+            <DialogTitle>
+              {t('admin.terraformMirror.dialogTitleEdit', { name: editConfig?.name })}
+            </DialogTitle>
             <DialogContent>
               <Box sx={{ pt: 1, display: 'flex', flexDirection: 'column', gap: 2 }}>
                 <TextField
-                  label="Name"
+                  label={t('admin.terraformMirror.labelName')}
                   value={editForm.name ?? ''}
                   onChange={(e) => setEditForm((prev) => ({ ...prev, name: e.target.value }))}
                   fullWidth
                 />
                 <TextField
-                  label="Description"
+                  label={t('admin.terraformMirror.labelDescription')}
                   value={editForm.description ?? ''}
                   onChange={(e) =>
                     setEditForm((prev) => ({ ...prev, description: e.target.value }))
@@ -940,7 +996,7 @@ const TerraformMirrorPage: React.FC = () => {
                 />
                 <TextField
                   select
-                  label="Tool"
+                  label={t('admin.terraformMirror.labelTool')}
                   value={editForm.tool ?? 'terraform'}
                   onChange={(e) => {
                     const newTool = e.target.value
@@ -960,25 +1016,25 @@ const TerraformMirrorPage: React.FC = () => {
                 >
                   <MenuItem value="terraform">Terraform (HashiCorp)</MenuItem>
                   <MenuItem value="opentofu">OpenTofu</MenuItem>
-                  <MenuItem value="custom">Custom</MenuItem>
+                  <MenuItem value="custom">{t('admin.terraformMirror.menuCustom')}</MenuItem>
                 </TextField>
                 <TextField
-                  label="Upstream URL"
+                  label={t('admin.terraformMirror.labelUpstreamUrl')}
                   value={editForm.upstream_url ?? ''}
                   onChange={(e) =>
                     setEditForm((prev) => ({ ...prev, upstream_url: e.target.value }))
                   }
                   helperText={
                     editForm.tool === 'opentofu'
-                      ? 'OpenTofu releases server (releases.opentofu.org) or a GitHub repo URL (e.g. https://github.com/opentofu/opentofu).'
+                      ? t('admin.terraformMirror.helpUrlOpentofu')
                       : editForm.tool === 'terraform'
-                        ? 'Terraform releases are sourced from releases.hashicorp.com.'
-                        : 'URL of the upstream source. Use a releases server URL or a GitHub repository URL.'
+                        ? t('admin.terraformMirror.helpUrlTerraform')
+                        : t('admin.terraformMirror.helpUrlCustom')
                   }
                   fullWidth
                 />
                 <TextField
-                  label="Sync Interval (hours)"
+                  label={t('admin.terraformMirror.labelSyncInterval')}
                   type="number"
                   value={editForm.sync_interval_hours ?? 24}
                   onChange={(e) =>
@@ -989,7 +1045,7 @@ const TerraformMirrorPage: React.FC = () => {
                   }
                   fullWidth
                   slotProps={{
-                    htmlInput: { min: 1 }
+                    htmlInput: { min: 1 },
                   }}
                 />
                 <Box sx={{ display: 'flex', gap: 2 }}>
@@ -1002,7 +1058,7 @@ const TerraformMirrorPage: React.FC = () => {
                         }
                       />
                     }
-                    label="Enabled"
+                    label={t('admin.terraformMirror.labelEnabled')}
                   />
                   <FormControlLabel
                     control={
@@ -1013,7 +1069,7 @@ const TerraformMirrorPage: React.FC = () => {
                         }
                       />
                     }
-                    label="GPG Verify"
+                    label={t('admin.terraformMirror.labelGpgVerify')}
                   />
                   <FormControlLabel
                     control={
@@ -1024,14 +1080,14 @@ const TerraformMirrorPage: React.FC = () => {
                         }
                       />
                     }
-                    label="Stable Only"
+                    label={t('admin.terraformMirror.labelStableOnly')}
                   />
                 </Box>
                 <TextField
-                  label="Version Filter"
+                  label={t('admin.terraformMirror.labelVersionFilter')}
                   value={editVersionFilter}
                   onChange={(e) => setEditVersionFilter(e.target.value)}
-                  helperText='Limit versions to sync: "1.9." (prefix), "latest:5", ">=1.5.0" (semver), "1.5.0,1.6.0" (list). Leave blank for all.'
+                  helperText={t('admin.terraformMirror.helpVersionFilter')}
                   fullWidth
                 />
                 <Autocomplete
@@ -1042,29 +1098,34 @@ const TerraformMirrorPage: React.FC = () => {
                   renderInput={(params) => (
                     <TextField
                       {...params}
-                      label="Platform Filter"
-                      placeholder={editPlatformFilter.length === 0 ? 'All platforms' : ''}
-                      helperText="Select platforms to sync. Leave empty to sync all platforms."
+                      label={t('admin.terraformMirror.labelPlatformFilter')}
+                      placeholder={
+                        editPlatformFilter.length === 0
+                          ? t('admin.terraformMirror.placeholderAllPlatforms')
+                          : ''
+                      }
+                      helperText={t('admin.terraformMirror.helpPlatformFilter')}
                       fullWidth
                     />
                   )}
                   renderValue={(value, getItemProps) =>
                     value.map((option, index) => (
-                      <Chip
-                        label={option}
-                        size="small"
-                        {...getItemProps({ index })}
-                        key={option}
-                      />
+                      <Chip label={option} size="small" {...getItemProps({ index })} key={option} />
                     ))
                   }
                 />
               </Box>
             </DialogContent>
             <DialogActions>
-              <Button onClick={() => setEditConfig(null)}>Cancel</Button>
+              <Button onClick={() => setEditConfig(null)}>
+                {t('admin.terraformMirror.cancel')}
+              </Button>
               <Button onClick={handleEdit} variant="contained" disabled={editMutation.isPending}>
-                {editMutation.isPending ? <CircularProgress size={18} /> : 'Save'}
+                {editMutation.isPending ? (
+                  <CircularProgress size={18} />
+                ) : (
+                  t('admin.terraformMirror.save')
+                )}
               </Button>
             </DialogActions>
           </Dialog>
@@ -1073,18 +1134,24 @@ const TerraformMirrorPage: React.FC = () => {
           Delete Config Dialog
       ================================================================== */}
           <Dialog open={!!deleteConfig} onClose={() => setDeleteConfig(null)}>
-            <DialogTitle>Delete Mirror Configuration</DialogTitle>
+            <DialogTitle>{t('admin.terraformMirror.deleteConfigTitle')}</DialogTitle>
             <DialogContent>
               <Typography>
-                Are you sure you want to delete mirror <strong>{deleteConfig?.name}</strong>? This
-                will delete all synced version records and cannot be undone. Binaries in storage
-                will NOT be removed automatically.
+                {t('admin.terraformMirror.deleteConfigTextBefore')}
+                <strong>{deleteConfig?.name}</strong>
+                {t('admin.terraformMirror.deleteConfigTextAfter')}
               </Typography>
             </DialogContent>
             <DialogActions>
-              <Button onClick={() => setDeleteConfig(null)}>Cancel</Button>
+              <Button onClick={() => setDeleteConfig(null)}>
+                {t('admin.terraformMirror.cancel')}
+              </Button>
               <Button color="error" onClick={handleDelete} disabled={deleteMutation.isPending}>
-                {deleteMutation.isPending ? <CircularProgress size={18} /> : 'Delete'}
+                {deleteMutation.isPending ? (
+                  <CircularProgress size={18} />
+                ) : (
+                  t('admin.terraformMirror.delete')
+                )}
               </Button>
             </DialogActions>
           </Dialog>
@@ -1095,7 +1162,7 @@ const TerraformMirrorPage: React.FC = () => {
           {versionsConfig && (
             <Dialog open onClose={() => setVersionsConfig(null)} maxWidth="lg" fullWidth>
               <DialogTitle>
-                Versions — {versionsConfig.name}
+                {t('admin.terraformMirror.versionsTitle', { name: versionsConfig.name })}
                 <Box component="span" sx={{ ml: 1 }}>
                   <ToolChip tool={versionsConfig.tool} />
                 </Box>
@@ -1106,17 +1173,19 @@ const TerraformMirrorPage: React.FC = () => {
                     <CircularProgress />
                   </Box>
                 ) : versions.length === 0 ? (
-                  <Alert severity="info">No versions have been synced yet.</Alert>
+                  <Alert severity="info">{t('admin.terraformMirror.noVersionsSynced')}</Alert>
                 ) : (
                   <TableContainer component={Paper} variant="outlined">
                     <Table size="small">
                       <TableHead>
                         <TableRow>
                           <TableCell width={48} />
-                          <TableCell>Version</TableCell>
-                          <TableCell>Status</TableCell>
-                          <TableCell>Synced At</TableCell>
-                          <TableCell align="right">Actions</TableCell>
+                          <TableCell>{t('admin.terraformMirror.thVersion')}</TableCell>
+                          <TableCell>{t('admin.terraformMirror.thStatus')}</TableCell>
+                          <TableCell>{t('admin.terraformMirror.thSyncedAt')}</TableCell>
+                          <TableCell align="right">
+                            {t('admin.terraformMirror.thActions')}
+                          </TableCell>
                         </TableRow>
                       </TableHead>
                       <TableBody>
@@ -1134,24 +1203,33 @@ const TerraformMirrorPage: React.FC = () => {
                 )}
               </DialogContent>
               <DialogActions>
-                <Button onClick={() => setVersionsConfig(null)}>Close</Button>
+                <Button onClick={() => setVersionsConfig(null)}>
+                  {t('admin.terraformMirror.close')}
+                </Button>
               </DialogActions>
             </Dialog>
           )}
 
           {/* ---- Delete Version Confirmation ---- */}
           <Dialog open={!!deleteVersion} onClose={() => setDeleteVersion(null)}>
-            <DialogTitle>Delete Terraform Version</DialogTitle>
+            <DialogTitle>{t('admin.terraformMirror.deleteVersionTitle')}</DialogTitle>
             <DialogContent>
               <Typography>
-                Are you sure you want to delete version <strong>{deleteVersion?.version}</strong>?
-                This will remove the version record and cannot be undone.
+                {t('admin.terraformMirror.deleteVersionTextBefore')}
+                <strong>{deleteVersion?.version}</strong>
+                {t('admin.terraformMirror.deleteVersionTextAfter')}
               </Typography>
             </DialogContent>
             <DialogActions>
-              <Button onClick={() => setDeleteVersion(null)}>Cancel</Button>
+              <Button onClick={() => setDeleteVersion(null)}>
+                {t('admin.terraformMirror.cancel')}
+              </Button>
               <Button color="error" onClick={handleDeleteVersion} disabled={deletingVersion}>
-                {deletingVersion ? <CircularProgress size={18} /> : 'Delete'}
+                {deletingVersion ? (
+                  <CircularProgress size={18} />
+                ) : (
+                  t('admin.terraformMirror.delete')
+                )}
               </Button>
             </DialogActions>
           </Dialog>
@@ -1165,26 +1243,28 @@ const TerraformMirrorPage: React.FC = () => {
             maxWidth="lg"
             fullWidth
           >
-            <DialogTitle>Sync History — {historyConfig?.name}</DialogTitle>
+            <DialogTitle>
+              {t('admin.terraformMirror.historyTitle', { name: historyConfig?.name })}
+            </DialogTitle>
             <DialogContent>
               {historyLoading ? (
                 <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
                   <CircularProgress />
                 </Box>
               ) : history.length === 0 ? (
-                <Alert severity="info">No sync history yet.</Alert>
+                <Alert severity="info">{t('admin.terraformMirror.noHistory')}</Alert>
               ) : (
                 <TableContainer component={Paper} variant="outlined">
                   <Table size="small">
                     <TableHead>
                       <TableRow>
-                        <TableCell>Started</TableCell>
-                        <TableCell>Completed</TableCell>
-                        <TableCell>Triggered By</TableCell>
-                        <TableCell>Status</TableCell>
-                        <TableCell>Versions</TableCell>
-                        <TableCell>Platforms</TableCell>
-                        <TableCell>Failures</TableCell>
+                        <TableCell>{t('admin.terraformMirror.thStarted')}</TableCell>
+                        <TableCell>{t('admin.terraformMirror.thCompleted')}</TableCell>
+                        <TableCell>{t('admin.terraformMirror.thTriggeredBy')}</TableCell>
+                        <TableCell>{t('admin.terraformMirror.thStatus')}</TableCell>
+                        <TableCell>{t('admin.terraformMirror.thVersions')}</TableCell>
+                        <TableCell>{t('admin.terraformMirror.thPlatforms')}</TableCell>
+                        <TableCell>{t('admin.terraformMirror.thFailures')}</TableCell>
                       </TableRow>
                     </TableHead>
                     <TableBody>
@@ -1215,13 +1295,15 @@ const TerraformMirrorPage: React.FC = () => {
               )}
             </DialogContent>
             <DialogActions>
-              <Button onClick={() => setHistoryConfig(null)}>Close</Button>
+              <Button onClick={() => setHistoryConfig(null)}>
+                {t('admin.terraformMirror.close')}
+              </Button>
             </DialogActions>
           </Dialog>
         </Container>
       )}
     </Box>
-  );
+  )
 }
 
 export default TerraformMirrorPage

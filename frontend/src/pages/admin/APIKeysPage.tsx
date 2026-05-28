@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import {
   Container,
@@ -75,6 +76,7 @@ function toDatetimeLocalValue(isoString?: string | null): string {
 }
 
 const APIKeysPage: React.FC = () => {
+  const { t } = useTranslation()
   const queryClient = useQueryClient()
   const { allowedScopes, roleTemplate, user } = useAuth()
   const [error, setError] = useState<string | null>(null)
@@ -101,7 +103,7 @@ const APIKeysPage: React.FC = () => {
 
   useEffect(() => {
     if (queryError && !error) {
-      setError('Failed to load API keys. Please try again.')
+      setError(t('admin.apiKeys.errLoad'))
     }
   }, [queryError]) // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -178,7 +180,7 @@ const APIKeysPage: React.FC = () => {
       const orgId =
         formData.organization_id || (memberships.length > 0 ? memberships[0].organization_id : '')
       if (!orgId) {
-        setError('You must be a member of an organization to create API keys.')
+        setError(t('admin.apiKeys.errNoOrg'))
         return
       }
       const response = await api.createAPIKey({
@@ -192,7 +194,7 @@ const APIKeysPage: React.FC = () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.apiKeys._def })
     } catch (err: unknown) {
       console.error('Failed to create API key:', err)
-      setError(getErrorMessage(err, 'Failed to create API key. Please try again.'))
+      setError(getErrorMessage(err, t('admin.apiKeys.errCreate')))
     }
   }
 
@@ -234,7 +236,7 @@ const APIKeysPage: React.FC = () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.apiKeys._def })
     } catch (err: unknown) {
       console.error('Failed to update API key:', err)
-      setError(getErrorMessage(err, 'Failed to update API key. Please try again.'))
+      setError(getErrorMessage(err, t('admin.apiKeys.errUpdate')))
     }
   }
 
@@ -265,7 +267,7 @@ const APIKeysPage: React.FC = () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.apiKeys._def })
     } catch (err: unknown) {
       console.error('Failed to rotate API key:', err)
-      setError(getErrorMessage(err, 'Failed to rotate API key. Please try again.'))
+      setError(getErrorMessage(err, t('admin.apiKeys.errRotate')))
     }
   }
 
@@ -293,7 +295,7 @@ const APIKeysPage: React.FC = () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.apiKeys._def })
     } catch (err: unknown) {
       console.error('Failed to delete API key:', err)
-      setError(getErrorMessage(err, 'Failed to delete API key. Please try again.'))
+      setError(getErrorMessage(err, t('admin.apiKeys.errDelete')))
     }
   }
 
@@ -322,11 +324,15 @@ const APIKeysPage: React.FC = () => {
     const status = getExpirationStatus(expiresAt)
     switch (status) {
       case 'expired':
-        return <Chip label="Expired" size="small" color="error" />
+        return <Chip label={t('admin.apiKeys.chipExpired')} size="small" color="error" />
       case 'expiring-soon':
         return (
-          <Tooltip title={`Expires ${new Date(expiresAt!).toLocaleString()}`}>
-            <Chip label="Expires soon" size="small" color="warning" />
+          <Tooltip
+            title={t('admin.apiKeys.tooltipExpires', {
+              date: new Date(expiresAt!).toLocaleString(),
+            })}
+          >
+            <Chip label={t('admin.apiKeys.chipExpiresSoon')} size="small" color="warning" />
           </Tooltip>
         )
       case 'active':
@@ -334,22 +340,30 @@ const APIKeysPage: React.FC = () => {
       case 'never':
       default:
         return (
-          <Typography variant="body2" sx={{
-            color: "text.secondary"
-          }}>Never
-                      </Typography>
-        );
+          <Typography
+            variant="body2"
+            sx={{
+              color: 'text.secondary',
+            }}
+          >
+            {t('admin.apiKeys.never')}
+          </Typography>
+        )
     }
   }
 
   const renderScopeChips = (scopes: string[]) => {
     if (!scopes || scopes.length === 0)
       return (
-        <Typography variant="body2" sx={{
-          color: "text.secondary"
-        }}>None
-                  </Typography>
-      );
+        <Typography
+          variant="body2"
+          sx={{
+            color: 'text.secondary',
+          }}
+        >
+          {t('admin.apiKeys.none')}
+        </Typography>
+      )
     const maxVisible = 2
     const visible = scopes.slice(0, maxVisible)
     const remaining = scopes.length - maxVisible
@@ -385,22 +399,20 @@ const APIKeysPage: React.FC = () => {
   const renderScopeCheckboxes = (selectedScopes: string[], onToggle: (scope: string) => void) => (
     <Box>
       <Typography variant="subtitle2" gutterBottom>
-        Scopes
+        {t('admin.apiKeys.scopesTitle')}
       </Typography>
       <Typography
         variant="caption"
         sx={{
-          color: "text.secondary",
+          color: 'text.secondary',
           mb: 1,
-          display: 'block'
-        }}>
-        Select the permissions for this API key. You can only select scopes within your role's
-        permissions.
+          display: 'block',
+        }}
+      >
+        {t('admin.apiKeys.scopesHelp')}
       </Typography>
       {availableScopes.length === 0 ? (
-        <Alert severity="error">
-          No scopes available. Please contact an administrator to assign you a role.
-        </Alert>
+        <Alert severity="error">{t('admin.apiKeys.noScopesAvailable')}</Alert>
       ) : (
         <FormGroup>
           {availableScopes.map((scope) => {
@@ -442,7 +454,7 @@ const APIKeysPage: React.FC = () => {
       )}
       {selectedScopes.length === 0 && availableScopes.length > 0 && (
         <Typography variant="caption" color="error">
-          Please select at least one scope
+          {t('admin.apiKeys.selectAtLeastOne')}
         </Typography>
       )}
     </Box>
@@ -453,16 +465,19 @@ const APIKeysPage: React.FC = () => {
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
         <Box>
           <Typography variant="h4" gutterBottom>
-            API Keys
+            {t('admin.apiKeys.pageTitle')}
           </Typography>
-          <Typography variant="body1" sx={{
-            color: "text.secondary"
-          }}>
-            Manage API keys for Terraform CLI authentication
+          <Typography
+            variant="body1"
+            sx={{
+              color: 'text.secondary',
+            }}
+          >
+            {t('admin.apiKeys.pageSubtitle')}
           </Typography>
         </Box>
         <Button variant="contained" startIcon={<AddIcon />} onClick={handleOpenDialog}>
-          Create API Key
+          {t('admin.apiKeys.createApiKey')}
         </Button>
       </Box>
       {error && (
@@ -472,8 +487,7 @@ const APIKeysPage: React.FC = () => {
       )}
       {!membershipsLoading && memberships.length === 0 && (
         <Alert severity="warning" sx={{ mb: 3 }}>
-          You are not a member of any organization. Contact an administrator to add you to an
-          organization before creating API keys.
+          {t('admin.apiKeys.warnNoOrg')}
         </Alert>
       )}
       {/* API Keys Table */}
@@ -484,11 +498,11 @@ const APIKeysPage: React.FC = () => {
           </Box>
         ) : apiKeys.length === 0 ? (
           <EmptyState
-            title="No API keys yet"
-            description="Create an API key to authenticate Terraform and CI/CD clients against this registry."
+            title={t('admin.apiKeys.emptyTitle')}
+            description={t('admin.apiKeys.emptyDescription')}
             icon={<KeyIcon />}
             primaryAction={{
-              label: 'Create API key',
+              label: t('admin.apiKeys.emptyAction'),
               icon: <AddIcon />,
               onClick: handleOpenDialog,
             }}
@@ -499,13 +513,13 @@ const APIKeysPage: React.FC = () => {
             <Table>
               <TableHead>
                 <TableRow>
-                  <TableCell>Name</TableCell>
-                  <TableCell>Key</TableCell>
-                  <TableCell>Scopes</TableCell>
-                  <TableCell>Expires</TableCell>
-                  <TableCell>Last Used</TableCell>
-                  <TableCell>Created</TableCell>
-                  <TableCell align="right">Actions</TableCell>
+                  <TableCell>{t('admin.apiKeys.thName')}</TableCell>
+                  <TableCell>{t('admin.apiKeys.thKey')}</TableCell>
+                  <TableCell>{t('admin.apiKeys.scopesTitle')}</TableCell>
+                  <TableCell>{t('admin.apiKeys.thExpires')}</TableCell>
+                  <TableCell>{t('admin.apiKeys.thLastUsed')}</TableCell>
+                  <TableCell>{t('admin.apiKeys.thCreated')}</TableCell>
+                  <TableCell align="right">{t('admin.apiKeys.thActions')}</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -517,16 +531,21 @@ const APIKeysPage: React.FC = () => {
                       sx={expStatus === 'expired' ? { opacity: 0.5 } : undefined}
                     >
                       <TableCell>
-                        <Typography sx={{
-                          fontWeight: "medium"
-                        }}>{apiKey.name || '-'}</Typography>
+                        <Typography
+                          sx={{
+                            fontWeight: 'medium',
+                          }}
+                        >
+                          {apiKey.name || '-'}
+                        </Typography>
                         {apiKey.description && (
                           <Typography
                             variant="caption"
                             sx={{
-                              color: "text.secondary",
-                              display: 'block'
-                            }}>
+                              color: 'text.secondary',
+                              display: 'block',
+                            }}
+                          >
                             {apiKey.description}
                           </Typography>
                         )}
@@ -544,7 +563,7 @@ const APIKeysPage: React.FC = () => {
                       <TableCell>
                         {apiKey.last_used_at && !isNaN(Date.parse(apiKey.last_used_at))
                           ? new Date(apiKey.last_used_at).toLocaleDateString()
-                          : 'Never'}
+                          : t('admin.apiKeys.never')}
                       </TableCell>
                       <TableCell>
                         {apiKey.created_at && !isNaN(Date.parse(apiKey.created_at))
@@ -553,28 +572,28 @@ const APIKeysPage: React.FC = () => {
                       </TableCell>
                       <TableCell align="right">
                         <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 0.5 }}>
-                          <Tooltip title="Edit">
+                          <Tooltip title={t('admin.apiKeys.tooltipEdit')}>
                             <IconButton
                               size="small"
-                              aria-label="Edit API key"
+                              aria-label={t('admin.apiKeys.ariaEdit')}
                               onClick={() => handleEditClick(apiKey)}
                             >
                               <EditIcon fontSize="small" />
                             </IconButton>
                           </Tooltip>
-                          <Tooltip title="Rotate">
+                          <Tooltip title={t('admin.apiKeys.tooltipRotate')}>
                             <IconButton
                               size="small"
-                              aria-label="Rotate API key"
+                              aria-label={t('admin.apiKeys.ariaRotate')}
                               onClick={() => handleRotateClick(apiKey)}
                             >
                               <AutorenewIcon fontSize="small" />
                             </IconButton>
                           </Tooltip>
-                          <Tooltip title="Delete">
+                          <Tooltip title={t('admin.apiKeys.tooltipDelete')}>
                             <IconButton
                               size="small"
-                              aria-label="Delete API key"
+                              aria-label={t('admin.apiKeys.ariaDelete')}
                               onClick={() => handleDeleteClick(apiKey)}
                               color="error"
                             >
@@ -584,7 +603,7 @@ const APIKeysPage: React.FC = () => {
                         </Box>
                       </TableCell>
                     </TableRow>
-                  );
+                  )
                 })}
               </TableBody>
             </Table>
@@ -598,16 +617,15 @@ const APIKeysPage: React.FC = () => {
         maxWidth="sm"
         fullWidth
       >
-        <DialogTitle>Create API Key</DialogTitle>
+        <DialogTitle>{t('admin.apiKeys.dialogTitleCreate')}</DialogTitle>
         <DialogContent>
           {newKeyValue ? (
             <Box sx={{ mt: 2 }}>
               <Alert severity="success" sx={{ mb: 3 }}>
-                API key created successfully! Make sure to copy it now - you won't be able to see it
-                again.
+                {t('admin.apiKeys.successCreated')}
               </Alert>
               <TextField
-                label="API Key"
+                label={t('admin.apiKeys.labelApiKey')}
                 value={newKeyValue}
                 fullWidth
                 slotProps={{
@@ -615,9 +633,9 @@ const APIKeysPage: React.FC = () => {
                     readOnly: true,
                     endAdornment: (
                       <InputAdornment position="end">
-                        <Tooltip title="Copy API key">
+                        <Tooltip title={t('admin.apiKeys.tooltipCopyApiKey')}>
                           <IconButton
-                            aria-label="Copy API key"
+                            aria-label={t('admin.apiKeys.ariaCopyApiKey')}
                             onClick={() => handleCopyKey(newKeyValue)}
                           >
                             <CopyIcon />
@@ -626,18 +644,19 @@ const APIKeysPage: React.FC = () => {
                       </InputAdornment>
                     ),
                     sx: { fontFamily: 'monospace' },
-                  }
+                  },
                 }}
               />
               {copiedKey && (
                 <Typography
                   variant="caption"
                   sx={{
-                    color: "success.main",
+                    color: 'success.main',
                     mt: 1,
-                    display: 'block'
-                  }}>
-                  Copied to clipboard!
+                    display: 'block',
+                  }}
+                >
+                  {t('admin.apiKeys.copied')}
                 </Typography>
               )}
             </Box>
@@ -645,28 +664,26 @@ const APIKeysPage: React.FC = () => {
             <Stack spacing={3} sx={{ mt: 2 }}>
               {!roleTemplate && (
                 <Alert severity="warning" icon={<InfoIcon />}>
-                  You don't have a role template assigned. Contact an administrator to assign a role
-                  before creating API keys.
+                  {t('admin.apiKeys.warnNoRole')}
                 </Alert>
               )}
               {roleTemplate && (
                 <Alert severity="info" icon={<InfoIcon />}>
-                  Your role: <strong>{roleTemplate.display_name}</strong>. You can only create API
-                  keys with scopes that match your role permissions.
+                  {t('admin.apiKeys.roleInfoBefore')}
+                  <strong>{roleTemplate.display_name}</strong>
+                  {t('admin.apiKeys.roleInfoAfter')}
                 </Alert>
               )}
               {memberships.length === 0 && (
-                <Alert severity="error">
-                  You must be a member of an organization to create API keys.
-                </Alert>
+                <Alert severity="error">{t('admin.apiKeys.errNoOrg')}</Alert>
               )}
               {memberships.length > 0 && (
                 <FormControl fullWidth>
-                  <InputLabel>Organization</InputLabel>
+                  <InputLabel>{t('admin.apiKeys.labelOrganization')}</InputLabel>
                   <Select
                     value={formData.organization_id}
                     onChange={(e) => setFormData({ ...formData, organization_id: e.target.value })}
-                    label="Organization"
+                    label={t('admin.apiKeys.labelOrganization')}
                   >
                     {memberships.map(
                       (m: {
@@ -684,15 +701,15 @@ const APIKeysPage: React.FC = () => {
                 </FormControl>
               )}
               <TextField
-                label="Name"
+                label={t('admin.apiKeys.labelName')}
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                 required
                 fullWidth
-                helperText="A descriptive name for this API key"
+                helperText={t('admin.apiKeys.helpName')}
               />
               <TextField
-                label="Description"
+                label={t('admin.apiKeys.labelDescription')}
                 value={formData.description}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                 multiline
@@ -700,14 +717,14 @@ const APIKeysPage: React.FC = () => {
                 fullWidth
               />
               <TextField
-                label="Expiration Date"
+                label={t('admin.apiKeys.labelExpirationDate')}
                 type="datetime-local"
                 value={formData.expires_at}
                 onChange={(e) => setFormData({ ...formData, expires_at: e.target.value })}
                 fullWidth
-                helperText="Leave empty for a key that never expires"
+                helperText={t('admin.apiKeys.helpExpiration')}
                 slotProps={{
-                  inputLabel: { shrink: true }
+                  inputLabel: { shrink: true },
                 }}
               />
               {renderScopeCheckboxes(formData.scopes, handleScopeToggle)}
@@ -717,11 +734,11 @@ const APIKeysPage: React.FC = () => {
         <DialogActions>
           {newKeyValue ? (
             <Button onClick={handleCloseDialog} variant="contained">
-              Done
+              {t('admin.apiKeys.done')}
             </Button>
           ) : (
             <>
-              <Button onClick={handleCloseDialog}>Cancel</Button>
+              <Button onClick={handleCloseDialog}>{t('admin.apiKeys.cancel')}</Button>
               <Button
                 onClick={handleCreateAPIKey}
                 variant="contained"
@@ -732,7 +749,7 @@ const APIKeysPage: React.FC = () => {
                   memberships.length === 0
                 }
               >
-                Create
+                {t('admin.apiKeys.create')}
               </Button>
             </>
           )}
@@ -745,38 +762,38 @@ const APIKeysPage: React.FC = () => {
         maxWidth="sm"
         fullWidth
       >
-        <DialogTitle>Edit API Key</DialogTitle>
+        <DialogTitle>{t('admin.apiKeys.dialogTitleEdit')}</DialogTitle>
         <DialogContent>
           <Stack spacing={3} sx={{ mt: 2 }}>
             <TextField
-              label="Name"
+              label={t('admin.apiKeys.labelName')}
               value={editFormData.name}
               onChange={(e) => setEditFormData({ ...editFormData, name: e.target.value })}
               required
               fullWidth
             />
             <TextField
-              label="Expiration Date"
+              label={t('admin.apiKeys.labelExpirationDate')}
               type="datetime-local"
               value={editFormData.expires_at}
               onChange={(e) => setEditFormData({ ...editFormData, expires_at: e.target.value })}
               fullWidth
-              helperText="Leave empty for a key that never expires"
+              helperText={t('admin.apiKeys.helpExpiration')}
               slotProps={{
-                inputLabel: { shrink: true }
+                inputLabel: { shrink: true },
               }}
             />
             {renderScopeCheckboxes(editFormData.scopes, handleEditScopeToggle)}
           </Stack>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setEditDialogOpen(false)}>Cancel</Button>
+          <Button onClick={() => setEditDialogOpen(false)}>{t('admin.apiKeys.cancel')}</Button>
           <Button
             onClick={handleEditSave}
             variant="contained"
             disabled={!editFormData.name || editFormData.scopes.length === 0}
           >
-            Save
+            {t('admin.apiKeys.save')}
           </Button>
         </DialogActions>
       </Dialog>
@@ -787,15 +804,15 @@ const APIKeysPage: React.FC = () => {
         maxWidth="sm"
         fullWidth
       >
-        <DialogTitle>Rotate API Key</DialogTitle>
+        <DialogTitle>{t('admin.apiKeys.dialogTitleRotate')}</DialogTitle>
         <DialogContent>
           {rotatedKeyValue ? (
             <Box sx={{ mt: 2 }}>
               <Alert severity="success" sx={{ mb: 3 }}>
-                Key rotated successfully! Copy your new key now - you won't be able to see it again.
+                {t('admin.apiKeys.successRotated')}
               </Alert>
               <TextField
-                label="New API Key"
+                label={t('admin.apiKeys.labelNewApiKey')}
                 value={rotatedKeyValue}
                 fullWidth
                 slotProps={{
@@ -803,9 +820,9 @@ const APIKeysPage: React.FC = () => {
                     readOnly: true,
                     endAdornment: (
                       <InputAdornment position="end">
-                        <Tooltip title="Copy API key">
+                        <Tooltip title={t('admin.apiKeys.tooltipCopyApiKey')}>
                           <IconButton
-                            aria-label="Copy rotated key"
+                            aria-label={t('admin.apiKeys.ariaCopyRotated')}
                             onClick={() => handleCopyKey(rotatedKeyValue)}
                           >
                             <CopyIcon />
@@ -814,33 +831,37 @@ const APIKeysPage: React.FC = () => {
                       </InputAdornment>
                     ),
                     sx: { fontFamily: 'monospace' },
-                  }
+                  },
                 }}
               />
               {copiedKey && (
                 <Typography
                   variant="caption"
                   sx={{
-                    color: "success.main",
+                    color: 'success.main',
                     mt: 1,
-                    display: 'block'
-                  }}>
-                  Copied to clipboard!
+                    display: 'block',
+                  }}
+                >
+                  {t('admin.apiKeys.copied')}
                 </Typography>
               )}
               {rotateResult && (
                 <Alert severity="info" sx={{ mt: 2 }}>
                   {rotateResult.oldStatus === 'revoked'
-                    ? 'The old key has been revoked immediately.'
-                    : `The old key will remain valid until ${new Date(rotateResult.oldExpiresAt!).toLocaleString()}.`}
+                    ? t('admin.apiKeys.rotateOldRevoked')
+                    : t('admin.apiKeys.rotateOldValid', {
+                        date: new Date(rotateResult.oldExpiresAt!).toLocaleString(),
+                      })}
                 </Alert>
               )}
             </Box>
           ) : (
             <Stack spacing={3} sx={{ mt: 2 }}>
               <Typography>
-                Rotating key "<strong>{keyToRotate?.name}</strong>" will generate a new key. Choose
-                how to handle the old key:
+                {t('admin.apiKeys.rotateIntroBefore')}
+                <strong>{keyToRotate?.name}</strong>
+                {t('admin.apiKeys.rotateIntroAfter')}
               </Typography>
               <FormControl>
                 <RadioGroup
@@ -850,19 +871,19 @@ const APIKeysPage: React.FC = () => {
                   <FormControlLabel
                     value="immediate"
                     control={<Radio />}
-                    label="Revoke old key immediately"
+                    label={t('admin.apiKeys.rotateImmediate')}
                   />
                   <FormControlLabel
                     value="grace"
                     control={<Radio />}
-                    label="Keep old key valid for a grace period"
+                    label={t('admin.apiKeys.rotateGrace')}
                   />
                 </RadioGroup>
               </FormControl>
               {rotateMode === 'grace' && (
                 <Box sx={{ px: 2 }}>
                   <Typography variant="body2" gutterBottom>
-                    Grace period: {gracePeriodHours} hour{gracePeriodHours !== 1 ? 's' : ''}
+                    {t('admin.apiKeys.gracePeriod', { count: gracePeriodHours })}
                   </Typography>
                   <Slider
                     value={gracePeriodHours}
@@ -879,11 +900,13 @@ const APIKeysPage: React.FC = () => {
                     valueLabelDisplay="auto"
                     valueLabelFormat={(v) => `${v}h`}
                   />
-                  <Typography variant="caption" sx={{
-                    color: "text.secondary"
-                  }}>
-                    The old key will continue to work during the grace period, giving you time to
-                    update integrations.
+                  <Typography
+                    variant="caption"
+                    sx={{
+                      color: 'text.secondary',
+                    }}
+                  >
+                    {t('admin.apiKeys.graceHelp')}
                   </Typography>
                 </Box>
               )}
@@ -893,13 +916,13 @@ const APIKeysPage: React.FC = () => {
         <DialogActions>
           {rotatedKeyValue ? (
             <Button onClick={handleCloseRotateDialog} variant="contained">
-              Done
+              {t('admin.apiKeys.done')}
             </Button>
           ) : (
             <>
-              <Button onClick={handleCloseRotateDialog}>Cancel</Button>
+              <Button onClick={handleCloseRotateDialog}>{t('admin.apiKeys.cancel')}</Button>
               <Button onClick={handleRotateConfirm} variant="contained" color="warning">
-                Rotate Key
+                {t('admin.apiKeys.rotateKey')}
               </Button>
             </>
           )}
@@ -907,29 +930,30 @@ const APIKeysPage: React.FC = () => {
       </Dialog>
       {/* Delete Confirmation Dialog */}
       <Dialog open={deleteDialogOpen} onClose={() => setDeleteDialogOpen(false)}>
-        <DialogTitle>Delete API Key</DialogTitle>
+        <DialogTitle>{t('admin.apiKeys.dialogTitleDelete')}</DialogTitle>
         <DialogContent>
-          <Typography>
-            Are you sure you want to delete API key "{keyToDelete?.name}"? This action cannot be
-            undone and will break any existing integrations using this key.
-          </Typography>
+          <Typography>{t('admin.apiKeys.deleteConfirm', { name: keyToDelete?.name })}</Typography>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setDeleteDialogOpen(false)}>Cancel</Button>
+          <Button onClick={() => setDeleteDialogOpen(false)}>{t('admin.apiKeys.cancel')}</Button>
           <Button onClick={handleDeleteConfirm} color="error" variant="contained">
-            Delete
+            {t('admin.apiKeys.tooltipDelete')}
           </Button>
         </DialogActions>
       </Dialog>
       {/* Usage Instructions */}
       <Paper sx={{ p: 3, mt: 3 }}>
         <Typography variant="h6" gutterBottom>
-          Using API Keys
+          {t('admin.apiKeys.usingApiKeysTitle')}
         </Typography>
-        <Typography variant="body2" component="div" sx={{
-          color: "text.secondary"
-        }}>
-          To use an API key with Terraform CLI, add it to your Terraform CLI configuration:
+        <Typography
+          variant="body2"
+          component="div"
+          sx={{
+            color: 'text.secondary',
+          }}
+        >
+          {t('admin.apiKeys.usingApiKeysIntro')}
           <Box
             component="pre"
             sx={{
@@ -950,7 +974,7 @@ credentials "${REGISTRY_HOST}" {
         </Typography>
       </Paper>
     </Container>
-  );
+  )
 }
 
 export default APIKeysPage

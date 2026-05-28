@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import {
   Container,
@@ -45,6 +46,7 @@ import { getErrorMessage } from '../../utils/errors'
 import { queryKeys } from '../../services/queryKeys'
 
 const OrganizationsPage: React.FC = () => {
+  const { t } = useTranslation()
   const queryClient = useQueryClient()
   const { allowedScopes } = useAuth()
   const canManage =
@@ -89,7 +91,7 @@ const OrganizationsPage: React.FC = () => {
   })
 
   if (queryError && !error && !import.meta.env.DEV) {
-    setError('Failed to load organizations. Please try again.')
+    setError(t('admin.organizations.errLoad'))
   }
 
   const handleOpenDialog = (org?: Organization) => {
@@ -137,7 +139,7 @@ const OrganizationsPage: React.FC = () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.organizations._def })
     },
     onError: (err: unknown) => {
-      setError(getErrorMessage(err, 'Failed to save organization. Please try again.'))
+      setError(getErrorMessage(err, t('admin.organizations.errSave')))
     },
   })
 
@@ -150,17 +152,14 @@ const OrganizationsPage: React.FC = () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.organizations._def })
     },
     onError: (err: unknown) => {
-      setError(getErrorMessage(err, 'Failed to delete organization. Please try again.'))
+      setError(getErrorMessage(err, t('admin.organizations.errDelete')))
     },
   })
 
   const handleSaveOrganization = () => {
     setError(null)
     if (!REGISTRY_SEGMENT_RE.test(formData.name)) {
-      setError(
-        'Organization name must be 1–64 characters, start with a lowercase letter or digit, ' +
-          'and contain only lowercase letters, digits, hyphens, or underscores.',
-      )
+      setError(t('admin.organizations.errName'))
       return
     }
     saveOrgMutation.mutate()
@@ -236,7 +235,7 @@ const OrganizationsPage: React.FC = () => {
       await loadMembers(selectedOrg.id)
     } catch (err: unknown) {
       console.error('Failed to add member:', err)
-      setError(getErrorMessage(err, 'Failed to add member'))
+      setError(getErrorMessage(err, t('admin.organizations.errAddMember')))
     }
   }
 
@@ -251,7 +250,7 @@ const OrganizationsPage: React.FC = () => {
       await loadMembers(selectedOrg.id)
     } catch (err: unknown) {
       console.error('Failed to update member role:', err)
-      setError(getErrorMessage(err, 'Failed to update member role'))
+      setError(getErrorMessage(err, t('admin.organizations.errUpdateRole')))
     }
   }
 
@@ -264,7 +263,7 @@ const OrganizationsPage: React.FC = () => {
       await loadMembers(selectedOrg.id)
     } catch (err: unknown) {
       console.error('Failed to remove member:', err)
-      setError(getErrorMessage(err, 'Failed to remove member'))
+      setError(getErrorMessage(err, t('admin.organizations.errRemoveMember')))
     }
   }
 
@@ -273,16 +272,19 @@ const OrganizationsPage: React.FC = () => {
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
         <Box>
           <Typography variant="h4" gutterBottom>
-            Organizations
+            {t('admin.organizations.pageTitle')}
           </Typography>
-          <Typography variant="body1" sx={{
-            color: "text.secondary"
-          }}>
-            Manage organizations and their members
+          <Typography
+            variant="body1"
+            sx={{
+              color: 'text.secondary',
+            }}
+          >
+            {t('admin.organizations.pageSubtitle')}
           </Typography>
         </Box>
         <Button variant="contained" startIcon={<AddIcon />} onClick={() => handleOpenDialog()}>
-          Add Organization
+          {t('admin.organizations.addOrganization')}
         </Button>
       </Box>
       {error && !import.meta.env.DEV && (
@@ -298,16 +300,20 @@ const OrganizationsPage: React.FC = () => {
           </Box>
         ) : organizations.length === 0 ? (
           <Box sx={{ textAlign: 'center', py: 8 }}>
-            <Typography sx={{
-              color: "text.secondary"
-            }}>No organizations found</Typography>
+            <Typography
+              sx={{
+                color: 'text.secondary',
+              }}
+            >
+              {t('admin.organizations.emptyState')}
+            </Typography>
             <Button
               variant="outlined"
               startIcon={<AddIcon />}
               onClick={() => handleOpenDialog()}
               sx={{ mt: 2 }}
             >
-              Create First Organization
+              {t('admin.organizations.createFirst')}
             </Button>
           </Box>
         ) : (
@@ -315,21 +321,25 @@ const OrganizationsPage: React.FC = () => {
             <Table>
               <TableHead>
                 <TableRow>
-                  <TableCell>Name</TableCell>
-                  <TableCell>Display Name</TableCell>
-                  <TableCell>Identity Provider</TableCell>
-                  <TableCell>Members</TableCell>
-                  <TableCell>Created</TableCell>
-                  <TableCell align="right">Actions</TableCell>
+                  <TableCell>{t('admin.organizations.thName')}</TableCell>
+                  <TableCell>{t('admin.organizations.thDisplayName')}</TableCell>
+                  <TableCell>{t('admin.organizations.thIdentityProvider')}</TableCell>
+                  <TableCell>{t('admin.organizations.thMembers')}</TableCell>
+                  <TableCell>{t('admin.organizations.thCreated')}</TableCell>
+                  <TableCell align="right">{t('admin.organizations.thActions')}</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
                 {organizations.map((org) => (
                   <TableRow key={org.id}>
                     <TableCell>
-                      <Typography sx={{
-                        fontWeight: "medium"
-                      }}>{org.name}</Typography>
+                      <Typography
+                        sx={{
+                          fontWeight: 'medium',
+                        }}
+                      >
+                        {org.name}
+                      </Typography>
                     </TableCell>
                     <TableCell>{org.display_name || '-'}</TableCell>
                     <TableCell>
@@ -340,10 +350,13 @@ const OrganizationsPage: React.FC = () => {
                           color="info"
                         />
                       ) : (
-                        <Typography variant="body2" sx={{
-                          color: "text.secondary"
-                        }}>
-                          Any
+                        <Typography
+                          variant="body2"
+                          sx={{
+                            color: 'text.secondary',
+                          }}
+                        >
+                          {t('admin.organizations.idpAny')}
                         </Typography>
                       )}
                     </TableCell>
@@ -353,25 +366,25 @@ const OrganizationsPage: React.FC = () => {
                         startIcon={<PeopleIcon />}
                         onClick={() => handleViewMembers(org)}
                       >
-                        View Members
+                        {t('admin.organizations.viewMembers')}
                       </Button>
                     </TableCell>
                     <TableCell>{new Date(org.created_at).toLocaleDateString()}</TableCell>
                     <TableCell align="right">
-                      <Tooltip title="Edit organization">
+                      <Tooltip title={t('admin.organizations.tooltipEditOrg')}>
                         <IconButton
                           size="small"
-                          aria-label="Edit organization"
+                          aria-label={t('admin.organizations.ariaEditOrg')}
                           onClick={() => handleOpenDialog(org)}
                           color="primary"
                         >
                           <EditIcon />
                         </IconButton>
                       </Tooltip>
-                      <Tooltip title="Delete organization">
+                      <Tooltip title={t('admin.organizations.tooltipDeleteOrg')}>
                         <IconButton
                           size="small"
-                          aria-label="Delete organization"
+                          aria-label={t('admin.organizations.ariaDeleteOrg')}
                           onClick={() => handleDeleteClick(org)}
                           color="error"
                         >
@@ -388,11 +401,15 @@ const OrganizationsPage: React.FC = () => {
       </Paper>
       {/* Add/Edit Organization Dialog */}
       <Dialog open={openDialog} onClose={handleCloseDialog} maxWidth="sm" fullWidth>
-        <DialogTitle>{editingOrg ? 'Edit Organization' : 'Add Organization'}</DialogTitle>
+        <DialogTitle>
+          {editingOrg
+            ? t('admin.organizations.dialogTitleEdit')
+            : t('admin.organizations.dialogTitleAdd')}
+        </DialogTitle>
         <DialogContent>
           <Stack spacing={3} sx={{ mt: 2 }}>
             <TextField
-              label="Name"
+              label={t('admin.organizations.labelName')}
               value={formData.name}
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
               required
@@ -400,42 +417,44 @@ const OrganizationsPage: React.FC = () => {
               error={!!formData.name && !REGISTRY_SEGMENT_RE.test(formData.name)}
               helperText={
                 formData.name && !REGISTRY_SEGMENT_RE.test(formData.name)
-                  ? 'Must start with a lowercase letter or digit; only lowercase letters, digits, hyphens, and underscores allowed (max 64 chars)'
-                  : 'Organization name used in registry URLs (e.g., myorg)'
+                  ? t('admin.organizations.helpNameInvalid')
+                  : t('admin.organizations.helpName')
               }
             />
-            {editingOrg && formData.name !== editingOrg.name && REGISTRY_SEGMENT_RE.test(formData.name) && (
-              <Alert severity="warning">
-                Renaming this organization will update all module and provider namespaces that
-                currently use <strong>{editingOrg.name}</strong> to{' '}
-                <strong>{formData.name}</strong>. User memberships are linked by ID and will not
-                be affected. Ensure any Terraform configurations referencing the old name are
-                updated.
-              </Alert>
-            )}
+            {editingOrg &&
+              formData.name !== editingOrg.name &&
+              REGISTRY_SEGMENT_RE.test(formData.name) && (
+                <Alert severity="warning">
+                  {t('admin.organizations.renameWarnPart1')}
+                  <strong>{editingOrg.name}</strong>
+                  {t('admin.organizations.renameWarnPart2')}
+                  <strong>{formData.name}</strong>
+                  {t('admin.organizations.renameWarnPart3')}
+                </Alert>
+              )}
             <TextField
-              label="Display Name"
+              label={t('admin.organizations.labelDisplayName')}
               value={formData.display_name}
               onChange={(e) => setFormData({ ...formData, display_name: e.target.value })}
               required
               multiline
               rows={3}
               fullWidth
-              helperText="Display name for the organization"
+              helperText={t('admin.organizations.helpDisplayName')}
             />
             {editingOrg && (
               <>
                 <FormControl fullWidth>
-                  <InputLabel>Identity Provider Type</InputLabel>
+                  <InputLabel>{t('admin.organizations.labelIdpType')}</InputLabel>
                   <Select
                     value={formData.idp_type}
-                    label="Identity Provider Type"
+                    label={t('admin.organizations.labelIdpType')}
                     onChange={(e: SelectChangeEvent) =>
                       setFormData({ ...formData, idp_type: e.target.value, idp_name: '' })
                     }
                   >
                     <MenuItem value="">
-                      <em>Any (no restriction)</em>
+                      <em>{t('admin.organizations.menuIdpAny')}</em>
                     </MenuItem>
                     <MenuItem value="oidc">OIDC</MenuItem>
                     <MenuItem value="saml">SAML</MenuItem>
@@ -444,11 +463,11 @@ const OrganizationsPage: React.FC = () => {
                 </FormControl>
                 {formData.idp_type && (
                   <TextField
-                    label="IdP Name"
+                    label={t('admin.organizations.labelIdpName')}
                     value={formData.idp_name}
                     onChange={(e) => setFormData({ ...formData, idp_name: e.target.value })}
                     fullWidth
-                    helperText="Name of the identity provider (e.g., SAML IdP name from config)"
+                    helperText={t('admin.organizations.helpIdpName')}
                   />
                 )}
               </>
@@ -456,29 +475,30 @@ const OrganizationsPage: React.FC = () => {
           </Stack>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleCloseDialog}>Cancel</Button>
+          <Button onClick={handleCloseDialog}>{t('admin.organizations.cancel')}</Button>
           <Button
             onClick={handleSaveOrganization}
             variant="contained"
             disabled={!formData.name.trim() || !formData.display_name.trim()}
           >
-            {editingOrg ? 'Save' : 'Create'}
+            {editingOrg ? t('admin.organizations.save') : t('admin.organizations.create')}
           </Button>
         </DialogActions>
       </Dialog>
       {/* Delete Confirmation Dialog */}
       <Dialog open={deleteDialogOpen} onClose={() => setDeleteDialogOpen(false)}>
-        <DialogTitle>Delete Organization</DialogTitle>
+        <DialogTitle>{t('admin.organizations.dialogTitleDelete')}</DialogTitle>
         <DialogContent>
           <Typography>
-            Are you sure you want to delete organization "{orgToDelete?.name}"? This action cannot
-            be undone.
+            {t('admin.organizations.confirmDelete', { name: orgToDelete?.name })}
           </Typography>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setDeleteDialogOpen(false)}>Cancel</Button>
+          <Button onClick={() => setDeleteDialogOpen(false)}>
+            {t('admin.organizations.cancel')}
+          </Button>
           <Button onClick={handleDeleteConfirm} color="error" variant="contained">
-            Delete
+            {t('admin.organizations.delete')}
           </Button>
         </DialogActions>
       </Dialog>
@@ -491,7 +511,7 @@ const OrganizationsPage: React.FC = () => {
       >
         <DialogTitle>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <span>Organization Members - {selectedOrg?.name}</span>
+            <span>{t('admin.organizations.membersTitle', { name: selectedOrg?.name })}</span>
             {canManage && (
               <Button
                 variant="contained"
@@ -499,7 +519,7 @@ const OrganizationsPage: React.FC = () => {
                 startIcon={<PersonAddIcon />}
                 onClick={handleOpenAddMember}
               >
-                Add Member
+                {t('admin.organizations.addMember')}
               </Button>
             )}
           </Box>
@@ -508,12 +528,13 @@ const OrganizationsPage: React.FC = () => {
           <Typography
             variant="body2"
             sx={{
-              color: "text.secondary",
-              mb: 2
-            }}>
+              color: 'text.secondary',
+              mb: 2,
+            }}
+          >
             {canManage
-              ? 'Manage members and their roles in this organization'
-              : 'View members and their roles in this organization'}
+              ? t('admin.organizations.membersManageDesc')
+              : t('admin.organizations.membersViewDesc')}
           </Typography>
           {membersLoading ? (
             <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
@@ -521,9 +542,13 @@ const OrganizationsPage: React.FC = () => {
             </Box>
           ) : members.length === 0 ? (
             <Paper variant="outlined" sx={{ p: 3, textAlign: 'center' }}>
-              <Typography sx={{
-                color: "text.secondary"
-              }}>No members in this organization yet</Typography>
+              <Typography
+                sx={{
+                  color: 'text.secondary',
+                }}
+              >
+                {t('admin.organizations.noMembers')}
+              </Typography>
               {canManage && (
                 <Button
                   variant="outlined"
@@ -531,7 +556,7 @@ const OrganizationsPage: React.FC = () => {
                   onClick={handleOpenAddMember}
                   sx={{ mt: 2 }}
                 >
-                  Add First Member
+                  {t('admin.organizations.addFirstMember')}
                 </Button>
               )}
             </Paper>
@@ -540,16 +565,18 @@ const OrganizationsPage: React.FC = () => {
               <Table size="small">
                 <TableHead>
                   <TableRow>
-                    <TableCell>Name</TableCell>
-                    <TableCell>Email</TableCell>
-                    <TableCell>Role</TableCell>
-                    {canManage && <TableCell align="right">Actions</TableCell>}
+                    <TableCell>{t('admin.organizations.thName')}</TableCell>
+                    <TableCell>{t('admin.organizations.thEmail')}</TableCell>
+                    <TableCell>{t('admin.organizations.thRole')}</TableCell>
+                    {canManage && (
+                      <TableCell align="right">{t('admin.organizations.thActions')}</TableCell>
+                    )}
                   </TableRow>
                 </TableHead>
                 <TableBody>
                   {members.map((member) => (
                     <TableRow key={member.user_id}>
-                      <TableCell>{member.user_name || 'Unknown'}</TableCell>
+                      <TableCell>{member.user_name || t('admin.organizations.unknown')}</TableCell>
                       <TableCell>{member.user_email || '-'}</TableCell>
                       <TableCell>
                         {canManage ? (
@@ -562,7 +589,7 @@ const OrganizationsPage: React.FC = () => {
                               }
                             >
                               <MenuItem value="">
-                                <em>No role</em>
+                                <em>{t('admin.organizations.noRole')}</em>
                               </MenuItem>
                               {roleTemplates.map((template) => (
                                 <MenuItem key={template.id} value={template.id}>
@@ -573,17 +600,17 @@ const OrganizationsPage: React.FC = () => {
                           </FormControl>
                         ) : (
                           <Typography variant="body2">
-                            {roleTemplates.find((t) => t.id === member.role_template_id)
-                              ?.display_name || 'No role'}
+                            {roleTemplates.find((rt) => rt.id === member.role_template_id)
+                              ?.display_name || t('admin.organizations.noRole')}
                           </Typography>
                         )}
                       </TableCell>
                       {canManage && (
                         <TableCell align="right">
-                          <Tooltip title="Remove member">
+                          <Tooltip title={t('admin.organizations.tooltipRemoveMember')}>
                             <IconButton
                               size="small"
-                              aria-label="Remove member"
+                              aria-label={t('admin.organizations.ariaRemoveMember')}
                               onClick={() => handleRemoveMember(member.user_id)}
                               color="error"
                             >
@@ -600,7 +627,9 @@ const OrganizationsPage: React.FC = () => {
           )}
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setMembersDialogOpen(false)}>Close</Button>
+          <Button onClick={() => setMembersDialogOpen(false)}>
+            {t('admin.organizations.close')}
+          </Button>
         </DialogActions>
       </Dialog>
       {/* Add Member Dialog */}
@@ -610,7 +639,9 @@ const OrganizationsPage: React.FC = () => {
         maxWidth="sm"
         fullWidth
       >
-        <DialogTitle>Add Member to {selectedOrg?.name}</DialogTitle>
+        <DialogTitle>
+          {t('admin.organizations.addMemberTitle', { name: selectedOrg?.name })}
+        </DialogTitle>
         <DialogContent>
           <Stack spacing={3} sx={{ mt: 2 }}>
             <Autocomplete
@@ -619,19 +650,23 @@ const OrganizationsPage: React.FC = () => {
               value={selectedUser}
               onChange={(_, newValue) => setSelectedUser(newValue)}
               renderInput={(params) => (
-                <TextField {...params} label="Select User" placeholder="Search users..." />
+                <TextField
+                  {...params}
+                  label={t('admin.organizations.labelSelectUser')}
+                  placeholder={t('admin.organizations.placeholderSearchUsers')}
+                />
               )}
               fullWidth
             />
             <FormControl fullWidth>
-              <InputLabel>Role Template</InputLabel>
+              <InputLabel>{t('admin.organizations.labelRoleTemplate')}</InputLabel>
               <Select
                 value={selectedRoleTemplateId}
-                label="Role Template"
+                label={t('admin.organizations.labelRoleTemplate')}
                 onChange={(e: SelectChangeEvent) => setSelectedRoleTemplateId(e.target.value)}
               >
                 <MenuItem value="">
-                  <em>No role (view only)</em>
+                  <em>{t('admin.organizations.menuNoRoleViewOnly')}</em>
                 </MenuItem>
                 {roleTemplates.map((template) => (
                   <MenuItem key={template.id} value={template.id}>
@@ -641,9 +676,10 @@ const OrganizationsPage: React.FC = () => {
                         component="span"
                         variant="caption"
                         sx={{
-                          color: "text.secondary",
-                          ml: 1
-                        }}>
+                          color: 'text.secondary',
+                          ml: 1,
+                        }}
+                      >
                         - {template.description}
                       </Typography>
                     )}
@@ -654,14 +690,16 @@ const OrganizationsPage: React.FC = () => {
           </Stack>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setAddMemberDialogOpen(false)}>Cancel</Button>
+          <Button onClick={() => setAddMemberDialogOpen(false)}>
+            {t('admin.organizations.cancel')}
+          </Button>
           <Button onClick={handleAddMember} variant="contained" disabled={!selectedUser}>
-            Add Member
+            {t('admin.organizations.addMember')}
           </Button>
         </DialogActions>
       </Dialog>
     </Container>
-  );
+  )
 }
 
 export default OrganizationsPage
