@@ -1,6 +1,13 @@
 <!-- markdownlint-disable MD013 MD024 MD041 -->
 # Changelog
 
+## [2.1.0](https://github.com/sethbacon/terraform-registry-frontend/compare/v2.0.4...v2.1.0) (2026-05-28)
+
+
+### Features
+
+* **mirror:** add release signing key status panel and dashboard tile ([#342](https://github.com/sethbacon/terraform-registry-frontend/issues/342)) ([febd1cf](https://github.com/sethbacon/terraform-registry-frontend/commit/febd1cf1d05af5d87650fc0a362d36cc09961793))
+
 ## [2.0.4](https://github.com/sethbacon/terraform-registry-frontend/compare/v2.0.3...v2.0.4) (2026-05-28)
 
 
