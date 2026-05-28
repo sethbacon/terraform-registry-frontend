@@ -1,6 +1,13 @@
 <!-- markdownlint-disable MD013 MD024 MD041 -->
 # Changelog
 
+## [2.2.0](https://github.com/sethbacon/terraform-registry-frontend/compare/v2.1.0...v2.2.0) (2026-05-28)
+
+
+### Features
+
+* add i18n support for user management and setup steps ([#344](https://github.com/sethbacon/terraform-registry-frontend/issues/344)) ([faaaf47](https://github.com/sethbacon/terraform-registry-frontend/commit/faaaf470581a5aa737dd6f15a5acbbcbd27fe37a))
+
 ## [2.1.0](https://github.com/sethbacon/terraform-registry-frontend/compare/v2.0.4...v2.1.0) (2026-05-28)
 
 
