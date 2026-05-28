@@ -1561,6 +1561,13 @@ class ApiClient {
     return response.data
   }
 
+  async getReleasesGPGKeys(): Promise<
+    import('../types/releases_gpg_keys').ReleasesGPGKeysResponse
+  > {
+    const response = await this.client.get('/api/v1/admin/terraform-mirrors/releases-gpg-keys')
+    return response.data
+  }
+
   // ============================================================================
   // Terraform Binary Mirror — Public Endpoints (no auth required)
   // The :name segment identifies the mirror config by its human-readable name.

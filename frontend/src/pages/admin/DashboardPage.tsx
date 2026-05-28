@@ -37,9 +37,11 @@ import Sync from '@mui/icons-material/Sync'
 import Refresh from '@mui/icons-material/Refresh'
 import ArrowForward from '@mui/icons-material/ArrowForward'
 import Security from '@mui/icons-material/Security'
+import VpnKey from '@mui/icons-material/VpnKey'
 import api from '../../services/api'
 import { useAuth } from '../../contexts/AuthContext'
 import QuotaUsageChart from '../../components/QuotaUsageChart'
+import { useReleasesGPGKeyStatus } from '../../hooks/useReleasesGPGKeyStatus'
 
 // ---------------------------------------------------------------------------
 // Types
@@ -568,6 +570,8 @@ const DashboardPage: React.FC = () => {
     retry: false,
   })
 
+  const { data: gpgKeysData } = useReleasesGPGKeyStatus()
+
   const error = queryError ? 'Failed to load dashboard statistics.' : null
 
   // Normalise: backend may not yet have mirror fields on older builds.
@@ -943,6 +947,60 @@ const DashboardPage: React.FC = () => {
                 </Paper>
               </Tooltip>
             )}
+            {hasScope('mirrors:read') && gpgKeysData && (() => {
+              const worst = gpgKeysData.keys.reduce<string>(
+                (acc, k) =>
+                  acc === 'expired' ? acc
+                    : k.status === 'expired' ? 'expired'
+                      : acc === 'warn' ? acc
+                        : k.status === 'warn' ? 'warn'
+                          : k.status === 'ok' ? 'ok' : acc,
+                'unknown',
+              )
+              const colour = worst === 'expired' ? 'error.main'
+                : worst === 'warn' ? 'warning.main'
+                  : worst === 'ok' ? 'success.main' : 'text.secondary'
+              const Icon = worst === 'expired' ? Error
+                : worst === 'warn' ? Sync
+                  : worst === 'ok' ? CheckCircle : CheckCircle
+              const label = worst === 'expired' ? 'Key Expired'
+                : worst === 'warn' ? 'Expiry Soon'
+                  : worst === 'ok' ? 'Keys OK' : 'Unknown'
+              return (
+                <Tooltip title="Release signing GPG key health">
+                  <Paper
+                    onClick={() => navigate('/admin/terraform-mirror')}
+                    sx={{
+                      px: 2,
+                      py: 1.5,
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 1.5,
+                      cursor: 'pointer',
+                      flex: 1,
+                      minWidth: 160,
+                      transition: 'box-shadow 0.15s',
+                      '&:hover': { boxShadow: 3 },
+                    }}
+                  >
+                    <Box sx={{ color: 'text.secondary', display: 'flex' }}>
+                      <VpnKey fontSize="small" />
+                    </Box>
+                    <Box sx={{ flex: 1, minWidth: 0 }}>
+                      <Typography variant="caption" noWrap sx={{ color: 'text.secondary' }}>
+                        GPG Keys
+                      </Typography>
+                      <Typography variant="body2" noWrap sx={{ fontWeight: 600 }}>
+                        {label}
+                      </Typography>
+                    </Box>
+                    <Box sx={{ color: colour, display: 'flex' }}>
+                      <Icon fontSize="small" />
+                    </Box>
+                  </Paper>
+                </Tooltip>
+              )
+            })()}
           </Box>
 
           {/* Zone 2 — Stat cards */}
