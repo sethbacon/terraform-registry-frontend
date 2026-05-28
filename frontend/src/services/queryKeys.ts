@@ -120,6 +120,7 @@ export const queryKeys = {
       [...queryKeys.terraformMirrors._def, 'versions', configId] as const,
     history: (configId: string) =>
       [...queryKeys.terraformMirrors._def, 'history', configId] as const,
+    releasesGPGKeys: () => [...queryKeys.terraformMirrors._def, 'releasesGPGKeys'] as const,
   },
   advisories: {
     _def: ['advisories'] as const,

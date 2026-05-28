@@ -62,6 +62,7 @@ import SyncIcon from '@mui/icons-material/Sync'
 
 import api from '../../services/api'
 import { getErrorMessage } from '../../utils/errors'
+import ReleasesGPGKeyStatus from '../../components/ReleasesGPGKeyStatus'
 import {
   type TerraformMirrorConfig,
   type TerraformMirrorStatusResponse,
@@ -725,6 +726,9 @@ const TerraformMirrorPage: React.FC = () => {
               {success}
             </Alert>
           )}
+
+          {/* Release signing key status panel */}
+          <ReleasesGPGKeyStatus />
 
           {/* Config cards */}
           {configs.length === 0 ? (
