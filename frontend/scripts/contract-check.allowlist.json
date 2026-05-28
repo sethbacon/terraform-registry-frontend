@@ -20,6 +20,11 @@
       "method": "POST",
       "path": "/api/v1/dev/impersonate/{}",
       "reason": "Backend route is registered conditionally under DEV_MODE=true and is intentionally undocumented in production swagger. Permanent allowlist entry."
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/admin/terraform-mirrors/releases-gpg-keys",
+      "reason": "Backend 1.3.0 ships this endpoint but CI container image may lag. Remove once CI pulls the updated image. Tracked in terraform-registry-backend#422."
     }
   ]
 }
