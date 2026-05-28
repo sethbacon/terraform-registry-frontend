@@ -20,11 +20,6 @@
       "method": "POST",
       "path": "/api/v1/dev/impersonate/{}",
       "reason": "Backend route is registered conditionally under DEV_MODE=true and is intentionally undocumented in production swagger. Permanent allowlist entry."
-    },
-    {
-      "method": "GET",
-      "path": "/api/v1/admin/terraform-mirrors/releases-gpg-keys",
-      "reason": "Backend PR sethbacon/terraform-registry-backend#422 adds this endpoint. Remove this entry once that PR merges and a backend release is cut."
     }
   ]
 }
