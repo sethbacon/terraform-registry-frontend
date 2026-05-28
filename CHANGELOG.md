@@ -1,6 +1,13 @@
 <!-- markdownlint-disable MD013 MD024 MD041 -->
 # Changelog
 
+## [2.0.4](https://github.com/sethbacon/terraform-registry-frontend/compare/v2.0.3...v2.0.4) (2026-05-28)
+
+
+### Bug Fixes
+
+* **scm:** unwrap events envelope so webhook panel renders ([#338](https://github.com/sethbacon/terraform-registry-frontend/issues/338)) ([d7c15e6](https://github.com/sethbacon/terraform-registry-frontend/commit/d7c15e6a717f50e737f972f6c5de86418f61f3cf)), closes [#337](https://github.com/sethbacon/terraform-registry-frontend/issues/337)
+
 ## [2.0.3](https://github.com/sethbacon/terraform-registry-frontend/compare/v2.0.2...v2.0.3) (2026-05-27)
 
 
