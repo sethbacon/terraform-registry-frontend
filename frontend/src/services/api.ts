@@ -850,7 +850,8 @@ class ApiClient {
 
   async getWebhookEvents(moduleId: string) {
     const response = await this.client.get(`/api/v1/admin/modules/${moduleId}/scm/events`)
-    return response.data
+    // Backend wraps the list as { events: [...] }; callers expect a bare array.
+    return response.data?.events ?? []
   }
 
   async updateModule(id: string, data: { description?: string; source?: string; namespace?: string }) {

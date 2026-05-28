@@ -1276,13 +1276,30 @@ describe('ApiClient', () => {
       expect(mockAxiosInstance.post).toHaveBeenCalledWith('/api/v1/admin/modules/m1/scm/sync', {})
     })
 
-    it('getWebhookEvents', async () => {
+    it('getWebhookEvents unwraps the events array from the response envelope', async () => {
+      const client = await getApiClient()
+      const sample = [
+        { id: 'e1', event_type: 'tag', state: 'succeeded' },
+        { id: 'e2', event_type: 'push', state: 'failed' },
+      ]
+        ; (mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+          data: { events: sample },
+        })
+      const result = await client.getWebhookEvents('m1')
+      expect(mockAxiosInstance.get).toHaveBeenCalledWith('/api/v1/admin/modules/m1/scm/events')
+      // Regression: the backend returns { events: [...] } — the client must hand
+      // callers the bare array, not the wrapper, or Array.isArray checks fail
+      // downstream and the UI panel renders empty.
+      expect(result).toEqual(sample)
+    })
+
+    it('getWebhookEvents returns [] when the envelope is missing events', async () => {
       const client = await getApiClient()
         ; (mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
-          data: { events: [] },
+          data: {},
         })
-      await client.getWebhookEvents('m1')
-      expect(mockAxiosInstance.get).toHaveBeenCalledWith('/api/v1/admin/modules/m1/scm/events')
+      const result = await client.getWebhookEvents('m1')
+      expect(result).toEqual([])
     })
   })
 
