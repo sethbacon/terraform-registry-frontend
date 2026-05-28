@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import {
   Autocomplete,
@@ -52,6 +53,7 @@ const AVAILABLE_ROLES = ['viewer', 'publisher', 'devops', 'user_manager', 'audit
 const emptyMapping: OIDCGroupMapping = { group: '', organization: '', role: 'viewer' }
 
 const OIDCSettingsPage: React.FC = () => {
+  const { t } = useTranslation()
   const queryClient = useQueryClient()
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
@@ -102,7 +104,7 @@ const OIDCSettingsPage: React.FC = () => {
 
   if (queryError && !error) {
     const e = queryError as { response?: { data?: { error?: string } } }
-    setError(e.response?.data?.error ?? 'Failed to load OIDC configuration')
+    setError(e.response?.data?.error ?? t('admin.oidcSettings.errLoad'))
   }
 
   const saveMutation = useMutation({
@@ -111,13 +113,13 @@ const OIDCSettingsPage: React.FC = () => {
       setGroupClaimName(updated.group_claim_name ?? '')
       setDefaultRole(updated.default_role ?? '')
       setMappings(updated.group_mappings ?? [])
-      setSuccess('Group mapping settings saved successfully.')
+      setSuccess(t('admin.oidcSettings.msgSaved'))
       setError(null)
       queryClient.invalidateQueries({ queryKey: queryKeys.oidcConfig._def })
     },
     onError: (err: unknown) => {
       const e = err as { response?: { data?: { error?: string } } }
-      setError(e.response?.data?.error ?? 'Failed to save group mapping settings')
+      setError(e.response?.data?.error ?? t('admin.oidcSettings.errSave'))
     },
   })
 
@@ -193,17 +195,20 @@ const OIDCSettingsPage: React.FC = () => {
               direction="row"
               spacing={2}
               sx={{
-                alignItems: "center",
-                mb: 1
-              }}>
+                alignItems: 'center',
+                mb: 1,
+              }}
+            >
               <ManageAccountsIcon sx={{ fontSize: 32, color: 'primary.main' }} />
-              <Typography variant="h4">OIDC Groups</Typography>
+              <Typography variant="h4">{t('admin.oidcSettings.pageTitle')}</Typography>
             </Stack>
-            <Typography variant="body1" sx={{
-              color: "text.secondary"
-            }}>
-              Configure group claim mapping from your identity provider to registry organizations
-              and roles. Changes take effect on the next login without requiring a server restart.
+            <Typography
+              variant="body1"
+              sx={{
+                color: 'text.secondary',
+              }}
+            >
+              {t('admin.oidcSettings.pageSubtitle')}
             </Typography>
           </Box>
 
@@ -222,47 +227,68 @@ const OIDCSettingsPage: React.FC = () => {
           {config && (
             <Paper sx={{ p: 3, mb: 3 }}>
               <Typography variant="h6" gutterBottom>
-                Active OIDC Provider
+                {t('admin.oidcSettings.activeProvider')}
               </Typography>
-              <Stack direction="row" spacing={2} useFlexGap sx={{
-                flexWrap: "wrap"
-              }}>
+              <Stack
+                direction="row"
+                spacing={2}
+                useFlexGap
+                sx={{
+                  flexWrap: 'wrap',
+                }}
+              >
                 <Box>
-                  <Typography variant="caption" sx={{
-                    color: "text.secondary"
-                  }}>
-                    Provider
+                  <Typography
+                    variant="caption"
+                    sx={{
+                      color: 'text.secondary',
+                    }}
+                  >
+                    {t('admin.oidcSettings.labelProvider')}
                   </Typography>
                   <Typography variant="body2">{config.provider_type}</Typography>
                 </Box>
                 <Divider orientation="vertical" flexItem />
                 <Box>
-                  <Typography variant="caption" sx={{
-                    color: "text.secondary"
-                  }}>
-                    Issuer
+                  <Typography
+                    variant="caption"
+                    sx={{
+                      color: 'text.secondary',
+                    }}
+                  >
+                    {t('admin.oidcSettings.labelIssuer')}
                   </Typography>
                   <Typography variant="body2">{config.issuer_url}</Typography>
                 </Box>
                 <Divider orientation="vertical" flexItem />
                 <Box>
-                  <Typography variant="caption" sx={{
-                    color: "text.secondary"
-                  }}>
-                    Client ID
+                  <Typography
+                    variant="caption"
+                    sx={{
+                      color: 'text.secondary',
+                    }}
+                  >
+                    {t('admin.oidcSettings.labelClientId')}
                   </Typography>
                   <Typography variant="body2">{config.client_id}</Typography>
                 </Box>
                 <Divider orientation="vertical" flexItem />
                 <Box>
-                  <Typography variant="caption" sx={{
-                    color: "text.secondary"
-                  }}>
-                    Status
+                  <Typography
+                    variant="caption"
+                    sx={{
+                      color: 'text.secondary',
+                    }}
+                  >
+                    {t('admin.oidcSettings.labelStatus')}
                   </Typography>
                   <Box>
                     <Chip
-                      label={config.is_active ? 'Active' : 'Inactive'}
+                      label={
+                        config.is_active
+                          ? t('admin.oidcSettings.active')
+                          : t('admin.oidcSettings.inactive')
+                      }
                       color={config.is_active ? 'success' : 'default'}
                       size="small"
                     />
@@ -275,38 +301,40 @@ const OIDCSettingsPage: React.FC = () => {
           {/* Group mapping settings */}
           <Paper sx={{ p: 3 }}>
             <Typography variant="h6" gutterBottom>
-              Group Claim Mapping
+              {t('admin.oidcSettings.groupClaimMapping')}
             </Typography>
             <Typography
               variant="body2"
               sx={{
-                color: "text.secondary",
-                mb: 3
-              }}>
-              Map IdP group claims to registry organizations and roles. The group claim name must
-              match the claim key in your OIDC ID token (e.g. <code>groups</code>).
+                color: 'text.secondary',
+                mb: 3,
+              }}
+            >
+              {t('admin.oidcSettings.groupClaimDescBefore')}
+              <code>groups</code>
+              {t('admin.oidcSettings.groupClaimDescAfter')}
             </Typography>
 
             <Stack spacing={3}>
               {/* Group claim name + default role */}
               <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
                 <TextField
-                  label="Group Claim Name"
+                  label={t('admin.oidcSettings.labelGroupClaimName')}
                   value={groupClaimName}
                   onChange={(e) => setGroupClaimName(e.target.value)}
                   placeholder="groups"
-                  helperText="The ID token claim that contains the user's group list"
+                  helperText={t('admin.oidcSettings.helpGroupClaimName')}
                   sx={{ flex: 1 }}
                 />
                 <FormControl sx={{ minWidth: 200 }}>
-                  <InputLabel>Default Role</InputLabel>
+                  <InputLabel>{t('admin.oidcSettings.labelDefaultRole')}</InputLabel>
                   <Select
                     value={defaultRole}
-                    label="Default Role"
+                    label={t('admin.oidcSettings.labelDefaultRole')}
                     onChange={(e: SelectChangeEvent) => setDefaultRole(e.target.value)}
                   >
                     <MenuItem value="">
-                      <em>None</em>
+                      <em>{t('admin.oidcSettings.menuNone')}</em>
                     </MenuItem>
                     {AVAILABLE_ROLES.map((r) => (
                       <MenuItem key={r} value={r}>
@@ -322,18 +350,21 @@ const OIDCSettingsPage: React.FC = () => {
                 <Stack
                   direction="row"
                   sx={{
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                    mb: 1
-                  }}>
-                  <Typography variant="subtitle1">Group Mappings</Typography>
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    mb: 1,
+                  }}
+                >
+                  <Typography variant="subtitle1">
+                    {t('admin.oidcSettings.groupMappings')}
+                  </Typography>
                   <Button
                     startIcon={<AddIcon />}
                     variant="outlined"
                     size="small"
                     onClick={openAddDialog}
                   >
-                    Add Mapping
+                    {t('admin.oidcSettings.addMapping')}
                   </Button>
                 </Stack>
 
@@ -341,20 +372,21 @@ const OIDCSettingsPage: React.FC = () => {
                   <Typography
                     variant="body2"
                     sx={{
-                      color: "text.secondary",
-                      py: 2
-                    }}>
-                    No group mappings configured. Click "Add Mapping" to create one.
+                      color: 'text.secondary',
+                      py: 2,
+                    }}
+                  >
+                    {t('admin.oidcSettings.emptyMappings')}
                   </Typography>
                 ) : (
                   <TableContainer>
                     <Table size="small">
                       <TableHead>
                         <TableRow>
-                          <TableCell>IdP Group</TableCell>
-                          <TableCell>Organization</TableCell>
-                          <TableCell>Role</TableCell>
-                          <TableCell align="right">Actions</TableCell>
+                          <TableCell>{t('admin.oidcSettings.thIdpGroup')}</TableCell>
+                          <TableCell>{t('admin.oidcSettings.thOrganization')}</TableCell>
+                          <TableCell>{t('admin.oidcSettings.thRole')}</TableCell>
+                          <TableCell align="right">{t('admin.oidcSettings.thActions')}</TableCell>
                         </TableRow>
                       </TableHead>
                       <TableBody>
@@ -373,19 +405,19 @@ const OIDCSettingsPage: React.FC = () => {
                               />
                             </TableCell>
                             <TableCell align="right">
-                              <Tooltip title="Edit claim mapping">
+                              <Tooltip title={t('admin.oidcSettings.tooltipEdit')}>
                                 <IconButton
                                   size="small"
-                                  aria-label="Edit claim mapping"
+                                  aria-label={t('admin.oidcSettings.ariaEdit')}
                                   onClick={() => openEditDialog(i)}
                                 >
                                   <EditIcon fontSize="small" />
                                 </IconButton>
                               </Tooltip>
-                              <Tooltip title="Delete claim mapping">
+                              <Tooltip title={t('admin.oidcSettings.tooltipDelete')}>
                                 <IconButton
                                   size="small"
-                                  aria-label="Delete claim mapping"
+                                  aria-label={t('admin.oidcSettings.ariaDelete')}
                                   color="error"
                                   onClick={() => setDeleteIndex(i)}
                                 >
@@ -409,7 +441,7 @@ const OIDCSettingsPage: React.FC = () => {
                   onClick={handleSave}
                   disabled={saving}
                 >
-                  {saving ? 'Saving…' : 'Save Changes'}
+                  {saving ? t('admin.oidcSettings.saving') : t('admin.oidcSettings.saveChanges')}
                 </Button>
               </Box>
             </Stack>
@@ -418,16 +450,18 @@ const OIDCSettingsPage: React.FC = () => {
           {/* Add / Edit mapping dialog */}
           <Dialog open={dialogOpen} onClose={() => setDialogOpen(false)} maxWidth="sm" fullWidth>
             <DialogTitle>
-              {editingIndex !== null ? 'Edit Group Mapping' : 'Add Group Mapping'}
+              {editingIndex !== null
+                ? t('admin.oidcSettings.dialogTitleEdit')
+                : t('admin.oidcSettings.dialogTitleAdd')}
             </DialogTitle>
             <DialogContent sx={{ pt: 2 }}>
               <Stack spacing={2} sx={{ mt: 1 }}>
                 <TextField
-                  label="IdP Group"
+                  label={t('admin.oidcSettings.labelIdpGroup')}
                   value={mappingForm.group}
                   onChange={(e) => setMappingForm((f) => ({ ...f, group: e.target.value }))}
                   placeholder="e.g. platform-admins"
-                  helperText="The exact group name as it appears in the ID token claim"
+                  helperText={t('admin.oidcSettings.helpIdpGroup')}
                   fullWidth
                   autoFocus
                 />
@@ -449,9 +483,9 @@ const OIDCSettingsPage: React.FC = () => {
                   renderInput={(params) => (
                     <TextField
                       {...params}
-                      label="Organization"
+                      label={t('admin.oidcSettings.labelOrganization')}
                       placeholder="e.g. my-org"
-                      helperText="Registry organization name the user will be added to"
+                      helperText={t('admin.oidcSettings.helpOrganization')}
                       fullWidth
                       slotProps={{
                         ...params.slotProps,
@@ -463,16 +497,16 @@ const OIDCSettingsPage: React.FC = () => {
                               {params.slotProps?.input?.endAdornment}
                             </>
                           ),
-                        }
+                        },
                       }}
                     />
                   )}
                 />
                 <FormControl fullWidth>
-                  <InputLabel>Role</InputLabel>
+                  <InputLabel>{t('admin.oidcSettings.labelRole')}</InputLabel>
                   <Select
                     value={mappingForm.role}
-                    label="Role"
+                    label={t('admin.oidcSettings.labelRole')}
                     onChange={(e: SelectChangeEvent) =>
                       setMappingForm((f) => ({ ...f, role: e.target.value }))
                     }
@@ -487,32 +521,33 @@ const OIDCSettingsPage: React.FC = () => {
               </Stack>
             </DialogContent>
             <DialogActions>
-              <Button onClick={() => setDialogOpen(false)}>Cancel</Button>
+              <Button onClick={() => setDialogOpen(false)}>{t('admin.oidcSettings.cancel')}</Button>
               <Button
                 onClick={handleDialogSave}
                 variant="contained"
                 disabled={!mappingForm.group || !mappingForm.organization || !mappingForm.role}
               >
-                {editingIndex !== null ? 'Update' : 'Add'}
+                {editingIndex !== null
+                  ? t('admin.oidcSettings.update')
+                  : t('admin.oidcSettings.add')}
               </Button>
             </DialogActions>
           </Dialog>
 
           {/* Delete confirm dialog */}
           <Dialog open={deleteIndex !== null} onClose={() => setDeleteIndex(null)}>
-            <DialogTitle>Remove Group Mapping</DialogTitle>
+            <DialogTitle>{t('admin.oidcSettings.removeTitle')}</DialogTitle>
             <DialogContent>
               <Typography>
-                Remove the mapping for group{' '}
-                <strong>{deleteIndex !== null ? mappings[deleteIndex]?.group : ''}</strong>? This
-                will not affect existing memberships — it only stops new logins from automatically
-                setting this membership.
+                {t('admin.oidcSettings.removeTextBefore')}
+                <strong>{deleteIndex !== null ? mappings[deleteIndex]?.group : ''}</strong>
+                {t('admin.oidcSettings.removeTextAfter')}
               </Typography>
             </DialogContent>
             <DialogActions>
-              <Button onClick={() => setDeleteIndex(null)}>Cancel</Button>
+              <Button onClick={() => setDeleteIndex(null)}>{t('admin.oidcSettings.cancel')}</Button>
               <Button onClick={handleDeleteConfirm} color="error" variant="contained">
-                Remove
+                {t('admin.oidcSettings.remove')}
               </Button>
             </DialogActions>
           </Dialog>
@@ -522,17 +557,21 @@ const OIDCSettingsPage: React.FC = () => {
       {identityMappings?.saml && (
         <Paper sx={{ p: 3, mt: 4 }}>
           <Typography variant="h6" gutterBottom>
-            SAML Group Mappings
+            {t('admin.oidcSettings.samlGroupMappings')}
           </Typography>
           <Alert severity="info" sx={{ mb: 2 }}>
-            SAML group mappings are configured in the server configuration file and are read-only.
+            {t('admin.oidcSettings.samlReadOnly')}
           </Alert>
           <Stack direction="row" spacing={2} sx={{ mb: 2 }}>
             <Chip
-              label={`Group attribute: ${identityMappings.saml.group_attribute_name || '(not set)'}`}
+              label={t('admin.oidcSettings.chipGroupAttribute', {
+                value: identityMappings.saml.group_attribute_name || t('admin.oidcSettings.notSet'),
+              })}
             />
             <Chip
-              label={`Default role: ${identityMappings.saml.default_role || '(none)'}`}
+              label={t('admin.oidcSettings.chipDefaultRole', {
+                value: identityMappings.saml.default_role || t('admin.oidcSettings.none'),
+              })}
               color="secondary"
             />
           </Stack>
@@ -541,9 +580,9 @@ const OIDCSettingsPage: React.FC = () => {
               <Table size="small">
                 <TableHead>
                   <TableRow>
-                    <TableCell>SAML Group</TableCell>
-                    <TableCell>Organization</TableCell>
-                    <TableCell>Role</TableCell>
+                    <TableCell>{t('admin.oidcSettings.thSamlGroup')}</TableCell>
+                    <TableCell>{t('admin.oidcSettings.thOrganization')}</TableCell>
+                    <TableCell>{t('admin.oidcSettings.thRole')}</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
@@ -560,9 +599,13 @@ const OIDCSettingsPage: React.FC = () => {
               </Table>
             </TableContainer>
           ) : (
-            <Typography sx={{
-              color: "text.secondary"
-            }}>No SAML group mappings configured.</Typography>
+            <Typography
+              sx={{
+                color: 'text.secondary',
+              }}
+            >
+              {t('admin.oidcSettings.noSamlMappings')}
+            </Typography>
           )}
         </Paper>
       )}
@@ -570,14 +613,16 @@ const OIDCSettingsPage: React.FC = () => {
       {identityMappings?.ldap && (
         <Paper sx={{ p: 3, mt: 4 }}>
           <Typography variant="h6" gutterBottom>
-            LDAP Group Mappings
+            {t('admin.oidcSettings.ldapGroupMappings')}
           </Typography>
           <Alert severity="info" sx={{ mb: 2 }}>
-            LDAP group mappings are configured in the server configuration file and are read-only.
+            {t('admin.oidcSettings.ldapReadOnly')}
           </Alert>
           <Stack direction="row" spacing={2} sx={{ mb: 2 }}>
             <Chip
-              label={`Default role: ${identityMappings.ldap.default_role || '(none)'}`}
+              label={t('admin.oidcSettings.chipDefaultRole', {
+                value: identityMappings.ldap.default_role || t('admin.oidcSettings.none'),
+              })}
               color="secondary"
             />
           </Stack>
@@ -586,9 +631,9 @@ const OIDCSettingsPage: React.FC = () => {
               <Table size="small">
                 <TableHead>
                   <TableRow>
-                    <TableCell>LDAP Group DN</TableCell>
-                    <TableCell>Organization</TableCell>
-                    <TableCell>Role</TableCell>
+                    <TableCell>{t('admin.oidcSettings.thLdapGroupDn')}</TableCell>
+                    <TableCell>{t('admin.oidcSettings.thOrganization')}</TableCell>
+                    <TableCell>{t('admin.oidcSettings.thRole')}</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
@@ -605,14 +650,18 @@ const OIDCSettingsPage: React.FC = () => {
               </Table>
             </TableContainer>
           ) : (
-            <Typography sx={{
-              color: "text.secondary"
-            }}>No LDAP group mappings configured.</Typography>
+            <Typography
+              sx={{
+                color: 'text.secondary',
+              }}
+            >
+              {t('admin.oidcSettings.noLdapMappings')}
+            </Typography>
           )}
         </Paper>
       )}
     </Container>
-  );
+  )
 }
 
 export default OIDCSettingsPage

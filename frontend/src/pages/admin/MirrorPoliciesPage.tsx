@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import {
   Box,
@@ -63,6 +64,7 @@ const defaultFormData: PolicyFormData = {
 }
 
 const MirrorPoliciesPage: React.FC = () => {
+  const { t } = useTranslation()
   const queryClient = useQueryClient()
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
@@ -100,7 +102,7 @@ const MirrorPoliciesPage: React.FC = () => {
   })
 
   if (queryError && !error) {
-    setError(getErrorMessage(queryError, 'Failed to load mirror policies'))
+    setError(getErrorMessage(queryError, t('admin.mirrorPolicies.errLoad')))
   }
 
   const saveMutation = useMutation({
@@ -111,7 +113,9 @@ const MirrorPoliciesPage: React.FC = () => {
       return api.createMirrorPolicy(payload)
     },
     onSuccess: () => {
-      setSuccess(editingPolicy ? 'Policy updated successfully' : 'Policy created successfully')
+      setSuccess(
+        editingPolicy ? t('admin.mirrorPolicies.msgUpdated') : t('admin.mirrorPolicies.msgCreated'),
+      )
       setError(null)
       setFormDialogOpen(false)
       setEditingPolicy(null)
@@ -119,7 +123,7 @@ const MirrorPoliciesPage: React.FC = () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.policies._def })
     },
     onError: (err: unknown) => {
-      setError(getErrorMessage(err, 'Failed to save policy'))
+      setError(getErrorMessage(err, t('admin.mirrorPolicies.errSave')))
     },
   })
 
@@ -128,12 +132,12 @@ const MirrorPoliciesPage: React.FC = () => {
     onSuccess: () => {
       setDeleteDialogOpen(false)
       setPolicyToDelete(null)
-      setSuccess('Policy deleted successfully')
+      setSuccess(t('admin.mirrorPolicies.msgDeleted'))
       setError(null)
       queryClient.invalidateQueries({ queryKey: queryKeys.policies._def })
     },
     onError: (err: unknown) => {
-      setError(getErrorMessage(err, 'Failed to delete policy'))
+      setError(getErrorMessage(err, t('admin.mirrorPolicies.errDelete')))
     },
   })
 
@@ -171,7 +175,7 @@ const MirrorPoliciesPage: React.FC = () => {
       })
       setEvaluateResult(result)
     } catch (err: unknown) {
-      setError(getErrorMessage(err, 'Failed to evaluate policy'))
+      setError(getErrorMessage(err, t('admin.mirrorPolicies.errEvaluate')))
     } finally {
       setEvaluating(false)
     }
@@ -201,9 +205,23 @@ const MirrorPoliciesPage: React.FC = () => {
 
   const getPolicyTypeChip = (policyType: 'allow' | 'deny') => {
     if (policyType === 'allow') {
-      return <Chip label="Allow" size="small" color="success" icon={<CheckCircleIcon />} />
+      return (
+        <Chip
+          label={t('admin.mirrorPolicies.chipAllow')}
+          size="small"
+          color="success"
+          icon={<CheckCircleIcon />}
+        />
+      )
     }
-    return <Chip label="Deny" size="small" color="error" icon={<BlockIcon />} />
+    return (
+      <Chip
+        label={t('admin.mirrorPolicies.chipDeny')}
+        size="small"
+        color="error"
+        icon={<BlockIcon />}
+      />
+    )
   }
 
   return (
@@ -225,15 +243,18 @@ const MirrorPoliciesPage: React.FC = () => {
             sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}
           >
             <Box>
-              <Typography variant="h4">Mirror Policies</Typography>
-              <Typography variant="body2" sx={{
-                color: "text.secondary"
-              }}>
-                Define allow/deny rules for provider mirroring
+              <Typography variant="h4">{t('admin.mirrorPolicies.pageTitle')}</Typography>
+              <Typography
+                variant="body2"
+                sx={{
+                  color: 'text.secondary',
+                }}
+              >
+                {t('admin.mirrorPolicies.pageSubtitle')}
               </Typography>
             </Box>
             <Box sx={{ display: 'flex', gap: 1 }}>
-              <Tooltip title="Evaluate a policy">
+              <Tooltip title={t('admin.mirrorPolicies.tooltipEvaluate')}>
                 <Button
                   variant="outlined"
                   startIcon={<PlayArrowIcon />}
@@ -243,7 +264,7 @@ const MirrorPoliciesPage: React.FC = () => {
                     setEvaluateDialogOpen(true)
                   }}
                 >
-                  Evaluate
+                  {t('admin.mirrorPolicies.evaluate')}
                 </Button>
               </Tooltip>
               <Button
@@ -253,10 +274,10 @@ const MirrorPoliciesPage: React.FC = () => {
                   loadPolicies()
                 }}
               >
-                Refresh
+                {t('admin.mirrorPolicies.refresh')}
               </Button>
               <Button variant="contained" startIcon={<AddIcon />} onClick={openCreateDialog}>
-                Create Policy
+                {t('admin.mirrorPolicies.createPolicy')}
               </Button>
             </Box>
           </Box>
@@ -280,24 +301,30 @@ const MirrorPoliciesPage: React.FC = () => {
                   <CardContent>
                     <Box
                       sx={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                        alignItems: "flex-start",
-                        mb: 1
-                      }}>
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'flex-start',
+                        mb: 1,
+                      }}
+                    >
                       <Typography variant="h6" sx={{ flex: 1, mr: 1 }}>
                         {policy.name}
                       </Typography>
                       <Box
                         sx={{
-                          display: "flex",
-                          flexDirection: "column",
-                          alignItems: "flex-end",
-                          gap: 0.5
-                        }}>
+                          display: 'flex',
+                          flexDirection: 'column',
+                          alignItems: 'flex-end',
+                          gap: 0.5,
+                        }}
+                      >
                         {getPolicyTypeChip(policy.policy_type)}
                         <Chip
-                          label={policy.is_active ? 'Active' : 'Inactive'}
+                          label={
+                            policy.is_active
+                              ? t('admin.mirrorPolicies.chipActive')
+                              : t('admin.mirrorPolicies.chipInactive')
+                          }
                           size="small"
                           color={policy.is_active ? 'default' : 'default'}
                           variant={policy.is_active ? 'filled' : 'outlined'}
@@ -306,69 +333,88 @@ const MirrorPoliciesPage: React.FC = () => {
                     </Box>
 
                     {policy.description && (
-                      <Typography variant="body2" color="textSecondary" sx={{
-                        marginBottom: "16px"
-                      }}>
+                      <Typography
+                        variant="body2"
+                        color="textSecondary"
+                        sx={{
+                          marginBottom: '16px',
+                        }}
+                      >
                         {policy.description}
                       </Typography>
                     )}
 
                     <Box
                       sx={{
-                        display: "flex",
-                        flexWrap: "wrap",
+                        display: 'flex',
+                        flexWrap: 'wrap',
                         gap: 0.5,
-                        mb: 1
-                      }}>
+                        mb: 1,
+                      }}
+                    >
                       {policy.upstream_registry && (
                         <Chip
                           size="small"
                           variant="outlined"
-                          label={`Registry: ${policy.upstream_registry}`}
+                          label={t('admin.mirrorPolicies.chipRegistry', {
+                            value: policy.upstream_registry,
+                          })}
                         />
                       )}
                       {policy.namespace_pattern && (
                         <Chip
                           size="small"
                           variant="outlined"
-                          label={`Namespace: ${policy.namespace_pattern}`}
+                          label={t('admin.mirrorPolicies.chipNamespace', {
+                            value: policy.namespace_pattern,
+                          })}
                         />
                       )}
                       {policy.provider_pattern && (
                         <Chip
                           size="small"
                           variant="outlined"
-                          label={`Provider: ${policy.provider_pattern}`}
+                          label={t('admin.mirrorPolicies.chipProvider', {
+                            value: policy.provider_pattern,
+                          })}
                         />
                       )}
                       {policy.requires_approval && (
-                        <Chip size="small" color="warning" label="Requires approval" />
+                        <Chip
+                          size="small"
+                          color="warning"
+                          label={t('admin.mirrorPolicies.chipRequiresApproval')}
+                        />
                       )}
                     </Box>
 
                     {policy.priority !== undefined && policy.priority !== 0 && (
-                      <Typography variant="caption" color="textSecondary" sx={{
-                        display: "block"
-                      }}>
-                        Priority: {policy.priority}
+                      <Typography
+                        variant="caption"
+                        color="textSecondary"
+                        sx={{
+                          display: 'block',
+                        }}
+                      >
+                        {t('admin.mirrorPolicies.priority', { value: policy.priority })}
                       </Typography>
                     )}
                   </CardContent>
 
                   <CardActions>
-                    <Tooltip title="Edit">
+                    <Tooltip title={t('admin.mirrorPolicies.tooltipEdit')}>
                       <IconButton
                         size="small"
-                        aria-label="Edit policy"
+                        aria-label={t('admin.mirrorPolicies.ariaEdit')}
                         onClick={() => openEditDialog(policy)}
                       >
                         <EditIcon />
                       </IconButton>
                     </Tooltip>
-                    <Tooltip title="Delete">
+                    <Tooltip title={t('admin.mirrorPolicies.tooltipDelete')}>
                       <IconButton
                         size="small"
-                        aria-label="Delete policy"
+                        aria-label={t('admin.mirrorPolicies.ariaDelete')}
                         color="error"
                         onClick={() => {
                           setPolicyToDelete(policy)
@@ -388,8 +434,7 @@ const MirrorPoliciesPage: React.FC = () => {
                 <Card>
                   <CardContent>
                     <Typography variant="body1" color="textSecondary" align="center">
-                      No mirror policies found. Create one to control which providers can be
-                      mirrored.
+                      {t('admin.mirrorPolicies.emptyState')}
                     </Typography>
                   </CardContent>
                 </Card>
@@ -407,20 +452,24 @@ const MirrorPoliciesPage: React.FC = () => {
             maxWidth="sm"
             fullWidth
           >
-            <DialogTitle>{editingPolicy ? 'Edit Policy' : 'Create Mirror Policy'}</DialogTitle>
+            <DialogTitle>
+              {editingPolicy
+                ? t('admin.mirrorPolicies.dialogTitleEdit')
+                : t('admin.mirrorPolicies.dialogTitleCreate')}
+            </DialogTitle>
             <DialogContent>
               <Box sx={{ pt: 2, display: 'flex', flexDirection: 'column', gap: 2 }}>
                 <TextField
-                  label="Name"
+                  label={t('admin.mirrorPolicies.labelName')}
                   fullWidth
                   required
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  helperText="A unique name for this policy"
+                  helperText={t('admin.mirrorPolicies.helpName')}
                 />
 
                 <TextField
-                  label="Description"
+                  label={t('admin.mirrorPolicies.labelDescription')}
                   fullWidth
                   multiline
                   rows={2}
@@ -429,57 +478,53 @@ const MirrorPoliciesPage: React.FC = () => {
                 />
 
                 <FormControl fullWidth required>
-                  <InputLabel>Policy Type</InputLabel>
+                  <InputLabel>{t('admin.mirrorPolicies.labelPolicyType')}</InputLabel>
                   <Select
-                    label="Policy Type"
+                    label={t('admin.mirrorPolicies.labelPolicyType')}
                     value={formData.policy_type}
                     onChange={(e) =>
                       setFormData({ ...formData, policy_type: e.target.value as 'allow' | 'deny' })
                     }
                   >
-                    <MenuItem value="allow">
-                      Allow — permit matching providers to be mirrored
-                    </MenuItem>
-                    <MenuItem value="deny">
-                      Deny — block matching providers from being mirrored
-                    </MenuItem>
+                    <MenuItem value="allow">{t('admin.mirrorPolicies.menuAllow')}</MenuItem>
+                    <MenuItem value="deny">{t('admin.mirrorPolicies.menuDeny')}</MenuItem>
                   </Select>
                 </FormControl>
 
                 <TextField
-                  label="Upstream Registry"
+                  label={t('admin.mirrorPolicies.labelUpstreamRegistry')}
                   fullWidth
                   value={formData.upstream_registry}
                   onChange={(e) => setFormData({ ...formData, upstream_registry: e.target.value })}
-                  helperText="e.g., registry.terraform.io (leave blank to match any)"
+                  helperText={t('admin.mirrorPolicies.helpUpstreamRegistry')}
                   placeholder="registry.terraform.io"
                 />
 
                 <TextField
-                  label="Namespace Pattern"
+                  label={t('admin.mirrorPolicies.labelNamespacePattern')}
                   fullWidth
                   value={formData.namespace_pattern}
                   onChange={(e) => setFormData({ ...formData, namespace_pattern: e.target.value })}
-                  helperText="Glob pattern, e.g., hashicorp or hash* (leave blank to match any)"
+                  helperText={t('admin.mirrorPolicies.helpNamespacePattern')}
                 />
 
                 <TextField
-                  label="Provider Pattern"
+                  label={t('admin.mirrorPolicies.labelProviderPattern')}
                   fullWidth
                   value={formData.provider_pattern}
                   onChange={(e) => setFormData({ ...formData, provider_pattern: e.target.value })}
-                  helperText="Glob pattern, e.g., aws or a* (leave blank to match any)"
+                  helperText={t('admin.mirrorPolicies.helpProviderPattern')}
                 />
 
                 <TextField
-                  label="Priority"
+                  label={t('admin.mirrorPolicies.labelPriority')}
                   type="number"
                   fullWidth
                   value={formData.priority}
                   onChange={(e) =>
                     setFormData({ ...formData, priority: parseInt(e.target.value) || 0 })
                   }
-                  helperText="Higher priority policies are evaluated first"
+                  helperText={t('admin.mirrorPolicies.helpPriority')}
                 />
 
                 <FormControlLabel
@@ -489,7 +534,7 @@ const MirrorPoliciesPage: React.FC = () => {
                       onChange={(e) => setFormData({ ...formData, is_active: e.target.checked })}
                     />
                   }
-                  label="Active"
+                  label={t('admin.mirrorPolicies.labelActive')}
                 />
 
                 <FormControlLabel
@@ -501,7 +546,7 @@ const MirrorPoliciesPage: React.FC = () => {
                       }
                     />
                   }
-                  label="Requires Approval"
+                  label={t('admin.mirrorPolicies.labelRequiresApproval')}
                 />
               </Box>
             </DialogContent>
@@ -513,27 +558,32 @@ const MirrorPoliciesPage: React.FC = () => {
                 }}
                 disabled={saving}
               >
-                Cancel
+                {t('admin.mirrorPolicies.cancel')}
               </Button>
               <Button variant="contained" onClick={handleSave} disabled={!formData.name || saving}>
-                {saving ? 'Saving...' : editingPolicy ? 'Update' : 'Create'}
+                {saving
+                  ? t('admin.mirrorPolicies.saving')
+                  : editingPolicy
+                    ? t('admin.mirrorPolicies.update')
+                    : t('admin.mirrorPolicies.create')}
               </Button>
             </DialogActions>
           </Dialog>
 
           {/* Delete Confirmation Dialog */}
           <Dialog open={deleteDialogOpen} onClose={() => setDeleteDialogOpen(false)}>
-            <DialogTitle>Confirm Delete</DialogTitle>
+            <DialogTitle>{t('admin.mirrorPolicies.confirmDeleteTitle')}</DialogTitle>
             <DialogContent>
               <Typography>
-                Are you sure you want to delete the policy "{policyToDelete?.name}"? This action
-                cannot be undone.
+                {t('admin.mirrorPolicies.confirmDeleteText', { name: policyToDelete?.name })}
               </Typography>
             </DialogContent>
             <DialogActions>
-              <Button onClick={() => setDeleteDialogOpen(false)}>Cancel</Button>
+              <Button onClick={() => setDeleteDialogOpen(false)}>
+                {t('admin.mirrorPolicies.cancel')}
+              </Button>
               <Button variant="contained" color="error" onClick={handleDelete}>
-                Delete
+                {t('admin.mirrorPolicies.delete')}
               </Button>
             </DialogActions>
           </Dialog>
@@ -545,15 +595,14 @@ const MirrorPoliciesPage: React.FC = () => {
             maxWidth="sm"
             fullWidth
           >
-            <DialogTitle>Evaluate Policy</DialogTitle>
+            <DialogTitle>{t('admin.mirrorPolicies.dialogTitleEvaluate')}</DialogTitle>
             <DialogContent>
               <Box sx={{ pt: 2, display: 'flex', flexDirection: 'column', gap: 2 }}>
                 <Typography variant="body2" color="textSecondary">
-                  Check whether a specific provider would be allowed or denied by the current policy
-                  set.
+                  {t('admin.mirrorPolicies.evaluateIntro')}
                 </Typography>
                 <TextField
-                  label="Registry"
+                  label={t('admin.mirrorPolicies.labelRegistry')}
                   fullWidth
                   required
                   value={evaluateForm.registry}
@@ -561,7 +610,7 @@ const MirrorPoliciesPage: React.FC = () => {
                   placeholder="registry.terraform.io"
                 />
                 <TextField
-                  label="Namespace"
+                  label={t('admin.mirrorPolicies.labelNamespace')}
                   fullWidth
                   required
                   value={evaluateForm.namespace}
@@ -569,7 +618,7 @@ const MirrorPoliciesPage: React.FC = () => {
                   placeholder="hashicorp"
                 />
                 <TextField
-                  label="Provider"
+                  label={t('admin.mirrorPolicies.labelProvider')}
                   fullWidth
                   required
                   value={evaluateForm.provider}
@@ -579,18 +628,26 @@ const MirrorPoliciesPage: React.FC = () => {
                 {evaluateResult && (
                   <Alert severity={evaluateResult.allowed ? 'success' : 'error'} sx={{ mt: 1 }}>
                     <Typography variant="body2">
-                      <strong>{evaluateResult.allowed ? 'Allowed' : 'Denied'}</strong>
-                      {evaluateResult.matched_policy && (
-                        <> — matched policy: {evaluateResult.matched_policy}</>
-                      )}
-                      {evaluateResult.reason && <> ({evaluateResult.reason})</>}
+                      <strong>
+                        {evaluateResult.allowed
+                          ? t('admin.mirrorPolicies.resultAllowed')
+                          : t('admin.mirrorPolicies.resultDenied')}
+                      </strong>
+                      {evaluateResult.matched_policy &&
+                        t('admin.mirrorPolicies.resultMatchedPolicy', {
+                          policy: evaluateResult.matched_policy,
+                        })}
+                      {evaluateResult.reason &&
+                        t('admin.mirrorPolicies.resultReason', { reason: evaluateResult.reason })}
                     </Typography>
                   </Alert>
                 )}
               </Box>
             </DialogContent>
             <DialogActions>
-              <Button onClick={() => setEvaluateDialogOpen(false)}>Close</Button>
+              <Button onClick={() => setEvaluateDialogOpen(false)}>
+                {t('admin.mirrorPolicies.close')}
+              </Button>
               <Button
                 variant="contained"
                 startIcon={evaluating ? <CircularProgress size={16} /> : <PlayArrowIcon />}
@@ -602,14 +659,16 @@ const MirrorPoliciesPage: React.FC = () => {
                   !evaluateForm.provider
                 }
               >
-                {evaluating ? 'Evaluating...' : 'Evaluate'}
+                {evaluating
+                  ? t('admin.mirrorPolicies.evaluating')
+                  : t('admin.mirrorPolicies.evaluate')}
               </Button>
             </DialogActions>
           </Dialog>
         </>
       )}
     </Container>
-  );
+  )
 }
 
 export default MirrorPoliciesPage

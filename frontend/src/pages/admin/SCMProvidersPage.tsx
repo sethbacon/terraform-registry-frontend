@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import {
   Box,
@@ -50,6 +51,7 @@ interface TokenStatus {
 }
 
 const SCMProvidersPage: React.FC = () => {
+  const { t } = useTranslation()
   const queryClient = useQueryClient()
   const { user } = useAuth()
   const [error, setError] = useState<string | null>(null)
@@ -127,7 +129,7 @@ const SCMProvidersPage: React.FC = () => {
   })
 
   if (queryError && !error) {
-    setError(getErrorMessage(queryError, 'Failed to load SCM providers'))
+    setError(getErrorMessage(queryError, t('admin.scmProviders.errLoad')))
   }
 
   const createMutation = useMutation({
@@ -139,7 +141,7 @@ const SCMProvidersPage: React.FC = () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.scmProviders._def })
     },
     onError: (err: unknown) => {
-      setError(getErrorMessage(err, 'Failed to create provider'))
+      setError(getErrorMessage(err, t('admin.scmProviders.errCreate')))
     },
   })
 
@@ -162,7 +164,7 @@ const SCMProvidersPage: React.FC = () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.scmProviders._def })
     },
     onError: (err: unknown) => {
-      setError(getErrorMessage(err, 'Failed to update provider'))
+      setError(getErrorMessage(err, t('admin.scmProviders.errUpdate')))
     },
   })
 
@@ -175,7 +177,7 @@ const SCMProvidersPage: React.FC = () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.scmProviders._def })
     },
     onError: (err: unknown) => {
-      setError(getErrorMessage(err, 'Failed to delete provider'))
+      setError(getErrorMessage(err, t('admin.scmProviders.errDelete')))
     },
   })
 
@@ -205,7 +207,7 @@ const SCMProvidersPage: React.FC = () => {
         const response = await api.initiateSCMOAuth(provider.id)
         window.location.href = response.authorization_url
       } catch (err: unknown) {
-        setError(getErrorMessage(err, 'Failed to initiate OAuth'))
+        setError(getErrorMessage(err, t('admin.scmProviders.errOAuth')))
       }
     }
   }
@@ -219,7 +221,7 @@ const SCMProvidersPage: React.FC = () => {
       setPatValue('')
       setPatProvider(null)
     } catch (err: unknown) {
-      setError(getErrorMessage(err, 'Failed to save access token'))
+      setError(getErrorMessage(err, t('admin.scmProviders.errSaveToken')))
     }
   }
 
@@ -293,41 +295,41 @@ const SCMProvidersPage: React.FC = () => {
   const getClientIdLabel = (type: SCMProviderType) => {
     switch (type) {
       case 'github':
-        return 'Client ID'
+        return t('admin.scmProviders.labelClientId')
       case 'azuredevops':
-        return 'App ID'
+        return t('admin.scmProviders.labelAppId')
       case 'gitlab':
-        return 'Application ID'
+        return t('admin.scmProviders.labelApplicationId')
       default:
-        return 'Client ID'
+        return t('admin.scmProviders.labelClientId')
     }
   }
 
   const getClientSecretLabel = (type: SCMProviderType) => {
     switch (type) {
       case 'github':
-        return 'Client Secret'
+        return t('admin.scmProviders.labelClientSecret')
       case 'azuredevops':
-        return 'Client Secret'
+        return t('admin.scmProviders.labelClientSecret')
       case 'gitlab':
-        return 'Secret'
+        return t('admin.scmProviders.labelSecret')
       default:
-        return 'Client Secret'
+        return t('admin.scmProviders.labelClientSecret')
     }
   }
 
   const getBaseUrlHelper = (type: SCMProviderType) => {
     switch (type) {
       case 'github':
-        return 'For GitHub Enterprise: https://github.company.com'
+        return t('admin.scmProviders.helpBaseUrlGithub')
       case 'azuredevops':
-        return 'For Azure DevOps Server: https://dev.azure.com/organization'
+        return t('admin.scmProviders.helpBaseUrlAzure')
       case 'gitlab':
-        return 'For self-hosted GitLab: https://gitlab.company.com'
+        return t('admin.scmProviders.helpBaseUrlGitlab')
       case 'bitbucket_dc':
-        return 'Required: https://bitbucket.company.com'
+        return t('admin.scmProviders.helpBaseUrlBitbucket')
       default:
-        return 'For self-hosted instances'
+        return t('admin.scmProviders.helpBaseUrlDefault')
     }
   }
 
@@ -350,7 +352,7 @@ const SCMProvidersPage: React.FC = () => {
             sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}
           >
             <Box>
-              <Typography variant="h4">SCM Providers</Typography>
+              <Typography variant="h4">{t('admin.scmProviders.pageTitle')}</Typography>
             </Box>
             <Box sx={{ display: 'flex', gap: 1 }}>
               <Button
@@ -360,7 +362,7 @@ const SCMProvidersPage: React.FC = () => {
                   loadProviders()
                 }}
               >
-                Refresh
+                {t('admin.scmProviders.refresh')}
               </Button>
               <Button
                 variant="contained"
@@ -370,7 +372,7 @@ const SCMProvidersPage: React.FC = () => {
                   setCreateDialogOpen(true)
                 }}
               >
-                Add Provider
+                {t('admin.scmProviders.addProvider')}
               </Button>
             </Box>
           </Box>
@@ -388,23 +390,34 @@ const SCMProvidersPage: React.FC = () => {
                   <CardContent sx={{ flexGrow: 1 }}>
                     <Box
                       sx={{
-                        display: "flex",
-                        alignItems: "center",
-                        mb: 2
-                      }}>
-                      <Box sx={{
-                        mr: 2
-                      }}>{getProviderIcon(provider.provider_type)}</Box>
-                      <Box sx={{
-                        flexGrow: 1
-                      }}>
+                        display: 'flex',
+                        alignItems: 'center',
+                        mb: 2,
+                      }}
+                    >
+                      <Box
+                        sx={{
+                          mr: 2,
+                        }}
+                      >
+                        {getProviderIcon(provider.provider_type)}
+                      </Box>
+                      <Box
+                        sx={{
+                          flexGrow: 1,
+                        }}
+                      >
                         <Typography variant="h6">{provider.name}</Typography>
                         <Typography variant="body2" color="textSecondary">
                           {getProviderLabel(provider.provider_type)}
                         </Typography>
                       </Box>
                       <Chip
-                        label={provider.is_active ? 'Active' : 'Inactive'}
+                        label={
+                          provider.is_active
+                            ? t('admin.scmProviders.active')
+                            : t('admin.scmProviders.inactive')
+                        }
                         color={provider.is_active ? 'success' : 'default'}
                         size="small"
                       />
@@ -412,17 +425,20 @@ const SCMProvidersPage: React.FC = () => {
 
                     {provider.tenant_id && (
                       <Typography variant="body2" color="textSecondary" gutterBottom>
-                        Tenant ID: {provider.tenant_id}
+                        {t('admin.scmProviders.tenantIdValue', { value: provider.tenant_id })}
                       </Typography>
                     )}
 
                     <Typography variant="body2" color="textSecondary" gutterBottom>
-                      {getClientIdLabel(provider.provider_type)}: {provider.client_id}
+                      {t('admin.scmProviders.clientIdValue', {
+                        label: getClientIdLabel(provider.provider_type),
+                        value: provider.client_id,
+                      })}
                     </Typography>
 
                     {provider.base_url && (
                       <Typography variant="body2" color="textSecondary" gutterBottom>
-                        Base URL: {provider.base_url}
+                        {t('admin.scmProviders.baseUrlValue', { value: provider.base_url })}
                       </Typography>
                     )}
 
@@ -438,23 +454,26 @@ const SCMProvidersPage: React.FC = () => {
                           borderRadius: 1,
 
                           border: (theme) =>
-                            `1px solid ${theme.palette.mode === 'dark' ? '#404040' : '#e0e0e0'}`
-                        }}>
+                            `1px solid ${theme.palette.mode === 'dark' ? '#404040' : '#e0e0e0'}`,
+                        }}
+                      >
                         <Typography
                           variant="caption"
                           color="textSecondary"
                           sx={{
-                            display: "block",
-                            mb: 0.5
-                          }}>
-                          OAuth Callback URL:
+                            display: 'block',
+                            mb: 0.5,
+                          }}
+                        >
+                          {t('admin.scmProviders.oauthCallbackUrl')}
                         </Typography>
                         <Box
                           sx={{
-                            display: "flex",
-                            alignItems: "center",
-                            gap: 1
-                          }}>
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: 1,
+                          }}
+                        >
                           <Typography
                             variant="caption"
                             sx={{
@@ -470,10 +489,10 @@ const SCMProvidersPage: React.FC = () => {
                           >
                             {getCallbackUrl(provider.id)}
                           </Typography>
-                          <Tooltip title="Copy to clipboard">
+                          <Tooltip title={t('admin.scmProviders.tooltipCopy')}>
                             <IconButton
                               size="small"
-                              aria-label="Copy callback URL"
+                              aria-label={t('admin.scmProviders.ariaCopyCallback')}
                               onClick={() => copyToClipboard(getCallbackUrl(provider.id))}
                               sx={{ flexShrink: 0 }}
                             >
@@ -488,17 +507,26 @@ const SCMProvidersPage: React.FC = () => {
 
                     <Box
                       sx={{
-                        display: "flex",
-                        alignItems: "flex-start",
-                        gap: 1
-                      }}>
-                      <Box sx={{
-                        flex: 1
-                      }}>
-                        <Typography variant="caption" color="textSecondary" sx={{
-                          display: "block"
-                        }}>
-                          Created: {new Date(provider.created_at).toLocaleDateString()}
+                        display: 'flex',
+                        alignItems: 'flex-start',
+                        gap: 1,
+                      }}
+                    >
+                      <Box
+                        sx={{
+                          flex: 1,
+                        }}
+                      >
+                        <Typography
+                          variant="caption"
+                          color="textSecondary"
+                          sx={{
+                            display: 'block',
+                          }}
+                        >
+                          {t('admin.scmProviders.created', {
+                            date: new Date(provider.created_at).toLocaleDateString(),
+                          })}
                         </Typography>
                         {(() => {
                           const status = tokenStatuses[provider.id]
@@ -506,11 +534,12 @@ const SCMProvidersPage: React.FC = () => {
                           return status.connected ? (
                             <Box
                               sx={{
-                                display: "flex",
-                                alignItems: "center",
+                                display: 'flex',
+                                alignItems: 'center',
                                 gap: 0.5,
-                                mt: 0.5
-                              }}>
+                                mt: 0.5,
+                              }}
+                            >
                               <CheckCircleIcon sx={{ fontSize: '0.9rem', color: 'success.main' }} />
                               <Box>
                                 <Typography
@@ -522,7 +551,7 @@ const SCMProvidersPage: React.FC = () => {
                                     display: 'block',
                                   }}
                                 >
-                                  Connected
+                                  {t('admin.scmProviders.connected')}
                                 </Typography>
                                 {status.connected_at && (
                                   <Typography
@@ -538,21 +567,22 @@ const SCMProvidersPage: React.FC = () => {
                           ) : (
                             <Box
                               sx={{
-                                display: "flex",
-                                alignItems: "center",
+                                display: 'flex',
+                                alignItems: 'center',
                                 gap: 0.5,
-                                mt: 0.5
-                              }}>
+                                mt: 0.5,
+                              }}
+                            >
                               <LinkOffIcon sx={{ fontSize: '0.9rem', color: 'text.disabled' }} />
                               <Typography
                                 variant="caption"
                                 color="text.disabled"
                                 sx={{ fontStyle: 'italic' }}
                               >
-                                Not connected
+                                {t('admin.scmProviders.notConnected')}
                               </Typography>
                             </Box>
-                          );
+                          )
                         })()}
                       </Box>
                       {tokenStatuses[provider.id]?.connected && (
@@ -572,16 +602,16 @@ const SCMProvidersPage: React.FC = () => {
                       title={
                         tokenStatuses[provider.id]?.connected
                           ? provider.provider_type === 'bitbucket_dc'
-                            ? 'Update PAT'
-                            : 'Reconnect OAuth'
+                            ? t('admin.scmProviders.tooltipUpdatePat')
+                            : t('admin.scmProviders.tooltipReconnectOauth')
                           : provider.provider_type === 'bitbucket_dc'
-                            ? 'Connect PAT'
-                            : 'Connect OAuth'
+                            ? t('admin.scmProviders.tooltipConnectPat')
+                            : t('admin.scmProviders.tooltipConnectOauth')
                       }
                     >
                       <IconButton
                         size="small"
-                        aria-label="Connect SCM provider"
+                        aria-label={t('admin.scmProviders.ariaConnect')}
                         color="primary"
                         onClick={() => handleConnect(provider)}
                       >
@@ -589,10 +619,10 @@ const SCMProvidersPage: React.FC = () => {
                       </IconButton>
                     </Tooltip>
                     {tokenStatuses[provider.id]?.connected && (
-                      <Tooltip title="Disconnect">
+                      <Tooltip title={t('admin.scmProviders.tooltipDisconnect')}>
                         <IconButton
                           size="small"
-                          aria-label="Disconnect SCM provider"
+                          aria-label={t('admin.scmProviders.ariaDisconnect')}
                           color="warning"
                           onClick={async () => {
                             try {
@@ -601,7 +631,7 @@ const SCMProvidersPage: React.FC = () => {
                                 queryKey: queryKeys.scmProviders._def,
                               })
                             } catch (err: unknown) {
-                              setError(getErrorMessage(err, 'Failed to disconnect'))
+                              setError(getErrorMessage(err, t('admin.scmProviders.errDisconnect')))
                             }
                           }}
                         >
@@ -609,19 +639,19 @@ const SCMProvidersPage: React.FC = () => {
                         </IconButton>
                       </Tooltip>
                     )}
-                    <Tooltip title="Edit">
+                    <Tooltip title={t('admin.scmProviders.tooltipEdit')}>
                       <IconButton
                         size="small"
-                        aria-label="Edit SCM provider"
+                        aria-label={t('admin.scmProviders.ariaEdit')}
                         onClick={() => openEditDialog(provider)}
                       >
                         <EditIcon />
                       </IconButton>
                     </Tooltip>
-                    <Tooltip title="Delete">
+                    <Tooltip title={t('admin.scmProviders.tooltipDelete')}>
                       <IconButton
                         size="small"
-                        aria-label="Delete SCM provider"
+                        aria-label={t('admin.scmProviders.ariaDelete')}
                         color="error"
                         onClick={() => {
                           setProviderToDelete(provider)
@@ -641,7 +671,7 @@ const SCMProvidersPage: React.FC = () => {
                 <Card>
                   <CardContent>
                     <Typography variant="body1" color="textSecondary" align="center">
-                      No SCM providers configured. Add one to get started!
+                      {t('admin.scmProviders.emptyState')}
                     </Typography>
                   </CardContent>
                 </Card>
@@ -660,16 +690,22 @@ const SCMProvidersPage: React.FC = () => {
             maxWidth="sm"
             fullWidth
           >
-            <DialogTitle>{editingProvider ? 'Edit Provider' : 'Add SCM Provider'}</DialogTitle>
+            <DialogTitle>
+              {editingProvider
+                ? t('admin.scmProviders.dialogTitleEdit')
+                : t('admin.scmProviders.dialogTitleAdd')}
+            </DialogTitle>
             <DialogContent>
               <Box sx={{ pt: 2, display: 'flex', flexDirection: 'column', gap: 2 }}>
                 {memberships.length > 0 && (
                   <FormControl fullWidth disabled={!!editingProvider}>
-                    <InputLabel id="organization-label">Organization</InputLabel>
+                    <InputLabel id="organization-label">
+                      {t('admin.scmProviders.labelOrganization')}
+                    </InputLabel>
                     <Select
                       labelId="organization-label"
                       value={formData.organization_id || ''}
-                      label="Organization"
+                      label={t('admin.scmProviders.labelOrganization')}
                       onChange={(e) =>
                         setFormData({ ...formData, organization_id: e.target.value as string })
                       }
@@ -688,11 +724,13 @@ const SCMProvidersPage: React.FC = () => {
 
                 {!editingProvider && (
                   <FormControl fullWidth>
-                    <InputLabel id="provider-type-label">Provider Type</InputLabel>
+                    <InputLabel id="provider-type-label">
+                      {t('admin.scmProviders.labelProviderType')}
+                    </InputLabel>
                     <Select
                       labelId="provider-type-label"
                       value={formData.provider_type}
-                      label="Provider Type"
+                      label={t('admin.scmProviders.labelProviderType')}
                       onChange={(e) =>
                         setFormData({
                           ...formData,
@@ -709,24 +747,24 @@ const SCMProvidersPage: React.FC = () => {
                 )}
 
                 <TextField
-                  label="Name"
+                  label={t('admin.scmProviders.labelName')}
                   fullWidth
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   required
-                  helperText="Friendly name to identify this SCM connection (e.g., 'GitHub Production', 'Internal GitLab')"
+                  helperText={t('admin.scmProviders.helpName')}
                 />
 
                 {(editingProvider?.provider_type || formData.provider_type) === 'azuredevops' && (
                   <TextField
-                    label="Tenant ID"
+                    label={t('admin.scmProviders.labelTenantId')}
                     fullWidth
                     value={formData.tenant_id || ''}
                     onChange={(e) =>
                       setFormData({ ...formData, tenant_id: e.target.value || null })
                     }
                     required
-                    helperText="Your Azure AD / Entra Tenant ID (found in Azure Portal → Azure Active Directory → Overview)"
+                    helperText={t('admin.scmProviders.helpTenantId')}
                   />
                 )}
 
@@ -740,7 +778,7 @@ const SCMProvidersPage: React.FC = () => {
                       value={formData.client_id}
                       onChange={(e) => setFormData({ ...formData, client_id: e.target.value })}
                       required
-                      helperText="OAuth App Client ID from your SCM provider's application or developer settings"
+                      helperText={t('admin.scmProviders.helpClientId')}
                     />
 
                     <TextField
@@ -752,7 +790,9 @@ const SCMProvidersPage: React.FC = () => {
                       value={formData.client_secret}
                       onChange={(e) => setFormData({ ...formData, client_secret: e.target.value })}
                       required={!editingProvider}
-                      helperText={editingProvider ? 'Leave blank to keep existing secret' : ''}
+                      helperText={
+                        editingProvider ? t('admin.scmProviders.helpClientSecretKeep') : ''
+                      }
                     />
                   </>
                 )}
@@ -760,8 +800,8 @@ const SCMProvidersPage: React.FC = () => {
                 <TextField
                   label={
                     isPATProvider(editingProvider?.provider_type || formData.provider_type)
-                      ? 'Base URL'
-                      : 'Base URL (optional)'
+                      ? t('admin.scmProviders.labelBaseUrl')
+                      : t('admin.scmProviders.labelBaseUrlOptional')
                   }
                   fullWidth
                   value={formData.base_url || ''}
@@ -773,11 +813,11 @@ const SCMProvidersPage: React.FC = () => {
                 />
 
                 <TextField
-                  label="Webhook Secret (optional)"
+                  label={t('admin.scmProviders.labelWebhookSecret')}
                   fullWidth
                   value={formData.webhook_secret}
                   onChange={(e) => setFormData({ ...formData, webhook_secret: e.target.value })}
-                  helperText="Used to validate webhook signatures from your SCM system. Can be added later."
+                  helperText={t('admin.scmProviders.helpWebhookSecret')}
                 />
               </Box>
             </DialogContent>
@@ -789,7 +829,7 @@ const SCMProvidersPage: React.FC = () => {
                   resetForm()
                 }}
               >
-                Cancel
+                {t('admin.scmProviders.cancel')}
               </Button>
               <Button
                 variant="contained"
@@ -801,24 +841,25 @@ const SCMProvidersPage: React.FC = () => {
                   (isPATProvider(formData.provider_type) && !formData.base_url)
                 }
               >
-                {editingProvider ? 'Update' : 'Create'}
+                {editingProvider ? t('admin.scmProviders.update') : t('admin.scmProviders.create')}
               </Button>
             </DialogActions>
           </Dialog>
 
           {/* Delete Confirmation Dialog */}
           <Dialog open={deleteConfirmOpen} onClose={() => setDeleteConfirmOpen(false)}>
-            <DialogTitle>Confirm Delete</DialogTitle>
+            <DialogTitle>{t('admin.scmProviders.confirmDeleteTitle')}</DialogTitle>
             <DialogContent>
               <Typography>
-                Are you sure you want to delete the provider "{providerToDelete?.name}"? This action
-                cannot be undone and will remove all associated OAuth tokens and module links.
+                {t('admin.scmProviders.confirmDeleteText', { name: providerToDelete?.name })}
               </Typography>
             </DialogContent>
             <DialogActions>
-              <Button onClick={() => setDeleteConfirmOpen(false)}>Cancel</Button>
+              <Button onClick={() => setDeleteConfirmOpen(false)}>
+                {t('admin.scmProviders.cancel')}
+              </Button>
               <Button variant="contained" color="error" onClick={handleDelete}>
-                Delete
+                {t('admin.scmProviders.delete')}
               </Button>
             </DialogActions>
           </Dialog>
@@ -834,15 +875,16 @@ const SCMProvidersPage: React.FC = () => {
             maxWidth="sm"
             fullWidth
           >
-            <DialogTitle>Connect to {patProvider?.name}</DialogTitle>
+            <DialogTitle>
+              {t('admin.scmProviders.connectToTitle', { name: patProvider?.name })}
+            </DialogTitle>
             <DialogContent>
               <Box sx={{ pt: 2, display: 'flex', flexDirection: 'column', gap: 2 }}>
                 <Typography variant="body2" color="textSecondary">
-                  Enter your Bitbucket Data Center Personal Access Token. You can generate one from
-                  your Bitbucket account settings under HTTP access tokens.
+                  {t('admin.scmProviders.patIntro')}
                 </Typography>
                 <TextField
-                  label="Personal Access Token"
+                  label={t('admin.scmProviders.labelPat')}
                   type="password"
                   fullWidth
                   value={patValue}
@@ -860,17 +902,17 @@ const SCMProvidersPage: React.FC = () => {
                   setPatProvider(null)
                 }}
               >
-                Cancel
+                {t('admin.scmProviders.cancel')}
               </Button>
               <Button variant="contained" onClick={handleSavePAT} disabled={!patValue}>
-                Save Token
+                {t('admin.scmProviders.saveToken')}
               </Button>
             </DialogActions>
           </Dialog>
         </>
       )}
     </Container>
-  );
+  )
 }
 
 export default SCMProvidersPage

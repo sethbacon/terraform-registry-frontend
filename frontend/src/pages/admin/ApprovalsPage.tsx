@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import {
   Box,
@@ -34,6 +35,7 @@ import { getErrorMessage } from '../../utils/errors'
 import { queryKeys } from '../../services/queryKeys'
 
 const ApprovalsPage: React.FC = () => {
+  const { t } = useTranslation()
   const queryClient = useQueryClient()
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
@@ -74,7 +76,7 @@ const ApprovalsPage: React.FC = () => {
   })
 
   if (queryError && !error) {
-    setError(getErrorMessage(queryError, 'Failed to load approval requests'))
+    setError(getErrorMessage(queryError, t('admin.approvals.errLoad')))
   }
 
   const createMutation = useMutation({
@@ -88,12 +90,12 @@ const ApprovalsPage: React.FC = () => {
     onSuccess: () => {
       setCreateDialogOpen(false)
       setCreateForm({ mirror_config_id: '', provider_namespace: '', provider_name: '', reason: '' })
-      setSuccess('Approval request created successfully')
+      setSuccess(t('admin.approvals.msgCreated'))
       setError(null)
       queryClient.invalidateQueries({ queryKey: queryKeys.approvals._def })
     },
     onError: (err: unknown) => {
-      setError(getErrorMessage(err, 'Failed to create approval request'))
+      setError(getErrorMessage(err, t('admin.approvals.errCreate')))
     },
   })
 
@@ -109,14 +111,14 @@ const ApprovalsPage: React.FC = () => {
     }) => api.reviewApproval(id, { status, notes }),
     onSuccess: () => {
       setReviewDialogOpen(false)
-      setSuccess(`Approval request ${reviewForm.status}`)
+      setSuccess(t('admin.approvals.reviewed', { status: reviewForm.status }))
       setError(null)
       setReviewingApproval(null)
       setReviewForm({ status: 'approved', notes: '' })
       queryClient.invalidateQueries({ queryKey: queryKeys.approvals._def })
     },
     onError: (err: unknown) => {
-      setError(getErrorMessage(err, 'Failed to review approval request'))
+      setError(getErrorMessage(err, t('admin.approvals.errReview')))
     },
   })
 
@@ -147,12 +149,33 @@ const ApprovalsPage: React.FC = () => {
   const getStatusChip = (status: string) => {
     switch (status) {
       case 'approved':
-        return <Chip label="Approved" size="small" color="success" icon={<CheckCircleIcon />} />
+        return (
+          <Chip
+            label={t('admin.approvals.statusApproved')}
+            size="small"
+            color="success"
+            icon={<CheckCircleIcon />}
+          />
+        )
       case 'rejected':
-        return <Chip label="Rejected" size="small" color="error" icon={<CancelIcon />} />
+        return (
+          <Chip
+            label={t('admin.approvals.statusRejected')}
+            size="small"
+            color="error"
+            icon={<CancelIcon />}
+          />
+        )
       case 'pending':
       default:
-        return <Chip label="Pending" size="small" color="warning" icon={<HourglassEmptyIcon />} />
+        return (
+          <Chip
+            label={t('admin.approvals.statusPending')}
+            size="small"
+            color="warning"
+            icon={<HourglassEmptyIcon />}
+          />
+        )
     }
   }
 
@@ -175,25 +198,28 @@ const ApprovalsPage: React.FC = () => {
             sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}
           >
             <Box>
-              <Typography variant="h4">Approval Requests</Typography>
-              <Typography variant="body2" sx={{
-                color: "text.secondary"
-              }}>
-                Review and manage mirror provider approval requests
+              <Typography variant="h4">{t('admin.approvals.pageTitle')}</Typography>
+              <Typography
+                variant="body2"
+                sx={{
+                  color: 'text.secondary',
+                }}
+              >
+                {t('admin.approvals.pageSubtitle')}
               </Typography>
             </Box>
             <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
               <FormControl size="small" sx={{ minWidth: 140 }}>
-                <InputLabel>Status</InputLabel>
+                <InputLabel>{t('admin.approvals.labelStatus')}</InputLabel>
                 <Select
-                  label="Status"
+                  label={t('admin.approvals.labelStatus')}
                   value={statusFilter}
                   onChange={(e) => setStatusFilter(e.target.value)}
                 >
-                  <MenuItem value="">All</MenuItem>
-                  <MenuItem value="pending">Pending</MenuItem>
-                  <MenuItem value="approved">Approved</MenuItem>
-                  <MenuItem value="rejected">Rejected</MenuItem>
+                  <MenuItem value="">{t('admin.approvals.filterAll')}</MenuItem>
+                  <MenuItem value="pending">{t('admin.approvals.statusPending')}</MenuItem>
+                  <MenuItem value="approved">{t('admin.approvals.statusApproved')}</MenuItem>
+                  <MenuItem value="rejected">{t('admin.approvals.statusRejected')}</MenuItem>
                 </Select>
               </FormControl>
               <Button
@@ -203,14 +229,14 @@ const ApprovalsPage: React.FC = () => {
                   loadApprovals()
                 }}
               >
-                Refresh
+                {t('admin.approvals.refresh')}
               </Button>
               <Button
                 variant="contained"
                 startIcon={<AddIcon />}
                 onClick={() => setCreateDialogOpen(true)}
               >
-                Create Request
+                {t('admin.approvals.createRequest')}
               </Button>
             </Box>
           </Box>
@@ -234,11 +260,12 @@ const ApprovalsPage: React.FC = () => {
                   <CardContent>
                     <Box
                       sx={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                        alignItems: "flex-start",
-                        mb: 1
-                      }}>
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'flex-start',
+                        mb: 1,
+                      }}
+                    >
                       <Typography variant="h6" sx={{ wordBreak: 'break-word', flex: 1, mr: 1 }}>
                         {approval.provider_namespace}
                         {approval.provider_name ? `/${approval.provider_name}` : ''}
@@ -247,36 +274,60 @@ const ApprovalsPage: React.FC = () => {
                     </Box>
 
                     {approval.reason && (
-                      <Typography variant="body2" color="textSecondary" sx={{
-                        marginBottom: "16px"
-                      }}>
+                      <Typography
+                        variant="body2"
+                        color="textSecondary"
+                        sx={{
+                          marginBottom: '16px',
+                        }}
+                      >
                         {approval.reason}
                       </Typography>
                     )}
 
-                    <Typography variant="caption" color="textSecondary" sx={{
-                      display: "block"
-                    }}>
-                      <strong>Mirror Config ID:</strong> {approval.mirror_config_id}
+                    <Typography
+                      variant="caption"
+                      color="textSecondary"
+                      sx={{
+                        display: 'block',
+                      }}
+                    >
+                      <strong>{t('admin.approvals.cardMirrorConfigId')}</strong>{' '}
+                      {approval.mirror_config_id}
                     </Typography>
-                    <Typography variant="caption" color="textSecondary" sx={{
-                      display: "block"
-                    }}>
-                      <strong>Created:</strong> {formatDate(approval.created_at)}
+                    <Typography
+                      variant="caption"
+                      color="textSecondary"
+                      sx={{
+                        display: 'block',
+                      }}
+                    >
+                      <strong>{t('admin.approvals.cardCreated')}</strong>{' '}
+                      {formatDate(approval.created_at)}
                     </Typography>
 
                     {approval.reviewed_at && (
                       <>
-                        <Typography variant="caption" color="textSecondary" sx={{
-                          display: "block"
-                        }}>
-                          <strong>Reviewed:</strong> {formatDate(approval.reviewed_at)}
+                        <Typography
+                          variant="caption"
+                          color="textSecondary"
+                          sx={{
+                            display: 'block',
+                          }}
+                        >
+                          <strong>{t('admin.approvals.cardReviewed')}</strong>{' '}
+                          {formatDate(approval.reviewed_at)}
                         </Typography>
                         {approval.review_notes && (
-                          <Typography variant="caption" color="textSecondary" sx={{
-                            display: "block"
-                          }}>
-                            <strong>Notes:</strong> {approval.review_notes}
+                          <Typography
+                            variant="caption"
+                            color="textSecondary"
+                            sx={{
+                              display: 'block',
+                            }}
+                          >
+                            <strong>{t('admin.approvals.cardNotes')}</strong>{' '}
+                            {approval.review_notes}
                           </Typography>
                         )}
                       </>
@@ -292,7 +343,7 @@ const ApprovalsPage: React.FC = () => {
                         startIcon={<CheckCircleIcon />}
                         onClick={() => openReviewDialog(approval, 'approved')}
                       >
-                        Approve
+                        {t('admin.approvals.approve')}
                       </Button>
                       <Button
                         size="small"
@@ -301,7 +352,7 @@ const ApprovalsPage: React.FC = () => {
                         startIcon={<CancelIcon />}
                         onClick={() => openReviewDialog(approval, 'rejected')}
                       >
-                        Reject
+                        {t('admin.approvals.reject')}
                       </Button>
                     </CardActions>
                   )}
@@ -314,8 +365,9 @@ const ApprovalsPage: React.FC = () => {
                 <Card>
                   <CardContent>
                     <Typography variant="body1" color="textSecondary" align="center">
-                      No approval requests found.
-                      {statusFilter && ` Try clearing the "${statusFilter}" filter.`}
+                      {t('admin.approvals.emptyState')}
+                      {statusFilter &&
+                        t('admin.approvals.emptyFilterHint', { status: statusFilter })}
                     </Typography>
                   </CardContent>
                 </Card>
@@ -330,55 +382,57 @@ const ApprovalsPage: React.FC = () => {
             maxWidth="sm"
             fullWidth
           >
-            <DialogTitle>Create Approval Request</DialogTitle>
+            <DialogTitle>{t('admin.approvals.dialogTitleCreate')}</DialogTitle>
             <DialogContent>
               <Box sx={{ pt: 2, display: 'flex', flexDirection: 'column', gap: 2 }}>
                 <TextField
-                  label="Mirror Config ID"
+                  label={t('admin.approvals.labelMirrorConfigId')}
                   fullWidth
                   required
                   value={createForm.mirror_config_id}
                   onChange={(e) =>
                     setCreateForm({ ...createForm, mirror_config_id: e.target.value })
                   }
-                  helperText="The ID of the mirror configuration to request access for"
+                  helperText={t('admin.approvals.helpMirrorConfigId')}
                 />
                 <TextField
-                  label="Provider Namespace"
+                  label={t('admin.approvals.labelProviderNamespace')}
                   fullWidth
                   required
                   value={createForm.provider_namespace}
                   onChange={(e) =>
                     setCreateForm({ ...createForm, provider_namespace: e.target.value })
                   }
-                  helperText="e.g., hashicorp"
+                  helperText={t('admin.approvals.helpProviderNamespace')}
                 />
                 <TextField
-                  label="Provider Name"
+                  label={t('admin.approvals.labelProviderName')}
                   fullWidth
                   value={createForm.provider_name}
                   onChange={(e) => setCreateForm({ ...createForm, provider_name: e.target.value })}
-                  helperText="Optional — leave blank to request access to all providers in the namespace"
+                  helperText={t('admin.approvals.helpProviderName')}
                 />
                 <TextField
-                  label="Reason"
+                  label={t('admin.approvals.labelReason')}
                   fullWidth
                   multiline
                   rows={3}
                   value={createForm.reason}
                   onChange={(e) => setCreateForm({ ...createForm, reason: e.target.value })}
-                  helperText="Explain why access is needed"
+                  helperText={t('admin.approvals.helpReason')}
                 />
               </Box>
             </DialogContent>
             <DialogActions>
-              <Button onClick={() => setCreateDialogOpen(false)}>Cancel</Button>
+              <Button onClick={() => setCreateDialogOpen(false)}>
+                {t('admin.approvals.cancel')}
+              </Button>
               <Button
                 variant="contained"
                 onClick={handleCreate}
                 disabled={!createForm.mirror_config_id || !createForm.provider_namespace}
               >
-                Submit Request
+                {t('admin.approvals.submitRequest')}
               </Button>
             </DialogActions>
           </Dialog>
@@ -390,23 +444,25 @@ const ApprovalsPage: React.FC = () => {
             maxWidth="sm"
             fullWidth
           >
-            <DialogTitle>Review Approval Request</DialogTitle>
+            <DialogTitle>{t('admin.approvals.dialogTitleReview')}</DialogTitle>
             <DialogContent>
               {reviewingApproval && (
                 <Box sx={{ pt: 2, display: 'flex', flexDirection: 'column', gap: 2 }}>
                   <Typography variant="body2">
-                    <strong>Provider:</strong> {reviewingApproval.provider_namespace}
+                    <strong>{t('admin.approvals.reviewProvider')}</strong>{' '}
+                    {reviewingApproval.provider_namespace}
                     {reviewingApproval.provider_name ? `/${reviewingApproval.provider_name}` : ''}
                   </Typography>
                   {reviewingApproval.reason && (
                     <Typography variant="body2">
-                      <strong>Reason:</strong> {reviewingApproval.reason}
+                      <strong>{t('admin.approvals.reviewReason')}</strong>{' '}
+                      {reviewingApproval.reason}
                     </Typography>
                   )}
                   <FormControl fullWidth>
-                    <InputLabel>Decision</InputLabel>
+                    <InputLabel>{t('admin.approvals.labelDecision')}</InputLabel>
                     <Select
-                      label="Decision"
+                      label={t('admin.approvals.labelDecision')}
                       value={reviewForm.status}
                       onChange={(e) =>
                         setReviewForm({
@@ -415,25 +471,25 @@ const ApprovalsPage: React.FC = () => {
                         })
                       }
                     >
-                      <MenuItem value="approved">Approve</MenuItem>
-                      <MenuItem value="rejected">Reject</MenuItem>
+                      <MenuItem value="approved">{t('admin.approvals.approve')}</MenuItem>
+                      <MenuItem value="rejected">{t('admin.approvals.reject')}</MenuItem>
                     </Select>
                   </FormControl>
                   <TextField
-                    label="Notes"
+                    label={t('admin.approvals.labelNotes')}
                     fullWidth
                     multiline
                     rows={3}
                     value={reviewForm.notes}
                     onChange={(e) => setReviewForm({ ...reviewForm, notes: e.target.value })}
-                    helperText="Optional notes for the requester"
+                    helperText={t('admin.approvals.helpNotes')}
                   />
                 </Box>
               )}
             </DialogContent>
             <DialogActions>
               <Button onClick={() => setReviewDialogOpen(false)} disabled={reviewing}>
-                Cancel
+                {t('admin.approvals.cancel')}
               </Button>
               <Button
                 variant="contained"
@@ -442,17 +498,17 @@ const ApprovalsPage: React.FC = () => {
                 disabled={reviewing}
               >
                 {reviewing
-                  ? 'Submitting...'
+                  ? t('admin.approvals.submitting')
                   : reviewForm.status === 'approved'
-                    ? 'Approve'
-                    : 'Reject'}
+                    ? t('admin.approvals.approve')
+                    : t('admin.approvals.reject')}
               </Button>
             </DialogActions>
           </Dialog>
         </>
       )}
     </Container>
-  );
+  )
 }
 
 export default ApprovalsPage

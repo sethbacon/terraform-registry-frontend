@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import {
   Box,
   Typography,
@@ -27,6 +28,7 @@ import { useSetupWizard } from '../../../contexts/SetupWizardContext'
 
 // === OIDC sub-form ===
 const OIDCFields: React.FC = () => {
+  const { t } = useTranslation()
   const {
     oidcForm,
     setOidcForm,
@@ -42,10 +44,10 @@ const OIDCFields: React.FC = () => {
   return (
     <Stack spacing={2}>
       <FormControl fullWidth>
-        <InputLabel>Provider Type</InputLabel>
+        <InputLabel>{t('setup.oidc.labelProviderType')}</InputLabel>
         <Select
           value={oidcForm.provider_type}
-          label="Provider Type"
+          label={t('setup.oidc.labelProviderType')}
           onChange={(e) =>
             setOidcForm({
               ...oidcForm,
@@ -53,29 +55,29 @@ const OIDCFields: React.FC = () => {
             })
           }
         >
-          <MenuItem value="generic_oidc">Generic OIDC (Keycloak, Auth0, Okta, etc.)</MenuItem>
+          <MenuItem value="generic_oidc">{t('setup.oidc.menuGenericOidc')}</MenuItem>
           <MenuItem value="azuread">Azure AD / Entra ID</MenuItem>
         </Select>
       </FormControl>
       <TextField
         fullWidth
-        label="Issuer URL"
+        label={t('setup.oidc.labelIssuerUrl')}
         value={oidcForm.issuer_url}
         onChange={(e) => setOidcForm({ ...oidcForm, issuer_url: e.target.value })}
         placeholder="https://accounts.google.com"
-        helperText="The OIDC issuer URL. Must serve a .well-known/openid-configuration document."
+        helperText={t('setup.oidc.helpIssuerUrl')}
         required
       />
       <TextField
         fullWidth
-        label="Client ID"
+        label={t('setup.oidc.labelClientId')}
         value={oidcForm.client_id}
         onChange={(e) => setOidcForm({ ...oidcForm, client_id: e.target.value })}
         required
       />
       <TextField
         fullWidth
-        label="Client Secret"
+        label={t('setup.oidc.labelClientSecret')}
         value={oidcForm.client_secret}
         onChange={(e) => setOidcForm({ ...oidcForm, client_secret: e.target.value })}
         type={showClientSecret ? 'text' : 'password'}
@@ -87,31 +89,31 @@ const OIDCFields: React.FC = () => {
                 <IconButton
                   onClick={() => setShowClientSecret(!showClientSecret)}
                   edge="end"
-                  aria-label="Toggle password visibility"
+                  aria-label={t('setup.oidc.ariaTogglePassword')}
                 >
                   {showClientSecret ? <VisibilityOffIcon /> : <VisibilityIcon />}
                 </IconButton>
               </InputAdornment>
             ),
-          }
+          },
         }}
       />
       <TextField
         fullWidth
-        label="Redirect URL"
+        label={t('setup.oidc.labelRedirectUrl')}
         value={oidcForm.redirect_url}
         onChange={(e) => setOidcForm({ ...oidcForm, redirect_url: e.target.value })}
-        helperText="The OAuth callback URL. Typically: https://your-registry/api/v1/auth/callback"
+        helperText={t('setup.oidc.helpRedirectUrl')}
         required
       />
       <TextField
         fullWidth
-        label="Scopes"
+        label={t('setup.oidc.labelScopes')}
         value={(oidcForm.scopes || []).join(' ')}
         onChange={(e) =>
           setOidcForm({ ...oidcForm, scopes: e.target.value.split(/\s+/).filter(Boolean) })
         }
-        helperText="Space-separated OIDC scopes. Must include 'openid'. Defaults: openid email profile"
+        helperText={t('setup.oidc.helpScopes')}
       />
       {oidcTestResult && (
         <Alert severity={oidcTestResult.success ? 'success' : 'error'} sx={{ mt: 1 }}>
@@ -127,7 +129,7 @@ const OIDCFields: React.FC = () => {
           }
         >
           {oidcTesting ? <CircularProgress size={20} sx={{ mr: 1 }} /> : null}
-          Test Connection
+          {t('setup.oidc.testConnection')}
         </Button>
         <Button
           variant="contained"
@@ -141,20 +143,21 @@ const OIDCFields: React.FC = () => {
           }
         >
           {oidcSaving ? <CircularProgress size={20} sx={{ mr: 1 }} /> : null}
-          Save OIDC Configuration
+          {t('setup.oidc.saveOidc')}
         </Button>
       </Stack>
       {oidcSaved && (
         <Alert severity="success" sx={{ mt: 1 }}>
-          OIDC provider configured successfully.
+          {t('setup.oidc.oidcConfigured')}
         </Alert>
       )}
     </Stack>
-  );
+  )
 }
 
 // === LDAP sub-form ===
 const LDAPFields: React.FC = () => {
+  const { t } = useTranslation()
   const {
     ldapForm,
     setLdapForm,
@@ -169,15 +172,18 @@ const LDAPFields: React.FC = () => {
 
   return (
     <Stack spacing={2}>
-      <Typography variant="subtitle2" sx={{
-        color: "text.secondary"
-      }}>
-        Connection
+      <Typography
+        variant="subtitle2"
+        sx={{
+          color: 'text.secondary',
+        }}
+      >
+        {t('setup.oidc.sectionConnection')}
       </Typography>
       <Stack direction="row" spacing={2}>
         <TextField
           sx={{ flex: 3 }}
-          label="LDAP Host"
+          label={t('setup.oidc.labelLdapHost')}
           value={ldapForm.host}
           onChange={(e) => setLdapForm({ ...ldapForm, host: e.target.value })}
           placeholder="ldap.example.com"
@@ -185,11 +191,11 @@ const LDAPFields: React.FC = () => {
         />
         <TextField
           sx={{ flex: 1 }}
-          label="Port"
+          label={t('setup.oidc.labelPort')}
           type="number"
           value={ldapForm.port || ''}
           onChange={(e) => setLdapForm({ ...ldapForm, port: parseInt(e.target.value) || 0 })}
-          helperText="389 or 636"
+          helperText={t('setup.oidc.helpPort')}
         />
       </Stack>
       <Stack direction="row" spacing={2}>
@@ -200,7 +206,7 @@ const LDAPFields: React.FC = () => {
               onChange={(e) => setLdapForm({ ...ldapForm, use_tls: e.target.checked })}
             />
           }
-          label="Use TLS (LDAPS)"
+          label={t('setup.oidc.labelUseTls')}
         />
         <FormControlLabel
           control={
@@ -209,7 +215,7 @@ const LDAPFields: React.FC = () => {
               onChange={(e) => setLdapForm({ ...ldapForm, start_tls: e.target.checked })}
             />
           }
-          label="StartTLS"
+          label={t('setup.oidc.labelStartTls')}
         />
         <FormControlLabel
           control={
@@ -218,18 +224,21 @@ const LDAPFields: React.FC = () => {
               onChange={(e) => setLdapForm({ ...ldapForm, insecure_skip_verify: e.target.checked })}
             />
           }
-          label="Skip TLS Verify"
+          label={t('setup.oidc.labelSkipTlsVerify')}
         />
       </Stack>
       <Divider />
-      <Typography variant="subtitle2" sx={{
-        color: "text.secondary"
-      }}>
-        Service Account
+      <Typography
+        variant="subtitle2"
+        sx={{
+          color: 'text.secondary',
+        }}
+      >
+        {t('setup.oidc.sectionServiceAccount')}
       </Typography>
       <TextField
         fullWidth
-        label="Bind DN"
+        label={t('setup.oidc.labelBindDn')}
         value={ldapForm.bind_dn}
         onChange={(e) => setLdapForm({ ...ldapForm, bind_dn: e.target.value })}
         placeholder="cn=svc-registry,ou=service-accounts,dc=example,dc=com"
@@ -237,7 +246,7 @@ const LDAPFields: React.FC = () => {
       />
       <TextField
         fullWidth
-        label="Bind Password"
+        label={t('setup.oidc.labelBindPassword')}
         value={ldapForm.bind_password}
         onChange={(e) => setLdapForm({ ...ldapForm, bind_password: e.target.value })}
         type={showBindPassword ? 'text' : 'password'}
@@ -249,24 +258,27 @@ const LDAPFields: React.FC = () => {
                 <IconButton
                   onClick={() => setShowBindPassword(!showBindPassword)}
                   edge="end"
-                  aria-label="Toggle password visibility"
+                  aria-label={t('setup.oidc.ariaTogglePassword')}
                 >
                   {showBindPassword ? <VisibilityOffIcon /> : <VisibilityIcon />}
                 </IconButton>
               </InputAdornment>
             ),
-          }
+          },
         }}
       />
       <Divider />
-      <Typography variant="subtitle2" sx={{
-        color: "text.secondary"
-      }}>
-        User Search
+      <Typography
+        variant="subtitle2"
+        sx={{
+          color: 'text.secondary',
+        }}
+      >
+        {t('setup.oidc.sectionUserSearch')}
       </Typography>
       <TextField
         fullWidth
-        label="Base DN"
+        label={t('setup.oidc.labelBaseDn')}
         value={ldapForm.base_dn}
         onChange={(e) => setLdapForm({ ...ldapForm, base_dn: e.target.value })}
         placeholder="dc=example,dc=com"
@@ -274,38 +286,41 @@ const LDAPFields: React.FC = () => {
       />
       <TextField
         fullWidth
-        label="User Filter"
+        label={t('setup.oidc.labelUserFilter')}
         value={ldapForm.user_filter}
         onChange={(e) => setLdapForm({ ...ldapForm, user_filter: e.target.value })}
         placeholder="(sAMAccountName=%s)"
-        helperText="LDAP search filter. %s is replaced with the username."
+        helperText={t('setup.oidc.helpUserFilter')}
         required
       />
       <Stack direction="row" spacing={2}>
         <TextField
           sx={{ flex: 1 }}
-          label="Email Attribute"
+          label={t('setup.oidc.labelEmailAttr')}
           value={ldapForm.user_attr_email}
           onChange={(e) => setLdapForm({ ...ldapForm, user_attr_email: e.target.value })}
           placeholder="mail"
         />
         <TextField
           sx={{ flex: 1 }}
-          label="Name Attribute"
+          label={t('setup.oidc.labelNameAttr')}
           value={ldapForm.user_attr_name}
           onChange={(e) => setLdapForm({ ...ldapForm, user_attr_name: e.target.value })}
           placeholder="displayName"
         />
       </Stack>
       <Divider />
-      <Typography variant="subtitle2" sx={{
-        color: "text.secondary"
-      }}>
-        Group Lookup (Optional)
+      <Typography
+        variant="subtitle2"
+        sx={{
+          color: 'text.secondary',
+        }}
+      >
+        {t('setup.oidc.sectionGroupLookup')}
       </Typography>
       <TextField
         fullWidth
-        label="Group Base DN"
+        label={t('setup.oidc.labelGroupBaseDn')}
         value={ldapForm.group_base_dn}
         onChange={(e) => setLdapForm({ ...ldapForm, group_base_dn: e.target.value })}
         placeholder="ou=groups,dc=example,dc=com"
@@ -313,13 +328,13 @@ const LDAPFields: React.FC = () => {
       <Stack direction="row" spacing={2}>
         <TextField
           sx={{ flex: 1 }}
-          label="Group Filter"
+          label={t('setup.oidc.labelGroupFilter')}
           value={ldapForm.group_filter}
           onChange={(e) => setLdapForm({ ...ldapForm, group_filter: e.target.value })}
         />
         <TextField
           sx={{ flex: 1 }}
-          label="Group Member Attr"
+          label={t('setup.oidc.labelGroupMemberAttr')}
           value={ldapForm.group_member_attr}
           onChange={(e) => setLdapForm({ ...ldapForm, group_member_attr: e.target.value })}
           placeholder="member"
@@ -344,7 +359,7 @@ const LDAPFields: React.FC = () => {
           }
         >
           {ldapTesting ? <CircularProgress size={20} sx={{ mr: 1 }} /> : null}
-          Test Connection
+          {t('setup.oidc.testConnection')}
         </Button>
         <Button
           variant="contained"
@@ -359,20 +374,21 @@ const LDAPFields: React.FC = () => {
           }
         >
           {ldapSaving ? <CircularProgress size={20} sx={{ mr: 1 }} /> : null}
-          Save LDAP Configuration
+          {t('setup.oidc.saveLdap')}
         </Button>
       </Stack>
       {ldapSaved && (
         <Alert severity="success" sx={{ mt: 1 }}>
-          LDAP configuration saved successfully.
+          {t('setup.oidc.ldapConfigured')}
         </Alert>
       )}
     </Stack>
-  );
+  )
 }
 
 // === Main step component ===
 const OIDCStep: React.FC = () => {
+  const { t } = useTranslation()
   const { authMethod, setAuthMethod, oidcSaved, ldapSaved, goToStep } = useSetupWizard()
   const saved = authMethod === 'oidc' ? oidcSaved : ldapSaved
 
@@ -381,16 +397,17 @@ const OIDCStep: React.FC = () => {
       <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
         <SecurityIcon sx={{ mr: 1, color: 'primary.main' }} />
         <Typography variant="h6" component="h2">
-          Identity Provider
+          {t('setup.oidc.title')}
         </Typography>
       </Box>
       <Typography
         variant="body2"
         sx={{
-          color: "text.secondary",
-          mb: 3
-        }}>
-        Choose how users will authenticate to the registry. Select one method below.
+          color: 'text.secondary',
+          mb: 3,
+        }}
+      >
+        {t('setup.oidc.subtitle')}
       </Typography>
       <ToggleButtonGroup
         value={authMethod}
@@ -403,6 +420,7 @@ const OIDCStep: React.FC = () => {
       >
         <ToggleButton value="oidc">OpenID Connect (OIDC)</ToggleButton>
         <ToggleButton value="ldap">LDAP / Active Directory</ToggleButton>
+        {/* Protocol/product names left untranslated intentionally */}
       </ToggleButtonGroup>
       <Collapse in={authMethod === 'oidc'}>
         <OIDCFields />
@@ -411,21 +429,25 @@ const OIDCStep: React.FC = () => {
         <LDAPFields />
       </Collapse>
       <Box sx={{ mt: 3 }}>
-        <Stack direction="row" spacing={2} sx={{
-          justifyContent: "space-between"
-        }}>
+        <Stack
+          direction="row"
+          spacing={2}
+          sx={{
+            justifyContent: 'space-between',
+          }}
+        >
           <Button variant="text" onClick={() => goToStep(0)}>
-            ← Back
+            {t('setup.oidc.back')}
           </Button>
           {saved && (
             <Button variant="contained" color="primary" onClick={() => goToStep(2)}>
-              Next: Configure Storage →
+              {t('setup.oidc.next')}
             </Button>
           )}
         </Stack>
       </Box>
     </Box>
-  );
+  )
 }
 
 export default OIDCStep

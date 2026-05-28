@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { useSearchParams } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import {
   Autocomplete,
@@ -79,6 +80,7 @@ import { queryKeys } from '../../services/queryKeys'
 // Version sub-row with expandable platform list
 // ---------------------------------------------------------------------------
 const VersionPlatformRow: React.FC<{ version: MirroredProviderVersion }> = ({ version }) => {
+  const { t } = useTranslation()
   const [open, setOpen] = useState(false)
   const platforms: MirroredProviderPlatform[] = version.platforms ?? []
 
@@ -88,7 +90,7 @@ const VersionPlatformRow: React.FC<{ version: MirroredProviderVersion }> = ({ ve
         <TableCell sx={{ pl: 1 }}>
           <IconButton
             size="small"
-            aria-label="Toggle platforms"
+            aria-label={t('admin.mirrors.ariaTogglePlatforms')}
             onClick={() => setOpen((p) => !p)}
             disabled={platforms.length === 0}
           >
@@ -96,9 +98,12 @@ const VersionPlatformRow: React.FC<{ version: MirroredProviderVersion }> = ({ ve
           </IconButton>
         </TableCell>
         <TableCell>
-          <Typography variant="caption" sx={{
-            fontFamily: "monospace"
-          }}>
+          <Typography
+            variant="caption"
+            sx={{
+              fontFamily: 'monospace',
+            }}
+          >
             {version.upstream_version}
           </Typography>
         </TableCell>
@@ -128,7 +133,7 @@ const VersionPlatformRow: React.FC<{ version: MirroredProviderVersion }> = ({ ve
                   <TableRow>
                     <TableCell>OS</TableCell>
                     <TableCell>Arch</TableCell>
-                    <TableCell>Filename</TableCell>
+                    <TableCell>{t('admin.mirrors.thFilename')}</TableCell>
                     <TableCell>SHA256</TableCell>
                   </TableRow>
                 </TableHead>
@@ -141,16 +146,20 @@ const VersionPlatformRow: React.FC<{ version: MirroredProviderVersion }> = ({ ve
                         <Typography
                           variant="caption"
                           sx={{
-                            fontFamily: "monospace",
-                            wordBreak: 'break-all'
-                          }}>
+                            fontFamily: 'monospace',
+                            wordBreak: 'break-all',
+                          }}
+                        >
                           {p.filename}
                         </Typography>
                       </TableCell>
                       <TableCell>
-                        <Typography variant="caption" sx={{
-                          fontFamily: "monospace"
-                        }}>
+                        <Typography
+                          variant="caption"
+                          sx={{
+                            fontFamily: 'monospace',
+                          }}
+                        >
                           {p.shasum ? p.shasum.slice(0, 12) + '…' : '—'}
                         </Typography>
                       </TableCell>
@@ -163,13 +172,14 @@ const VersionPlatformRow: React.FC<{ version: MirroredProviderVersion }> = ({ ve
         </TableCell>
       </TableRow>
     </>
-  );
+  )
 }
 
 // ---------------------------------------------------------------------------
 // Expandable provider row — shows synced versions when expanded
 // ---------------------------------------------------------------------------
 const ProviderRow: React.FC<{ provider: MirroredProvider }> = ({ provider }) => {
+  const { t } = useTranslation()
   const [open, setOpen] = useState(false)
   const versions: MirroredProviderVersion[] = provider.versions ?? []
 
@@ -179,7 +189,7 @@ const ProviderRow: React.FC<{ provider: MirroredProvider }> = ({ provider }) => 
         <TableCell>
           <IconButton
             size="small"
-            aria-label="Toggle versions"
+            aria-label={t('admin.mirrors.ariaToggleVersions')}
             onClick={() => setOpen((p) => !p)}
             disabled={versions.length === 0}
           >
@@ -189,9 +199,12 @@ const ProviderRow: React.FC<{ provider: MirroredProvider }> = ({ provider }) => 
         <TableCell>{provider.upstream_namespace}</TableCell>
         <TableCell>{provider.upstream_type}</TableCell>
         <TableCell>
-          <Typography variant="body2" sx={{
-            fontFamily: "monospace"
-          }}>
+          <Typography
+            variant="body2"
+            sx={{
+              fontFamily: 'monospace',
+            }}
+          >
             {provider.last_sync_version ?? '—'}
           </Typography>
         </TableCell>
@@ -201,7 +214,11 @@ const ProviderRow: React.FC<{ provider: MirroredProvider }> = ({ provider }) => 
         </TableCell>
         <TableCell>
           <Chip
-            label={provider.sync_enabled ? 'enabled' : 'disabled'}
+            label={
+              provider.sync_enabled
+                ? t('admin.mirrors.chipSyncEnabled')
+                : t('admin.mirrors.chipSyncDisabled')
+            }
             size="small"
             color={provider.sync_enabled ? 'success' : 'default'}
           />
@@ -212,21 +229,24 @@ const ProviderRow: React.FC<{ provider: MirroredProvider }> = ({ provider }) => 
           <Collapse in={open} unmountOnExit>
             <Box sx={{ mx: 2, mb: 2 }}>
               {versions.length === 0 ? (
-                <Typography variant="caption" sx={{
-                  color: "text.secondary"
-                }}>
-                  No versions synced.
+                <Typography
+                  variant="caption"
+                  sx={{
+                    color: 'text.secondary',
+                  }}
+                >
+                  {t('admin.mirrors.noVersionsSynced')}
                 </Typography>
               ) : (
                 <Table size="small">
                   <TableHead>
                     <TableRow>
                       <TableCell width={40} />
-                      <TableCell>Version</TableCell>
-                      <TableCell>Synced At</TableCell>
-                      <TableCell>Shasum</TableCell>
+                      <TableCell>{t('admin.mirrors.thVersion')}</TableCell>
+                      <TableCell>{t('admin.mirrors.thSyncedAt')}</TableCell>
+                      <TableCell>{t('admin.mirrors.thShasum')}</TableCell>
                       <TableCell>GPG</TableCell>
-                      <TableCell>Platforms</TableCell>
+                      <TableCell>{t('admin.mirrors.thPlatforms')}</TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>
@@ -241,10 +261,11 @@ const ProviderRow: React.FC<{ provider: MirroredProvider }> = ({ provider }) => 
         </TableCell>
       </TableRow>
     </>
-  );
+  )
 }
 
 const MirrorsPage: React.FC = () => {
+  const { t } = useTranslation()
   const queryClient = useQueryClient()
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
@@ -299,7 +320,7 @@ const MirrorsPage: React.FC = () => {
   })
 
   if (queryError && !error) {
-    setError(getErrorMessage(queryError, 'Failed to load mirrors'))
+    setError(getErrorMessage(queryError, t('admin.mirrors.errLoadMirrors')))
   }
 
   // Auto-open the Add Mirror dialog when navigated here with ?action=add
@@ -314,12 +335,12 @@ const MirrorsPage: React.FC = () => {
     onSuccess: () => {
       setCreateDialogOpen(false)
       resetForm()
-      setSuccess('Mirror configuration created successfully')
+      setSuccess(t('admin.mirrors.msgCreated'))
       setError(null)
       queryClient.invalidateQueries({ queryKey: queryKeys.mirrors._def })
     },
     onError: (err: unknown) => {
-      setError(getErrorMessage(err, 'Failed to create mirror'))
+      setError(getErrorMessage(err, t('admin.mirrors.errCreate')))
     },
   })
 
@@ -329,12 +350,12 @@ const MirrorsPage: React.FC = () => {
     onSuccess: () => {
       setEditingMirror(null)
       resetForm()
-      setSuccess('Mirror configuration updated successfully')
+      setSuccess(t('admin.mirrors.msgUpdated'))
       setError(null)
       queryClient.invalidateQueries({ queryKey: queryKeys.mirrors._def })
     },
     onError: (err: unknown) => {
-      setError(getErrorMessage(err, 'Failed to update mirror'))
+      setError(getErrorMessage(err, t('admin.mirrors.errUpdate')))
     },
   })
 
@@ -343,12 +364,12 @@ const MirrorsPage: React.FC = () => {
     onSuccess: () => {
       setDeleteConfirmOpen(false)
       setMirrorToDelete(null)
-      setSuccess('Mirror configuration deleted successfully')
+      setSuccess(t('admin.mirrors.msgDeleted'))
       setError(null)
       queryClient.invalidateQueries({ queryKey: queryKeys.mirrors._def })
     },
     onError: (err: unknown) => {
-      setError(getErrorMessage(err, 'Failed to delete mirror'))
+      setError(getErrorMessage(err, t('admin.mirrors.errDelete')))
     },
   })
 
@@ -403,10 +424,10 @@ const MirrorsPage: React.FC = () => {
     try {
       setError(null)
       await api.triggerMirrorSync(mirror.id)
-      setSuccess(`Sync triggered for "${mirror.name}"`)
+      setSuccess(t('admin.mirrors.syncTriggered', { name: mirror.name }))
       queryClient.invalidateQueries({ queryKey: queryKeys.mirrors._def })
     } catch (err: unknown) {
-      setError(getErrorMessage(err, 'Failed to trigger sync'))
+      setError(getErrorMessage(err, t('admin.mirrors.errTriggerSync')))
     }
   }
 
@@ -473,15 +494,36 @@ const MirrorsPage: React.FC = () => {
 
   const getStatusChip = (mirror: MirrorConfiguration) => {
     if (!mirror.last_sync_status) {
-      return <Chip label="Never synced" size="small" color="default" />
+      return <Chip label={t('admin.mirrors.statusNeverSynced')} size="small" color="default" />
     }
     switch (mirror.last_sync_status) {
       case 'success':
-        return <Chip label="Success" size="small" color="success" icon={<CheckCircleIcon />} />
+        return (
+          <Chip
+            label={t('admin.mirrors.statusSuccess')}
+            size="small"
+            color="success"
+            icon={<CheckCircleIcon />}
+          />
+        )
       case 'failed':
-        return <Chip label="Failed" size="small" color="error" icon={<ErrorIcon />} />
+        return (
+          <Chip
+            label={t('admin.mirrors.statusFailed')}
+            size="small"
+            color="error"
+            icon={<ErrorIcon />}
+          />
+        )
       case 'in_progress':
-        return <Chip label="Syncing..." size="small" color="info" icon={<SyncIcon />} />
+        return (
+          <Chip
+            label={t('admin.mirrors.statusSyncing')}
+            size="small"
+            color="info"
+            icon={<SyncIcon />}
+          />
+        )
       default:
         return <Chip label={mirror.last_sync_status} size="small" />
     }
@@ -506,11 +548,14 @@ const MirrorsPage: React.FC = () => {
             sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}
           >
             <Box>
-              <Typography variant="h4">Mirroring — Provider Config</Typography>
-              <Typography variant="body2" sx={{
-                color: "text.secondary"
-              }}>
-                Configure upstream registry mirroring for providers
+              <Typography variant="h4">{t('admin.mirrors.pageTitle')}</Typography>
+              <Typography
+                variant="body2"
+                sx={{
+                  color: 'text.secondary',
+                }}
+              >
+                {t('admin.mirrors.pageSubtitle')}
               </Typography>
             </Box>
             <Box sx={{ display: 'flex', gap: 1 }}>
@@ -521,7 +566,7 @@ const MirrorsPage: React.FC = () => {
                   loadMirrors()
                 }}
               >
-                Refresh
+                {t('admin.mirrors.refresh')}
               </Button>
               <Button
                 variant="contained"
@@ -531,7 +576,7 @@ const MirrorsPage: React.FC = () => {
                   setCreateDialogOpen(true)
                 }}
               >
-                Add Mirror
+                {t('admin.mirrors.addMirror')}
               </Button>
             </Box>
           </Box>
@@ -562,14 +607,17 @@ const MirrorsPage: React.FC = () => {
                       <CardContent>
                         <Box
                           sx={{
-                            display: "flex",
-                            alignItems: "center",
-                            mb: 2
-                          }}>
+                            display: 'flex',
+                            alignItems: 'center',
+                            mb: 2,
+                          }}
+                        >
                           <CloudDownloadIcon sx={{ mr: 2, color: 'primary.main' }} />
-                          <Box sx={{
-                            flexGrow: 1
-                          }}>
+                          <Box
+                            sx={{
+                              flexGrow: 1,
+                            }}
+                          >
                             <Typography variant="h6">{mirror.name}</Typography>
                             <Typography variant="body2" color="textSecondary" noWrap>
                               {mirror.upstream_registry_url}
@@ -577,13 +625,18 @@ const MirrorsPage: React.FC = () => {
                           </Box>
                           <Box
                             sx={{
-                              display: "flex",
-                              flexDirection: "column",
-                              alignItems: "flex-end",
-                              gap: 0.5
-                            }}>
+                              display: 'flex',
+                              flexDirection: 'column',
+                              alignItems: 'flex-end',
+                              gap: 0.5,
+                            }}
+                          >
                             <Chip
-                              label={mirror.enabled ? 'Enabled' : 'Disabled'}
+                              label={
+                                mirror.enabled
+                                  ? t('admin.mirrors.enabled')
+                                  : t('admin.mirrors.disabled')
+                              }
                               color={mirror.enabled ? 'success' : 'default'}
                               size="small"
                             />
@@ -592,53 +645,66 @@ const MirrorsPage: React.FC = () => {
                         </Box>
 
                         {mirror.description && (
-                          <Typography variant="body2" color="textSecondary" sx={{
-                            marginBottom: "16px"
-                          }}>
+                          <Typography
+                            variant="body2"
+                            color="textSecondary"
+                            sx={{
+                              marginBottom: '16px',
+                            }}
+                          >
                             {mirror.description}
                           </Typography>
                         )}
 
                         <Box
                           sx={{
-                            display: "flex",
+                            display: 'flex',
                             gap: 1,
-                            flexWrap: "wrap",
-                            mb: 1
-                          }}>
+                            flexWrap: 'wrap',
+                            mb: 1,
+                          }}
+                        >
                           {parsed.namespaceFilters.length > 0 && (
-                            <Tooltip title="Namespace filters">
+                            <Tooltip title={t('admin.mirrors.tooltipNamespaceFilters')}>
                               <Chip
                                 size="small"
-                                label={`Namespaces: ${parsed.namespaceFilters.join(', ')}`}
+                                label={t('admin.mirrors.chipNamespaces', {
+                                  list: parsed.namespaceFilters.join(', '),
+                                })}
                                 variant="outlined"
                               />
                             </Tooltip>
                           )}
                           {parsed.providerFilters.length > 0 && (
-                            <Tooltip title="Provider filters">
+                            <Tooltip title={t('admin.mirrors.tooltipProviderFilters')}>
                               <Chip
                                 size="small"
-                                label={`Providers: ${parsed.providerFilters.join(', ')}`}
+                                label={t('admin.mirrors.chipProviders', {
+                                  list: parsed.providerFilters.join(', '),
+                                })}
                                 variant="outlined"
                               />
                             </Tooltip>
                           )}
                           {mirror.version_filter && (
-                            <Tooltip title="Version filter">
+                            <Tooltip title={t('admin.mirrors.tooltipVersionFilter')}>
                               <Chip
                                 size="small"
-                                label={`Versions: ${mirror.version_filter}`}
+                                label={t('admin.mirrors.chipVersions', {
+                                  value: mirror.version_filter,
+                                })}
                                 variant="outlined"
                                 color="primary"
                               />
                             </Tooltip>
                           )}
                           {parsed.platformFilters.length > 0 && (
-                            <Tooltip title="Platform filters">
+                            <Tooltip title={t('admin.mirrors.tooltipPlatformFilters')}>
                               <Chip
                                 size="small"
-                                label={`Platforms: ${parsed.platformFilters.join(', ')}`}
+                                label={t('admin.mirrors.chipPlatforms', {
+                                  list: parsed.platformFilters.join(', '),
+                                })}
                                 variant="outlined"
                                 color="secondary"
                               />
@@ -646,16 +712,26 @@ const MirrorsPage: React.FC = () => {
                           )}
                         </Box>
 
-                        <Typography variant="caption" color="textSecondary" sx={{
-                          display: "block"
-                        }}>
+                        <Typography
+                          variant="caption"
+                          color="textSecondary"
+                          sx={{
+                            display: 'block',
+                          }}
+                        >
                           <ScheduleIcon sx={{ fontSize: 14, verticalAlign: 'middle', mr: 0.5 }} />
-                          Sync interval: {mirror.sync_interval_hours} hours
+                          {t('admin.mirrors.syncInterval', { hours: mirror.sync_interval_hours })}
                         </Typography>
-                        <Typography variant="caption" color="textSecondary" sx={{
-                          display: "block"
-                        }}>
-                          Last sync: {formatDate(mirror.last_sync_at, 'Never')}
+                        <Typography
+                          variant="caption"
+                          color="textSecondary"
+                          sx={{
+                            display: 'block',
+                          }}
+                        >
+                          {t('admin.mirrors.lastSync', {
+                            date: formatDate(mirror.last_sync_at, t('admin.mirrors.never')),
+                          })}
                         </Typography>
 
                         {mirror.last_sync_error && (
@@ -669,15 +745,15 @@ const MirrorsPage: React.FC = () => {
                         sx={{ justifyContent: 'space-between', flexWrap: 'wrap', gap: 0.5 }}
                       >
                         <Box>
-                          <Tooltip title="View status and current sync">
+                          <Tooltip title={t('admin.mirrors.tooltipViewStatus')}>
                             <Button size="small" onClick={() => handleViewStatus(mirror)}>
-                              View Details
+                              {t('admin.mirrors.viewDetails')}
                             </Button>
                           </Tooltip>
-                          <Tooltip title="View sync history">
+                          <Tooltip title={t('admin.mirrors.tooltipViewHistory')}>
                             <IconButton
                               size="small"
-                              aria-label="View sync history"
+                              aria-label={t('admin.mirrors.ariaViewHistory')}
                               onClick={() => handleViewHistory(mirror)}
                             >
                               <HistoryIcon fontSize="small" />
@@ -685,11 +761,11 @@ const MirrorsPage: React.FC = () => {
                           </Tooltip>
                         </Box>
                         <Box>
-                          <Tooltip title="Trigger sync">
+                          <Tooltip title={t('admin.mirrors.tooltipTriggerSync')}>
                             <span>
                               <IconButton
                                 size="small"
-                                aria-label="Sync mirror"
+                                aria-label={t('admin.mirrors.ariaSyncMirror')}
                                 color="primary"
                                 onClick={() => handleTriggerSync(mirror)}
                                 disabled={mirror.last_sync_status === 'in_progress'}
@@ -698,19 +774,19 @@ const MirrorsPage: React.FC = () => {
                               </IconButton>
                             </span>
                           </Tooltip>
-                          <Tooltip title="Edit">
+                          <Tooltip title={t('admin.mirrors.tooltipEdit')}>
                             <IconButton
                               size="small"
-                              aria-label="Edit mirror"
+                              aria-label={t('admin.mirrors.ariaEditMirror')}
                               onClick={() => openEditDialog(mirror)}
                             >
                               <EditIcon fontSize="small" />
                             </IconButton>
                           </Tooltip>
-                          <Tooltip title="Delete">
+                          <Tooltip title={t('admin.mirrors.tooltipDelete')}>
                             <IconButton
                               size="small"
-                              aria-label="Delete mirror"
+                              aria-label={t('admin.mirrors.ariaDeleteMirror')}
                               color="error"
                               onClick={() => {
                                 setMirrorToDelete(mirror)
@@ -724,7 +800,7 @@ const MirrorsPage: React.FC = () => {
                       </CardActions>
                     </Card>
                   </Grid>
-                );
+                )
               })}
 
             {mirrors.length === 0 && !loading && (
@@ -732,8 +808,7 @@ const MirrorsPage: React.FC = () => {
                 <Card>
                   <CardContent>
                     <Typography variant="body1" color="textSecondary" align="center">
-                      No mirror configurations found. Add one to start mirroring providers from
-                      upstream registries.
+                      {t('admin.mirrors.emptyState')}
                     </Typography>
                   </CardContent>
                 </Card>
@@ -768,20 +843,24 @@ const MirrorsPage: React.FC = () => {
             maxWidth="sm"
             fullWidth
           >
-            <DialogTitle>{editingMirror ? 'Edit Mirror' : 'Add Provider Mirror'}</DialogTitle>
+            <DialogTitle>
+              {editingMirror
+                ? t('admin.mirrors.dialogTitleEdit')
+                : t('admin.mirrors.dialogTitleAdd')}
+            </DialogTitle>
             <DialogContent>
               <Box sx={{ pt: 2, display: 'flex', flexDirection: 'column', gap: 2 }}>
                 <TextField
-                  label="Name"
+                  label={t('admin.mirrors.labelName')}
                   fullWidth
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   required
-                  helperText="A unique name for this mirror configuration"
+                  helperText={t('admin.mirrors.helpName')}
                 />
 
                 <TextField
-                  label="Description"
+                  label={t('admin.mirrors.labelDescription')}
                   fullWidth
                   multiline
                   rows={2}
@@ -790,39 +869,39 @@ const MirrorsPage: React.FC = () => {
                 />
 
                 <TextField
-                  label="Upstream Registry URL"
+                  label={t('admin.mirrors.labelUpstreamUrl')}
                   fullWidth
                   value={formData.upstream_registry_url}
                   onChange={(e) =>
                     setFormData({ ...formData, upstream_registry_url: e.target.value })
                   }
                   required
-                  helperText="e.g., https://registry.terraform.io"
+                  helperText={t('admin.mirrors.helpUpstreamUrl')}
                 />
 
                 <TextField
-                  label="Namespace Filter"
+                  label={t('admin.mirrors.labelNamespaceFilter')}
                   fullWidth
                   value={namespaceFilterInput}
                   onChange={(e) => setNamespaceFilterInput(e.target.value)}
-                  helperText="Comma-separated list of namespaces to mirror (e.g., hashicorp, aws)"
+                  helperText={t('admin.mirrors.helpNamespaceFilter')}
                 />
 
                 <TextField
-                  label="Provider Filter"
+                  label={t('admin.mirrors.labelProviderFilter')}
                   fullWidth
                   value={providerFilterInput}
                   onChange={(e) => setProviderFilterInput(e.target.value)}
-                  helperText="Comma-separated list of provider names to mirror (e.g., aws, google, azurerm)"
+                  helperText={t('admin.mirrors.helpProviderFilter')}
                 />
 
                 <TextField
-                  label="Version Filter"
+                  label={t('admin.mirrors.labelVersionFilter')}
                   fullWidth
                   value={versionFilterInput}
                   onChange={(e) => setVersionFilterInput(e.target.value)}
-                  helperText="Filter versions to sync: '3.' (prefix), 'latest:5' (latest N), '>=3.0.0' (semver), or comma-separated list"
-                  placeholder="e.g., 3. or latest:5 or >=3.0.0"
+                  helperText={t('admin.mirrors.helpVersionFilter')}
+                  placeholder={t('admin.mirrors.placeholderVersionFilter')}
                 />
 
                 <Autocomplete
@@ -833,25 +912,24 @@ const MirrorsPage: React.FC = () => {
                   renderInput={(params) => (
                     <TextField
                       {...params}
-                      label="Platform Filter"
-                      placeholder={platformFilterInput.length === 0 ? 'All platforms' : ''}
-                      helperText="Select platforms to sync. Leave empty to sync all platforms."
+                      label={t('admin.mirrors.labelPlatformFilter')}
+                      placeholder={
+                        platformFilterInput.length === 0
+                          ? t('admin.mirrors.placeholderAllPlatforms')
+                          : ''
+                      }
+                      helperText={t('admin.mirrors.helpPlatformFilter')}
                     />
                   )}
                   renderValue={(value, getItemProps) =>
                     value.map((option, index) => (
-                      <Chip
-                        label={option}
-                        size="small"
-                        {...getItemProps({ index })}
-                        key={option}
-                      />
+                      <Chip label={option} size="small" {...getItemProps({ index })} key={option} />
                     ))
                   }
                 />
 
                 <TextField
-                  label="Sync Interval (hours)"
+                  label={t('admin.mirrors.labelSyncInterval')}
                   type="number"
                   fullWidth
                   value={formData.sync_interval_hours}
@@ -861,9 +939,9 @@ const MirrorsPage: React.FC = () => {
                       sync_interval_hours: parseInt(e.target.value) || 24,
                     })
                   }
-                  helperText="How often to check for updates"
+                  helperText={t('admin.mirrors.helpSyncInterval')}
                   slotProps={{
-                    htmlInput: { min: 1 }
+                    htmlInput: { min: 1 },
                   }}
                 />
 
@@ -874,7 +952,7 @@ const MirrorsPage: React.FC = () => {
                       onChange={(e) => setFormData({ ...formData, enabled: e.target.checked })}
                     />
                   }
-                  label="Enabled"
+                  label={t('admin.mirrors.enabled')}
                 />
               </Box>
             </DialogContent>
@@ -886,31 +964,32 @@ const MirrorsPage: React.FC = () => {
                   resetForm()
                 }}
               >
-                Cancel
+                {t('admin.mirrors.cancel')}
               </Button>
               <Button
                 variant="contained"
                 onClick={editingMirror ? handleUpdate : handleCreate}
                 disabled={!formData.name || !formData.upstream_registry_url}
               >
-                {editingMirror ? 'Update' : 'Create'}
+                {editingMirror ? t('admin.mirrors.update') : t('admin.mirrors.create')}
               </Button>
             </DialogActions>
           </Dialog>
 
           {/* Delete Confirmation Dialog */}
           <Dialog open={deleteConfirmOpen} onClose={() => setDeleteConfirmOpen(false)}>
-            <DialogTitle>Confirm Delete</DialogTitle>
+            <DialogTitle>{t('admin.mirrors.confirmDeleteTitle')}</DialogTitle>
             <DialogContent>
               <Typography>
-                Are you sure you want to delete the mirror "{mirrorToDelete?.name}"? This action
-                cannot be undone. Mirrored providers will remain in your registry.
+                {t('admin.mirrors.confirmDeleteText', { name: mirrorToDelete?.name })}
               </Typography>
             </DialogContent>
             <DialogActions>
-              <Button onClick={() => setDeleteConfirmOpen(false)}>Cancel</Button>
+              <Button onClick={() => setDeleteConfirmOpen(false)}>
+                {t('admin.mirrors.cancel')}
+              </Button>
               <Button variant="contained" color="error" onClick={handleDelete}>
-                Delete
+                {t('admin.mirrors.delete')}
               </Button>
             </DialogActions>
           </Dialog>
@@ -925,31 +1004,34 @@ const MirrorsPage: React.FC = () => {
             maxWidth="lg"
             fullWidth
           >
-            <DialogTitle>Sync History — {historyMirrorName}</DialogTitle>
+            <DialogTitle>
+              {t('admin.mirrors.syncHistoryTitle', { name: historyMirrorName })}
+            </DialogTitle>
             <DialogContent>
               {historyLoading ? (
                 <Box
                   sx={{
-                    display: "flex",
-                    justifyContent: "center",
-                    p: 4
-                  }}>
+                    display: 'flex',
+                    justifyContent: 'center',
+                    p: 4,
+                  }}
+                >
                   <CircularProgress />
                 </Box>
               ) : mirrorHistory.length === 0 ? (
                 <Typography color="textSecondary" sx={{ py: 2 }}>
-                  No sync history available.
+                  {t('admin.mirrors.noSyncHistory')}
                 </Typography>
               ) : (
                 <TableContainer component={Paper} variant="outlined">
                   <Table size="small">
                     <TableHead>
                       <TableRow>
-                        <TableCell>Started</TableCell>
-                        <TableCell>Completed</TableCell>
-                        <TableCell>Status</TableCell>
-                        <TableCell align="right">Providers Synced</TableCell>
-                        <TableCell align="right">Failures</TableCell>
+                        <TableCell>{t('admin.mirrors.thStarted')}</TableCell>
+                        <TableCell>{t('admin.mirrors.thCompleted')}</TableCell>
+                        <TableCell>{t('admin.mirrors.thStatus')}</TableCell>
+                        <TableCell align="right">{t('admin.mirrors.thProvidersSynced')}</TableCell>
+                        <TableCell align="right">{t('admin.mirrors.thFailures')}</TableCell>
                       </TableRow>
                     </TableHead>
                     <TableBody>
@@ -1006,7 +1088,7 @@ const MirrorsPage: React.FC = () => {
                   setMirrorHistory([])
                 }}
               >
-                Close
+                {t('admin.mirrors.close')}
               </Button>
             </DialogActions>
           </Dialog>
@@ -1021,31 +1103,34 @@ const MirrorsPage: React.FC = () => {
             maxWidth="lg"
             fullWidth
           >
-            <DialogTitle>Providers — {providersDialogName}</DialogTitle>
+            <DialogTitle>
+              {t('admin.mirrors.providersTitle', { name: providersDialogName })}
+            </DialogTitle>
             <DialogContent>
               {providersLoading ? (
                 <Box
                   sx={{
-                    display: "flex",
-                    justifyContent: "center",
-                    py: 4
-                  }}>
+                    display: 'flex',
+                    justifyContent: 'center',
+                    py: 4,
+                  }}
+                >
                   <CircularProgress />
                 </Box>
               ) : mirrorProviders.length === 0 ? (
-                <Alert severity="info">No providers have been synced yet.</Alert>
+                <Alert severity="info">{t('admin.mirrors.noProvidersSynced')}</Alert>
               ) : (
                 <TableContainer component={Paper} variant="outlined">
                   <Table size="small">
                     <TableHead>
                       <TableRow>
                         <TableCell width={48} />
-                        <TableCell>Namespace</TableCell>
-                        <TableCell>Type</TableCell>
-                        <TableCell>Latest Version</TableCell>
-                        <TableCell>Versions</TableCell>
-                        <TableCell>Last Synced</TableCell>
-                        <TableCell>Enabled</TableCell>
+                        <TableCell>{t('admin.mirrors.thNamespace')}</TableCell>
+                        <TableCell>{t('admin.mirrors.thType')}</TableCell>
+                        <TableCell>{t('admin.mirrors.thLatestVersion')}</TableCell>
+                        <TableCell>{t('admin.mirrors.thVersions')}</TableCell>
+                        <TableCell>{t('admin.mirrors.thLastSynced')}</TableCell>
+                        <TableCell>{t('admin.mirrors.enabled')}</TableCell>
                       </TableRow>
                     </TableHead>
                     <TableBody>
@@ -1064,14 +1149,14 @@ const MirrorsPage: React.FC = () => {
                   setMirrorProviders([])
                 }}
               >
-                Close
+                {t('admin.mirrors.close')}
               </Button>
             </DialogActions>
           </Dialog>
         </>
       )}
     </Container>
-  );
+  )
 }
 
 export default MirrorsPage

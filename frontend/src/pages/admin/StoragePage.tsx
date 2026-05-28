@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query'
+import { useTranslation } from 'react-i18next'
 import {
   Box,
   Button,
@@ -61,6 +62,7 @@ import { queryKeys } from '../../services/queryKeys'
 import StorageMigrationWizard from '../../components/StorageMigrationWizard'
 
 const StoragePage: React.FC = () => {
+  const { t } = useTranslation()
   const queryClient = useQueryClient()
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
@@ -77,7 +79,11 @@ const StoragePage: React.FC = () => {
     local_serve_directly: true,
   })
 
-  const steps = ['Select Backend', 'Configure Settings', 'Review & Save']
+  const steps = [
+    t('admin.storage.stepSelectBackend'),
+    t('admin.storage.stepConfigureSettings'),
+    t('admin.storage.stepReviewSave'),
+  ]
 
   const {
     data: storageData,
@@ -110,19 +116,19 @@ const StoragePage: React.FC = () => {
   const activateMutation = useMutation({
     mutationFn: (id: string) => api.activateStorageConfig(id),
     onSuccess: (data) => {
-      setSuccess(data.message || 'Configuration activated successfully')
+      setSuccess(data.message || t('admin.storage.msgActivated'))
       queryClient.invalidateQueries({ queryKey: queryKeys.storageConfigs._def })
     },
-    onError: (err) => setError(getErrorMessage(err, 'Failed to activate configuration')),
+    onError: (err) => setError(getErrorMessage(err, t('admin.storage.errActivate'))),
   })
 
   const deleteMutation = useMutation({
     mutationFn: (id: string) => api.deleteStorageConfig(id),
     onSuccess: () => {
-      setSuccess('Configuration deleted successfully')
+      setSuccess(t('admin.storage.msgDeleted'))
       queryClient.invalidateQueries({ queryKey: queryKeys.storageConfigs._def })
     },
-    onError: (err) => setError(getErrorMessage(err, 'Failed to delete configuration')),
+    onError: (err) => setError(getErrorMessage(err, t('admin.storage.errDelete'))),
   })
 
   const testMutation = useMutation({
@@ -151,16 +157,16 @@ const StoragePage: React.FC = () => {
     },
     onSuccess: (result) => {
       if (result.success) {
-        setSuccess('Storage configuration test passed')
+        setSuccess(t('admin.storage.msgTestPassed'))
       } else {
-        setError(result.message || 'Storage configuration test failed')
+        setError(result.message || t('admin.storage.errTestFailed'))
       }
     },
-    onError: (err) => setError(getErrorMessage(err, 'Configuration test failed')),
+    onError: (err) => setError(getErrorMessage(err, t('admin.storage.errConfigTest'))),
   })
 
   if (queryError && !error) {
-    setError(getErrorMessage(queryError, 'Failed to load storage configuration'))
+    setError(getErrorMessage(queryError, t('admin.storage.errLoad')))
   }
 
   const handleBackendChange = (type: StorageBackendType) => {
@@ -196,10 +202,10 @@ const StoragePage: React.FC = () => {
       setError(null)
       const result = await api.testStorageConfig(formData)
       if (result.success) {
-        setSuccess('Storage configuration is valid!')
+        setSuccess(t('admin.storage.msgValid'))
       }
     } catch (err: unknown) {
-      setError(getErrorMessage(err, 'Configuration test failed'))
+      setError(getErrorMessage(err, t('admin.storage.errConfigTest')))
     } finally {
       setTesting(false)
     }
@@ -210,12 +216,12 @@ const StoragePage: React.FC = () => {
       setSaving(true)
       setError(null)
       await api.createStorageConfig(formData)
-      setSuccess('Storage configuration saved successfully!')
+      setSuccess(t('admin.storage.msgSaved'))
       queryClient.invalidateQueries({ queryKey: queryKeys.storageConfigs._def })
       setActiveStep(0)
       setShowAddWizard(false)
     } catch (err: unknown) {
-      setError(getErrorMessage(err, 'Failed to save configuration'))
+      setError(getErrorMessage(err, t('admin.storage.errSave')))
     } finally {
       setSaving(false)
     }
@@ -265,10 +271,11 @@ const StoragePage: React.FC = () => {
             <CardContent>
               <Box
                 sx={{
-                  display: "flex",
-                  alignItems: "center",
-                  mb: 1
-                }}>
+                  display: 'flex',
+                  alignItems: 'center',
+                  mb: 1,
+                }}
+              >
                 {getBackendIcon(type)}
                 <Typography variant="h6" sx={{ ml: 1 }}>
                   {getBackendLabel(type)}
@@ -278,14 +285,10 @@ const StoragePage: React.FC = () => {
                 )}
               </Box>
               <Typography variant="body2" color="textSecondary">
-                {type === 'local' &&
-                  'Store files on the local file system. Best for development and small deployments.'}
-                {type === 'azure' &&
-                  'Use Azure Blob Storage for scalable cloud storage with Azure integration.'}
-                {type === 's3' &&
-                  'Use Amazon S3 or any S3-compatible storage (MinIO, DigitalOcean Spaces, etc.).'}
-                {type === 'gcs' &&
-                  'Use Google Cloud Storage for GCP-native storage with workload identity support.'}
+                {type === 'local' && t('admin.storage.descLocal')}
+                {type === 'azure' && t('admin.storage.descAzure')}
+                {type === 's3' && t('admin.storage.descS3')}
+                {type === 'gcs' && t('admin.storage.descGcs')}
               </Typography>
             </CardContent>
           </Card>
@@ -297,11 +300,11 @@ const StoragePage: React.FC = () => {
   const renderLocalSettings = () => (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
       <TextField
-        label="Base Path"
+        label={t('admin.storage.labelBasePath')}
         fullWidth
         value={formData.local_base_path || ''}
         onChange={(e) => setFormData({ ...formData, local_base_path: e.target.value })}
-        helperText="Directory where files will be stored (relative to working directory or absolute path)"
+        helperText={t('admin.storage.helpBasePath')}
         required
       />
       <FormControlLabel
@@ -311,7 +314,7 @@ const StoragePage: React.FC = () => {
             onChange={(e) => setFormData({ ...formData, local_serve_directly: e.target.checked })}
           />
         }
-        label="Serve files directly (recommended for local development)"
+        label={t('admin.storage.labelServeDirectly')}
       />
     </Box>
   )
@@ -319,36 +322,36 @@ const StoragePage: React.FC = () => {
   const renderAzureSettings = () => (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
       <TextField
-        label="Account Name"
+        label={t('admin.storage.labelAccountName')}
         fullWidth
         value={formData.azure_account_name || ''}
         onChange={(e) => setFormData({ ...formData, azure_account_name: e.target.value })}
         required
-        helperText="Your Azure Storage account name (visible in Azure Portal → Storage Accounts)"
+        helperText={t('admin.storage.helpAccountName')}
       />
       <TextField
-        label="Account Key"
+        label={t('admin.storage.labelAccountKey')}
         type="password"
         fullWidth
         value={formData.azure_account_key || ''}
         onChange={(e) => setFormData({ ...formData, azure_account_key: e.target.value })}
         required
-        helperText="Primary or secondary access key (Azure Portal → Storage Account → Access keys). Keep this secret."
+        helperText={t('admin.storage.helpAccountKey')}
       />
       <TextField
-        label="Container Name"
+        label={t('admin.storage.labelContainerName')}
         fullWidth
         value={formData.azure_container_name || ''}
         onChange={(e) => setFormData({ ...formData, azure_container_name: e.target.value })}
         required
-        helperText="Blob container name. The container must exist before activating this backend."
+        helperText={t('admin.storage.helpContainerName')}
       />
       <TextField
-        label="CDN URL (optional)"
+        label={t('admin.storage.labelCdnUrl')}
         fullWidth
         value={formData.azure_cdn_url || ''}
         onChange={(e) => setFormData({ ...formData, azure_cdn_url: e.target.value })}
-        helperText="If using Azure CDN, provide the CDN endpoint URL"
+        helperText={t('admin.storage.helpCdnUrl')}
       />
     </Box>
   )
@@ -356,65 +359,61 @@ const StoragePage: React.FC = () => {
   const renderS3Settings = () => (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
       <TextField
-        label="Bucket"
+        label={t('admin.storage.labelBucket')}
         fullWidth
         value={formData.s3_bucket || ''}
         onChange={(e) => setFormData({ ...formData, s3_bucket: e.target.value })}
         required
-        helperText="S3 bucket name. The bucket must already exist in the specified region."
+        helperText={t('admin.storage.helpS3Bucket')}
       />
       <TextField
-        label="Region"
+        label={t('admin.storage.labelRegion')}
         fullWidth
         value={formData.s3_region || ''}
         onChange={(e) => setFormData({ ...formData, s3_region: e.target.value })}
         required
-        helperText="AWS region where the bucket is located (e.g., us-east-1, eu-west-1)"
+        helperText={t('admin.storage.helpS3Region')}
       />
       <TextField
-        label="Endpoint (optional)"
+        label={t('admin.storage.labelEndpointOptional')}
         fullWidth
         value={formData.s3_endpoint || ''}
         onChange={(e) => setFormData({ ...formData, s3_endpoint: e.target.value })}
-        helperText="For S3-compatible services (MinIO, DigitalOcean Spaces, etc.)"
+        helperText={t('admin.storage.helpS3Endpoint')}
       />
       <FormControl fullWidth>
-        <InputLabel>Authentication Method</InputLabel>
+        <InputLabel>{t('admin.storage.labelAuthMethod')}</InputLabel>
         <Select
           value={formData.s3_auth_method || 'default'}
-          label="Authentication Method"
+          label={t('admin.storage.labelAuthMethod')}
           onChange={(e) => setFormData({ ...formData, s3_auth_method: e.target.value })}
         >
-          <MenuItem value="default">Default Credential Chain</MenuItem>
-          <MenuItem value="static">Access Key / Secret Key</MenuItem>
-          <MenuItem value="oidc">OIDC / Web Identity</MenuItem>
-          <MenuItem value="assume_role">AssumeRole</MenuItem>
+          <MenuItem value="default">{t('admin.storage.s3AuthDefault')}</MenuItem>
+          <MenuItem value="static">{t('admin.storage.s3AuthStatic')}</MenuItem>
+          <MenuItem value="oidc">{t('admin.storage.s3AuthOidc')}</MenuItem>
+          <MenuItem value="assume_role">{t('admin.storage.s3AuthAssumeRole')}</MenuItem>
         </Select>
-        <FormHelperText>
-          default = AWS credential chain (recommended for EC2/EKS with IAM roles) · static =
-          explicit key/secret (local dev or non-AWS S3-compatible) · oidc = web identity token
-          (GitHub Actions, EKS pod identity) · assume_role = cross-account access
-        </FormHelperText>
+        <FormHelperText>{t('admin.storage.helpS3Auth')}</FormHelperText>
       </FormControl>
 
       {formData.s3_auth_method === 'static' && (
         <>
           <TextField
-            label="Access Key ID"
+            label={t('admin.storage.labelAccessKeyId')}
             fullWidth
             value={formData.s3_access_key_id || ''}
             onChange={(e) => setFormData({ ...formData, s3_access_key_id: e.target.value })}
             required
-            helperText="IAM user access key ID. Use secrets management rather than committing credentials."
+            helperText={t('admin.storage.helpAccessKeyId')}
           />
           <TextField
-            label="Secret Access Key"
+            label={t('admin.storage.labelSecretAccessKey')}
             type="password"
             fullWidth
             value={formData.s3_secret_access_key || ''}
             onChange={(e) => setFormData({ ...formData, s3_secret_access_key: e.target.value })}
             required
-            helperText="IAM user secret access key. Use secrets management rather than committing credentials."
+            helperText={t('admin.storage.helpSecretAccessKey')}
           />
         </>
       )}
@@ -422,15 +421,15 @@ const StoragePage: React.FC = () => {
       {(formData.s3_auth_method === 'oidc' || formData.s3_auth_method === 'assume_role') && (
         <>
           <TextField
-            label="Role ARN"
+            label={t('admin.storage.labelRoleArn')}
             fullWidth
             value={formData.s3_role_arn || ''}
             onChange={(e) => setFormData({ ...formData, s3_role_arn: e.target.value })}
             required
-            helperText="IAM Role ARN to assume (e.g., arn:aws:iam::123456789012:role/TerraformRegistry)"
+            helperText={t('admin.storage.helpRoleArn')}
           />
           <TextField
-            label="Role Session Name (optional)"
+            label={t('admin.storage.labelRoleSessionName')}
             fullWidth
             value={formData.s3_role_session_name || ''}
             onChange={(e) => setFormData({ ...formData, s3_role_session_name: e.target.value })}
@@ -440,21 +439,21 @@ const StoragePage: React.FC = () => {
 
       {formData.s3_auth_method === 'oidc' && (
         <TextField
-          label="Web Identity Token File"
+          label={t('admin.storage.labelWebIdentityTokenFile')}
           fullWidth
           value={formData.s3_web_identity_token_file || ''}
           onChange={(e) => setFormData({ ...formData, s3_web_identity_token_file: e.target.value })}
-          helperText="Path to the web identity token file (e.g., for Kubernetes service account tokens)"
+          helperText={t('admin.storage.helpWebIdentityTokenFile')}
         />
       )}
 
       {formData.s3_auth_method === 'assume_role' && (
         <TextField
-          label="External ID (optional)"
+          label={t('admin.storage.labelExternalId')}
           fullWidth
           value={formData.s3_external_id || ''}
           onChange={(e) => setFormData({ ...formData, s3_external_id: e.target.value })}
-          helperText="Optional external ID defined in the role's trust policy, used for cross-account access"
+          helperText={t('admin.storage.helpExternalId')}
         />
       )}
     </Box>
@@ -463,63 +462,62 @@ const StoragePage: React.FC = () => {
   const renderGCSSettings = () => (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
       <TextField
-        label="Bucket"
+        label={t('admin.storage.labelBucket')}
         fullWidth
         value={formData.gcs_bucket || ''}
         onChange={(e) => setFormData({ ...formData, gcs_bucket: e.target.value })}
         required
       />
       <TextField
-        label="Project ID (optional)"
+        label={t('admin.storage.labelProjectIdOptional')}
         fullWidth
         value={formData.gcs_project_id || ''}
         onChange={(e) => setFormData({ ...formData, gcs_project_id: e.target.value })}
-        helperText="Required if creating a new bucket"
+        helperText={t('admin.storage.helpGcsProjectId')}
       />
       <FormControl fullWidth>
-        <InputLabel>Authentication Method</InputLabel>
+        <InputLabel>{t('admin.storage.labelAuthMethod')}</InputLabel>
         <Select
           value={formData.gcs_auth_method || 'default'}
-          label="Authentication Method"
+          label={t('admin.storage.labelAuthMethod')}
           onChange={(e) => setFormData({ ...formData, gcs_auth_method: e.target.value })}
         >
-          <MenuItem value="default">Application Default Credentials</MenuItem>
-          <MenuItem value="service_account">Service Account</MenuItem>
-          <MenuItem value="workload_identity">Workload Identity</MenuItem>
+          <MenuItem value="default">{t('admin.storage.gcsAuthDefault')}</MenuItem>
+          <MenuItem value="service_account">{t('admin.storage.gcsAuthServiceAccount')}</MenuItem>
+          <MenuItem value="workload_identity">
+            {t('admin.storage.gcsAuthWorkloadIdentity')}
+          </MenuItem>
         </Select>
-        <FormHelperText>
-          default = ADC / gcloud auth (recommended for GKE) · service_account = JSON key file ·
-          workload_identity = keyless federation (GitHub Actions, GKE Workload Identity)
-        </FormHelperText>
+        <FormHelperText>{t('admin.storage.helpGcsAuth')}</FormHelperText>
       </FormControl>
 
       {formData.gcs_auth_method === 'service_account' && (
         <>
           <TextField
-            label="Credentials File Path (optional)"
+            label={t('admin.storage.labelCredentialsFile')}
             fullWidth
             value={formData.gcs_credentials_file || ''}
             onChange={(e) => setFormData({ ...formData, gcs_credentials_file: e.target.value })}
-            helperText="Path to service account JSON file"
+            helperText={t('admin.storage.helpCredentialsFile')}
           />
           <TextField
-            label="Credentials JSON (optional)"
+            label={t('admin.storage.labelCredentialsJson')}
             fullWidth
             multiline
             rows={4}
             value={formData.gcs_credentials_json || ''}
             onChange={(e) => setFormData({ ...formData, gcs_credentials_json: e.target.value })}
-            helperText="Paste service account JSON directly (alternative to file path)"
+            helperText={t('admin.storage.helpCredentialsJson')}
           />
         </>
       )}
 
       <TextField
-        label="Endpoint (optional)"
+        label={t('admin.storage.labelEndpointOptional')}
         fullWidth
         value={formData.gcs_endpoint || ''}
         onChange={(e) => setFormData({ ...formData, gcs_endpoint: e.target.value })}
-        helperText="For GCS emulators or compatible services"
+        helperText={t('admin.storage.helpGcsEndpoint')}
       />
     </Box>
   )
@@ -542,13 +540,13 @@ const StoragePage: React.FC = () => {
   const renderReview = () => (
     <Box>
       <Typography variant="h6" gutterBottom>
-        Configuration Summary
+        {t('admin.storage.configSummary')}
       </Typography>
       <Paper variant="outlined" sx={{ p: 2, mb: 2 }}>
         <Grid container spacing={2}>
           <Grid size={4}>
             <Typography variant="body2" color="textSecondary">
-              Backend Type
+              {t('admin.storage.backendType')}
             </Typography>
           </Grid>
           <Grid size={8}>
@@ -559,7 +557,7 @@ const StoragePage: React.FC = () => {
             <>
               <Grid size={4}>
                 <Typography variant="body2" color="textSecondary">
-                  Base Path
+                  {t('admin.storage.labelBasePath')}
                 </Typography>
               </Grid>
               <Grid size={8}>
@@ -572,7 +570,7 @@ const StoragePage: React.FC = () => {
             <>
               <Grid size={4}>
                 <Typography variant="body2" color="textSecondary">
-                  Account Name
+                  {t('admin.storage.labelAccountName')}
                 </Typography>
               </Grid>
               <Grid size={8}>
@@ -580,7 +578,7 @@ const StoragePage: React.FC = () => {
               </Grid>
               <Grid size={4}>
                 <Typography variant="body2" color="textSecondary">
-                  Container
+                  {t('admin.storage.container')}
                 </Typography>
               </Grid>
               <Grid size={8}>
@@ -593,7 +591,7 @@ const StoragePage: React.FC = () => {
             <>
               <Grid size={4}>
                 <Typography variant="body2" color="textSecondary">
-                  Bucket
+                  {t('admin.storage.labelBucket')}
                 </Typography>
               </Grid>
               <Grid size={8}>
@@ -601,7 +599,7 @@ const StoragePage: React.FC = () => {
               </Grid>
               <Grid size={4}>
                 <Typography variant="body2" color="textSecondary">
-                  Region
+                  {t('admin.storage.labelRegion')}
                 </Typography>
               </Grid>
               <Grid size={8}>
@@ -609,7 +607,7 @@ const StoragePage: React.FC = () => {
               </Grid>
               <Grid size={4}>
                 <Typography variant="body2" color="textSecondary">
-                  Auth Method
+                  {t('admin.storage.authMethod')}
                 </Typography>
               </Grid>
               <Grid size={8}>
@@ -622,7 +620,7 @@ const StoragePage: React.FC = () => {
             <>
               <Grid size={4}>
                 <Typography variant="body2" color="textSecondary">
-                  Bucket
+                  {t('admin.storage.labelBucket')}
                 </Typography>
               </Grid>
               <Grid size={8}>
@@ -630,7 +628,7 @@ const StoragePage: React.FC = () => {
               </Grid>
               <Grid size={4}>
                 <Typography variant="body2" color="textSecondary">
-                  Auth Method
+                  {t('admin.storage.authMethod')}
                 </Typography>
               </Grid>
               <Grid size={8}>
@@ -643,16 +641,17 @@ const StoragePage: React.FC = () => {
 
       <Box
         sx={{
-          display: "flex",
-          gap: 2
-        }}>
+          display: 'flex',
+          gap: 2,
+        }}
+      >
         <Button
           variant="outlined"
           onClick={handleTestConfig}
           disabled={testing}
           startIcon={testing ? <CircularProgress size={20} /> : <RefreshIcon />}
         >
-          Test Configuration
+          {t('admin.storage.testConfiguration')}
         </Button>
       </Box>
     </Box>
@@ -661,17 +660,16 @@ const StoragePage: React.FC = () => {
   const renderSetupWizard = () => (
     <Container maxWidth="lg" sx={{ py: 4 }}>
       <Typography variant="h4" gutterBottom>
-        {showAddWizard ? 'Add Storage Configuration' : 'Storage Configuration'}
+        {showAddWizard ? t('admin.storage.titleAdd') : t('admin.storage.titleConfigure')}
       </Typography>
       <Typography
         variant="body1"
         sx={{
-          color: "text.secondary",
-          marginBottom: "16px"
-        }}>
-        {showAddWizard
-          ? 'Add a second storage configuration. Once added, you can migrate data from the active backend to this one.'
-          : 'Configure where the registry will store module and provider files. This is required before you can upload artifacts.'}
+          color: 'text.secondary',
+          marginBottom: '16px',
+        }}
+      >
+        {showAddWizard ? t('admin.storage.subtitleAdd') : t('admin.storage.subtitleConfigure')}
       </Typography>
 
       <Stepper activeStep={activeStep} sx={{ mb: 4 }}>
@@ -702,12 +700,13 @@ const StoragePage: React.FC = () => {
 
       <Box
         sx={{
-          display: "flex",
-          justifyContent: "space-between"
-        }}>
+          display: 'flex',
+          justifyContent: 'space-between',
+        }}
+      >
         <Box sx={{ display: 'flex', gap: 1 }}>
           <Button disabled={activeStep === 0} onClick={() => setActiveStep((prev) => prev - 1)}>
-            Back
+            {t('admin.storage.back')}
           </Button>
           {showAddWizard && (
             <Button
@@ -716,7 +715,7 @@ const StoragePage: React.FC = () => {
                 setActiveStep(0)
               }}
             >
-              Cancel
+              {t('admin.storage.cancel')}
             </Button>
           )}
         </Box>
@@ -728,11 +727,11 @@ const StoragePage: React.FC = () => {
               disabled={saving}
               startIcon={saving ? <CircularProgress size={20} /> : <CheckCircleIcon />}
             >
-              Save Configuration
+              {t('admin.storage.saveConfiguration')}
             </Button>
           ) : (
             <Button variant="contained" onClick={() => setActiveStep((prev) => prev + 1)}>
-              Next
+              {t('admin.storage.next')}
             </Button>
           )}
         </Box>
@@ -744,7 +743,7 @@ const StoragePage: React.FC = () => {
     <Container maxWidth="lg" sx={{ py: 4 }}>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
         <Box>
-          <Typography variant="h4">Storage Settings</Typography>
+          <Typography variant="h4">{t('admin.storage.storageSettings')}</Typography>
         </Box>
         <Box sx={{ display: 'flex', gap: 1 }}>
           {configs.length >= 2 ? (
@@ -753,7 +752,7 @@ const StoragePage: React.FC = () => {
               startIcon={<SyncIcon />}
               onClick={() => setMigrationWizardOpen(true)}
             >
-              Migrate Data
+              {t('admin.storage.migrateData')}
             </Button>
           ) : (
             <Button
@@ -764,7 +763,7 @@ const StoragePage: React.FC = () => {
                 setShowAddWizard(true)
               }}
             >
-              Add Configuration
+              {t('admin.storage.addConfiguration')}
             </Button>
           )}
           <Button
@@ -774,7 +773,7 @@ const StoragePage: React.FC = () => {
               queryClient.invalidateQueries({ queryKey: queryKeys.storageConfigs._def })
             }
           >
-            Refresh
+            {t('admin.storage.refresh')}
           </Button>
         </Box>
       </Box>
@@ -794,20 +793,20 @@ const StoragePage: React.FC = () => {
       <Alert severity="info" sx={{ mb: 3 }}>
         <Box
           sx={{
-            display: "flex",
-            alignItems: "center"
-          }}>
+            display: 'flex',
+            alignItems: 'center',
+          }}
+        >
           <InfoIcon sx={{ mr: 1 }} />
-          Storage has been configured. Changing storage backends after initial setup may result in
-          data loss. Create a new configuration and activate it only after migrating existing data.
+          {t('admin.storage.infoConfigured')}
         </Box>
       </Alert>
 
       {configs.length === 1 && (
         <Alert severity="info" sx={{ mb: 3 }} icon={<SyncIcon />}>
-          To migrate data to a different storage backend, click <strong>Add Configuration</strong>{' '}
-          above to configure a second backend. A migration option will appear once a second
-          configuration exists.
+          {t('admin.storage.infoMigrateHintBefore')}
+          <strong>{t('admin.storage.addConfiguration')}</strong>
+          {t('admin.storage.infoMigrateHintAfter')}
         </Alert>
       )}
 
@@ -818,16 +817,19 @@ const StoragePage: React.FC = () => {
               <CardContent>
                 <Box
                   sx={{
-                    display: "flex",
-                    alignItems: "center",
-                    mb: 2
-                  }}>
+                    display: 'flex',
+                    alignItems: 'center',
+                    mb: 2,
+                  }}
+                >
                   {getBackendIcon(config.backend_type)}
                   <Typography variant="h6" sx={{ ml: 1, flexGrow: 1 }}>
                     {getBackendLabel(config.backend_type)}
                   </Typography>
                   <Chip
-                    label={config.is_active ? 'Active' : 'Inactive'}
+                    label={
+                      config.is_active ? t('admin.storage.active') : t('admin.storage.inactive')
+                    }
                     color={config.is_active ? 'success' : 'default'}
                     size="small"
                   />
@@ -837,17 +839,17 @@ const StoragePage: React.FC = () => {
 
                 {config.backend_type === 'local' && (
                   <Typography variant="body2" color="textSecondary">
-                    Path: {config.local_base_path}
+                    {t('admin.storage.cardPath', { path: config.local_base_path })}
                   </Typography>
                 )}
 
                 {config.backend_type === 'azure' && (
                   <>
                     <Typography variant="body2" color="textSecondary">
-                      Account: {config.azure_account_name}
+                      {t('admin.storage.cardAccount', { account: config.azure_account_name })}
                     </Typography>
                     <Typography variant="body2" color="textSecondary">
-                      Container: {config.azure_container_name}
+                      {t('admin.storage.cardContainer', { container: config.azure_container_name })}
                     </Typography>
                   </>
                 )}
@@ -855,13 +857,13 @@ const StoragePage: React.FC = () => {
                 {config.backend_type === 's3' && (
                   <>
                     <Typography variant="body2" color="textSecondary">
-                      Bucket: {config.s3_bucket}
+                      {t('admin.storage.cardBucket', { bucket: config.s3_bucket })}
                     </Typography>
                     <Typography variant="body2" color="textSecondary">
-                      Region: {config.s3_region}
+                      {t('admin.storage.cardRegion', { region: config.s3_region })}
                     </Typography>
                     <Typography variant="body2" color="textSecondary">
-                      Auth: {config.s3_auth_method || 'default'}
+                      {t('admin.storage.cardAuth', { auth: config.s3_auth_method || 'default' })}
                     </Typography>
                   </>
                 )}
@@ -869,10 +871,10 @@ const StoragePage: React.FC = () => {
                 {config.backend_type === 'gcs' && (
                   <>
                     <Typography variant="body2" color="textSecondary">
-                      Bucket: {config.gcs_bucket}
+                      {t('admin.storage.cardBucket', { bucket: config.gcs_bucket })}
                     </Typography>
                     <Typography variant="body2" color="textSecondary">
-                      Auth: {config.gcs_auth_method || 'default'}
+                      {t('admin.storage.cardAuth', { auth: config.gcs_auth_method || 'default' })}
                     </Typography>
                   </>
                 )}
@@ -881,52 +883,57 @@ const StoragePage: React.FC = () => {
                   variant="caption"
                   color="textSecondary"
                   sx={{
-                    display: "block",
-                    mt: 2
-                  }}>
-                  Updated: {new Date(config.updated_at).toLocaleString()}
+                    display: 'block',
+                    mt: 2,
+                  }}
+                >
+                  {t('admin.storage.cardUpdated', {
+                    date: new Date(config.updated_at).toLocaleString(),
+                  })}
                 </Typography>
               </CardContent>
               <CardActions sx={{ justifyContent: 'flex-end', px: 2, pb: 2 }}>
-                <Tooltip title="Test connection">
+                <Tooltip title={t('admin.storage.tooltipTestConnection')}>
                   <IconButton
                     size="small"
                     onClick={() => testMutation.mutate(config)}
                     disabled={testMutation.isPending}
-                    aria-label={`Test ${getBackendLabel(config.backend_type)}`}
+                    aria-label={t('admin.storage.ariaTest', {
+                      backend: getBackendLabel(config.backend_type),
+                    })}
                   >
                     <PlayArrowIcon fontSize="small" />
                   </IconButton>
                 </Tooltip>
                 {!config.is_active && (
-                  <Tooltip title="Activate">
+                  <Tooltip title={t('admin.storage.tooltipActivate')}>
                     <IconButton
                       size="small"
                       color="primary"
                       onClick={() => activateMutation.mutate(config.id)}
                       disabled={activateMutation.isPending}
-                      aria-label={`Activate ${getBackendLabel(config.backend_type)}`}
+                      aria-label={t('admin.storage.ariaActivate', {
+                        backend: getBackendLabel(config.backend_type),
+                      })}
                     >
                       <CheckCircleIcon fontSize="small" />
                     </IconButton>
                   </Tooltip>
                 )}
                 {!config.is_active && (
-                  <Tooltip title="Delete">
+                  <Tooltip title={t('admin.storage.tooltipDelete')}>
                     <IconButton
                       size="small"
                       color="error"
                       onClick={() => {
-                        if (
-                          window.confirm(
-                            'Are you sure you want to delete this storage configuration?',
-                          )
-                        ) {
+                        if (window.confirm(t('admin.storage.confirmDelete'))) {
                           deleteMutation.mutate(config.id)
                         }
                       }}
                       disabled={deleteMutation.isPending}
-                      aria-label={`Delete ${getBackendLabel(config.backend_type)}`}
+                      aria-label={t('admin.storage.ariaDelete', {
+                        backend: getBackendLabel(config.backend_type),
+                      })}
                     >
                       <DeleteIcon fontSize="small" />
                     </IconButton>
@@ -944,12 +951,13 @@ const StoragePage: React.FC = () => {
           <AccordionSummary expandIcon={<ExpandMoreIcon />}>
             <Box
               sx={{
-                display: "flex",
-                alignItems: "center",
-                gap: 1
-              }}>
+                display: 'flex',
+                alignItems: 'center',
+                gap: 1,
+              }}
+            >
               <HistoryIcon />
-              <Typography variant="h6">Migration History</Typography>
+              <Typography variant="h6">{t('admin.storage.migrationHistory')}</Typography>
             </Box>
           </AccordionSummary>
           <AccordionDetails>
@@ -957,13 +965,13 @@ const StoragePage: React.FC = () => {
               <Table size="small">
                 <TableHead>
                   <TableRow>
-                    <TableCell>Status</TableCell>
-                    <TableCell>Source</TableCell>
-                    <TableCell>Target</TableCell>
-                    <TableCell align="right">Migrated</TableCell>
-                    <TableCell align="right">Failed</TableCell>
-                    <TableCell>Started</TableCell>
-                    <TableCell>Completed</TableCell>
+                    <TableCell>{t('admin.storage.thStatus')}</TableCell>
+                    <TableCell>{t('admin.storage.thSource')}</TableCell>
+                    <TableCell>{t('admin.storage.thTarget')}</TableCell>
+                    <TableCell align="right">{t('admin.storage.thMigrated')}</TableCell>
+                    <TableCell align="right">{t('admin.storage.thFailed')}</TableCell>
+                    <TableCell>{t('admin.storage.thStarted')}</TableCell>
+                    <TableCell>{t('admin.storage.thCompleted')}</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
