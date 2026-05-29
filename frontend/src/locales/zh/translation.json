@@ -142,6 +142,11 @@
     "protocolSupport": "注册表协议支持",
     "protocolDesc": "完全兼容 Terraform Registry Protocol v1 — 无需任何插件或代理，即可在 Terraform CLI 和提供程序配置中直接使用此注册表。",
     "viewApiDocs": "查看 API 文档",
+    "searchScope": "搜索范围",
+    "apiChipModule": "模块注册表 API",
+    "apiChipProvider": "服务提供商注册表 API",
+    "apiChipDiscovery": "服务发现",
+    "apiChipAuth": "身份验证",
     "setupRequired": "需要进行设置",
     "featureSetupRequired": "所需功能配置",
     "setupRequiredDesc": "该注册表尚未配置。请完成设置向导，以配置身份验证、存储以及初始管理员帐户。",
@@ -953,6 +958,7 @@
       "update": "更新",
       "ariaTogglePlatforms": "切换平台",
       "ariaToggleVersions": "切换版本",
+      "thArch": "拱门",
       "thFilename": "文件名",
       "thVersion": "版本",
       "thSyncedAt": "同步于",
@@ -1049,6 +1055,7 @@
       "chipDeprecated": "已弃用",
       "tooltipDeleteVersion": "从存储中删除该版本及其二进制文件",
       "ariaDeleteVersion": "删除版本",
+      "thArch": "拱门",
       "thFilename": "文件名",
       "thStatus": "状态",
       "noPlatformsSynced": "尚未同步任何平台。",
@@ -1664,6 +1671,36 @@
       "showScanDetails": "显示扫描详情",
       "notScannedYet": "尚未扫描"
     },
+    "scimProvisioning": {
+      "title": "SCIM 配置",
+      "description": "SCIM 2.0 端点允许外部身份提供商自动为用户和组分配及撤销权限。",
+      "configuration": "配置",
+      "labelBaseUrl": "SCIM 基础 URL",
+      "helpBaseUrl": "请将此地址用作身份提供商 SCIM 配置中的租户 URL。",
+      "labelUsersEndpoint": "用户端点",
+      "labelGroupsEndpoint": "组端点",
+      "authentication": "身份验证",
+      "storeWarning": "请妥善保管 API 密钥。该密钥可提供完整的用户和组配置权限。",
+      "supportedOperations": "支持的操作"
+    },
+    "roles": {
+      "loadError": "加载角色失败。请重试。",
+      "title": "角色与权限",
+      "subtitle": "查看可用的角色及其关联的权限范围。系统角色是预定义的，无法进行修改。",
+      "availableScopesReference": "可用作用域参考",
+      "scopesDefine": "作用域定义了角色在注册表中可以执行的操作。",
+      "thScope": "范围",
+      "thDescription": "描述",
+      "roleTemplates": "角色模板",
+      "clickRole": "点击某个角色，查看其完整职责范围。",
+      "noRoles": "未找到角色。",
+      "systemChip": "系统",
+      "scopeCount_one": "{{count}} 范围",
+      "scopeCount_other": "{{count}} 范围",
+      "assignedScopes": "指定范围：",
+      "permissionsByCategory": "按类别划分的权限：",
+      "fullAccessViaAdmin": "完全访问权限（通过管理员）"
+    },
     "dashboard": {
       "loadError": "无法加载仪表板统计数据。",
       "loadErrorShort": "无法加载仪表盘",
@@ -1841,6 +1878,235 @@
     "yes": "是的",
     "no": "不",
     "sensitive": "敏感"
+  },
+  "usageExample": {
+    "title": "使用示例",
+    "toolAria": "工具",
+    "copied": "已复制！",
+    "copyExample": "复制示例",
+    "tabSource": "来源",
+    "tabWithInputs": "在提供必要输入的情况下"
+  },
+  "webhookEvents": {
+    "title": "Webhook 事件",
+    "toggleAria": "切换 webhook 事件",
+    "noEvents": "尚未记录任何 webhook 事件。",
+    "showingCount": "显示{{total}}的10个活动",
+    "refresh": "刷新"
+  },
+  "repositoryBrowser": {
+    "searchPlaceholder": "搜索仓库...",
+    "refresh": "刷新",
+    "refreshAria": "刷新仓库",
+    "selected": "已选中",
+    "protected": "受保护"
+  },
+  "advisoryBanner": {
+    "title": "安全公告",
+    "dismiss": "本次会话结束"
+  },
+  "commandPalette": {
+    "title": "命令面板",
+    "searchPlaceholder": "搜索页面、模块、提供程序……"
+  },
+  "devUserSwitcher": {
+    "title": "开发模式：切换用户",
+    "selectUser": "选择用户"
+  },
+  "markdownRenderer": {
+    "ariaLabel": "已渲染的文档"
+  },
+  "versionDetailsPanel": {
+    "title": "版本{{version}}详细信息",
+    "published": "发布日期：",
+    "na": "不适用",
+    "downloads": "下载：",
+    "publishedBy": "发布者：",
+    "deprecated": "已弃用",
+    "deprecatedOn": "{{date}}",
+    "replacement": "替换：",
+    "removingDeprecation": "移除弃用标记...",
+    "removeDeprecation": "移除弃用标记",
+    "deprecateVersion": "弃用版本",
+    "deleteThisVersion": "删除此版本"
+  },
+  "policyResultsPanel": {
+    "title": "政策评估"
+  },
+  "providerDocsSidebar": {
+    "filterPlaceholder": "筛选文档..."
+  },
+  "registryItemCard": {
+    "deprecated": "已弃用",
+    "viewDetails": "查看详情",
+    "noDescription": "无描述",
+    "ariaAction": "{{label}} {{title}}"
+  },
+  "scmRepositoryPanel": {
+    "title": "源代码仓库"
+  },
+  "securityScanPanel": {
+    "title": "安全扫描"
+  },
+  "versionSelector": {
+    "showDeprecated": "显示已弃用的",
+    "showDeprecatedAria": "显示已弃用的版本",
+    "allDeprecated": "该模块的所有版本均已弃用。"
+  },
+  "errorBoundary": {
+    "title": "出现了一些问题",
+    "description": "发生了一个意外错误。您可以重试或刷新页面。",
+    "tryAgain": "重试",
+    "reloadPage": "刷新页面"
+  },
+  "quotaUsageChart": {
+    "storage": "存储",
+    "publishesPerDay": "每日发布",
+    "downloadsPerDay": "每日下载量"
+  },
+  "helpPanel": {
+    "closeAria": "关闭帮助面板"
+  },
+  "layout": {
+    "mainNavigation": "主导航"
+  },
+  "apiDocumentation": {
+    "title": "API Swagger 文档",
+    "subtitle": "交互式 API 参考 — 使用“授权”按钮通过 API 密钥进行身份验证"
+  },
+  "mtls": {
+    "certificateSubject": "证书主题",
+    "scopes": "范围"
+  },
+  "reviewStep": {
+    "configured": "已配置",
+    "notConfigured": "未配置",
+    "actionPermanent": "此操作将永久生效"
+  },
+  "adminUserStep": {
+    "adminEmail": "管理员邮箱",
+    "emailMustMatch": "此电子邮件地址必须与您的 OIDC 提供商身份一致"
+  },
+  "authenticateStep": {
+    "findingToken": "查找您的设置令牌",
+    "setupToken": "设置令牌"
+  },
+  "setupWizardPage": {
+    "setupProgress": "安装进度"
+  },
+  "loginPage": {
+    "loadingProviders": "正在加载登录提供商"
+  },
+  "scanDiagnostics": {
+    "errorMessage": "错误信息",
+    "scannerOutput": "扫描仪输出（stderr / stdout）",
+    "rawJson": "原始扫描仪 JSON"
+  },
+  "settingsPage": {
+    "title": "设置",
+    "telemetryPrivacy": "遥测与隐私",
+    "description": "控制您分享的数据。网站正常运行所需的必要Cookie无法禁用。更改将立即生效。",
+    "essentialRequired": "必要Cookie（必选）",
+    "errorReporting": "错误报告——有助于我们更快地修复漏洞",
+    "performanceMonitoring": "性能监控 — Web Vitals 和页面加载指标",
+    "analytics": "分析 — 通过使用模式优化产品"
+  },
+  "consentBanner": {
+    "ariaLabel": "Cookie 同意",
+    "title": "我们重视您的隐私",
+    "essential": "必备（始终开启）",
+    "errorReporting": "错误报告",
+    "performanceMonitoring": "性能监控",
+    "analytics": "分析",
+    "hideDetails": "隐藏详情",
+    "customize": "自定义",
+    "rejectAll": "全部拒绝",
+    "acceptAll": "全部接受"
+  },
+  "releasesGpgKeys": {
+    "title": "发布签名密钥",
+    "description": "用于验证上游发布签名所用的 GPG 密钥。状态是根据配置的警告阈值得出的。",
+    "loadError": "无法加载 GPG 密钥状态。",
+    "noData": "没有可用的发布签名密钥数据。",
+    "thTool": "工具",
+    "thStatus": "状态",
+    "thSource": "来源",
+    "thFingerprint": "指纹",
+    "thExpiry": "有效期",
+    "thLastRefresh": "最后更新",
+    "expiredAgo": "已过期 {{days}} 天前",
+    "days": "{{days}} d"
+  },
+  "scanFindingsModal": {
+    "title": "扫描结果",
+    "close": "关闭",
+    "noData": "没有扫描数据。",
+    "critical": "重要：{{count}}",
+    "high": "高：{{count}}",
+    "medium": "Medium：{{count}}",
+    "low": "Low：{{count}}",
+    "downloadTooltip": "下载结果（CSV格式）",
+    "exportCsv": "导出 CSV",
+    "thSeverity": "严重程度",
+    "thRuleId": "规则 ID",
+    "thTitle": "标题",
+    "thResource": "资源",
+    "thFile": "文件",
+    "thResolution": "决议",
+    "parseError": "无法解析扫描仪输出中的单个结果。",
+    "hideRawJson": "隐藏原始 JSON",
+    "showRawJson": "显示原始 JSON"
+  },
+  "storageMigration": {
+    "stepSelect": "选择源和目标",
+    "stepReview": "复习计划",
+    "stepExecute": "执行与监控",
+    "stepComplete": "完成",
+    "backendLocal": "本地文件系统",
+    "backendAzure": "Azure Blob 存储",
+    "backendS3": "亚马逊 S3",
+    "backendGcs": "Google 云存储",
+    "planError": "无法创建迁移计划",
+    "startError": "迁移启动失败",
+    "cancelError": "无法取消迁移",
+    "sourceConfiguration": "源配置",
+    "targetConfiguration": "目标配置",
+    "activeSuffix": " (已启用)",
+    "createNew": "+ 创建新配置…",
+    "mustBeDifferent": "源配置和目标配置必须不同。",
+    "migrationPlan": "迁移计划",
+    "source": "来源",
+    "target": "目标",
+    "totalArtifacts": "文物总数",
+    "modules": "模块",
+    "providers": "服务提供商",
+    "estimatedSize": "预计尺寸",
+    "startWarning": "启动此次迁移将把源存储中的所有工件复制到目标存储。根据工件的数量和大小，此过程可能需要一段时间。",
+    "inProgress": "正在迁移",
+    "artifactsProgress": "{{migrated}} / {{total}} 构建产物",
+    "failedCount": "{{count}} 构建项失败",
+    "cancelMigration": "取消迁移",
+    "complete": "迁移完成",
+    "successDetail": "已成功迁移 {{total}} 中的 {{migrated}} 个构建产物。",
+    "failedToMigrate": "{{count}} 无法迁移该（这些）组件。",
+    "errorSuffix": " 错误：{{error}}",
+    "failed": "迁移失败",
+    "migratedBeforeFailure": "在故障发生前，已将 {{total}} 中的 {{migrated}} 相关资源迁移完毕。",
+    "wizardTitle": "存储迁移向导",
+    "done": "完成",
+    "cancel": "取消",
+    "back": "返回",
+    "reviewPlanBtn": "复习计划",
+    "startMigrationBtn": "开始迁移"
+  },
+  "moduleActionsMenu": {
+    "moreActions": "更多操作",
+    "moduleActions": "模块操作",
+    "publishNewVersion": "发布新版本",
+    "editDescription": "编辑描述",
+    "deprecateModule": "废弃模块",
+    "undeprecateModule": "取消弃用模块",
+    "deleteModule": "删除模块"
   },
   "setup": {
     "oidc": {
