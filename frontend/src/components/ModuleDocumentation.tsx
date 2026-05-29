@@ -1,4 +1,5 @@
 import React from 'react'
+import { useTranslation } from 'react-i18next'
 import {
   Box,
   Typography,
@@ -18,15 +19,20 @@ interface ModuleDocumentationProps {
 }
 
 const ModuleDocumentation: React.FC<ModuleDocumentationProps> = ({ moduleDocs, docsLoading }) => {
+  const { t } = useTranslation()
   if (docsLoading) return null
 
   if (!moduleDocs) {
     return (
-      <Typography variant="body2" sx={{
-        color: "text.secondary"
-      }}>No inputs, outputs, or provider requirements detected for this module version.
-              </Typography>
-    );
+      <Typography
+        variant="body2"
+        sx={{
+          color: 'text.secondary',
+        }}
+      >
+        {t('moduleDocumentation.noData')}
+      </Typography>
+    )
   }
 
   const inputs = moduleDocs.inputs ?? []
@@ -40,54 +46,65 @@ const ModuleDocumentation: React.FC<ModuleDocumentationProps> = ({ moduleDocs, d
     !moduleDocs.requirements?.required_version
   ) {
     return (
-      <Typography variant="body2" sx={{
-        color: "text.secondary"
-      }}>No inputs, outputs, or provider requirements detected for this module version.
-              </Typography>
-    );
+      <Typography
+        variant="body2"
+        sx={{
+          color: 'text.secondary',
+        }}
+      >
+        {t('moduleDocumentation.noData')}
+      </Typography>
+    )
   }
 
   return (
     <Box>
       {moduleDocs.requirements?.required_version && (
-        <Box sx={{
-          mb: 2
-        }}>
+        <Box
+          sx={{
+            mb: 2,
+          }}
+        >
           <Typography variant="subtitle2" gutterBottom>
-            Terraform Version Requirement
+            {t('moduleDocumentation.terraformVersionRequirement')}
           </Typography>
-          <Typography variant="body2" sx={{
-            fontFamily: "monospace"
-          }}>
+          <Typography
+            variant="body2"
+            sx={{
+              fontFamily: 'monospace',
+            }}
+          >
             {moduleDocs.requirements.required_version}
           </Typography>
         </Box>
       )}
       {inputs.length > 0 && (
-        <Box sx={{
-          mb: 3
-        }}>
+        <Box
+          sx={{
+            mb: 3,
+          }}
+        >
           <Typography variant="subtitle2" gutterBottom>
-            Inputs
+            {t('moduleDocumentation.inputs')}
           </Typography>
           <TableContainer>
             <Table size="small" sx={{ tableLayout: 'fixed', width: '100%' }}>
               <TableHead>
                 <TableRow>
                   <TableCell sx={{ width: '22%' }}>
-                    <strong>Name</strong>
+                    <strong>{t('moduleDocumentation.thName')}</strong>
                   </TableCell>
                   <TableCell sx={{ width: '14%' }}>
-                    <strong>Type</strong>
+                    <strong>{t('moduleDocumentation.thType')}</strong>
                   </TableCell>
                   <TableCell sx={{ width: '34%' }}>
-                    <strong>Description</strong>
+                    <strong>{t('moduleDocumentation.thDescription')}</strong>
                   </TableCell>
                   <TableCell sx={{ width: '20%' }}>
-                    <strong>Default</strong>
+                    <strong>{t('moduleDocumentation.thDefault')}</strong>
                   </TableCell>
                   <TableCell sx={{ width: '10%' }}>
-                    <strong>Required</strong>
+                    <strong>{t('moduleDocumentation.thRequired')}</strong>
                   </TableCell>
                 </TableRow>
               </TableHead>
@@ -106,7 +123,9 @@ const ModuleDocumentation: React.FC<ModuleDocumentationProps> = ({ moduleDocs, d
                     </TableCell>
                     <TableCell>
                       <Chip
-                        label={inp.required ? 'Yes' : 'No'}
+                        label={
+                          inp.required ? t('moduleDocumentation.yes') : t('moduleDocumentation.no')
+                        }
                         size="small"
                         color={inp.required ? 'error' : 'default'}
                         variant="outlined"
@@ -120,24 +139,26 @@ const ModuleDocumentation: React.FC<ModuleDocumentationProps> = ({ moduleDocs, d
         </Box>
       )}
       {outputs.length > 0 && (
-        <Box sx={{
-          mb: 3
-        }}>
+        <Box
+          sx={{
+            mb: 3,
+          }}
+        >
           <Typography variant="subtitle2" gutterBottom>
-            Outputs
+            {t('moduleDocumentation.outputs')}
           </Typography>
           <TableContainer>
             <Table size="small" sx={{ tableLayout: 'fixed', width: '100%' }}>
               <TableHead>
                 <TableRow>
                   <TableCell sx={{ width: '25%' }}>
-                    <strong>Name</strong>
+                    <strong>{t('moduleDocumentation.thName')}</strong>
                   </TableCell>
                   <TableCell sx={{ width: '65%' }}>
-                    <strong>Description</strong>
+                    <strong>{t('moduleDocumentation.thDescription')}</strong>
                   </TableCell>
                   <TableCell sx={{ width: '10%' }}>
-                    <strong>Sensitive</strong>
+                    <strong>{t('moduleDocumentation.thSensitive')}</strong>
                   </TableCell>
                 </TableRow>
               </TableHead>
@@ -150,11 +171,19 @@ const ModuleDocumentation: React.FC<ModuleDocumentationProps> = ({ moduleDocs, d
                     <TableCell>{out.description}</TableCell>
                     <TableCell>
                       {out.sensitive ? (
-                        <Chip label="Sensitive" size="small" color="warning" variant="outlined" />
+                        <Chip
+                          label={t('moduleDocumentation.sensitive')}
+                          size="small"
+                          color="warning"
+                          variant="outlined"
+                        />
                       ) : (
-                        <Typography variant="body2" sx={{
-                          color: "text.secondary"
-                        }}>
+                        <Typography
+                          variant="body2"
+                          sx={{
+                            color: 'text.secondary',
+                          }}
+                        >
                           —
                         </Typography>
                       )}
@@ -169,20 +198,20 @@ const ModuleDocumentation: React.FC<ModuleDocumentationProps> = ({ moduleDocs, d
       {providers.length > 0 && (
         <Box>
           <Typography variant="subtitle2" gutterBottom>
-            Provider Requirements
+            {t('moduleDocumentation.providerRequirements')}
           </Typography>
           <TableContainer>
             <Table size="small" sx={{ tableLayout: 'fixed', width: '100%' }}>
               <TableHead>
                 <TableRow>
                   <TableCell sx={{ width: '20%' }}>
-                    <strong>Name</strong>
+                    <strong>{t('moduleDocumentation.thName')}</strong>
                   </TableCell>
                   <TableCell sx={{ width: '50%' }}>
-                    <strong>Source</strong>
+                    <strong>{t('moduleDocumentation.thSource')}</strong>
                   </TableCell>
                   <TableCell sx={{ width: '30%' }}>
-                    <strong>Version Constraints</strong>
+                    <strong>{t('moduleDocumentation.thVersionConstraints')}</strong>
                   </TableCell>
                 </TableRow>
               </TableHead>
@@ -206,7 +235,7 @@ const ModuleDocumentation: React.FC<ModuleDocumentationProps> = ({ moduleDocs, d
         </Box>
       )}
     </Box>
-  );
+  )
 }
 
 export default ModuleDocumentation

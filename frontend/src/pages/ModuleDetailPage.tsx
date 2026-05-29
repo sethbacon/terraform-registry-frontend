@@ -1,4 +1,5 @@
 import React from 'react'
+import { useTranslation } from 'react-i18next'
 import { useNavigate, Link as RouterLink } from 'react-router-dom'
 import MarkdownRenderer from '../components/MarkdownRenderer'
 import {
@@ -43,6 +44,7 @@ import { REGISTRY_HOST } from '../config'
 import { useModuleDetail } from '../hooks/useModuleDetail'
 
 const ModuleDetailPage: React.FC = () => {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const [editingDescription, setEditingDescription] = React.useState(false)
   const [editDescription, setEditDescription] = React.useState('')
@@ -145,19 +147,35 @@ const ModuleDetailPage: React.FC = () => {
             >
               Modules
             </Link>
-            <Typography sx={{
-              color: "text.primary"
-            }}>{namespace}</Typography>
-            <Typography sx={{
-              color: "text.primary"
-            }}>{name}</Typography>
-            <Typography sx={{
-              color: "text.primary"
-            }}>{system}</Typography>
+            <Typography
+              sx={{
+                color: 'text.primary',
+              }}
+            >
+              {namespace}
+            </Typography>
+            <Typography
+              sx={{
+                color: 'text.primary',
+              }}
+            >
+              {name}
+            </Typography>
+            <Typography
+              sx={{
+                color: 'text.primary',
+              }}
+            >
+              {system}
+            </Typography>
             {selectedVersion && (
-              <Typography sx={{
-                color: "text.primary"
-              }}>v{selectedVersion.version}</Typography>
+              <Typography
+                sx={{
+                  color: 'text.primary',
+                }}
+              >
+                v{selectedVersion.version}
+              </Typography>
             )}
           </Breadcrumbs>
 
@@ -187,14 +205,22 @@ const ModuleDetailPage: React.FC = () => {
             <Stack
               direction="row"
               sx={{
-                alignItems: "center",
-                justifyContent: "space-between",
-                mb: 2
-              }}>
-              <Stack direction="row" spacing={2} sx={{
-                alignItems: "center"
-              }}>
-                <IconButton aria-label="Back to modules" onClick={() => navigate('/modules')}>
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                mb: 2,
+              }}
+            >
+              <Stack
+                direction="row"
+                spacing={2}
+                sx={{
+                  alignItems: 'center',
+                }}
+              >
+                <IconButton
+                  aria-label={t('modules.detail.ariaBack')}
+                  onClick={() => navigate('/modules')}
+                >
                   <ArrowBack />
                 </IconButton>
                 <Typography variant="h4" component="h1">
@@ -203,7 +229,7 @@ const ModuleDetailPage: React.FC = () => {
               </Stack>
               {canManage && (
                 <Button variant="contained" startIcon={<Add />} onClick={handlePublishNewVersion}>
-                  Publish New Version
+                  {t('modules.detail.publishNewVersion')}
                 </Button>
               )}
             </Stack>
@@ -211,9 +237,10 @@ const ModuleDetailPage: React.FC = () => {
               direction="row"
               spacing={1}
               sx={{
-                alignItems: "center",
-                mb: 0
-              }}>
+                alignItems: 'center',
+                mb: 0,
+              }}
+            >
               {editingDescription ? (
                 <>
                   <TextField
@@ -221,7 +248,7 @@ const ModuleDetailPage: React.FC = () => {
                     fullWidth
                     value={editDescription}
                     onChange={(e) => setEditDescription(e.target.value)}
-                    placeholder="Module description"
+                    placeholder={t('modules.detail.placeholderDescription')}
                     autoFocus
                     onKeyDown={(e) => {
                       if (e.key === 'Enter') {
@@ -232,7 +259,7 @@ const ModuleDetailPage: React.FC = () => {
                       }
                     }}
                   />
-                  <Tooltip title="Save description">
+                  <Tooltip title={t('modules.detail.tooltipSaveDescription')}>
                     <IconButton
                       size="small"
                       color="primary"
@@ -240,16 +267,16 @@ const ModuleDetailPage: React.FC = () => {
                         handleUpdateDescription(editDescription)
                         setEditingDescription(false)
                       }}
-                      aria-label="Save description"
+                      aria-label={t('modules.detail.ariaSaveDescription')}
                     >
                       <Check fontSize="small" />
                     </IconButton>
                   </Tooltip>
-                  <Tooltip title="Cancel editing">
+                  <Tooltip title={t('modules.detail.tooltipCancelEditing')}>
                     <IconButton
                       size="small"
                       onClick={() => setEditingDescription(false)}
-                      aria-label="Cancel editing"
+                      aria-label={t('modules.detail.ariaCancelEditing')}
                     >
                       <Close fontSize="small" />
                     </IconButton>
@@ -257,20 +284,23 @@ const ModuleDetailPage: React.FC = () => {
                 </>
               ) : (
                 <>
-                  <Typography variant="body1" sx={{
-                    color: "text.secondary"
-                  }}>
+                  <Typography
+                    variant="body1"
+                    sx={{
+                      color: 'text.secondary',
+                    }}
+                  >
                     {module.description || 'No description available'}
                   </Typography>
                   {canManage && (
-                    <Tooltip title="Edit description">
+                    <Tooltip title={t('modules.detail.tooltipEditDescription')}>
                       <IconButton
                         size="small"
                         onClick={() => {
                           setEditDescription(module.description || '')
                           setEditingDescription(true)
                         }}
-                        aria-label="Edit description"
+                        aria-label={t('modules.detail.ariaEditDescription')}
                       >
                         <EditIcon fontSize="small" />
                       </IconButton>
@@ -283,10 +313,11 @@ const ModuleDetailPage: React.FC = () => {
               direction="row"
               spacing={1}
               sx={{
-                alignItems: "center",
-                flexWrap: "wrap",
-                mt: 2
-              }}>
+                alignItems: 'center',
+                flexWrap: 'wrap',
+                mt: 2,
+              }}
+            >
               <Chip label={`${namespace}/${system}`} />
               <VersionSelector
                 versions={versions}
@@ -295,7 +326,12 @@ const ModuleDetailPage: React.FC = () => {
                 data-testid="module-version-selector"
               />
               {selectedVersion?.deprecated && (
-                <Chip label="Deprecated" color="warning" size="small" icon={<Warning />} />
+                <Chip
+                  label={t('modules.detail.chipDeprecated')}
+                  color="warning"
+                  size="small"
+                  icon={<Warning />}
+                />
               )}
               <Chip label={`${module.download_count ?? 0} downloads`} />
               <ModuleActionsMenu
@@ -331,16 +367,19 @@ const ModuleDetailPage: React.FC = () => {
               <Paper sx={{ p: 3 }}>
                 <Tabs value={docTab} onChange={(_, newValue) => setDocTab(newValue)} sx={{ mb: 2 }}>
                   <Tab label="README" />
-                  <Tab label="Inputs / Outputs" />
+                  <Tab label={t('modules.detail.tabInputsOutputs')} />
                 </Tabs>
                 <Divider sx={{ mb: 2 }} />
                 {docTab === 0 &&
                   (selectedVersion && selectedVersion.readme ? (
                     <MarkdownRenderer>{selectedVersion.readme}</MarkdownRenderer>
                   ) : (
-                    <Typography variant="body2" sx={{
-                      color: "text.secondary"
-                    }}>
+                    <Typography
+                      variant="body2"
+                      sx={{
+                        color: 'text.secondary',
+                      }}
+                    >
                       No README provided for this module version.
                     </Typography>
                   ))}
@@ -355,7 +394,7 @@ const ModuleDetailPage: React.FC = () => {
               {/* Module Information */}
               <Paper sx={{ p: 3, mb: 3 }}>
                 <Typography variant="h6" gutterBottom>
-                  Module Information
+                  {t('modules.detail.sidebarTitle')}
                 </Typography>
                 <Divider sx={{ mb: 2 }} />
                 <Box sx={{ '& > *': { mb: 1 } }}>
@@ -369,7 +408,7 @@ const ModuleDetailPage: React.FC = () => {
                           size="small"
                           value={editNamespace}
                           onChange={(e) => setEditNamespace(e.target.value)}
-                          placeholder="Namespace"
+                          placeholder={t('modules.detail.placeholderNamespace')}
                           autoFocus
                           sx={{ ml: 0.5, flex: 1 }}
                           onKeyDown={(e) => {
@@ -381,7 +420,7 @@ const ModuleDetailPage: React.FC = () => {
                             }
                           }}
                         />
-                        <Tooltip title="Save namespace">
+                        <Tooltip title={t('modules.detail.tooltipSaveNamespace')}>
                           <IconButton
                             size="small"
                             color="primary"
@@ -391,16 +430,16 @@ const ModuleDetailPage: React.FC = () => {
                                 setEditingNamespace(false)
                               }
                             }}
-                            aria-label="Save namespace"
+                            aria-label={t('modules.detail.ariaSaveNamespace')}
                           >
                             <Check fontSize="small" />
                           </IconButton>
                         </Tooltip>
-                        <Tooltip title="Cancel editing namespace">
+                        <Tooltip title={t('modules.detail.tooltipCancelNamespace')}>
                           <IconButton
                             size="small"
                             onClick={() => setEditingNamespace(false)}
-                            aria-label="Cancel editing namespace"
+                            aria-label={t('modules.detail.ariaCancelNamespace')}
                           >
                             <Close fontSize="small" />
                           </IconButton>
@@ -410,14 +449,14 @@ const ModuleDetailPage: React.FC = () => {
                       <>
                         <Typography variant="body2">{namespace}</Typography>
                         {canManage && (
-                          <Tooltip title="Edit namespace">
+                          <Tooltip title={t('modules.detail.tooltipEditNamespace')}>
                             <IconButton
                               size="small"
                               onClick={() => {
                                 setEditNamespace(namespace || '')
                                 setEditingNamespace(true)
                               }}
-                              aria-label="Edit namespace"
+                              aria-label={t('modules.detail.ariaEditNamespace')}
                             >
                               <EditIcon fontSize="small" />
                             </IconButton>
@@ -433,20 +472,21 @@ const ModuleDetailPage: React.FC = () => {
                     <strong>Provider:</strong> {system}
                   </Typography>
                   <Typography variant="body2">
-                    <strong>Latest Version:</strong>{' '}
+                    <strong>{t('modules.detail.labelLatestVersion')}</strong>{' '}
                     {versions.length > 0
                       ? (versions.find((v) => !v.deprecated) ?? versions[0]).version
                       : 'N/A'}
                   </Typography>
                   <Typography variant="body2">
-                    <strong>Total Downloads:</strong> {module.download_count ?? 0}
+                    <strong>{t('modules.detail.labelTotalDownloads')}</strong>{' '}
+                    {module.download_count ?? 0}
                   </Typography>
                   <Typography variant="body2">
                     <strong>Organization:</strong> {module.organization_name || namespace}
                   </Typography>
                   {module.created_by_name && (
                     <Typography variant="body2">
-                      <strong>Created By:</strong> {module.created_by_name}
+                      <strong>{t('modules.detail.labelCreatedBy')}</strong> {module.created_by_name}
                     </Typography>
                   )}
                 </Box>
@@ -502,7 +542,7 @@ const ModuleDetailPage: React.FC = () => {
             open={deleteModuleDialogOpen}
             onClose={() => setDeleteModuleDialogOpen(false)}
             onConfirm={handleDeleteModule}
-            title="Delete Module"
+            title={t('modules.detail.deleteModuleTitle')}
             description={
               <>
                 Are you sure you want to delete the module{' '}
@@ -513,7 +553,9 @@ const ModuleDetailPage: React.FC = () => {
                 be undone.
               </>
             }
-            confirmLabel={deleting ? 'Deleting...' : 'Delete Module'}
+            confirmLabel={
+              deleting ? t('modules.detail.deletingLabel') : t('modules.detail.deleteModuleTitle')
+            }
             severity="error"
             typeToConfirmText={`${namespace}/${name}/${system}`}
             loading={deleting}
@@ -525,7 +567,7 @@ const ModuleDetailPage: React.FC = () => {
             open={deleteVersionDialogOpen}
             onClose={() => setDeleteVersionDialogOpen(false)}
             onConfirm={handleDeleteVersion}
-            title="Delete Version"
+            title={t('modules.detail.deleteVersionTitle')}
             description={
               <>
                 Are you sure you want to delete version <strong>{versionToDelete}</strong> of{' '}
@@ -536,7 +578,9 @@ const ModuleDetailPage: React.FC = () => {
                 cannot be undone.
               </>
             }
-            confirmLabel={deleting ? 'Deleting...' : 'Delete Version'}
+            confirmLabel={
+              deleting ? t('modules.detail.deletingLabel') : t('modules.detail.deleteVersionTitle')
+            }
             severity="error"
             typeToConfirmText={versionToDelete || undefined}
             loading={deleting}
@@ -550,7 +594,7 @@ const ModuleDetailPage: React.FC = () => {
             maxWidth="md"
             fullWidth
           >
-            <DialogTitle>Link Repository</DialogTitle>
+            <DialogTitle>{t('modules.detail.dialogLinkRepository')}</DialogTitle>
             <DialogContent>
               {module?.id && (
                 <PublishFromSCMWizard
@@ -584,7 +628,7 @@ const ModuleDetailPage: React.FC = () => {
               await Promise.resolve()
               handleDeprecateVersion()
             }}
-            title="Deprecate Version"
+            title={t('modules.detail.deprecateVersionTitle')}
             description={
               <>
                 Are you sure you want to deprecate version{' '}
@@ -596,12 +640,16 @@ const ModuleDetailPage: React.FC = () => {
               </>
             }
             severity="warning"
-            confirmLabel={deprecating ? 'Deprecating...' : 'Deprecate Version'}
+            confirmLabel={
+              deprecating
+                ? t('modules.detail.deprecatingLabel')
+                : t('modules.detail.deprecateVersionConfirm')
+            }
             loading={deprecating}
             fields={[
               {
                 id: 'message',
-                label: 'Deprecation Message (optional)',
+                label: t('modules.detail.deprecateVersionMsgLabel'),
                 placeholder: 'e.g., Use version 2.0.0 instead - this version has a critical bug',
                 multiline: true,
                 rows: 3,
@@ -609,7 +657,7 @@ const ModuleDetailPage: React.FC = () => {
               },
               {
                 id: 'replacement_source',
-                label: 'Replacement Module Address (optional)',
+                label: t('modules.detail.deprecateVersionReplacementLabel'),
                 placeholder: 'e.g., registry.example.com/namespace/module/provider',
                 helperText: 'Full registry address of the replacement module (Terraform CLI ≥1.10)',
                 initialValue: deprecationReplacementSource,
@@ -632,7 +680,7 @@ const ModuleDetailPage: React.FC = () => {
               await Promise.resolve()
               handleDeprecateModule()
             }}
-            title="Deprecate Module"
+            title={t('modules.detail.deprecateModuleTitle')}
             description={
               <>
                 Are you sure you want to deprecate the module{' '}
@@ -643,12 +691,16 @@ const ModuleDetailPage: React.FC = () => {
               </>
             }
             severity="warning"
-            confirmLabel={deprecatingModule ? 'Deprecating...' : 'Deprecate Module'}
+            confirmLabel={
+              deprecatingModule
+                ? t('modules.detail.deprecatingLabel')
+                : t('modules.detail.deprecateModuleConfirm')
+            }
             loading={deprecatingModule}
             fields={[
               {
                 id: 'message',
-                label: 'Deprecation Message',
+                label: t('modules.detail.deprecateModuleMsgLabel'),
                 placeholder: 'e.g., This module has been replaced by namespace/new-module/system',
                 multiline: true,
                 rows: 3,
@@ -657,7 +709,7 @@ const ModuleDetailPage: React.FC = () => {
               },
               {
                 id: 'successor',
-                label: 'Successor Module ID (optional)',
+                label: t('modules.detail.deprecateModuleSuccessorLabel'),
                 placeholder: 'e.g., namespace/name/system',
                 helperText: 'If this module has a replacement, enter its ID to help users migrate.',
                 initialValue: successorModuleId,
@@ -671,7 +723,7 @@ const ModuleDetailPage: React.FC = () => {
             open={undeprecateModuleDialogOpen}
             onClose={() => setUndeprecateModuleDialogOpen(false)}
             onConfirm={handleUndeprecateModule}
-            title="Undeprecate Module"
+            title={t('modules.detail.undeprecateModuleTitle')}
             description={
               <>
                 Are you sure you want to remove the deprecation from{' '}
@@ -682,14 +734,18 @@ const ModuleDetailPage: React.FC = () => {
               </>
             }
             severity="info"
-            confirmLabel={deprecatingModule ? 'Processing...' : 'Undeprecate Module'}
+            confirmLabel={
+              deprecatingModule
+                ? t('modules.detail.processingLabel')
+                : t('modules.detail.undeprecateModuleConfirm')
+            }
             loading={deprecatingModule}
             data-testid="undeprecate-module-dialog"
           />
         </Container>
       )}
     </Box>
-  );
+  )
 }
 
 export default ModuleDetailPage

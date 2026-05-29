@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useLocation, useNavigate } from 'react-router-dom'
 import {
   Container,
@@ -20,10 +21,7 @@ import SCMIcon from '@mui/icons-material/AccountTree'
 import ArrowBack from '@mui/icons-material/ArrowBack'
 import api from '../../services/api'
 import { getErrorMessage } from '../../utils/errors'
-import {
-  isValidRegistrySegment,
-  REGISTRY_SEGMENT_HELP,
-} from '../../utils/registrySegment'
+import { isValidRegistrySegment, REGISTRY_SEGMENT_HELP } from '../../utils/registrySegment'
 import PublishFromSCMWizard from '../../components/PublishFromSCMWizard'
 import FileDropZone from '../../components/FileDropZone'
 import PolicyResultsPanel from '../../components/PolicyResultsPanel'
@@ -32,6 +30,7 @@ import { PolicyResult } from '../../types'
 type ModuleMethod = 'choose' | 'upload' | 'scm'
 
 const ModuleUploadPage: React.FC = () => {
+  const { t } = useTranslation()
   const location = useLocation()
   const navigate = useNavigate()
   const state = location.state as {
@@ -158,16 +157,16 @@ const ModuleUploadPage: React.FC = () => {
   const renderModuleMethodChooser = () => (
     <Box sx={{ p: 3 }}>
       <Typography variant="h6" gutterBottom>
-        How would you like to publish this module?
+        {t('admin.moduleUpload.chooseTitle')}
       </Typography>
       <Typography
         variant="body2"
         sx={{
-          color: "text.secondary",
-          mb: 3
-        }}>
-        Upload a packaged archive directly, or connect a git repository for automated publishing via
-        webhooks.
+          color: 'text.secondary',
+          mb: 3,
+        }}
+      >
+        {t('admin.moduleUpload.chooseSubtitle')}
       </Typography>
       <Box sx={{ display: 'flex', gap: 3, flexDirection: { xs: 'column', sm: 'row' } }}>
         <Card
@@ -178,13 +177,15 @@ const ModuleUploadPage: React.FC = () => {
             <CardContent sx={{ textAlign: 'center', py: 4 }}>
               <CloudUpload sx={{ fontSize: 48, color: 'primary.main', mb: 2 }} />
               <Typography variant="h6" gutterBottom>
-                Upload from File
+                {t('admin.moduleUpload.uploadFromFile')}
               </Typography>
-              <Typography variant="body2" sx={{
-                color: "text.secondary"
-              }}>
-                Package your module as a <strong>.tar.gz</strong> archive and upload it directly.
-                Best for one-off or manual releases.
+              <Typography
+                variant="body2"
+                sx={{
+                  color: 'text.secondary',
+                }}
+              >
+                {t('admin.moduleUpload.uploadFromFileDesc')}
               </Typography>
             </CardContent>
           </CardActionArea>
@@ -198,13 +199,15 @@ const ModuleUploadPage: React.FC = () => {
             <CardContent sx={{ textAlign: 'center', py: 4 }}>
               <SCMIcon sx={{ fontSize: 48, color: 'secondary.main', mb: 2 }} />
               <Typography variant="h6" gutterBottom>
-                Link from SCM Repository
+                {t('admin.moduleUpload.linkFromScm')}
               </Typography>
-              <Typography variant="body2" sx={{
-                color: "text.secondary"
-              }}>
-                Connect a GitHub, Azure DevOps, GitLab, or Bitbucket repository. New versions
-                publish automatically when tags are pushed.
+              <Typography
+                variant="body2"
+                sx={{
+                  color: 'text.secondary',
+                }}
+              >
+                {t('admin.moduleUpload.linkFromScmDesc')}
               </Typography>
             </CardContent>
           </CardActionArea>
@@ -227,7 +230,7 @@ const ModuleUploadPage: React.FC = () => {
         Back
       </Button>
       <Typography variant="h6" gutterBottom>
-        Link Module to SCM Repository
+        {t('admin.moduleUpload.formScmTitle')}
       </Typography>
 
       {scmModuleId ? (
@@ -247,15 +250,15 @@ const ModuleUploadPage: React.FC = () => {
           <Typography
             variant="body2"
             sx={{
-              color: "text.secondary",
-              mb: 3
-            }}>
-            First, define the module identity. Then you'll choose a repository and configure
-            publishing settings.
+              color: 'text.secondary',
+              mb: 3,
+            }}
+          >
+            {t('admin.moduleUpload.scmSubtitle')}
           </Typography>
           <Stack spacing={3} sx={{ maxWidth: 500 }}>
             <TextField
-              label="Namespace"
+              label={t('admin.moduleUpload.labelNamespace')}
               value={scmNamespace}
               onChange={(e) => setScmNamespace(e.target.value)}
               placeholder="e.g., bconline"
@@ -265,11 +268,11 @@ const ModuleUploadPage: React.FC = () => {
               helperText={
                 scmNamespace && !isValidRegistrySegment(scmNamespace)
                   ? REGISTRY_SEGMENT_HELP
-                  : 'Your organization identifier'
+                  : t('admin.moduleUpload.helpNamespace')
               }
             />
             <TextField
-              label="Module Name"
+              label={t('admin.moduleUpload.labelModuleName')}
               value={scmName}
               onChange={(e) => setScmName(e.target.value)}
               placeholder="e.g., networking-vpc"
@@ -281,7 +284,7 @@ const ModuleUploadPage: React.FC = () => {
               }
             />
             <TextField
-              label="Provider"
+              label={t('admin.moduleUpload.labelProvider')}
               value={scmSystem}
               onChange={(e) => setScmSystem(e.target.value)}
               placeholder="e.g., aws"
@@ -295,7 +298,7 @@ const ModuleUploadPage: React.FC = () => {
               }
             />
             <TextField
-              label="Description (optional)"
+              label={t('admin.moduleUpload.labelDescriptionOptional')}
               value={scmDescription}
               onChange={(e) => setScmDescription(e.target.value)}
               fullWidth
@@ -320,7 +323,9 @@ const ModuleUploadPage: React.FC = () => {
               startIcon={scmCreating ? <CircularProgress size={18} /> : <SCMIcon />}
               size="large"
             >
-              {scmCreating ? 'Creating...' : 'Continue to Repository Selection'}
+              {scmCreating
+                ? t('admin.moduleUpload.creating')
+                : t('admin.moduleUpload.continueToRepo')}
             </Button>
           </Stack>
         </>
@@ -342,7 +347,7 @@ const ModuleUploadPage: React.FC = () => {
         Back
       </Button>
       <Typography variant="h6" gutterBottom>
-        Upload Terraform Module
+        {t('admin.moduleUpload.formUploadTitle')}
       </Typography>
       <Box
         sx={{
@@ -352,14 +357,22 @@ const ModuleUploadPage: React.FC = () => {
           borderRadius: 1,
         }}
       >
-        <Typography variant="body2" gutterBottom sx={{
-          color: "text.secondary"
-        }}>
+        <Typography
+          variant="body2"
+          gutterBottom
+          sx={{
+            color: 'text.secondary',
+          }}
+        >
           <strong>Requirements:</strong>
         </Typography>
-        <Typography variant="body2" component="div" sx={{
-          color: "text.secondary"
-        }}>
+        <Typography
+          variant="body2"
+          component="div"
+          sx={{
+            color: 'text.secondary',
+          }}
+        >
           • Package your module as a <strong>.tar.gz</strong> or <strong>.tgz</strong> file
           <br />• Include all <strong>.tf</strong> files (main.tf, variables.tf, outputs.tf)
           <br />• Add a <strong>README.md</strong> with usage documentation
@@ -370,11 +383,15 @@ const ModuleUploadPage: React.FC = () => {
       </Box>
 
       <Stack spacing={3}>
-        <Stack direction={{ xs: 'column', md: 'row' }} spacing={2} sx={{
-          alignItems: "flex-start"
-        }}>
+        <Stack
+          direction={{ xs: 'column', md: 'row' }}
+          spacing={2}
+          sx={{
+            alignItems: 'flex-start',
+          }}
+        >
           <TextField
-            label="Namespace"
+            label={t('admin.moduleUpload.labelNamespace')}
             value={moduleNamespace}
             onChange={(e) => setModuleNamespace(e.target.value)}
             placeholder="e.g., bconline"
@@ -385,11 +402,11 @@ const ModuleUploadPage: React.FC = () => {
             helperText={
               moduleNamespace && !isValidRegistrySegment(moduleNamespace)
                 ? REGISTRY_SEGMENT_HELP
-                : 'Your organization identifier'
+                : t('admin.moduleUpload.helpNamespace')
             }
           />
           <TextField
-            label="Module Name"
+            label={t('admin.moduleUpload.labelModuleName')}
             value={moduleName}
             onChange={(e) => setModuleName(e.target.value)}
             placeholder="e.g., networking-vpc"
@@ -400,11 +417,11 @@ const ModuleUploadPage: React.FC = () => {
             helperText={
               moduleName && !isValidRegistrySegment(moduleName)
                 ? REGISTRY_SEGMENT_HELP
-                : 'Descriptive name for what the module does'
+                : t('admin.moduleUpload.helpModuleName')
             }
           />
           <TextField
-            label="Provider"
+            label={t('admin.moduleUpload.labelProvider')}
             value={moduleProvider}
             onChange={(e) => setModuleProvider(e.target.value)}
             placeholder="e.g., aws"
@@ -415,19 +432,19 @@ const ModuleUploadPage: React.FC = () => {
             helperText={
               moduleProvider && !isValidRegistrySegment(moduleProvider)
                 ? REGISTRY_SEGMENT_HELP
-                : 'Target cloud (aws, azure, google, etc.)'
+                : t('admin.moduleUpload.helpProvider')
             }
           />
         </Stack>
         <TextField
-          label="Version"
+          label={t('admin.moduleUpload.labelVersion')}
           value={moduleVersion}
           onChange={(e) => setModuleVersion(e.target.value)}
           placeholder="e.g., 1.0.0"
           required
           fullWidth
           disabled={uploading}
-          helperText="Semantic version in format X.Y.Z (e.g., 1.0.0, 2.1.3). Use 0.x.x for pre-release."
+          helperText={t('admin.moduleUpload.helpVersion')}
         />
 
         <FileDropZone
@@ -440,7 +457,7 @@ const ModuleUploadPage: React.FC = () => {
         />
 
         <TextField
-          label="Description"
+          label={t('admin.moduleUpload.labelDescription')}
           value={moduleDescription}
           onChange={(e) => setModuleDescription(e.target.value)}
           placeholder="e.g., Creates a VPC with public and private subnets"
@@ -448,15 +465,18 @@ const ModuleUploadPage: React.FC = () => {
           multiline
           rows={3}
           disabled={uploading}
-          helperText="Optional. Brief description of what this module does."
+          helperText={t('admin.moduleUpload.helpDescription')}
         />
 
         {uploading && uploadPercent !== null && (
           <Box data-testid="module-upload-progress">
             <LinearProgress variant="determinate" value={uploadPercent} />
-            <Typography variant="caption" sx={{
-              color: "text.secondary"
-            }}>
+            <Typography
+              variant="caption"
+              sx={{
+                color: 'text.secondary',
+              }}
+            >
               Uploading… {uploadPercent}%
             </Typography>
           </Box>
@@ -482,7 +502,7 @@ const ModuleUploadPage: React.FC = () => {
             startIcon={uploading ? <CircularProgress size={20} /> : <CloudUpload />}
             size="large"
           >
-            {uploading ? 'Uploading...' : 'Upload Module'}
+            {uploading ? t('admin.moduleUpload.uploading') : t('admin.moduleUpload.uploadModule')}
           </Button>
           {policyResult?.allowed && (
             <Button
@@ -492,7 +512,7 @@ const ModuleUploadPage: React.FC = () => {
                 navigate(`/modules/${moduleNamespace}/${moduleName}/${moduleProvider}`)
               }
             >
-              View Module
+              {t('admin.moduleUpload.viewModule')}
             </Button>
           )}
         </Stack>
@@ -503,15 +523,16 @@ const ModuleUploadPage: React.FC = () => {
   return (
     <Container maxWidth="md" sx={{ py: 4 }}>
       <Typography variant="h4" gutterBottom>
-        Upload Module
+        {t('admin.moduleUpload.pageTitle')}
       </Typography>
       <Typography
         variant="body1"
         sx={{
-          color: "text.secondary",
-          mb: 4
-        }}>
-        Publish a Terraform module to your registry
+          color: 'text.secondary',
+          mb: 4,
+        }}
+      >
+        {t('admin.moduleUpload.pageSubtitle')}
       </Typography>
       <Paper sx={{ width: '100%' }}>
         {moduleMethod === 'choose' && renderModuleMethodChooser()}
@@ -519,7 +540,7 @@ const ModuleUploadPage: React.FC = () => {
         {moduleMethod === 'scm' && renderScmMetadataForm()}
       </Paper>
     </Container>
-  );
+  )
 }
 
 export default ModuleUploadPage

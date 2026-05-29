@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import {
   Box,
   Stepper,
@@ -34,8 +35,6 @@ interface PublishFromSCMWizardProps {
   onCancel?: () => void
 }
 
-const steps = ['Select Provider', 'Choose Repository', 'Configure Settings']
-
 type PublishMode = 'sync_all' | 'specific_tag'
 
 const PublishFromSCMWizard: React.FC<PublishFromSCMWizardProps> = ({
@@ -44,6 +43,12 @@ const PublishFromSCMWizard: React.FC<PublishFromSCMWizardProps> = ({
   onComplete,
   onCancel,
 }) => {
+  const { t } = useTranslation()
+  const steps = [
+    t('scmWizard.stepSelectProvider'),
+    t('scmWizard.stepChooseRepository'),
+    t('scmWizard.stepConfigureSettings'),
+  ]
   const [activeStep, setActiveStep] = useState(0)
   const [providers, setProviders] = useState<SCMProvider[]>([])
   const [selectedProvider, setSelectedProvider] = useState<SCMProvider | null>(null)
@@ -62,6 +67,7 @@ const PublishFromSCMWizard: React.FC<PublishFromSCMWizardProps> = ({
 
   useEffect(() => {
     loadProviders()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const loadProviders = async () => {
@@ -70,7 +76,7 @@ const PublishFromSCMWizard: React.FC<PublishFromSCMWizardProps> = ({
       const data = await api.listSCMProviders()
       setProviders(Array.isArray(data) ? data.filter((p: SCMProvider) => p.is_active) : [])
     } catch (err: unknown) {
-      setError('Failed to load SCM providers')
+      setError(t('scmWizard.loadProvidersError'))
       console.error('Error loading providers:', err)
     } finally {
       setLoading(false)
@@ -92,7 +98,7 @@ const PublishFromSCMWizard: React.FC<PublishFromSCMWizardProps> = ({
 
   const handleComplete = async () => {
     if (!selectedProvider || !selectedRepository) {
-      setError('Please select a provider and repository')
+      setError(t('scmWizard.selectProviderRepoError'))
       return
     }
 
@@ -102,7 +108,7 @@ const PublishFromSCMWizard: React.FC<PublishFromSCMWizardProps> = ({
 
       if (publishMode === 'specific_tag') {
         if (!selectedTag) {
-          setError('Please select a specific tag in Step 2')
+          setError(t('scmWizard.selectTagError'))
           return
         }
         // Link with the exact tag as the pattern and auto-publish disabled.
@@ -137,7 +143,7 @@ const PublishFromSCMWizard: React.FC<PublishFromSCMWizardProps> = ({
         onComplete()
       }
     } catch (err: unknown) {
-      setError(getErrorMessage(err, 'Failed to link module to SCM'))
+      setError(getErrorMessage(err, t('scmWizard.linkError')))
     } finally {
       setLoading(false)
     }
@@ -158,11 +164,11 @@ const PublishFromSCMWizard: React.FC<PublishFromSCMWizardProps> = ({
 
   const repoNameFilter: RegExp | undefined = moduleSystem
     ? new RegExp(
-      '^terraform-' +
-      moduleSystem.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') +
-      '-[a-z0-9][a-z0-9-]*$',
-      'i',
-    )
+        '^terraform-' +
+          moduleSystem.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') +
+          '-[a-z0-9][a-z0-9-]*$',
+        'i',
+      )
     : undefined
 
   const getStepContent = (step: number) => {
@@ -171,27 +177,29 @@ const PublishFromSCMWizard: React.FC<PublishFromSCMWizardProps> = ({
         return (
           <Box>
             <Typography variant="h6" gutterBottom>
-              Select SCM Provider
+              {t('scmWizard.step0Title')}
             </Typography>
-            <Typography variant="body2" color="textSecondary" sx={{
-              marginBottom: "16px"
-            }}>
-              Choose the SCM provider where your module source code is hosted.
+            <Typography
+              variant="body2"
+              color="textSecondary"
+              sx={{
+                marginBottom: '16px',
+              }}
+            >
+              {t('scmWizard.step0Desc')}
             </Typography>
             {providers.length === 0 ? (
-              <Alert severity="warning">
-                No active SCM providers found. Please configure an SCM provider first.
-              </Alert>
+              <Alert severity="warning">{t('scmWizard.noProviders')}</Alert>
             ) : (
               <FormControl fullWidth>
-                <InputLabel>Provider</InputLabel>
+                <InputLabel>{t('scmWizard.providerLabel')}</InputLabel>
                 <Select
                   value={selectedProvider?.id || ''}
                   onChange={(e) => {
                     const provider = providers.find((p) => p.id === e.target.value)
                     setSelectedProvider(provider || null)
                   }}
-                  label="Provider"
+                  label={t('scmWizard.providerLabel')}
                 >
                   {providers.map((provider) => (
                     <MenuItem key={provider.id} value={provider.id}>
@@ -202,19 +210,22 @@ const PublishFromSCMWizard: React.FC<PublishFromSCMWizardProps> = ({
               </FormControl>
             )}
           </Box>
-        );
+        )
 
       case 1:
         return (
           <Box>
             <Typography variant="h6" gutterBottom>
-              Choose Repository
+              {t('scmWizard.step1Title')}
             </Typography>
-            <Typography variant="body2" color="textSecondary" sx={{
-              marginBottom: "16px"
-            }}>
-              Select the repository that contains your Terraform module code. Optionally select a
-              specific tag if you only want to publish one version.
+            <Typography
+              variant="body2"
+              color="textSecondary"
+              sx={{
+                marginBottom: '16px',
+              }}
+            >
+              {t('scmWizard.step1Desc')}
             </Typography>
             {selectedProvider ? (
               <RepositoryBrowser
@@ -232,27 +243,31 @@ const PublishFromSCMWizard: React.FC<PublishFromSCMWizardProps> = ({
                 }}
               />
             ) : (
-              <Alert severity="warning">Please select a provider first</Alert>
+              <Alert severity="warning">{t('scmWizard.selectProviderFirst')}</Alert>
             )}
           </Box>
-        );
+        )
 
       case 2:
         return (
           <Box>
             <Typography variant="h6" gutterBottom>
-              Configure Settings
+              {t('scmWizard.step2Title')}
             </Typography>
-            <Typography variant="body2" color="textSecondary" sx={{
-              marginBottom: "16px"
-            }}>
-              Choose how versions will be published from this repository.
+            <Typography
+              variant="body2"
+              color="textSecondary"
+              sx={{
+                marginBottom: '16px',
+              }}
+            >
+              {t('scmWizard.step2Desc')}
             </Typography>
             {/* Repository summary */}
             {selectedRepository && (
               <Paper variant="outlined" sx={{ p: 2, mb: 3, bgcolor: 'background.default' }}>
                 <Typography variant="subtitle2" gutterBottom>
-                  Selected Repository
+                  {t('scmWizard.selectedRepository')}
                 </Typography>
                 <Typography variant="body2">{selectedRepository.full_name}</Typography>
               </Paper>
@@ -260,7 +275,7 @@ const PublishFromSCMWizard: React.FC<PublishFromSCMWizardProps> = ({
             {/* Publishing mode selection */}
             <FormControl component="fieldset" sx={{ mb: 3, width: '100%' }}>
               <FormLabel component="legend" sx={{ mb: 1, fontWeight: 500 }}>
-                Publishing Mode
+                {t('scmWizard.publishingMode')}
               </FormLabel>
               <RadioGroup
                 value={publishMode}
@@ -282,10 +297,9 @@ const PublishFromSCMWizard: React.FC<PublishFromSCMWizardProps> = ({
                     control={<Radio />}
                     label={
                       <Box>
-                        <Typography variant="subtitle2">Sync all matching tags</Typography>
+                        <Typography variant="subtitle2">{t('scmWizard.syncAll')}</Typography>
                         <Typography variant="body2" color="textSecondary">
-                          All existing tags matching the pattern will be imported, and new matching
-                          tags can trigger automatic publishing via webhooks.
+                          {t('scmWizard.syncAllDesc')}
                         </Typography>
                       </Box>
                     }
@@ -309,10 +323,11 @@ const PublishFromSCMWizard: React.FC<PublishFromSCMWizardProps> = ({
                     control={<Radio />}
                     label={
                       <Box>
-                        <Typography variant="subtitle2">Publish specific tag</Typography>
+                        <Typography variant="subtitle2">
+                          {t('scmWizard.publishSpecific')}
+                        </Typography>
                         <Typography variant="body2" color="textSecondary">
-                          Publishes only the single tag you selected. Auto-publish is disabled —
-                          future versions must be published manually or via a new sync.
+                          {t('scmWizard.publishSpecificDesc')}
                         </Typography>
                       </Box>
                     }
@@ -325,28 +340,28 @@ const PublishFromSCMWizard: React.FC<PublishFromSCMWizardProps> = ({
             {publishMode === 'sync_all' ? (
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
                 <TextField
-                  label="Repository Path (optional)"
+                  label={t('scmWizard.repositoryPath')}
                   fullWidth
                   value={settings.repository_path}
                   onChange={(e) => setSettings({ ...settings, repository_path: e.target.value })}
-                  helperText="Subdirectory path if module is not at repository root"
+                  helperText={t('scmWizard.repositoryPathHelp')}
                   placeholder="modules/example"
                 />
 
                 <TextField
-                  label="Default Branch"
+                  label={t('scmWizard.defaultBranch')}
                   fullWidth
                   value={settings.default_branch}
                   onChange={(e) => setSettings({ ...settings, default_branch: e.target.value })}
-                  helperText="The main branch for the repository"
+                  helperText={t('scmWizard.defaultBranchHelp')}
                 />
 
                 <TextField
-                  label="Tag Pattern"
+                  label={t('scmWizard.tagPattern')}
                   fullWidth
                   value={settings.tag_pattern}
                   onChange={(e) => setSettings({ ...settings, tag_pattern: e.target.value })}
-                  helperText="Pattern to match version tags (e.g., v*, release/*)"
+                  helperText={t('scmWizard.tagPatternHelp')}
                 />
 
                 <FormControlLabel
@@ -358,14 +373,11 @@ const PublishFromSCMWizard: React.FC<PublishFromSCMWizardProps> = ({
                       }
                     />
                   }
-                  label="Enable automatic publishing on tag push"
+                  label={t('scmWizard.autoPublishLabel')}
                 />
 
                 {settings.auto_publish_enabled && (
-                  <Alert severity="info">
-                    When enabled, new versions will be automatically published when matching tags
-                    are pushed to the repository. Webhooks will be configured automatically.
-                  </Alert>
+                  <Alert severity="info">{t('scmWizard.autoPublishInfo')}</Alert>
                 )}
               </Box>
             ) : (
@@ -373,61 +385,58 @@ const PublishFromSCMWizard: React.FC<PublishFromSCMWizardProps> = ({
                 {selectedTag ? (
                   <Paper variant="outlined" sx={{ p: 2 }}>
                     <Typography variant="subtitle2" gutterBottom>
-                      Tag to publish
+                      {t('scmWizard.tagToPublish')}
                     </Typography>
                     <Box
                       sx={{
-                        display: "flex",
-                        alignItems: "center",
+                        display: 'flex',
+                        alignItems: 'center',
                         gap: 1,
-                        flexWrap: "wrap"
-                      }}>
+                        flexWrap: 'wrap',
+                      }}
+                    >
                       <Chip label={selectedTag.tag_name} color="primary" size="small" />
                       <Chip
-                        label={`Commit: ${selectedTag.target_commit.substring(0, 7)}`}
+                        label={t('scmWizard.commitLabel', {
+                          commit: selectedTag.target_commit.substring(0, 7),
+                        })}
                         size="small"
                         variant="outlined"
                       />
                     </Box>
                     <Typography variant="body2" color="textSecondary" sx={{ mt: 1.5 }}>
-                      To change the tag, go back to Step 2 and select a different one.
+                      {t('scmWizard.changeTagHint')}
                     </Typography>
                   </Paper>
                 ) : (
-                  <Alert severity="warning">
-                    No tag selected. Go back to Step 2 and select a specific tag from the repository
-                    browser.
-                  </Alert>
+                  <Alert severity="warning">{t('scmWizard.noTagSelected')}</Alert>
                 )}
 
                 <TextField
-                  label="Repository Path (optional)"
+                  label={t('scmWizard.repositoryPath')}
                   fullWidth
                   value={settings.repository_path}
                   onChange={(e) => setSettings({ ...settings, repository_path: e.target.value })}
-                  helperText="Subdirectory path if module is not at repository root"
+                  helperText={t('scmWizard.repositoryPathHelp')}
                   placeholder="modules/example"
                 />
 
                 <TextField
-                  label="Default Branch"
+                  label={t('scmWizard.defaultBranch')}
                   fullWidth
                   value={settings.default_branch}
                   onChange={(e) => setSettings({ ...settings, default_branch: e.target.value })}
-                  helperText="The main branch for the repository"
+                  helperText={t('scmWizard.defaultBranchHelp')}
                 />
 
-                <Alert severity="info">
-                  Only this tag will be published. Auto-publish and tag pattern are not applicable
-                  for single-tag publishing.
-                </Alert>
+                <Alert severity="info">{t('scmWizard.singleTagInfo')}</Alert>
               </Box>
             )}
           </Box>
-        );
+        )
 
       default:
-        return 'Unknown step'
+        return t('scmWizard.unknownStep')
     }
   }
 
@@ -448,10 +457,11 @@ const PublishFromSCMWizard: React.FC<PublishFromSCMWizardProps> = ({
       {loading ? (
         <Box
           sx={{
-            display: "flex",
-            justifyContent: "center",
-            py: 4
-          }}>
+            display: 'flex',
+            justifyContent: 'center',
+            py: 4,
+          }}
+        >
           <CircularProgress />
         </Box>
       ) : (
@@ -461,24 +471,18 @@ const PublishFromSCMWizard: React.FC<PublishFromSCMWizardProps> = ({
           <Divider sx={{ my: 3 }} />
 
           <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-            <Button onClick={onCancel}>
-              Cancel
-            </Button>
+            <Button onClick={onCancel}>{t('scmWizard.cancel')}</Button>
             <Box>
               <Button disabled={activeStep === 0} onClick={handleBack} sx={{ mr: 1 }}>
-                Back
+                {t('scmWizard.back')}
               </Button>
               {activeStep === steps.length - 1 ? (
-                <Button
-                  variant="contained"
-                  onClick={handleComplete}
-                  disabled={!canProceedToNext()}
-                >
-                  Link Module
+                <Button variant="contained" onClick={handleComplete} disabled={!canProceedToNext()}>
+                  {t('scmWizard.linkModule')}
                 </Button>
               ) : (
                 <Button variant="contained" onClick={handleNext} disabled={!canProceedToNext()}>
-                  Next
+                  {t('scmWizard.next')}
                 </Button>
               )}
             </Box>
@@ -486,7 +490,7 @@ const PublishFromSCMWizard: React.FC<PublishFromSCMWizardProps> = ({
         </>
       )}
     </Box>
-  );
+  )
 }
 
 export default PublishFromSCMWizard

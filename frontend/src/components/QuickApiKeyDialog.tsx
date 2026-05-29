@@ -1,4 +1,5 @@
 import React from 'react'
+import { useTranslation } from 'react-i18next'
 import {
   Dialog,
   DialogTitle,
@@ -60,6 +61,7 @@ const QuickApiKeyDialog: React.FC<QuickApiKeyDialogProps> = ({
   hostname,
   defaultScopes,
 }) => {
+  const { t } = useTranslation()
   const { announce } = useAnnouncer()
   const [name, setName] = React.useState('')
   const [description, setDescription] = React.useState('')
@@ -86,11 +88,11 @@ const QuickApiKeyDialog: React.FC<QuickApiKeyDialogProps> = ({
 
   const handleSubmit = async () => {
     if (!name.trim()) {
-      setError('Name is required.')
+      setError(t('quickApiKey.nameRequired'))
       return
     }
     if (!organizationId) {
-      setError('You must be a member of an organization to create an API key.')
+      setError(t('quickApiKey.orgRequired'))
       return
     }
     setSubmitting(true)
@@ -104,9 +106,9 @@ const QuickApiKeyDialog: React.FC<QuickApiKeyDialogProps> = ({
         expires_at: expiryIsoFromPreset(expiry),
       })
       setToken(resp.key)
-      announce('API key created. Credentials snippet is now visible.')
+      announce(t('quickApiKey.createdAnnounce'))
     } catch (err) {
-      setError(getErrorMessage(err, 'Failed to create API key.'))
+      setError(getErrorMessage(err, t('quickApiKey.createFailed')))
     } finally {
       setSubmitting(false)
     }
@@ -118,10 +120,10 @@ const QuickApiKeyDialog: React.FC<QuickApiKeyDialogProps> = ({
     try {
       await navigator.clipboard.writeText(snippet)
       setCopied(true)
-      announce('API key credentials copied to clipboard')
+      announce(t('quickApiKey.copiedAnnounce'))
       setTimeout(() => setCopied(false), 2000)
     } catch {
-      setError('Unable to copy to clipboard. Select the text manually.')
+      setError(t('quickApiKey.copyFailed'))
     }
   }
 
@@ -136,7 +138,7 @@ const QuickApiKeyDialog: React.FC<QuickApiKeyDialogProps> = ({
 
   return (
     <Dialog open={open} onClose={handleRequestClose} maxWidth="sm" fullWidth>
-      <DialogTitle>Create API key</DialogTitle>
+      <DialogTitle>{t('quickApiKey.title')}</DialogTitle>
       <DialogContent dividers>
         <Stack spacing={2} sx={{ pt: 1 }}>
           {error && (
@@ -148,7 +150,7 @@ const QuickApiKeyDialog: React.FC<QuickApiKeyDialogProps> = ({
           {!token ? (
             <>
               <TextField
-                label="Name"
+                label={t('quickApiKey.labelName')}
                 required
                 autoFocus
                 fullWidth
@@ -156,11 +158,11 @@ const QuickApiKeyDialog: React.FC<QuickApiKeyDialogProps> = ({
                 onChange={(e) => setName(e.target.value)}
                 disabled={submitting}
                 slotProps={{
-                  htmlInput: { 'aria-label': 'API key name' }
+                  htmlInput: { 'aria-label': t('quickApiKey.ariaName') },
                 }}
               />
               <TextField
-                label="Description (optional)"
+                label={t('quickApiKey.labelDescription')}
                 fullWidth
                 multiline
                 rows={2}
@@ -169,32 +171,26 @@ const QuickApiKeyDialog: React.FC<QuickApiKeyDialogProps> = ({
                 disabled={submitting}
               />
               <FormControl fullWidth>
-                <InputLabel id="quick-apikey-expiry-label">Expires in</InputLabel>
+                <InputLabel id="quick-apikey-expiry-label">{t('quickApiKey.expiresIn')}</InputLabel>
                 <Select
                   labelId="quick-apikey-expiry-label"
-                  label="Expires in"
+                  label={t('quickApiKey.expiresIn')}
                   value={expiry}
                   onChange={(e) => setExpiry(e.target.value as ExpiryPreset)}
                   disabled={submitting}
                   inputProps={{ 'data-testid': 'quick-apikey-expiry' }}
                 >
-                  <MenuItem value="7">7 days</MenuItem>
-                  <MenuItem value="30">30 days</MenuItem>
-                  <MenuItem value="90">90 days</MenuItem>
-                  <MenuItem value="never">Never</MenuItem>
+                  <MenuItem value="7">{t('quickApiKey.expiry7')}</MenuItem>
+                  <MenuItem value="30">{t('quickApiKey.expiry30')}</MenuItem>
+                  <MenuItem value="90">{t('quickApiKey.expiry90')}</MenuItem>
+                  <MenuItem value="never">{t('quickApiKey.expiryNever')}</MenuItem>
                 </Select>
               </FormControl>
-              {!organizationId && (
-                <Alert severity="warning">
-                  You must be a member of an organization to create an API key.
-                </Alert>
-              )}
+              {!organizationId && <Alert severity="warning">{t('quickApiKey.orgRequired')}</Alert>}
             </>
           ) : (
             <>
-              <Alert severity="warning">
-                This is the only time this token will be displayed. Copy it and store it securely.
-              </Alert>
+              <Alert severity="warning">{t('quickApiKey.tokenWarning')}</Alert>
               <Box
                 sx={{
                   position: 'relative',
@@ -216,9 +212,12 @@ const QuickApiKeyDialog: React.FC<QuickApiKeyDialogProps> = ({
                 >
                   {buildSnippet(hostname, token)}
                 </Box>
-                <Tooltip title={copied ? 'Copied!' : 'Copy snippet'} placement="top">
+                <Tooltip
+                  title={copied ? t('quickApiKey.copied') : t('quickApiKey.copySnippet')}
+                  placement="top"
+                >
                   <IconButton
-                    aria-label="Copy credentials snippet"
+                    aria-label={t('quickApiKey.copyAria')}
                     size="small"
                     onClick={handleCopy}
                     sx={{ position: 'absolute', top: 4, right: 4 }}
@@ -232,13 +231,13 @@ const QuickApiKeyDialog: React.FC<QuickApiKeyDialogProps> = ({
 
           {confirmClose && (
             <Alert severity="warning" data-testid="quick-apikey-confirm-close">
-              You haven't copied the token yet. Close anyway?
+              {t('quickApiKey.confirmCloseText')}
               <Stack direction="row" spacing={1} sx={{ mt: 1 }}>
                 <Button size="small" onClick={() => setConfirmClose(false)}>
-                  Keep open
+                  {t('quickApiKey.keepOpen')}
                 </Button>
                 <Button size="small" color="warning" onClick={onClose}>
-                  Close without copying
+                  {t('quickApiKey.closeWithoutCopying')}
                 </Button>
               </Stack>
             </Alert>
@@ -249,7 +248,7 @@ const QuickApiKeyDialog: React.FC<QuickApiKeyDialogProps> = ({
         {!token ? (
           <>
             <Button onClick={handleRequestClose} disabled={submitting}>
-              Cancel
+              {t('quickApiKey.cancel')}
             </Button>
             <Button
               variant="contained"
@@ -257,17 +256,17 @@ const QuickApiKeyDialog: React.FC<QuickApiKeyDialogProps> = ({
               disabled={submitting || !organizationId || !name.trim()}
               startIcon={submitting ? <CircularProgress size={16} /> : undefined}
             >
-              Create
+              {t('quickApiKey.create')}
             </Button>
           </>
         ) : (
           <Button variant="contained" onClick={handleRequestClose}>
-            Done
+            {t('quickApiKey.done')}
           </Button>
         )}
       </DialogActions>
     </Dialog>
-  );
+  )
 }
 
 export default QuickApiKeyDialog

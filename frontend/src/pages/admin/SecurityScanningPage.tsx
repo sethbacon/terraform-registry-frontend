@@ -1,4 +1,6 @@
 import React, { useMemo, useState } from 'react'
+import { useTranslation } from 'react-i18next'
+import type { TFunction } from 'i18next'
 import { useQuery } from '@tanstack/react-query'
 import {
   Container,
@@ -32,34 +34,63 @@ import ScanFindingsModal from '../../components/ScanFindingsModal'
 import api from '../../services/api'
 import type { ModuleScan, RecentScanEntry } from '../../types'
 
-function statusChip(status: string, onClick?: () => void) {
+function statusChip(t: TFunction, status: string, onClick?: () => void) {
   const clickProps = onClick ? { onClick, sx: { cursor: 'pointer' } } : {}
   switch (status) {
     case 'clean':
-      return <Chip label="Clean" size="small" color="success" variant="outlined" />
+      return (
+        <Chip
+          label={t('admin.securityScanning.statusClean')}
+          size="small"
+          color="success"
+          variant="outlined"
+        />
+      )
     case 'findings':
       return (
-        <Chip label="Findings" size="small" color="warning" variant="outlined" {...clickProps} />
+        <Chip
+          label={t('admin.securityScanning.statusFindings')}
+          size="small"
+          color="warning"
+          variant="outlined"
+          {...clickProps}
+        />
       )
     case 'error':
-      return <Chip label="Error" size="small" color="error" variant="outlined" />
+      return (
+        <Chip
+          label={t('admin.securityScanning.statusError')}
+          size="small"
+          color="error"
+          variant="outlined"
+        />
+      )
     case 'pending':
-      return <Chip label="Pending" size="small" variant="outlined" />
+      return (
+        <Chip label={t('admin.securityScanning.statusPending')} size="small" variant="outlined" />
+      )
     case 'scanning':
-      return <Chip label="Scanning" size="small" color="info" variant="outlined" />
+      return (
+        <Chip
+          label={t('admin.securityScanning.statusScanning')}
+          size="small"
+          color="info"
+          variant="outlined"
+        />
+      )
     default:
       return <Chip label={status} size="small" variant="outlined" />
   }
 }
 
-function timeAgo(iso: string): string {
+function timeAgo(t: TFunction, iso: string): string {
   const diff = Date.now() - new Date(iso).getTime()
   const mins = Math.floor(diff / 60_000)
-  if (mins < 1) return 'just now'
-  if (mins < 60) return `${mins}m ago`
+  if (mins < 1) return t('admin.securityScanning.timeJustNow')
+  if (mins < 60) return t('admin.securityScanning.timeMinsAgo', { count: mins })
   const hrs = Math.floor(mins / 60)
-  if (hrs < 24) return `${hrs}h ago`
-  return `${Math.floor(hrs / 24)}d ago`
+  if (hrs < 24) return t('admin.securityScanning.timeHoursAgo', { count: hrs })
+  return t('admin.securityScanning.timeDaysAgo', { count: Math.floor(hrs / 24) })
 }
 
 interface ScannerHealth {
@@ -90,6 +121,7 @@ function computeScannerHealth(scans: RecentScanEntry[]): ScannerHealth {
 }
 
 const SecurityScanningPage: React.FC = () => {
+  const { t } = useTranslation()
   const {
     data: config,
     isLoading: configLoading,
@@ -161,157 +193,222 @@ const SecurityScanningPage: React.FC = () => {
 
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
-      <Typography variant="h4" gutterBottom sx={{
-        fontWeight: 700
-      }}>
-        Security Scanning
+      <Typography
+        variant="h4"
+        gutterBottom
+        sx={{
+          fontWeight: 700,
+        }}
+      >
+        {t('admin.securityScanning.pageTitle')}
       </Typography>
       <Typography
         variant="body2"
         sx={{
-          color: "text.secondary",
-          mb: 3
-        }}>
-        Module security scanning configuration and status
+          color: 'text.secondary',
+          mb: 3,
+        }}
+      >
+        {t('admin.securityScanning.pageSubtitle')}
       </Typography>
       {loading ? (
         <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
           <CircularProgress />
         </Box>
       ) : error ? (
-        <Alert severity="error">Failed to load scanning data.</Alert>
+        <Alert severity="error">{t('admin.securityScanning.loadError')}</Alert>
       ) : (
         <>
           {/* Configuration */}
           <Paper sx={{ p: 3, mb: 3 }}>
             <Typography variant="h6" gutterBottom>
-              Configuration
+              {t('admin.securityScanning.configuration')}
             </Typography>
             <Divider sx={{ mb: 2 }} />
             <Grid container spacing={2}>
               <Grid size={{ xs: 12, sm: 6, md: 4 }}>
-                <Typography variant="caption" sx={{
-                  color: "text.secondary"
-                }}>
-                  Status
+                <Typography
+                  variant="caption"
+                  sx={{
+                    color: 'text.secondary',
+                  }}
+                >
+                  {t('admin.securityScanning.status')}
                 </Typography>
                 <Box sx={{ mt: 0.5 }}>
                   <Chip
                     icon={config?.enabled ? <CheckCircle /> : <Error />}
-                    label={config?.enabled ? 'Enabled' : 'Disabled'}
+                    label={
+                      config?.enabled
+                        ? t('admin.securityScanning.enabled')
+                        : t('admin.securityScanning.disabled')
+                    }
                     color={config?.enabled ? 'success' : 'default'}
                     variant="outlined"
                   />
                 </Box>
               </Grid>
               <Grid size={{ xs: 12, sm: 6, md: 4 }}>
-                <Typography variant="caption" sx={{
-                  color: "text.secondary"
-                }}>
-                  Scanner Tool
+                <Typography
+                  variant="caption"
+                  sx={{
+                    color: 'text.secondary',
+                  }}
+                >
+                  {t('admin.securityScanning.scannerTool')}
                 </Typography>
-                <Typography variant="body1" sx={{
-                  fontFamily: "monospace"
-                }}>
+                <Typography
+                  variant="body1"
+                  sx={{
+                    fontFamily: 'monospace',
+                  }}
+                >
                   {config?.tool || '—'}
                 </Typography>
               </Grid>
               <Grid size={{ xs: 12, sm: 6, md: 4 }}>
-                <Typography variant="caption" sx={{
-                  color: "text.secondary"
-                }}>
-                  Expected Version
+                <Typography
+                  variant="caption"
+                  sx={{
+                    color: 'text.secondary',
+                  }}
+                >
+                  {t('admin.securityScanning.expectedVersion')}
                 </Typography>
-                <Typography variant="body1" sx={{
-                  fontFamily: "monospace"
-                }}>
-                  {config?.expected_version || 'Not pinned'}
+                <Typography
+                  variant="body1"
+                  sx={{
+                    fontFamily: 'monospace',
+                  }}
+                >
+                  {config?.expected_version || t('admin.securityScanning.notPinned')}
                 </Typography>
               </Grid>
               <Grid size={{ xs: 12, sm: 6, md: 4 }}>
-                <Typography variant="caption" sx={{
-                  color: "text.secondary"
-                }}>
-                  Severity Threshold
+                <Typography
+                  variant="caption"
+                  sx={{
+                    color: 'text.secondary',
+                  }}
+                >
+                  {t('admin.securityScanning.severityThreshold')}
                 </Typography>
-                <Typography variant="body1" sx={{
-                  fontFamily: "monospace"
-                }}>
+                <Typography
+                  variant="body1"
+                  sx={{
+                    fontFamily: 'monospace',
+                  }}
+                >
                   {config?.severity_threshold || '—'}
                 </Typography>
               </Grid>
               <Grid size={{ xs: 12, sm: 6, md: 4 }}>
-                <Typography variant="caption" sx={{
-                  color: "text.secondary"
-                }}>
-                  Timeout
+                <Typography
+                  variant="caption"
+                  sx={{
+                    color: 'text.secondary',
+                  }}
+                >
+                  {t('admin.securityScanning.timeout')}
                 </Typography>
-                <Typography variant="body1" sx={{
-                  fontFamily: "monospace"
-                }}>
+                <Typography
+                  variant="body1"
+                  sx={{
+                    fontFamily: 'monospace',
+                  }}
+                >
                   {config?.timeout || '—'}
                 </Typography>
               </Grid>
               <Grid size={{ xs: 12, sm: 6, md: 4 }}>
-                <Typography variant="caption" sx={{
-                  color: "text.secondary"
-                }}>
-                  Workers / Interval
+                <Typography
+                  variant="caption"
+                  sx={{
+                    color: 'text.secondary',
+                  }}
+                >
+                  {t('admin.securityScanning.workersInterval')}
                 </Typography>
-                <Typography variant="body1" sx={{
-                  fontFamily: "monospace"
-                }}>
-                  {config?.worker_count ?? '—'} workers, every {config?.scan_interval_mins ?? '—'}m
+                <Typography
+                  variant="body1"
+                  sx={{
+                    fontFamily: 'monospace',
+                  }}
+                >
+                  {t('admin.securityScanning.workersValue', {
+                    workers: config?.worker_count ?? '—',
+                    mins: config?.scan_interval_mins ?? '—',
+                  })}
                 </Typography>
               </Grid>
               <Grid size={{ xs: 12, sm: 6, md: 4 }}>
-                <Typography variant="caption" sx={{
-                  color: "text.secondary"
-                }}>
-                  Binary Path
+                <Typography
+                  variant="caption"
+                  sx={{
+                    color: 'text.secondary',
+                  }}
+                >
+                  {t('admin.securityScanning.binaryPath')}
                 </Typography>
                 {config?.binary_path ? (
                   <Typography
                     variant="body1"
                     sx={{
-                      fontFamily: "monospace",
-                      wordBreak: 'break-all'
-                    }}>
+                      fontFamily: 'monospace',
+                      wordBreak: 'break-all',
+                    }}
+                  >
                     {config.binary_path}
                   </Typography>
                 ) : (
-                  <Typography variant="body2" sx={{
-                    color: "text.disabled"
-                  }}>
-                    Not reported by backend
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      color: 'text.disabled',
+                    }}
+                  >
+                    {t('admin.securityScanning.notReported')}
                   </Typography>
                 )}
               </Grid>
               <Grid size={{ xs: 12, sm: 6, md: 4 }}>
-                <Typography variant="caption" sx={{
-                  color: "text.secondary"
-                }}>
-                  Detected Version
+                <Typography
+                  variant="caption"
+                  sx={{
+                    color: 'text.secondary',
+                  }}
+                >
+                  {t('admin.securityScanning.detectedVersion')}
                 </Typography>
                 {config?.detected_version ? (
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mt: 0.5 }}>
-                    <Typography variant="body1" sx={{
-                      fontFamily: "monospace"
-                    }}>
+                    <Typography
+                      variant="body1"
+                      sx={{
+                        fontFamily: 'monospace',
+                      }}
+                    >
                       {config.detected_version}
                     </Typography>
                     {config.expected_version &&
                       config.detected_version !== config.expected_version && (
-                        <Tooltip title={`Expected ${config.expected_version}`}>
+                        <Tooltip
+                          title={t('admin.securityScanning.expectedTooltip', {
+                            version: config.expected_version,
+                          })}
+                        >
                           <WarningAmber fontSize="small" color="warning" />
                         </Tooltip>
                       )}
                   </Box>
                 ) : (
-                  <Typography variant="body2" sx={{
-                    color: "text.disabled"
-                  }}>
-                    Not reported by backend
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      color: 'text.disabled',
+                    }}
+                  >
+                    {t('admin.securityScanning.notReported')}
                   </Typography>
                 )}
               </Grid>
@@ -323,25 +420,42 @@ const SecurityScanningPage: React.FC = () => {
             <Box sx={{ display: 'flex', gap: 1.5, flexWrap: 'wrap', mb: 3 }}>
               {[
                 {
-                  label: 'Total Scans',
+                  testId: 'total-scans',
+                  label: t('admin.securityScanning.totalScans'),
                   value: stats.total,
                   icon: <CheckCircle fontSize="small" />,
+                  color: undefined as string | undefined,
                   filterValue: undefined as string | undefined,
                 },
                 {
-                  label: 'Pending',
+                  testId: 'pending',
+                  label: t('admin.securityScanning.statusPending'),
                   value: stats.pending,
                   icon: <HourglassEmpty fontSize="small" />,
+                  color: undefined as string | undefined,
                   filterValue: 'pending',
                 },
-                { label: 'Clean', value: stats.clean, color: 'success.main', filterValue: 'clean' },
                 {
-                  label: 'Findings',
+                  testId: 'clean',
+                  label: t('admin.securityScanning.statusClean'),
+                  value: stats.clean,
+                  color: 'success.main',
+                  filterValue: 'clean',
+                },
+                {
+                  testId: 'findings',
+                  label: t('admin.securityScanning.statusFindings'),
                   value: stats.findings,
                   color: 'warning.main',
                   filterValue: 'findings',
                 },
-                { label: 'Errors', value: stats.error, color: 'error.main', filterValue: 'error' },
+                {
+                  testId: 'errors',
+                  label: t('admin.securityScanning.errors'),
+                  value: stats.error,
+                  color: 'error.main',
+                  filterValue: 'error',
+                },
               ].map((item) => (
                 <Paper
                   key={item.label}
@@ -364,19 +478,23 @@ const SecurityScanningPage: React.FC = () => {
                     setStatusFilter(item.filterValue)
                     setPage(0)
                   }}
-                  data-testid={`stat-card-${item.label.toLowerCase().replace(/\s/g, '-')}`}
+                  data-testid={`stat-card-${item.testId}`}
                 >
-                  <Typography variant="caption" sx={{
-                    color: "text.secondary"
-                  }}>
+                  <Typography
+                    variant="caption"
+                    sx={{
+                      color: 'text.secondary',
+                    }}
+                  >
                     {item.label}
                   </Typography>
                   <Typography
                     variant="h5"
                     sx={{
                       fontWeight: 700,
-                      color: item.color
-                    }}>
+                      color: item.color,
+                    }}
+                  >
                     {item.value}
                   </Typography>
                 </Paper>
@@ -388,35 +506,44 @@ const SecurityScanningPage: React.FC = () => {
           {stats && stats.recent_scans.length > 0 && (
             <Paper sx={{ p: 3, mb: 3 }} data-testid="scanner-health">
               <Typography variant="h6" gutterBottom>
-                Scanner Health
+                {t('admin.securityScanning.scannerHealth')}
               </Typography>
               <Divider sx={{ mb: 2 }} />
               <Grid container spacing={2}>
                 <Grid size={{ xs: 12, sm: 4 }}>
-                  <Typography variant="caption" sx={{
-                    color: "text.secondary"
-                  }}>
-                    Last successful scan
+                  <Typography
+                    variant="caption"
+                    sx={{
+                      color: 'text.secondary',
+                    }}
+                  >
+                    {t('admin.securityScanning.lastSuccessfulScan')}
                   </Typography>
                   {health.lastSuccess?.scanned_at ? (
                     <Tooltip title={new Date(health.lastSuccess.scanned_at).toLocaleString()}>
                       <Typography variant="body1">
-                        {timeAgo(health.lastSuccess.scanned_at)}
+                        {timeAgo(t, health.lastSuccess.scanned_at)}
                       </Typography>
                     </Tooltip>
                   ) : (
-                    <Typography variant="body2" sx={{
-                      color: "text.disabled"
-                    }}>
-                      No successful scans in window
+                    <Typography
+                      variant="body2"
+                      sx={{
+                        color: 'text.disabled',
+                      }}
+                    >
+                      {t('admin.securityScanning.noSuccessfulScans')}
                     </Typography>
                   )}
                 </Grid>
                 <Grid size={{ xs: 12, sm: 4 }}>
-                  <Typography variant="caption" sx={{
-                    color: "text.secondary"
-                  }}>
-                    Error rate (last {health.windowSize || 0} scans)
+                  <Typography
+                    variant="caption"
+                    sx={{
+                      color: 'text.secondary',
+                    }}
+                  >
+                    {t('admin.securityScanning.errorRate', { count: health.windowSize || 0 })}
                   </Typography>
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, mt: 0.5 }}>
                     <Typography
@@ -429,32 +556,45 @@ const SecurityScanningPage: React.FC = () => {
                   </Box>
                 </Grid>
                 <Grid size={{ xs: 12, sm: 4 }}>
-                  <Typography variant="caption" sx={{
-                    color: "text.secondary"
-                  }}>
-                    Last error
+                  <Typography
+                    variant="caption"
+                    sx={{
+                      color: 'text.secondary',
+                    }}
+                  >
+                    {t('admin.securityScanning.lastErrorLabel')}
                   </Typography>
                   {health.lastError ? (
                     <Box>
-                      <Typography variant="body2" noWrap sx={{
-                        fontFamily: "monospace"
-                      }}>
+                      <Typography
+                        variant="body2"
+                        noWrap
+                        sx={{
+                          fontFamily: 'monospace',
+                        }}
+                      >
                         {health.lastError.namespace}/{health.lastError.module_name}/
                         {health.lastError.system}
                       </Typography>
-                      <Typography variant="caption" sx={{
-                        color: "text.secondary"
-                      }}>
+                      <Typography
+                        variant="caption"
+                        sx={{
+                          color: 'text.secondary',
+                        }}
+                      >
                         {health.lastError.scanned_at
-                          ? timeAgo(health.lastError.scanned_at)
-                          : timeAgo(health.lastError.created_at)}
+                          ? timeAgo(t, health.lastError.scanned_at)
+                          : timeAgo(t, health.lastError.created_at)}
                       </Typography>
                     </Box>
                   ) : (
-                    <Typography variant="body2" sx={{
-                      color: "success.main"
-                    }}>
-                      No errors in window
+                    <Typography
+                      variant="body2"
+                      sx={{
+                        color: 'success.main',
+                      }}
+                    >
+                      {t('admin.securityScanning.noErrorsInWindow')}
                     </Typography>
                   )}
                 </Grid>
@@ -465,124 +605,139 @@ const SecurityScanningPage: React.FC = () => {
           {/* Recent Scans */}
           <Paper sx={{ p: 3 }}>
             <Typography variant="h6" gutterBottom>
-              Recent Scans
+              {t('admin.securityScanning.recentScans')}
             </Typography>
             <Divider sx={{ mb: 2 }} />
             {!stats?.recent_scans?.length ? (
-              <Typography variant="body2" sx={{
-                color: "text.secondary"
-              }}>
-                No scans recorded yet.
+              <Typography
+                variant="body2"
+                sx={{
+                  color: 'text.secondary',
+                }}
+              >
+                {t('admin.securityScanning.noScansYet')}
               </Typography>
             ) : (
               <>
                 <TableContainer>
-                <Table size="small">
-                  <TableHead>
-                    <TableRow>
-                      <TableCell sx={{ width: 40 }} />
-                      <TableCell>Module</TableCell>
-                      <TableCell>Version</TableCell>
-                      <TableCell>Scanner</TableCell>
-                      <TableCell>Status</TableCell>
-                      <TableCell align="right">Critical</TableCell>
-                      <TableCell align="right">High</TableCell>
-                      <TableCell align="right">Medium</TableCell>
-                      <TableCell align="right">Low</TableCell>
-                      <TableCell align="right">When</TableCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {stats.recent_scans.map((scan) => {
-                      const hasDiagnostics =
-                        Boolean(scan.error_message) || Boolean(scan.execution_log)
-                      const isExpanded = expandedScanId === scan.id
-                      return (
-                        <React.Fragment key={scan.id}>
-                          <TableRow hover>
-                            <TableCell sx={{ p: 0.5 }}>
-                              {hasDiagnostics && (
-                                <IconButton
-                                  size="small"
-                                  aria-label={
-                                    isExpanded ? 'Hide scan details' : 'Show scan details'
-                                  }
-                                  onClick={() => setExpandedScanId(isExpanded ? null : scan.id)}
-                                  data-testid={`scan-row-toggle-${scan.id}`}
+                  <Table size="small">
+                    <TableHead>
+                      <TableRow>
+                        <TableCell sx={{ width: 40 }} />
+                        <TableCell>{t('admin.securityScanning.thModule')}</TableCell>
+                        <TableCell>{t('admin.securityScanning.thVersion')}</TableCell>
+                        <TableCell>{t('admin.securityScanning.thScanner')}</TableCell>
+                        <TableCell>{t('admin.securityScanning.thStatus')}</TableCell>
+                        <TableCell align="right">
+                          {t('admin.securityScanning.thCritical')}
+                        </TableCell>
+                        <TableCell align="right">{t('admin.securityScanning.thHigh')}</TableCell>
+                        <TableCell align="right">{t('admin.securityScanning.thMedium')}</TableCell>
+                        <TableCell align="right">{t('admin.securityScanning.thLow')}</TableCell>
+                        <TableCell align="right">{t('admin.securityScanning.thWhen')}</TableCell>
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      {stats.recent_scans.map((scan) => {
+                        const hasDiagnostics =
+                          Boolean(scan.error_message) || Boolean(scan.execution_log)
+                        const isExpanded = expandedScanId === scan.id
+                        return (
+                          <React.Fragment key={scan.id}>
+                            <TableRow hover>
+                              <TableCell sx={{ p: 0.5 }}>
+                                {hasDiagnostics && (
+                                  <IconButton
+                                    size="small"
+                                    aria-label={
+                                      isExpanded
+                                        ? t('admin.securityScanning.hideScanDetails')
+                                        : t('admin.securityScanning.showScanDetails')
+                                    }
+                                    onClick={() => setExpandedScanId(isExpanded ? null : scan.id)}
+                                    data-testid={`scan-row-toggle-${scan.id}`}
+                                  >
+                                    {isExpanded ? <KeyboardArrowDown /> : <KeyboardArrowRight />}
+                                  </IconButton>
+                                )}
+                              </TableCell>
+                              <TableCell>
+                                <Typography
+                                  variant="body2"
+                                  noWrap
+                                  sx={{
+                                    fontFamily: 'monospace',
+                                  }}
                                 >
-                                  {isExpanded ? <KeyboardArrowDown /> : <KeyboardArrowRight />}
-                                </IconButton>
-                              )}
-                            </TableCell>
-                            <TableCell>
-                              <Typography variant="body2" noWrap sx={{
-                                fontFamily: "monospace"
-                              }}>
-                                {scan.namespace}/{scan.module_name}/{scan.system}
-                              </Typography>
-                            </TableCell>
-                            <TableCell>{scan.module_version}</TableCell>
-                            <TableCell>{scan.scanner}</TableCell>
-                            <TableCell>
-                              {statusChip(
-                                scan.status,
-                                scan.status === 'findings'
-                                  ? () => handleFindingsClick(scan)
-                                  : undefined,
-                              )}
-                            </TableCell>
-                            <TableCell align="right">{scan.critical_count}</TableCell>
-                            <TableCell align="right">{scan.high_count}</TableCell>
-                            <TableCell align="right">{scan.medium_count}</TableCell>
-                            <TableCell align="right">{scan.low_count}</TableCell>
-                            <TableCell align="right">
-                              <Tooltip
-                                title={
-                                  scan.scanned_at
-                                    ? new Date(scan.scanned_at).toLocaleString()
-                                    : 'Not scanned yet'
-                                }
-                              >
-                                <Typography variant="caption" sx={{
-                                  color: "text.secondary"
-                                }}>
-                                  {scan.scanned_at ? timeAgo(scan.scanned_at) : '—'}
+                                  {scan.namespace}/{scan.module_name}/{scan.system}
                                 </Typography>
-                              </Tooltip>
-                            </TableCell>
-                          </TableRow>
-                          {hasDiagnostics && (
-                            <TableRow>
-                              <TableCell colSpan={10} sx={{ py: 0, border: 0 }}>
-                                <Collapse in={isExpanded} unmountOnExit>
-                                  <Box sx={{ py: 2, px: 1 }}>
-                                    <ScanDiagnostics
-                                      errorMessage={scan.error_message}
-                                      executionLog={scan.execution_log}
-                                    />
-                                  </Box>
-                                </Collapse>
+                              </TableCell>
+                              <TableCell>{scan.module_version}</TableCell>
+                              <TableCell>{scan.scanner}</TableCell>
+                              <TableCell>
+                                {statusChip(
+                                  t,
+                                  scan.status,
+                                  scan.status === 'findings'
+                                    ? () => handleFindingsClick(scan)
+                                    : undefined,
+                                )}
+                              </TableCell>
+                              <TableCell align="right">{scan.critical_count}</TableCell>
+                              <TableCell align="right">{scan.high_count}</TableCell>
+                              <TableCell align="right">{scan.medium_count}</TableCell>
+                              <TableCell align="right">{scan.low_count}</TableCell>
+                              <TableCell align="right">
+                                <Tooltip
+                                  title={
+                                    scan.scanned_at
+                                      ? new Date(scan.scanned_at).toLocaleString()
+                                      : t('admin.securityScanning.notScannedYet')
+                                  }
+                                >
+                                  <Typography
+                                    variant="caption"
+                                    sx={{
+                                      color: 'text.secondary',
+                                    }}
+                                  >
+                                    {scan.scanned_at ? timeAgo(t, scan.scanned_at) : '—'}
+                                  </Typography>
+                                </Tooltip>
                               </TableCell>
                             </TableRow>
-                          )}
-                        </React.Fragment>
-                      );
-                    })}
-                  </TableBody>
-                </Table>
-              </TableContainer>
-              <TablePagination
-                component="div"
-                count={stats.total_filtered}
-                page={page}
-                onPageChange={(_, newPage) => setPage(newPage)}
-                rowsPerPage={rowsPerPage}
-                onRowsPerPageChange={(e) => {
-                  setRowsPerPage(parseInt(e.target.value, 10))
-                  setPage(0)
-                }}
-                rowsPerPageOptions={[10, 20, 50, 100]}
-              />
+                            {hasDiagnostics && (
+                              <TableRow>
+                                <TableCell colSpan={10} sx={{ py: 0, border: 0 }}>
+                                  <Collapse in={isExpanded} unmountOnExit>
+                                    <Box sx={{ py: 2, px: 1 }}>
+                                      <ScanDiagnostics
+                                        errorMessage={scan.error_message}
+                                        executionLog={scan.execution_log}
+                                      />
+                                    </Box>
+                                  </Collapse>
+                                </TableCell>
+                              </TableRow>
+                            )}
+                          </React.Fragment>
+                        )
+                      })}
+                    </TableBody>
+                  </Table>
+                </TableContainer>
+                <TablePagination
+                  component="div"
+                  count={stats.total_filtered}
+                  page={page}
+                  onPageChange={(_, newPage) => setPage(newPage)}
+                  rowsPerPage={rowsPerPage}
+                  onRowsPerPageChange={(e) => {
+                    setRowsPerPage(parseInt(e.target.value, 10))
+                    setPage(0)
+                  }}
+                  rowsPerPageOptions={[10, 20, 50, 100]}
+                />
               </>
             )}
           </Paper>
@@ -596,7 +751,7 @@ const SecurityScanningPage: React.FC = () => {
         moduleLabel={findingsModalLabel}
       />
     </Container>
-  );
+  )
 }
 
 export default SecurityScanningPage

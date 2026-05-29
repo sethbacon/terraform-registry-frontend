@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom'
 import {
   Container,
@@ -49,6 +50,7 @@ import ProviderDocsSidebar from '../components/ProviderDocsSidebar'
 import ProviderDocContent from '../components/ProviderDocContent'
 
 const ProviderDetailPage: React.FC = () => {
+  const { t } = useTranslation()
   const { namespace, type } = useParams<{
     namespace: string
     type: string
@@ -406,16 +408,28 @@ provider "${name}" {
             >
               Providers
             </Link>
-            <Typography sx={{
-              color: "text.primary"
-            }}>{namespace}</Typography>
-            <Typography sx={{
-              color: "text.primary"
-            }}>{name}</Typography>
+            <Typography
+              sx={{
+                color: 'text.primary',
+              }}
+            >
+              {namespace}
+            </Typography>
+            <Typography
+              sx={{
+                color: 'text.primary',
+              }}
+            >
+              {name}
+            </Typography>
             {selectedVersion && (
-              <Typography sx={{
-                color: "text.primary"
-              }}>v{selectedVersion.version}</Typography>
+              <Typography
+                sx={{
+                  color: 'text.primary',
+                }}
+              >
+                v{selectedVersion.version}
+              </Typography>
             )}
           </Breadcrumbs>
 
@@ -425,14 +439,22 @@ provider "${name}" {
               direction="row"
               spacing={2}
               sx={{
-                alignItems: "center",
-                justifyContent: "space-between",
-                mb: 2
-              }}>
-              <Stack direction="row" spacing={2} sx={{
-                alignItems: "center"
-              }}>
-                <IconButton aria-label="Back to providers" onClick={() => navigate('/providers')}>
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                mb: 2,
+              }}
+            >
+              <Stack
+                direction="row"
+                spacing={2}
+                sx={{
+                  alignItems: 'center',
+                }}
+              >
+                <IconButton
+                  aria-label={t('providers.detail.ariaBack')}
+                  onClick={() => navigate('/providers')}
+                >
                   <ArrowBack />
                 </IconButton>
                 <Typography variant="h4" component="h1">
@@ -441,25 +463,35 @@ provider "${name}" {
               </Stack>
               {canManage && !provider.source && (
                 <Button variant="contained" startIcon={<Add />} onClick={handlePublishNewVersion}>
-                  Publish New Version
+                  {t('providers.detail.publishNewVersion')}
                 </Button>
               )}
             </Stack>
-            <Typography variant="body1" gutterBottom sx={{
-              color: "text.secondary"
-            }}>
+            <Typography
+              variant="body1"
+              gutterBottom
+              sx={{
+                color: 'text.secondary',
+              }}
+            >
               {provider.description || 'No description available'}
             </Typography>
             <Stack
               direction="row"
               spacing={1}
               sx={{
-                alignItems: "center",
-                mt: 2
-              }}>
+                alignItems: 'center',
+                mt: 2,
+              }}
+            >
               <Chip label={namespace} />
               {provider.source && (
-                <Chip label="Network Mirrored" color="info" size="small" variant="outlined" />
+                <Chip
+                  label={t('providers.networkMirroredBadge')}
+                  color="info"
+                  size="small"
+                  variant="outlined"
+                />
               )}
               <FormControl size="small" sx={{ minWidth: 220 }}>
                 <Select
@@ -484,7 +516,12 @@ provider "${name}" {
                 </Select>
               </FormControl>
               {selectedVersion?.deprecated && (
-                <Chip label="Deprecated" color="warning" size="small" icon={<Warning />} />
+                <Chip
+                  label={t('providers.detail.chipDeprecated')}
+                  color="warning"
+                  size="small"
+                  icon={<Warning />}
+                />
               )}
               <Chip label={`${provider.download_count ?? 0} downloads`} />
               {canManage && (
@@ -495,7 +532,7 @@ provider "${name}" {
                   startIcon={<Delete />}
                   onClick={() => setDeleteProviderDialogOpen(true)}
                 >
-                  Delete Provider
+                  {t('providers.detail.deleteProvider')}
                 </Button>
               )}
             </Stack>
@@ -505,8 +542,8 @@ provider "${name}" {
           {hasDocs && (
             <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 3 }}>
               <Tabs value={activeTab} onChange={handleTabChange}>
-                <Tab label="Overview" />
-                <Tab label="Documentation" />
+                <Tab label={t('providers.detail.tabOverview')} />
+                <Tab label={t('providers.detail.tabDocumentation')} />
               </Tabs>
             </Box>
           )}
@@ -521,14 +558,15 @@ provider "${name}" {
                   <Stack
                     direction="row"
                     sx={{
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                      mb: 2
-                    }}>
-                    <Typography variant="h6">Usage Example</Typography>
-                    <Tooltip title={copiedSource ? 'Copied!' : 'Copy source'}>
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      mb: 2,
+                    }}
+                  >
+                    <Typography variant="h6">{t('providers.detail.usageExample')}</Typography>
+                    <Tooltip title={copiedSource ? 'Copied!' : t('providers.detail.copySourceUrl')}>
                       <IconButton
-                        aria-label="Copy source URL"
+                        aria-label={t('providers.detail.copySourceUrl')}
                         onClick={handleCopySource}
                         size="small"
                       >
@@ -566,8 +604,8 @@ provider "${name}" {
                           <TableHead>
                             <TableRow>
                               <TableCell>OS</TableCell>
-                              <TableCell>Architecture</TableCell>
-                              <TableCell>SHA256 Sum</TableCell>
+                              <TableCell>{t('providers.detail.thArchitecture')}</TableCell>
+                              <TableCell>{t('providers.detail.thSha256Sum')}</TableCell>
                               <TableCell width="50px"></TableCell>
                             </TableRow>
                           </TableHead>
@@ -591,12 +629,12 @@ provider "${name}" {
                                       title={
                                         copiedChecksum === platform.shasum
                                           ? 'Copied!'
-                                          : 'Copy checksum'
+                                          : t('providers.detail.tooltipCopyChecksum')
                                       }
                                     >
                                       <IconButton
                                         size="small"
-                                        aria-label="Copy checksum"
+                                        aria-label={t('providers.detail.ariaCopyChecksum')}
                                         onClick={() => handleCopyChecksum(platform.shasum)}
                                       >
                                         <ContentCopy fontSize="small" />
@@ -618,7 +656,7 @@ provider "${name}" {
                 {/* Provider Information */}
                 <Paper sx={{ p: 3, mb: 3 }}>
                   <Typography variant="h6" gutterBottom>
-                    Provider Information
+                    {t('providers.detail.sidebarProviderInfo')}
                   </Typography>
                   <Divider sx={{ mb: 2 }} />
                   <Box sx={{ '& > *': { mb: 1 } }}>
@@ -629,13 +667,14 @@ provider "${name}" {
                       <strong>Name:</strong> {name}
                     </Typography>
                     <Typography variant="body2">
-                      <strong>Latest Version:</strong>{' '}
+                      <strong>{t('providers.detail.labelLatestVersion')}</strong>{' '}
                       {versions.length > 0
                         ? (versions.find((v) => !v.deprecated) ?? versions[0]).version
                         : 'N/A'}
                     </Typography>
                     <Typography variant="body2">
-                      <strong>Total Downloads:</strong> {provider.download_count ?? 0}
+                      <strong>{t('providers.detail.labelTotalDownloads')}</strong>{' '}
+                      {provider.download_count ?? 0}
                     </Typography>
                     {githubUrl && (
                       <Box sx={{ mt: 1 }}>
@@ -668,7 +707,8 @@ provider "${name}" {
                     )}
                     {provider.created_by_name && (
                       <Typography variant="body2" sx={{ mt: 1 }}>
-                        <strong>Created By:</strong> {provider.created_by_name}
+                        <strong>{t('providers.detail.labelCreatedBy')}</strong>{' '}
+                        {provider.created_by_name}
                       </Typography>
                     )}
                   </Box>
@@ -690,7 +730,8 @@ provider "${name}" {
                     </Typography>
                     {selectedVersion.published_by_name && (
                       <Typography variant="body2" sx={{ mb: 2 }}>
-                        <strong>Published By:</strong> {selectedVersion.published_by_name}
+                        <strong>{t('providers.detail.labelPublishedBy')}</strong>{' '}
+                        {selectedVersion.published_by_name}
                       </Typography>
                     )}
 
@@ -698,7 +739,7 @@ provider "${name}" {
                     {selectedVersion.deprecated && (
                       <Alert severity="warning" sx={{ mb: 2 }}>
                         <Typography variant="body2">
-                          <strong>Deprecated</strong>
+                          <strong>{t('providers.detail.chipDeprecated')}</strong>
                           {selectedVersion.deprecated_at && (
                             <>
                               {' '}
@@ -727,7 +768,9 @@ provider "${name}" {
                             disabled={deprecating}
                             fullWidth
                           >
-                            {deprecating ? 'Removing Deprecation...' : 'Remove Deprecation'}
+                            {deprecating
+                              ? t('providers.detail.removing')
+                              : t('providers.detail.removeDeprecation')}
                           </Button>
                         ) : (
                           <Button
@@ -738,7 +781,7 @@ provider "${name}" {
                             onClick={() => setDeprecateDialogOpen(true)}
                             fullWidth
                           >
-                            Deprecate Version
+                            {t('providers.detail.deprecateVersion')}
                           </Button>
                         )}
                         <Button
@@ -749,7 +792,7 @@ provider "${name}" {
                           onClick={() => openDeleteVersionDialog(selectedVersion.version)}
                           fullWidth
                         >
-                          Delete This Version
+                          {t('providers.detail.deleteThisVersion')}
                         </Button>
                       </Stack>
                     )}
@@ -796,9 +839,11 @@ provider "${name}" {
                     />
                   ) : (
                     <Box sx={{ p: 4, textAlign: 'center' }}>
-                      <Typography sx={{
-                        color: "text.secondary"
-                      }}>
+                      <Typography
+                        sx={{
+                          color: 'text.secondary',
+                        }}
+                      >
                         Select a document from the sidebar.
                       </Typography>
                     </Box>
@@ -810,7 +855,7 @@ provider "${name}" {
               <Box sx={{ width: 320, flexShrink: 0 }}>
                 <Paper sx={{ p: 3, mb: 3 }}>
                   <Typography variant="h6" gutterBottom>
-                    Provider Information
+                    {t('providers.detail.sidebarProviderInfo')}
                   </Typography>
                   <Divider sx={{ mb: 2 }} />
                   <Box sx={{ '& > *': { mb: 1 } }}>
@@ -821,13 +866,14 @@ provider "${name}" {
                       <strong>Name:</strong> {name}
                     </Typography>
                     <Typography variant="body2">
-                      <strong>Latest Version:</strong>{' '}
+                      <strong>{t('providers.detail.labelLatestVersion')}</strong>{' '}
                       {versions.length > 0
                         ? (versions.find((v) => !v.deprecated) ?? versions[0]).version
                         : 'N/A'}
                     </Typography>
                     <Typography variant="body2">
-                      <strong>Total Downloads:</strong> {provider.download_count ?? 0}
+                      <strong>{t('providers.detail.labelTotalDownloads')}</strong>{' '}
+                      {provider.download_count ?? 0}
                     </Typography>
                     {githubUrl && (
                       <Box sx={{ mt: 1 }}>
@@ -860,7 +906,8 @@ provider "${name}" {
                     )}
                     {provider.created_by_name && (
                       <Typography variant="body2" sx={{ mt: 1 }}>
-                        <strong>Created By:</strong> {provider.created_by_name}
+                        <strong>{t('providers.detail.labelCreatedBy')}</strong>{' '}
+                        {provider.created_by_name}
                       </Typography>
                     )}
                   </Box>
@@ -881,13 +928,14 @@ provider "${name}" {
                     </Typography>
                     {selectedVersion.published_by_name && (
                       <Typography variant="body2" sx={{ mb: 2 }}>
-                        <strong>Published By:</strong> {selectedVersion.published_by_name}
+                        <strong>{t('providers.detail.labelPublishedBy')}</strong>{' '}
+                        {selectedVersion.published_by_name}
                       </Typography>
                     )}
                     {selectedVersion.deprecated && (
                       <Alert severity="warning" sx={{ mb: 2 }}>
                         <Typography variant="body2">
-                          <strong>Deprecated</strong>
+                          <strong>{t('providers.detail.chipDeprecated')}</strong>
                           {selectedVersion.deprecated_at && (
                             <>
                               {' '}
@@ -915,7 +963,9 @@ provider "${name}" {
                             disabled={deprecating}
                             fullWidth
                           >
-                            {deprecating ? 'Removing...' : 'Remove Deprecation'}
+                            {deprecating
+                              ? t('providers.detail.removing')
+                              : t('providers.detail.removeDeprecation')}
                           </Button>
                         ) : (
                           <Button
@@ -926,7 +976,7 @@ provider "${name}" {
                             onClick={() => setDeprecateDialogOpen(true)}
                             fullWidth
                           >
-                            Deprecate Version
+                            {t('providers.detail.deprecateVersion')}
                           </Button>
                         )}
                         <Button
@@ -937,7 +987,7 @@ provider "${name}" {
                           onClick={() => openDeleteVersionDialog(selectedVersion.version)}
                           fullWidth
                         >
-                          Delete This Version
+                          {t('providers.detail.deleteThisVersion')}
                         </Button>
                       </Stack>
                     )}
@@ -952,7 +1002,7 @@ provider "${name}" {
             open={deleteProviderDialogOpen}
             onClose={() => setDeleteProviderDialogOpen(false)}
           >
-            <DialogTitle>Delete Provider</DialogTitle>
+            <DialogTitle>{t('providers.detail.deleteProviderTitle')}</DialogTitle>
             <DialogContent>
               <DialogContentText>
                 Are you sure you want to delete the provider{' '}
@@ -965,17 +1015,19 @@ provider "${name}" {
             </DialogContent>
             <DialogActions>
               <Button onClick={() => setDeleteProviderDialogOpen(false)} disabled={deleting}>
-                Cancel
+                {t('providers.detail.cancel')}
               </Button>
               <Button onClick={handleDeleteProvider} color="error" disabled={deleting}>
-                {deleting ? 'Deleting...' : 'Delete Provider'}
+                {deleting
+                  ? t('providers.detail.deleting')
+                  : t('providers.detail.deleteProviderTitle')}
               </Button>
             </DialogActions>
           </Dialog>
 
           {/* Delete Version Confirmation Dialog */}
           <Dialog open={deleteVersionDialogOpen} onClose={() => setDeleteVersionDialogOpen(false)}>
-            <DialogTitle>Delete Version</DialogTitle>
+            <DialogTitle>{t('providers.detail.deleteVersionTitle')}</DialogTitle>
             <DialogContent>
               <DialogContentText>
                 Are you sure you want to delete version <strong>{versionToDelete}</strong> of{' '}
@@ -988,17 +1040,19 @@ provider "${name}" {
             </DialogContent>
             <DialogActions>
               <Button onClick={() => setDeleteVersionDialogOpen(false)} disabled={deleting}>
-                Cancel
+                {t('providers.detail.cancel')}
               </Button>
               <Button onClick={handleDeleteVersion} color="error" disabled={deleting}>
-                {deleting ? 'Deleting...' : 'Delete Version'}
+                {deleting
+                  ? t('providers.detail.deleting')
+                  : t('providers.detail.deleteVersionTitle')}
               </Button>
             </DialogActions>
           </Dialog>
 
           {/* Deprecate Version Dialog */}
           <Dialog open={deprecateDialogOpen} onClose={() => setDeprecateDialogOpen(false)}>
-            <DialogTitle>Deprecate Version</DialogTitle>
+            <DialogTitle>{t('providers.detail.deprecateVersionTitle')}</DialogTitle>
             <DialogContent>
               <DialogContentText sx={{ mb: 2 }}>
                 Are you sure you want to deprecate version{' '}
@@ -1010,7 +1064,7 @@ provider "${name}" {
               </DialogContentText>
               <TextField
                 autoFocus
-                label="Deprecation Message (optional)"
+                label={t('providers.detail.labelDeprecationMsg')}
                 placeholder="e.g., Use version 5.0.0 instead - this version has a critical bug"
                 fullWidth
                 multiline
@@ -1027,17 +1081,19 @@ provider "${name}" {
                 }}
                 disabled={deprecating}
               >
-                Cancel
+                {t('providers.detail.cancel')}
               </Button>
               <Button onClick={handleDeprecateVersion} color="warning" disabled={deprecating}>
-                {deprecating ? 'Deprecating...' : 'Deprecate Version'}
+                {deprecating
+                  ? t('providers.detail.deprecating')
+                  : t('providers.detail.deprecateVersionTitle')}
               </Button>
             </DialogActions>
           </Dialog>
         </Container>
       )}
     </Box>
-  );
+  )
 }
 
 export default ProviderDetailPage
