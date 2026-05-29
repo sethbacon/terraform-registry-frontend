@@ -1,4 +1,5 @@
 import React from 'react'
+import { useTranslation } from 'react-i18next'
 import {
   Box,
   Paper,
@@ -35,19 +36,21 @@ const SCMRepositoryPanel: React.FC<SCMRepositoryPanelProps> = ({
   onUnlink,
   onOpenWizard,
 }) => {
+  const { t } = useTranslation()
   if (!isAuthenticated || !scmLinkLoaded) return null
 
   return (
     <Paper sx={{ p: 3, mb: 3 }}>
       <Box
         sx={{
-          display: "flex",
-          alignItems: "center",
+          display: 'flex',
+          alignItems: 'center',
           gap: 1,
-          mb: 1
-        }}>
+          mb: 1,
+        }}
+      >
         <SCMIcon fontSize="small" color="action" />
-        <Typography variant="h6">Source Repository</Typography>
+        <Typography variant="h6">{t('scmRepositoryPanel.title')}</Typography>
       </Box>
       <Divider sx={{ mb: 2 }} />
       {scmLink ? (
@@ -60,19 +63,21 @@ const SCMRepositoryPanel: React.FC<SCMRepositoryPanelProps> = ({
           <Typography
             variant="caption"
             sx={{
-              color: "text.secondary",
-              display: "block",
-              mb: 0.5
-            }}>
+              color: 'text.secondary',
+              display: 'block',
+              mb: 0.5,
+            }}
+          >
             Branch: {scmLink.default_branch}
           </Typography>
           <Typography
             variant="caption"
             sx={{
-              color: "text.secondary",
-              display: "block",
-              mb: 0.5
-            }}>
+              color: 'text.secondary',
+              display: 'block',
+              mb: 0.5,
+            }}
+          >
             Tag pattern: <code>{scmLink.tag_pattern || 'v*'}</code>
           </Typography>
           <Chip
@@ -86,10 +91,11 @@ const SCMRepositoryPanel: React.FC<SCMRepositoryPanelProps> = ({
             <Typography
               variant="caption"
               sx={{
-                color: "text.secondary",
-                display: "block",
-                mb: 1.5
-              }}>
+                color: 'text.secondary',
+                display: 'block',
+                mb: 1.5,
+              }}
+            >
               Last synced: {new Date(scmLink.last_sync_at).toLocaleString()}
             </Typography>
           )}
@@ -122,9 +128,10 @@ const SCMRepositoryPanel: React.FC<SCMRepositoryPanelProps> = ({
           <Typography
             variant="body2"
             sx={{
-              color: "text.secondary",
-              mb: 2
-            }}>
+              color: 'text.secondary',
+              mb: 2,
+            }}
+          >
             Not linked to a repository. Link one to enable automatic version publishing.
           </Typography>
           <Button
@@ -139,7 +146,7 @@ const SCMRepositoryPanel: React.FC<SCMRepositoryPanelProps> = ({
         </Box>
       )}
     </Paper>
-  );
+  )
 }
 
 export default SCMRepositoryPanel

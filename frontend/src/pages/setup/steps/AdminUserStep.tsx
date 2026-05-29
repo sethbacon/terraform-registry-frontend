@@ -1,9 +1,11 @@
 import React from 'react'
+import { useTranslation } from 'react-i18next'
 import { Box, Typography, Alert, Stack, TextField, Button, CircularProgress } from '@mui/material'
 import PersonIcon from '@mui/icons-material/Person'
 import { useSetupWizard } from '../../../contexts/SetupWizardContext'
 
 const AdminUserStep: React.FC = () => {
+  const { t } = useTranslation()
   const { adminEmail, setAdminEmail, adminSaving, adminSaved, saveAdmin, goToStep } =
     useSetupWizard()
 
@@ -18,9 +20,10 @@ const AdminUserStep: React.FC = () => {
       <Typography
         variant="body2"
         sx={{
-          color: "text.secondary",
-          mb: 3
-        }}>
+          color: 'text.secondary',
+          mb: 3,
+        }}
+      >
         Specify the email address of the first admin user. This must match the email in your OIDC
         provider. When this user logs in via OIDC for the first time, they will automatically
         receive admin privileges.
@@ -32,12 +35,12 @@ const AdminUserStep: React.FC = () => {
       <Stack spacing={2}>
         <TextField
           fullWidth
-          label="Admin Email"
+          label={t('adminUserStep.adminEmail')}
           type="email"
           value={adminEmail}
           onChange={(e) => setAdminEmail(e.target.value)}
           placeholder="admin@example.com"
-          helperText="This email must match your OIDC provider identity"
+          helperText={t('adminUserStep.emailMustMatch')}
           required
         />
 
@@ -64,7 +67,7 @@ const AdminUserStep: React.FC = () => {
         )}
       </Stack>
     </Box>
-  );
+  )
 }
 
 export default AdminUserStep

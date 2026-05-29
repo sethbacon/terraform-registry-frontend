@@ -409,11 +409,11 @@ const Layout = () => {
     () =>
       isAuthenticated
         ? adminNavGroups
-          .map((group) => ({
-            ...group,
-            items: group.items.filter((item) => item.scope === null || hasScope(item.scope)),
-          }))
-          .filter((group) => group.items.length > 0)
+            .map((group) => ({
+              ...group,
+              items: group.items.filter((item) => item.scope === null || hasScope(item.scope)),
+            }))
+            .filter((group) => group.items.length > 0)
         : [],
     [isAuthenticated, adminNavGroups, hasScope],
   )
@@ -427,7 +427,7 @@ const Layout = () => {
   }, [])
 
   const drawer = (
-    <Box component="nav" aria-label="Main navigation">
+    <Box component="nav" aria-label={t('layout.mainNavigation')}>
       <Toolbar>
         {logoUrl ? (
           <Box
@@ -468,13 +468,13 @@ const Layout = () => {
                   <ListItemText
                     primary={item.text}
                     slotProps={{
-                      primary: { sx: { fontWeight: isActive ? 600 : 400 } }
+                      primary: { sx: { fontWeight: isActive ? 600 : 400 } },
                     }}
                   />
                 </ListItemButton>
               </Tooltip>
             </ListItem>
-          );
+          )
         })}
       </List>
       {import.meta.env.DEV && (
@@ -509,8 +509,8 @@ const Layout = () => {
                         sx: {
                           fontWeight: location.pathname === '/dev/components' ? 600 : 400,
                           fontSize: '0.875rem',
-                        }
-                      }
+                        },
+                      },
                     }}
                   />
                   <Chip
@@ -555,12 +555,12 @@ const Layout = () => {
                       <ListItemText
                         primary={t('nav.admin.dashboard')}
                         slotProps={{
-                          primary: { sx: { fontWeight: isActive ? 600 : 400 } }
+                          primary: { sx: { fontWeight: isActive ? 600 : 400 } },
                         }}
                       />
                     </ListItemButton>
                   </Tooltip>
-                );
+                )
               })()}
             </ListItem>
           </List>
@@ -579,8 +579,8 @@ const Layout = () => {
                           letterSpacing: '0.08em',
                           textTransform: 'uppercase',
                           color: 'text.secondary',
-                        }
-                      }
+                        },
+                      },
                     }}
                   />
                   {openGroups[group.key] ? (
@@ -621,13 +621,13 @@ const Layout = () => {
                               <ListItemText
                                 primary={item.text}
                                 slotProps={{
-                                  primary: { sx: { fontWeight: isActive ? 600 : 400 } }
+                                  primary: { sx: { fontWeight: isActive ? 600 : 400 } },
                                 }}
                               />
                             </ListItemButton>
                           </Tooltip>
                         </ListItem>
-                      );
+                      )
                     })}
                   </List>
                 </Collapse>

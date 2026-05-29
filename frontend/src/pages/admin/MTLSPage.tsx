@@ -1,4 +1,5 @@
 import React from 'react'
+import { useTranslation } from 'react-i18next'
 import { useQuery } from '@tanstack/react-query'
 import {
   Container,
@@ -20,6 +21,7 @@ import api from '../../services/api'
 import type { MTLSConfigResponse } from '../../types'
 
 const MTLSPage: React.FC = () => {
+  const { t } = useTranslation()
   const {
     data: config,
     isLoading,
@@ -37,9 +39,10 @@ const MTLSPage: React.FC = () => {
       <Typography
         variant="body1"
         sx={{
-          color: "text.secondary",
-          mb: 3
-        }}>
+          color: 'text.secondary',
+          mb: 3,
+        }}
+      >
         Mutual TLS certificate-subject to scope mappings. These are configured in the server
         configuration file and are read-only.
       </Typography>
@@ -56,17 +59,24 @@ const MTLSPage: React.FC = () => {
       {config && (
         <>
           <Paper sx={{ p: 3, mb: 3 }}>
-            <Stack direction="row" spacing={2} sx={{
-              alignItems: "center"
-            }}>
+            <Stack
+              direction="row"
+              spacing={2}
+              sx={{
+                alignItems: 'center',
+              }}
+            >
               <Chip
                 label={config.enabled ? 'Enabled' : 'Disabled'}
                 color={config.enabled ? 'success' : 'default'}
               />
               {config.client_ca_file && (
-                <Typography variant="body2" sx={{
-                  color: "text.secondary"
-                }}>
+                <Typography
+                  variant="body2"
+                  sx={{
+                    color: 'text.secondary',
+                  }}
+                >
                   CA File: <code>{config.client_ca_file}</code>
                 </Typography>
               )}
@@ -78,24 +88,32 @@ const MTLSPage: React.FC = () => {
               <Table>
                 <TableHead>
                   <TableRow>
-                    <TableCell>Certificate Subject</TableCell>
-                    <TableCell>Scopes</TableCell>
+                    <TableCell>{t('mtls.certificateSubject')}</TableCell>
+                    <TableCell>{t('mtls.scopes')}</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
                   {config.mappings.map((mapping, i) => (
                     <TableRow key={i}>
                       <TableCell>
-                        <Typography variant="body2" sx={{
-                          fontFamily: "monospace"
-                        }}>
+                        <Typography
+                          variant="body2"
+                          sx={{
+                            fontFamily: 'monospace',
+                          }}
+                        >
                           {mapping.subject}
                         </Typography>
                       </TableCell>
                       <TableCell>
-                        <Stack direction="row" spacing={1} useFlexGap sx={{
-                          flexWrap: "wrap"
-                        }}>
+                        <Stack
+                          direction="row"
+                          spacing={1}
+                          useFlexGap
+                          sx={{
+                            flexWrap: 'wrap',
+                          }}
+                        >
                           {mapping.scopes.map((scope) => (
                             <Chip key={scope} label={scope} size="small" variant="outlined" />
                           ))}
@@ -108,9 +126,11 @@ const MTLSPage: React.FC = () => {
             </TableContainer>
           ) : (
             <Paper sx={{ p: 3, textAlign: 'center' }}>
-              <Typography sx={{
-                color: "text.secondary"
-              }}>
+              <Typography
+                sx={{
+                  color: 'text.secondary',
+                }}
+              >
                 No mTLS certificate mappings configured.
               </Typography>
             </Paper>
@@ -118,7 +138,7 @@ const MTLSPage: React.FC = () => {
         </>
       )}
     </Container>
-  );
+  )
 }
 
 export default MTLSPage

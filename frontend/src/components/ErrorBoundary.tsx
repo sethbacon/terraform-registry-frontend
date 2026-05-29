@@ -1,6 +1,7 @@
 import { Component } from 'react'
 import type { ErrorInfo, ReactNode } from 'react'
 import { Alert, AlertTitle, Box, Button, Container, Stack, Typography } from '@mui/material'
+import i18n from '../i18n'
 import { captureError } from '../services/errorReporting'
 
 interface ErrorBoundaryProps {
@@ -44,9 +45,9 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
       return (
         <Container maxWidth="sm" sx={{ py: 8 }} role="alert" aria-live="assertive">
           <Alert severity="error">
-            <AlertTitle component="h2">Something went wrong</AlertTitle>
+            <AlertTitle component="h2">{i18n.t('errorBoundary.title')}</AlertTitle>
             <Typography variant="body2" sx={{ mb: 2 }}>
-              An unexpected error occurred. You can try again or reload the page.
+              {i18n.t('errorBoundary.description')}
             </Typography>
             {this.state.error && (
               <Box
@@ -66,10 +67,10 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
             )}
             <Stack direction="row" spacing={1}>
               <Button size="small" variant="outlined" onClick={this.handleReset}>
-                Try Again
+                {i18n.t('errorBoundary.tryAgain')}
               </Button>
               <Button size="small" variant="contained" onClick={this.handleReload}>
-                Reload Page
+                {i18n.t('errorBoundary.reloadPage')}
               </Button>
             </Stack>
           </Alert>

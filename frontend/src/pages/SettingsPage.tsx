@@ -1,4 +1,5 @@
 import { Box, Container, FormControlLabel, Paper, Switch, Typography } from '@mui/material'
+import { useTranslation } from 'react-i18next'
 import { useConsent } from '../contexts/ConsentContext'
 
 /**
@@ -6,28 +7,32 @@ import { useConsent } from '../contexts/ConsentContext'
  * reviewed and updated at any time (GDPR Art 7(3) — right to withdraw consent).
  */
 export default function SettingsPage() {
+  const { t } = useTranslation()
   const { preferences, updatePreferences } = useConsent()
 
   return (
     <Container maxWidth="sm" sx={{ py: 4 }}>
       <Typography variant="h4" component="h1" gutterBottom>
-        Settings
+        {t('settingsPage.title')}
       </Typography>
       <Paper sx={{ p: 3, mb: 3 }}>
         <Typography variant="h6" gutterBottom>
-          Telemetry &amp; Privacy
+          {t('settingsPage.telemetryPrivacy')}
         </Typography>
-        <Typography variant="body2" gutterBottom sx={{
-          color: "text.secondary"
-        }}>
-          Control which data you share. Essential cookies required for the site to function cannot
-          be disabled. Changes take effect immediately.
+        <Typography
+          variant="body2"
+          gutterBottom
+          sx={{
+            color: 'text.secondary',
+          }}
+        >
+          {t('settingsPage.description')}
         </Typography>
 
         <Box sx={{ mt: 2 }}>
           <FormControlLabel
             control={<Switch checked disabled />}
-            label="Essential cookies (required)"
+            label={t('settingsPage.essentialRequired')}
           />
           <FormControlLabel
             control={
@@ -36,7 +41,7 @@ export default function SettingsPage() {
                 onChange={(_, checked) => updatePreferences({ errorReporting: checked })}
               />
             }
-            label="Error reporting — helps us fix bugs faster"
+            label={t('settingsPage.errorReporting')}
           />
           <FormControlLabel
             control={
@@ -45,7 +50,7 @@ export default function SettingsPage() {
                 onChange={(_, checked) => updatePreferences({ performanceReporting: checked })}
               />
             }
-            label="Performance monitoring — Web Vitals and page load metrics"
+            label={t('settingsPage.performanceMonitoring')}
           />
           <FormControlLabel
             control={
@@ -54,13 +59,16 @@ export default function SettingsPage() {
                 onChange={(_, checked) => updatePreferences({ analytics: checked })}
               />
             }
-            label="Analytics — usage patterns to improve the product"
+            label={t('settingsPage.analytics')}
           />
         </Box>
       </Paper>
-      <Typography variant="body2" sx={{
-        color: "text.secondary"
-      }}>
+      <Typography
+        variant="body2"
+        sx={{
+          color: 'text.secondary',
+        }}
+      >
         For more information, see our{' '}
         <a href="/privacy" style={{ color: 'inherit' }}>
           Privacy Policy
@@ -68,5 +76,5 @@ export default function SettingsPage() {
         .
       </Typography>
     </Container>
-  );
+  )
 }

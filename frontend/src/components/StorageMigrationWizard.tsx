@@ -1,4 +1,6 @@
 import React, { useState } from 'react'
+import { useTranslation } from 'react-i18next'
+import type { TFunction } from 'i18next'
 import {
   Box,
   Button,
@@ -35,18 +37,16 @@ interface StorageMigrationWizardProps {
   configs: StorageConfigResponse[]
 }
 
-const steps = ['Select Source & Target', 'Review Plan', 'Execute & Monitor', 'Complete']
-
-const getBackendLabel = (type: string): string => {
+const getBackendLabel = (t: TFunction, type: string): string => {
   switch (type) {
     case 'local':
-      return 'Local File System'
+      return t('storageMigration.backendLocal')
     case 'azure':
-      return 'Azure Blob Storage'
+      return t('storageMigration.backendAzure')
     case 's3':
-      return 'Amazon S3'
+      return t('storageMigration.backendS3')
     case 'gcs':
-      return 'Google Cloud Storage'
+      return t('storageMigration.backendGcs')
     default:
       return type
   }
@@ -65,6 +65,13 @@ const StorageMigrationWizard: React.FC<StorageMigrationWizardProps> = ({
   onClose,
   configs,
 }) => {
+  const { t } = useTranslation()
+  const steps = [
+    t('storageMigration.stepSelect'),
+    t('storageMigration.stepReview'),
+    t('storageMigration.stepExecute'),
+    t('storageMigration.stepComplete'),
+  ]
   const queryClient = useQueryClient()
   const [activeStep, setActiveStep] = useState(0)
   const [sourceConfigId, setSourceConfigId] = useState('')
@@ -110,7 +117,7 @@ const StorageMigrationWizard: React.FC<StorageMigrationWizardProps> = ({
       setActiveStep(1)
     },
     onError: (err) => {
-      setError(getErrorMessage(err, 'Failed to create migration plan'))
+      setError(getErrorMessage(err, t('storageMigration.planError')))
     },
   })
 
@@ -122,7 +129,7 @@ const StorageMigrationWizard: React.FC<StorageMigrationWizardProps> = ({
       setActiveStep(2)
     },
     onError: (err) => {
-      setError(getErrorMessage(err, 'Failed to start migration'))
+      setError(getErrorMessage(err, t('storageMigration.startError')))
     },
   })
 
@@ -132,7 +139,7 @@ const StorageMigrationWizard: React.FC<StorageMigrationWizardProps> = ({
       setError(null)
     },
     onError: (err) => {
-      setError(getErrorMessage(err, 'Failed to cancel migration'))
+      setError(getErrorMessage(err, t('storageMigration.cancelError')))
     },
   })
 
@@ -183,11 +190,13 @@ const StorageMigrationWizard: React.FC<StorageMigrationWizardProps> = ({
         return (
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, mt: 2 }}>
             <FormControl fullWidth>
-              <InputLabel id="source-config-label">Source Configuration</InputLabel>
+              <InputLabel id="source-config-label">
+                {t('storageMigration.sourceConfiguration')}
+              </InputLabel>
               <Select
                 labelId="source-config-label"
                 value={sourceConfigId}
-                label="Source Configuration"
+                label={t('storageMigration.sourceConfiguration')}
                 onChange={(e) => setSourceConfigId(e.target.value)}
               >
                 {configs.map((config) => (
@@ -196,19 +205,21 @@ const StorageMigrationWizard: React.FC<StorageMigrationWizardProps> = ({
                     value={config.id}
                     disabled={config.id === targetConfigId}
                   >
-                    {getBackendLabel(config.backend_type)}
-                    {config.is_active ? ' (Active)' : ''}
+                    {getBackendLabel(t, config.backend_type)}
+                    {config.is_active ? t('storageMigration.activeSuffix') : ''}
                   </MenuItem>
                 ))}
               </Select>
             </FormControl>
 
             <FormControl fullWidth>
-              <InputLabel id="target-config-label">Target Configuration</InputLabel>
+              <InputLabel id="target-config-label">
+                {t('storageMigration.targetConfiguration')}
+              </InputLabel>
               <Select
                 labelId="target-config-label"
                 value={targetConfigId}
-                label="Target Configuration"
+                label={t('storageMigration.targetConfiguration')}
                 onChange={(e) => {
                   const val = e.target.value
                   if (val === '__create_new__') {
@@ -226,8 +237,8 @@ const StorageMigrationWizard: React.FC<StorageMigrationWizardProps> = ({
                     value={config.id}
                     disabled={config.id === sourceConfigId}
                   >
-                    {getBackendLabel(config.backend_type)}
-                    {config.is_active ? ' (Active)' : ''}
+                    {getBackendLabel(t, config.backend_type)}
+                    {config.is_active ? t('storageMigration.activeSuffix') : ''}
                   </MenuItem>
                 ))}
                 <Divider />
@@ -235,13 +246,13 @@ const StorageMigrationWizard: React.FC<StorageMigrationWizardProps> = ({
                   value="__create_new__"
                   sx={{ fontStyle: 'italic', color: 'primary.main' }}
                 >
-                  + Create new configuration…
+                  {t('storageMigration.createNew')}
                 </MenuItem>
               </Select>
             </FormControl>
 
             {sourceConfigId && targetConfigId && sourceConfigId === targetConfigId && (
-              <Alert severity="warning">Source and target configurations must be different.</Alert>
+              <Alert severity="warning">{t('storageMigration.mustBeDifferent')}</Alert>
             )}
           </Box>
         )
@@ -252,62 +263,80 @@ const StorageMigrationWizard: React.FC<StorageMigrationWizardProps> = ({
             {plan && (
               <Paper variant="outlined" sx={{ p: 2 }}>
                 <Typography variant="h6" gutterBottom>
-                  Migration Plan
+                  {t('storageMigration.migrationPlan')}
                 </Typography>
                 <Grid container spacing={2}>
                   <Grid size={6}>
-                    <Typography variant="body2" sx={{
-                      color: "text.secondary"
-                    }}>
-                      Source
+                    <Typography
+                      variant="body2"
+                      sx={{
+                        color: 'text.secondary',
+                      }}
+                    >
+                      {t('storageMigration.source')}
                     </Typography>
                     <Typography variant="body1">
                       {sourceConfig
-                        ? getBackendLabel(sourceConfig.backend_type)
+                        ? getBackendLabel(t, sourceConfig.backend_type)
                         : plan.source_config_id}
                     </Typography>
                   </Grid>
                   <Grid size={6}>
-                    <Typography variant="body2" sx={{
-                      color: "text.secondary"
-                    }}>
-                      Target
+                    <Typography
+                      variant="body2"
+                      sx={{
+                        color: 'text.secondary',
+                      }}
+                    >
+                      {t('storageMigration.target')}
                     </Typography>
                     <Typography variant="body1">
                       {targetConfig
-                        ? getBackendLabel(targetConfig.backend_type)
+                        ? getBackendLabel(t, targetConfig.backend_type)
                         : plan.target_config_id}
                     </Typography>
                   </Grid>
                   <Grid size={4}>
-                    <Typography variant="body2" sx={{
-                      color: "text.secondary"
-                    }}>
-                      Total Artifacts
+                    <Typography
+                      variant="body2"
+                      sx={{
+                        color: 'text.secondary',
+                      }}
+                    >
+                      {t('storageMigration.totalArtifacts')}
                     </Typography>
                     <Typography variant="h6">{plan.total_artifacts}</Typography>
                   </Grid>
                   <Grid size={4}>
-                    <Typography variant="body2" sx={{
-                      color: "text.secondary"
-                    }}>
-                      Modules
+                    <Typography
+                      variant="body2"
+                      sx={{
+                        color: 'text.secondary',
+                      }}
+                    >
+                      {t('storageMigration.modules')}
                     </Typography>
                     <Typography variant="h6">{plan.total_modules}</Typography>
                   </Grid>
                   <Grid size={4}>
-                    <Typography variant="body2" sx={{
-                      color: "text.secondary"
-                    }}>
-                      Providers
+                    <Typography
+                      variant="body2"
+                      sx={{
+                        color: 'text.secondary',
+                      }}
+                    >
+                      {t('storageMigration.providers')}
                     </Typography>
                     <Typography variant="h6">{plan.total_providers}</Typography>
                   </Grid>
                   <Grid size={12}>
-                    <Typography variant="body2" sx={{
-                      color: "text.secondary"
-                    }}>
-                      Estimated Size
+                    <Typography
+                      variant="body2"
+                      sx={{
+                        color: 'text.secondary',
+                      }}
+                    >
+                      {t('storageMigration.estimatedSize')}
                     </Typography>
                     <Typography variant="h6">{formatBytes(plan.estimated_size_bytes)}</Typography>
                   </Grid>
@@ -315,11 +344,10 @@ const StorageMigrationWizard: React.FC<StorageMigrationWizardProps> = ({
               </Paper>
             )}
             <Alert severity="warning" sx={{ mt: 2 }}>
-              Starting this migration will copy all artifacts from the source to the target storage.
-              This may take a while depending on the number and size of artifacts.
+              {t('storageMigration.startWarning')}
             </Alert>
           </Box>
-        );
+        )
 
       case 2:
         return (
@@ -327,18 +355,27 @@ const StorageMigrationWizard: React.FC<StorageMigrationWizardProps> = ({
             sx={{ mt: 2, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}
           >
             <CircularProgress size={48} />
-            <Typography variant="h6">Migration in Progress</Typography>
+            <Typography variant="h6">{t('storageMigration.inProgress')}</Typography>
             {migration && (
               <Box sx={{ width: '100%' }}>
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                  <Typography variant="body2" sx={{
-                    color: "text.secondary"
-                  }}>
-                    {migration.migrated_artifacts} / {migration.total_artifacts} artifacts
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      color: 'text.secondary',
+                    }}
+                  >
+                    {t('storageMigration.artifactsProgress', {
+                      migrated: migration.migrated_artifacts,
+                      total: migration.total_artifacts,
+                    })}
                   </Typography>
-                  <Typography variant="body2" sx={{
-                    color: "text.secondary"
-                  }}>
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      color: 'text.secondary',
+                    }}
+                  >
                     {migration.total_artifacts > 0
                       ? Math.round((migration.migrated_artifacts / migration.total_artifacts) * 100)
                       : 0}
@@ -356,7 +393,7 @@ const StorageMigrationWizard: React.FC<StorageMigrationWizardProps> = ({
                 />
                 {migration.failed_artifacts > 0 && (
                   <Typography variant="body2" color="error" sx={{ mt: 1 }}>
-                    {migration.failed_artifacts} artifact(s) failed
+                    {t('storageMigration.failedCount', { count: migration.failed_artifacts })}
                   </Typography>
                 )}
               </Box>
@@ -367,10 +404,10 @@ const StorageMigrationWizard: React.FC<StorageMigrationWizardProps> = ({
               onClick={() => cancelMutation.mutate()}
               disabled={cancelMutation.isPending}
             >
-              Cancel Migration
+              {t('storageMigration.cancelMigration')}
             </Button>
           </Box>
-        );
+        )
 
       case 3:
         return (
@@ -380,39 +417,50 @@ const StorageMigrationWizard: React.FC<StorageMigrationWizardProps> = ({
             {migration?.status === 'completed' ? (
               <>
                 <CheckCircleIcon color="success" sx={{ fontSize: 64 }} />
-                <Typography variant="h6">Migration Complete</Typography>
-                <Typography variant="body2" sx={{
-                  color: "text.secondary"
-                }}>
-                  Successfully migrated {migration.migrated_artifacts} of{' '}
-                  {migration.total_artifacts} artifacts.
+                <Typography variant="h6">{t('storageMigration.complete')}</Typography>
+                <Typography
+                  variant="body2"
+                  sx={{
+                    color: 'text.secondary',
+                  }}
+                >
+                  {t('storageMigration.successDetail', {
+                    migrated: migration.migrated_artifacts,
+                    total: migration.total_artifacts,
+                  })}
                 </Typography>
                 {migration.failed_artifacts > 0 && (
                   <Alert severity="warning" sx={{ width: '100%' }}>
-                    {migration.failed_artifacts} artifact(s) failed to migrate.
-                    {migration.error_message && ` Error: ${migration.error_message}`}
+                    {t('storageMigration.failedToMigrate', { count: migration.failed_artifacts })}
+                    {migration.error_message &&
+                      t('storageMigration.errorSuffix', { error: migration.error_message })}
                   </Alert>
                 )}
               </>
             ) : (
               <>
                 <ErrorIcon color="error" sx={{ fontSize: 64 }} />
-                <Typography variant="h6">Migration Failed</Typography>
+                <Typography variant="h6">{t('storageMigration.failed')}</Typography>
                 {migration?.error_message && (
                   <Alert severity="error" sx={{ width: '100%' }}>
                     {migration.error_message}
                   </Alert>
                 )}
-                <Typography variant="body2" sx={{
-                  color: "text.secondary"
-                }}>
-                  Migrated {migration?.migrated_artifacts ?? 0} of {migration?.total_artifacts ?? 0}{' '}
-                  artifacts before failure.
+                <Typography
+                  variant="body2"
+                  sx={{
+                    color: 'text.secondary',
+                  }}
+                >
+                  {t('storageMigration.migratedBeforeFailure', {
+                    migrated: migration?.migrated_artifacts ?? 0,
+                    total: migration?.total_artifacts ?? 0,
+                  })}
                 </Typography>
               </>
             )}
           </Box>
-        );
+        )
 
       default:
         return null
@@ -427,7 +475,7 @@ const StorageMigrationWizard: React.FC<StorageMigrationWizardProps> = ({
       fullWidth
       aria-labelledby="migration-wizard-title"
     >
-      <DialogTitle id="migration-wizard-title">Storage Migration Wizard</DialogTitle>
+      <DialogTitle id="migration-wizard-title">{t('storageMigration.wizardTitle')}</DialogTitle>
       <DialogContent>
         <Stepper activeStep={activeStep} sx={{ mb: 3, mt: 1 }}>
           {steps.map((label) => (
@@ -448,17 +496,17 @@ const StorageMigrationWizard: React.FC<StorageMigrationWizardProps> = ({
       <DialogActions>
         {activeStep === 3 ? (
           <Button onClick={handleClose} variant="contained">
-            Done
+            {t('storageMigration.done')}
           </Button>
         ) : activeStep === 2 ? null : (
           <>
-            <Button onClick={handleClose}>Cancel</Button>
+            <Button onClick={handleClose}>{t('storageMigration.cancel')}</Button>
             {activeStep > 0 && (
               <Button
                 onClick={handleBack}
                 disabled={planMutation.isPending || startMutation.isPending}
               >
-                Back
+                {t('storageMigration.back')}
               </Button>
             )}
             <Button
@@ -471,7 +519,9 @@ const StorageMigrationWizard: React.FC<StorageMigrationWizardProps> = ({
                 ) : undefined
               }
             >
-              {activeStep === 0 ? 'Review Plan' : 'Start Migration'}
+              {activeStep === 0
+                ? t('storageMigration.reviewPlanBtn')
+                : t('storageMigration.startMigrationBtn')}
             </Button>
           </>
         )}

@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react'
+import { useTranslation } from 'react-i18next'
 import {
   Box,
   Typography,
@@ -49,6 +50,7 @@ const RepositoryBrowser: React.FC<RepositoryBrowserProps> = ({
   selectedTag,
   nameFilter,
 }) => {
+  const { t } = useTranslation()
   const [repositories, setRepositories] = useState<SCMRepository[]>([])
   const [tags, setTags] = useState<SCMTag[]>([])
   const [branches, setBranches] = useState<SCMBranch[]>([])
@@ -164,11 +166,12 @@ const RepositoryBrowser: React.FC<RepositoryBrowserProps> = ({
       {loading ? (
         <Box
           sx={{
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            minHeight: "200px"
-          }}>
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            minHeight: '200px',
+          }}
+        >
           <CircularProgress />
         </Box>
       ) : (
@@ -176,13 +179,14 @@ const RepositoryBrowser: React.FC<RepositoryBrowserProps> = ({
           <Box
             sx={{
               mb: 2,
-              display: "flex",
-              gap: 1
-            }}>
+              display: 'flex',
+              gap: 1,
+            }}
+          >
             <TextField
               fullWidth
               size="small"
-              placeholder="Search repositories..."
+              placeholder={t('repositoryBrowser.searchPlaceholder')}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               slotProps={{
@@ -192,11 +196,15 @@ const RepositoryBrowser: React.FC<RepositoryBrowserProps> = ({
                       <SearchIcon />
                     </InputAdornment>
                   ),
-                }
+                },
               }}
             />
-            <Tooltip title="Refresh">
-              <IconButton onClick={loadRepositories} size="small" aria-label="Refresh repositories">
+            <Tooltip title={t('repositoryBrowser.refresh')}>
+              <IconButton
+                onClick={loadRepositories}
+                size="small"
+                aria-label={t('repositoryBrowser.refreshAria')}
+              >
                 <RefreshIcon />
               </IconButton>
             </Tooltip>
@@ -239,10 +247,11 @@ const RepositoryBrowser: React.FC<RepositoryBrowserProps> = ({
                   <AccordionSummary expandIcon={<ExpandMoreIcon />}>
                     <Box
                       sx={{
-                        display: "flex",
-                        alignItems: "center",
-                        width: "100%"
-                      }}>
+                        display: 'flex',
+                        alignItems: 'center',
+                        width: '100%',
+                      }}
+                    >
                       <ListItemIcon sx={{ minWidth: 40 }}>
                         {selectedRepository?.full_name === repo.full_name ? (
                           <CheckCircleIcon color="primary" />
@@ -250,9 +259,11 @@ const RepositoryBrowser: React.FC<RepositoryBrowserProps> = ({
                           <FolderIcon />
                         )}
                       </ListItemIcon>
-                      <Box sx={{
-                        flexGrow: 1
-                      }}>
+                      <Box
+                        sx={{
+                          flexGrow: 1,
+                        }}
+                      >
                         <Typography variant="subtitle1">{repo.full_name}</Typography>
                         {repo.description && (
                           <Typography variant="caption" color="textSecondary">
@@ -261,7 +272,12 @@ const RepositoryBrowser: React.FC<RepositoryBrowserProps> = ({
                         )}
                       </Box>
                       {selectedRepository?.full_name === repo.full_name && (
-                        <Chip label="Selected" color="primary" size="small" sx={{ mr: 1 }} />
+                        <Chip
+                          label={t('repositoryBrowser.selected')}
+                          color="primary"
+                          size="small"
+                          sx={{ mr: 1 }}
+                        />
                       )}
                       <Chip
                         icon={repo.private ? <LockIcon /> : <PublicIcon />}
@@ -276,10 +292,11 @@ const RepositoryBrowser: React.FC<RepositoryBrowserProps> = ({
                     {loadingTags ? (
                       <Box
                         sx={{
-                          display: "flex",
-                          justifyContent: "center",
-                          py: 2
-                        }}>
+                          display: 'flex',
+                          justifyContent: 'center',
+                          py: 2,
+                        }}
+                      >
                         <CircularProgress size={24} />
                       </Box>
                     ) : (
@@ -333,7 +350,11 @@ const RepositoryBrowser: React.FC<RepositoryBrowserProps> = ({
                               key={branch.branch_name}
                               secondaryAction={
                                 branch.is_protected && (
-                                  <Chip label="Protected" size="small" color="primary" />
+                                  <Chip
+                                    label={t('repositoryBrowser.protected')}
+                                    size="small"
+                                    color="primary"
+                                  />
                                 )
                               }
                             >
@@ -359,7 +380,7 @@ const RepositoryBrowser: React.FC<RepositoryBrowserProps> = ({
         </Box>
       )}
     </Box>
-  );
+  )
 }
 
 export default RepositoryBrowser

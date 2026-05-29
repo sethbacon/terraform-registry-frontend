@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import {
   FormControl,
   FormControlLabel,
@@ -52,6 +53,7 @@ function VersionSelector<V extends VersionSelectorItem>({
   storageKey = DEFAULT_STORAGE_KEY,
   'data-testid': testId = 'version-selector',
 }: VersionSelectorProps<V>) {
+  const { t } = useTranslation()
   const [showDeprecated, setShowDeprecated] = useState<boolean>(() =>
     readStoredPreference(storageKey),
   )
@@ -87,9 +89,10 @@ function VersionSelector<V extends VersionSelectorItem>({
       spacing={2}
       data-testid={testId}
       sx={{
-        alignItems: "center",
-        flexWrap: "wrap"
-      }}>
+        alignItems: 'center',
+        flexWrap: 'wrap',
+      }}
+    >
       <FormControl size="small" sx={{ minWidth: 220 }}>
         <Select
           value={
@@ -125,22 +128,22 @@ function VersionSelector<V extends VersionSelectorItem>({
             onChange={(e) => setShowDeprecated(e.target.checked)}
             slotProps={{
               input: {
-                'aria-label': 'Show deprecated versions',
+                'aria-label': t('versionSelector.showDeprecatedAria'),
                 // @ts-expect-error data-testid is accepted by native input
                 'data-testid': `${testId}-toggle`,
-              }
+              },
             }}
           />
         }
-        label="Show deprecated"
+        label={t('versionSelector.showDeprecated')}
       />
       {allDeprecated && (
         <Alert severity="warning" data-testid={`${testId}-all-deprecated`} sx={{ py: 0 }}>
-          All versions of this module are deprecated.
+          {t('versionSelector.allDeprecated')}
         </Alert>
       )}
     </Stack>
-  );
+  )
 }
 
 export default VersionSelector

@@ -1,15 +1,8 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useQuery } from '@tanstack/react-query'
 import { Link as RouterLink } from 'react-router-dom'
-import {
-  Alert,
-  AlertTitle,
-  Box,
-  Collapse,
-  IconButton,
-  Tooltip,
-  Typography,
-} from '@mui/material'
+import { Alert, AlertTitle, Box, Collapse, IconButton, Tooltip, Typography } from '@mui/material'
 import CloseIcon from '@mui/icons-material/Close'
 import apiClient from '../services/api'
 import { queryKeys } from '../services/queryKeys'
@@ -66,6 +59,7 @@ function setDismissed(severity: CVESeverity): void {
  * Mount this component once inside Layout, just below <Toolbar />.
  */
 export default function AdvisoryBanner() {
+  const { t } = useTranslation()
   const { data: advisories } = useQuery({
     queryKey: queryKeys.advisories.active(),
     queryFn: () => apiClient.getActiveAdvisories(),
@@ -93,9 +87,7 @@ export default function AdvisoryBanner() {
     bySeverity.set(adv.severity, bucket)
   }
 
-  const visibleSeverities = SEVERITY_ORDER.filter(
-    (s) => bySeverity.has(s) && !dismissed[s],
-  )
+  const visibleSeverities = SEVERITY_ORDER.filter((s) => bySeverity.has(s) && !dismissed[s])
 
   if (visibleSeverities.length === 0) return null
 
@@ -105,7 +97,7 @@ export default function AdvisoryBanner() {
   }
 
   return (
-    <Box sx={{ mb: 1 }} role="region" aria-label="Security advisories">
+    <Box sx={{ mb: 1 }} role="region" aria-label={t('advisoryBanner.title')}>
       {visibleSeverities.map((severity) => {
         const group = bySeverity.get(severity)!
         const count = group.length
@@ -120,7 +112,7 @@ export default function AdvisoryBanner() {
               severity={muiSeverity}
               sx={{ borderRadius: 0, mb: 0.5 }}
               action={
-                <Tooltip title="Dismiss for this session">
+                <Tooltip title={t('advisoryBanner.dismiss')}>
                   <IconButton
                     size="small"
                     color="inherit"

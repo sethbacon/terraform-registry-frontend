@@ -1,4 +1,5 @@
 import React, { useCallback } from 'react'
+import { useTranslation } from 'react-i18next'
 import {
   Box,
   Container,
@@ -43,6 +44,7 @@ const stepComponents: Record<number, React.FC> = {
 }
 
 const SetupWizardShell: React.FC = () => {
+  const { t } = useTranslation()
   const { loading, setupStatus, activeStep, error, setError, success, setSuccess } =
     useSetupWizard()
 
@@ -77,9 +79,12 @@ const SetupWizardShell: React.FC = () => {
               <Typography variant="h4" component="h1" gutterBottom>
                 {isPending ? 'Configure New Features' : 'Terraform Registry Setup'}
               </Typography>
-              <Typography variant="body1" sx={{
-                color: "text.secondary"
-              }}>
+              <Typography
+                variant="body1"
+                sx={{
+                  color: 'text.secondary',
+                }}
+              >
                 {isPending
                   ? 'New features have been added that require configuration. Your existing OIDC, storage, and admin settings are preserved.'
                   : 'Configure your registry for first-time use. This wizard will guide you through setting up OIDC authentication, storage backend, and the initial admin user.'}
@@ -90,7 +95,7 @@ const SetupWizardShell: React.FC = () => {
               activeStep={visualActiveStep}
               sx={{ mb: 4 }}
               alternativeLabel
-              aria-label="Setup progress"
+              aria-label={t('setupWizardPage.setupProgress')}
             >
               {pendingSteps.map(({ label }) => (
                 <Step key={label}>
@@ -117,9 +122,12 @@ const SetupWizardShell: React.FC = () => {
             <Typography variant="subtitle2" gutterBottom>
               Prefer using the command line?
             </Typography>
-            <Typography variant="body2" sx={{
-              color: "text.secondary"
-            }}>
+            <Typography
+              variant="body2"
+              sx={{
+                color: 'text.secondary',
+              }}
+            >
               All setup steps can also be performed via curl or any HTTP client. See the{' '}
               <a href="/api-docs/" target="_blank" rel="noopener noreferrer">
                 API documentation
@@ -131,19 +139,13 @@ const SetupWizardShell: React.FC = () => {
         </Container>
       )}
     </Box>
-  );
+  )
 }
 
 const SetupWizardPage: React.FC = () => {
   const navigate = useNavigate()
-  const handleSetupCompleted = useCallback(
-    () => navigate('/', { replace: true }),
-    [navigate],
-  )
-  const handleSetupFinalized = useCallback(
-    () => navigate('/login', { replace: true }),
-    [navigate],
-  )
+  const handleSetupCompleted = useCallback(() => navigate('/', { replace: true }), [navigate])
+  const handleSetupFinalized = useCallback(() => navigate('/login', { replace: true }), [navigate])
   return (
     <SetupWizardProvider
       onSetupCompleted={handleSetupCompleted}

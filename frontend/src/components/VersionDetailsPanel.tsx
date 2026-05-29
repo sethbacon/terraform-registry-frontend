@@ -1,4 +1,5 @@
 import React from 'react'
+import { useTranslation } from 'react-i18next'
 import { Paper, Typography, Divider, Alert, Button, Stack } from '@mui/material'
 import Delete from '@mui/icons-material/Delete'
 import Warning from '@mui/icons-material/Warning'
@@ -22,28 +23,30 @@ const VersionDetailsPanel: React.FC<VersionDetailsPanelProps> = ({
   onOpenDeprecateDialog,
   onOpenDeleteVersionDialog,
 }) => {
+  const { t } = useTranslation()
   if (!selectedVersion) return null
 
   return (
     <Paper sx={{ p: 3 }}>
       <Typography variant="h6" gutterBottom>
-        Version {selectedVersion.version} Details
+        {t('versionDetailsPanel.title', { version: selectedVersion.version })}
       </Typography>
       <Divider sx={{ mb: 2 }} />
       <Typography variant="body2" sx={{ mb: 2 }}>
-        <strong>Published:</strong>{' '}
+        <strong>{t('versionDetailsPanel.published')}</strong>{' '}
         {selectedVersion.published_at || selectedVersion.created_at
           ? new Date(
               selectedVersion.published_at || selectedVersion.created_at!,
             ).toLocaleDateString()
-          : 'N/A'}
+          : t('versionDetailsPanel.na')}
       </Typography>
       <Typography variant="body2" sx={{ mb: 2 }}>
-        <strong>Downloads:</strong> {selectedVersion.download_count ?? 0}
+        <strong>{t('versionDetailsPanel.downloads')}</strong> {selectedVersion.download_count ?? 0}
       </Typography>
       {selectedVersion.published_by_name && (
         <Typography variant="body2" sx={{ mb: 2 }}>
-          <strong>Published By:</strong> {selectedVersion.published_by_name}
+          <strong>{t('versionDetailsPanel.publishedBy')}</strong>{' '}
+          {selectedVersion.published_by_name}
         </Typography>
       )}
 
@@ -51,9 +54,14 @@ const VersionDetailsPanel: React.FC<VersionDetailsPanelProps> = ({
       {selectedVersion.deprecated && (
         <Alert severity="warning" sx={{ mb: 2 }}>
           <Typography variant="body2">
-            <strong>Deprecated</strong>
+            <strong>{t('versionDetailsPanel.deprecated')}</strong>
             {selectedVersion.deprecated_at && (
-              <> on {new Date(selectedVersion.deprecated_at).toLocaleDateString()}</>
+              <>
+                {' '}
+                {t('versionDetailsPanel.deprecatedOn', {
+                  date: new Date(selectedVersion.deprecated_at).toLocaleDateString(),
+                })}
+              </>
             )}
           </Typography>
           {(selectedVersion.deprecation_message || selectedVersion.deprecation?.reason) && (
@@ -63,7 +71,7 @@ const VersionDetailsPanel: React.FC<VersionDetailsPanelProps> = ({
           )}
           {(selectedVersion.replacement_source || selectedVersion.deprecation?.link) && (
             <Typography variant="body2" sx={{ mt: 1 }}>
-              <strong>Replacement:</strong>{' '}
+              <strong>{t('versionDetailsPanel.replacement')}</strong>{' '}
               {selectedVersion.deprecation?.link ?? selectedVersion.replacement_source}
             </Typography>
           )}
@@ -82,7 +90,9 @@ const VersionDetailsPanel: React.FC<VersionDetailsPanelProps> = ({
               disabled={deprecating}
               fullWidth
             >
-              {deprecating ? 'Removing Deprecation...' : 'Remove Deprecation'}
+              {deprecating
+                ? t('versionDetailsPanel.removingDeprecation')
+                : t('versionDetailsPanel.removeDeprecation')}
             </Button>
           ) : (
             <Button
@@ -93,7 +103,7 @@ const VersionDetailsPanel: React.FC<VersionDetailsPanelProps> = ({
               onClick={onOpenDeprecateDialog}
               fullWidth
             >
-              Deprecate Version
+              {t('versionDetailsPanel.deprecateVersion')}
             </Button>
           )}
           <Button
@@ -104,7 +114,7 @@ const VersionDetailsPanel: React.FC<VersionDetailsPanelProps> = ({
             onClick={() => onOpenDeleteVersionDialog(selectedVersion.version)}
             fullWidth
           >
-            Delete This Version
+            {t('versionDetailsPanel.deleteThisVersion')}
           </Button>
         </Stack>
       )}

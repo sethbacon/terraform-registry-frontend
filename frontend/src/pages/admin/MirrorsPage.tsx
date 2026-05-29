@@ -132,7 +132,7 @@ const VersionPlatformRow: React.FC<{ version: MirroredProviderVersion }> = ({ ve
                 <TableHead>
                   <TableRow>
                     <TableCell>OS</TableCell>
-                    <TableCell>Arch</TableCell>
+                    <TableCell>{t('admin.mirrors.thArch')}</TableCell>
                     <TableCell>{t('admin.mirrors.thFilename')}</TableCell>
                     <TableCell>SHA256</TableCell>
                   </TableRow>

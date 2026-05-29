@@ -142,6 +142,11 @@
     "protocolSupport": "Registry Protocol Support",
     "protocolDesc": "Full compatibility with Terraform Registry Protocol v1 \u2014 use this registry directly in Terraform CLI and provider configurations without any plugins or proxies.",
     "viewApiDocs": "View API Documentation",
+    "searchScope": "Search scope",
+    "apiChipModule": "Module Registry API",
+    "apiChipProvider": "Provider Registry API",
+    "apiChipDiscovery": "Service Discovery",
+    "apiChipAuth": "Authentication",
     "setupRequired": "Setup Required",
     "featureSetupRequired": "Feature Configuration Required",
     "setupRequiredDesc": "This registry has not been configured yet. Complete the setup wizard to configure authentication, storage, and the initial admin account.",
@@ -953,6 +958,7 @@
       "update": "Update",
       "ariaTogglePlatforms": "Toggle platforms",
       "ariaToggleVersions": "Toggle versions",
+      "thArch": "Arch",
       "thFilename": "Filename",
       "thVersion": "Version",
       "thSyncedAt": "Synced At",
@@ -1049,6 +1055,7 @@
       "chipDeprecated": "deprecated",
       "tooltipDeleteVersion": "Delete version and its binaries from storage",
       "ariaDeleteVersion": "Delete version",
+      "thArch": "Arch",
       "thFilename": "Filename",
       "thStatus": "Status",
       "noPlatformsSynced": "No platforms synced yet.",
@@ -1664,6 +1671,36 @@
       "showScanDetails": "Show scan details",
       "notScannedYet": "Not scanned yet"
     },
+    "scimProvisioning": {
+      "title": "SCIM Provisioning",
+      "description": "SCIM 2.0 endpoints allow external identity providers to automatically provision and de-provision users and groups.",
+      "configuration": "Configuration",
+      "labelBaseUrl": "SCIM Base URL",
+      "helpBaseUrl": "Use this as the Tenant URL in your identity provider's SCIM configuration.",
+      "labelUsersEndpoint": "Users Endpoint",
+      "labelGroupsEndpoint": "Groups Endpoint",
+      "authentication": "Authentication",
+      "storeWarning": "Store the API key securely. It provides full user and group provisioning access.",
+      "supportedOperations": "Supported Operations"
+    },
+    "roles": {
+      "loadError": "Failed to load roles. Please try again.",
+      "title": "Roles & Permissions",
+      "subtitle": "View the available roles and their associated permission scopes. System roles are predefined and cannot be modified.",
+      "availableScopesReference": "Available Scopes Reference",
+      "scopesDefine": "Scopes define what actions a role can perform in the registry.",
+      "thScope": "Scope",
+      "thDescription": "Description",
+      "roleTemplates": "Role Templates",
+      "clickRole": "Click on a role to see its full scope details.",
+      "noRoles": "No roles found.",
+      "systemChip": "System",
+      "scopeCount_one": "{{count}} scope",
+      "scopeCount_other": "{{count}} scopes",
+      "assignedScopes": "Assigned Scopes:",
+      "permissionsByCategory": "Permissions by Category:",
+      "fullAccessViaAdmin": "Full Access (via Admin)"
+    },
     "dashboard": {
       "loadError": "Failed to load dashboard statistics.",
       "loadErrorShort": "Failed to load dashboard",
@@ -1841,6 +1878,235 @@
     "yes": "Yes",
     "no": "No",
     "sensitive": "Sensitive"
+  },
+  "usageExample": {
+    "title": "Usage Example",
+    "toolAria": "Tool",
+    "copied": "Copied!",
+    "copyExample": "Copy example",
+    "tabSource": "Source",
+    "tabWithInputs": "With required inputs"
+  },
+  "webhookEvents": {
+    "title": "Webhook Events",
+    "toggleAria": "Toggle webhook events",
+    "noEvents": "No webhook events recorded yet.",
+    "showingCount": "Showing 10 of {{total}} events",
+    "refresh": "Refresh"
+  },
+  "repositoryBrowser": {
+    "searchPlaceholder": "Search repositories...",
+    "refresh": "Refresh",
+    "refreshAria": "Refresh repositories",
+    "selected": "Selected",
+    "protected": "Protected"
+  },
+  "advisoryBanner": {
+    "title": "Security advisories",
+    "dismiss": "Dismiss for this session"
+  },
+  "commandPalette": {
+    "title": "Command Palette",
+    "searchPlaceholder": "Search pages, modules, providers…"
+  },
+  "devUserSwitcher": {
+    "title": "Development Mode: Switch User",
+    "selectUser": "Select user"
+  },
+  "markdownRenderer": {
+    "ariaLabel": "Rendered documentation"
+  },
+  "versionDetailsPanel": {
+    "title": "Version {{version}} Details",
+    "published": "Published:",
+    "na": "N/A",
+    "downloads": "Downloads:",
+    "publishedBy": "Published By:",
+    "deprecated": "Deprecated",
+    "deprecatedOn": "on {{date}}",
+    "replacement": "Replacement:",
+    "removingDeprecation": "Removing Deprecation...",
+    "removeDeprecation": "Remove Deprecation",
+    "deprecateVersion": "Deprecate Version",
+    "deleteThisVersion": "Delete This Version"
+  },
+  "policyResultsPanel": {
+    "title": "Policy Evaluation"
+  },
+  "providerDocsSidebar": {
+    "filterPlaceholder": "Filter docs..."
+  },
+  "registryItemCard": {
+    "deprecated": "Deprecated",
+    "viewDetails": "View Details",
+    "noDescription": "No description available",
+    "ariaAction": "{{label}} for {{title}}"
+  },
+  "scmRepositoryPanel": {
+    "title": "Source Repository"
+  },
+  "securityScanPanel": {
+    "title": "Security Scan"
+  },
+  "versionSelector": {
+    "showDeprecated": "Show deprecated",
+    "showDeprecatedAria": "Show deprecated versions",
+    "allDeprecated": "All versions of this module are deprecated."
+  },
+  "errorBoundary": {
+    "title": "Something went wrong",
+    "description": "An unexpected error occurred. You can try again or reload the page.",
+    "tryAgain": "Try Again",
+    "reloadPage": "Reload Page"
+  },
+  "quotaUsageChart": {
+    "storage": "Storage",
+    "publishesPerDay": "Publishes / Day",
+    "downloadsPerDay": "Downloads / Day"
+  },
+  "helpPanel": {
+    "closeAria": "Close help panel"
+  },
+  "layout": {
+    "mainNavigation": "Main navigation"
+  },
+  "apiDocumentation": {
+    "title": "API Swagger Documentation",
+    "subtitle": "Interactive API reference — use the Authorize button to authenticate with an API key"
+  },
+  "mtls": {
+    "certificateSubject": "Certificate Subject",
+    "scopes": "Scopes"
+  },
+  "reviewStep": {
+    "configured": "Configured",
+    "notConfigured": "Not configured",
+    "actionPermanent": "This action is permanent"
+  },
+  "adminUserStep": {
+    "adminEmail": "Admin Email",
+    "emailMustMatch": "This email must match your OIDC provider identity"
+  },
+  "authenticateStep": {
+    "findingToken": "Finding your setup token",
+    "setupToken": "Setup Token"
+  },
+  "setupWizardPage": {
+    "setupProgress": "Setup progress"
+  },
+  "loginPage": {
+    "loadingProviders": "Loading sign-in providers"
+  },
+  "scanDiagnostics": {
+    "errorMessage": "Error message",
+    "scannerOutput": "Scanner output (stderr / stdout)",
+    "rawJson": "Raw scanner JSON"
+  },
+  "settingsPage": {
+    "title": "Settings",
+    "telemetryPrivacy": "Telemetry & Privacy",
+    "description": "Control which data you share. Essential cookies required for the site to function cannot be disabled. Changes take effect immediately.",
+    "essentialRequired": "Essential cookies (required)",
+    "errorReporting": "Error reporting — helps us fix bugs faster",
+    "performanceMonitoring": "Performance monitoring — Web Vitals and page load metrics",
+    "analytics": "Analytics — usage patterns to improve the product"
+  },
+  "consentBanner": {
+    "ariaLabel": "Cookie consent",
+    "title": "We value your privacy",
+    "essential": "Essential (always on)",
+    "errorReporting": "Error Reporting",
+    "performanceMonitoring": "Performance Monitoring",
+    "analytics": "Analytics",
+    "hideDetails": "Hide details",
+    "customize": "Customize",
+    "rejectAll": "Reject all",
+    "acceptAll": "Accept all"
+  },
+  "releasesGpgKeys": {
+    "title": "Release Signing Keys",
+    "description": "GPG keys used to verify upstream release signatures. Status is derived against the configured warning threshold.",
+    "loadError": "Failed to load GPG key status.",
+    "noData": "No release signing key data available.",
+    "thTool": "Tool",
+    "thStatus": "Status",
+    "thSource": "Source",
+    "thFingerprint": "Fingerprint",
+    "thExpiry": "Expiry",
+    "thLastRefresh": "Last Refresh",
+    "expiredAgo": "expired {{days}}d ago",
+    "days": "{{days}}d"
+  },
+  "scanFindingsModal": {
+    "title": "Scan Findings",
+    "close": "close",
+    "noData": "No scan data available.",
+    "critical": "Critical: {{count}}",
+    "high": "High: {{count}}",
+    "medium": "Medium: {{count}}",
+    "low": "Low: {{count}}",
+    "downloadTooltip": "Download findings as CSV",
+    "exportCsv": "Export CSV",
+    "thSeverity": "Severity",
+    "thRuleId": "Rule ID",
+    "thTitle": "Title",
+    "thResource": "Resource",
+    "thFile": "File",
+    "thResolution": "Resolution",
+    "parseError": "Could not parse individual findings from scanner output.",
+    "hideRawJson": "Hide raw JSON",
+    "showRawJson": "Show raw JSON"
+  },
+  "storageMigration": {
+    "stepSelect": "Select Source & Target",
+    "stepReview": "Review Plan",
+    "stepExecute": "Execute & Monitor",
+    "stepComplete": "Complete",
+    "backendLocal": "Local File System",
+    "backendAzure": "Azure Blob Storage",
+    "backendS3": "Amazon S3",
+    "backendGcs": "Google Cloud Storage",
+    "planError": "Failed to create migration plan",
+    "startError": "Failed to start migration",
+    "cancelError": "Failed to cancel migration",
+    "sourceConfiguration": "Source Configuration",
+    "targetConfiguration": "Target Configuration",
+    "activeSuffix": " (Active)",
+    "createNew": "+ Create new configuration…",
+    "mustBeDifferent": "Source and target configurations must be different.",
+    "migrationPlan": "Migration Plan",
+    "source": "Source",
+    "target": "Target",
+    "totalArtifacts": "Total Artifacts",
+    "modules": "Modules",
+    "providers": "Providers",
+    "estimatedSize": "Estimated Size",
+    "startWarning": "Starting this migration will copy all artifacts from the source to the target storage. This may take a while depending on the number and size of artifacts.",
+    "inProgress": "Migration in Progress",
+    "artifactsProgress": "{{migrated}} / {{total}} artifacts",
+    "failedCount": "{{count}} artifact(s) failed",
+    "cancelMigration": "Cancel Migration",
+    "complete": "Migration Complete",
+    "successDetail": "Successfully migrated {{migrated}} of {{total}} artifacts.",
+    "failedToMigrate": "{{count}} artifact(s) failed to migrate.",
+    "errorSuffix": " Error: {{error}}",
+    "failed": "Migration Failed",
+    "migratedBeforeFailure": "Migrated {{migrated}} of {{total}} artifacts before failure.",
+    "wizardTitle": "Storage Migration Wizard",
+    "done": "Done",
+    "cancel": "Cancel",
+    "back": "Back",
+    "reviewPlanBtn": "Review Plan",
+    "startMigrationBtn": "Start Migration"
+  },
+  "moduleActionsMenu": {
+    "moreActions": "More actions",
+    "moduleActions": "Module actions",
+    "publishNewVersion": "Publish new version",
+    "editDescription": "Edit description",
+    "deprecateModule": "Deprecate module",
+    "undeprecateModule": "Undeprecate module",
+    "deleteModule": "Delete module"
   },
   "setup": {
     "oidc": {

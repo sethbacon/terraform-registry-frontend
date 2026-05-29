@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import {
   IconButton,
   Menu,
@@ -39,6 +40,7 @@ export default function ModuleActionsMenu({
   onDeleteModule,
   'data-testid': testId = 'module-actions-menu',
 }: ModuleActionsMenuProps) {
+  const { t } = useTranslation()
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null)
   const open = Boolean(anchorEl)
 
@@ -53,11 +55,11 @@ export default function ModuleActionsMenu({
 
   return (
     <>
-      <Tooltip title="More actions">
+      <Tooltip title={t('moduleActionsMenu.moreActions')}>
         <IconButton
           size="small"
           onClick={handleOpen}
-          aria-label="Module actions"
+          aria-label={t('moduleActionsMenu.moduleActions')}
           aria-haspopup="menu"
           aria-expanded={open ? 'true' : undefined}
           data-testid={`${testId}-button`}
@@ -71,7 +73,7 @@ export default function ModuleActionsMenu({
         onClose={handleClose}
         data-testid={`${testId}-menu`}
         slotProps={{
-          list: { 'aria-label': 'Module actions' }
+          list: { 'aria-label': t('moduleActionsMenu.moduleActions') },
         }}
       >
         {includePublishAction && onPublishNewVersion && (
@@ -79,7 +81,7 @@ export default function ModuleActionsMenu({
             <ListItemIcon>
               <Add fontSize="small" />
             </ListItemIcon>
-            <ListItemText>Publish new version</ListItemText>
+            <ListItemText>{t('moduleActionsMenu.publishNewVersion')}</ListItemText>
           </MenuItem>
         )}
         {onEditDescription && (
@@ -87,7 +89,7 @@ export default function ModuleActionsMenu({
             <ListItemIcon>
               <Edit fontSize="small" />
             </ListItemIcon>
-            <ListItemText>Edit description</ListItemText>
+            <ListItemText>{t('moduleActionsMenu.editDescription')}</ListItemText>
           </MenuItem>
         )}
         {(includePublishAction || onEditDescription) && <Divider />}
@@ -96,7 +98,7 @@ export default function ModuleActionsMenu({
             <ListItemIcon>
               <Warning fontSize="small" color="warning" />
             </ListItemIcon>
-            <ListItemText>Deprecate module</ListItemText>
+            <ListItemText>{t('moduleActionsMenu.deprecateModule')}</ListItemText>
           </MenuItem>
         )}
         {deprecated && onUndeprecateModule && (
@@ -104,7 +106,7 @@ export default function ModuleActionsMenu({
             <ListItemIcon>
               <Undo fontSize="small" />
             </ListItemIcon>
-            <ListItemText>Undeprecate module</ListItemText>
+            <ListItemText>{t('moduleActionsMenu.undeprecateModule')}</ListItemText>
           </MenuItem>
         )}
         {onDeleteModule && (
@@ -116,10 +118,10 @@ export default function ModuleActionsMenu({
             <ListItemIcon>
               <Delete fontSize="small" color="error" />
             </ListItemIcon>
-            <ListItemText>Delete module</ListItemText>
+            <ListItemText>{t('moduleActionsMenu.deleteModule')}</ListItemText>
           </MenuItem>
         )}
       </Menu>
     </>
-  );
+  )
 }

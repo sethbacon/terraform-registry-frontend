@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import {
   Box,
   Paper,
@@ -40,6 +41,7 @@ const SecurityScanPanel: React.FC<SecurityScanPanelProps> = ({
   onRescan,
   rescanPending = false,
 }) => {
+  const { t } = useTranslation()
   const [diagnosticsOpen, setDiagnosticsOpen] = useState(false)
   const [findingsOpen, setFindingsOpen] = useState(false)
 
@@ -57,13 +59,14 @@ const SecurityScanPanel: React.FC<SecurityScanPanelProps> = ({
     <Paper sx={{ p: 3, mb: 3 }}>
       <Box
         sx={{
-          display: "flex",
-          alignItems: "center",
+          display: 'flex',
+          alignItems: 'center',
           gap: 1,
-          mb: 1
-        }}>
+          mb: 1,
+        }}
+      >
         <SecurityIcon fontSize="small" color="action" />
-        <Typography variant="h6">Security Scan</Typography>
+        <Typography variant="h6">{t('securityScanPanel.title')}</Typography>
         {scanInProgress && <CircularProgress size={16} sx={{ ml: 'auto' }} />}
         {onRescan && !scanInProgress && (
           <Button
@@ -82,10 +85,11 @@ const SecurityScanPanel: React.FC<SecurityScanPanelProps> = ({
       {scanLoading ? (
         <Box
           sx={{
-            display: "flex",
-            justifyContent: "center",
-            py: 2
-          }}>
+            display: 'flex',
+            justifyContent: 'center',
+            py: 2,
+          }}
+        >
           <CircularProgress size={24} />
         </Box>
       ) : scanNotConfigured ? (
@@ -94,16 +98,21 @@ const SecurityScanPanel: React.FC<SecurityScanPanelProps> = ({
           backend configuration to enable scanning.
         </Alert>
       ) : scanNotFound ? (
-        <Typography variant="body2" sx={{
-          color: "text.secondary"
-        }}>
+        <Typography
+          variant="body2"
+          sx={{
+            color: 'text.secondary',
+          }}
+        >
           No scan available for this version.
         </Typography>
       ) : moduleScan ? (
         <Box>
-          <Box sx={{
-            mb: 1.5
-          }}>
+          <Box
+            sx={{
+              mb: 1.5,
+            }}
+          >
             <Chip
               label={moduleScan.status}
               size="small"
@@ -131,9 +140,10 @@ const SecurityScanPanel: React.FC<SecurityScanPanelProps> = ({
               direction="row"
               spacing={0.5}
               sx={{
-                flexWrap: "wrap",
-                mb: 1.5
-              }}>
+                flexWrap: 'wrap',
+                mb: 1.5,
+              }}
+            >
               {moduleScan.critical_count > 0 && (
                 <Chip label={`Critical: ${moduleScan.critical_count}`} size="small" color="error" />
               )}
@@ -150,9 +160,12 @@ const SecurityScanPanel: React.FC<SecurityScanPanelProps> = ({
                 moduleScan.high_count === 0 &&
                 moduleScan.medium_count === 0 &&
                 moduleScan.low_count === 0 && (
-                  <Typography variant="body2" sx={{
-                    color: "success.main"
-                  }}>
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      color: 'success.main',
+                    }}
+                  >
                     No findings
                   </Typography>
                 )}
@@ -161,9 +174,10 @@ const SecurityScanPanel: React.FC<SecurityScanPanelProps> = ({
           <Typography
             variant="caption"
             sx={{
-              color: "text.secondary",
-              display: "block"
-            }}>
+              color: 'text.secondary',
+              display: 'block',
+            }}
+          >
             Scanner: {moduleScan.scanner}
             {moduleScan.scanner_version ? ` ${moduleScan.scanner_version}` : ''}
           </Typography>
@@ -171,9 +185,10 @@ const SecurityScanPanel: React.FC<SecurityScanPanelProps> = ({
             <Typography
               variant="caption"
               sx={{
-                color: "text.secondary",
-                display: "block"
-              }}>
+                color: 'text.secondary',
+                display: 'block',
+              }}
+            >
               Scanned: {new Date(moduleScan.scanned_at).toLocaleString()}
             </Typography>
           )}
@@ -206,7 +221,7 @@ const SecurityScanPanel: React.FC<SecurityScanPanelProps> = ({
         scan={moduleScan}
       />
     </Paper>
-  );
+  )
 }
 
 export default SecurityScanPanel
