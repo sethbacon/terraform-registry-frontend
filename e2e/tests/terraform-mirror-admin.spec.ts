@@ -80,6 +80,19 @@ test.describe('Admin: Terraform Binary Mirrors', () => {
     await expect(createBtn).toBeVisible({ timeout: 5_000 });
   });
 
+  test('Add Mirror dialog exposes the Require approval toggle', async ({ loggedInPage: page }) => {
+    await page.goto('/admin/terraform-mirror');
+    await page.waitForSelector('[class*="MuiAlert"]', { timeout: 20_000 });
+
+    await page.getByRole('button', { name: /Add Mirror/i }).click();
+    await expect(page.locator('[class*="MuiDialog"]').first()).toBeVisible({ timeout: 5_000 });
+
+    // Version approval gate toggle from the version-approval feature.
+    await expect(
+      page.getByLabel(/Require approval for new versions/i),
+    ).toBeVisible({ timeout: 5_000 });
+  });
+
   test('cards show "View Details" button', async ({ loggedInPage: page }) => {
     await page.goto('/admin/terraform-mirror');
 

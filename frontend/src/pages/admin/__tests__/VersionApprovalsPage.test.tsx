@@ -252,4 +252,74 @@ describe('VersionApprovalsPage', () => {
     const rowCheckboxes = screen.getAllByRole('checkbox').slice(1)
     rowCheckboxes.forEach((cb) => expect(cb).toBeChecked())
   })
+
+  it('shows success alert after approving', async () => {
+    approveVersionMock.mockResolvedValue(undefined)
+    const user = userEvent.setup()
+    renderWithProviders(<VersionApprovalsPage />)
+    await waitFor(() => screen.getAllByRole('button', { name: 'Approve' }))
+    await user.click(screen.getAllByRole('button', { name: 'Approve' })[0])
+    const dialog = screen.getByRole('dialog')
+    await user.click(within(dialog).getByRole('button', { name: 'Approve' }))
+    await waitFor(() => expect(screen.getByText('Version approved')).toBeInTheDocument())
+  })
+
+  it('expands a row to load and render the audit trail', async () => {
+    getVersionApprovalEventsMock.mockResolvedValue([
+      {
+        id: 'ev-1',
+        action: 'auto_approved',
+        performed_by_name: 'alice',
+        notes: 'matched rule',
+        auto_approve_rule: 'gpg_verified',
+        created_at: '2026-05-29T11:00:00Z',
+      },
+    ])
+    const user = userEvent.setup()
+    renderWithProviders(<VersionApprovalsPage />)
+    await waitFor(() => screen.getAllByRole('button', { name: /expand row/i }))
+    await user.click(screen.getAllByRole('button', { name: /expand row/i })[0])
+    await waitFor(() => expect(getVersionApprovalEventsMock).toHaveBeenCalledWith('mpv-1'))
+    expect(await screen.findByText(/auto_approved/)).toBeInTheDocument()
+    expect(screen.getByText(/alice/)).toBeInTheDocument()
+  })
+
+  it('shows empty audit trail message when a row has no events', async () => {
+    getVersionApprovalEventsMock.mockResolvedValue([])
+    const user = userEvent.setup()
+    renderWithProviders(<VersionApprovalsPage />)
+    await waitFor(() => screen.getAllByRole('button', { name: /expand row/i }))
+    await user.click(screen.getAllByRole('button', { name: /expand row/i })[0])
+    expect(await screen.findByText(/No approval events/i)).toBeInTheDocument()
+  })
+
+  it('filters by provider type via the type toggle', async () => {
+    const user = userEvent.setup()
+    renderWithProviders(<VersionApprovalsPage />)
+    await waitFor(() => screen.getByRole('button', { name: 'Provider Versions' }))
+    await user.click(screen.getByRole('button', { name: 'Provider Versions' }))
+    await waitFor(() =>
+      expect(listVersionApprovalsMock).toHaveBeenCalledWith(
+        expect.objectContaining({ type: 'provider' }),
+      ),
+    )
+  })
+
+  it('calls bulkRejectVersions with selected IDs on confirm', async () => {
+    bulkRejectVersionsMock.mockResolvedValue({ rejected: 1, failures: [] })
+    const user = userEvent.setup()
+    renderWithProviders(<VersionApprovalsPage />)
+    await waitFor(() => screen.getAllByRole('checkbox'))
+    await user.click(screen.getAllByRole('checkbox')[1])
+    await user.click(screen.getByRole('button', { name: /Reject Selected/ }))
+    const dialog = screen.getByRole('dialog')
+    await user.click(within(dialog).getByRole('button', { name: 'Reject Selected' }))
+    await waitFor(() => expect(bulkRejectVersionsMock).toHaveBeenCalledWith(['mpv-1'], undefined))
+  })
+
+  it('shows error alert when listing fails', async () => {
+    listVersionApprovalsMock.mockRejectedValue(new Error('boom'))
+    renderWithProviders(<VersionApprovalsPage />)
+    await waitFor(() => expect(screen.getByRole('alert')).toBeInTheDocument())
+  })
 })
