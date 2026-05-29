@@ -1,4 +1,5 @@
 import React from 'react'
+import { useTranslation } from 'react-i18next'
 import {
   Box,
   Paper,
@@ -42,6 +43,7 @@ const WebhookEventsPanel: React.FC<WebhookEventsPanelProps> = ({
   onToggleExpanded,
   onLoadEvents,
 }) => {
+  const { t } = useTranslation()
   if (!isAuthenticated || !scmLink) return null
 
   const handleToggle = () => {
@@ -56,21 +58,23 @@ const WebhookEventsPanel: React.FC<WebhookEventsPanelProps> = ({
       <Box
         onClick={handleToggle}
         sx={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          cursor: 'pointer'
-        }}>
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          cursor: 'pointer',
+        }}
+      >
         <Box
           sx={{
-            display: "flex",
-            alignItems: "center",
-            gap: 1
-          }}>
+            display: 'flex',
+            alignItems: 'center',
+            gap: 1,
+          }}
+        >
           <WebhookIcon fontSize="small" color="action" />
-          <Typography variant="h6">Webhook Events</Typography>
+          <Typography variant="h6">{t('webhookEvents.title')}</Typography>
         </Box>
-        <IconButton size="small" aria-label="Toggle webhook events">
+        <IconButton size="small" aria-label={t('webhookEvents.toggleAria')}>
           {webhookEventsExpanded ? <ExpandLessIcon /> : <ExpandMoreIcon />}
         </IconButton>
       </Box>
@@ -79,17 +83,21 @@ const WebhookEventsPanel: React.FC<WebhookEventsPanelProps> = ({
         {webhookEventsLoading ? (
           <Box
             sx={{
-              display: "flex",
-              justifyContent: "center",
-              py: 2
-            }}>
+              display: 'flex',
+              justifyContent: 'center',
+              py: 2,
+            }}
+          >
             <CircularProgress size={24} />
           </Box>
         ) : webhookEvents.length === 0 ? (
-          <Typography variant="body2" sx={{
-            color: "text.secondary"
-          }}>
-            No webhook events recorded yet.
+          <Typography
+            variant="body2"
+            sx={{
+              color: 'text.secondary',
+            }}
+          >
+            {t('webhookEvents.noEvents')}
           </Typography>
         ) : (
           <List dense disablePadding>
@@ -99,10 +107,11 @@ const WebhookEventsPanel: React.FC<WebhookEventsPanelProps> = ({
                   primary={
                     <Box
                       sx={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: 1
-                      }}>
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 1,
+                      }}
+                    >
                       <Chip
                         label={event.state}
                         size="small"
@@ -126,15 +135,20 @@ const WebhookEventsPanel: React.FC<WebhookEventsPanelProps> = ({
                       <Typography
                         variant="caption"
                         sx={{
-                          color: "text.secondary",
-                          display: "block"
-                        }}>
+                          color: 'text.secondary',
+                          display: 'block',
+                        }}
+                      >
                         {new Date(event.created_at).toLocaleString()}
                       </Typography>
                       {event.error_message && (
-                        <Typography variant="caption" color="error" sx={{
-                          display: "block"
-                        }}>
+                        <Typography
+                          variant="caption"
+                          color="error"
+                          sx={{
+                            display: 'block',
+                          }}
+                        >
                           {event.error_message}
                         </Typography>
                       )}
@@ -147,20 +161,23 @@ const WebhookEventsPanel: React.FC<WebhookEventsPanelProps> = ({
               <Typography
                 variant="caption"
                 sx={{
-                  color: "text.secondary",
+                  color: 'text.secondary',
                   pl: 0,
                   mt: 1,
-                  display: 'block'
-                }}>
-                Showing 10 of {webhookEvents.length} events
+                  display: 'block',
+                }}
+              >
+                {t('webhookEvents.showingCount', { total: webhookEvents.length })}
               </Typography>
             )}
           </List>
         )}
         {webhookEventsLoaded && (
-          <Box sx={{
-            mt: 1
-          }}>
+          <Box
+            sx={{
+              mt: 1,
+            }}
+          >
             <Button
               size="small"
               startIcon={<SyncIcon />}
@@ -170,13 +187,13 @@ const WebhookEventsPanel: React.FC<WebhookEventsPanelProps> = ({
               }}
               disabled={webhookEventsLoading}
             >
-              Refresh
+              {t('webhookEvents.refresh')}
             </Button>
           </Box>
         )}
       </Collapse>
     </Paper>
-  );
+  )
 }
 
 export default WebhookEventsPanel

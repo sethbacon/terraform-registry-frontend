@@ -1,4 +1,5 @@
 import React from 'react'
+import { useTranslation } from 'react-i18next'
 import { Box, Typography, Stack } from '@mui/material'
 
 interface ScanDiagnosticsProps {
@@ -21,6 +22,7 @@ const ScanDiagnostics: React.FC<ScanDiagnosticsProps> = ({
   rawResults,
   maxBlockHeight = 240,
 }) => {
+  const { t } = useTranslation()
   const hasErrorMessage = Boolean(errorMessage)
   const hasLog = Boolean(executionLog)
   const hasRaw = rawResults != null && Object.keys(rawResults).length > 0
@@ -30,32 +32,30 @@ const ScanDiagnostics: React.FC<ScanDiagnosticsProps> = ({
   return (
     <Stack spacing={2} data-testid="scan-diagnostics">
       {hasErrorMessage && (
-        <Section title="Error message" testId="scan-diagnostics-error">
+        <Section title={t('scanDiagnostics.errorMessage')} testId="scan-diagnostics-error">
           <Typography
             variant="body2"
             sx={{
-              color: "error.main",
-              whiteSpace: 'pre-wrap'
-            }}>
+              color: 'error.main',
+              whiteSpace: 'pre-wrap',
+            }}
+          >
             {errorMessage}
           </Typography>
         </Section>
       )}
       {hasLog && (
-        <Section title="Scanner output (stderr / stdout)" testId="scan-diagnostics-log">
+        <Section title={t('scanDiagnostics.scannerOutput')} testId="scan-diagnostics-log">
           <LogBlock content={executionLog as string} maxHeight={maxBlockHeight} />
         </Section>
       )}
       {hasRaw && (
-        <Section title="Raw scanner JSON" testId="scan-diagnostics-raw">
-          <LogBlock
-            content={JSON.stringify(rawResults, null, 2)}
-            maxHeight={maxBlockHeight}
-          />
+        <Section title={t('scanDiagnostics.rawJson')} testId="scan-diagnostics-raw">
+          <LogBlock content={JSON.stringify(rawResults, null, 2)} maxHeight={maxBlockHeight} />
         </Section>
       )}
     </Stack>
-  );
+  )
 }
 
 const Section: React.FC<{
@@ -67,10 +67,11 @@ const Section: React.FC<{
     <Typography
       variant="caption"
       sx={{
-        color: "text.secondary",
+        color: 'text.secondary',
         display: 'block',
-        mb: 0.5
-      }}>
+        mb: 0.5,
+      }}
+    >
       {title}
     </Typography>
     {children}

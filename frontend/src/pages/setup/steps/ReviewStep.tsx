@@ -1,4 +1,5 @@
 import React from 'react'
+import { useTranslation } from 'react-i18next'
 import {
   Box,
   Typography,
@@ -19,6 +20,7 @@ import PersonIcon from '@mui/icons-material/Person'
 import { useSetupWizard } from '../../../contexts/SetupWizardContext'
 
 const ReviewStep: React.FC = () => {
+  const { t } = useTranslation()
   const {
     setupStatus,
     authMethod,
@@ -48,9 +50,12 @@ const ReviewStep: React.FC = () => {
         <Typography variant="h5" component="h2" gutterBottom>
           Ready to Complete Setup
         </Typography>
-        <Typography variant="body1" sx={{
-          color: "text.secondary"
-        }}>
+        <Typography
+          variant="body1"
+          sx={{
+            color: 'text.secondary',
+          }}
+        >
           Review your configuration below and finalize the setup.
         </Typography>
       </Box>
@@ -62,18 +67,29 @@ const ReviewStep: React.FC = () => {
             Identity Provider
           </Typography>
           {authSaved ? (
-            <Chip label="Configured" color="success" size="small" icon={<CheckCircleIcon />} />
+            <Chip
+              label={t('reviewStep.configured')}
+              color="success"
+              size="small"
+              icon={<CheckCircleIcon />}
+            />
           ) : (
-            <Chip label="Not configured" color="error" size="small" icon={<ErrorIcon />} />
+            <Chip
+              label={t('reviewStep.notConfigured')}
+              color="error"
+              size="small"
+              icon={<ErrorIcon />}
+            />
           )}
         </Box>
         {authSaved && authMethod === 'oidc' && (
           <Typography
             variant="body2"
             sx={{
-              color: "text.secondary",
-              pl: 4
-            }}>
+              color: 'text.secondary',
+              pl: 4,
+            }}
+          >
             {oidcForm.provider_type === 'azuread' ? 'Azure AD' : 'Generic OIDC'} —{' '}
             {oidcForm.issuer_url}
           </Typography>
@@ -82,9 +98,10 @@ const ReviewStep: React.FC = () => {
           <Typography
             variant="body2"
             sx={{
-              color: "text.secondary",
-              pl: 4
-            }}>
+              color: 'text.secondary',
+              pl: 4,
+            }}
+          >
             LDAP — {ldapForm.host}:{ldapForm.port || 389}
           </Typography>
         )}
@@ -95,18 +112,29 @@ const ReviewStep: React.FC = () => {
             Storage Backend
           </Typography>
           {storageSaved ? (
-            <Chip label="Configured" color="success" size="small" icon={<CheckCircleIcon />} />
+            <Chip
+              label={t('reviewStep.configured')}
+              color="success"
+              size="small"
+              icon={<CheckCircleIcon />}
+            />
           ) : (
-            <Chip label="Not configured" color="error" size="small" icon={<ErrorIcon />} />
+            <Chip
+              label={t('reviewStep.notConfigured')}
+              color="error"
+              size="small"
+              icon={<ErrorIcon />}
+            />
           )}
         </Box>
         {storageSaved && (
           <Typography
             variant="body2"
             sx={{
-              color: "text.secondary",
-              pl: 4
-            }}>
+              color: 'text.secondary',
+              pl: 4,
+            }}
+          >
             {storageForm.backend_type.toUpperCase()}
             {storageForm.backend_type === 'local' && ` — ${storageForm.local_base_path}`}
             {storageForm.backend_type === 's3' && ` — ${storageForm.s3_bucket}`}
@@ -128,16 +156,22 @@ const ReviewStep: React.FC = () => {
               icon={scanningForm.enabled ? <CheckCircleIcon /> : undefined}
             />
           ) : (
-            <Chip label="Not configured" color="error" size="small" icon={<ErrorIcon />} />
+            <Chip
+              label={t('reviewStep.notConfigured')}
+              color="error"
+              size="small"
+              icon={<ErrorIcon />}
+            />
           )}
         </Box>
         {scanningSaved && scanningForm.enabled && (
           <Typography
             variant="body2"
             sx={{
-              color: "text.secondary",
-              pl: 4
-            }}>
+              color: 'text.secondary',
+              pl: 4,
+            }}
+          >
             {scanningForm.tool}
             {scanningTestResult?.version ? ` v${scanningTestResult.version}` : ''}
           </Typography>
@@ -149,31 +183,46 @@ const ReviewStep: React.FC = () => {
             Admin User
           </Typography>
           {adminSaved ? (
-            <Chip label="Configured" color="success" size="small" icon={<CheckCircleIcon />} />
+            <Chip
+              label={t('reviewStep.configured')}
+              color="success"
+              size="small"
+              icon={<CheckCircleIcon />}
+            />
           ) : (
-            <Chip label="Not configured" color="error" size="small" icon={<ErrorIcon />} />
+            <Chip
+              label={t('reviewStep.notConfigured')}
+              color="error"
+              size="small"
+              icon={<ErrorIcon />}
+            />
           )}
         </Box>
         {adminSaved && (
           <Typography
             variant="body2"
             sx={{
-              color: "text.secondary",
-              pl: 4
-            }}>
+              color: 'text.secondary',
+              pl: 4,
+            }}
+          >
             {adminEmail}
           </Typography>
         )}
       </Stack>
       <Alert severity="warning" sx={{ mb: 3 }}>
-        <AlertTitle>This action is permanent</AlertTitle>
+        <AlertTitle>{t('reviewStep.actionPermanent')}</AlertTitle>
         After completing setup, the setup token will be invalidated and these endpoints will be
         permanently disabled. All future configuration changes must be made through the
         authenticated admin interface.
       </Alert>
-      <Stack direction="row" spacing={2} sx={{
-        justifyContent: "center"
-      }}>
+      <Stack
+        direction="row"
+        spacing={2}
+        sx={{
+          justifyContent: 'center',
+        }}
+      >
         <Button variant="text" onClick={() => goToStep(isPending ? 3 : 4)}>
           ← Back
         </Button>
@@ -189,7 +238,7 @@ const ReviewStep: React.FC = () => {
         </Button>
       </Stack>
     </Box>
-  );
+  )
 }
 
 export default ReviewStep

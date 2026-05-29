@@ -1,4 +1,5 @@
 import React from 'react'
+import { useTranslation } from 'react-i18next'
 import { Box, LinearProgress, Typography, Tooltip, Paper } from '@mui/material'
 import { OrgQuota } from '../types'
 
@@ -21,14 +22,20 @@ function QuotaRow({ label, used, limit, ratio, formatUsed, formatLimit }: QuotaR
   return (
     <Box>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
-        <Typography variant="body2" sx={{
-          color: "text.secondary"
-        }}>
+        <Typography
+          variant="body2"
+          sx={{
+            color: 'text.secondary',
+          }}
+        >
           {label}
         </Typography>
-        <Typography variant="body2" sx={{
-          fontWeight: 500
-        }}>
+        <Typography
+          variant="body2"
+          sx={{
+            fontWeight: 500,
+          }}
+        >
           {unlimited ? (
             <Box component="span" sx={{ color: 'text.secondary' }}>
               {formatUsed(used)} / Unlimited
@@ -52,7 +59,7 @@ function QuotaRow({ label, used, limit, ratio, formatUsed, formatLimit }: QuotaR
         />
       </Tooltip>
     </Box>
-  );
+  )
 }
 
 function formatBytes(bytes: number): string {
@@ -68,18 +75,23 @@ interface QuotaUsageChartProps {
 }
 
 const QuotaUsageChart: React.FC<QuotaUsageChartProps> = ({ quota, orgName }) => {
+  const { t } = useTranslation()
   return (
     <Paper variant="outlined" sx={{ p: 2 }}>
       {orgName && (
-        <Typography variant="subtitle2" gutterBottom sx={{
-          fontWeight: 600
-        }}>
+        <Typography
+          variant="subtitle2"
+          gutterBottom
+          sx={{
+            fontWeight: 600,
+          }}
+        >
           {orgName}
         </Typography>
       )}
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
         <QuotaRow
-          label="Storage"
+          label={t('quotaUsageChart.storage')}
           used={quota.storage_bytes_used}
           limit={quota.storage_bytes_limit}
           ratio={quota.storage_utilization_ratio}
@@ -87,7 +99,7 @@ const QuotaUsageChart: React.FC<QuotaUsageChartProps> = ({ quota, orgName }) => 
           formatLimit={formatBytes}
         />
         <QuotaRow
-          label="Publishes / Day"
+          label={t('quotaUsageChart.publishesPerDay')}
           used={quota.publishes_today}
           limit={quota.publishes_per_day_limit}
           ratio={quota.publish_utilization_ratio}
@@ -95,7 +107,7 @@ const QuotaUsageChart: React.FC<QuotaUsageChartProps> = ({ quota, orgName }) => 
           formatLimit={(v) => String(v)}
         />
         <QuotaRow
-          label="Downloads / Day"
+          label={t('quotaUsageChart.downloadsPerDay')}
           used={quota.downloads_today}
           limit={quota.downloads_per_day_limit}
           ratio={quota.download_utilization_ratio}
@@ -104,7 +116,7 @@ const QuotaUsageChart: React.FC<QuotaUsageChartProps> = ({ quota, orgName }) => 
         />
       </Box>
     </Paper>
-  );
+  )
 }
 
 export default QuotaUsageChart

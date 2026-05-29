@@ -189,9 +189,14 @@ const HomePage: React.FC = () => {
         }}
       >
         <Container maxWidth="lg">
-          <Typography variant="h2" component="h1" gutterBottom sx={{
-            fontWeight: "bold"
-          }}>
+          <Typography
+            variant="h2"
+            component="h1"
+            gutterBottom
+            sx={{
+              fontWeight: 'bold',
+            }}
+          >
             {t('home.heroTitle')}
           </Typography>
           <Typography variant="h5" sx={{ mb: 4, opacity: 0.9 }}>
@@ -202,9 +207,10 @@ const HomePage: React.FC = () => {
             spacing={2}
             useFlexGap
             sx={{
-              flexWrap: "wrap",
-              mb: 3
-            }}>
+              flexWrap: 'wrap',
+              mb: 3,
+            }}
+          >
             <Button
               variant="contained"
               size="large"
@@ -255,17 +261,22 @@ const HomePage: React.FC = () => {
       </Box>
       {/* Quick Search */}
       <Container maxWidth="sm" sx={{ mb: 8, textAlign: 'center' }}>
-        <Typography variant="h5" gutterBottom sx={{
-          fontWeight: 600
-        }}>
+        <Typography
+          variant="h5"
+          gutterBottom
+          sx={{
+            fontWeight: 600,
+          }}
+        >
           {t('home.findWhatYouNeed')}
         </Typography>
         <Typography
           variant="body2"
           sx={{
-            color: "text.secondary",
-            mb: 2
-          }}>
+            color: 'text.secondary',
+            mb: 2,
+          }}
+        >
           {t('home.searchAcross')}
         </Typography>
         <Stack
@@ -273,7 +284,7 @@ const HomePage: React.FC = () => {
           direction={isXs ? 'column' : 'row'}
           spacing={1.5}
           sx={{
-            alignItems: isXs ? 'stretch' : 'center'
+            alignItems: isXs ? 'stretch' : 'center',
           }}
         >
           <ToggleButtonGroup
@@ -283,7 +294,7 @@ const HomePage: React.FC = () => {
             onChange={(_e, val) => {
               if (val) setSearchType(val)
             }}
-            aria-label="Search scope"
+            aria-label={t('home.searchScope')}
             data-testid="quick-search-toggle"
             sx={{ alignSelf: isXs ? 'center' : 'auto', flexShrink: 0 }}
           >
@@ -305,15 +316,21 @@ const HomePage: React.FC = () => {
                 ),
                 endAdornment: (
                   <InputAdornment position="end">
-                    <Button size="small" onClick={handleSearch} variant="contained" disableElevation>
+                    <Button
+                      size="small"
+                      onClick={handleSearch}
+                      variant="contained"
+                      disableElevation
+                    >
                       {t('home.search')}
                     </Button>
                   </InputAdornment>
                 ),
               },
 
-              htmlInput: { 'aria-label': `Search ${searchType}` }
-            }} />
+              htmlInput: { 'aria-label': `Search ${searchType}` },
+            }}
+          />
         </Stack>
       </Container>
       {/* What's Available */}
@@ -323,8 +340,9 @@ const HomePage: React.FC = () => {
           gutterBottom
           sx={{
             fontWeight: 600,
-            mb: 4
-          }}>
+            mb: 4,
+          }}
+        >
           {t('home.whatsAvailable')}
         </Typography>
         <Grid container spacing={3}>
@@ -350,9 +368,10 @@ const HomePage: React.FC = () => {
                       component="span"
                       variant="body2"
                       sx={{
-                        color: "text.secondary",
-                        ml: 1
-                      }}>
+                        color: 'text.secondary',
+                        ml: 1,
+                      }}
+                    >
                       ({stats.moduleCount})
                     </Typography>
                   )}
@@ -360,9 +379,10 @@ const HomePage: React.FC = () => {
                 <Typography
                   variant="body2"
                   sx={{
-                    color: "text.secondary",
-                    mb: 2
-                  }}>
+                    color: 'text.secondary',
+                    mb: 2,
+                  }}
+                >
                   {t('home.modulesDescription')}
                 </Typography>
                 <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.75, minHeight: 32 }}>
@@ -416,9 +436,10 @@ const HomePage: React.FC = () => {
                       component="span"
                       variant="body2"
                       sx={{
-                        color: "text.secondary",
-                        ml: 1
-                      }}>
+                        color: 'text.secondary',
+                        ml: 1,
+                      }}
+                    >
                       ({stats.providerCount})
                     </Typography>
                   )}
@@ -426,9 +447,10 @@ const HomePage: React.FC = () => {
                 <Typography
                   variant="body2"
                   sx={{
-                    color: "text.secondary",
-                    mb: 2
-                  }}>
+                    color: 'text.secondary',
+                    mb: 2,
+                  }}
+                >
                   {t('home.providersDescription')}
                 </Typography>
                 <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.75, minHeight: 32 }}>
@@ -479,9 +501,10 @@ const HomePage: React.FC = () => {
                 <Typography
                   variant="body2"
                   sx={{
-                    color: "text.secondary",
-                    mb: 2
-                  }}>
+                    color: 'text.secondary',
+                    mb: 2,
+                  }}
+                >
                   {t('home.terraformBinariesDescription')}
                 </Typography>
                 <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.75, minHeight: 32 }}>
@@ -504,9 +527,12 @@ const HomePage: React.FC = () => {
                       />
                     ))
                   ) : (
-                    <Typography variant="body2" sx={{
-                      color: "text.secondary"
-                    }}>
+                    <Typography
+                      variant="body2"
+                      sx={{
+                        color: 'text.secondary',
+                      }}
+                    >
                       {t('home.noBinaryMirrors')}
                     </Typography>
                   )}
@@ -534,8 +560,9 @@ const HomePage: React.FC = () => {
             gutterBottom
             sx={{
               fontWeight: 600,
-              mb: 4
-            }}>
+              mb: 4,
+            }}
+          >
             {t('home.gettingStarted')}
           </Typography>
           <Grid container spacing={3}>
@@ -545,9 +572,12 @@ const HomePage: React.FC = () => {
                   <Typography variant="h6" gutterBottom color="primary">
                     {t('home.step1Title')}
                   </Typography>
-                  <Typography variant="body2" sx={{
-                    color: "text.secondary"
-                  }}>
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      color: 'text.secondary',
+                    }}
+                  >
                     {t('home.step1Desc')}
                   </Typography>
                 </CardContent>
@@ -562,9 +592,10 @@ const HomePage: React.FC = () => {
                   <Typography
                     variant="body2"
                     sx={{
-                      color: "text.secondary",
-                      mb: 1.5
-                    }}>
+                      color: 'text.secondary',
+                      mb: 1.5,
+                    }}
+                  >
                     {isAuthenticated ? t('home.step2DescAuth') : t('home.step2DescUnauth')}
                   </Typography>
 
@@ -604,9 +635,14 @@ const HomePage: React.FC = () => {
                     </Stack>
                   ) : (
                     <Stack spacing={1.5}>
-                      <Stack direction="row" spacing={1} useFlexGap sx={{
-                        flexWrap: "wrap"
-                      }}>
+                      <Stack
+                        direction="row"
+                        spacing={1}
+                        useFlexGap
+                        sx={{
+                          flexWrap: 'wrap',
+                        }}
+                      >
                         <Button
                           variant="contained"
                           size="small"
@@ -678,9 +714,12 @@ const HomePage: React.FC = () => {
                   <Typography variant="h6" gutterBottom color="primary">
                     {t('home.step3Title')}
                   </Typography>
-                  <Typography variant="body2" sx={{
-                    color: "text.secondary"
-                  }}>
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      color: 'text.secondary',
+                    }}
+                  >
                     {t('home.step3Desc')}
                   </Typography>
                 </CardContent>
@@ -696,16 +735,18 @@ const HomePage: React.FC = () => {
           gutterBottom
           sx={{
             fontWeight: 600,
-            mb: 2
-          }}>
+            mb: 2,
+          }}
+        >
           {t('home.protocolSupport')}
         </Typography>
         <Typography
           variant="body1"
           sx={{
-            color: "text.secondary",
-            mb: 3
-          }}>
+            color: 'text.secondary',
+            mb: 3,
+          }}
+        >
           {t('home.protocolDesc')}
         </Typography>
         <Stack
@@ -713,13 +754,14 @@ const HomePage: React.FC = () => {
           spacing={1}
           useFlexGap
           sx={{
-            flexWrap: "wrap",
-            mb: 3
-          }}>
-          <Chip label="Module Registry API" color="primary" />
-          <Chip label="Provider Registry API" color="secondary" />
-          <Chip label="Service Discovery" />
-          <Chip label="Authentication" />
+            flexWrap: 'wrap',
+            mb: 3,
+          }}
+        >
+          <Chip label={t('home.apiChipModule')} color="primary" />
+          <Chip label={t('home.apiChipProvider')} color="secondary" />
+          <Chip label={t('home.apiChipDiscovery')} />
+          <Chip label={t('home.apiChipAuth')} />
         </Stack>
         <Button
           variant="outlined"
@@ -736,7 +778,7 @@ const HomePage: React.FC = () => {
         hostname={typeof window !== 'undefined' ? window.location.hostname : ''}
       />
     </Box>
-  );
+  )
 }
 
 export default HomePage

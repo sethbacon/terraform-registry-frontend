@@ -1,4 +1,5 @@
 import React from 'react'
+import { useTranslation } from 'react-i18next'
 import {
   Box,
   Typography,
@@ -14,6 +15,7 @@ import CheckCircleIcon from '@mui/icons-material/CheckCircle'
 import { useSetupWizard } from '../../../contexts/SetupWizardContext'
 
 const AuthenticateStep: React.FC = () => {
+  const { t } = useTranslation()
   const { setupToken, setSetupToken, tokenValidating, tokenValid, validateToken } = useSetupWizard()
   return (
     <Box>
@@ -26,14 +28,15 @@ const AuthenticateStep: React.FC = () => {
       <Typography
         variant="body2"
         sx={{
-          color: "text.secondary",
-          mb: 3
-        }}>
+          color: 'text.secondary',
+          mb: 3,
+        }}
+      >
         Enter the setup token that was printed to the server logs when the registry started. Look
         for a line containing <code>tfr_setup_</code> in your server output.
       </Typography>
       <Alert severity="info" sx={{ mb: 3 }}>
-        <AlertTitle>Finding your setup token</AlertTitle>
+        <AlertTitle>{t('authenticateStep.findingToken')}</AlertTitle>
         The token is printed once at startup in a framed box. It looks like:{' '}
         <Box
           component="code"
@@ -45,7 +48,7 @@ const AuthenticateStep: React.FC = () => {
       </Alert>
       <TextField
         fullWidth
-        label="Setup Token"
+        label={t('authenticateStep.setupToken')}
         value={setupToken}
         onChange={(e) => setSetupToken(e.target.value)}
         placeholder="tfr_setup_..."
@@ -58,7 +61,7 @@ const AuthenticateStep: React.FC = () => {
                 {tokenValid && <CheckCircleIcon color="success" />}
               </InputAdornment>
             ),
-          }
+          },
         }}
       />
       <Button
@@ -71,7 +74,7 @@ const AuthenticateStep: React.FC = () => {
         {tokenValidating ? <CircularProgress size={24} /> : 'Verify Token'}
       </Button>
     </Box>
-  );
+  )
 }
 
 export default AuthenticateStep

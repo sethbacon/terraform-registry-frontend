@@ -1,4 +1,5 @@
 import React from 'react'
+import { useTranslation } from 'react-i18next'
 import {
   Box,
   IconButton,
@@ -66,6 +67,7 @@ const UsageExample: React.FC<UsageExampleProps> = ({
   onCopied,
   'data-testid': testId = 'usage-example',
 }) => {
+  const { t } = useTranslation()
   const [tool, setTool] = React.useState<UsageTool>(() => readPreferredTool())
   const [tab, setTab] = React.useState(0)
   const [copied, setCopied] = React.useState(false)
@@ -117,20 +119,25 @@ const UsageExample: React.FC<UsageExampleProps> = ({
         direction={{ xs: 'column', sm: 'row' }}
         spacing={1}
         sx={{
-          justifyContent: "space-between",
+          justifyContent: 'space-between',
           alignItems: { xs: 'flex-start', sm: 'center' },
-          mb: 2
-        }}>
-        <Typography variant="h6">Usage Example</Typography>
-        <Stack direction="row" spacing={1} sx={{
-          alignItems: "center"
-        }}>
+          mb: 2,
+        }}
+      >
+        <Typography variant="h6">{t('usageExample.title')}</Typography>
+        <Stack
+          direction="row"
+          spacing={1}
+          sx={{
+            alignItems: 'center',
+          }}
+        >
           <ToggleButtonGroup
             size="small"
             exclusive
             value={tool}
             onChange={handleToolChange}
-            aria-label="Tool"
+            aria-label={t('usageExample.toolAria')}
             data-testid={`${testId}-tool`}
           >
             <ToggleButton value="terraform" aria-label="Terraform">
@@ -145,9 +152,9 @@ const UsageExample: React.FC<UsageExampleProps> = ({
               </ToggleButton>
             )}
           </ToggleButtonGroup>
-          <Tooltip title={copied ? 'Copied!' : 'Copy example'}>
+          <Tooltip title={copied ? t('usageExample.copied') : t('usageExample.copyExample')}>
             <IconButton
-              aria-label="Copy example"
+              aria-label={t('usageExample.copyExample')}
               size="small"
               onClick={handleCopy}
               data-testid={`${testId}-copy`}
@@ -164,8 +171,8 @@ const UsageExample: React.FC<UsageExampleProps> = ({
           sx={{ mb: 1 }}
           data-testid={`${testId}-tabs`}
         >
-          <Tab label="Source" />
-          <Tab label="With required inputs" />
+          <Tab label={t('usageExample.tabSource')} />
+          <Tab label={t('usageExample.tabWithInputs')} />
         </Tabs>
       )}
       <Box
@@ -187,10 +194,11 @@ const UsageExample: React.FC<UsageExampleProps> = ({
         <Typography
           variant="caption"
           sx={{
-            color: "text.secondary",
+            color: 'text.secondary',
             display: 'block',
-            mt: 1
-          }}>
+            mt: 1,
+          }}
+        >
           Placeholders are the zero-value for each type — fill them before running
           <code style={{ marginLeft: 4 }}>
             {tool === 'opentofu' ? 'tofu apply' : 'terraform apply'}
@@ -202,15 +210,16 @@ const UsageExample: React.FC<UsageExampleProps> = ({
         <Typography
           variant="caption"
           sx={{
-            color: "text.secondary",
+            color: 'text.secondary',
             display: 'block',
-            mt: 1
-          }}>
+            mt: 1,
+          }}
+        >
           Requires <code>oras</code> CLI. Pull the module archive directly from the OCI registry.
         </Typography>
       )}
     </Paper>
-  );
+  )
 }
 
 export default UsageExample

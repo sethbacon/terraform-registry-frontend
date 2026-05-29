@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import {
   Box,
   FormControl,
@@ -22,6 +23,7 @@ interface DevUser {
 }
 
 const DevUserSwitcher = () => {
+  const { t } = useTranslation()
   const { user, setToken } = useAuth()
   const [devMode, setDevMode] = useState<boolean | null>(null)
   const [users, setUsers] = useState<DevUser[]>([])
@@ -79,7 +81,7 @@ const DevUserSwitcher = () => {
 
   return (
     <Box sx={{ display: 'flex', alignItems: 'center', mr: 2 }}>
-      <Tooltip title="Development Mode: Switch User">
+      <Tooltip title={t('devUserSwitcher.title')}>
         <Chip icon={<SyncAlt />} label="DEV" size="small" color="warning" sx={{ mr: 1 }} />
       </Tooltip>
       <FormControl size="small" sx={{ minWidth: 200 }}>
@@ -107,7 +109,7 @@ const DevUserSwitcher = () => {
             }
             const selectedUser = users.find((u) => u.id === selected)
             if (!selectedUser) {
-              return <Typography variant="body2">Select user</Typography>
+              return <Typography variant="body2">{t('devUserSwitcher.selectUser')}</Typography>
             }
             return (
               <Box>
@@ -129,9 +131,12 @@ const DevUserSwitcher = () => {
             <MenuItem key={u.id} value={u.id}>
               <Box sx={{ display: 'flex', flexDirection: 'column' }}>
                 <Typography variant="body2">{u.name || u.email}</Typography>
-                <Typography variant="caption" sx={{
-                  color: "text.secondary"
-                }}>
+                <Typography
+                  variant="caption"
+                  sx={{
+                    color: 'text.secondary',
+                  }}
+                >
                   {u.email} - {u.primary_role}
                 </Typography>
               </Box>
@@ -140,7 +145,7 @@ const DevUserSwitcher = () => {
         </Select>
       </FormControl>
     </Box>
-  );
+  )
 }
 
 export default DevUserSwitcher

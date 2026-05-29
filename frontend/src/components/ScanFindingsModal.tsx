@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import {
   Dialog,
   DialogTitle,
@@ -30,7 +31,7 @@ import ScanDiagnostics from './ScanDiagnostics'
 /** Escape a single CSV field value (RFC 4180). */
 function csvEscape(value: string): string {
   if (value.includes('"') || value.includes(',') || value.includes('\n')) {
-    return `"${value.replace(/"/g, '""')}"`;
+    return `"${value.replace(/"/g, '""')}"`
   }
   return value
 }
@@ -85,6 +86,7 @@ const ScanFindingsModal: React.FC<ScanFindingsModalProps> = ({
   loading = false,
   moduleLabel,
 }) => {
+  const { t } = useTranslation()
   const [rawOpen, setRawOpen] = useState(false)
 
   const findings = scan ? parseScanFindings(scan.scanner, scan.raw_results) : []
@@ -92,9 +94,7 @@ const ScanFindingsModal: React.FC<ScanFindingsModalProps> = ({
   const handleDownloadCsv = () => {
     if (findings.length === 0) return
     const date = new Date().toISOString().slice(0, 10)
-    const slug = moduleLabel
-      ? moduleLabel.replace(/[^a-z0-9]+/gi, '-').toLowerCase()
-      : 'scan'
+    const slug = moduleLabel ? moduleLabel.replace(/[^a-z0-9]+/gi, '-').toLowerCase() : 'scan'
     downloadCsv(findingsToCsv(findings), `scan-findings-${slug}-${date}.csv`)
   }
 
@@ -102,23 +102,24 @@ const ScanFindingsModal: React.FC<ScanFindingsModalProps> = ({
     <Dialog open={open} onClose={onClose} maxWidth="lg" fullWidth>
       <DialogTitle sx={{ display: 'flex', alignItems: 'center', gap: 1, pr: 6 }}>
         <Typography variant="h6" component="span">
-          Scan Findings
+          {t('scanFindingsModal.title')}
         </Typography>
         {moduleLabel && (
           <Typography
             variant="body2"
             component="span"
             sx={{
-              color: "text.secondary",
-              ml: 1
-            }}>
+              color: 'text.secondary',
+              ml: 1,
+            }}
+          >
             {moduleLabel}
           </Typography>
         )}
         <IconButton
           onClick={onClose}
           sx={{ position: 'absolute', right: 8, top: 8 }}
-          aria-label="close"
+          aria-label={t('scanFindingsModal.close')}
           data-testid="findings-modal-close"
         >
           <CloseIcon />
@@ -128,54 +129,81 @@ const ScanFindingsModal: React.FC<ScanFindingsModalProps> = ({
         {loading ? (
           <Box
             sx={{
-              display: "flex",
-              justifyContent: "center",
-              py: 4
-            }}>
+              display: 'flex',
+              justifyContent: 'center',
+              py: 4,
+            }}
+          >
             <CircularProgress data-testid="findings-loading" />
           </Box>
         ) : !scan ? (
-          <Typography sx={{
-            color: "text.secondary"
-          }}>No scan data available.</Typography>
+          <Typography
+            sx={{
+              color: 'text.secondary',
+            }}
+          >
+            {t('scanFindingsModal.noData')}
+          </Typography>
         ) : (
           <>
             <Stack
               direction="row"
               spacing={1}
               sx={{
-                alignItems: "center",
-                flexWrap: "wrap",
-                mb: 2
-              }}>
-              <Typography variant="body2" sx={{
-                color: "text.secondary"
-              }}>
+                alignItems: 'center',
+                flexWrap: 'wrap',
+                mb: 2,
+              }}
+            >
+              <Typography
+                variant="body2"
+                sx={{
+                  color: 'text.secondary',
+                }}
+              >
                 {scan.scanner}
                 {scan.scanner_version ? ` ${scan.scanner_version}` : ''}
               </Typography>
               {scan.scanned_at && (
-                <Typography variant="body2" sx={{
-                  color: "text.secondary"
-                }}>
+                <Typography
+                  variant="body2"
+                  sx={{
+                    color: 'text.secondary',
+                  }}
+                >
                   {new Date(scan.scanned_at).toLocaleString()}
                 </Typography>
               )}
               <Box sx={{ flexGrow: 1 }} />
               {scan.critical_count > 0 && (
-                <Chip label={`Critical: ${scan.critical_count}`} size="small" color="error" />
+                <Chip
+                  label={t('scanFindingsModal.critical', { count: scan.critical_count })}
+                  size="small"
+                  color="error"
+                />
               )}
               {scan.high_count > 0 && (
-                <Chip label={`High: ${scan.high_count}`} size="small" color="warning" />
+                <Chip
+                  label={t('scanFindingsModal.high', { count: scan.high_count })}
+                  size="small"
+                  color="warning"
+                />
               )}
               {scan.medium_count > 0 && (
-                <Chip label={`Medium: ${scan.medium_count}`} size="small" />
+                <Chip
+                  label={t('scanFindingsModal.medium', { count: scan.medium_count })}
+                  size="small"
+                />
               )}
               {scan.low_count > 0 && (
-                <Chip label={`Low: ${scan.low_count}`} size="small" color="info" />
+                <Chip
+                  label={t('scanFindingsModal.low', { count: scan.low_count })}
+                  size="small"
+                  color="info"
+                />
               )}
               {findings.length > 0 && (
-                <Tooltip title="Download findings as CSV">
+                <Tooltip title={t('scanFindingsModal.downloadTooltip')}>
                   <Button
                     size="small"
                     variant="outlined"
@@ -183,7 +211,7 @@ const ScanFindingsModal: React.FC<ScanFindingsModalProps> = ({
                     onClick={handleDownloadCsv}
                     data-testid="findings-csv-download"
                   >
-                    Export CSV
+                    {t('scanFindingsModal.exportCsv')}
                   </Button>
                 </Tooltip>
               )}
@@ -194,12 +222,24 @@ const ScanFindingsModal: React.FC<ScanFindingsModalProps> = ({
                 <Table stickyHeader size="small">
                   <TableHead>
                     <TableRow>
-                      <TableCell sx={{ fontWeight: 'bold', width: 100 }}>Severity</TableCell>
-                      <TableCell sx={{ fontWeight: 'bold', width: 160 }}>Rule ID</TableCell>
-                      <TableCell sx={{ fontWeight: 'bold' }}>Title</TableCell>
-                      <TableCell sx={{ fontWeight: 'bold', width: 180 }}>Resource</TableCell>
-                      <TableCell sx={{ fontWeight: 'bold', width: 120 }}>File</TableCell>
-                      <TableCell sx={{ fontWeight: 'bold', width: 180 }}>Resolution</TableCell>
+                      <TableCell sx={{ fontWeight: 'bold', width: 100 }}>
+                        {t('scanFindingsModal.thSeverity')}
+                      </TableCell>
+                      <TableCell sx={{ fontWeight: 'bold', width: 160 }}>
+                        {t('scanFindingsModal.thRuleId')}
+                      </TableCell>
+                      <TableCell sx={{ fontWeight: 'bold' }}>
+                        {t('scanFindingsModal.thTitle')}
+                      </TableCell>
+                      <TableCell sx={{ fontWeight: 'bold', width: 180 }}>
+                        {t('scanFindingsModal.thResource')}
+                      </TableCell>
+                      <TableCell sx={{ fontWeight: 'bold', width: 120 }}>
+                        {t('scanFindingsModal.thFile')}
+                      </TableCell>
+                      <TableCell sx={{ fontWeight: 'bold', width: 180 }}>
+                        {t('scanFindingsModal.thResolution')}
+                      </TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>
@@ -233,10 +273,11 @@ const ScanFindingsModal: React.FC<ScanFindingsModalProps> = ({
               <Typography
                 variant="body2"
                 sx={{
-                  color: "text.secondary",
-                  mb: 2
-                }}>
-                Could not parse individual findings from scanner output.
+                  color: 'text.secondary',
+                  mb: 2,
+                }}
+              >
+                {t('scanFindingsModal.parseError')}
               </Typography>
             )}
 
@@ -250,7 +291,9 @@ const ScanFindingsModal: React.FC<ScanFindingsModalProps> = ({
                   sx={{ textTransform: 'none' }}
                   data-testid="findings-raw-toggle"
                 >
-                  {rawOpen ? 'Hide' : 'Show'} raw JSON
+                  {rawOpen
+                    ? t('scanFindingsModal.hideRawJson')
+                    : t('scanFindingsModal.showRawJson')}
                 </Button>
                 <Collapse in={rawOpen} unmountOnExit>
                   <ScanDiagnostics rawResults={scan.raw_results} maxBlockHeight={300} />
@@ -261,7 +304,7 @@ const ScanFindingsModal: React.FC<ScanFindingsModalProps> = ({
         )}
       </DialogContent>
     </Dialog>
-  );
+  )
 }
 
 export default ScanFindingsModal

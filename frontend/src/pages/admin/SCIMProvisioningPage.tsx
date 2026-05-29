@@ -1,4 +1,5 @@
 import React from 'react'
+import { useTranslation } from 'react-i18next'
 import { Box, Typography, Paper, Alert, TextField, Stack, Chip } from '@mui/material'
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined'
 
@@ -7,27 +8,28 @@ import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined'
  * Admins use this to configure their identity provider's SCIM integration.
  */
 const SCIMProvisioningPage: React.FC = () => {
+  const { t } = useTranslation()
   const baseUrl = window.location.origin
   const scimBaseUrl = `${baseUrl}/scim/v2`
 
   return (
     <Box sx={{ pr: { xs: 2, sm: 3 } }}>
       <Typography variant="h5" gutterBottom>
-        SCIM Provisioning
+        {t('admin.scimProvisioning.title')}
       </Typography>
       <Typography
         variant="body2"
         sx={{
-          color: "text.secondary",
-          mb: 3
-        }}>
-        SCIM 2.0 endpoints allow external identity providers to automatically provision and
-        de-provision users and groups.
+          color: 'text.secondary',
+          mb: 3,
+        }}
+      >
+        {t('admin.scimProvisioning.description')}
       </Typography>
       <Stack spacing={3}>
         <Paper sx={{ p: 3 }}>
           <Typography variant="h6" gutterBottom>
-            Configuration
+            {t('admin.scimProvisioning.configuration')}
           </Typography>
           <Alert severity="info" icon={<InfoOutlinedIcon />} sx={{ mb: 2 }}>
             Configure your identity provider with the endpoints below. Authentication requires a
@@ -37,22 +39,22 @@ const SCIMProvisioningPage: React.FC = () => {
 
           <Stack spacing={2}>
             <TextField
-              label="SCIM Base URL"
+              label={t('admin.scimProvisioning.labelBaseUrl')}
               value={scimBaseUrl}
               fullWidth
               slotProps={{ input: { readOnly: true } }}
-              helperText="Use this as the Tenant URL in your identity provider's SCIM configuration."
+              helperText={t('admin.scimProvisioning.helpBaseUrl')}
               size="small"
             />
             <TextField
-              label="Users Endpoint"
+              label={t('admin.scimProvisioning.labelUsersEndpoint')}
               value={`${scimBaseUrl}/Users`}
               fullWidth
               slotProps={{ input: { readOnly: true } }}
               size="small"
             />
             <TextField
-              label="Groups Endpoint"
+              label={t('admin.scimProvisioning.labelGroupsEndpoint')}
               value={`${scimBaseUrl}/Groups`}
               fullWidth
               slotProps={{ input: { readOnly: true } }}
@@ -63,26 +65,25 @@ const SCIMProvisioningPage: React.FC = () => {
 
         <Paper sx={{ p: 3 }}>
           <Typography variant="h6" gutterBottom>
-            Authentication
+            {t('admin.scimProvisioning.authentication')}
           </Typography>
           <Typography
             variant="body2"
             sx={{
-              color: "text.secondary",
-              mb: 2
-            }}>
+              color: 'text.secondary',
+              mb: 2,
+            }}
+          >
             SCIM requests must include a Bearer token in the Authorization header. Create an API key
             with the <strong>scim:provision</strong> scope on the{' '}
             <a href="/admin/apikeys">API Keys</a> page.
           </Typography>
-          <Alert severity="warning">
-            Store the API key securely. It provides full user and group provisioning access.
-          </Alert>
+          <Alert severity="warning">{t('admin.scimProvisioning.storeWarning')}</Alert>
         </Paper>
 
         <Paper sx={{ p: 3 }}>
           <Typography variant="h6" gutterBottom>
-            Supported Operations
+            {t('admin.scimProvisioning.supportedOperations')}
           </Typography>
           <Stack spacing={1}>
             <Typography variant="body2">
@@ -104,7 +105,7 @@ const SCIMProvisioningPage: React.FC = () => {
         </Paper>
       </Stack>
     </Box>
-  );
+  )
 }
 
 export default SCIMProvisioningPage

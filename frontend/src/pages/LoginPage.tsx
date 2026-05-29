@@ -144,9 +144,12 @@ const LoginPage: React.FC = () => {
             <Typography variant="h4" component="h1" gutterBottom>
               {productName}
             </Typography>
-            <Typography variant="body1" sx={{
-              color: "text.secondary"
-            }}>
+            <Typography
+              variant="body1"
+              sx={{
+                color: 'text.secondary',
+              }}
+            >
               {t('auth.signInToContinue')}
             </Typography>
           </Box>
@@ -179,9 +182,12 @@ const LoginPage: React.FC = () => {
                 </Button>
                 {(loading || providers.length > 0) && (
                   <Divider>
-                    <Typography variant="body2" sx={{
-                      color: "text.secondary"
-                    }}>
+                    <Typography
+                      variant="body2"
+                      sx={{
+                        color: 'text.secondary',
+                      }}
+                    >
                       {t('auth.orUseProductionAuth')}
                     </Typography>
                   </Divider>
@@ -194,7 +200,7 @@ const LoginPage: React.FC = () => {
                 <Skeleton variant="rounded" height={48} />
                 <Skeleton variant="rounded" height={48} />
                 <Box sx={{ display: 'flex', justifyContent: 'center', pt: 1 }}>
-                  <CircularProgress size={18} aria-label="Loading sign-in providers" />
+                  <CircularProgress size={18} aria-label={t('loginPage.loadingProviders')} />
                 </Box>
               </Stack>
             ) : (
@@ -212,9 +218,12 @@ const LoginPage: React.FC = () => {
                     </Button>
                     {idx < visible.length - 1 && (
                       <Divider>
-                        <Typography variant="body2" sx={{
-                          color: "text.secondary"
-                        }}>
+                        <Typography
+                          variant="body2"
+                          sx={{
+                            color: 'text.secondary',
+                          }}
+                        >
                           {t('auth.or')}
                         </Typography>
                       </Divider>
@@ -224,9 +233,12 @@ const LoginPage: React.FC = () => {
 
                 {hasLdap && ssoProviders.length > 0 && (
                   <Divider>
-                    <Typography variant="body2" sx={{
-                      color: "text.secondary"
-                    }}>
+                    <Typography
+                      variant="body2"
+                      sx={{
+                        color: 'text.secondary',
+                      }}
+                    >
                       {t('auth.orSignInWithLdap')}
                     </Typography>
                   </Divider>
@@ -239,9 +251,10 @@ const LoginPage: React.FC = () => {
                         <Typography
                           variant="subtitle2"
                           sx={{
-                            color: "text.secondary",
-                            textAlign: "center"
-                          }}>
+                            color: 'text.secondary',
+                            textAlign: 'center',
+                          }}
+                        >
                           {t('auth.signInWithLdap')}
                         </Typography>
                       )}
@@ -282,9 +295,12 @@ const LoginPage: React.FC = () => {
           </Stack>
 
           <Box sx={{ mt: 3, textAlign: 'center' }}>
-            <Typography variant="body2" sx={{
-              color: "text.secondary"
-            }}>
+            <Typography
+              variant="body2"
+              sx={{
+                color: 'text.secondary',
+              }}
+            >
               {t('auth.ssoInfo')}
               <br />
               {t('auth.ssoContact')}
@@ -293,7 +309,7 @@ const LoginPage: React.FC = () => {
         </Paper>
       </Box>
     </Container>
-  );
+  )
 }
 
 export default LoginPage

@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useQuery } from '@tanstack/react-query'
 import {
   Container,
@@ -38,6 +39,7 @@ const SCOPE_CATEGORIES: Record<string, string[]> = {
 }
 
 const RolesPage: React.FC = () => {
+  const { t } = useTranslation()
   const [expandedRole, setExpandedRole] = useState<string | false>(false)
 
   const {
@@ -60,7 +62,7 @@ const RolesPage: React.FC = () => {
     },
   })
 
-  const error = queryError ? 'Failed to load roles. Please try again.' : null
+  const error = queryError ? t('admin.roles.loadError') : null
 
   const handleAccordionChange =
     (roleId: string) => (_: React.SyntheticEvent, isExpanded: boolean) => {
@@ -72,11 +74,12 @@ const RolesPage: React.FC = () => {
       {loading ? (
         <Box
           sx={{
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            minHeight: "400px"
-          }}>
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            minHeight: '400px',
+          }}
+        >
           <CircularProgress />
         </Box>
       ) : (
@@ -86,19 +89,22 @@ const RolesPage: React.FC = () => {
               direction="row"
               spacing={2}
               sx={{
-                alignItems: "center",
-                mb: 2
-              }}>
+                alignItems: 'center',
+                mb: 2,
+              }}
+            >
               <ShieldIcon sx={{ fontSize: 32, color: 'primary.main' }} />
               <Typography variant="h4" component="h1">
-                Roles & Permissions
+                {t('admin.roles.title')}
               </Typography>
             </Stack>
-            <Typography variant="body1" sx={{
-              color: "text.secondary"
-            }}>
-              View the available roles and their associated permission scopes. System roles are
-              predefined and cannot be modified.
+            <Typography
+              variant="body1"
+              sx={{
+                color: 'text.secondary',
+              }}
+            >
+              {t('admin.roles.subtitle')}
             </Typography>
           </Box>
 
@@ -111,25 +117,26 @@ const RolesPage: React.FC = () => {
           {/* Scope Reference */}
           <Paper sx={{ p: 3, mb: 4 }}>
             <Typography variant="h6" gutterBottom>
-              Available Scopes Reference
+              {t('admin.roles.availableScopesReference')}
             </Typography>
             <Typography
               variant="body2"
               sx={{
-                color: "text.secondary",
-                mb: 2
-              }}>
-              Scopes define what actions a role can perform in the registry.
+                color: 'text.secondary',
+                mb: 2,
+              }}
+            >
+              {t('admin.roles.scopesDefine')}
             </Typography>
             <TableContainer>
               <Table size="small">
                 <TableHead>
                   <TableRow>
                     <TableCell>
-                      <strong>Scope</strong>
+                      <strong>{t('admin.roles.thScope')}</strong>
                     </TableCell>
                     <TableCell>
-                      <strong>Description</strong>
+                      <strong>{t('admin.roles.thDescription')}</strong>
                     </TableCell>
                   </TableRow>
                 </TableHead>
@@ -155,19 +162,20 @@ const RolesPage: React.FC = () => {
           {/* Roles List */}
           <Paper sx={{ p: 3 }}>
             <Typography variant="h6" gutterBottom>
-              Role Templates
+              {t('admin.roles.roleTemplates')}
             </Typography>
             <Typography
               variant="body2"
               sx={{
-                color: "text.secondary",
-                mb: 3
-              }}>
-              Click on a role to see its full scope details.
+                color: 'text.secondary',
+                mb: 3,
+              }}
+            >
+              {t('admin.roles.clickRole')}
             </Typography>
 
             {roles.length === 0 ? (
-              <Alert severity="info">No roles found.</Alert>
+              <Alert severity="info">{t('admin.roles.noRoles')}</Alert>
             ) : (
               <Box>
                 {roles.map((role) => (
@@ -193,10 +201,11 @@ const RolesPage: React.FC = () => {
                         direction="row"
                         spacing={2}
                         sx={{
-                          alignItems: "center",
+                          alignItems: 'center',
                           width: '100%',
-                          pr: 2
-                        }}>
+                          pr: 2,
+                        }}
+                      >
                         {role.name === 'admin' ? (
                           <AdminIcon color="error" />
                         ) : role.is_system ? (
@@ -205,24 +214,31 @@ const RolesPage: React.FC = () => {
                           <ShieldIcon color="primary" />
                         )}
                         <Box sx={{ flexGrow: 1 }}>
-                          <Typography variant="subtitle1" component="span" sx={{
-                            fontWeight: "medium"
-                          }}>
+                          <Typography
+                            variant="subtitle1"
+                            component="span"
+                            sx={{
+                              fontWeight: 'medium',
+                            }}
+                          >
                             {role.display_name}
                           </Typography>
                           {role.is_system && (
                             <Chip
-                              label="System"
+                              label={t('admin.roles.systemChip')}
                               size="small"
                               color="default"
                               sx={{ ml: 1, height: 20, fontSize: '0.7rem' }}
                             />
                           )}
                         </Box>
-                        <Typography variant="body2" sx={{
-                          color: "text.secondary"
-                        }}>
-                          {role.scopes.length} scope{role.scopes.length !== 1 ? 's' : ''}
+                        <Typography
+                          variant="body2"
+                          sx={{
+                            color: 'text.secondary',
+                          }}
+                        >
+                          {t('admin.roles.scopeCount', { count: role.scopes.length })}
                         </Typography>
                       </Stack>
                     </AccordionSummary>
@@ -231,24 +247,26 @@ const RolesPage: React.FC = () => {
                         <Typography
                           variant="body2"
                           sx={{
-                            color: "text.secondary",
-                            mb: 2
-                          }}>
+                            color: 'text.secondary',
+                            mb: 2,
+                          }}
+                        >
                           {role.description}
                         </Typography>
                       )}
 
                       <Typography variant="subtitle2" gutterBottom>
-                        Assigned Scopes:
+                        {t('admin.roles.assignedScopes')}
                       </Typography>
                       <Stack
                         direction="row"
                         spacing={1}
                         useFlexGap
                         sx={{
-                          flexWrap: "wrap",
-                          mb: 2
-                        }}>
+                          flexWrap: 'wrap',
+                          mb: 2,
+                        }}
+                      >
                         {role.scopes.map((scope) => {
                           const scopeInfo = getScopeInfo(scope)
                           return (
@@ -265,7 +283,7 @@ const RolesPage: React.FC = () => {
 
                       {/* Scope breakdown by category */}
                       <Typography variant="subtitle2" gutterBottom sx={{ mt: 2 }}>
-                        Permissions by Category:
+                        {t('admin.roles.permissionsByCategory')}
                       </Typography>
                       <TableContainer>
                         <Table size="small">
@@ -285,7 +303,7 @@ const RolesPage: React.FC = () => {
                                   <TableCell>
                                     {hasAdminScope && category !== 'System' ? (
                                       <Chip
-                                        label="Full Access (via Admin)"
+                                        label={t('admin.roles.fullAccessViaAdmin')}
                                         size="small"
                                         color="error"
                                         variant="outlined"
@@ -296,7 +314,7 @@ const RolesPage: React.FC = () => {
                                         spacing={0.5}
                                         useFlexGap
                                         sx={{
-                                          flexWrap: "wrap"
+                                          flexWrap: 'wrap',
                                         }}
                                       >
                                         {matchingScopes.map((scope) => {
@@ -313,15 +331,18 @@ const RolesPage: React.FC = () => {
                                         })}
                                       </Stack>
                                     ) : (
-                                      <Typography variant="body2" sx={{
-                                        color: "text.disabled"
-                                      }}>
+                                      <Typography
+                                        variant="body2"
+                                        sx={{
+                                          color: 'text.disabled',
+                                        }}
+                                      >
                                         No access
                                       </Typography>
                                     )}
                                   </TableCell>
                                 </TableRow>
-                              );
+                              )
                             })}
                           </TableBody>
                         </Table>
@@ -329,9 +350,12 @@ const RolesPage: React.FC = () => {
 
                       {/* Metadata */}
                       <Box sx={{ mt: 2, pt: 2, borderTop: 1, borderColor: 'divider' }}>
-                        <Typography variant="caption" sx={{
-                          color: "text.secondary"
-                        }}>
+                        <Typography
+                          variant="caption"
+                          sx={{
+                            color: 'text.secondary',
+                          }}
+                        >
                           Role ID: {role.id} | Created:{' '}
                           {new Date(role.created_at).toLocaleDateString()}
                           {role.updated_at !== role.created_at && (
@@ -348,7 +372,7 @@ const RolesPage: React.FC = () => {
         </>
       )}
     </Container>
-  );
+  )
 }
 
 export default RolesPage

@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import {
   Box,
   Button,
@@ -18,6 +19,7 @@ import { useConsent } from '../contexts/ConsentContext'
  * Users can accept all, reject all (essential only), or customize.
  */
 export default function ConsentBanner() {
+  const { t } = useTranslation()
   const { hasConsented, preferences, updatePreferences, acceptAll, rejectAll } = useConsent()
   const [showDetails, setShowDetails] = useState(false)
 
@@ -28,7 +30,7 @@ export default function ConsentBanner() {
       <Paper
         elevation={8}
         role="dialog"
-        aria-label="Cookie consent"
+        aria-label={t('consentBanner.ariaLabel')}
         aria-describedby="consent-description"
         sx={{
           position: 'fixed',
@@ -41,11 +43,16 @@ export default function ConsentBanner() {
         }}
       >
         <Typography variant="h6" gutterBottom>
-          We value your privacy
+          {t('consentBanner.title')}
         </Typography>
-        <Typography id="consent-description" variant="body2" gutterBottom sx={{
-          color: "text.secondary"
-        }}>
+        <Typography
+          id="consent-description"
+          variant="body2"
+          gutterBottom
+          sx={{
+            color: 'text.secondary',
+          }}
+        >
           We use cookies and similar technologies. Essential cookies are always active. You may
           choose to enable additional categories below. See our{' '}
           <a href="/privacy" style={{ color: 'inherit' }}>
@@ -56,7 +63,10 @@ export default function ConsentBanner() {
 
         {showDetails && (
           <Box sx={{ my: 2 }}>
-            <FormControlLabel control={<Switch checked disabled />} label="Essential (always on)" />
+            <FormControlLabel
+              control={<Switch checked disabled />}
+              label={t('consentBanner.essential')}
+            />
             <FormControlLabel
               control={
                 <Switch
@@ -64,7 +74,7 @@ export default function ConsentBanner() {
                   onChange={(_, checked) => updatePreferences({ errorReporting: checked })}
                 />
               }
-              label="Error Reporting"
+              label={t('consentBanner.errorReporting')}
             />
             <FormControlLabel
               control={
@@ -73,7 +83,7 @@ export default function ConsentBanner() {
                   onChange={(_, checked) => updatePreferences({ performanceReporting: checked })}
                 />
               }
-              label="Performance Monitoring"
+              label={t('consentBanner.performanceMonitoring')}
             />
             <FormControlLabel
               control={
@@ -82,7 +92,7 @@ export default function ConsentBanner() {
                   onChange={(_, checked) => updatePreferences({ analytics: checked })}
                 />
               }
-              label="Analytics"
+              label={t('consentBanner.analytics')}
             />
           </Box>
         )}
@@ -91,20 +101,21 @@ export default function ConsentBanner() {
           direction="row"
           spacing={1}
           sx={{
-            justifyContent: "flex-end",
-            mt: 2
-          }}>
+            justifyContent: 'flex-end',
+            mt: 2,
+          }}
+        >
           <Button variant="text" onClick={() => setShowDetails((v) => !v)}>
-            {showDetails ? 'Hide details' : 'Customize'}
+            {showDetails ? t('consentBanner.hideDetails') : t('consentBanner.customize')}
           </Button>
           <Button variant="outlined" onClick={rejectAll}>
-            Reject all
+            {t('consentBanner.rejectAll')}
           </Button>
           <Button variant="contained" onClick={acceptAll}>
-            Accept all
+            {t('consentBanner.acceptAll')}
           </Button>
         </Stack>
       </Paper>
     </Slide>
-  );
+  )
 }

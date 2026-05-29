@@ -1,4 +1,5 @@
 import React, { useState, useMemo, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import {
   Box,
   List,
@@ -61,6 +62,7 @@ const ProviderDocsSidebar: React.FC<ProviderDocsSidebarProps> = ({
   onSelect,
   loading,
 }) => {
+  const { t } = useTranslation()
   const [filter, setFilter] = useState('')
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set())
   const [expandedSubGroups, setExpandedSubGroups] = useState<Set<string>>(new Set())
@@ -164,25 +166,31 @@ const ProviderDocsSidebar: React.FC<ProviderDocsSidebarProps> = ({
   if (loading) {
     return (
       <Box sx={{ p: 2, fontFamily: sidebarFont }}>
-        <Typography variant="body2" sx={{
-          color: "text.secondary"
-        }}>
+        <Typography
+          variant="body2"
+          sx={{
+            color: 'text.secondary',
+          }}
+        >
           Loading documentation...
         </Typography>
       </Box>
-    );
+    )
   }
 
   if (docs.length === 0) {
     return (
       <Box sx={{ p: 2, fontFamily: sidebarFont }}>
-        <Typography variant="body2" sx={{
-          color: "text.secondary"
-        }}>
+        <Typography
+          variant="body2"
+          sx={{
+            color: 'text.secondary',
+          }}
+        >
           No documentation available for this provider.
         </Typography>
       </Box>
-    );
+    )
   }
 
   const isSelected = (cat: string, slug: string) =>
@@ -255,7 +263,7 @@ const ProviderDocsSidebar: React.FC<ProviderDocsSidebarProps> = ({
         <TextField
           size="small"
           fullWidth
-          placeholder="Filter docs..."
+          placeholder={t('providerDocsSidebar.filterPlaceholder')}
           value={filter}
           onChange={(e) => setFilter(e.target.value)}
           slotProps={{
@@ -266,7 +274,7 @@ const ProviderDocsSidebar: React.FC<ProviderDocsSidebarProps> = ({
                 </InputAdornment>
               ),
               sx: { fontFamily: sidebarFont, fontSize: '0.875rem' },
-            }
+            },
           }}
         />
       </Box>
@@ -422,7 +430,7 @@ const ProviderDocsSidebar: React.FC<ProviderDocsSidebarProps> = ({
         })}
       </Box>
     </Box>
-  );
+  )
 }
 
 export default ProviderDocsSidebar

@@ -17,6 +17,8 @@ import CheckCircleIcon from '@mui/icons-material/CheckCircle'
 import ErrorIcon from '@mui/icons-material/Error'
 import WarningIcon from '@mui/icons-material/Warning'
 import HelpOutlineIcon from '@mui/icons-material/HelpOutlined'
+import { useTranslation } from 'react-i18next'
+import type { TFunction } from 'i18next'
 import { useReleasesGPGKeyStatus } from '../hooks/useReleasesGPGKeyStatus'
 import type { ReleasesGPGKeyStatus, ReleasesGPGKeyStatusView } from '../types/releases_gpg_keys'
 
@@ -46,15 +48,15 @@ function StatusIcon({ status }: { status: ReleasesGPGKeyStatus }) {
   }
 }
 
-function formatExpiry(days: number | null | undefined): string {
+function formatExpiry(t: TFunction, days: number | null | undefined): string {
   if (days == null) return '—'
-  if (days < 0) return `expired ${Math.abs(days)}d ago`
-  return `${days}d`
+  if (days < 0) return t('releasesGpgKeys.expiredAgo', { days: Math.abs(days) })
+  return t('releasesGpgKeys.days', { days })
 }
 
 function KeyRow({ row }: { row: ReleasesGPGKeyStatusView }) {
-  const effective =
-    row.effective_source === 'cache' && row.cache ? row.cache : row.embedded
+  const { t } = useTranslation()
+  const effective = row.effective_source === 'cache' && row.cache ? row.cache : row.embedded
   const fingerprint = effective?.fingerprint ?? '—'
   const daysUntilExpiry = effective?.days_until_expiry
 
@@ -80,7 +82,9 @@ function KeyRow({ row }: { row: ReleasesGPGKeyStatusView }) {
       <TableCell>
         <Tooltip title={fingerprint}>
           <Typography variant="body2" sx={{ fontFamily: 'monospace', fontSize: '0.75rem' }}>
-            {fingerprint.length > 16 ? `${fingerprint.slice(0, 8)}…${fingerprint.slice(-8)}` : fingerprint}
+            {fingerprint.length > 16
+              ? `${fingerprint.slice(0, 8)}…${fingerprint.slice(-8)}`
+              : fingerprint}
           </Typography>
         </Tooltip>
       </TableCell>
@@ -95,7 +99,7 @@ function KeyRow({ row }: { row: ReleasesGPGKeyStatusView }) {
                 : 'text.primary'
           }
         >
-          {formatExpiry(daysUntilExpiry)}
+          {formatExpiry(t, daysUntilExpiry)}
         </Typography>
       </TableCell>
       <TableCell>
@@ -106,7 +110,9 @@ function KeyRow({ row }: { row: ReleasesGPGKeyStatusView }) {
             </Typography>
           </Tooltip>
         ) : (
-          <Typography variant="body2" color="text.secondary">—</Typography>
+          <Typography variant="body2" color="text.secondary">
+            —
+          </Typography>
         )}
       </TableCell>
     </TableRow>
@@ -114,16 +120,16 @@ function KeyRow({ row }: { row: ReleasesGPGKeyStatusView }) {
 }
 
 export default function ReleasesGPGKeyStatus() {
+  const { t } = useTranslation()
   const { data, isLoading, error } = useReleasesGPGKeyStatus()
 
   return (
     <Paper variant="outlined" sx={{ p: 2, mb: 3 }}>
       <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 1 }}>
-        Release Signing Keys
+        {t('releasesGpgKeys.title')}
       </Typography>
       <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-        GPG keys used to verify upstream release signatures. Status is derived against the
-        configured warning threshold.
+        {t('releasesGpgKeys.description')}
       </Typography>
 
       {isLoading ? (
@@ -131,18 +137,18 @@ export default function ReleasesGPGKeyStatus() {
           <CircularProgress size={24} />
         </Box>
       ) : error ? (
-        <Alert severity="error">Failed to load GPG key status.</Alert>
+        <Alert severity="error">{t('releasesGpgKeys.loadError')}</Alert>
       ) : data && data.keys.length > 0 ? (
         <TableContainer>
           <Table size="small">
             <TableHead>
               <TableRow>
-                <TableCell>Tool</TableCell>
-                <TableCell>Status</TableCell>
-                <TableCell>Source</TableCell>
-                <TableCell>Fingerprint</TableCell>
-                <TableCell>Expiry</TableCell>
-                <TableCell>Last Refresh</TableCell>
+                <TableCell>{t('releasesGpgKeys.thTool')}</TableCell>
+                <TableCell>{t('releasesGpgKeys.thStatus')}</TableCell>
+                <TableCell>{t('releasesGpgKeys.thSource')}</TableCell>
+                <TableCell>{t('releasesGpgKeys.thFingerprint')}</TableCell>
+                <TableCell>{t('releasesGpgKeys.thExpiry')}</TableCell>
+                <TableCell>{t('releasesGpgKeys.thLastRefresh')}</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -153,7 +159,7 @@ export default function ReleasesGPGKeyStatus() {
           </Table>
         </TableContainer>
       ) : (
-        <Alert severity="info">No release signing key data available.</Alert>
+        <Alert severity="info">{t('releasesGpgKeys.noData')}</Alert>
       )}
     </Paper>
   )

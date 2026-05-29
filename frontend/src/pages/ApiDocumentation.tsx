@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import SwaggerUI from 'swagger-ui-react'
 import 'swagger-ui-react/swagger-ui.css'
 import { Box, Typography, List, ListItem, ListItemButton, ListItemText, Paper } from '@mui/material'
@@ -401,6 +402,7 @@ function buildNavTags(spec: OpenAPISpec): NavTag[] {
 const NAV_WIDTH = 200
 
 const ApiDocumentation: React.FC = () => {
+  const { t } = useTranslation()
   const theme = useTheme()
   const isDark = theme.palette.mode === 'dark'
 
@@ -517,11 +519,14 @@ const ApiDocumentation: React.FC = () => {
     <Box sx={{ overflow: 'hidden' }}>
       {/* Page title */}
       <Box sx={{ mb: 3 }}>
-        <Typography variant="h4">API Swagger Documentation</Typography>
-        <Typography variant="body2" sx={{
-          color: "text.secondary"
-        }}>
-          Interactive API reference — use the Authorize button to authenticate with an API key
+        <Typography variant="h4">{t('apiDocumentation.title')}</Typography>
+        <Typography
+          variant="body2"
+          sx={{
+            color: 'text.secondary',
+          }}
+        >
+          {t('apiDocumentation.subtitle')}
         </Typography>
       </Box>
       {/* Layout: sticky left nav + Swagger UI content */}
@@ -594,12 +599,12 @@ const ApiDocumentation: React.FC = () => {
                                 color: isActive ? activeText : navText,
                                 lineHeight: 1.4,
                               },
-                            }
+                            },
                           }}
                         />
                       </ListItemButton>
                     </ListItem>
-                  );
+                  )
                 })}
               </List>
             </Paper>
@@ -623,7 +628,7 @@ const ApiDocumentation: React.FC = () => {
         </Box>
       </Box>
     </Box>
-  );
+  )
 }
 
 export default ApiDocumentation

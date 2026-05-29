@@ -1,4 +1,5 @@
 import React from 'react'
+import { useTranslation } from 'react-i18next'
 import {
   Card,
   CardActions,
@@ -55,72 +56,88 @@ const RegistryItemCard: React.FC<RegistryItemCardProps> = ({
   description,
   badge,
   chips,
-  actionLabel = 'View Details',
+  actionLabel,
   actionColor = 'primary',
   onClick,
   deprecated,
   sx,
-}) => (
-  <Card
-    sx={[
-      cardHoverSx,
-      ...(deprecated ? [{ opacity: 0.7 } as const] : []),
-      ...(Array.isArray(sx) ? sx : sx ? [sx] : []),
-    ]}
-    onClick={onClick}
-    onKeyDown={(e: React.KeyboardEvent) => {
-      if (e.key === 'Enter' || e.key === ' ') {
-        e.preventDefault()
-        onClick()
-      }
-    }}
-    tabIndex={0}
-    role="article"
-    aria-label={`${title}${deprecated ? ' (deprecated)' : ''}`}
-  >
-    <CardContent sx={{ flexGrow: 1 }}>
-      <Typography variant="h6" component="h3" gutterBottom noWrap>
-        {title}
-      </Typography>
-      {subtitle && (
-        <Typography variant="body2" gutterBottom sx={{
-          color: "text.secondary"
-        }}>
-          {subtitle}
+}) => {
+  const { t } = useTranslation()
+  const label = actionLabel ?? t('registryItemCard.viewDetails')
+  return (
+    <Card
+      sx={[
+        cardHoverSx,
+        ...(deprecated ? [{ opacity: 0.7 } as const] : []),
+        ...(Array.isArray(sx) ? sx : sx ? [sx] : []),
+      ]}
+      onClick={onClick}
+      onKeyDown={(e: React.KeyboardEvent) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault()
+          onClick()
+        }
+      }}
+      tabIndex={0}
+      role="article"
+      aria-label={`${title}${deprecated ? ' (deprecated)' : ''}`}
+    >
+      <CardContent sx={{ flexGrow: 1 }}>
+        <Typography variant="h6" component="h3" gutterBottom noWrap>
+          {title}
         </Typography>
-      )}
-      <Typography
-        variant="body2"
-        sx={{
-          color: "text.secondary",
-          mt: 2,
-          mb: 2,
-          overflow: 'hidden',
-          textOverflow: 'ellipsis',
-          display: '-webkit-box',
-          WebkitLineClamp: 3,
-          WebkitBoxOrient: 'vertical',
-          minHeight: '3.6em'
-        }}>
-        {description || 'No description available'}
-      </Typography>
-      <Box sx={{ mt: 'auto' }}>
-        {badge && <Box sx={{ mb: 1 }}>{badge}</Box>}
-        {deprecated && <Chip label="Deprecated" color="warning" size="small" sx={{ mr: 1 }} />}
-        {chips}
-      </Box>
-    </CardContent>
-    <CardActions>
-      <Button
-        size="small"
-        color={actionColor}
-        onClick={onClick}
-        aria-label={`${actionLabel} for ${title}`}
-      >
-        {actionLabel}
-      </Button>
-    </CardActions>
-  </Card>
-)
+        {subtitle && (
+          <Typography
+            variant="body2"
+            gutterBottom
+            sx={{
+              color: 'text.secondary',
+            }}
+          >
+            {subtitle}
+          </Typography>
+        )}
+        <Typography
+          variant="body2"
+          sx={{
+            color: 'text.secondary',
+            mt: 2,
+            mb: 2,
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            display: '-webkit-box',
+            WebkitLineClamp: 3,
+            WebkitBoxOrient: 'vertical',
+            minHeight: '3.6em',
+          }}
+        >
+          {description || t('registryItemCard.noDescription')}
+        </Typography>
+        <Box sx={{ mt: 'auto' }}>
+          {badge && <Box sx={{ mb: 1 }}>{badge}</Box>}
+          {deprecated && (
+            <Chip
+              label={t('registryItemCard.deprecated')}
+              color="warning"
+              size="small"
+              sx={{ mr: 1 }}
+            />
+          )}
+          {chips}
+        </Box>
+      </CardContent>
+      <CardActions>
+        <Button
+          size="small"
+          color={actionColor}
+          onClick={onClick}
+          aria-label={t('registryItemCard.ariaAction', { label, title })}
+        >
+          {label}
+        </Button>
+      </CardActions>
+    </Card>
+  )
+}
 
 export default React.memo(RegistryItemCard)

@@ -1,4 +1,5 @@
 import React from 'react'
+import { useTranslation } from 'react-i18next'
 import { Command } from 'cmdk'
 import { useNavigate } from 'react-router-dom'
 import { Box, Dialog, Typography, useTheme } from '@mui/material'
@@ -75,6 +76,7 @@ interface CommandPaletteProps {
 }
 
 const CommandPalette: React.FC<CommandPaletteProps> = ({ open, onClose }) => {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const theme = useTheme()
   const { allowedScopes, isAuthenticated } = useAuth()
@@ -132,10 +134,10 @@ const CommandPalette: React.FC<CommandPaletteProps> = ({ open, onClose }) => {
       maxWidth="sm"
       data-testid="command-palette"
       slotProps={{
-        paper: { sx: { overflow: 'hidden' } }
+        paper: { sx: { overflow: 'hidden' } },
       }}
     >
-      <Command label="Command Palette" shouldFilter>
+      <Command label={t('commandPalette.title')} shouldFilter>
         <Box
           sx={{
             borderBottom: 1,
@@ -147,7 +149,7 @@ const CommandPalette: React.FC<CommandPaletteProps> = ({ open, onClose }) => {
             autoFocus
             value={search}
             onValueChange={setSearch}
-            placeholder="Search pages, modules, providers…"
+            placeholder={t('commandPalette.searchPlaceholder')}
             data-testid="command-palette-input"
             style={{
               width: '100%',
@@ -182,9 +184,12 @@ const CommandPalette: React.FC<CommandPaletteProps> = ({ open, onClose }) => {
           >
             <Command.Empty>
               <Box sx={{ p: 3, textAlign: 'center' }}>
-                <Typography variant="body2" sx={{
-                  color: "text.secondary"
-                }}>
+                <Typography
+                  variant="body2"
+                  sx={{
+                    color: 'text.secondary',
+                  }}
+                >
                   No results.
                 </Typography>
               </Box>
@@ -255,7 +260,7 @@ const CommandPalette: React.FC<CommandPaletteProps> = ({ open, onClose }) => {
         </Box>
       </Command>
     </Dialog>
-  );
+  )
 }
 
 interface PaletteItemProps {
@@ -283,15 +288,18 @@ const PaletteItem: React.FC<PaletteItemProps> = ({ value, label, hint, onSelect 
       >
         <Typography variant="body2">{label}</Typography>
         {hint && (
-          <Typography variant="caption" sx={{
-            color: "text.secondary"
-          }}>
+          <Typography
+            variant="caption"
+            sx={{
+              color: 'text.secondary',
+            }}
+          >
             {hint}
           </Typography>
         )}
       </Box>
     </Command.Item>
-  );
+  )
 }
 
 export default CommandPalette

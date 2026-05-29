@@ -199,7 +199,7 @@ const VersionRow: React.FC<{
                   <TableHead>
                     <TableRow>
                       <TableCell>OS</TableCell>
-                      <TableCell>Arch</TableCell>
+                      <TableCell>{t('admin.terraformMirror.thArch')}</TableCell>
                       <TableCell>{t('admin.terraformMirror.thFilename')}</TableCell>
                       <TableCell>{t('admin.terraformMirror.thStatus')}</TableCell>
                       <TableCell>SHA256</TableCell>
