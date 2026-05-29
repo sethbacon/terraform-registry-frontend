@@ -159,7 +159,11 @@ function VersionRow({
           <Checkbox checked={selected} onChange={onToggleSelect} size="small" />
         </TableCell>
         <TableCell>
-          <IconButton size="small" onClick={() => setOpen((v) => !v)} aria-label="expand row">
+          <IconButton
+            size="small"
+            onClick={() => setOpen((v) => !v)}
+            aria-label={t('admin.versionApprovals.expandRow')}
+          >
             {open ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
           </IconButton>
         </TableCell>
@@ -174,7 +178,7 @@ function VersionRow({
               {item.provider_namespace}/{item.provider_name}
             </Typography>
           ) : (
-            <Chip label="Terraform" size="small" variant="outlined" />
+            <Chip label={t('admin.versionApprovals.terraform')} size="small" variant="outlined" />
           )}
         </TableCell>
         <TableCell>
@@ -185,8 +189,12 @@ function VersionRow({
         </TableCell>
         <TableCell>
           {item.gpg_verified && (
-            <Tooltip title="GPG verified">
-              <VerifiedIcon fontSize="small" color="success" titleAccess="GPG verified" />
+            <Tooltip title={t('admin.versionApprovals.gpgVerified')}>
+              <VerifiedIcon
+                fontSize="small"
+                color="success"
+                titleAccess={t('admin.versionApprovals.gpgVerified')}
+              />
             </Tooltip>
           )}
         </TableCell>
