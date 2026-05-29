@@ -1,4 +1,6 @@
 import React from 'react'
+import { useTranslation } from 'react-i18next'
+import type { TFunction } from 'i18next'
 import { useNavigate } from 'react-router-dom'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { queryKeys } from '../../services/queryKeys'
@@ -118,24 +120,45 @@ function fmtNumber(n: number): string {
   return String(n)
 }
 
-function timeAgo(iso: string): string {
+function timeAgo(t: TFunction, iso: string): string {
   const diff = Date.now() - new Date(iso).getTime()
   const mins = Math.floor(diff / 60_000)
-  if (mins < 1) return 'just now'
-  if (mins < 60) return `${mins}m ago`
+  if (mins < 1) return t('admin.dashboard.timeJustNow')
+  if (mins < 60) return t('admin.dashboard.timeMinsAgo', { count: mins })
   const hrs = Math.floor(mins / 60)
-  if (hrs < 24) return `${hrs}h ago`
-  return `${Math.floor(hrs / 24)}d ago`
+  if (hrs < 24) return t('admin.dashboard.timeHoursAgo', { count: hrs })
+  return t('admin.dashboard.timeDaysAgo', { count: Math.floor(hrs / 24) })
 }
 
-function syncStatusChip(status: string) {
+function syncStatusChip(t: TFunction, status: string) {
   switch (status) {
     case 'success':
-      return <Chip label="success" size="small" color="success" variant="outlined" />
+      return (
+        <Chip
+          label={t('admin.dashboard.syncSuccess')}
+          size="small"
+          color="success"
+          variant="outlined"
+        />
+      )
     case 'failed':
-      return <Chip label="failed" size="small" color="error" variant="outlined" />
+      return (
+        <Chip
+          label={t('admin.dashboard.syncFailed')}
+          size="small"
+          color="error"
+          variant="outlined"
+        />
+      )
     case 'running':
-      return <Chip label="running" size="small" color="info" variant="outlined" />
+      return (
+        <Chip
+          label={t('admin.dashboard.syncRunning')}
+          size="small"
+          color="info"
+          variant="outlined"
+        />
+      )
     default:
       return <Chip label={status} size="small" variant="outlined" />
   }
@@ -162,6 +185,7 @@ const HealthPill: React.FC<HealthPillProps> = ({
   icon,
   route,
 }) => {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const hasIssue = failed > 0
   const isSyncing = syncing > 0
@@ -173,12 +197,12 @@ const HealthPill: React.FC<HealthPillProps> = ({
     <Tooltip
       title={
         hasIssue
-          ? `${failed} of ${total} failed`
+          ? t('admin.dashboard.pillFailed', { failed, total })
           : isSyncing
-            ? `${syncing} syncing`
+            ? t('admin.dashboard.pillSyncing', { syncing })
             : total === 0
-              ? 'None configured'
-              : 'All healthy'
+              ? t('admin.dashboard.pillNoneConfigured')
+              : t('admin.dashboard.pillAllHealthy')
       }
     >
       <Paper
@@ -198,15 +222,25 @@ const HealthPill: React.FC<HealthPillProps> = ({
       >
         <Box sx={{ color: 'text.secondary', display: 'flex' }}>{icon}</Box>
         <Box sx={{ flex: 1, minWidth: 0 }}>
-          <Typography variant="caption" noWrap sx={{
-            color: "text.secondary"
-          }}>
+          <Typography
+            variant="caption"
+            noWrap
+            sx={{
+              color: 'text.secondary',
+            }}
+          >
             {label}
           </Typography>
-          <Typography variant="body2" noWrap sx={{
-            fontWeight: 600
-          }}>
-            {total === 0 ? 'None' : `${total - failed} / ${total} OK`}
+          <Typography
+            variant="body2"
+            noWrap
+            sx={{
+              fontWeight: 600,
+            }}
+          >
+            {total === 0
+              ? t('admin.dashboard.pillNone')
+              : t('admin.dashboard.pillOkRatio', { ok: total - failed, total })}
           </Typography>
         </Box>
         <Box sx={{ color: colour, display: 'flex' }}>
@@ -214,7 +248,7 @@ const HealthPill: React.FC<HealthPillProps> = ({
         </Box>
       </Paper>
     </Tooltip>
-  );
+  )
 }
 
 interface StatCardProps {
@@ -268,13 +302,18 @@ const StatCard: React.FC<StatCardProps> = ({
           variant={compact ? 'h5' : 'h4'}
           sx={{
             fontWeight: 700,
-            lineHeight: 1.1
-          }}>
+            lineHeight: 1.1,
+          }}
+        >
           {fmtNumber(value)}
         </Typography>
-        <Typography variant="body2" noWrap sx={{
-          color: "text.secondary"
-        }}>
+        <Typography
+          variant="body2"
+          noWrap
+          sx={{
+            color: 'text.secondary',
+          }}
+        >
           {title}
         </Typography>
         {/* Reserve space for sub-line even when absent so all cards stay the same height */}
@@ -282,11 +321,12 @@ const StatCard: React.FC<StatCardProps> = ({
           variant="caption"
           noWrap
           sx={{
-            color: "text.disabled",
-            display: "block",
+            color: 'text.disabled',
+            display: 'block',
             mt: 0.25,
-            minHeight: '1.2em'
-          }}>
+            minHeight: '1.2em',
+          }}
+        >
           {sub ?? ''}
         </Typography>
       </Box>
@@ -307,7 +347,7 @@ const StatCard: React.FC<StatCardProps> = ({
         </>
       )}
     </Paper>
-  );
+  )
 }
 
 // Two-row breakdown for provider manual vs mirrored.
@@ -325,6 +365,7 @@ const ProviderBreakdown: React.FC<ProviderBreakdownProps> = ({
   mirroredVersions,
   color,
 }) => {
+  const { t } = useTranslation()
   const total = manual + mirrored
   if (total === 0) return null
   const manualPct = Math.round((manual / total) * 100)
@@ -332,16 +373,26 @@ const ProviderBreakdown: React.FC<ProviderBreakdownProps> = ({
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.75 }}>
       {[
-        { label: 'Manual', count: manual, versions: manualVersions, pct: manualPct, shade: color },
         {
-          label: 'Mirrored',
+          label: t('admin.dashboard.breakdownManual'),
+          count: manual,
+          versions: manualVersions,
+          pct: manualPct,
+          shade: color,
+        },
+        {
+          label: t('admin.dashboard.breakdownMirrored'),
           count: mirrored,
           versions: mirroredVersions,
           pct: mirroredPct,
           shade: '#7E57C2',
         },
       ].map((row) => (
-        <Tooltip key={row.label} title={`${row.versions} versions`} placement="left">
+        <Tooltip
+          key={row.label}
+          title={t('admin.dashboard.breakdownVersions', { count: row.versions })}
+          placement="left"
+        >
           <Box>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.2 }}>
               <Typography variant="caption" sx={{ lineHeight: 1.2 }}>
@@ -352,8 +403,9 @@ const ProviderBreakdown: React.FC<ProviderBreakdownProps> = ({
                 sx={{
                   fontWeight: 600,
                   lineHeight: 1.2,
-                  ml: 0.5
-                }}>
+                  ml: 0.5,
+                }}
+              >
                 {row.count}
               </Typography>
             </Box>
@@ -364,7 +416,7 @@ const ProviderBreakdown: React.FC<ProviderBreakdownProps> = ({
         </Tooltip>
       ))}
     </Box>
-  );
+  )
 }
 
 // Compact vertical list of system → count with a proportional bar.
@@ -373,12 +425,17 @@ const SystemBreakdown: React.FC<{ items: ModuleSystemCount[]; total: number; col
   total,
   color,
 }) => {
+  const { t } = useTranslation()
   if (items.length === 0) return null
   const max = items[0].count // already sorted desc
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
       {items.slice(0, 5).map((item) => (
-        <Tooltip key={item.system} title={`${item.count} of ${total} modules`} placement="left">
+        <Tooltip
+          key={item.system}
+          title={t('admin.dashboard.systemModulesTooltip', { count: item.count, total })}
+          placement="left"
+        >
           <Box>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.2 }}>
               <Typography variant="caption" noWrap sx={{ maxWidth: 66, lineHeight: 1.2 }}>
@@ -389,8 +446,9 @@ const SystemBreakdown: React.FC<{ items: ModuleSystemCount[]; total: number; col
                 sx={{
                   fontWeight: 600,
                   lineHeight: 1.2,
-                  ml: 0.5
-                }}>
+                  ml: 0.5,
+                }}
+              >
                 {item.count}
               </Typography>
             </Box>
@@ -408,7 +466,7 @@ const SystemBreakdown: React.FC<{ items: ModuleSystemCount[]; total: number; col
         </Tooltip>
       ))}
     </Box>
-  );
+  )
 }
 
 // Per-tool platform count (terraform vs opentofu).
@@ -416,6 +474,7 @@ const BinaryToolBreakdown: React.FC<{ items: BinaryToolCount[]; color: string }>
   items,
   color,
 }) => {
+  const { t } = useTranslation()
   if (items.length === 0) return null
   const max = items[0].platforms
   const labelFor = (tool: string) =>
@@ -423,7 +482,11 @@ const BinaryToolBreakdown: React.FC<{ items: BinaryToolCount[]; color: string }>
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.75 }}>
       {items.map((item) => (
-        <Tooltip key={item.tool} title={`${item.platforms} platform binaries`} placement="left">
+        <Tooltip
+          key={item.tool}
+          title={t('admin.dashboard.binaryPlatformsTooltip', { count: item.platforms })}
+          placement="left"
+        >
           <Box>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.2 }}>
               <Typography variant="caption" noWrap sx={{ lineHeight: 1.2 }}>
@@ -434,8 +497,9 @@ const BinaryToolBreakdown: React.FC<{ items: BinaryToolCount[]; color: string }>
                 sx={{
                   fontWeight: 600,
                   lineHeight: 1.2,
-                  ml: 0.5
-                }}>
+                  ml: 0.5,
+                }}
+              >
                 {item.platforms}
               </Typography>
             </Box>
@@ -453,7 +517,7 @@ const BinaryToolBreakdown: React.FC<{ items: BinaryToolCount[]; color: string }>
         </Tooltip>
       ))}
     </Box>
-  );
+  )
 }
 
 // Downloads split by source type.
@@ -462,18 +526,23 @@ const DownloadBreakdown: React.FC<{
   providerDownloads: number
   binaryDownloads: number
 }> = ({ moduleDownloads, providerDownloads, binaryDownloads }) => {
+  const { t } = useTranslation()
   const total = moduleDownloads + providerDownloads + binaryDownloads
   if (total === 0)
     return (
-      <Typography variant="caption" sx={{
-        color: "text.disabled"
-      }}>No downloads yet
-              </Typography>
-    );
+      <Typography
+        variant="caption"
+        sx={{
+          color: 'text.disabled',
+        }}
+      >
+        {t('admin.dashboard.noDownloads')}
+      </Typography>
+    )
   const rows = [
-    { label: 'Modules', count: moduleDownloads, color: '#5C4EE5' },
-    { label: 'Providers', count: providerDownloads, color: '#00D9C0' },
-    { label: 'Binaries', count: binaryDownloads, color: '#FF7043' },
+    { label: t('admin.dashboard.downloadModules'), count: moduleDownloads, color: '#5C4EE5' },
+    { label: t('admin.dashboard.downloadProviders'), count: providerDownloads, color: '#00D9C0' },
+    { label: t('admin.dashboard.downloadBinaries'), count: binaryDownloads, color: '#FF7043' },
   ]
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.75 }}>
@@ -488,8 +557,9 @@ const DownloadBreakdown: React.FC<{
               sx={{
                 fontWeight: 600,
                 lineHeight: 1.2,
-                ml: 0.5
-              }}>
+                ml: 0.5,
+              }}
+            >
               {fmtNumber(row.count)}
             </Typography>
           </Box>
@@ -506,7 +576,7 @@ const DownloadBreakdown: React.FC<{
         </Box>
       ))}
     </Box>
-  );
+  )
 }
 
 interface QuickLinkProps {
@@ -536,13 +606,14 @@ const QuickLink: React.FC<QuickLinkProps> = ({ label, icon, route, color }) => {
         variant="body2"
         sx={{
           fontWeight: 500,
-          flex: 1
-        }}>
+          flex: 1,
+        }}
+      >
         {label}
       </Typography>
       <ArrowForward fontSize="small" sx={{ color: 'text.disabled' }} />
     </Paper>
-  );
+  )
 }
 
 // ---------------------------------------------------------------------------
@@ -550,6 +621,7 @@ const QuickLink: React.FC<QuickLinkProps> = ({ label, icon, route, color }) => {
 // ---------------------------------------------------------------------------
 
 const DashboardPage: React.FC = () => {
+  const { t } = useTranslation()
   const { allowedScopes } = useAuth()
   const queryClient = useQueryClient()
   const navigate = useNavigate()
@@ -572,45 +644,45 @@ const DashboardPage: React.FC = () => {
 
   const { data: gpgKeysData } = useReleasesGPGKeyStatus()
 
-  const error = queryError ? 'Failed to load dashboard statistics.' : null
+  const error = queryError ? t('admin.dashboard.loadError') : null
 
   // Normalise: backend may not yet have mirror fields on older builds.
   const data: DashboardData | null = raw
     ? {
-      modules: raw.modules ?? { total: 0, versions: 0, downloads: 0, by_system: [] },
-      providers: raw.providers ?? {
-        total: 0,
-        manual: 0,
-        mirrored: 0,
-        total_versions: 0,
-        manual_versions: 0,
-        mirrored_versions: 0,
-        downloads: 0,
-      },
-      users: raw.users ?? 0,
-      organizations: raw.organizations ?? 0,
-      downloads: raw.downloads ?? 0,
-      scm_providers: raw.scm_providers ?? 0,
-      binary_mirrors: raw.binary_mirrors ?? {
-        total: 0,
-        healthy: 0,
-        failed: 0,
-        syncing: 0,
-        platforms: 0,
-        downloads: 0,
-        by_tool: [],
-      },
-      provider_mirrors: raw.provider_mirrors ?? { total: 0, healthy: 0, failed: 0 },
-      scanning: raw.scanning ?? {
-        enabled: false,
-        total: 0,
-        pending: 0,
-        clean: 0,
-        findings: 0,
-        error: 0,
-      },
-      recent_syncs: raw.recent_syncs ?? [],
-    }
+        modules: raw.modules ?? { total: 0, versions: 0, downloads: 0, by_system: [] },
+        providers: raw.providers ?? {
+          total: 0,
+          manual: 0,
+          mirrored: 0,
+          total_versions: 0,
+          manual_versions: 0,
+          mirrored_versions: 0,
+          downloads: 0,
+        },
+        users: raw.users ?? 0,
+        organizations: raw.organizations ?? 0,
+        downloads: raw.downloads ?? 0,
+        scm_providers: raw.scm_providers ?? 0,
+        binary_mirrors: raw.binary_mirrors ?? {
+          total: 0,
+          healthy: 0,
+          failed: 0,
+          syncing: 0,
+          platforms: 0,
+          downloads: 0,
+          by_tool: [],
+        },
+        provider_mirrors: raw.provider_mirrors ?? { total: 0, healthy: 0, failed: 0 },
+        scanning: raw.scanning ?? {
+          enabled: false,
+          total: 0,
+          pending: 0,
+          clean: 0,
+          findings: 0,
+          error: 0,
+        },
+        recent_syncs: raw.recent_syncs ?? [],
+      }
     : null
 
   const hasScope = (scope: string) =>
@@ -625,77 +697,77 @@ const DashboardPage: React.FC = () => {
   const statCards: (StatCardProps & { scope: string | null; gridMd: number })[] = !data
     ? []
     : [
-      // Row 1 — content cards (each md=6)
-      {
-        title: 'Modules',
-        value: data.modules.total,
-        sub: `${data.modules.versions} versions`,
-        icon: <ViewModule sx={{ fontSize: 36 }} />,
-        accentColor: '#5C4EE5',
-        route: '/modules',
-        scope: 'modules:read',
-        gridMd: 6,
-        aside:
-          data.modules.by_system?.length > 0 ? (
-            <SystemBreakdown
-              items={data.modules.by_system}
-              total={data.modules.total}
-              color="#5C4EE5"
+        // Row 1 — content cards (each md=6)
+        {
+          title: t('admin.dashboard.statModules'),
+          value: data.modules.total,
+          sub: t('admin.dashboard.statVersions', { count: data.modules.versions }),
+          icon: <ViewModule sx={{ fontSize: 36 }} />,
+          accentColor: '#5C4EE5',
+          route: '/modules',
+          scope: 'modules:read',
+          gridMd: 6,
+          aside:
+            data.modules.by_system?.length > 0 ? (
+              <SystemBreakdown
+                items={data.modules.by_system}
+                total={data.modules.total}
+                color="#5C4EE5"
+              />
+            ) : undefined,
+        },
+        {
+          title: t('admin.dashboard.statProviders'),
+          value: data.providers.total,
+          sub: t('admin.dashboard.statVersions', { count: data.providers.total_versions }),
+          icon: <Extension sx={{ fontSize: 36 }} />,
+          accentColor: '#00D9C0',
+          route: '/providers',
+          scope: 'providers:read',
+          gridMd: 6,
+          aside:
+            data.providers.total > 0 ? (
+              <ProviderBreakdown
+                manual={data.providers.manual}
+                mirrored={data.providers.mirrored}
+                manualVersions={data.providers.manual_versions}
+                mirroredVersions={data.providers.mirrored_versions}
+                color="#00D9C0"
+              />
+            ) : undefined,
+        },
+        // Row 2 — mirror/download summary (each md=6)
+        {
+          title: t('admin.dashboard.statTerraformBinaries'),
+          value: data.binary_mirrors.platforms,
+          sub: t('admin.dashboard.statAcrossMirrors', { count: data.binary_mirrors.total }),
+          icon: <GetApp sx={{ fontSize: 36 }} />,
+          accentColor: '#FF7043',
+          route: '/admin/terraform-mirror',
+          scope: 'mirrors:read',
+          gridMd: 6,
+          aside:
+            data.binary_mirrors.by_tool?.length > 0 ? (
+              <BinaryToolBreakdown items={data.binary_mirrors.by_tool} color="#FF7043" />
+            ) : undefined,
+        },
+        {
+          title: t('admin.dashboard.statTotalDownloads'),
+          value: data.downloads,
+          icon: <Download sx={{ fontSize: 36 }} />,
+          accentColor: '#FFB74D',
+          route: '/modules',
+          scope: null,
+          gridMd: 6,
+          aside: (
+            <DownloadBreakdown
+              moduleDownloads={data.modules.downloads}
+              providerDownloads={data.providers.downloads}
+              binaryDownloads={data.binary_mirrors.downloads}
             />
-          ) : undefined,
-      },
-      {
-        title: 'Providers',
-        value: data.providers.total,
-        sub: `${data.providers.total_versions} versions`,
-        icon: <Extension sx={{ fontSize: 36 }} />,
-        accentColor: '#00D9C0',
-        route: '/providers',
-        scope: 'providers:read',
-        gridMd: 6,
-        aside:
-          data.providers.total > 0 ? (
-            <ProviderBreakdown
-              manual={data.providers.manual}
-              mirrored={data.providers.mirrored}
-              manualVersions={data.providers.manual_versions}
-              mirroredVersions={data.providers.mirrored_versions}
-              color="#00D9C0"
-            />
-          ) : undefined,
-      },
-      // Row 2 — mirror/download summary (each md=6)
-      {
-        title: 'Terraform Binaries',
-        value: data.binary_mirrors.platforms,
-        sub: `across ${data.binary_mirrors.total} mirror${data.binary_mirrors.total !== 1 ? 's' : ''}`,
-        icon: <GetApp sx={{ fontSize: 36 }} />,
-        accentColor: '#FF7043',
-        route: '/admin/terraform-mirror',
-        scope: 'mirrors:read',
-        gridMd: 6,
-        aside:
-          data.binary_mirrors.by_tool?.length > 0 ? (
-            <BinaryToolBreakdown items={data.binary_mirrors.by_tool} color="#FF7043" />
-          ) : undefined,
-      },
-      {
-        title: 'Total Downloads',
-        value: data.downloads,
-        icon: <Download sx={{ fontSize: 36 }} />,
-        accentColor: '#FFB74D',
-        route: '/modules',
-        scope: null,
-        gridMd: 6,
-        aside: (
-          <DownloadBreakdown
-            moduleDownloads={data.modules.downloads}
-            providerDownloads={data.providers.downloads}
-            binaryDownloads={data.binary_mirrors.downloads}
-          />
-        ),
-      },
-    ].filter((c) => c.scope === null || hasScope(c.scope))
+          ),
+        },
+      ].filter((c) => c.scope === null || hasScope(c.scope))
 
   // ---- Zone 3 left: recent syncs -------------------------------------------
   const recentSyncs = data ? data.recent_syncs.slice(0, 8) : []
@@ -703,56 +775,56 @@ const DashboardPage: React.FC = () => {
   // ---- Zone 3 right: quick links -------------------------------------------
   const quickLinks: (QuickLinkProps & { scope: string | null })[] = [
     {
-      label: 'Upload Module',
+      label: t('admin.dashboard.qlUploadModule'),
       icon: <CloudUpload fontSize="small" />,
       route: '/admin/upload/module',
       color: '#5C4EE5',
       scope: 'modules:write',
     },
     {
-      label: 'Upload Provider',
+      label: t('admin.dashboard.qlUploadProvider'),
       icon: <CloudUpload fontSize="small" />,
       route: '/admin/upload/provider',
       color: '#00D9C0',
       scope: 'providers:write',
     },
     {
-      label: 'Provider Mirrors',
+      label: t('admin.dashboard.qlProviderMirrors'),
       icon: <CloudDownload fontSize="small" />,
       route: '/admin/mirrors',
       color: '#7E57C2',
       scope: 'mirrors:read',
     },
     {
-      label: 'Binary Mirrors',
+      label: t('admin.dashboard.qlBinaryMirrors'),
       icon: <GetApp fontSize="small" />,
       route: '/admin/terraform-mirror',
       color: '#FF7043',
       scope: 'mirrors:read',
     },
     {
-      label: 'Manage Users',
+      label: t('admin.dashboard.qlManageUsers'),
       icon: <People fontSize="small" />,
       route: '/admin/users',
       color: '#EF5350',
       scope: 'users:read',
     },
     {
-      label: 'API Keys',
+      label: t('admin.dashboard.qlApiKeys'),
       icon: <Key fontSize="small" />,
       route: '/admin/apikeys',
       color: '#FFB74D',
       scope: null,
     },
     {
-      label: 'SCM Providers',
+      label: t('admin.dashboard.qlScmProviders'),
       icon: <GitHub fontSize="small" />,
       route: '/admin/scm-providers',
       color: '#6E5494',
       scope: 'scm:read',
     },
     {
-      label: 'Storage',
+      label: t('admin.dashboard.qlStorage'),
       icon: <Storage fontSize="small" />,
       route: '/admin/storage',
       color: '#78909C',
@@ -767,7 +839,7 @@ const DashboardPage: React.FC = () => {
           <CircularProgress />
         </Box>
       ) : error || !data ? (
-        <Alert severity="error">{error ?? 'Failed to load dashboard'}</Alert>
+        <Alert severity="error">{error ?? t('admin.dashboard.loadErrorShort')}</Alert>
       ) : (
         <>
           {/* Header */}
@@ -775,15 +847,21 @@ const DashboardPage: React.FC = () => {
             sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}
           >
             <Box>
-              <Typography variant="h4" sx={{
-                fontWeight: 700
-              }}>
-                Dashboard
+              <Typography
+                variant="h4"
+                sx={{
+                  fontWeight: 700,
+                }}
+              >
+                {t('admin.dashboard.title')}
               </Typography>
-              <Typography variant="body2" sx={{
-                color: "text.secondary"
-              }}>
-                Registry health at a glance
+              <Typography
+                variant="body2"
+                sx={{
+                  color: 'text.secondary',
+                }}
+              >
+                {t('admin.dashboard.subtitle')}
               </Typography>
             </Box>
             <Button
@@ -794,14 +872,14 @@ const DashboardPage: React.FC = () => {
               }
               disabled={refreshing}
             >
-              Refresh
+              {t('admin.dashboard.refresh')}
             </Button>
           </Box>
 
           {/* Zone 1 — System health bar */}
           {anyMirrorIssue && (
             <Alert severity="error" sx={{ mb: 2 }}>
-              One or more mirrors have failed their last sync. Check the mirror pages for details.
+              {t('admin.dashboard.mirrorIssueAlert')}
             </Alert>
           )}
 
@@ -809,7 +887,7 @@ const DashboardPage: React.FC = () => {
             {hasScope('mirrors:read') && (
               <>
                 <HealthPill
-                  label="Binary Mirrors"
+                  label={t('admin.dashboard.binaryMirrors')}
                   total={data.binary_mirrors.total}
                   failed={data.binary_mirrors.failed}
                   syncing={data.binary_mirrors.syncing}
@@ -817,7 +895,7 @@ const DashboardPage: React.FC = () => {
                   route="/admin/terraform-mirror"
                 />
                 <HealthPill
-                  label="Provider Mirrors"
+                  label={t('admin.dashboard.providerMirrors')}
                   total={data.provider_mirrors.total}
                   failed={data.provider_mirrors.failed}
                   icon={<CloudDownload fontSize="small" />}
@@ -827,7 +905,7 @@ const DashboardPage: React.FC = () => {
             )}
             {hasScope('admin') && (
               <HealthPill
-                label="Storage"
+                label={t('admin.dashboard.storage')}
                 total={1}
                 failed={0}
                 icon={<Storage fontSize="small" />}
@@ -838,8 +916,13 @@ const DashboardPage: React.FC = () => {
               <Tooltip
                 title={
                   data.scanning.total === 0
-                    ? 'No modules scanned yet'
-                    : `${data.scanning.clean} clean · ${data.scanning.findings} with findings · ${data.scanning.pending} pending · ${data.scanning.error} errors`
+                    ? t('admin.dashboard.scanNoModules')
+                    : t('admin.dashboard.scanSummary', {
+                        clean: data.scanning.clean,
+                        findings: data.scanning.findings,
+                        pending: data.scanning.pending,
+                        errors: data.scanning.error,
+                      })
                 }
               >
                 <Paper
@@ -861,23 +944,34 @@ const DashboardPage: React.FC = () => {
                     <Security fontSize="small" />
                   </Box>
                   <Box sx={{ flex: 1, minWidth: 0 }}>
-                    <Typography variant="caption" noWrap sx={{
-                      color: "text.secondary"
-                    }}>
-                      Security Scanning
+                    <Typography
+                      variant="caption"
+                      noWrap
+                      sx={{
+                        color: 'text.secondary',
+                      }}
+                    >
+                      {t('admin.dashboard.securityScanning')}
                     </Typography>
-                    <Typography variant="body2" noWrap sx={{
-                      fontWeight: 600
-                    }}>
+                    <Typography
+                      variant="body2"
+                      noWrap
+                      sx={{
+                        fontWeight: 600,
+                      }}
+                    >
                       {data.scanning.total === 0
-                        ? 'None'
-                        : `${data.scanning.total - data.scanning.error} / ${data.scanning.total} OK`}
+                        ? t('admin.dashboard.pillNone')
+                        : t('admin.dashboard.pillOkRatio', {
+                            ok: data.scanning.total - data.scanning.error,
+                            total: data.scanning.total,
+                          })}
                     </Typography>
                     {data.scanning.total > 0 && (
                       <Box sx={{ display: 'flex', gap: 0.5, mt: 0.5, flexWrap: 'wrap' }}>
                         {data.scanning.clean > 0 && (
                           <Chip
-                            label={`${data.scanning.clean} clean`}
+                            label={t('admin.dashboard.scanClean', { count: data.scanning.clean })}
                             size="small"
                             color="success"
                             variant="outlined"
@@ -886,7 +980,9 @@ const DashboardPage: React.FC = () => {
                         )}
                         {data.scanning.findings > 0 && (
                           <Chip
-                            label={`${data.scanning.findings} findings`}
+                            label={t('admin.dashboard.scanFindings', {
+                              count: data.scanning.findings,
+                            })}
                             size="small"
                             color="warning"
                             variant="outlined"
@@ -904,7 +1000,9 @@ const DashboardPage: React.FC = () => {
                         )}
                         {data.scanning.pending > 0 && (
                           <Chip
-                            label={`${data.scanning.pending} pending`}
+                            label={t('admin.dashboard.scanPending', {
+                              count: data.scanning.pending,
+                            })}
                             size="small"
                             color="info"
                             variant="outlined"
@@ -913,7 +1011,7 @@ const DashboardPage: React.FC = () => {
                         )}
                         {data.scanning.error > 0 && (
                           <Chip
-                            label={`${data.scanning.error} errors`}
+                            label={t('admin.dashboard.scanErrors', { count: data.scanning.error })}
                             size="small"
                             color="error"
                             variant="outlined"
@@ -947,60 +1045,83 @@ const DashboardPage: React.FC = () => {
                 </Paper>
               </Tooltip>
             )}
-            {hasScope('mirrors:read') && gpgKeysData && (() => {
-              const worst = gpgKeysData.keys.reduce<string>(
-                (acc, k) =>
-                  acc === 'expired' ? acc
-                    : k.status === 'expired' ? 'expired'
-                      : acc === 'warn' ? acc
-                        : k.status === 'warn' ? 'warn'
-                          : k.status === 'ok' ? 'ok' : acc,
-                'unknown',
-              )
-              const colour = worst === 'expired' ? 'error.main'
-                : worst === 'warn' ? 'warning.main'
-                  : worst === 'ok' ? 'success.main' : 'text.secondary'
-              const Icon = worst === 'expired' ? Error
-                : worst === 'warn' ? Sync
-                  : worst === 'ok' ? CheckCircle : CheckCircle
-              const label = worst === 'expired' ? 'Key Expired'
-                : worst === 'warn' ? 'Expiry Soon'
-                  : worst === 'ok' ? 'Keys OK' : 'Unknown'
-              return (
-                <Tooltip title="Release signing GPG key health">
-                  <Paper
-                    onClick={() => navigate('/admin/terraform-mirror')}
-                    sx={{
-                      px: 2,
-                      py: 1.5,
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: 1.5,
-                      cursor: 'pointer',
-                      flex: 1,
-                      minWidth: 160,
-                      transition: 'box-shadow 0.15s',
-                      '&:hover': { boxShadow: 3 },
-                    }}
-                  >
-                    <Box sx={{ color: 'text.secondary', display: 'flex' }}>
-                      <VpnKey fontSize="small" />
-                    </Box>
-                    <Box sx={{ flex: 1, minWidth: 0 }}>
-                      <Typography variant="caption" noWrap sx={{ color: 'text.secondary' }}>
-                        GPG Keys
-                      </Typography>
-                      <Typography variant="body2" noWrap sx={{ fontWeight: 600 }}>
-                        {label}
-                      </Typography>
-                    </Box>
-                    <Box sx={{ color: colour, display: 'flex' }}>
-                      <Icon fontSize="small" />
-                    </Box>
-                  </Paper>
-                </Tooltip>
-              )
-            })()}
+            {hasScope('mirrors:read') &&
+              gpgKeysData &&
+              (() => {
+                const worst = gpgKeysData.keys.reduce<string>(
+                  (acc, k) =>
+                    acc === 'expired'
+                      ? acc
+                      : k.status === 'expired'
+                        ? 'expired'
+                        : acc === 'warn'
+                          ? acc
+                          : k.status === 'warn'
+                            ? 'warn'
+                            : k.status === 'ok'
+                              ? 'ok'
+                              : acc,
+                  'unknown',
+                )
+                const colour =
+                  worst === 'expired'
+                    ? 'error.main'
+                    : worst === 'warn'
+                      ? 'warning.main'
+                      : worst === 'ok'
+                        ? 'success.main'
+                        : 'text.secondary'
+                const Icon =
+                  worst === 'expired'
+                    ? Error
+                    : worst === 'warn'
+                      ? Sync
+                      : worst === 'ok'
+                        ? CheckCircle
+                        : CheckCircle
+                const label =
+                  worst === 'expired'
+                    ? t('admin.dashboard.keyExpired')
+                    : worst === 'warn'
+                      ? t('admin.dashboard.expirySoon')
+                      : worst === 'ok'
+                        ? t('admin.dashboard.keysOk')
+                        : t('admin.dashboard.unknown')
+                return (
+                  <Tooltip title={t('admin.dashboard.gpgTooltip')}>
+                    <Paper
+                      onClick={() => navigate('/admin/terraform-mirror')}
+                      sx={{
+                        px: 2,
+                        py: 1.5,
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 1.5,
+                        cursor: 'pointer',
+                        flex: 1,
+                        minWidth: 160,
+                        transition: 'box-shadow 0.15s',
+                        '&:hover': { boxShadow: 3 },
+                      }}
+                    >
+                      <Box sx={{ color: 'text.secondary', display: 'flex' }}>
+                        <VpnKey fontSize="small" />
+                      </Box>
+                      <Box sx={{ flex: 1, minWidth: 0 }}>
+                        <Typography variant="caption" noWrap sx={{ color: 'text.secondary' }}>
+                          {t('admin.dashboard.gpgKeys')}
+                        </Typography>
+                        <Typography variant="body2" noWrap sx={{ fontWeight: 600 }}>
+                          {label}
+                        </Typography>
+                      </Box>
+                      <Box sx={{ color: colour, display: 'flex' }}>
+                        <Icon fontSize="small" />
+                      </Box>
+                    </Paper>
+                  </Tooltip>
+                )
+              })()}
           </Box>
 
           {/* Zone 2 — Stat cards */}
@@ -1017,10 +1138,14 @@ const DashboardPage: React.FC = () => {
           {/* Zone 2.5 — Quota usage (only shown when quotas are configured) */}
           {quotas && quotas.length > 0 && (
             <>
-              <Typography variant="h6" gutterBottom sx={{
-                fontWeight: 600
-              }}>
-                Resource Quotas
+              <Typography
+                variant="h6"
+                gutterBottom
+                sx={{
+                  fontWeight: 600,
+                }}
+              >
+                {t('admin.dashboard.resourceQuotas')}
               </Typography>
               <Grid container spacing={2} sx={{ mb: 4 }}>
                 {quotas.map((q) => (
@@ -1037,17 +1162,24 @@ const DashboardPage: React.FC = () => {
           <Grid container spacing={3}>
             {/* Recent sync activity */}
             <Grid size={{ xs: 12, md: 8 }}>
-              <Typography variant="h6" gutterBottom sx={{
-                fontWeight: 600
-              }}>
-                Recent Sync Activity
+              <Typography
+                variant="h6"
+                gutterBottom
+                sx={{
+                  fontWeight: 600,
+                }}
+              >
+                {t('admin.dashboard.recentSyncActivity')}
               </Typography>
               {recentSyncs.length === 0 ? (
                 <Paper sx={{ p: 3, textAlign: 'center' }}>
-                  <Typography variant="body2" sx={{
-                    color: "text.secondary"
-                  }}>
-                    No sync history yet. Trigger a sync from the mirror pages.
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      color: 'text.secondary',
+                    }}
+                  >
+                    {t('admin.dashboard.noSyncHistory')}
                   </Typography>
                 </Paper>
               ) : (
@@ -1055,21 +1187,25 @@ const DashboardPage: React.FC = () => {
                   <Table size="small">
                     <TableHead>
                       <TableRow>
-                        <TableCell>Mirror</TableCell>
-                        <TableCell>Type</TableCell>
-                        <TableCell>Status</TableCell>
-                        <TableCell align="right">Synced</TableCell>
-                        <TableCell align="right">Platforms</TableCell>
-                        <TableCell align="right">When</TableCell>
+                        <TableCell>{t('admin.dashboard.thMirror')}</TableCell>
+                        <TableCell>{t('admin.dashboard.thType')}</TableCell>
+                        <TableCell>{t('admin.dashboard.thStatus')}</TableCell>
+                        <TableCell align="right">{t('admin.dashboard.thSynced')}</TableCell>
+                        <TableCell align="right">{t('admin.dashboard.thPlatforms')}</TableCell>
+                        <TableCell align="right">{t('admin.dashboard.thWhen')}</TableCell>
                       </TableRow>
                     </TableHead>
                     <TableBody>
                       {recentSyncs.map((s, i) => (
                         <TableRow key={i} hover>
                           <TableCell>
-                            <Typography variant="body2" noWrap sx={{
-                              fontFamily: "monospace"
-                            }}>
+                            <Typography
+                              variant="body2"
+                              noWrap
+                              sx={{
+                                fontFamily: 'monospace',
+                              }}
+                            >
                               {s.mirror_name}
                             </Typography>
                           </TableCell>
@@ -1081,7 +1217,7 @@ const DashboardPage: React.FC = () => {
                               variant="outlined"
                             />
                           </TableCell>
-                          <TableCell>{syncStatusChip(s.status)}</TableCell>
+                          <TableCell>{syncStatusChip(t, s.status)}</TableCell>
                           <TableCell align="right">
                             <Typography variant="body2">{s.versions_synced}</Typography>
                           </TableCell>
@@ -1092,10 +1228,13 @@ const DashboardPage: React.FC = () => {
                           </TableCell>
                           <TableCell align="right">
                             <Tooltip title={new Date(s.started_at).toLocaleString()}>
-                              <Typography variant="caption" sx={{
-                                color: "text.secondary"
-                              }}>
-                                {timeAgo(s.started_at)}
+                              <Typography
+                                variant="caption"
+                                sx={{
+                                  color: 'text.secondary',
+                                }}
+                              >
+                                {timeAgo(t, s.started_at)}
                               </Typography>
                             </Tooltip>
                           </TableCell>
@@ -1109,10 +1248,14 @@ const DashboardPage: React.FC = () => {
 
             {/* Quick links */}
             <Grid size={{ xs: 12, md: 4 }}>
-              <Typography variant="h6" gutterBottom sx={{
-                fontWeight: 600
-              }}>
-                Quick Links
+              <Typography
+                variant="h6"
+                gutterBottom
+                sx={{
+                  fontWeight: 600,
+                }}
+              >
+                {t('admin.dashboard.quickLinks')}
               </Typography>
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
                 {quickLinks.map((link) => (
@@ -1124,7 +1267,7 @@ const DashboardPage: React.FC = () => {
         </>
       )}
     </Container>
-  );
+  )
 }
 
 export default DashboardPage

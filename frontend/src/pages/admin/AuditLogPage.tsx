@@ -1,4 +1,5 @@
 import React, { useState, useRef } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useQuery } from '@tanstack/react-query'
 import {
   Container,
@@ -47,6 +48,7 @@ const RESOURCE_TYPES = [
 ]
 
 const AuditLogPage: React.FC = () => {
+  const { t } = useTranslation()
   const [error, setError] = useState<string | null>(null)
 
   // Pagination (MUI TablePagination uses 0-based page)
@@ -200,9 +202,12 @@ const AuditLogPage: React.FC = () => {
           <Typography variant="h4" component="h1" gutterBottom>
             Audit Logs
           </Typography>
-          <Typography variant="body2" sx={{
-            color: "text.secondary"
-          }}>
+          <Typography
+            variant="body2"
+            sx={{
+              color: 'text.secondary',
+            }}
+          >
             Track system activity across all resources and users
           </Typography>
         </Box>
@@ -219,8 +224,8 @@ const AuditLogPage: React.FC = () => {
             open={Boolean(exportAnchor)}
             onClose={() => setExportAnchor(null)}
           >
-            <MenuItem onClick={handleExportCSV}>Export as CSV</MenuItem>
-            <MenuItem onClick={handleExportJSON}>Export as JSON</MenuItem>
+            <MenuItem onClick={handleExportCSV}>{t('admin.auditLog.exportCsv')}</MenuItem>
+            <MenuItem onClick={handleExportJSON}>{t('admin.auditLog.exportJson')}</MenuItem>
           </Menu>
         </Box>
       </Box>
@@ -228,33 +233,35 @@ const AuditLogPage: React.FC = () => {
       <Paper sx={{ p: 2, mb: 2 }}>
         <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, alignItems: 'center' }}>
           <TextField
-            label="Start Date"
+            label={t('admin.auditLog.labelStartDate')}
             type="datetime-local"
             size="small"
             value={startDate}
             onChange={(e) => handleStartDateChange(e.target.value)}
             sx={{ minWidth: 200 }}
             slotProps={{
-              inputLabel: { shrink: true }
+              inputLabel: { shrink: true },
             }}
           />
           <TextField
-            label="End Date"
+            label={t('admin.auditLog.labelEndDate')}
             type="datetime-local"
             size="small"
             value={endDate}
             onChange={(e) => handleEndDateChange(e.target.value)}
             sx={{ minWidth: 200 }}
             slotProps={{
-              inputLabel: { shrink: true }
+              inputLabel: { shrink: true },
             }}
           />
           <FormControl size="small" sx={{ minWidth: 180 }}>
-            <InputLabel id="resource-type-label">Resource Type</InputLabel>
+            <InputLabel id="resource-type-label">
+              {t('admin.auditLog.labelResourceType')}
+            </InputLabel>
             <Select
               labelId="resource-type-label"
               value={resourceType}
-              label="Resource Type"
+              label={t('admin.auditLog.labelResourceType')}
               onChange={handleResourceTypeChange}
               inputProps={{ 'data-testid': 'resource-type-select' }}
             >
@@ -266,7 +273,7 @@ const AuditLogPage: React.FC = () => {
             </Select>
           </FormControl>
           <TextField
-            label="Action"
+            label={t('admin.auditLog.labelAction')}
             size="small"
             placeholder="e.g. POST /api/v1/modules"
             value={actionFilter}
@@ -274,9 +281,9 @@ const AuditLogPage: React.FC = () => {
             sx={{ minWidth: 220 }}
           />
           <TextField
-            label="User Email"
+            label={t('admin.auditLog.labelUserEmail')}
             size="small"
-            placeholder="Search by email..."
+            placeholder={t('admin.auditLog.placeholderUserEmail')}
             value={userEmailFilter}
             onChange={(e) => handleUserEmailChange(e.target.value)}
             sx={{ minWidth: 200 }}
@@ -304,11 +311,15 @@ const AuditLogPage: React.FC = () => {
               <Table stickyHeader size="small">
                 <TableHead>
                   <TableRow>
-                    <TableCell sx={{ fontWeight: 600 }}>Timestamp</TableCell>
-                    <TableCell sx={{ fontWeight: 600 }}>Action</TableCell>
-                    <TableCell sx={{ fontWeight: 600 }}>Resource</TableCell>
-                    <TableCell sx={{ fontWeight: 600 }}>User</TableCell>
-                    <TableCell sx={{ fontWeight: 600 }}>IP Address</TableCell>
+                    <TableCell sx={{ fontWeight: 600 }}>
+                      {t('admin.auditLog.thTimestamp')}
+                    </TableCell>
+                    <TableCell sx={{ fontWeight: 600 }}>{t('admin.auditLog.thAction')}</TableCell>
+                    <TableCell sx={{ fontWeight: 600 }}>{t('admin.auditLog.thResource')}</TableCell>
+                    <TableCell sx={{ fontWeight: 600 }}>{t('admin.auditLog.thUser')}</TableCell>
+                    <TableCell sx={{ fontWeight: 600 }}>
+                      {t('admin.auditLog.thIpAddress')}
+                    </TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
@@ -316,8 +327,8 @@ const AuditLogPage: React.FC = () => {
                     <TableRow>
                       <TableCell colSpan={5} sx={{ p: 0, border: 0 }}>
                         <EmptyState
-                          title="No audit entries match the current filters"
-                          description="Audit log entries appear when users make changes. Adjust the filters above or publish a module to see one."
+                          title={t('admin.auditLog.emptyTitle')}
+                          description={t('admin.auditLog.emptySubtitle')}
                           icon={<HistoryIcon />}
                           data-testid="audit-log-empty-state"
                         />
@@ -372,15 +383,18 @@ const AuditLogPage: React.FC = () => {
       </Paper>
       {/* Detail Dialog */}
       <Dialog open={detailOpen} onClose={() => setDetailOpen(false)} maxWidth="md" fullWidth>
-        <DialogTitle>Audit Log Detail</DialogTitle>
+        <DialogTitle>{t('admin.auditLog.detailTitle')}</DialogTitle>
         <DialogContent dividers>
           {selectedLog && (
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
               <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2 }}>
                 <Box>
-                  <Typography variant="caption" sx={{
-                    color: "text.secondary"
-                  }}>
+                  <Typography
+                    variant="caption"
+                    sx={{
+                      color: 'text.secondary',
+                    }}
+                  >
                     ID
                   </Typography>
                   <Typography
@@ -391,17 +405,23 @@ const AuditLogPage: React.FC = () => {
                   </Typography>
                 </Box>
                 <Box>
-                  <Typography variant="caption" sx={{
-                    color: "text.secondary"
-                  }}>
+                  <Typography
+                    variant="caption"
+                    sx={{
+                      color: 'text.secondary',
+                    }}
+                  >
                     Timestamp
                   </Typography>
                   <Typography variant="body2">{formatTimestamp(selectedLog.created_at)}</Typography>
                 </Box>
                 <Box>
-                  <Typography variant="caption" sx={{
-                    color: "text.secondary"
-                  }}>
+                  <Typography
+                    variant="caption"
+                    sx={{
+                      color: 'text.secondary',
+                    }}
+                  >
                     Action
                   </Typography>
                   <Typography variant="body2" sx={{ fontFamily: 'monospace' }}>
@@ -409,17 +429,23 @@ const AuditLogPage: React.FC = () => {
                   </Typography>
                 </Box>
                 <Box>
-                  <Typography variant="caption" sx={{
-                    color: "text.secondary"
-                  }}>
+                  <Typography
+                    variant="caption"
+                    sx={{
+                      color: 'text.secondary',
+                    }}
+                  >
                     Resource Type
                   </Typography>
                   <Typography variant="body2">{selectedLog.resource_type ?? '—'}</Typography>
                 </Box>
                 <Box>
-                  <Typography variant="caption" sx={{
-                    color: "text.secondary"
-                  }}>
+                  <Typography
+                    variant="caption"
+                    sx={{
+                      color: 'text.secondary',
+                    }}
+                  >
                     Resource ID
                   </Typography>
                   <Typography
@@ -430,17 +456,23 @@ const AuditLogPage: React.FC = () => {
                   </Typography>
                 </Box>
                 <Box>
-                  <Typography variant="caption" sx={{
-                    color: "text.secondary"
-                  }}>
+                  <Typography
+                    variant="caption"
+                    sx={{
+                      color: 'text.secondary',
+                    }}
+                  >
                     IP Address
                   </Typography>
                   <Typography variant="body2">{selectedLog.ip_address ?? '—'}</Typography>
                 </Box>
                 <Box>
-                  <Typography variant="caption" sx={{
-                    color: "text.secondary"
-                  }}>
+                  <Typography
+                    variant="caption"
+                    sx={{
+                      color: 'text.secondary',
+                    }}
+                  >
                     User
                   </Typography>
                   <Typography variant="body2">
@@ -450,9 +482,12 @@ const AuditLogPage: React.FC = () => {
                   </Typography>
                 </Box>
                 <Box>
-                  <Typography variant="caption" sx={{
-                    color: "text.secondary"
-                  }}>
+                  <Typography
+                    variant="caption"
+                    sx={{
+                      color: 'text.secondary',
+                    }}
+                  >
                     Organization ID
                   </Typography>
                   <Typography variant="body2" sx={{ wordBreak: 'break-all' }}>
@@ -462,9 +497,12 @@ const AuditLogPage: React.FC = () => {
               </Box>
               {selectedLog.metadata && Object.keys(selectedLog.metadata).length > 0 && (
                 <Box>
-                  <Typography variant="caption" sx={{
-                    color: "text.secondary"
-                  }}>
+                  <Typography
+                    variant="caption"
+                    sx={{
+                      color: 'text.secondary',
+                    }}
+                  >
                     Metadata
                   </Typography>
                   <Paper variant="outlined" sx={{ mt: 0.5, p: 1.5, bgcolor: 'grey.50' }}>
@@ -485,11 +523,11 @@ const AuditLogPage: React.FC = () => {
           )}
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setDetailOpen(false)}>Close</Button>
+          <Button onClick={() => setDetailOpen(false)}>{t('admin.auditLog.close')}</Button>
         </DialogActions>
       </Dialog>
     </Container>
-  );
+  )
 }
 
 export default AuditLogPage

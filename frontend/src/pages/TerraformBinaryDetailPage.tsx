@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useParams, useNavigate, Link as RouterLink } from 'react-router-dom'
 import {
   Container,
@@ -61,6 +62,7 @@ const PlatformRows: React.FC<{ mirrorName: string; version: string }> = ({
   mirrorName,
   version,
 }) => {
+  const { t } = useTranslation()
   const [platforms, setPlatforms] = useState<TerraformVersionPlatform[] | null>(null)
   const [loading, setLoading] = useState(false)
 
@@ -97,14 +99,17 @@ const PlatformRows: React.FC<{ mirrorName: string; version: string }> = ({
     return (
       <TableRow>
         <TableCell colSpan={6} sx={{ py: 1 }}>
-          <Typography variant="caption" sx={{
-            color: "text.secondary"
-          }}>
-            No platforms synced yet.
+          <Typography
+            variant="caption"
+            sx={{
+              color: 'text.secondary',
+            }}
+          >
+            {t('terraformBinaries.detail.noPlatformsSynced')}
           </Typography>
         </TableCell>
       </TableRow>
-    );
+    )
   }
 
   return (
@@ -112,9 +117,12 @@ const PlatformRows: React.FC<{ mirrorName: string; version: string }> = ({
       {platforms.map((p) => (
         <TableRow key={p.id} sx={{ bgcolor: 'action.hover' }}>
           <TableCell sx={{ pl: 6 }} colSpan={2}>
-            <Typography variant="caption" sx={{
-              fontFamily: "monospace"
-            }}>
+            <Typography
+              variant="caption"
+              sx={{
+                fontFamily: 'monospace',
+              }}
+            >
               {p.os} / {p.arch}
             </Typography>
           </TableCell>
@@ -125,9 +133,10 @@ const PlatformRows: React.FC<{ mirrorName: string; version: string }> = ({
             <Typography
               variant="caption"
               sx={{
-                fontFamily: "monospace",
-                wordBreak: 'break-all'
-              }}>
+                fontFamily: 'monospace',
+                wordBreak: 'break-all',
+              }}
+            >
               {p.filename}
             </Typography>
           </TableCell>
@@ -148,7 +157,7 @@ const PlatformRows: React.FC<{ mirrorName: string; version: string }> = ({
         </TableRow>
       ))}
     </>
-  );
+  )
 }
 
 // ---------------------------------------------------------------------------
@@ -187,6 +196,7 @@ const VersionRow: React.FC<VersionRowProps> = ({
   onUndeprecate,
   onDelete,
 }) => {
+  const { t } = useTranslation()
   const [open, setOpen] = useState(false)
   const changelogUrl = getChangelogUrl(tool, version.version)
 
@@ -202,7 +212,7 @@ const VersionRow: React.FC<VersionRowProps> = ({
         <TableCell width={48}>
           <IconButton
             size="small"
-            aria-label="Toggle version details"
+            aria-label={t('terraformBinaries.detail.ariaToggle')}
             onClick={() => setOpen((p) => !p)}
           >
             {open ? <ExpandLessIcon /> : <ExpandMoreIcon />}
@@ -210,13 +220,16 @@ const VersionRow: React.FC<VersionRowProps> = ({
         </TableCell>
         <TableCell>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
-            <Typography variant="body2" sx={{
-              fontFamily: "monospace"
-            }}>
+            <Typography
+              variant="body2"
+              sx={{
+                fontFamily: 'monospace',
+              }}
+            >
               {version.version}
             </Typography>
             {changelogUrl && (
-              <Tooltip title="View release notes">
+              <Tooltip title={t('terraformBinaries.detail.tooltipReleaseNotes')}>
                 <IconButton
                   size="small"
                   component="a"
@@ -249,20 +262,20 @@ const VersionRow: React.FC<VersionRowProps> = ({
           <TableCell align="right">
             <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 0.5 }}>
               {version.is_deprecated ? (
-                <Tooltip title="Remove deprecation (re-enable syncing)">
+                <Tooltip title={t('terraformBinaries.detail.tooltipUndeprecate')}>
                   <IconButton
                     size="small"
-                    aria-label="Undeprecate version"
+                    aria-label={t('terraformBinaries.detail.ariaUndeprecate')}
                     onClick={() => onUndeprecate(version)}
                   >
                     <RestoreIcon fontSize="small" />
                   </IconButton>
                 </Tooltip>
               ) : (
-                <Tooltip title="Mark as deprecated (prevents re-sync)">
+                <Tooltip title={t('terraformBinaries.detail.tooltipDeprecate')}>
                   <IconButton
                     size="small"
-                    aria-label="Deprecate version"
+                    aria-label={t('terraformBinaries.detail.ariaDeprecate')}
                     color="warning"
                     onClick={() => onDeprecate(version)}
                     disabled={version.sync_status === 'syncing'}
@@ -271,11 +284,11 @@ const VersionRow: React.FC<VersionRowProps> = ({
                   </IconButton>
                 </Tooltip>
               )}
-              <Tooltip title="Delete version and its binaries">
+              <Tooltip title={t('terraformBinaries.detail.tooltipDeleteVersion')}>
                 <span>
                   <IconButton
                     size="small"
-                    aria-label="Delete version"
+                    aria-label={t('terraformBinaries.detail.ariaDeleteVersion')}
                     color="error"
                     onClick={() => onDelete(version)}
                     disabled={version.sync_status === 'syncing'}
@@ -300,10 +313,10 @@ const VersionRow: React.FC<VersionRowProps> = ({
                 <TableHead>
                   <TableRow>
                     <TableCell colSpan={2} sx={{ pl: 6, fontWeight: 600 }}>
-                      Platform
+                      {t('terraformBinaries.detail.thPlatform')}
                     </TableCell>
-                    <TableCell>Status</TableCell>
-                    <TableCell>Filename</TableCell>
+                    <TableCell>{t('terraformBinaries.detail.thStatus')}</TableCell>
+                    <TableCell>{t('terraformBinaries.detail.thFilename')}</TableCell>
                     <TableCell>SHA256</TableCell>
                     <TableCell>GPG</TableCell>
                   </TableRow>
@@ -317,7 +330,7 @@ const VersionRow: React.FC<VersionRowProps> = ({
         </TableCell>
       </TableRow>
     </>
-  );
+  )
 }
 
 // ---------------------------------------------------------------------------
@@ -325,6 +338,7 @@ const VersionRow: React.FC<VersionRowProps> = ({
 // ---------------------------------------------------------------------------
 
 const TerraformBinaryDetailPage: React.FC = () => {
+  const { t } = useTranslation()
   const { name } = useParams<{ name: string }>()
   const navigate = useNavigate()
   const { isAuthenticated, allowedScopes } = useAuth()
@@ -493,27 +507,31 @@ const TerraformBinaryDetailPage: React.FC = () => {
             </Link>
             <Typography
               sx={{
-                color: "text.primary",
-                fontFamily: "monospace"
-              }}>
+                color: 'text.primary',
+                fontFamily: 'monospace',
+              }}
+            >
               {name}
             </Typography>
           </Breadcrumbs>
 
           {/* Back button + title */}
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-            <Tooltip title="Back to mirrors">
+            <Tooltip title={t('terraformBinaries.detail.tooltipBackToMirrors')}>
               <IconButton
                 size="small"
-                aria-label="Back to binaries"
+                aria-label={t('terraformBinaries.detail.ariaBackToBinaries')}
                 onClick={() => navigate('/terraform-binaries')}
               >
                 <ArrowBack />
               </IconButton>
             </Tooltip>
-            <Typography variant="h4" sx={{
-              fontFamily: "monospace"
-            }}>
+            <Typography
+              variant="h4"
+              sx={{
+                fontFamily: 'monospace',
+              }}
+            >
               {name}
             </Typography>
             <Chip
@@ -529,9 +547,10 @@ const TerraformBinaryDetailPage: React.FC = () => {
             <Typography
               variant="body1"
               sx={{
-                color: "text.secondary",
-                mb: 2
-              }}>
+                color: 'text.secondary',
+                mb: 2,
+              }}
+            >
               {config.description}
             </Typography>
           )}
@@ -539,7 +558,7 @@ const TerraformBinaryDetailPage: React.FC = () => {
           {/* Download URL hint */}
           <Alert severity="info" sx={{ mb: 3 }}>
             <Typography variant="body2">
-              <strong>Mirror download URL: </strong>
+              <strong>{t('terraformBinaries.detail.mirrorUrlLabel')}</strong>
               <code>
                 {window.location.origin}/terraform/binaries/{name}
                 /versions/&#123;version&#125;/&#123;os&#125;/&#123;arch&#125;
@@ -560,21 +579,23 @@ const TerraformBinaryDetailPage: React.FC = () => {
 
           {/* Versions table */}
           <Typography variant="h6" sx={{ mb: 1 }}>
-            Versions
+            {t('terraformBinaries.detail.versionsTitle')}
           </Typography>
 
           {versions.length === 0 ? (
-            <Alert severity="info">No versions have been synced yet.</Alert>
+            <Alert severity="info">{t('terraformBinaries.detail.noVersionsSynced')}</Alert>
           ) : (
             <TableContainer component={Paper} variant="outlined">
               <Table size="small">
                 <TableHead>
                   <TableRow>
                     <TableCell width={48} />
-                    <TableCell>Version</TableCell>
-                    <TableCell>Status</TableCell>
-                    <TableCell>Synced At</TableCell>
-                    {canManage && <TableCell align="right">Actions</TableCell>}
+                    <TableCell>{t('terraformBinaries.detail.thVersion')}</TableCell>
+                    <TableCell>{t('terraformBinaries.detail.thStatus')}</TableCell>
+                    <TableCell>{t('terraformBinaries.detail.thSyncedAt')}</TableCell>
+                    {canManage && (
+                      <TableCell align="right">{t('terraformBinaries.detail.thActions')}</TableCell>
+                    )}
                   </TableRow>
                 </TableHead>
                 <TableBody>
@@ -605,20 +626,22 @@ const TerraformBinaryDetailPage: React.FC = () => {
             maxWidth="sm"
             fullWidth
           >
-            <DialogTitle>Deprecate Version {deprecateTarget?.version}</DialogTitle>
+            <DialogTitle>
+              {t('terraformBinaries.detail.deprecateDialogTitleBefore')}
+              {deprecateTarget?.version}
+            </DialogTitle>
             <DialogContent>
               <Typography variant="body2" sx={{ mb: 2 }}>
-                Marking this version as deprecated prevents it from being re-synced in future sync
-                runs. It will remain available for download but will be flagged as deprecated.
+                {t('terraformBinaries.detail.deprecateDialogBody')}
               </Typography>
               <TextField
-                label="Reason (optional)"
+                label={t('terraformBinaries.detail.labelReasonOptional')}
                 value={deprecateMessage}
                 onChange={(e) => setDeprecateMessage(e.target.value)}
                 fullWidth
                 multiline
                 rows={2}
-                helperText="Explain why this version is deprecated, e.g. security vulnerability."
+                helperText={t('terraformBinaries.detail.helpReason')}
               />
             </DialogContent>
             <DialogActions>
@@ -628,7 +651,7 @@ const TerraformBinaryDetailPage: React.FC = () => {
                   setDeprecateMessage('')
                 }}
               >
-                Cancel
+                {t('terraformBinaries.detail.cancel')}
               </Button>
               <Button
                 color="warning"
@@ -636,14 +659,21 @@ const TerraformBinaryDetailPage: React.FC = () => {
                 onClick={handleDeprecate}
                 disabled={deprecating || undeprecating}
               >
-                {deprecating ? <CircularProgress size={18} /> : 'Deprecate'}
+                {deprecating ? (
+                  <CircularProgress size={18} />
+                ) : (
+                  t('terraformBinaries.detail.deprecate')
+                )}
               </Button>
             </DialogActions>
           </Dialog>
 
           {/* ---- Delete Dialog ---- */}
           <Dialog open={!!deleteTarget} onClose={() => setDeleteTarget(null)}>
-            <DialogTitle>Delete Version {deleteTarget?.version}</DialogTitle>
+            <DialogTitle>
+              {t('terraformBinaries.detail.deleteDialogTitleBefore')}
+              {deleteTarget?.version}
+            </DialogTitle>
             <DialogContent>
               <Typography>
                 Are you sure you want to delete version <strong>{deleteTarget?.version}</strong>?
@@ -658,16 +688,18 @@ const TerraformBinaryDetailPage: React.FC = () => {
               )}
             </DialogContent>
             <DialogActions>
-              <Button onClick={() => setDeleteTarget(null)}>Cancel</Button>
+              <Button onClick={() => setDeleteTarget(null)}>
+                {t('terraformBinaries.detail.cancel')}
+              </Button>
               <Button color="error" variant="contained" onClick={handleDelete} disabled={deleting}>
-                {deleting ? <CircularProgress size={18} /> : 'Delete'}
+                {deleting ? <CircularProgress size={18} /> : t('terraformBinaries.detail.delete')}
               </Button>
             </DialogActions>
           </Dialog>
         </Container>
       )}
     </Box>
-  );
+  )
 }
 
 export default TerraformBinaryDetailPage

@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useNavigate, useLocation } from 'react-router-dom'
 import {
   Container,
@@ -30,6 +31,7 @@ import FileDropZone from '../../components/FileDropZone'
 type ProviderMethod = 'choose' | 'upload' | 'mirror'
 
 const ProviderUploadPage: React.FC = () => {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const location = useLocation()
   const state = location.state as {
@@ -102,16 +104,16 @@ const ProviderUploadPage: React.FC = () => {
   const renderProviderMethodChooser = () => (
     <Box sx={{ p: 3 }}>
       <Typography variant="h6" gutterBottom>
-        How would you like to add this provider?
+        {t('admin.providerUpload.chooseTitle')}
       </Typography>
       <Typography
         variant="body2"
         sx={{
-          color: "text.secondary",
-          mb: 3
-        }}>
-        Upload a provider binary directly, or configure a mirror to automatically sync providers
-        from the public Terraform Registry.
+          color: 'text.secondary',
+          mb: 3,
+        }}
+      >
+        {t('admin.providerUpload.chooseSubtitle')}
       </Typography>
       <Box sx={{ display: 'flex', gap: 3, flexDirection: { xs: 'column', sm: 'row' } }}>
         <Card
@@ -122,13 +124,15 @@ const ProviderUploadPage: React.FC = () => {
             <CardContent sx={{ textAlign: 'center', py: 4 }}>
               <CloudUpload sx={{ fontSize: 48, color: 'primary.main', mb: 2 }} />
               <Typography variant="h6" gutterBottom>
-                Manual Upload
+                {t('admin.providerUpload.manualUpload')}
               </Typography>
-              <Typography variant="body2" sx={{
-                color: "text.secondary"
-              }}>
-                Package a provider binary as a <strong>.zip</strong> file and upload it directly.
-                Best for private or custom providers.
+              <Typography
+                variant="body2"
+                sx={{
+                  color: 'text.secondary',
+                }}
+              >
+                {t('admin.providerUpload.manualUploadDesc')}
               </Typography>
             </CardContent>
           </CardActionArea>
@@ -145,13 +149,15 @@ const ProviderUploadPage: React.FC = () => {
             <CardContent sx={{ textAlign: 'center', py: 4 }}>
               <CloudDownload sx={{ fontSize: 48, color: 'secondary.main', mb: 2 }} />
               <Typography variant="h6" gutterBottom>
-                Provider Mirror
+                {t('admin.providerUpload.providerMirror')}
               </Typography>
-              <Typography variant="body2" sx={{
-                color: "text.secondary"
-              }}>
-                Configure a mirror to automatically sync one or more providers from the public
-                Terraform Registry on a schedule.
+              <Typography
+                variant="body2"
+                sx={{
+                  color: 'text.secondary',
+                }}
+              >
+                {t('admin.providerUpload.providerMirrorDesc')}
               </Typography>
             </CardContent>
           </CardActionArea>
@@ -174,7 +180,7 @@ const ProviderUploadPage: React.FC = () => {
         Back
       </Button>
       <Typography variant="h6" gutterBottom>
-        Upload Terraform Provider
+        {t('admin.providerUpload.formTitle')}
       </Typography>
       <Box
         sx={{
@@ -184,14 +190,22 @@ const ProviderUploadPage: React.FC = () => {
           borderRadius: 1,
         }}
       >
-        <Typography variant="body2" gutterBottom sx={{
-          color: "text.secondary"
-        }}>
+        <Typography
+          variant="body2"
+          gutterBottom
+          sx={{
+            color: 'text.secondary',
+          }}
+        >
           <strong>Requirements:</strong>
         </Typography>
-        <Typography variant="body2" component="div" sx={{
-          color: "text.secondary"
-        }}>
+        <Typography
+          variant="body2"
+          component="div"
+          sx={{
+            color: 'text.secondary',
+          }}
+        >
           • Package provider binary as a <strong>.zip</strong> file
           <br />
           • Upload each OS/Architecture combination separately
@@ -204,38 +218,38 @@ const ProviderUploadPage: React.FC = () => {
 
       <Stack spacing={3}>
         <TextField
-          label="Namespace"
+          label={t('admin.providerUpload.labelNamespace')}
           value={providerNamespace}
           onChange={(e) => setProviderNamespace(e.target.value)}
           placeholder="e.g., myorg"
           required
           fullWidth
-          helperText="Your organization identifier."
+          helperText={t('admin.providerUpload.helpNamespace')}
         />
         <TextField
-          label="Provider Name"
+          label={t('admin.providerUpload.labelProviderName')}
           value={providerName}
           onChange={(e) => setProviderName(e.target.value)}
           placeholder="e.g., custom-api"
           required
           fullWidth
-          helperText="Provider type name (e.g., 'aws', 'azurerm', 'custom-api'). Lowercase only."
+          helperText={t('admin.providerUpload.helpProviderName')}
         />
         <TextField
-          label="Version"
+          label={t('admin.providerUpload.labelVersion')}
           value={providerVersion}
           onChange={(e) => setProviderVersion(e.target.value)}
           placeholder="e.g., 1.0.0"
           required
           fullWidth
-          helperText="Semantic version in format X.Y.Z (e.g., 1.0.0, 2.1.3). Must match binary version."
+          helperText={t('admin.providerUpload.helpVersion')}
         />
 
         <FormControl fullWidth required>
-          <InputLabel>Operating System</InputLabel>
+          <InputLabel>{t('admin.providerUpload.labelOperatingSystem')}</InputLabel>
           <Select
             value={providerOS}
-            label="Operating System"
+            label={t('admin.providerUpload.labelOperatingSystem')}
             onChange={(e: SelectChangeEvent) => setProviderOS(e.target.value)}
           >
             <MenuItem value="linux">Linux</MenuItem>
@@ -245,19 +259,20 @@ const ProviderUploadPage: React.FC = () => {
           <Typography
             variant="caption"
             sx={{
-              color: "text.secondary",
+              color: 'text.secondary',
               mt: 0.5,
-              ml: 1.75
-            }}>
-            Target operating system for this provider binary
+              ml: 1.75,
+            }}
+          >
+            {t('admin.providerUpload.helpOsCaption')}
           </Typography>
         </FormControl>
 
         <FormControl fullWidth required>
-          <InputLabel>Architecture</InputLabel>
+          <InputLabel>{t('admin.providerUpload.labelArchitecture')}</InputLabel>
           <Select
             value={providerArch}
-            label="Architecture"
+            label={t('admin.providerUpload.labelArchitecture')}
             onChange={(e: SelectChangeEvent) => setProviderArch(e.target.value)}
           >
             <MenuItem value="amd64">AMD64 (x86_64)</MenuItem>
@@ -267,11 +282,12 @@ const ProviderUploadPage: React.FC = () => {
           <Typography
             variant="caption"
             sx={{
-              color: "text.secondary",
+              color: 'text.secondary',
               mt: 0.5,
-              ml: 1.75
-            }}>
-            CPU architecture for this provider binary (most common: amd64)
+              ml: 1.75,
+            }}
+          >
+            {t('admin.providerUpload.helpArchCaption')}
           </Typography>
         </FormControl>
 
@@ -287,9 +303,12 @@ const ProviderUploadPage: React.FC = () => {
         {uploading && uploadPercent !== null && (
           <Box data-testid="provider-upload-progress">
             <LinearProgress variant="determinate" value={uploadPercent} />
-            <Typography variant="caption" sx={{
-              color: "text.secondary"
-            }}>
+            <Typography
+              variant="caption"
+              sx={{
+                color: 'text.secondary',
+              }}
+            >
               Uploading… {uploadPercent}%
             </Typography>
           </Box>
@@ -305,7 +324,9 @@ const ProviderUploadPage: React.FC = () => {
           startIcon={uploading ? <CircularProgress size={20} /> : <CloudUpload />}
           size="large"
         >
-          {uploading ? 'Uploading...' : 'Upload Provider'}
+          {uploading
+            ? t('admin.providerUpload.uploading')
+            : t('admin.providerUpload.uploadProvider')}
         </Button>
       </Stack>
     </Box>
@@ -314,22 +335,23 @@ const ProviderUploadPage: React.FC = () => {
   return (
     <Container maxWidth="md" sx={{ py: 4 }}>
       <Typography variant="h4" gutterBottom>
-        Upload Provider
+        {t('admin.providerUpload.pageTitle')}
       </Typography>
       <Typography
         variant="body1"
         sx={{
-          color: "text.secondary",
-          mb: 4
-        }}>
-        Add a Terraform provider to your registry
+          color: 'text.secondary',
+          mb: 4,
+        }}
+      >
+        {t('admin.providerUpload.pageSubtitle')}
       </Typography>
       <Paper sx={{ width: '100%' }}>
         {providerMethod === 'choose' && renderProviderMethodChooser()}
         {providerMethod === 'upload' && renderFileUploadForm()}
       </Paper>
     </Container>
-  );
+  )
 }
 
 export default ProviderUploadPage
