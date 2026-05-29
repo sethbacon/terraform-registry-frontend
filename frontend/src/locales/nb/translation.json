@@ -142,6 +142,11 @@
     "protocolSupport": "Støtte for registerprotokoller",
     "protocolDesc": "Full kompatibilitet med Terraform Registry Protocol v1 – bruk dette registeret direkte i Terraform CLI og leverandørkonfigurasjoner uten behov for plugins eller proxyer.",
     "viewApiDocs": "Vis API-dokumentasjon",
+    "searchScope": "Søkeområde",
+    "apiChipModule": "Modulregister-API",
+    "apiChipProvider": "API for leverandørregister",
+    "apiChipDiscovery": "Tjenesteoppdagelse",
+    "apiChipAuth": "Autentisering",
     "setupRequired": "Krav til oppsett",
     "featureSetupRequired": "Konfigurasjon av funksjoner kreves",
     "setupRequiredDesc": "Dette registeret er ikke konfigurert ennå. Fullfør konfigurasjonsveiviseren for å konfigurere autentisering, lagring og den første administratorkontoen.",
@@ -953,6 +958,7 @@
       "update": "Oppdatering",
       "ariaTogglePlatforms": "Bytt mellom plattformer",
       "ariaToggleVersions": "Veksle mellom versjoner",
+      "thArch": "Bue",
       "thFilename": "Filnavn",
       "thVersion": "Versjon",
       "thSyncedAt": "Synkronisert kl.",
@@ -1049,6 +1055,7 @@
       "chipDeprecated": "utgått",
       "tooltipDeleteVersion": "Slett versjonen og tilhørende binærfiler fra lagringsplassen",
       "ariaDeleteVersion": "Slett versjon",
+      "thArch": "Bue",
       "thFilename": "Filnavn",
       "thStatus": "Status",
       "noPlatformsSynced": "Ingen plattformer er synkronisert ennå.",
@@ -1664,6 +1671,36 @@
       "showScanDetails": "Vis skanningsdetaljer",
       "notScannedYet": "Ikke skannet ennå"
     },
+    "scimProvisioning": {
+      "title": "SCIM-konfigurering",
+      "description": "SCIM 2.0-endepunkter gjør det mulig for eksterne identitetsleverandører å automatisk opprette og fjerne brukere og grupper.",
+      "configuration": "Konfigurasjon",
+      "labelBaseUrl": "SCIM-base-URL",
+      "helpBaseUrl": "Bruk denne som leietaker-URL i identitetsleverandørens SCIM-konfigurasjon.",
+      "labelUsersEndpoint": "Brukerens sluttpunkt",
+      "labelGroupsEndpoint": "Grupper Endepunkt",
+      "authentication": "Autentisering",
+      "storeWarning": "Oppbevar API-nøkkelen på et sikkert sted. Den gir full tilgang til bruker- og gruppekonfigurering.",
+      "supportedOperations": "Støttede operasjoner"
+    },
+    "roles": {
+      "loadError": "Det gikk ikke å laste inn roller. Prøv på nytt.",
+      "title": "Roller og rettigheter",
+      "subtitle": "Se de tilgjengelige rollene og de tilhørende tillatelsesområdene. Systemroller er forhåndsdefinerte og kan ikke endres.",
+      "availableScopesReference": "Oversikt over tilgjengelige skoper",
+      "scopesDefine": "Omfang definerer hvilke handlinger en rolle kan utføre i registeret.",
+      "thScope": "Omfang",
+      "thDescription": "Beskrivelse",
+      "roleTemplates": "Rollemaler",
+      "clickRole": "Klikk på en rolle for å se alle detaljer om dens omfang.",
+      "noRoles": "Ingen roller funnet.",
+      "systemChip": "System",
+      "scopeCount_one": "{{count}} omfang",
+      "scopeCount_other": "{{count}} kikkerter",
+      "assignedScopes": "Tildelte områder:",
+      "permissionsByCategory": "Tillatelser etter kategori:",
+      "fullAccessViaAdmin": "Full tilgang (via administrator)"
+    },
     "dashboard": {
       "loadError": "Det gikk ikke å laste inn statistikken for oversikten.",
       "loadErrorShort": "Det gikk ikke å laste inn oversikten",
@@ -1841,6 +1878,235 @@
     "yes": "Ja",
     "no": "Nei",
     "sensitive": "Følsom"
+  },
+  "usageExample": {
+    "title": "Eksempel på bruk",
+    "toolAria": "Verktøy",
+    "copied": "Kopiert!",
+    "copyExample": "Eksempel på kopiering",
+    "tabSource": "Kilde",
+    "tabWithInputs": "Med nødvendige opplysninger"
+  },
+  "webhookEvents": {
+    "title": "Webhook-hendelser",
+    "toggleAria": "Slå webhook-hendelser av og på",
+    "noEvents": "Det er ikke registrert noen webhook-hendelser ennå.",
+    "showingCount": "Viser 10 av{{total}}-arrangementer",
+    "refresh": "Oppdater"
+  },
+  "repositoryBrowser": {
+    "searchPlaceholder": "Søk i arkivene...",
+    "refresh": "Oppdater",
+    "refreshAria": "Oppdater arkiver",
+    "selected": "Valgt",
+    "protected": "Beskyttet"
+  },
+  "advisoryBanner": {
+    "title": "Sikkerhetsmeldinger",
+    "dismiss": "Avslutt for denne økten"
+  },
+  "commandPalette": {
+    "title": "Kommandopalett",
+    "searchPlaceholder": "Søk etter sider, moduler, leverandører…"
+  },
+  "devUserSwitcher": {
+    "title": "Utviklingsmodus: Bytt bruker",
+    "selectUser": "Velg bruker"
+  },
+  "markdownRenderer": {
+    "ariaLabel": "Ferdigstilt dokumentasjon"
+  },
+  "versionDetailsPanel": {
+    "title": "Versjons{{version}}-detaljer",
+    "published": "Publisert:",
+    "na": "Ikke relevant",
+    "downloads": "Nedlastinger:",
+    "publishedBy": "Utgitt av:",
+    "deprecated": "Utdatert",
+    "deprecatedOn": "på {{date}}",
+    "replacement": "Erstatning:",
+    "removingDeprecation": "Fjerner utgått funksjon...",
+    "removeDeprecation": "Fjern utdatert merking",
+    "deprecateVersion": "Utgått versjon",
+    "deleteThisVersion": "Slett denne versjonen"
+  },
+  "policyResultsPanel": {
+    "title": "Evaluering av politikk"
+  },
+  "providerDocsSidebar": {
+    "filterPlaceholder": "Filtrer dokumenter..."
+  },
+  "registryItemCard": {
+    "deprecated": "Utdatert",
+    "viewDetails": "Vis detaljer",
+    "noDescription": "Ingen beskrivelse tilgjengelig",
+    "ariaAction": "{{label}} for {{title}}"
+  },
+  "scmRepositoryPanel": {
+    "title": "Kildekode-arkiv"
+  },
+  "securityScanPanel": {
+    "title": "Sikkerhetssjekk"
+  },
+  "versionSelector": {
+    "showDeprecated": "Vis utdaterte",
+    "showDeprecatedAria": "Vis utdaterte versjoner",
+    "allDeprecated": "Alle versjoner av denne modulen er utfaset."
+  },
+  "errorBoundary": {
+    "title": "Det oppstod en feil",
+    "description": "Det oppstod en uventet feil. Du kan prøve på nytt eller laste inn siden på nytt.",
+    "tryAgain": "Prøv på nytt",
+    "reloadPage": "Oppdater siden"
+  },
+  "quotaUsageChart": {
+    "storage": "Oppbevaring",
+    "publishesPerDay": "Publiserer / dag",
+    "downloadsPerDay": "Nedlastinger / dag"
+  },
+  "helpPanel": {
+    "closeAria": "Lukk hjelpefeltet"
+  },
+  "layout": {
+    "mainNavigation": "Hovednavigasjon"
+  },
+  "apiDocumentation": {
+    "title": "API Swagger-dokumentasjon",
+    "subtitle": "Interaktiv API-referanse – bruk «Autorisere»-knappen for å logge inn med en API-nøkkel"
+  },
+  "mtls": {
+    "certificateSubject": "Sertifikatets emne",
+    "scopes": "Omfang"
+  },
+  "reviewStep": {
+    "configured": "Konfigurert",
+    "notConfigured": "Ikke konfigurert",
+    "actionPermanent": "Denne endringen er permanent"
+  },
+  "adminUserStep": {
+    "adminEmail": "E-post til administrator",
+    "emailMustMatch": "Denne e-postadressen må samsvare med identiteten din hos OIDC-leverandøren"
+  },
+  "authenticateStep": {
+    "findingToken": "Finne oppsettstokenet ditt",
+    "setupToken": "Konfigurer token"
+  },
+  "setupWizardPage": {
+    "setupProgress": "Fremdrift i installasjonen"
+  },
+  "loginPage": {
+    "loadingProviders": "Laster inn påloggingsleverandører"
+  },
+  "scanDiagnostics": {
+    "errorMessage": "Feilmelding",
+    "scannerOutput": "Skannerutdata (stderr / stdout)",
+    "rawJson": "Rå skanner-JSON"
+  },
+  "settingsPage": {
+    "title": "Innstillinger",
+    "telemetryPrivacy": "Telemetri og personvern",
+    "description": "Bestem selv hvilke opplysninger du vil dele. Nødvendige informasjonskapsler som er avgjørende for at nettstedet skal fungere, kan ikke deaktiveres. Endringene trer i kraft umiddelbart.",
+    "essentialRequired": "Nødvendige informasjonskapsler (påkrevd)",
+    "errorReporting": "Feilrapportering — hjelper oss med å fikse feil raskere",
+    "performanceMonitoring": "Ytelsesovervåking — Web Vitals og målinger for sideinnlasting",
+    "analytics": "Analyser – bruksmønstre for å forbedre produktet"
+  },
+  "consentBanner": {
+    "ariaLabel": "Samtykke til bruk av informasjonskapsler",
+    "title": "Vi legger vekt på å ivareta personvernet ditt",
+    "essential": "Nødvendig (alltid på)",
+    "errorReporting": "Feilrapportering",
+    "performanceMonitoring": "Ytelsesovervåking",
+    "analytics": "Analytikk",
+    "hideDetails": "Skjul detaljer",
+    "customize": "Tilpass",
+    "rejectAll": "Avvis alle",
+    "acceptAll": "Godta alle"
+  },
+  "releasesGpgKeys": {
+    "title": "Frigjør signeringsnøkler",
+    "description": "GPG-nøkler som brukes til å verifisere signaturene på oppstrømsutgivelser. Statusen beregnes ut fra den konfigurerte varselgrensen.",
+    "loadError": "Det gikk ikke å laste inn statusen for GPG-nøkkelen.",
+    "noData": "Det foreligger ingen nøkkeldata for signering av utgivelser.",
+    "thTool": "Verktøy",
+    "thStatus": "Status",
+    "thSource": "Kilde",
+    "thFingerprint": "Fingeravtrykk",
+    "thExpiry": "Utløpsdato",
+    "thLastRefresh": "Siste oppdatering",
+    "expiredAgo": "utløpt {{days}} d siden",
+    "days": "{{days}} d"
+  },
+  "scanFindingsModal": {
+    "title": "Skanneresultater",
+    "close": "lukk",
+    "noData": "Det finnes ingen skannede data.",
+    "critical": "Viktig: {{count}}",
+    "high": "Høy: {{count}}",
+    "medium": "Kilde: {{count}}",
+    "low": "Lav: {{count}}",
+    "downloadTooltip": "Last ned resultatene som CSV-fil",
+    "exportCsv": "Eksporter CSV",
+    "thSeverity": "Alvorlighetsgrad",
+    "thRuleId": "Regel-ID",
+    "thTitle": "Tittel",
+    "thResource": "Ressurs",
+    "thFile": "Fil",
+    "thResolution": "Beslutning",
+    "parseError": "Det var ikke mulig å analysere de enkelte funnene fra skannerutskriften.",
+    "hideRawJson": "Skjul rå JSON",
+    "showRawJson": "Vis rå JSON"
+  },
+  "storageMigration": {
+    "stepSelect": "Velg kilde og mål",
+    "stepReview": "Gjennomgangsplan",
+    "stepExecute": "Utfør og overvåk",
+    "stepComplete": "Fullfør",
+    "backendLocal": "Lokalt filsystem",
+    "backendAzure": "Azure Blob Storage",
+    "backendS3": "Amazon S3",
+    "backendGcs": "Google Cloud Storage",
+    "planError": "Det lyktes ikke å opprette en migreringsplan",
+    "startError": "Det gikk ikke å starte overføringen",
+    "cancelError": "Det lyktes ikke å avbryte overføringen",
+    "sourceConfiguration": "Kildekonfigurasjon",
+    "targetConfiguration": "Målkonfigurasjon",
+    "activeSuffix": " (Aktiv)",
+    "createNew": "+ Opprett ny konfigurasjon…",
+    "mustBeDifferent": "Kilde- og målkonfigurasjonene må være forskjellige.",
+    "migrationPlan": "Migreringsplan",
+    "source": "Kilde",
+    "target": "Mål",
+    "totalArtifacts": "Totalt antall gjenstander",
+    "modules": "Moduler",
+    "providers": "Leverandører",
+    "estimatedSize": "Anslått størrelse",
+    "startWarning": "Når du starter denne migreringen, kopieres alle artefakter fra kildelagringen til mållagringen. Dette kan ta en stund, avhengig av antall og størrelsen på artefaktene.",
+    "inProgress": "Overføring pågår",
+    "artifactsProgress": "{{migrated}} / {{total}}-artefakter",
+    "failedCount": "{{count}} en eller flere gjenstander mislyktes",
+    "cancelMigration": "Avbryt overføring",
+    "complete": "Overføringen er fullført",
+    "successDetail": "{{migrated}}er artefakter fra {{total}} er nå overført.",
+    "failedToMigrate": "{{count}} Det lyktes ikke å overføre artefakt(er).",
+    "errorSuffix": " Feil: {{error}}",
+    "failed": "Overføringen mislyktes",
+    "migratedBeforeFailure": "{{migrated}}-filer fra {{total}} ble overført før feilen oppstod.",
+    "wizardTitle": "Veiviser for lagringsmigrering",
+    "done": "Ferdig",
+    "cancel": "Avbryt",
+    "back": "Tilbake",
+    "reviewPlanBtn": "Gjennomgangsplan",
+    "startMigrationBtn": "Start overføringen"
+  },
+  "moduleActionsMenu": {
+    "moreActions": "Flere handlinger",
+    "moduleActions": "Modulhandlinger",
+    "publishNewVersion": "Publiser ny versjon",
+    "editDescription": "Rediger beskrivelse",
+    "deprecateModule": "Avvikle modul",
+    "undeprecateModule": "Fjern markering av modul som utgått",
+    "deleteModule": "Slett modul"
   },
   "setup": {
     "oidc": {

@@ -142,6 +142,11 @@
     "protocolSupport": "Unterstützung von Registrierungsprotokollen",
     "protocolDesc": "Volle Kompatibilität mit dem Terraform Registry Protocol v1 – nutzen Sie dieses Registry direkt in der Terraform-CLI und in Provider-Konfigurationen, ganz ohne Plugins oder Proxys.",
     "viewApiDocs": "API-Dokumentation anzeigen",
+    "searchScope": "Suchbereich",
+    "apiChipModule": "Modul-Registrierungs-API",
+    "apiChipProvider": "Anbieter-Register-API",
+    "apiChipDiscovery": "Diensterkennung",
+    "apiChipAuth": "Authentifizierung",
     "setupRequired": "Einrichtung erforderlich",
     "featureSetupRequired": "Erforderliche Konfiguration der Funktionen",
     "setupRequiredDesc": "Diese Registrierung wurde noch nicht konfiguriert. Führen Sie den Einrichtungsassistenten aus, um die Authentifizierung, den Speicher und das erste Administratorkonto zu konfigurieren.",
@@ -953,6 +958,7 @@
       "update": "Aktualisierung",
       "ariaTogglePlatforms": "Plattformen umschalten",
       "ariaToggleVersions": "Versionen umschalten",
+      "thArch": "Bogen",
       "thFilename": "Dateiname",
       "thVersion": "Version",
       "thSyncedAt": "Synchronisiert am",
@@ -1049,6 +1055,7 @@
       "chipDeprecated": "veraltet",
       "tooltipDeleteVersion": "Version und zugehörige Binärdateien aus dem Speicher löschen",
       "ariaDeleteVersion": "Version löschen",
+      "thArch": "Bogen",
       "thFilename": "Dateiname",
       "thStatus": "Status",
       "noPlatformsSynced": "Es wurden noch keine Plattformen synchronisiert.",
@@ -1664,6 +1671,36 @@
       "showScanDetails": "Scan-Details anzeigen",
       "notScannedYet": "Noch nicht gescannt"
     },
+    "scimProvisioning": {
+      "title": "SCIM-Bereitstellung",
+      "description": "SCIM 2.0-Endpunkte ermöglichen es externen Identitätsanbietern, Benutzer und Gruppen automatisch zuzuweisen und zu entfernen.",
+      "configuration": "Konfiguration",
+      "labelBaseUrl": "SCIM-Basis-URL",
+      "helpBaseUrl": "Verwenden Sie diese URL als Mandanten-URL in der SCIM-Konfiguration Ihres Identitätsanbieters.",
+      "labelUsersEndpoint": "Benutzer-Endpunkt",
+      "labelGroupsEndpoint": "Gruppen-Endpunkt",
+      "authentication": "Authentifizierung",
+      "storeWarning": "Bewahren Sie den API-Schlüssel sicher auf. Er gewährt vollständigen Zugriff auf die Benutzer- und Gruppenverwaltung.",
+      "supportedOperations": "Unterstützte Vorgänge"
+    },
+    "roles": {
+      "loadError": "Das Laden der Rollen ist fehlgeschlagen. Bitte versuche es erneut.",
+      "title": "Rollen und Berechtigungen",
+      "subtitle": "Zeigen Sie die verfügbaren Rollen und die ihnen zugeordneten Berechtigungsbereiche an. Systemrollen sind vordefiniert und können nicht geändert werden.",
+      "availableScopesReference": "Übersicht über die verfügbaren Bereiche",
+      "scopesDefine": "Bereiche legen fest, welche Aktionen eine Rolle im Register ausführen kann.",
+      "thScope": "Geltungsbereich",
+      "thDescription": "Beschreibung",
+      "roleTemplates": "Rollenvorlagen",
+      "clickRole": "Klicken Sie auf eine Rolle, um deren vollständigen Umfang anzuzeigen.",
+      "noRoles": "Es wurden keine Rollen gefunden.",
+      "systemChip": "System",
+      "scopeCount_one": "{{count}} Anwendungsbereich",
+      "scopeCount_other": "{{count}} Anwendungsbereiche",
+      "assignedScopes": "Zugewiesene Bereiche:",
+      "permissionsByCategory": "Berechtigungen nach Kategorie:",
+      "fullAccessViaAdmin": "Voller Zugriff (über den Administrator)"
+    },
     "dashboard": {
       "loadError": "Das Laden der Dashboard-Statistiken ist fehlgeschlagen.",
       "loadErrorShort": "Das Dashboard konnte nicht geladen werden",
@@ -1841,6 +1878,235 @@
     "yes": "Ja",
     "no": "Nein",
     "sensitive": "Empfindlich"
+  },
+  "usageExample": {
+    "title": "Anwendungsbeispiel",
+    "toolAria": "Werkzeug",
+    "copied": "Kopiert!",
+    "copyExample": "Beispiel kopieren",
+    "tabSource": "Quelle",
+    "tabWithInputs": "mit den erforderlichen Eingaben"
+  },
+  "webhookEvents": {
+    "title": "Webhook-Ereignisse",
+    "toggleAria": "Webhook-Ereignisse umschalten",
+    "noEvents": "Es wurden noch keine Webhook-Ereignisse aufgezeichnet.",
+    "showingCount": "Es werden 10 von insgesamt {{total}} Veranstaltungen angezeigt",
+    "refresh": "Aktualisieren"
+  },
+  "repositoryBrowser": {
+    "searchPlaceholder": "Repositories durchsuchen...",
+    "refresh": "Aktualisieren",
+    "refreshAria": "Repositorys aktualisieren",
+    "selected": "Ausgewählt",
+    "protected": "Geschützt"
+  },
+  "advisoryBanner": {
+    "title": "Sicherheitshinweise",
+    "dismiss": "Für diese Sitzung schließen"
+  },
+  "commandPalette": {
+    "title": "Befehlspalette",
+    "searchPlaceholder": "Seiten, Module, Anbieter suchen…"
+  },
+  "devUserSwitcher": {
+    "title": "Entwicklungsmodus: Benutzer wechseln",
+    "selectUser": "Benutzer auswählen"
+  },
+  "markdownRenderer": {
+    "ariaLabel": "Renderte Dokumentation"
+  },
+  "versionDetailsPanel": {
+    "title": "Details zur Version „{{version}}“",
+    "published": "Veröffentlicht:",
+    "na": "k. A.",
+    "downloads": "Downloads:",
+    "publishedBy": "Herausgegeben von:",
+    "deprecated": "Veraltet",
+    "deprecatedOn": "auf {{date}}",
+    "replacement": "Ersatz:",
+    "removingDeprecation": "Entfernen der Veralterung...",
+    "removeDeprecation": "Veraltete Markierung entfernen",
+    "deprecateVersion": "Version als veraltet kennzeichnen",
+    "deleteThisVersion": "Diese Version löschen"
+  },
+  "policyResultsPanel": {
+    "title": "Politikbewertung"
+  },
+  "providerDocsSidebar": {
+    "filterPlaceholder": "Dokumente filtern..."
+  },
+  "registryItemCard": {
+    "deprecated": "Veraltet",
+    "viewDetails": "Details anzeigen",
+    "noDescription": "Keine Beschreibung verfügbar",
+    "ariaAction": "{{label}} für {{title}}"
+  },
+  "scmRepositoryPanel": {
+    "title": "Quell-Repository"
+  },
+  "securityScanPanel": {
+    "title": "Sicherheitsscan"
+  },
+  "versionSelector": {
+    "showDeprecated": "Als veraltet anzeigen",
+    "showDeprecatedAria": "Veraltete Versionen anzeigen",
+    "allDeprecated": "Alle Versionen dieses Moduls sind veraltet."
+  },
+  "errorBoundary": {
+    "title": "Es ist ein Fehler aufgetreten",
+    "description": "Es ist ein unerwarteter Fehler aufgetreten. Sie können es erneut versuchen oder die Seite neu laden.",
+    "tryAgain": "Es noch einmal versuchen",
+    "reloadPage": "Seite neu laden"
+  },
+  "quotaUsageChart": {
+    "storage": "Lagerung",
+    "publishesPerDay": "Veröffentlichungen / Tag",
+    "downloadsPerDay": "Downloads / Tag"
+  },
+  "helpPanel": {
+    "closeAria": "Hilfebereich schließen"
+  },
+  "layout": {
+    "mainNavigation": "Hauptnavigation"
+  },
+  "apiDocumentation": {
+    "title": "API-Swagger-Dokumentation",
+    "subtitle": "Interaktive API-Referenz – Klicken Sie auf die Schaltfläche „Autorisieren“, um sich mit einem API-Schlüssel anzumelden"
+  },
+  "mtls": {
+    "certificateSubject": "Zertifikatsbetreff",
+    "scopes": "Anwendungsbereiche"
+  },
+  "reviewStep": {
+    "configured": "Konfiguriert",
+    "notConfigured": "Nicht konfiguriert",
+    "actionPermanent": "Diese Maßnahme ist dauerhaft"
+  },
+  "adminUserStep": {
+    "adminEmail": "E-Mail-Adresse des Administrators",
+    "emailMustMatch": "Diese E-Mail-Adresse muss mit der Identität Ihres OIDC-Anbieters übereinstimmen"
+  },
+  "authenticateStep": {
+    "findingToken": "So finden Sie Ihr Setup-Token",
+    "setupToken": "Einrichtungstoken"
+  },
+  "setupWizardPage": {
+    "setupProgress": "Fortschritt der Einrichtung"
+  },
+  "loginPage": {
+    "loadingProviders": "Anmeldeanbieter werden geladen"
+  },
+  "scanDiagnostics": {
+    "errorMessage": "Fehlermeldung",
+    "scannerOutput": "Scanner-Ausgabe (stderr / stdout)",
+    "rawJson": "Rohdaten des Scanners im JSON-Format"
+  },
+  "settingsPage": {
+    "title": "Einstellungen",
+    "telemetryPrivacy": "Telemetrie und Datenschutz",
+    "description": "Bestimmen Sie selbst, welche Daten Sie weitergeben. Unverzichtbare Cookies, die für das Funktionieren der Website erforderlich sind, können nicht deaktiviert werden. Die Änderungen treten sofort in Kraft.",
+    "essentialRequired": "Unverzichtbare Cookies (erforderlich)",
+    "errorReporting": "Fehlermeldung – hilft uns, Fehler schneller zu beheben",
+    "performanceMonitoring": "Leistungsüberwachung – Web Vitals und Metriken zum Seitenaufbau",
+    "analytics": "Analytik – Nutzungsverhalten zur Produktoptimierung"
+  },
+  "consentBanner": {
+    "ariaLabel": "Einwilligung zur Verwendung von Cookies",
+    "title": "Der Schutz Ihrer Daten ist uns wichtig",
+    "essential": "Unverzichtbar (immer aktiv)",
+    "errorReporting": "Fehlermeldung",
+    "performanceMonitoring": "Leistungsüberwachung",
+    "analytics": "Analytik",
+    "hideDetails": "Details ausblenden",
+    "customize": "Anpassen",
+    "rejectAll": "Alle ablehnen",
+    "acceptAll": "Alle akzeptieren"
+  },
+  "releasesGpgKeys": {
+    "title": "Freigabe von Signaturschlüsseln",
+    "description": "GPG-Schlüssel, die zur Überprüfung der Signaturen von Upstream-Veröffentlichungen verwendet werden. Der Status wird anhand des konfigurierten Warnschwellenwerts ermittelt.",
+    "loadError": "Der Status des GPG-Schlüssels konnte nicht geladen werden.",
+    "noData": "Es liegen keine Daten zur Freigabe und Signatur vor.",
+    "thTool": "Werkzeug",
+    "thStatus": "Status",
+    "thSource": "Quelle",
+    "thFingerprint": "Fingerabdruck",
+    "thExpiry": "Ablauf",
+    "thLastRefresh": "Zuletzt aktualisiert",
+    "expiredAgo": "abgelaufen vor {{days}} Tagen",
+    "days": "{{days}} d"
+  },
+  "scanFindingsModal": {
+    "title": "Befunde der Untersuchung",
+    "close": "Schließen",
+    "noData": "Es sind keine Scandaten verfügbar.",
+    "critical": "Wichtig: {{count}}",
+    "high": "High: {{count}}",
+    "medium": "Quelle: {{count}}",
+    "low": "Niedrig: {{count}}",
+    "downloadTooltip": "Ergebnisse als CSV-Datei herunterladen",
+    "exportCsv": "Als CSV exportieren",
+    "thSeverity": "Schweregrad",
+    "thRuleId": "Regel-ID",
+    "thTitle": "Titel",
+    "thResource": "Ressource",
+    "thFile": "Datei",
+    "thResolution": "Beschluss",
+    "parseError": "Die einzelnen Ergebnisse aus der Scannerausgabe konnten nicht ausgewertet werden.",
+    "hideRawJson": "Rohes JSON ausblenden",
+    "showRawJson": "JSON im Rohformat anzeigen"
+  },
+  "storageMigration": {
+    "stepSelect": "Quelle und Ziel auswählen",
+    "stepReview": "Überprüfungsplan",
+    "stepExecute": "Ausführen & Überwachen",
+    "stepComplete": "Vollständig",
+    "backendLocal": "Lokales Dateisystem",
+    "backendAzure": "Azure Blob Storage",
+    "backendS3": "Amazon S3",
+    "backendGcs": "Google Cloud Storage",
+    "planError": "Die Erstellung des Migrationsplans ist fehlgeschlagen",
+    "startError": "Die Migration konnte nicht gestartet werden",
+    "cancelError": "Die Migration konnte nicht abgebrochen werden",
+    "sourceConfiguration": "Quellkonfiguration",
+    "targetConfiguration": "Zielkonfiguration",
+    "activeSuffix": " (Aktiv)",
+    "createNew": "+ Neue Konfiguration erstellen…",
+    "mustBeDifferent": "Die Quell- und Zielkonfigurationen müssen unterschiedlich sein.",
+    "migrationPlan": "Migrationsplan",
+    "source": "Quelle",
+    "target": "Ziel",
+    "totalArtifacts": "Gesamtzahl der Artefakte",
+    "modules": "Module",
+    "providers": "Anbieter",
+    "estimatedSize": "Geschätzte Größe",
+    "startWarning": "Wenn Sie diese Migration starten, werden alle Artefakte vom Quell- in den Zielspeicher kopiert. Dies kann je nach Anzahl und Größe der Artefakte eine Weile dauern.",
+    "inProgress": "Migration läuft",
+    "artifactsProgress": "{{migrated}} / Artefakte von „{{total}}“",
+    "failedCount": "{{count}} Artefakt(e) fehlgeschlagen",
+    "cancelMigration": "Migration abbrechen",
+    "complete": "Migration abgeschlossen",
+    "successDetail": "{{migrated}}e Artefakte von {{total}} wurden erfolgreich migriert.",
+    "failedToMigrate": "{{count}} Die Migration der Artefakte ist fehlgeschlagen.",
+    "errorSuffix": " Fehler: {{error}}",
+    "failed": "Migration fehlgeschlagen",
+    "migratedBeforeFailure": "{{migrated}}-Artefakte von {{total}} wurden vor dem Ausfall migriert.",
+    "wizardTitle": "Assistent für die Speicher-Migration",
+    "done": "Fertig",
+    "cancel": "Abbrechen",
+    "back": "Zurück",
+    "reviewPlanBtn": "Überprüfungsplan",
+    "startMigrationBtn": "Migration starten"
+  },
+  "moduleActionsMenu": {
+    "moreActions": "Weitere Aktionen",
+    "moduleActions": "Modulaktionen",
+    "publishNewVersion": "Neue Version veröffentlichen",
+    "editDescription": "Beschreibung bearbeiten",
+    "deprecateModule": "Modul als veraltet kennzeichnen",
+    "undeprecateModule": "Modul wieder als empfohlen kennzeichnen",
+    "deleteModule": "Modul löschen"
   },
   "setup": {
     "oidc": {

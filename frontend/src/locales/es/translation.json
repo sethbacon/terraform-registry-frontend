@@ -142,6 +142,11 @@
     "protocolSupport": "Compatibilidad con el protocolo de registro",
     "protocolDesc": "Totalmente compatible con el protocolo Terraform Registry v1: utiliza este registro directamente en la CLI de Terraform y en las configuraciones de los proveedores sin necesidad de plugins ni proxies.",
     "viewApiDocs": "Ver la documentación de la API",
+    "searchScope": "Ámbito de búsqueda",
+    "apiChipModule": "API del Registro de módulos",
+    "apiChipProvider": "API del Registro de proveedores",
+    "apiChipDiscovery": "Detección de servicios",
+    "apiChipAuth": "Autenticación",
     "setupRequired": "Se requiere configuración",
     "featureSetupRequired": "Se requiere la configuración de la función",
     "setupRequiredDesc": "Este registro aún no se ha configurado. Completa el asistente de configuración para configurar la autenticación, el almacenamiento y la cuenta de administrador inicial.",
@@ -953,6 +958,7 @@
       "update": "Actualización",
       "ariaTogglePlatforms": "Alternar plataformas",
       "ariaToggleVersions": "Alternar versiones",
+      "thArch": "Arco",
       "thFilename": "Nombre del archivo",
       "thVersion": "Versión",
       "thSyncedAt": "Sincronizado a las",
@@ -1049,6 +1055,7 @@
       "chipDeprecated": "obsoleto",
       "tooltipDeleteVersion": "Eliminar la versión y sus archivos binarios del almacenamiento",
       "ariaDeleteVersion": "Eliminar versión",
+      "thArch": "Arco",
       "thFilename": "Nombre del archivo",
       "thStatus": "Estado",
       "noPlatformsSynced": "Aún no hay ninguna plataforma sincronizada.",
@@ -1664,6 +1671,36 @@
       "showScanDetails": "Mostrar detalles del escaneo",
       "notScannedYet": "Aún no se ha escaneado"
     },
+    "scimProvisioning": {
+      "title": "Aprovisionamiento de SCIM",
+      "description": "Los puntos finales de SCIM 2.0 permiten a los proveedores de identidad externos gestionar automáticamente el alta y la baja de usuarios y grupos.",
+      "configuration": "Configuración",
+      "labelBaseUrl": "URL base de SCIM",
+      "helpBaseUrl": "Utiliza esto como URL del inquilino en la configuración SCIM de tu proveedor de identidades.",
+      "labelUsersEndpoint": "Terminales de los usuarios",
+      "labelGroupsEndpoint": "Punto final de grupos",
+      "authentication": "Autenticación",
+      "storeWarning": "Guarda la clave API en un lugar seguro. Esta clave permite el acceso completo a la gestión de usuarios y grupos.",
+      "supportedOperations": "Operaciones compatibles"
+    },
+    "roles": {
+      "loadError": "No se han podido cargar los roles. Inténtalo de nuevo.",
+      "title": "Roles y permisos",
+      "subtitle": "Consulte los roles disponibles y sus ámbitos de permisos asociados. Los roles del sistema están predefinidos y no se pueden modificar.",
+      "availableScopesReference": "Referencia de los visores disponibles",
+      "scopesDefine": "Los ámbitos definen las acciones que un rol puede realizar en el registro.",
+      "thScope": "Ámbito de aplicación",
+      "thDescription": "Descripción",
+      "roleTemplates": "Plantillas de roles",
+      "clickRole": "Haz clic en un rol para ver todos los detalles de su ámbito de aplicación.",
+      "noRoles": "No se han encontrado roles.",
+      "systemChip": "Sistema",
+      "scopeCount_one": "{{count}} ámbito",
+      "scopeCount_other": "{{count}} ámbitos",
+      "assignedScopes": "Ámbitos asignados:",
+      "permissionsByCategory": "Permisos por categoría:",
+      "fullAccessViaAdmin": "Acceso completo (a través del administrador)"
+    },
     "dashboard": {
       "loadError": "No se han podido cargar las estadísticas del panel de control.",
       "loadErrorShort": "No se ha podido cargar el panel de control",
@@ -1841,6 +1878,235 @@
     "yes": "Sí",
     "no": "No",
     "sensitive": "Delicado"
+  },
+  "usageExample": {
+    "title": "Ejemplo de uso",
+    "toolAria": "Herramienta",
+    "copied": "¡Copiado!",
+    "copyExample": "Ejemplo de texto",
+    "tabSource": "Fuente",
+    "tabWithInputs": "Con los datos necesarios"
+  },
+  "webhookEvents": {
+    "title": "Eventos de webhook",
+    "toggleAria": "Activar o desactivar los eventos de webhook",
+    "noEvents": "Aún no se han registrado eventos de webhook.",
+    "showingCount": "Se muestran 10 de los eventos de «{{total}}»",
+    "refresh": "Actualizar"
+  },
+  "repositoryBrowser": {
+    "searchPlaceholder": "Buscar en los repositorios...",
+    "refresh": "Actualizar",
+    "refreshAria": "Actualizar repositorios",
+    "selected": "Seleccionado",
+    "protected": "Protegido"
+  },
+  "advisoryBanner": {
+    "title": "Avisos de seguridad",
+    "dismiss": "Cerrar esta sesión"
+  },
+  "commandPalette": {
+    "title": "Paleta de comandos",
+    "searchPlaceholder": "Buscar páginas, módulos, proveedores…"
+  },
+  "devUserSwitcher": {
+    "title": "Modo de desarrollo: Cambiar de usuario",
+    "selectUser": "Seleccionar usuario"
+  },
+  "markdownRenderer": {
+    "ariaLabel": "Documentación generada"
+  },
+  "versionDetailsPanel": {
+    "title": "Detalles de la versión{{version}}",
+    "published": "Publicado:",
+    "na": "N/A",
+    "downloads": "Descargas:",
+    "publishedBy": "Publicado por:",
+    "deprecated": "En desuso",
+    "deprecatedOn": "en {{date}}",
+    "replacement": "Sustitución:",
+    "removingDeprecation": "Eliminando la marca de obsolescencia...",
+    "removeDeprecation": "Eliminar la marca de obsolescencia",
+    "deprecateVersion": "Versión obsoleta",
+    "deleteThisVersion": "Eliminar esta versión"
+  },
+  "policyResultsPanel": {
+    "title": "Evaluación de políticas"
+  },
+  "providerDocsSidebar": {
+    "filterPlaceholder": "Filtrar documentos..."
+  },
+  "registryItemCard": {
+    "deprecated": "En desuso",
+    "viewDetails": "Ver detalles",
+    "noDescription": "No hay descripción disponible",
+    "ariaAction": "{{label}} para {{title}}"
+  },
+  "scmRepositoryPanel": {
+    "title": "Repositorio de código fuente"
+  },
+  "securityScanPanel": {
+    "title": "Análisis de seguridad"
+  },
+  "versionSelector": {
+    "showDeprecated": "Mostrar elementos obsoletos",
+    "showDeprecatedAria": "Mostrar versiones obsoletas",
+    "allDeprecated": "Todas las versiones de este módulo están obsoletas."
+  },
+  "errorBoundary": {
+    "title": "Ha ocurrido un error",
+    "description": "Se ha producido un error inesperado. Puedes volver a intentarlo o actualizar la página.",
+    "tryAgain": "Inténtalo de nuevo",
+    "reloadPage": "Actualizar página"
+  },
+  "quotaUsageChart": {
+    "storage": "Almacenamiento",
+    "publishesPerDay": "Publicaciones / Día",
+    "downloadsPerDay": "Descargas / Día"
+  },
+  "helpPanel": {
+    "closeAria": "Cerrar el panel de ayuda"
+  },
+  "layout": {
+    "mainNavigation": "Navegación principal"
+  },
+  "apiDocumentation": {
+    "title": "Documentación de Swagger para la API",
+    "subtitle": "Referencia interactiva de la API: utiliza el botón «Autorizar» para autenticarte con una clave de API"
+  },
+  "mtls": {
+    "certificateSubject": "Asunto del certificado",
+    "scopes": "Ámbitos de aplicación"
+  },
+  "reviewStep": {
+    "configured": "Configurado",
+    "notConfigured": "No está configurado",
+    "actionPermanent": "Esta acción es permanente"
+  },
+  "adminUserStep": {
+    "adminEmail": "Correo electrónico del administrador",
+    "emailMustMatch": "Esta dirección de correo electrónico debe coincidir con la identidad de tu proveedor OIDC"
+  },
+  "authenticateStep": {
+    "findingToken": "Cómo encontrar tu token de configuración",
+    "setupToken": "Token de configuración"
+  },
+  "setupWizardPage": {
+    "setupProgress": "Progreso de la instalación"
+  },
+  "loginPage": {
+    "loadingProviders": "Cargando proveedores de inicio de sesión"
+  },
+  "scanDiagnostics": {
+    "errorMessage": "Mensaje de error",
+    "scannerOutput": "Salida del escáner (stderr / stdout)",
+    "rawJson": "JSON sin procesar del escáner"
+  },
+  "settingsPage": {
+    "title": "Configuración",
+    "telemetryPrivacy": "Telemetría y privacidad",
+    "description": "Controla qué datos compartes. Las cookies esenciales, necesarias para el funcionamiento del sitio web, no se pueden desactivar. Los cambios surten efecto de inmediato.",
+    "essentialRequired": "Cookies esenciales (obligatorias)",
+    "errorReporting": "Notificación de errores: nos ayuda a solucionar los fallos más rápidamente",
+    "performanceMonitoring": "Supervisión del rendimiento: Web Vitals y métricas de carga de la página",
+    "analytics": "Análisis: patrones de uso para mejorar el producto"
+  },
+  "consentBanner": {
+    "ariaLabel": "Consentimiento sobre el uso de cookies",
+    "title": "Valoramos tu privacidad",
+    "essential": "Esencial (siempre activo)",
+    "errorReporting": "Notificación de errores",
+    "performanceMonitoring": "Supervisión del rendimiento",
+    "analytics": "Análisis",
+    "hideDetails": "Ocultar detalles",
+    "customize": "Personalizar",
+    "rejectAll": "Rechazar todo",
+    "acceptAll": "Aceptar todo"
+  },
+  "releasesGpgKeys": {
+    "title": "Liberación de claves de firma",
+    "description": "Claves GPG utilizadas para verificar las firmas de las versiones de los proveedores. El estado se determina en función del umbral de alerta configurado.",
+    "loadError": "No se ha podido cargar el estado de la clave GPG.",
+    "noData": "No hay datos clave sobre la firma del contrato disponibles.",
+    "thTool": "Herramienta",
+    "thStatus": "Estado",
+    "thSource": "Fuente",
+    "thFingerprint": "Huella dactilar",
+    "thExpiry": "Caducidad",
+    "thLastRefresh": "Última actualización",
+    "expiredAgo": "caducado hace {{days}} días",
+    "days": "{{days}} d"
+  },
+  "scanFindingsModal": {
+    "title": "Resultados de la exploración",
+    "close": "cerrar",
+    "noData": "No hay datos de escaneo disponibles.",
+    "critical": "Crítico: {{count}}",
+    "high": "Enlaces: {{count}}",
+    "medium": "Enlace: {{count}}",
+    "low": "Mínima: {{count}}",
+    "downloadTooltip": "Descargar los resultados en formato CSV",
+    "exportCsv": "Exportar CSV",
+    "thSeverity": "Gravedad",
+    "thRuleId": "ID de la regla",
+    "thTitle": "Título",
+    "thResource": "Recurso",
+    "thFile": "Archivo",
+    "thResolution": "Resolución",
+    "parseError": "No se han podido analizar los resultados individuales de la salida del escáner.",
+    "hideRawJson": "Ocultar el JSON sin formato",
+    "showRawJson": "Mostrar JSON sin formato"
+  },
+  "storageMigration": {
+    "stepSelect": "Seleccionar origen y destino",
+    "stepReview": "Plan de revisión",
+    "stepExecute": "Ejecutar y supervisar",
+    "stepComplete": "Completo",
+    "backendLocal": "Sistema de archivos local",
+    "backendAzure": "Almacenamiento de blobs de Azure",
+    "backendS3": "Amazon S3",
+    "backendGcs": "Almacenamiento en la nube de Google",
+    "planError": "No se ha podido crear el plan de migración",
+    "startError": "No se ha podido iniciar la migración",
+    "cancelError": "No se ha podido cancelar la migración",
+    "sourceConfiguration": "Configuración de la fuente",
+    "targetConfiguration": "Configuración de destino",
+    "activeSuffix": " (Activo)",
+    "createNew": "+ Crear nueva configuración…",
+    "mustBeDifferent": "Las configuraciones de origen y destino deben ser diferentes.",
+    "migrationPlan": "Plan de migración",
+    "source": "Fuente",
+    "target": "Destino",
+    "totalArtifacts": "Total de artefactos",
+    "modules": "Módulos",
+    "providers": "Proveedores",
+    "estimatedSize": "Tamaño estimado",
+    "startWarning": "Al iniciar esta migración, se copiarán todos los artefactos del almacenamiento de origen al de destino. Esto puede tardar un tiempo, dependiendo del número y el tamaño de los artefactos.",
+    "inProgress": "Migración en curso",
+    "artifactsProgress": "{{migrated}} / Artefactos de «{{total}}»",
+    "failedCount": "{{count}} El/los artefacto(s) ha(n) fallado",
+    "cancelMigration": "Cancelar la migración",
+    "complete": "Migración completada",
+    "successDetail": "Se han migrado correctamente {{migrated}} de los artefactos de {{total}}.",
+    "failedToMigrate": "{{count}} No se han podido migrar algunos artefactos.",
+    "errorSuffix": " Error: {{error}}",
+    "failed": "Error en la migración",
+    "migratedBeforeFailure": "Se han migrado los artefactos de {{migrated}} y {{total}} antes de que se produjera el fallo.",
+    "wizardTitle": "Asistente para la migración de almacenamiento",
+    "done": "Hecho",
+    "cancel": "Cancelar",
+    "back": "Atrás",
+    "reviewPlanBtn": "Plan de revisión",
+    "startMigrationBtn": "Iniciar la migración"
+  },
+  "moduleActionsMenu": {
+    "moreActions": "Más acciones",
+    "moduleActions": "Acciones del módulo",
+    "publishNewVersion": "Publicar nueva versión",
+    "editDescription": "Editar descripción",
+    "deprecateModule": "Marcar el módulo como obsoleto",
+    "undeprecateModule": "Reactivar el módulo",
+    "deleteModule": "Eliminar módulo"
   },
   "setup": {
     "oidc": {

@@ -142,6 +142,11 @@
     "protocolSupport": "Supporto del protocollo di registro",
     "protocolDesc": "Piena compatibilità con il protocollo Terraform Registry v1: è possibile utilizzare questo registro direttamente nella CLI di Terraform e nelle configurazioni dei provider senza bisogno di plugin o proxy.",
     "viewApiDocs": "Visualizza la documentazione dell'API",
+    "searchScope": "Ambito della ricerca",
+    "apiChipModule": "API del Registro dei moduli",
+    "apiChipProvider": "API del Registro dei fornitori",
+    "apiChipDiscovery": "Individuazione dei servizi",
+    "apiChipAuth": "Autenticazione",
     "setupRequired": "Configurazione richiesta",
     "featureSetupRequired": "Configurazione delle funzionalità richiesta",
     "setupRequiredDesc": "Questo registro non è ancora stato configurato. Completa la procedura guidata di configurazione per impostare l'autenticazione, l'archiviazione e l'account amministratore iniziale.",
@@ -953,6 +958,7 @@
       "update": "Aggiornamento",
       "ariaTogglePlatforms": "Cambia piattaforma",
       "ariaToggleVersions": "Cambia versione",
+      "thArch": "Arco",
       "thFilename": "Nome file",
       "thVersion": "Versione",
       "thSyncedAt": "Sincronizzato alle",
@@ -1049,6 +1055,7 @@
       "chipDeprecated": "obsoleto",
       "tooltipDeleteVersion": "Elimina la versione e i relativi file binari dall'archivio",
       "ariaDeleteVersion": "Elimina versione",
+      "thArch": "Arco",
       "thFilename": "Nome file",
       "thStatus": "Stato",
       "noPlatformsSynced": "Non ci sono ancora piattaforme sincronizzate.",
@@ -1664,6 +1671,36 @@
       "showScanDetails": "Mostra i dettagli della scansione",
       "notScannedYet": "Non ancora scansionato"
     },
+    "scimProvisioning": {
+      "title": "Provisioning SCIM",
+      "description": "Gli endpoint SCIM 2.0 consentono ai provider di identità esterni di effettuare automaticamente il provisioning e il deprovisioning di utenti e gruppi.",
+      "configuration": "Configurazione",
+      "labelBaseUrl": "URL di base SCIM",
+      "helpBaseUrl": "Utilizza questo URL come URL del tenant nella configurazione SCIM del tuo provider di identità.",
+      "labelUsersEndpoint": "Utenti - Endpoint",
+      "labelGroupsEndpoint": "Endpoint dei gruppi",
+      "authentication": "Autenticazione",
+      "storeWarning": "Conserva la chiave API in un luogo sicuro. Essa garantisce pieno accesso alle operazioni di provisioning di utenti e gruppi.",
+      "supportedOperations": "Operazioni supportate"
+    },
+    "roles": {
+      "loadError": "Impossibile caricare i ruoli. Riprovare.",
+      "title": "Ruoli e autorizzazioni",
+      "subtitle": "Visualizza i ruoli disponibili e i relativi ambiti di autorizzazione. I ruoli di sistema sono predefiniti e non possono essere modificati.",
+      "availableScopesReference": "Riferimento agli oscilloscopi disponibili",
+      "scopesDefine": "Gli ambiti definiscono quali azioni un ruolo può eseguire nel registro.",
+      "thScope": "Ambito di applicazione",
+      "thDescription": "Descrizione",
+      "roleTemplates": "Modelli di ruolo",
+      "clickRole": "Clicca su un ruolo per visualizzarne tutti i dettagli.",
+      "noRoles": "Nessun ruolo trovato.",
+      "systemChip": "Sistema",
+      "scopeCount_one": "{{count}} ambito",
+      "scopeCount_other": "{{count}} campi di applicazione",
+      "assignedScopes": "Ambiti assegnati:",
+      "permissionsByCategory": "Autorizzazioni per categoria:",
+      "fullAccessViaAdmin": "Accesso completo (tramite amministratore)"
+    },
     "dashboard": {
       "loadError": "Impossibile caricare le statistiche della dashboard.",
       "loadErrorShort": "Impossibile caricare la dashboard",
@@ -1841,6 +1878,235 @@
     "yes": "Sì",
     "no": "No",
     "sensitive": "Delicato"
+  },
+  "usageExample": {
+    "title": "Esempio di utilizzo",
+    "toolAria": "Strumento",
+    "copied": "Copiato!",
+    "copyExample": "Esempio di copia",
+    "tabSource": "Fonte",
+    "tabWithInputs": "Con i dati richiesti"
+  },
+  "webhookEvents": {
+    "title": "Eventi Webhook",
+    "toggleAria": "Attiva/disattiva gli eventi webhook",
+    "noEvents": "Non sono stati registrati ancora eventi webhook.",
+    "showingCount": "Vengono visualizzati 10 eventi su {{total}}",
+    "refresh": "Aggiorna"
+  },
+  "repositoryBrowser": {
+    "searchPlaceholder": "Cerca nei repository...",
+    "refresh": "Aggiorna",
+    "refreshAria": "Aggiorna i repository",
+    "selected": "Selezionato",
+    "protected": "Protetto"
+  },
+  "advisoryBanner": {
+    "title": "Avvisi di sicurezza",
+    "dismiss": "Ignora per questa sessione"
+  },
+  "commandPalette": {
+    "title": "Palette dei comandi",
+    "searchPlaceholder": "Cerca pagine, moduli, provider…"
+  },
+  "devUserSwitcher": {
+    "title": "Modalità di sviluppo: Cambia utente",
+    "selectUser": "Seleziona utente"
+  },
+  "markdownRenderer": {
+    "ariaLabel": "Documentazione tradotta"
+  },
+  "versionDetailsPanel": {
+    "title": "Dettagli sulla versione{{version}}",
+    "published": "Pubblicato:",
+    "na": "N/A",
+    "downloads": "Download:",
+    "publishedBy": "Pubblicato da:",
+    "deprecated": "Obsoleto",
+    "deprecatedOn": "su {{date}}",
+    "replacement": "Sostituzione:",
+    "removingDeprecation": "Rimozione della segnalazione di obsolescenza...",
+    "removeDeprecation": "Rimuovi il tag \"deprecated\"",
+    "deprecateVersion": "Versione obsoleta",
+    "deleteThisVersion": "Elimina questa versione"
+  },
+  "policyResultsPanel": {
+    "title": "Valutazione delle politiche"
+  },
+  "providerDocsSidebar": {
+    "filterPlaceholder": "Filtra i documenti..."
+  },
+  "registryItemCard": {
+    "deprecated": "Obsoleto",
+    "viewDetails": "Visualizza i dettagli",
+    "noDescription": "Nessuna descrizione disponibile",
+    "ariaAction": "{{label}} per {{title}}"
+  },
+  "scmRepositoryPanel": {
+    "title": "Repository sorgente"
+  },
+  "securityScanPanel": {
+    "title": "Scansione di sicurezza"
+  },
+  "versionSelector": {
+    "showDeprecated": "Mostra elementi obsoleti",
+    "showDeprecatedAria": "Mostra le versioni obsolete",
+    "allDeprecated": "Tutte le versioni di questo modulo sono obsolete."
+  },
+  "errorBoundary": {
+    "title": "Si è verificato un errore",
+    "description": "Si è verificato un errore imprevisto. Puoi riprovare o ricaricare la pagina.",
+    "tryAgain": "Riprova",
+    "reloadPage": "Aggiorna la pagina"
+  },
+  "quotaUsageChart": {
+    "storage": "Archiviazione",
+    "publishesPerDay": "Pubblicazioni / Giorno",
+    "downloadsPerDay": "Download / Giorno"
+  },
+  "helpPanel": {
+    "closeAria": "Chiudi il pannello di aiuto"
+  },
+  "layout": {
+    "mainNavigation": "Navigazione principale"
+  },
+  "apiDocumentation": {
+    "title": "Documentazione Swagger dell'API",
+    "subtitle": "Guida interattiva alle API — utilizzare il pulsante \"Autorizza\" per effettuare l'autenticazione con una chiave API"
+  },
+  "mtls": {
+    "certificateSubject": "Oggetto del certificato",
+    "scopes": "Campi di applicazione"
+  },
+  "reviewStep": {
+    "configured": "Configurato",
+    "notConfigured": "Non configurato",
+    "actionPermanent": "Questa azione è definitiva"
+  },
+  "adminUserStep": {
+    "adminEmail": "E-mail dell'amministratore",
+    "emailMustMatch": "L'indirizzo e-mail deve corrispondere all'identità del tuo provider OIDC"
+  },
+  "authenticateStep": {
+    "findingToken": "Come trovare il proprio token di configurazione",
+    "setupToken": "Token di configurazione"
+  },
+  "setupWizardPage": {
+    "setupProgress": "Stato dell'installazione"
+  },
+  "loginPage": {
+    "loadingProviders": "Caricamento dei provider di accesso"
+  },
+  "scanDiagnostics": {
+    "errorMessage": "Messaggio di errore",
+    "scannerOutput": "Output dello scanner (stderr / stdout)",
+    "rawJson": "JSON grezzo dello scanner"
+  },
+  "settingsPage": {
+    "title": "Impostazioni",
+    "telemetryPrivacy": "Telemetria e privacy",
+    "description": "Decidi tu quali dati condividere. I cookie essenziali, necessari per il funzionamento del sito, non possono essere disattivati. Le modifiche hanno effetto immediato.",
+    "essentialRequired": "Cookie essenziali (obbligatori)",
+    "errorReporting": "Segnalazione degli errori: ci aiuta a risolvere i bug più rapidamente",
+    "performanceMonitoring": "Monitoraggio delle prestazioni — Web Vitals e metriche relative al caricamento delle pagine",
+    "analytics": "Analisi dei dati — modelli di utilizzo per migliorare il prodotto"
+  },
+  "consentBanner": {
+    "ariaLabel": "Consenso all'uso dei cookie",
+    "title": "La tua privacy è importante per noi",
+    "essential": "Essenziale (sempre attivo)",
+    "errorReporting": "Segnalazione degli errori",
+    "performanceMonitoring": "Monitoraggio delle prestazioni",
+    "analytics": "Analisi",
+    "hideDetails": "Nascondi i dettagli",
+    "customize": "Personalizza",
+    "rejectAll": "Rifiuta tutto",
+    "acceptAll": "Accetta tutto"
+  },
+  "releasesGpgKeys": {
+    "title": "Rilascio delle chiavi di firma",
+    "description": "Chiavi GPG utilizzate per verificare le firme delle versioni upstream. Lo stato viene determinato in base alla soglia di avviso configurata.",
+    "loadError": "Impossibile caricare lo stato della chiave GPG.",
+    "noData": "Non sono disponibili dati chiave relativi alla firma del rilascio.",
+    "thTool": "Strumento",
+    "thStatus": "Stato",
+    "thSource": "Fonte",
+    "thFingerprint": "Impronta digitale",
+    "thExpiry": "Scadenza",
+    "thLastRefresh": "Ultimo aggiornamento",
+    "expiredAgo": "scaduto {{days}} giorni fa",
+    "days": "{{days}} d"
+  },
+  "scanFindingsModal": {
+    "title": "Risultati della scansione",
+    "close": "chiudi",
+    "noData": "Non sono disponibili dati di scansione.",
+    "critical": "Importante: {{count}}",
+    "high": "Alta: {{count}}",
+    "medium": "Link: {{count}}",
+    "low": "Minimo: {{count}}",
+    "downloadTooltip": "Scarica i risultati in formato CSV",
+    "exportCsv": "Esporta in CSV",
+    "thSeverity": "Gravità",
+    "thRuleId": "ID regola",
+    "thTitle": "Titolo",
+    "thResource": "Risorsa",
+    "thFile": "File",
+    "thResolution": "Risoluzione",
+    "parseError": "Impossibile analizzare i singoli risultati dell'output dello scanner.",
+    "hideRawJson": "Nascondi il JSON grezzo",
+    "showRawJson": "Mostra JSON non formattato"
+  },
+  "storageMigration": {
+    "stepSelect": "Seleziona origine e destinazione",
+    "stepReview": "Piano di revisione",
+    "stepExecute": "Esegui e monitora",
+    "stepComplete": "Completo",
+    "backendLocal": "Sistema di file locale",
+    "backendAzure": "Azure Blob Storage",
+    "backendS3": "Amazon S3",
+    "backendGcs": "Google Cloud Storage",
+    "planError": "Impossibile creare il piano di migrazione",
+    "startError": "Impossibile avviare la migrazione",
+    "cancelError": "Impossibile annullare la migrazione",
+    "sourceConfiguration": "Configurazione della fonte",
+    "targetConfiguration": "Configurazione di destinazione",
+    "activeSuffix": " (Attivo)",
+    "createNew": "+ Crea una nuova configurazione…",
+    "mustBeDifferent": "Le configurazioni di origine e di destinazione devono essere diverse.",
+    "migrationPlan": "Piano di migrazione",
+    "source": "Fonte",
+    "target": "Destinatario",
+    "totalArtifacts": "Totale reperti",
+    "modules": "Moduli",
+    "providers": "Fornitori",
+    "estimatedSize": "Dimensioni stimate",
+    "startWarning": "L'avvio di questa migrazione comporterà la copia di tutti gli artefatti dall'archivio di origine a quello di destinazione. L'operazione potrebbe richiedere un po' di tempo, a seconda del numero e delle dimensioni degli artefatti.",
+    "inProgress": "Migrazione in corso",
+    "artifactsProgress": "{{migrated}} / Artefatti di {{total}}",
+    "failedCount": "{{count}} errore/i nell'artefatto",
+    "cancelMigration": "Annulla migrazione",
+    "complete": "Migrazione completata",
+    "successDetail": "Sono stati migrati con successo {{migrated}} artefatti da {{total}}.",
+    "failedToMigrate": "{{count}} La migrazione di uno o più artefatti non è andata a buon fine.",
+    "errorSuffix": " Errore: {{error}}",
+    "failed": "Migrazione non riuscita",
+    "migratedBeforeFailure": "{{migrated}}, contenente gli artefatti di {{total}}, è stato migrato prima dell'interruzione del servizio.",
+    "wizardTitle": "Procedura guidata per la migrazione dell'archiviazione",
+    "done": "Fatto",
+    "cancel": "Annulla",
+    "back": "Indietro",
+    "reviewPlanBtn": "Piano di revisione",
+    "startMigrationBtn": "Avvia la migrazione"
+  },
+  "moduleActionsMenu": {
+    "moreActions": "Altre azioni",
+    "moduleActions": "Azioni del modulo",
+    "publishNewVersion": "Pubblica la nuova versione",
+    "editDescription": "Modifica la descrizione",
+    "deprecateModule": "Deprecare il modulo",
+    "undeprecateModule": "Rimuovere la segnalazione di obsolescenza dal modulo",
+    "deleteModule": "Elimina modulo"
   },
   "setup": {
     "oidc": {
