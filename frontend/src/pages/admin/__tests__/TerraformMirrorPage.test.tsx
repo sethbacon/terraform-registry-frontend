@@ -603,4 +603,44 @@ describe('TerraformMirrorPage', () => {
     await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument())
     expect(updateMirrorMock).not.toHaveBeenCalled()
   })
+
+  it('shows requires approval switch in create dialog', async () => {
+    listTerraformMirrorConfigsMock.mockResolvedValue({ configs: [] })
+    renderPage()
+    await waitFor(() => expect(screen.getByRole('button', { name: /add/i })).toBeInTheDocument())
+    await userEvent.click(screen.getByRole('button', { name: /add/i }))
+    await waitFor(() => expect(screen.getByRole('dialog')).toBeInTheDocument())
+    expect(screen.getByText('Require approval for new versions')).toBeInTheDocument()
+  })
+
+  it('shows requires approval switch in edit dialog', async () => {
+    listTerraformMirrorConfigsMock.mockResolvedValue({ configs: fakeConfigs })
+    renderPage()
+    await waitFor(() => expect(screen.getAllByText('terraform').length).toBeGreaterThan(0))
+    await userEvent.click(screen.getByRole('button', { name: /edit mirror/i }))
+    await waitFor(() => expect(screen.getByRole('dialog')).toBeInTheDocument())
+    expect(screen.getByText('Require approval for new versions')).toBeInTheDocument()
+  })
+
+  it('shows approval status chip in versions dialog for pending versions', async () => {
+    listTerraformMirrorConfigsMock.mockResolvedValue({ configs: fakeConfigs })
+    listVersionsMock.mockResolvedValue({
+      versions: [
+        {
+          id: 'v1',
+          version: '1.5.0',
+          sync_status: 'synced',
+          is_latest: false,
+          is_deprecated: false,
+          synced_at: '2025-06-01T00:00:00Z',
+          approval_status: 'pending_approval',
+        },
+      ],
+    })
+    renderPage()
+    await waitFor(() => expect(screen.getAllByText('terraform').length).toBeGreaterThan(0))
+    await userEvent.click(screen.getByRole('button', { name: /view details/i }))
+    await waitFor(() => expect(screen.getByText('1.5.0')).toBeInTheDocument())
+    expect(screen.getByText('Pending Approval')).toBeInTheDocument()
+  })
 })

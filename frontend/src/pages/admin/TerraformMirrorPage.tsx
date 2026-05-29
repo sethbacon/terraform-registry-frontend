@@ -170,6 +170,21 @@ const VersionRow: React.FC<{
           <SyncStatusChip status={version.sync_status} />
         </TableCell>
         <TableCell>
+          {version.approval_status && (
+            <Chip
+              label={t(`admin.versionApprovals.status.${version.approval_status}`)}
+              size="small"
+              color={
+                version.approval_status === 'approved'
+                  ? 'success'
+                  : version.approval_status === 'rejected'
+                    ? 'error'
+                    : 'warning'
+              }
+            />
+          )}
+        </TableCell>
+        <TableCell>
           {version.synced_at ? new Date(version.synced_at).toLocaleString() : '—'}
         </TableCell>
         <TableCell align="right">
@@ -189,7 +204,7 @@ const VersionRow: React.FC<{
         </TableCell>
       </TableRow>
       <TableRow>
-        <TableCell colSpan={5} sx={{ pb: 0, pt: 0 }}>
+        <TableCell colSpan={6} sx={{ pb: 0, pt: 0 }}>
           <Collapse in={open} unmountOnExit>
             <Box sx={{ m: 1, mb: 2 }}>
               {loadingPlatforms ? (
@@ -461,6 +476,7 @@ const emptyCreate = (): CreateTerraformMirrorConfigRequest => ({
   stable_only: false,
   enabled: true,
   sync_interval_hours: 24,
+  requires_approval: false,
 })
 
 // ---------------------------------------------------------------------------
@@ -581,6 +597,7 @@ const TerraformMirrorPage: React.FC = () => {
       gpg_verify: config.gpg_verify,
       stable_only: config.stable_only,
       sync_interval_hours: config.sync_interval_hours,
+      requires_approval: config.requires_approval ?? false,
     })
   }
 
@@ -919,6 +936,20 @@ const TerraformMirrorPage: React.FC = () => {
                     }
                     label={t('admin.terraformMirror.labelStableOnly')}
                   />
+                  <FormControlLabel
+                    control={
+                      <Switch
+                        checked={createForm.requires_approval ?? false}
+                        onChange={(e) =>
+                          setCreateForm((prev) => ({
+                            ...prev,
+                            requires_approval: e.target.checked,
+                          }))
+                        }
+                      />
+                    }
+                    label={t('admin.terraformMirror.labelRequiresApproval')}
+                  />
                 </Box>
                 <TextField
                   label={t('admin.terraformMirror.labelVersionFilter')}
@@ -1082,6 +1113,20 @@ const TerraformMirrorPage: React.FC = () => {
                     }
                     label={t('admin.terraformMirror.labelStableOnly')}
                   />
+                  <FormControlLabel
+                    control={
+                      <Switch
+                        checked={editForm.requires_approval ?? false}
+                        onChange={(e) =>
+                          setEditForm((prev) => ({
+                            ...prev,
+                            requires_approval: e.target.checked,
+                          }))
+                        }
+                      />
+                    }
+                    label={t('admin.terraformMirror.labelRequiresApproval')}
+                  />
                 </Box>
                 <TextField
                   label={t('admin.terraformMirror.labelVersionFilter')}
@@ -1182,6 +1227,7 @@ const TerraformMirrorPage: React.FC = () => {
                           <TableCell width={48} />
                           <TableCell>{t('admin.terraformMirror.thVersion')}</TableCell>
                           <TableCell>{t('admin.terraformMirror.thStatus')}</TableCell>
+                          <TableCell>{t('admin.terraformMirror.thApproval')}</TableCell>
                           <TableCell>{t('admin.terraformMirror.thSyncedAt')}</TableCell>
                           <TableCell align="right">
                             {t('admin.terraformMirror.thActions')}

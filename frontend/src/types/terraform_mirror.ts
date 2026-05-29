@@ -18,6 +18,8 @@ export interface TerraformMirrorConfig {
   gpg_verify: boolean
   stable_only: boolean
   sync_interval_hours: number
+  requires_approval: boolean
+  auto_approve_rules?: string | null // JSON: AutoApproveRules
   last_sync_at?: string | null
   last_sync_status?: string | null
   last_sync_error?: string | null
@@ -56,6 +58,8 @@ export interface TerraformVersion {
   sync_status: string
   sync_error?: string | null
   synced_at?: string | null
+  /** pending_approval | approved | rejected | null (not subject to approval) */
+  approval_status?: 'pending_approval' | 'approved' | 'rejected' | null
   created_at: string
   updated_at: string
   platforms?: TerraformVersionPlatform[]
@@ -132,6 +136,7 @@ export interface CreateTerraformMirrorConfigRequest {
   stable_only?: boolean
   enabled?: boolean
   sync_interval_hours?: number
+  requires_approval?: boolean
 }
 
 export interface UpdateTerraformMirrorConfigRequest {
@@ -147,6 +152,7 @@ export interface UpdateTerraformMirrorConfigRequest {
   gpg_verify?: boolean
   stable_only?: boolean
   sync_interval_hours?: number
+  requires_approval?: boolean
 }
 
 // ---- UI helpers ----

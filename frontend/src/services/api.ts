@@ -1755,6 +1755,71 @@ class ApiClient {
     const response = await this.client.post('/api/v1/admin/advisories/poll')
     return response.data
   }
+
+  // ============================================================================
+  // Version Approvals
+  // ============================================================================
+
+  async listVersionApprovals(params?: {
+    type?: 'provider' | 'terraform'
+    status?: 'pending_approval' | 'approved' | 'rejected'
+    config_id?: string
+    limit?: number
+    offset?: number
+  }): Promise<import('../types/version_approval').VersionApprovalListResponse> {
+    const queryParams: Record<string, string | number> = {}
+    if (params?.type) queryParams.type = params.type
+    if (params?.status) queryParams.status = params.status
+    if (params?.config_id) queryParams.config_id = params.config_id
+    if (params?.limit) queryParams.limit = params.limit
+    if (params?.offset) queryParams.offset = params.offset
+    const response = await this.client.get('/api/v1/admin/version-approvals', {
+      params: queryParams,
+    })
+    return response.data
+  }
+
+  async approveVersion(id: string, data?: { notes?: string }): Promise<void> {
+    await this.client.put(`/api/v1/admin/version-approvals/${id}/approve`, data ?? {})
+  }
+
+  async rejectVersion(id: string, data?: { notes?: string }): Promise<void> {
+    await this.client.put(`/api/v1/admin/version-approvals/${id}/reject`, data ?? {})
+  }
+
+  async bulkApproveVersions(
+    ids: string[],
+    notes?: string,
+  ): Promise<import('../types/version_approval').VersionApprovalBulkResponse> {
+    const response = await this.client.post('/api/v1/admin/version-approvals/bulk-approve', {
+      ids,
+      notes,
+    })
+    return response.data
+  }
+
+  async bulkRejectVersions(
+    ids: string[],
+    notes?: string,
+  ): Promise<import('../types/version_approval').VersionApprovalBulkResponse> {
+    const response = await this.client.post('/api/v1/admin/version-approvals/bulk-reject', {
+      ids,
+      notes,
+    })
+    return response.data
+  }
+
+  async getVersionApprovalEvents(
+    id: string,
+  ): Promise<import('../types/version_approval').VersionApprovalEvent[]> {
+    const response = await this.client.get(`/api/v1/admin/version-approvals/${id}/events`)
+    return Array.isArray(response.data) ? response.data : []
+  }
+
+  async getPendingVersionApprovalCount(): Promise<{ count: number }> {
+    const response = await this.client.get('/api/v1/admin/version-approvals/pending-count')
+    return response.data
+  }
 }
 
 const apiClient = new ApiClient()

@@ -107,6 +107,21 @@ const VersionPlatformRow: React.FC<{ version: MirroredProviderVersion }> = ({ ve
             {version.upstream_version}
           </Typography>
         </TableCell>
+        <TableCell>
+          {version.approval_status && (
+            <Chip
+              label={t(`admin.versionApprovals.status.${version.approval_status}`)}
+              size="small"
+              color={
+                version.approval_status === 'approved'
+                  ? 'success'
+                  : version.approval_status === 'rejected'
+                    ? 'error'
+                    : 'warning'
+              }
+            />
+          )}
+        </TableCell>
         <TableCell>{new Date(version.synced_at).toLocaleString()}</TableCell>
         <TableCell>
           {version.shasum_verified ? (
@@ -125,7 +140,7 @@ const VersionPlatformRow: React.FC<{ version: MirroredProviderVersion }> = ({ ve
         <TableCell>{platforms.length}</TableCell>
       </TableRow>
       <TableRow>
-        <TableCell colSpan={6} sx={{ pb: 0, pt: 0 }}>
+        <TableCell colSpan={7} sx={{ pb: 0, pt: 0 }}>
           <Collapse in={open} unmountOnExit>
             <Box sx={{ ml: 4, mb: 1 }}>
               <Table size="small">
@@ -243,6 +258,7 @@ const ProviderRow: React.FC<{ provider: MirroredProvider }> = ({ provider }) => 
                     <TableRow>
                       <TableCell width={40} />
                       <TableCell>{t('admin.mirrors.thVersion')}</TableCell>
+                      <TableCell>{t('admin.mirrors.thStatus')}</TableCell>
                       <TableCell>{t('admin.mirrors.thSyncedAt')}</TableCell>
                       <TableCell>{t('admin.mirrors.thShasum')}</TableCell>
                       <TableCell>GPG</TableCell>
@@ -296,6 +312,7 @@ const MirrorsPage: React.FC = () => {
     version_filter: '',
     enabled: true,
     sync_interval_hours: 24,
+    requires_approval: false,
   })
 
   // For the filters input
@@ -410,6 +427,7 @@ const MirrorsPage: React.FC = () => {
       platform_filter: platformFilterInput.length > 0 ? platformFilterInput : undefined,
       enabled: formData.enabled,
       sync_interval_hours: formData.sync_interval_hours,
+      requires_approval: formData.requires_approval,
     }
     updateMutation.mutate({ id: editingMirror.id, data })
   }
@@ -469,6 +487,7 @@ const MirrorsPage: React.FC = () => {
       version_filter: '',
       enabled: true,
       sync_interval_hours: 24,
+      requires_approval: false,
     })
     setNamespaceFilterInput('')
     setProviderFilterInput('')
@@ -485,6 +504,7 @@ const MirrorsPage: React.FC = () => {
       upstream_registry_url: mirror.upstream_registry_url,
       enabled: mirror.enabled,
       sync_interval_hours: mirror.sync_interval_hours,
+      requires_approval: mirror.requires_approval ?? false,
     })
     setNamespaceFilterInput(parsed.namespaceFilters.join(', '))
     setProviderFilterInput(parsed.providerFilters.join(', '))
@@ -953,6 +973,18 @@ const MirrorsPage: React.FC = () => {
                     />
                   }
                   label={t('admin.mirrors.enabled')}
+                />
+
+                <FormControlLabel
+                  control={
+                    <Switch
+                      checked={formData.requires_approval ?? false}
+                      onChange={(e) =>
+                        setFormData({ ...formData, requires_approval: e.target.checked })
+                      }
+                    />
+                  }
+                  label={t('admin.mirrors.requiresApproval')}
                 />
               </Box>
             </DialogContent>
