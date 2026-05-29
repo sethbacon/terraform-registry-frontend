@@ -1,6 +1,13 @@
 <!-- markdownlint-disable MD013 MD024 MD041 -->
 # Changelog
 
+## [2.3.0](https://github.com/sethbacon/terraform-registry-frontend/compare/v2.2.0...v2.3.0) (2026-05-29)
+
+
+### Features
+
+* complete i18n translation coverage for all user-facing strings ([#349](https://github.com/sethbacon/terraform-registry-frontend/issues/349)) ([48157aa](https://github.com/sethbacon/terraform-registry-frontend/commit/48157aafbc9e8e12c482961030ef0b10996a3994))
+
 ## [2.2.0](https://github.com/sethbacon/terraform-registry-frontend/compare/v2.1.0...v2.2.0) (2026-05-28)
 
 
