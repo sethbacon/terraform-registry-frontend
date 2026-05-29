@@ -142,6 +142,11 @@
     "protocolSupport": "レジストリプロトコルのサポート",
     "protocolDesc": "Terraform Registry Protocol v1 と完全に互換性があります。プラグインやプロキシを一切使用せずに、Terraform CLI やプロバイダーの設定でこのレジストリを直接利用できます。",
     "viewApiDocs": "APIドキュメントを表示",
+    "searchScope": "検索範囲",
+    "apiChipModule": "モジュール登録API",
+    "apiChipProvider": "プロバイダー登録API",
+    "apiChipDiscovery": "サービスディスカバリー",
+    "apiChipAuth": "認証",
     "setupRequired": "セットアップが必要です",
     "featureSetupRequired": "必要な機能設定",
     "setupRequiredDesc": "このレジストリはまだ設定されていません。セットアップウィザードを完了して、認証、ストレージ、および初期管理者アカウントを設定してください。",
@@ -953,6 +958,7 @@
       "update": "更新",
       "ariaTogglePlatforms": "プラットフォームを切り替える",
       "ariaToggleVersions": "バージョンを切り替える",
+      "thArch": "アーチ",
       "thFilename": "ファイル名",
       "thVersion": "バージョン",
       "thSyncedAt": "同期日時",
@@ -1049,6 +1055,7 @@
       "chipDeprecated": "非推奨",
       "tooltipDeleteVersion": "ストレージからバージョンとそのバイナリを削除する",
       "ariaDeleteVersion": "バージョンを削除",
+      "thArch": "アーチ",
       "thFilename": "ファイル名",
       "thStatus": "ステータス",
       "noPlatformsSynced": "まだ同期されたプラットフォームはありません。",
@@ -1664,6 +1671,36 @@
       "showScanDetails": "スキャンの詳細を表示",
       "notScannedYet": "まだスキャンされていません"
     },
+    "scimProvisioning": {
+      "title": "SCIMのプロビジョニング",
+      "description": "SCIM 2.0 エンドポイントを使用すると、外部のIDプロバイダーがユーザーやグループの自動プロビジョニングおよびデプロビジョニングを行うことができます。",
+      "configuration": "設定",
+      "labelBaseUrl": "SCIM ベース URL",
+      "helpBaseUrl": "これを、IDプロバイダーのSCIM設定におけるテナントURLとして使用してください。",
+      "labelUsersEndpoint": "ユーザーエンドポイント",
+      "labelGroupsEndpoint": "グループのエンドポイント",
+      "authentication": "認証",
+      "storeWarning": "APIキーは安全に保管してください。このキーには、ユーザーおよびグループのプロビジョニングに関するすべてのアクセス権限が含まれています。",
+      "supportedOperations": "対応機能"
+    },
+    "roles": {
+      "loadError": "ロールの読み込みに失敗しました。もう一度お試しください。",
+      "title": "役割と権限",
+      "subtitle": "利用可能なロールとその関連する権限範囲を確認します。システムロールはあらかじめ定義されており、変更することはできません。",
+      "availableScopesReference": "利用可能なスコープのリファレンス",
+      "scopesDefine": "スコープは、ロールがレジストリ内で実行できるアクションを定義します。",
+      "thScope": "適用範囲",
+      "thDescription": "説明",
+      "roleTemplates": "役割テンプレート",
+      "clickRole": "役割をクリックすると、その詳細な範囲を確認できます。",
+      "noRoles": "該当する役割が見つかりませんでした。",
+      "systemChip": "システム",
+      "scopeCount_one": "{{count}} 範囲",
+      "scopeCount_other": "{{count}} スコープ",
+      "assignedScopes": "適用範囲：",
+      "permissionsByCategory": "カテゴリ別の権限：",
+      "fullAccessViaAdmin": "完全アクセス権（管理者経由）"
+    },
     "dashboard": {
       "loadError": "ダッシュボードの統計データを読み込めませんでした。",
       "loadErrorShort": "ダッシュボードの読み込みに失敗しました",
@@ -1841,6 +1878,235 @@
     "yes": "はい",
     "no": "いいえ",
     "sensitive": "デリケート"
+  },
+  "usageExample": {
+    "title": "使用例",
+    "toolAria": "ツール",
+    "copied": "コピーしました！",
+    "copyExample": "コピーの例",
+    "tabSource": "出典",
+    "tabWithInputs": "必要な入力項目"
+  },
+  "webhookEvents": {
+    "title": "Webhookイベント",
+    "toggleAria": "Webhookイベントのオン/オフを切り替える",
+    "noEvents": "まだウェブフックイベントは記録されていません。",
+    "showingCount": "{{total}}のイベントを10件表示中",
+    "refresh": "更新"
+  },
+  "repositoryBrowser": {
+    "searchPlaceholder": "リポジトリを検索...",
+    "refresh": "更新",
+    "refreshAria": "リポジトリを更新する",
+    "selected": "選択済み",
+    "protected": "非公開"
+  },
+  "advisoryBanner": {
+    "title": "セキュリティ情報",
+    "dismiss": "このセッションを終了する"
+  },
+  "commandPalette": {
+    "title": "コマンドパレット",
+    "searchPlaceholder": "ページ、モジュール、プロバイダーを検索…"
+  },
+  "devUserSwitcher": {
+    "title": "開発モード：ユーザーを切り替える",
+    "selectUser": "ユーザーを選択"
+  },
+  "markdownRenderer": {
+    "ariaLabel": "作成済みのドキュメント"
+  },
+  "versionDetailsPanel": {
+    "title": "バージョン{{version}}の詳細",
+    "published": "公開日：",
+    "na": "該当なし",
+    "downloads": "ダウンロード：",
+    "publishedBy": "発行元：",
+    "deprecated": "非推奨",
+    "deprecatedOn": "{{date}}にて",
+    "replacement": "交換：",
+    "removingDeprecation": "非推奨の解除...",
+    "removeDeprecation": "非推奨の指定を解除する",
+    "deprecateVersion": "非推奨バージョン",
+    "deleteThisVersion": "このバージョンを削除"
+  },
+  "policyResultsPanel": {
+    "title": "政策評価"
+  },
+  "providerDocsSidebar": {
+    "filterPlaceholder": "ドキュメントをフィルタリング..."
+  },
+  "registryItemCard": {
+    "deprecated": "非推奨",
+    "viewDetails": "詳細を見る",
+    "noDescription": "説明文はありません",
+    "ariaAction": "{{label}} {{title}} 向け"
+  },
+  "scmRepositoryPanel": {
+    "title": "ソースリポジトリ"
+  },
+  "securityScanPanel": {
+    "title": "セキュリティスキャン"
+  },
+  "versionSelector": {
+    "showDeprecated": "非推奨を表示",
+    "showDeprecatedAria": "非推奨のバージョンを表示",
+    "allDeprecated": "このモジュールのすべてのバージョンは非推奨となっています。"
+  },
+  "errorBoundary": {
+    "title": "何か問題が発生しました",
+    "description": "予期せぬエラーが発生しました。もう一度試すか、ページを再読み込みしてください。",
+    "tryAgain": "もう一度試す",
+    "reloadPage": "ページを再読み込み"
+  },
+  "quotaUsageChart": {
+    "storage": "ストレージ",
+    "publishesPerDay": "1日あたりの投稿数",
+    "downloadsPerDay": "1日あたりのダウンロード数"
+  },
+  "helpPanel": {
+    "closeAria": "ヘルプパネルを閉じる"
+  },
+  "layout": {
+    "mainNavigation": "メインナビゲーション"
+  },
+  "apiDocumentation": {
+    "title": "API Swagger ドキュメント",
+    "subtitle": "インタラクティブなAPIリファレンス — 「認証」ボタンを使用して、APIキーで認証を行ってください"
+  },
+  "mtls": {
+    "certificateSubject": "証明書のサブジェクト",
+    "scopes": "適用範囲"
+  },
+  "reviewStep": {
+    "configured": "設定済み",
+    "notConfigured": "設定されていません",
+    "actionPermanent": "この操作は元に戻せません"
+  },
+  "adminUserStep": {
+    "adminEmail": "管理者用メールアドレス",
+    "emailMustMatch": "このメールアドレスは、OIDCプロバイダーのIDと一致している必要があります"
+  },
+  "authenticateStep": {
+    "findingToken": "セットアップトークンの確認",
+    "setupToken": "トークンの設定"
+  },
+  "setupWizardPage": {
+    "setupProgress": "セットアップの進捗状況"
+  },
+  "loginPage": {
+    "loadingProviders": "サインインプロバイダーを読み込んでいます"
+  },
+  "scanDiagnostics": {
+    "errorMessage": "エラーメッセージ",
+    "scannerOutput": "スキャナーの出力（stderr / stdout）",
+    "rawJson": "スキャナーの生のJSONデータ"
+  },
+  "settingsPage": {
+    "title": "設定",
+    "telemetryPrivacy": "テレメトリとプライバシー",
+    "description": "共有するデータを管理してください。サイトの機能に不可欠な必須クッキーは無効にすることはできません。変更は直ちに反映されます。",
+    "essentialRequired": "必須のクッキー（必須）",
+    "errorReporting": "エラー報告 — バグの早期修正に役立ちます",
+    "performanceMonitoring": "パフォーマンスの監視 — Web Vitals とページ読み込み指標",
+    "analytics": "アナリティクス — 製品改善に向けた利用傾向"
+  },
+  "consentBanner": {
+    "ariaLabel": "クッキーに関する同意",
+    "title": "お客様のプライバシーを尊重いたします",
+    "essential": "必須（常時稼働）",
+    "errorReporting": "エラー報告",
+    "performanceMonitoring": "パフォーマンス監視",
+    "analytics": "分析",
+    "hideDetails": "詳細を非表示にする",
+    "customize": "カスタマイズ",
+    "rejectAll": "すべて拒否",
+    "acceptAll": "すべて受け入れる"
+  },
+  "releasesGpgKeys": {
+    "title": "署名鍵の公開",
+    "description": "アップストリームのリリース署名を検証するために使用されるGPG鍵。ステータスは、設定された警告閾値に基づいて判定されます。",
+    "loadError": "GPGキーの状態を読み込めませんでした。",
+    "noData": "リリース署名キーのデータは利用できません。",
+    "thTool": "ツール",
+    "thStatus": "ステータス",
+    "thSource": "出典",
+    "thFingerprint": "指紋",
+    "thExpiry": "有効期限",
+    "thLastRefresh": "最終更新日時",
+    "expiredAgo": "{{days}}日前に期限切れ",
+    "days": "{{days}} d"
+  },
+  "scanFindingsModal": {
+    "title": "スキャン結果",
+    "close": "閉じる",
+    "noData": "スキャンデータはありません。",
+    "critical": "重要: {{count}}",
+    "high": "詳細はこちら：{{count}}",
+    "medium": "Medium：{{count}}",
+    "low": "低：{{count}}",
+    "downloadTooltip": "調査結果をCSV形式でダウンロード",
+    "exportCsv": "CSVをエクスポート",
+    "thSeverity": "深刻度",
+    "thRuleId": "ルールID",
+    "thTitle": "タイトル",
+    "thResource": "リソース",
+    "thFile": "ファイル",
+    "thResolution": "決議",
+    "parseError": "スキャナーの出力から個々の結果を解析できませんでした。",
+    "hideRawJson": "生のJSONを非表示にする",
+    "showRawJson": "生のJSONを表示"
+  },
+  "storageMigration": {
+    "stepSelect": "ソースとターゲットを選択",
+    "stepReview": "計画の見直し",
+    "stepExecute": "実行と監視",
+    "stepComplete": "完了",
+    "backendLocal": "ローカルファイルシステム",
+    "backendAzure": "Azure Blob Storage",
+    "backendS3": "Amazon S3",
+    "backendGcs": "Google Cloud Storage",
+    "planError": "移行プランの作成に失敗しました",
+    "startError": "移行の開始に失敗しました",
+    "cancelError": "移行のキャンセルに失敗しました",
+    "sourceConfiguration": "ソース設定",
+    "targetConfiguration": "目標構成",
+    "activeSuffix": " (アクティブ)",
+    "createNew": "+ 新しい設定を作成…",
+    "mustBeDifferent": "ソースとターゲットの設定は異なる必要があります。",
+    "migrationPlan": "移行計画",
+    "source": "出典",
+    "target": "ターゲット",
+    "totalArtifacts": "アーティファクトの総数",
+    "modules": "モジュール",
+    "providers": "プロバイダー",
+    "estimatedSize": "推定サイズ",
+    "startWarning": "この移行を開始すると、ソースからターゲットのストレージへすべてのアーティファクトがコピーされます。アーティファクトの数やサイズによっては、時間がかかる場合があります。",
+    "inProgress": "移行中",
+    "artifactsProgress": "{{migrated}} / {{total}} のアーティファクト",
+    "failedCount": "{{count}} アーティファクトの処理に失敗しました",
+    "cancelMigration": "移行をキャンセル",
+    "complete": "移行が完了しました",
+    "successDetail": "{{total}} のアーティファクト {{migrated}} の移行に成功しました。",
+    "failedToMigrate": "{{count}} アーティファクトの移行に失敗しました。",
+    "errorSuffix": " エラー：{{error}}",
+    "failed": "移行に失敗しました",
+    "migratedBeforeFailure": "障害発生前に、{{total}}のアートファクトのうち{{migrated}}を移行しました。",
+    "wizardTitle": "ストレージ移行ウィザード",
+    "done": "完了",
+    "cancel": "キャンセル",
+    "back": "戻る",
+    "reviewPlanBtn": "計画の見直し",
+    "startMigrationBtn": "移行を開始"
+  },
+  "moduleActionsMenu": {
+    "moreActions": "その他の操作",
+    "moduleActions": "モジュールのアクション",
+    "publishNewVersion": "新しいバージョンを公開する",
+    "editDescription": "説明を編集",
+    "deprecateModule": "モジュールの非推奨化",
+    "undeprecateModule": "モジュールの非非推奨化",
+    "deleteModule": "モジュールを削除"
   },
   "setup": {
     "oidc": {

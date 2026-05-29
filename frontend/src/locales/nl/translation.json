@@ -142,6 +142,11 @@
     "protocolSupport": "Ondersteuning voor het registerprotocol",
     "protocolDesc": "Volledig compatibel met het Terraform Registry Protocol v1 — gebruik dit register rechtstreeks in de Terraform CLI en providerconfiguraties, zonder plug-ins of proxyservers.",
     "viewApiDocs": "API-documentatie bekijken",
+    "searchScope": "Zoekbereik",
+    "apiChipModule": "Module Registry API",
+    "apiChipProvider": "API voor het leveranciersregister",
+    "apiChipDiscovery": "Dienstdetectie",
+    "apiChipAuth": "Authenticatie",
     "setupRequired": "Installatie vereist",
     "featureSetupRequired": "Vereiste configuratie van functies",
     "setupRequiredDesc": "Dit register is nog niet geconfigureerd. Voltooi de installatiewizard om de authenticatie, de opslag en het eerste beheerdersaccount in te stellen.",
@@ -953,6 +958,7 @@
       "update": "Update",
       "ariaTogglePlatforms": "Platforms wisselen",
       "ariaToggleVersions": "Versies weergeven",
+      "thArch": "Boog",
       "thFilename": "Bestandsnaam",
       "thVersion": "Versie",
       "thSyncedAt": "Gesynchroniseerd op",
@@ -1049,6 +1055,7 @@
       "chipDeprecated": "verouderd",
       "tooltipDeleteVersion": "Verwijder de versie en de bijbehorende binaire bestanden uit de opslag",
       "ariaDeleteVersion": "Versie verwijderen",
+      "thArch": "Boog",
       "thFilename": "Bestandsnaam",
       "thStatus": "Status",
       "noPlatformsSynced": "Er zijn nog geen platforms gesynchroniseerd.",
@@ -1664,6 +1671,36 @@
       "showScanDetails": "Scangegevens weergeven",
       "notScannedYet": "Nog niet gescand"
     },
+    "scimProvisioning": {
+      "title": "SCIM-provisioning",
+      "description": "Met SCIM 2.0-eindpunten kunnen externe identiteitsproviders automatisch gebruikers en groepen aanmaken en verwijderen.",
+      "configuration": "Configuratie",
+      "labelBaseUrl": "SCIM-basis-URL",
+      "helpBaseUrl": "Gebruik dit als de tenant-URL in de SCIM-configuratie van je identiteitsprovider.",
+      "labelUsersEndpoint": "Gebruikers-eindpunt",
+      "labelGroupsEndpoint": "Groepen-eindpunt",
+      "authentication": "Authenticatie",
+      "storeWarning": "Bewaar de API-sleutel op een veilige plek. Deze geeft volledige toegang tot het aanmaken van gebruikers en groepen.",
+      "supportedOperations": "Ondersteunde bewerkingen"
+    },
+    "roles": {
+      "loadError": "Het laden van rollen is mislukt. Probeer het nog eens.",
+      "title": "Rollen en rechten",
+      "subtitle": "Bekijk de beschikbare rollen en de bijbehorende machtigingsbereiken. Systeemrollen zijn vooraf gedefinieerd en kunnen niet worden gewijzigd.",
+      "availableScopesReference": "Overzicht van beschikbare scopes",
+      "scopesDefine": "Scopes bepalen welke acties een rol in het register kan uitvoeren.",
+      "thScope": "Toepassingsgebied",
+      "thDescription": "Beschrijving",
+      "roleTemplates": "Rolmodellen",
+      "clickRole": "Klik op een functie om de volledige beschrijving te bekijken.",
+      "noRoles": "Er zijn geen rollen gevonden.",
+      "systemChip": "Systeem",
+      "scopeCount_one": "{{count}} toepassingsgebied",
+      "scopeCount_other": "{{count}} toepassingsgebieden",
+      "assignedScopes": "Toegewezen werkgebieden:",
+      "permissionsByCategory": "Rechten per categorie:",
+      "fullAccessViaAdmin": "Volledige toegang (via beheerder)"
+    },
     "dashboard": {
       "loadError": "Het laden van de dashboardstatistieken is mislukt.",
       "loadErrorShort": "Het laden van het dashboard is mislukt",
@@ -1841,6 +1878,235 @@
     "yes": "Ja",
     "no": "Nee",
     "sensitive": "Gevoelig"
+  },
+  "usageExample": {
+    "title": "Gebruiksvoorbeeld",
+    "toolAria": "Hulpmiddel",
+    "copied": "Gekopieerd!",
+    "copyExample": "Voorbeeld kopiëren",
+    "tabSource": "Bron",
+    "tabWithInputs": "Met de vereiste gegevens"
+  },
+  "webhookEvents": {
+    "title": "Webhook-gebeurtenissen",
+    "toggleAria": "Webhook-gebeurtenissen in- of uitschakelen",
+    "noEvents": "Er zijn nog geen webhook-gebeurtenissen geregistreerd.",
+    "showingCount": "10 van de {{total}}-evenementen worden weergegeven",
+    "refresh": "Vernieuwen"
+  },
+  "repositoryBrowser": {
+    "searchPlaceholder": "Zoek in repositories...",
+    "refresh": "Vernieuwen",
+    "refreshAria": "Repositories vernieuwen",
+    "selected": "Geselecteerd",
+    "protected": "Beveiligd"
+  },
+  "advisoryBanner": {
+    "title": "Beveiligingsadviezen",
+    "dismiss": "Voor deze sessie sluiten"
+  },
+  "commandPalette": {
+    "title": "Opdrachtpalet",
+    "searchPlaceholder": "Zoekpagina’s, modules, aanbieders…"
+  },
+  "devUserSwitcher": {
+    "title": "Ontwikkelingsmodus: van gebruiker wisselen",
+    "selectUser": "Gebruiker selecteren"
+  },
+  "markdownRenderer": {
+    "ariaLabel": "Vertaalde documentatie"
+  },
+  "versionDetailsPanel": {
+    "title": "Versie{{version}}-details",
+    "published": "Gepubliceerd:",
+    "na": "n.v.t.",
+    "downloads": "Downloads:",
+    "publishedBy": "Uitgegeven door:",
+    "deprecated": "Verouderd",
+    "deprecatedOn": "op {{date}}",
+    "replacement": "Vervanging:",
+    "removingDeprecation": "Verouderde functie verwijderen...",
+    "removeDeprecation": "Verwijder de verouderingsmarkering",
+    "deprecateVersion": "Verouderde versie",
+    "deleteThisVersion": "Deze versie verwijderen"
+  },
+  "policyResultsPanel": {
+    "title": "Beleidsbeoordeling"
+  },
+  "providerDocsSidebar": {
+    "filterPlaceholder": "Documenten filteren..."
+  },
+  "registryItemCard": {
+    "deprecated": "Verouderd",
+    "viewDetails": "Bekijk details",
+    "noDescription": "Er is geen beschrijving beschikbaar",
+    "ariaAction": "{{label}} voor {{title}}"
+  },
+  "scmRepositoryPanel": {
+    "title": "Bronrepository"
+  },
+  "securityScanPanel": {
+    "title": "Beveiligingsscan"
+  },
+  "versionSelector": {
+    "showDeprecated": "Verouderd weergeven",
+    "showDeprecatedAria": "Verouderde versies weergeven",
+    "allDeprecated": "Alle versies van deze module zijn verouderd."
+  },
+  "errorBoundary": {
+    "title": "Er is iets misgegaan",
+    "description": "Er is een onverwachte fout opgetreden. Je kunt het opnieuw proberen of de pagina opnieuw laden.",
+    "tryAgain": "Probeer het nog eens",
+    "reloadPage": "Pagina opnieuw laden"
+  },
+  "quotaUsageChart": {
+    "storage": "Opslag",
+    "publishesPerDay": "Publicaties / dag",
+    "downloadsPerDay": "Downloads / Dag"
+  },
+  "helpPanel": {
+    "closeAria": "Helpvenster sluiten"
+  },
+  "layout": {
+    "mainNavigation": "Hoofdnavigatie"
+  },
+  "apiDocumentation": {
+    "title": "API Swagger-documentatie",
+    "subtitle": "Interactieve API-referentie — gebruik de knop ‘Autoriseren’ om je aan te melden met een API-sleutel"
+  },
+  "mtls": {
+    "certificateSubject": "Onderwerp van het certificaat",
+    "scopes": "Toepassingsgebieden"
+  },
+  "reviewStep": {
+    "configured": "Geconfigureerd",
+    "notConfigured": "Niet geconfigureerd",
+    "actionPermanent": "Deze wijziging is definitief"
+  },
+  "adminUserStep": {
+    "adminEmail": "E-mailadres beheerder",
+    "emailMustMatch": "Deze e-mailadres moet overeenkomen met de identiteit van uw OIDC-provider"
+  },
+  "authenticateStep": {
+    "findingToken": "Je configuratietoken vinden",
+    "setupToken": "Configuratietoken"
+  },
+  "setupWizardPage": {
+    "setupProgress": "Voortgang van de installatie"
+  },
+  "loginPage": {
+    "loadingProviders": "Aanmeldingsproviders worden geladen"
+  },
+  "scanDiagnostics": {
+    "errorMessage": "Foutmelding",
+    "scannerOutput": "Uitvoer van de scanner (stderr / stdout)",
+    "rawJson": "Onbewerkte JSON-scanner"
+  },
+  "settingsPage": {
+    "title": "Instellingen",
+    "telemetryPrivacy": "Telemetrie en privacy",
+    "description": "Bepaal zelf welke gegevens u deelt. Essentiële cookies die nodig zijn voor de werking van de website, kunnen niet worden uitgeschakeld. Wijzigingen worden onmiddellijk van kracht.",
+    "essentialRequired": "Essentiële cookies (verplicht)",
+    "errorReporting": "Foutmeldingen — helpen ons om fouten sneller op te lossen",
+    "performanceMonitoring": "Prestatiebewaking — Web Vitals en statistieken over het laden van pagina’s",
+    "analytics": "Analytics — gebruikspatronen om het product te verbeteren"
+  },
+  "consentBanner": {
+    "ariaLabel": "Toestemming voor cookies",
+    "title": "Wij hechten veel waarde aan uw privacy",
+    "essential": "Essentieel (altijd actief)",
+    "errorReporting": "Foutmeldingen",
+    "performanceMonitoring": "Prestatiebewaking",
+    "analytics": "Analytics",
+    "hideDetails": "Details verbergen",
+    "customize": "Aanpassen",
+    "rejectAll": "Alles afwijzen",
+    "acceptAll": "Alles accepteren"
+  },
+  "releasesGpgKeys": {
+    "title": "Sleutels vrijgeven",
+    "description": "GPG-sleutels die worden gebruikt om de handtekeningen van upstream-releases te verifiëren. De status wordt bepaald op basis van de ingestelde waarschuwingsdrempel.",
+    "loadError": "De status van de GPG-sleutel kan niet worden geladen.",
+    "noData": "Er zijn geen gegevens over de ondertekeningssleutel beschikbaar.",
+    "thTool": "Hulpmiddel",
+    "thStatus": "Status",
+    "thSource": "Bron",
+    "thFingerprint": "Vingerafdruk",
+    "thExpiry": "Vervaldatum",
+    "thLastRefresh": "Laatste vernieuwing",
+    "expiredAgo": "{{days}} dagen geleden verlopen",
+    "days": "{{days}} d"
+  },
+  "scanFindingsModal": {
+    "title": "Scanresultaten",
+    "close": "sluiten",
+    "noData": "Er zijn geen scangegevens beschikbaar.",
+    "critical": "Belangrijk: {{count}}",
+    "high": "Hoog: {{count}}",
+    "medium": "Bron: {{count}}",
+    "low": "Laag: {{count}}",
+    "downloadTooltip": "Resultaten als CSV-bestand downloaden",
+    "exportCsv": "CSV exporteren",
+    "thSeverity": "Ernst",
+    "thRuleId": "Regel-ID",
+    "thTitle": "Titel",
+    "thResource": "Bron",
+    "thFile": "Bestand",
+    "thResolution": "Resolutie",
+    "parseError": "De afzonderlijke resultaten uit de scanneruitvoer konden niet worden geparseerd.",
+    "hideRawJson": "Onbewerkte JSON verbergen",
+    "showRawJson": "Onbewerkte JSON weergeven"
+  },
+  "storageMigration": {
+    "stepSelect": "Bron en doel selecteren",
+    "stepReview": "Beoordelingsplan",
+    "stepExecute": "Uitvoeren en controleren",
+    "stepComplete": "Voltooien",
+    "backendLocal": "Lokaal bestandssysteem",
+    "backendAzure": "Azure Blob Storage",
+    "backendS3": "Amazon S3",
+    "backendGcs": "Google Cloud Storage",
+    "planError": "Het is niet gelukt om een migratieplan op te stellen",
+    "startError": "Het starten van de migratie is mislukt",
+    "cancelError": "Het is niet gelukt om de migratie te annuleren",
+    "sourceConfiguration": "Bronconfiguratie",
+    "targetConfiguration": "Doelconfiguratie",
+    "activeSuffix": " (Actief)",
+    "createNew": "+ Nieuwe configuratie aanmaken…",
+    "mustBeDifferent": "De bron- en doelconfiguraties moeten verschillend zijn.",
+    "migrationPlan": "Migratieplan",
+    "source": "Bron",
+    "target": "Doel",
+    "totalArtifacts": "Totaal aantal artefacten",
+    "modules": "Modules",
+    "providers": "Aanbieders",
+    "estimatedSize": "Geschatte omvang",
+    "startWarning": "Als u deze migratie start, worden alle artefacten van de bron naar de doelsopslag gekopieerd. Dit kan even duren, afhankelijk van het aantal en de grootte van de artefacten.",
+    "inProgress": "Migratie bezig",
+    "artifactsProgress": "{{migrated}} / {{total}}-artefacten",
+    "failedCount": "{{count}} er is/zijn een/meer fout opgetreden(en)",
+    "cancelMigration": "Migratie annuleren",
+    "complete": "Migratie voltooid",
+    "successDetail": "{{migrated}}en met artefacten van {{total}} zijn succesvol gemigreerd.",
+    "failedToMigrate": "{{count}} er zijn artefacten niet gemigreerd.",
+    "errorSuffix": " Fout: {{error}}",
+    "failed": "Migratie is mislukt",
+    "migratedBeforeFailure": "{{migrated}}-artefacten van {{total}} zijn vóór de storing gemigreerd.",
+    "wizardTitle": "Wizard voor opslagmigratie",
+    "done": "Klaar",
+    "cancel": "Annuleren",
+    "back": "Terug",
+    "reviewPlanBtn": "Beoordelingsplan",
+    "startMigrationBtn": "Start migratie"
+  },
+  "moduleActionsMenu": {
+    "moreActions": "Meer acties",
+    "moduleActions": "Moduleacties",
+    "publishNewVersion": "Nieuwe versie publiceren",
+    "editDescription": "Beschrijving bewerken",
+    "deprecateModule": "Module verouderd verklaren",
+    "undeprecateModule": "Module weer als standaard instellen",
+    "deleteModule": "Module verwijderen"
   },
   "setup": {
     "oidc": {
