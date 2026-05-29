@@ -178,7 +178,7 @@ function VersionRow({
               {item.provider_namespace}/{item.provider_name}
             </Typography>
           ) : (
-            <Chip label={t('admin.versionApprovals.terraform')} size="small" variant="outlined" />
+            <Chip label="Terraform" size="small" variant="outlined" />
           )}
         </TableCell>
         <TableCell>

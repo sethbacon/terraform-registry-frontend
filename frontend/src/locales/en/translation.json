@@ -1199,7 +1199,6 @@
       "performedBy": "by {{name}}",
       "expandRow": "Expand row",
       "gpgVerified": "GPG verified",
-      "terraform": "Terraform",
       "errLoad": "Failed to load version approvals",
       "errApprove": "Failed to approve version",
       "errReject": "Failed to reject version",
