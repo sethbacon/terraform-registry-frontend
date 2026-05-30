@@ -61,6 +61,15 @@ const HELP_ACTION_KEYS: Record<string, string[]> = {
     'deleteConfig',
   ],
   approvals: ['reviewRequest', 'createRequest', 'filterByStatus', 'mirrorPolicyLink'],
+  versionApprovals: [
+    'whyPending',
+    'statusTabs',
+    'typeFilter',
+    'approveReject',
+    'bulkActions',
+    'auditTrail',
+    'autoApprove',
+  ],
   mirrorPolicies: [
     'createPolicy',
     'allowVsDeny',
@@ -139,6 +148,8 @@ function getHelpContent(pathname: string, t: TStr): HelpContent {
       return makeContent('terraformMirror', t)
     case '/admin/approvals':
       return makeContent('approvals', t)
+    case '/admin/version-approvals':
+      return makeContent('versionApprovals', t)
     case '/admin/policies':
       return makeContent('mirrorPolicies', t)
     case '/admin/security-scanning':
@@ -218,7 +229,7 @@ const HelpPanel = () => {
             color: 'text.secondary',
           }}
         >
-          What you can do
+          {t('helpPanel.whatYouCanDo')}
         </Typography>
 
         <List disablePadding sx={{ mt: 0.5 }}>
@@ -253,9 +264,9 @@ const HelpPanel = () => {
             color: 'text.secondary',
           }}
         >
-          Full API reference:{' '}
+          {t('helpPanel.apiReferenceLabel')}{' '}
           <MuiLink component={RouterLink} to="/api-docs" onClick={isMobile ? closeHelp : undefined}>
-            API Docs
+            {t('helpPanel.apiDocsLink')}
           </MuiLink>
         </Typography>
       </Box>
