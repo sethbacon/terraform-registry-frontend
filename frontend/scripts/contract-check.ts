@@ -261,12 +261,13 @@ async function main() {
       const why = backendKeys.has(k) ? 'now exists on backend' : 'frontend no longer calls it'
       console.error(`  - ${k}  (${why})`)
     }
-    process.exit(1)
+    process.exitCode = 1
+    return
   }
 
   if (missing.length === 0) {
     console.log(`\nOK: every frontend route exists on backend (or is on the allowlist).`)
-    process.exit(0)
+    return
   }
 
   console.error(`\nFAIL: ${missing.length} frontend route(s) have no matching backend route:\n`)
@@ -285,10 +286,14 @@ async function main() {
   console.error(
     `If a missing route is intentional and being tracked elsewhere, add an entry to\nfrontend/scripts/contract-check.allowlist.json with the linked issue URL as the reason.`,
   )
-  process.exit(1)
+  process.exitCode = 1
 }
 
+// Set the exit code and let the process drain naturally. Calling process.exit()
+// while the global fetch (undici) socket is still closing aborts the process on
+// Windows with "Assertion failed: !(handle->flags & UV_HANDLE_CLOSING)", which
+// would fail the check even on success.
 main().catch((err) => {
   console.error('contract-check failed:', err)
-  process.exit(2)
+  process.exitCode = 2
 })
