@@ -1,6 +1,18 @@
 <!-- markdownlint-disable MD013 MD024 MD041 -->
 # Changelog
 
+## [2.4.0](https://github.com/sethbacon/terraform-registry-frontend/compare/v2.3.0...v2.4.0) (2026-05-30)
+
+
+### Features
+
+* version approvals admin page for mirror version gate ([#352](https://github.com/sethbacon/terraform-registry-frontend/issues/352)) ([3a4e993](https://github.com/sethbacon/terraform-registry-frontend/commit/3a4e99315ffb168b482f859afc79d2b08629684b))
+
+
+### Bug Fixes
+
+* **contract-check:** pin backend image to 1.4.0; exit cleanly ([#355](https://github.com/sethbacon/terraform-registry-frontend/issues/355)) ([940c1ac](https://github.com/sethbacon/terraform-registry-frontend/commit/940c1acdaca37ad09f048f35964835879ed538e8))
+
 ## [2.3.0](https://github.com/sethbacon/terraform-registry-frontend/compare/v2.2.0...v2.3.0) (2026-05-29)
 
 
