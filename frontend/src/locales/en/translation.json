@@ -2079,7 +2079,10 @@
     "downloadsPerDay": "Downloads / Day"
   },
   "helpPanel": {
-    "closeAria": "Close help panel"
+    "closeAria": "Close help panel",
+    "whatYouCanDo": "What you can do",
+    "apiReferenceLabel": "Full API reference:",
+    "apiDocsLink": "API Docs"
   },
   "layout": {
     "mainNavigation": "Main navigation"

@@ -229,7 +229,7 @@ const HelpPanel = () => {
             color: 'text.secondary',
           }}
         >
-          What you can do
+          {t('helpPanel.whatYouCanDo')}
         </Typography>
 
         <List disablePadding sx={{ mt: 0.5 }}>
@@ -264,9 +264,9 @@ const HelpPanel = () => {
             color: 'text.secondary',
           }}
         >
-          Full API reference:{' '}
+          {t('helpPanel.apiReferenceLabel')}{' '}
           <MuiLink component={RouterLink} to="/api-docs" onClick={isMobile ? closeHelp : undefined}>
-            API Docs
+            {t('helpPanel.apiDocsLink')}
           </MuiLink>
         </Typography>
       </Box>
