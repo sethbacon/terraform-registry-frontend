@@ -61,6 +61,15 @@ const HELP_ACTION_KEYS: Record<string, string[]> = {
     'deleteConfig',
   ],
   approvals: ['reviewRequest', 'createRequest', 'filterByStatus', 'mirrorPolicyLink'],
+  versionApprovals: [
+    'whyPending',
+    'statusTabs',
+    'typeFilter',
+    'approveReject',
+    'bulkActions',
+    'auditTrail',
+    'autoApprove',
+  ],
   mirrorPolicies: [
     'createPolicy',
     'allowVsDeny',
@@ -139,6 +148,8 @@ function getHelpContent(pathname: string, t: TStr): HelpContent {
       return makeContent('terraformMirror', t)
     case '/admin/approvals':
       return makeContent('approvals', t)
+    case '/admin/version-approvals':
+      return makeContent('versionApprovals', t)
     case '/admin/policies':
       return makeContent('mirrorPolicies', t)
     case '/admin/security-scanning':

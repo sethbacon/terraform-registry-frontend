@@ -721,6 +721,40 @@
         }
       }
     },
+    "versionApprovals": {
+      "title": "Version Approvals",
+      "overview": "When a provider or Terraform binary mirror has \"Require approval\" enabled, each newly synced version is held in pending approval and hidden from Terraform clients until an administrator approves it — so \"latest\" means \"latest approved version\". This page is the review queue for those gated versions.",
+      "actions": {
+        "whyPending": {
+          "heading": "Why a Version Is Here",
+          "text": "Versions appear here only for mirrors with \"Require approval\" enabled. A synced version stays hidden from the version listing, network mirror index, and downloads until it is approved. Existing versions and non-gated mirrors are unaffected."
+        },
+        "statusTabs": {
+          "heading": "Status Tabs",
+          "text": "Switch between Pending, Approved, and Rejected to see versions in each state. Pending is the queue that needs action; Rejected versions stay permanently hidden."
+        },
+        "typeFilter": {
+          "heading": "Filter by Type",
+          "text": "Use the Provider / Terraform toggle to narrow the list to mirrored provider versions or Terraform binary versions."
+        },
+        "approveReject": {
+          "heading": "Approve or Reject",
+          "text": "Use the Approve or Reject button on a pending row to open the confirmation dialog. Add optional notes to record why; approving a Terraform version also recomputes which version is \"latest\"."
+        },
+        "bulkActions": {
+          "heading": "Bulk Approve / Reject",
+          "text": "Tick the checkboxes (or the header checkbox to select all) and use Approve Selected / Reject Selected to act on many versions at once. The result reports how many succeeded and lists any failures."
+        },
+        "auditTrail": {
+          "heading": "Audit Trail",
+          "text": "Expand a row to see its approval history — auto-approvals, manual decisions, who acted, any notes, and the rule that matched for auto-approvals."
+        },
+        "autoApprove": {
+          "heading": "Auto-Approval",
+          "text": "A mirror's auto-approve rules (patch_only, gpg_verified, semver_constraint, delay_hours) can approve low-risk versions at sync time so only versions that need review land here. delay_hours approves on a later sync once the version has aged; for Terraform binaries the gpg_verified rule does not apply at discovery time."
+        }
+      }
+    },
     "mirrorPolicies": {
       "title": "Mirror Policies",
       "overview": "Mirror policies control which providers are allowed or denied from being mirrored, and whether mirroring them requires an approval request. Policies are matched by upstream registry URL, namespace pattern, and provider name pattern. Higher-priority policies take precedence when multiple rules match.",

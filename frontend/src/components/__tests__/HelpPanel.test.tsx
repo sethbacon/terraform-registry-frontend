@@ -142,6 +142,14 @@ describe('HelpPanel', () => {
     expect(screen.getByText('Mirror Policies')).toBeInTheDocument()
   })
 
+  it('renders version approvals help', () => {
+    renderAtPath('/admin/version-approvals')
+    expect(screen.getByText('Version Approvals')).toBeInTheDocument()
+    expect(screen.getByText(/latest approved version/)).toBeInTheDocument()
+    expect(screen.getByText('Bulk Approve / Reject')).toBeInTheDocument()
+    expect(screen.getByText('Auto-Approval')).toBeInTheDocument()
+  })
+
   it('renders default help for unknown paths', () => {
     renderAtPath('/some/unknown/path')
     expect(screen.getByText('Help')).toBeInTheDocument()
