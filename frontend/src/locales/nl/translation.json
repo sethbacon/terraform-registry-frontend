@@ -721,6 +721,40 @@
         }
       }
     },
+    "versionApprovals": {
+      "title": "Goedkeuringen van versies",
+      "overview": "Wanneer bij een provider of Terraform-binaire mirror de optie \"Goedkeuring vereist\" is ingeschakeld, wordt elke nieuw gesynchroniseerde versie in de wachtrij voor goedkeuring geplaatst en verborgen voor Terraform-clients totdat een beheerder deze goedkeurt — dus \"nieuwste\" betekent \"nieuwste goedgekeurde versie\". Deze pagina is de beoordelingswachtrij voor die versies die nog moeten worden goedgekeurd.",
+      "actions": {
+        "whyPending": {
+          "heading": "Waarom deze versie er is",
+          "text": "Versies worden hier alleen weergegeven voor mirrors waarop \"Goedkeuring vereist\" is ingeschakeld. Een gesynchroniseerde versie blijft verborgen in de versielijst, de index van netwerkmirrors en de downloads totdat deze is goedgekeurd. Bestaande versies en mirrors zonder goedkeuringsvereiste worden hierdoor niet beïnvloed."
+        },
+        "statusTabs": {
+          "heading": "Status-tabbladen",
+          "text": "Schakel tussen ‘In behandeling’, ‘Goedgekeurd’ en ‘Afgewezen’ om de versies in elke status te bekijken. ‘In behandeling’ is de wachtrij waarvoor actie nodig is; ‘Afgewezen’ versies blijven permanent verborgen."
+        },
+        "typeFilter": {
+          "heading": "Filter op type",
+          "text": "Gebruik de schakelaar ‘Provider / Terraform’ om de lijst te beperken tot gespiegelde providerversies of binaire Terraform-versies."
+        },
+        "approveReject": {
+          "heading": "Goedkeuren of afwijzen",
+          "text": "Klik op de knop ‘Goedkeuren’ of ‘Afwijzen’ bij een rij in behandeling om het bevestigingsvenster te openen. Voeg eventueel opmerkingen toe om aan te geven waarom; als je een Terraform-versie goedkeurt, wordt ook opnieuw berekend welke versie de ‘nieuwste’ is."
+        },
+        "bulkActions": {
+          "heading": "In één keer goedkeuren / afwijzen",
+          "text": "Vink de selectievakjes aan (of het selectievakje bovenaan om alles te selecteren) en gebruik 'Geselecteerde goedkeuren' / 'Geselecteerde afwijzen' om meerdere versies tegelijk te verwerken. In het resultaat wordt weergegeven hoeveel er zijn geslaagd en worden eventuele fouten weergegeven."
+        },
+        "auditTrail": {
+          "heading": "Audittrail",
+          "text": "Klik op een rij om de goedkeuringsgeschiedenis te bekijken: automatische goedkeuringen, handmatige beslissingen, wie de actie heeft uitgevoerd, eventuele opmerkingen en de regel die bij automatische goedkeuringen van toepassing was."
+        },
+        "autoApprove": {
+          "heading": "Automatische goedkeuring",
+          "text": "De regels voor automatische goedkeuring van een mirror (patch_only, gpg_verified, semver_constraint, delay_hours) kunnen versies met een laag risico tijdens de synchronisatie goedkeuren, zodat hier alleen versies terechtkomen die moeten worden gecontroleerd. De regel delay_hours keurt de versie goed bij een latere synchronisatie, zodra de versie enige tijd heeft gestaan; voor Terraform-binaire bestanden is de regel gpg_verified niet van toepassing op het moment van detectie."
+        }
+      }
+    },
     "mirrorPolicies": {
       "title": "Beleid inzake spiegels",
       "overview": "Spiegelbeleidsregels bepalen welke providers wel of niet mogen worden gespiegeld, en of er voor het spiegelen een goedkeuringsverzoek nodig is. Beleidsregels worden vergeleken op basis van de URL van het upstream-register, het naamruimtepatroon en het patroon van de providernaam. Wanneer meerdere regels van toepassing zijn, krijgen beleidsregels met een hogere prioriteit voorrang.",
@@ -2043,7 +2077,10 @@
     "downloadsPerDay": "Downloads / Dag"
   },
   "helpPanel": {
-    "closeAria": "Helpvenster sluiten"
+    "closeAria": "Helpvenster sluiten",
+    "whatYouCanDo": "Wat je kunt doen",
+    "apiReferenceLabel": "Volledige API-referentie:",
+    "apiDocsLink": "API-documentatie"
   },
   "layout": {
     "mainNavigation": "Hoofdnavigatie"

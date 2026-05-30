@@ -721,6 +721,40 @@
         }
       }
     },
+    "versionApprovals": {
+      "title": "Versjonsgodkjenninger",
+      "overview": "Når en leverandør eller et Terraform-binærspeil har aktivert «Krev godkjenning», blir hver ny synkroniserte versjon holdt tilbake i påvente av godkjenning og skjult for Terraform-klienter inntil en administrator godkjenner den – så «siste» betyr «siste godkjente versjon». Denne siden er gjennomgangskøen for disse versjonene som er under godkjenning.",
+      "actions": {
+        "whyPending": {
+          "heading": "Hvorfor denne versjonen finnes",
+          "text": "Versjoner vises her kun for speilserverne der «Krev godkjenning» er aktivert. En synkronisert versjon forblir skjult i versjonslisten, nettverksspeilindeksen og nedlastingsområdet inntil den er godkjent. Eksisterende versjoner og speilserverne uten godkjenningskrav påvirkes ikke."
+        },
+        "statusTabs": {
+          "heading": "Statusfaner",
+          "text": "Veksle mellom «Venter på behandling», «Godkjent» og «Avvist» for å se versjonene i hver status. «Venter på behandling» er køen der det må gjøres noe; «Avviste» versjoner forblir permanent skjult."
+        },
+        "typeFilter": {
+          "heading": "Filtrer etter type",
+          "text": "Bruk bryteren «Leverandør / Terraform» for å begrense listen til speilede leverandørversjoner eller binære Terraform-versjoner."
+        },
+        "approveReject": {
+          "heading": "Godkjenn eller avvis",
+          "text": "Bruk knappen «Godkjenn» eller «Avvis» i en rad med en ventende oppgave for å åpne bekreftelsesdialogen. Du kan legge til valgfrie merknader for å dokumentere årsaken; når du godkjenner en Terraform-versjon, beregnes det også på nytt hvilken versjon som er «den nyeste»."
+        },
+        "bulkActions": {
+          "heading": "Godkjenn/avvis i bulk",
+          "text": "Merk av i avmerkingsrutene (eller i avmerkingsruten øverst for å velge alle), og bruk «Godkjenn valgte» / «Avvis valgte» for å behandle flere versjoner samtidig. Resultatet viser hvor mange som ble godkjent, og lister opp eventuelle feil."
+        },
+        "auditTrail": {
+          "heading": "Revisjonsspor",
+          "text": "Utvid en rad for å se godkjenningshistorikken – automatiske godkjenninger, manuelle avgjørelser, hvem som utførte handlingen, eventuelle merknader og regelen som ble brukt ved automatiske godkjenninger."
+        },
+        "autoApprove": {
+          "heading": "Automatisk godkjenning",
+          "text": "Et speils regler for automatisk godkjenning (patch_only, gpg_verified, semver_constraint, delay_hours) kan godkjenne versjoner med lav risiko ved synkronisering, slik at kun versjoner som krever gjennomgang havner her. delay_hours godkjenner ved en senere synkronisering når versjonen har ligget en stund; for Terraform-binærfiler gjelder ikke regelen gpg_verified ved oppdagelse."
+        }
+      }
+    },
     "mirrorPolicies": {
       "title": "Retningslinjer for speil",
       "overview": "Speilingsregler styrer hvilke leverandører som tillates eller nektes å bli speilet, og om det kreves en godkjenningsforespørsel for å speile dem. Reglene samsvarer med oppstrømsregisterets URL, navnerommønster og leverandørnavnmønster. Regler med høyere prioritet har forrang når flere regler samsvarer.",
@@ -2043,7 +2077,10 @@
     "downloadsPerDay": "Nedlastinger / dag"
   },
   "helpPanel": {
-    "closeAria": "Lukk hjelpefeltet"
+    "closeAria": "Lukk hjelpefeltet",
+    "whatYouCanDo": "Hva du kan gjøre",
+    "apiReferenceLabel": "Fullstendig API-referanse:",
+    "apiDocsLink": "API-dokumentasjon"
   },
   "layout": {
     "mainNavigation": "Hovednavigasjon"
