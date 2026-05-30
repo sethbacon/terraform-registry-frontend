@@ -1,6 +1,13 @@
 <!-- markdownlint-disable MD013 MD024 MD041 -->
 # Changelog
 
+## [2.4.1](https://github.com/sethbacon/terraform-registry-frontend/compare/v2.4.0...v2.4.1) (2026-05-30)
+
+
+### Bug Fixes
+
+* **help:** add context help for the Version Approvals page ([#356](https://github.com/sethbacon/terraform-registry-frontend/issues/356)) ([14ebd84](https://github.com/sethbacon/terraform-registry-frontend/commit/14ebd845c65fc61b3b452ee503e3db9b3aaf6807))
+
 ## [2.4.0](https://github.com/sethbacon/terraform-registry-frontend/compare/v2.3.0...v2.4.0) (2026-05-30)
 
 
