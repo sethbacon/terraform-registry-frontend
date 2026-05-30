@@ -721,6 +721,40 @@
         }
       }
     },
+    "versionApprovals": {
+      "title": "Approvazioni delle versioni",
+      "overview": "Quando un provider o un mirror binario di Terraform ha l'opzione \"Richiedi approvazione\" abilitata, ogni nuova versione sincronizzata viene messa in attesa di approvazione e nascosta ai client Terraform finché un amministratore non la approva; pertanto, \"ultima\" significa \"ultima versione approvata\". Questa pagina costituisce la coda di revisione per tali versioni soggette a approvazione.",
+      "actions": {
+        "whyPending": {
+          "heading": "Perché è disponibile questa versione",
+          "text": "Le versioni vengono visualizzate qui solo per i mirror su cui è abilitata l'opzione \"Richiedi approvazione\". Una versione sincronizzata rimane nascosta dall'elenco delle versioni, dall'indice dei mirror di rete e dalla sezione dei download finché non viene approvata. Le versioni esistenti e i mirror senza restrizioni non subiscono alcuna modifica."
+        },
+        "statusTabs": {
+          "heading": "Schede di stato",
+          "text": "Passa da \"In sospeso\" a \"Approvato\" e \"Rifiutato\" per visualizzare le versioni in ciascuno stato. \"In sospeso\" è la coda che richiede un intervento; le versioni \"Rifiutate\" rimangono nascoste in modo permanente."
+        },
+        "typeFilter": {
+          "heading": "Filtra per tipo",
+          "text": "Utilizza il pulsante di selezione \"Provider / Terraform\" per restringere l'elenco alle versioni dei provider sincronizzate o alle versioni binarie di Terraform."
+        },
+        "approveReject": {
+          "heading": "Approvare o rifiutare",
+          "text": "Utilizza il pulsante \"Approva\" o \"Rifiuta\" su una riga in sospeso per aprire la finestra di dialogo di conferma. Aggiungi eventuali note per spiegare il motivo; l'approvazione di una versione di Terraform comporta anche il ricalcolo della versione \"più recente\"."
+        },
+        "bulkActions": {
+          "heading": "Approvazione / Rifiuto in blocco",
+          "text": "Seleziona le caselle di controllo (o quella in alto per selezionarle tutte) e usa \"Approva selezionati\" / \"Rifiuta selezionati\" per agire su più versioni contemporaneamente. Il risultato indica quante operazioni sono andate a buon fine ed elenca eventuali errori."
+        },
+        "auditTrail": {
+          "heading": "Registro di controllo",
+          "text": "Espandi una riga per visualizzarne la cronologia delle approvazioni: approvazioni automatiche, decisioni manuali, chi ha agito, eventuali note e la regola applicata per le approvazioni automatiche."
+        },
+        "autoApprove": {
+          "heading": "Approvazione automatica",
+          "text": "Le regole di approvazione automatica di un mirror (patch_only, gpg_verified, semver_constraint, delay_hours) consentono di approvare le versioni a basso rischio al momento della sincronizzazione, in modo che qui arrivino solo le versioni che necessitano di revisione. La regola delay_hours approva la versione in una sincronizzazione successiva, una volta che questa ha raggiunto una certa maturità; per i binari Terraform, la regola gpg_verified non si applica al momento dell'individuazione."
+        }
+      }
+    },
     "mirrorPolicies": {
       "title": "Politiche relative ai mirror",
       "overview": "Le politiche di mirroring stabiliscono quali provider possono o non possono essere sottoposti a mirroring e se tale operazione richiede una richiesta di approvazione. Le politiche vengono applicate in base all'URL del registro a monte, al modello dello spazio dei nomi e al modello del nome del provider. In caso di corrispondenza con più regole, hanno la precedenza le politiche con priorità più alta.",
@@ -2043,7 +2077,10 @@
     "downloadsPerDay": "Download / Giorno"
   },
   "helpPanel": {
-    "closeAria": "Chiudi il pannello di aiuto"
+    "closeAria": "Chiudi il pannello di aiuto",
+    "whatYouCanDo": "Cosa puoi fare",
+    "apiReferenceLabel": "Riferimento completo all'API:",
+    "apiDocsLink": "Documentazione API"
   },
   "layout": {
     "mainNavigation": "Navigazione principale"

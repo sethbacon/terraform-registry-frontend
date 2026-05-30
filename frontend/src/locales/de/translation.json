@@ -721,6 +721,40 @@
         }
       }
     },
+    "versionApprovals": {
+      "title": "Versionsfreigaben",
+      "overview": "Wenn bei einem Anbieter oder einem Terraform-Binär-Mirror die Option „Genehmigung erforderlich“ aktiviert ist, wird jede neu synchronisierte Version zur Genehmigung vorgemerkt und für Terraform-Clients ausgeblendet, bis ein Administrator sie genehmigt – „Neueste Version“ bedeutet also „neueste genehmigte Version“. Diese Seite dient als Überprüfungswarteschlange für diese gesperrten Versionen.",
+      "actions": {
+        "whyPending": {
+          "heading": "Warum es diese Version gibt",
+          "text": "Versionen werden hier nur für Spiegel angezeigt, bei denen die Option „Genehmigung erforderlich“ aktiviert ist. Eine synchronisierte Version bleibt in der Versionsliste, im Netzwerk-Spiegelindex und im Download-Bereich verborgen, bis sie genehmigt wurde. Bestehende Versionen und Spiegel ohne Zugangsbeschränkung sind davon nicht betroffen."
+        },
+        "statusTabs": {
+          "heading": "Status-Registerkarten",
+          "text": "Wechseln Sie zwischen „Ausstehend“, „Genehmigt“ und „Abgelehnt“, um die Versionen in den jeweiligen Statusbereichen anzuzeigen. „Ausstehend“ ist die Warteschlange, in der Maßnahmen erforderlich sind; abgelehnte Versionen bleiben dauerhaft ausgeblendet."
+        },
+        "typeFilter": {
+          "heading": "Nach Typ filtern",
+          "text": "Verwenden Sie den Umschalter „Anbieter / Terraform“, um die Liste auf gespiegelte Anbieterversionen oder Terraform-Binärversionen einzugrenzen."
+        },
+        "approveReject": {
+          "heading": "Genehmigen oder ablehnen",
+          "text": "Klicken Sie in einer ausstehenden Zeile auf die Schaltfläche „Genehmigen“ oder „Ablehnen“, um das Bestätigungsfenster zu öffnen. Fügen Sie optional Anmerkungen hinzu, um den Grund festzuhalten; durch die Genehmigung einer Terraform-Version wird zudem neu berechnet, welche Version als „aktuellste“ gilt."
+        },
+        "bulkActions": {
+          "heading": "Massenweise genehmigen / ablehnen",
+          "text": "Aktivieren Sie die Kontrollkästchen (oder das Kontrollkästchen in der Kopfzeile, um alle auszuwählen) und nutzen Sie die Funktionen „Ausgewählte genehmigen“ bzw. „Ausgewählte ablehnen“, um mehrere Versionen gleichzeitig zu bearbeiten. Im Ergebnis wird angezeigt, wie viele erfolgreich waren, und es werden etwaige Fehler aufgelistet."
+        },
+        "auditTrail": {
+          "heading": "Prüfpfad",
+          "text": "Erweitern Sie eine Zeile, um den Genehmigungsverlauf anzuzeigen – automatische Genehmigungen, manuelle Entscheidungen, die verantwortlichen Personen, etwaige Notizen sowie die Regel, die bei automatischen Genehmigungen angewendet wurde."
+        },
+        "autoApprove": {
+          "heading": "Automatische Genehmigung",
+          "text": "Die Regeln für die automatische Freigabe eines Spiegelservers (patch_only, gpg_verified, semver_constraint, delay_hours) können Versionen mit geringem Risiko bereits bei der Synchronisierung freigeben, sodass hier nur noch Versionen landen, die einer Überprüfung bedürfen. Die Regel „delay_hours“ führt die Freigabe bei einer späteren Synchronisierung durch, sobald die Version eine gewisse Zeit lang vorhanden war; bei Terraform-Binärdateien findet die Regel „gpg_verified“ zum Zeitpunkt der Erkennung keine Anwendung."
+        }
+      }
+    },
     "mirrorPolicies": {
       "title": "Richtlinien für Spiegel",
       "overview": "Spiegelungsrichtlinien legen fest, welche Anbieter gespiegelt werden dürfen oder nicht, und ob für deren Spiegelung eine Genehmigungsanfrage erforderlich ist. Die Richtlinien werden anhand der URL der Upstream-Registrierungsstelle, des Namensraum-Musters und des Anbieternamen-Musters abgeglichen. Bei mehreren übereinstimmenden Regeln haben Richtlinien mit höherer Priorität Vorrang.",
@@ -2043,7 +2077,10 @@
     "downloadsPerDay": "Downloads / Tag"
   },
   "helpPanel": {
-    "closeAria": "Hilfebereich schließen"
+    "closeAria": "Hilfebereich schließen",
+    "whatYouCanDo": "Was Sie tun können",
+    "apiReferenceLabel": "Vollständige API-Referenz:",
+    "apiDocsLink": "API-Dokumentation"
   },
   "layout": {
     "mainNavigation": "Hauptnavigation"

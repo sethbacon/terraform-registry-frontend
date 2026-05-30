@@ -721,6 +721,40 @@
         }
       }
     },
+    "versionApprovals": {
+      "title": "Aprobaciones de versiones",
+      "overview": "Cuando un proveedor o un servidor de réplicas binarias de Terraform tiene activada la opción «Requiere aprobación», cada nueva versión sincronizada queda en espera de aprobación y oculta a los clientes de Terraform hasta que un administrador la apruebe; por lo tanto, «última» significa «última versión aprobada». Esta página es la cola de revisión de esas versiones restringidas.",
+      "actions": {
+        "whyPending": {
+          "heading": "Por qué hay una versión aquí",
+          "text": "Las versiones solo aparecen aquí en los servidores espejo que tengan activada la opción «Requiere aprobación». Una versión sincronizada permanece oculta en la lista de versiones, en el índice de servidores espejo de la red y en las descargas hasta que se apruebe. Las versiones existentes y los servidores espejo sin restricción de acceso no se ven afectados."
+        },
+        "statusTabs": {
+          "heading": "Pestañas de estado",
+          "text": "Cambia entre «Pendiente», «Aprobado» y «Rechazado» para ver las versiones en cada estado. «Pendiente» es la cola que requiere una acción; las versiones «Rechazadas» permanecen ocultas de forma permanente."
+        },
+        "typeFilter": {
+          "heading": "Filtrar por tipo",
+          "text": "Utiliza el botón de alternancia «Proveedor / Terraform» para limitar la lista a las versiones duplicadas de los proveedores o a las versiones binarias de Terraform."
+        },
+        "approveReject": {
+          "heading": "Aprobar o rechazar",
+          "text": "Utiliza el botón «Aprobar» o «Rechazar» de una fila pendiente para abrir el cuadro de diálogo de confirmación. Añade notas opcionales para explicar el motivo; al aprobar una versión de Terraform, el sistema vuelve a calcular cuál es la «última» versión."
+        },
+        "bulkActions": {
+          "heading": "Aprobar o rechazar en bloque",
+          "text": "Marca las casillas de selección (o la casilla de la cabecera para seleccionarlas todas) y utiliza «Aprobar selección» o «Rechazar selección» para aplicar la acción a varias versiones a la vez. El resultado indica cuántas se han procesado correctamente y enumera los posibles errores."
+        },
+        "auditTrail": {
+          "heading": "Registro de auditoría",
+          "text": "Despliega una fila para ver su historial de aprobaciones: aprobaciones automáticas, decisiones manuales, quién las gestionó, cualquier nota y la regla que se aplicó en las aprobaciones automáticas."
+        },
+        "autoApprove": {
+          "heading": "Aprobación automática",
+          "text": "Las reglas de aprobación automática de un espejo (patch_only, gpg_verified, semver_constraint, delay_hours) pueden aprobar versiones de bajo riesgo en el momento de la sincronización, de modo que solo llegan aquí las versiones que requieren revisión. La regla delay_hours aprueba la versión en una sincronización posterior, una vez que ha transcurrido un tiempo; en el caso de los binarios de Terraform, la regla gpg_verified no se aplica en el momento del descubrimiento."
+        }
+      }
+    },
     "mirrorPolicies": {
       "title": "Políticas de duplicación",
       "overview": "Las políticas de réplica controlan qué proveedores pueden o no pueden replicarse, y si su réplica requiere una solicitud de aprobación. Las políticas se aplican en función de la URL del registro de origen, el patrón del espacio de nombres y el patrón del nombre del proveedor. Cuando coinciden varias reglas, prevalecen las políticas de mayor prioridad.",
@@ -2043,7 +2077,10 @@
     "downloadsPerDay": "Descargas / Día"
   },
   "helpPanel": {
-    "closeAria": "Cerrar el panel de ayuda"
+    "closeAria": "Cerrar el panel de ayuda",
+    "whatYouCanDo": "Qué puedes hacer",
+    "apiReferenceLabel": "Referencia completa de la API:",
+    "apiDocsLink": "Documentación de la API"
   },
   "layout": {
     "mainNavigation": "Navegación principal"

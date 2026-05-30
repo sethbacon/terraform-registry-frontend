@@ -721,6 +721,40 @@
         }
       }
     },
+    "versionApprovals": {
+      "title": "版本审批",
+      "overview": "当提供商或 Terraform 二进制镜像启用了“需要审批”功能时，每个新同步的版本都会处于待审批状态，并被隐藏，直到管理员批准后才会向 Terraform 客户端显示——因此，“最新”指的是“最新已批准版本”。本页面即为这些受控版本的审核队列。",
+      "actions": {
+        "whyPending": {
+          "heading": "为何会有这个版本",
+          "text": "此处仅显示启用了“需要批准”功能的镜像的版本。同步后的版本在获得批准之前，不会显示在版本列表、网络镜像索引和下载页面中。现有版本和未启用“需要批准”功能的镜像不受此影响。"
+        },
+        "statusTabs": {
+          "heading": "状态选项卡",
+          "text": "在“待处理”、“已批准”和“已拒绝”之间切换，即可查看各状态下的版本。“待处理”是需要采取行动的队列；“已拒绝”的版本将永久隐藏。"
+        },
+        "typeFilter": {
+          "heading": "按类型筛选",
+          "text": "使用“提供商/Terraform”切换按钮，可将列表筛选为镜像的提供商版本或Terraform二进制版本。"
+        },
+        "approveReject": {
+          "heading": "批准或拒绝",
+          "text": "点击待处理行中的“批准”或“拒绝”按钮，即可打开确认对话框。您可以添加备注说明原因；批准某个 Terraform 版本后，系统也会重新计算哪个版本是“最新”版本。"
+        },
+        "bulkActions": {
+          "heading": "批量批准/拒绝",
+          "text": "勾选复选框（或勾选顶部的复选框以全选），然后使用“批准所选”或“拒绝所选”功能，即可一次性处理多个版本。结果会显示成功数量，并列出所有失败项。"
+        },
+        "auditTrail": {
+          "heading": "审计轨迹",
+          "text": "展开一行以查看其审批历史——自动审批、人工决策、操作人员、相关备注，以及触发自动审批的规则。"
+        },
+        "autoApprove": {
+          "heading": "自动批准",
+          "text": "镜像的自动批准规则（patch_only、gpg_verified、semver_constraint、delay_hours）可在同步时批准低风险版本，因此只有需要审核的版本才会被收录到此处。delay_hours 规则会在版本存放一段时间后，于后续同步时进行批准；对于 Terraform 二进制文件，gpg_verified 规则在发现阶段不适用。"
+        }
+      }
+    },
     "mirrorPolicies": {
       "title": "镜像策略",
       "overview": "镜像策略用于控制允许或拒绝哪些提供商进行镜像，以及镜像这些提供商是否需要提交审批请求。策略通过上游注册表 URL、命名空间模式和提供商名称模式进行匹配。当多条规则均匹配时，优先级更高的策略将优先生效。",
@@ -2043,7 +2077,10 @@
     "downloadsPerDay": "每日下载量"
   },
   "helpPanel": {
-    "closeAria": "关闭帮助面板"
+    "closeAria": "关闭帮助面板",
+    "whatYouCanDo": "您可以采取以下措施",
+    "apiReferenceLabel": "完整的 API 参考：",
+    "apiDocsLink": "API 文档"
   },
   "layout": {
     "mainNavigation": "主导航"
