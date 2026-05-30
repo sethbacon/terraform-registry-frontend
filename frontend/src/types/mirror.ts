@@ -12,6 +12,8 @@ export interface MirrorConfiguration {
   platform_filter?: string // JSON array string of "os/arch" (e.g. ["linux/amd64", "windows/amd64"])
   enabled: boolean
   sync_interval_hours: number
+  requires_approval?: boolean
+  auto_approve_rules?: string // JSON: AutoApproveRules
   last_sync_at?: string
   last_sync_status?: 'success' | 'failed' | 'in_progress'
   last_sync_error?: string
@@ -50,6 +52,8 @@ export interface CreateMirrorConfigRequest {
   platform_filter?: string[] // List of "os/arch" strings (e.g. ["linux/amd64", "windows/amd64"])
   enabled?: boolean
   sync_interval_hours?: number
+  requires_approval?: boolean
+  auto_approve_rules?: string // JSON: AutoApproveRules
 }
 
 export interface UpdateMirrorConfigRequest {
@@ -63,6 +67,8 @@ export interface UpdateMirrorConfigRequest {
   platform_filter?: string[] // List of "os/arch" strings (e.g. ["linux/amd64", "windows/amd64"])
   enabled?: boolean
   sync_interval_hours?: number
+  requires_approval?: boolean
+  auto_approve_rules?: string // JSON: AutoApproveRules
 }
 
 export interface TriggerSyncRequest {
@@ -87,6 +93,7 @@ export interface MirroredProviderVersion {
   synced_at: string
   shasum_verified: boolean
   gpg_verified: boolean
+  approval_status?: 'pending_approval' | 'approved' | 'rejected' | null
   platforms: MirroredProviderPlatform[]
 }
 

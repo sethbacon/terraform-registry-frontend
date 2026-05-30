@@ -6,9 +6,13 @@ import { MemoryRouter } from 'react-router-dom'
 // ---- Mocks ----
 
 const getDashboardStatsMock = vi.fn()
+const getPendingVersionApprovalCountMock = vi.fn()
 vi.mock('../../../services/api', () => ({
   default: {
     getDashboardStats: (...args: unknown[]) => getDashboardStatsMock(...args),
+    getPendingVersionApprovalCount: (...args: unknown[]) =>
+      getPendingVersionApprovalCountMock(...args),
+    getOrgQuotas: () => Promise.reject(new Error('not found')),
   },
 }))
 
@@ -116,6 +120,7 @@ const fakeDashboardData = {
 describe('DashboardPage', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    getPendingVersionApprovalCountMock.mockResolvedValue({ count: 0 })
   })
 
   it('shows loading spinner while fetching', () => {
@@ -219,5 +224,21 @@ describe('DashboardPage', () => {
         ),
       ).toBeInTheDocument()
     })
+  })
+
+  it('shows pending version approvals badge when count > 0', async () => {
+    getDashboardStatsMock.mockResolvedValue(fakeDashboardData)
+    getPendingVersionApprovalCountMock.mockResolvedValue({ count: 3 })
+    renderPage()
+    await waitFor(() => expect(screen.getByText('Dashboard')).toBeInTheDocument())
+    await waitFor(() => expect(screen.getByText('3 pending approvals')).toBeInTheDocument())
+  })
+
+  it('hides pending version approvals badge when count is 0', async () => {
+    getDashboardStatsMock.mockResolvedValue(fakeDashboardData)
+    getPendingVersionApprovalCountMock.mockResolvedValue({ count: 0 })
+    renderPage()
+    await waitFor(() => expect(screen.getByText('Dashboard')).toBeInTheDocument())
+    expect(screen.queryByText(/pending approval/i)).not.toBeInTheDocument()
   })
 })

@@ -716,4 +716,65 @@ describe('MirrorsPage', () => {
       expect(screen.queryByText('Providers — Upstream Public')).not.toBeInTheDocument()
     })
   })
+
+  it('shows requires approval switch in create dialog', async () => {
+    listMirrorsMock.mockResolvedValue([])
+    const user = userEvent.setup()
+    renderWithProviders(<MirrorsPage />)
+    await waitFor(() => expect(screen.getByText('Add Mirror')).toBeInTheDocument())
+    await user.click(screen.getByText('Add Mirror'))
+    expect(screen.getByText('Require approval for new versions')).toBeInTheDocument()
+  })
+
+  it('passes requires_approval false by default on create', async () => {
+    listMirrorsMock.mockResolvedValue([])
+    createMirrorMock.mockResolvedValue({ id: 'new-1' })
+    const user = userEvent.setup()
+    renderWithProviders(<MirrorsPage />)
+    await waitFor(() => expect(screen.getByText('Add Mirror')).toBeInTheDocument())
+    await user.click(screen.getByText('Add Mirror'))
+    const nameInput = screen.getByLabelText('Name *')
+    await user.clear(nameInput)
+    await user.type(nameInput, 'Test Mirror')
+    await user.click(screen.getByText('Create'))
+    await waitFor(() => expect(createMirrorMock).toHaveBeenCalledTimes(1))
+    expect(createMirrorMock.mock.calls[0][0].requires_approval).toBe(false)
+  })
+
+  it('shows approval status chip on version rows when status set', async () => {
+    listMirrorsMock.mockResolvedValue([baseMirror])
+    getMirrorProvidersMock.mockResolvedValue([
+      {
+        id: 'prov-1',
+        mirror_config_id: 'mirror-1',
+        provider_id: 'p1',
+        upstream_namespace: 'hashicorp',
+        upstream_type: 'aws',
+        last_synced_at: '2025-07-01T08:00:00Z',
+        last_sync_version: '5.10.0',
+        sync_enabled: true,
+        created_at: '2025-06-01T00:00:00Z',
+        versions: [
+          {
+            id: 'v1',
+            mirrored_provider_id: 'prov-1',
+            provider_version_id: 'pv1',
+            upstream_version: '5.10.0',
+            synced_at: '2025-07-01T08:00:00Z',
+            shasum_verified: true,
+            gpg_verified: false,
+            approval_status: 'pending_approval',
+            platforms: [],
+          },
+        ],
+      },
+    ])
+    const user = userEvent.setup()
+    renderWithProviders(<MirrorsPage />)
+    await waitFor(() => expect(screen.getByText('Upstream Public')).toBeInTheDocument())
+    await user.click(screen.getByText('View Details'))
+    await waitFor(() => expect(screen.getByText('hashicorp')).toBeInTheDocument())
+    await user.click(screen.getByLabelText('Toggle versions'))
+    await waitFor(() => expect(screen.getByText('Pending Approval')).toBeInTheDocument())
+  })
 })

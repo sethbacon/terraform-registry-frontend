@@ -642,6 +642,13 @@ const DashboardPage: React.FC = () => {
     retry: false,
   })
 
+  const { data: pendingVersionCount } = useQuery({
+    queryKey: queryKeys.versionApprovals.pendingCount(),
+    queryFn: () => api.getPendingVersionApprovalCount(),
+    enabled: allowedScopes.includes('admin') || allowedScopes.includes('mirrors:read'),
+    retry: false,
+  })
+
   const { data: gpgKeysData } = useReleasesGPGKeyStatus()
 
   const error = queryError ? t('admin.dashboard.loadError') : null
@@ -901,6 +908,29 @@ const DashboardPage: React.FC = () => {
                   icon={<CloudDownload fontSize="small" />}
                   route="/admin/mirrors"
                 />
+                {(pendingVersionCount?.count ?? 0) > 0 && (
+                  <Paper
+                    onClick={() => navigate('/admin/version-approvals')}
+                    sx={{
+                      px: 2,
+                      py: 1.5,
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 1,
+                      cursor: 'pointer',
+                      border: '1px solid',
+                      borderColor: 'warning.main',
+                      '&:hover': { bgcolor: 'action.hover' },
+                    }}
+                  >
+                    <Sync fontSize="small" color="warning" />
+                    <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                      {t('admin.dashboard.pendingVersionApprovals', {
+                        count: pendingVersionCount?.count ?? 0,
+                      })}
+                    </Typography>
+                  </Paper>
+                )}
               </>
             )}
             {hasScope('admin') && (

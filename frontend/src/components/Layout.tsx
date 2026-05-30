@@ -301,6 +301,13 @@ const Layout = () => {
             scope: 'mirrors:read',
           },
           {
+            text: t('nav.admin.versionApprovals'),
+            icon: <HourglassEmpty />,
+            path: '/admin/version-approvals',
+            tooltip: t('nav.admin.versionApprovalsTooltip'),
+            scope: 'mirrors:read',
+          },
+          {
             text: t('nav.admin.mirrorPolicies'),
             icon: <Policy />,
             path: '/admin/policies',

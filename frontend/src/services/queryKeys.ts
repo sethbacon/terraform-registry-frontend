@@ -127,4 +127,11 @@ export const queryKeys = {
     active: () => [...queryKeys.advisories._def, 'active'] as const,
     adminList: (kind?: string) => [...queryKeys.advisories._def, 'admin', kind] as const,
   },
+  versionApprovals: {
+    _def: ['versionApprovals'] as const,
+    list: (params?: { type?: string; config_id?: string; status?: string }) =>
+      [...queryKeys.versionApprovals._def, 'list', params] as const,
+    pendingCount: () => [...queryKeys.versionApprovals._def, 'pendingCount'] as const,
+    events: (id: string) => [...queryKeys.versionApprovals._def, 'events', id] as const,
+  },
 } as const

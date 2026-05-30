@@ -38,6 +38,7 @@ const RolesPage = lazy(() => import('./pages/admin/RolesPage'))
 const StoragePage = lazy(() => import('./pages/admin/StoragePage'))
 const TerraformMirrorPage = lazy(() => import('./pages/admin/TerraformMirrorPage'))
 const ApprovalsPage = lazy(() => import('./pages/admin/ApprovalsPage'))
+const VersionApprovalsPage = lazy(() => import('./pages/admin/VersionApprovalsPage'))
 const MirrorPoliciesPage = lazy(() => import('./pages/admin/MirrorPoliciesPage'))
 const OIDCSettingsPage = lazy(() => import('./pages/admin/OIDCSettingsPage'))
 const SCIMProvisioningPage = lazy(() => import('./pages/admin/SCIMProvisioningPage'))
@@ -288,6 +289,18 @@ function App() {
                               <ErrorBoundary>
                                 <Suspense fallback={loader}>
                                   <ApprovalsPage />
+                                </Suspense>
+                              </ErrorBoundary>
+                            </ProtectedRoute>
+                          }
+                        />
+                        <Route
+                          path="/admin/version-approvals"
+                          element={
+                            <ProtectedRoute requiredScope="mirrors:read">
+                              <ErrorBoundary>
+                                <Suspense fallback={loader}>
+                                  <VersionApprovalsPage />
                                 </Suspense>
                               </ErrorBoundary>
                             </ProtectedRoute>
