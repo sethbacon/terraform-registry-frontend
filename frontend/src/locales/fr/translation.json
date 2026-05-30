@@ -721,6 +721,40 @@
         }
       }
     },
+    "versionApprovals": {
+      "title": "Approbations de version",
+      "overview": "Lorsqu'un fournisseur ou un miroir binaire Terraform a activé l'option « Require approval » (Approbation requise), chaque nouvelle version synchronisée est mise en attente d'approbation et masquée aux clients Terraform jusqu'à ce qu'un administrateur l'approuve ; ainsi, « latest » (dernière version) signifie « dernière version approuvée ». Cette page correspond à la file d'attente de révision pour ces versions soumises à validation.",
+      "actions": {
+        "whyPending": {
+          "heading": "Pourquoi cette version existe-t-elle ?",
+          "text": "Les versions n'apparaissent ici que pour les miroirs sur lesquels l'option « Approuver » est activée. Une version synchronisée reste masquée dans la liste des versions, l'index des miroirs du réseau et la section des téléchargements jusqu'à ce qu'elle soit approuvée. Les versions existantes et les miroirs sans restriction ne sont pas concernés."
+        },
+        "statusTabs": {
+          "heading": "Onglets d'état",
+          "text": "Passez de l'état « En attente » à « Approuvé » puis à « Refusé » pour voir les versions dans chaque état. L'état « En attente » correspond à la file d'attente nécessitant une intervention ; les versions « Refusées » restent masquées de manière permanente."
+        },
+        "typeFilter": {
+          "heading": "Filtrer par type",
+          "text": "Utilisez le bouton bascule « Fournisseur / Terraform » pour limiter la liste aux versions du fournisseur en miroir ou aux versions binaires de Terraform."
+        },
+        "approveReject": {
+          "heading": "Approuver ou rejeter",
+          "text": "Cliquez sur le bouton « Approuver » ou « Refuser » d'une ligne en attente pour ouvrir la boîte de dialogue de confirmation. Vous pouvez ajouter des remarques facultatives pour expliquer votre décision ; l'approbation d'une version de Terraform entraîne également le recalcul de la version considérée comme « la plus récente »."
+        },
+        "bulkActions": {
+          "heading": "Approuver / Refuser en masse",
+          "text": "Cochez les cases (ou la case en haut de la liste pour tout sélectionner), puis utilisez les boutons « Approuver la sélection » ou « Rejeter la sélection » pour traiter plusieurs versions à la fois. Le résultat indique le nombre de versions approuvées et répertorie celles qui ont été rejetées."
+        },
+        "auditTrail": {
+          "heading": "Piste d'audit",
+          "text": "Développez une ligne pour afficher l'historique des validations : validations automatiques, décisions manuelles, intervenants, remarques éventuelles et règle appliquée pour les validations automatiques."
+        },
+        "autoApprove": {
+          "heading": "Approbation automatique",
+          "text": "Les règles d'approbation automatique d'un miroir (patch_only, gpg_verified, semver_constraint, delay_hours) permettent d'approuver les versions à faible risque au moment de la synchronisation, de sorte que seules les versions nécessitant une révision y sont transférées. La règle delay_hours approuve la version lors d'une synchronisation ultérieure, une fois que celle-ci a pris de l'âge ; pour les binaires Terraform, la règle gpg_verified ne s'applique pas au moment de la détection."
+        }
+      }
+    },
     "mirrorPolicies": {
       "title": "Politiques relatives aux miroirs",
       "overview": "Les politiques de mise en miroir déterminent quels fournisseurs peuvent ou ne peuvent pas faire l'objet d'une mise en miroir, et si cette opération nécessite une demande d'autorisation. Les politiques sont appliquées en fonction de l'URL du registre en amont, du modèle d'espace de noms et du modèle de nom du fournisseur. En cas de correspondance avec plusieurs règles, les politiques ayant la priorité la plus élevée prévalent.",
@@ -2043,7 +2077,10 @@
     "downloadsPerDay": "Téléchargements / Jour"
   },
   "helpPanel": {
-    "closeAria": "Fermer le panneau d'aide"
+    "closeAria": "Fermer le panneau d'aide",
+    "whatYouCanDo": "Ce que vous pouvez faire",
+    "apiReferenceLabel": "Référence complète de l'API :",
+    "apiDocsLink": "Documentation de l'API"
   },
   "layout": {
     "mainNavigation": "Navigation principale"

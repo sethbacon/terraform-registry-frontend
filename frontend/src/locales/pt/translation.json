@@ -721,6 +721,40 @@
         }
       }
     },
+    "versionApprovals": {
+      "title": "Aprovações de versão",
+      "overview": "Quando um fornecedor ou um espelho binário do Terraform tem a opção «Requer aprovação» ativada, cada versão recém-sincronizada fica em espera de aprovação e é ocultada dos clientes do Terraform até que um administrador a aprove — por isso, «mais recente» significa «versão mais recente aprovada». Esta página é a fila de revisão dessas versões em espera.",
+      "actions": {
+        "whyPending": {
+          "heading": "Por que existe esta versão",
+          "text": "As versões aparecem aqui apenas para os espelhos com a opção «Requer aprovação» ativada. Uma versão sincronizada permanece oculta na lista de versões, no índice de espelhos de rede e nas transferências até ser aprovada. As versões existentes e os espelhos sem restrições não são afetados."
+        },
+        "statusTabs": {
+          "heading": "Separadores de estado",
+          "text": "Alterne entre «Pendente», «Aprovado» e «Rejeitado» para ver as versões em cada estado. «Pendente» é a fila que requer uma ação; as versões «Rejeitadas» permanecem permanentemente ocultas."
+        },
+        "typeFilter": {
+          "heading": "Filtrar por tipo",
+          "text": "Utilize o botão de alternância «Provedor / Terraform» para restringir a lista às versões espelhadas do provedor ou às versões binárias do Terraform."
+        },
+        "approveReject": {
+          "heading": "Aprovar ou rejeitar",
+          "text": "Utilize o botão «Aprovar» ou «Rejeitar» numa linha pendente para abrir a caixa de diálogo de confirmação. Adicione notas opcionais para registar o motivo; ao aprovar uma versão do Terraform, o sistema volta a calcular qual é a versão «mais recente»."
+        },
+        "bulkActions": {
+          "heading": "Aprovar/Rejeitar em massa",
+          "text": "Marque as caixas de seleção (ou a caixa de seleção do cabeçalho para selecionar tudo) e utilize as opções «Aprovar selecionados» / «Rejeitar selecionados» para agir sobre várias versões de uma só vez. O resultado indica quantas foram aprovadas e lista as que falharam."
+        },
+        "auditTrail": {
+          "heading": "Registo de auditoria",
+          "text": "Expanda uma linha para ver o seu histórico de aprovação — aprovações automáticas, decisões manuais, quem tomou a decisão, quaisquer notas e a regra que se aplicou às aprovações automáticas."
+        },
+        "autoApprove": {
+          "heading": "Aprovação automática",
+          "text": "As regras de aprovação automática de um espelho (patch_only, gpg_verified, semver_constraint, delay_hours) podem aprovar versões de baixo risco no momento da sincronização, de modo que apenas as versões que necessitam de revisão cheguem aqui. A regra delay_hours aprova numa sincronização posterior, assim que a versão tiver atingido um certo tempo de existência; no caso dos binários do Terraform, a regra gpg_verified não se aplica no momento da detecção."
+        }
+      }
+    },
     "mirrorPolicies": {
       "title": "Políticas de espelhamento",
       "overview": "As políticas de espelhamento controlam quais os fornecedores que podem ou não ser espelhados e se o espelhamento requer um pedido de aprovação. As políticas são comparadas com base no URL do registo de origem, no padrão do espaço de nomes e no padrão do nome do fornecedor. Quando várias regras correspondem, as políticas com prioridade mais elevada têm precedência.",
@@ -2043,7 +2077,10 @@
     "downloadsPerDay": "Downloads / Dia"
   },
   "helpPanel": {
-    "closeAria": "Fechar painel de ajuda"
+    "closeAria": "Fechar painel de ajuda",
+    "whatYouCanDo": "O que pode fazer",
+    "apiReferenceLabel": "Referência completa da API:",
+    "apiDocsLink": "Documentação da API"
   },
   "layout": {
     "mainNavigation": "Navegação principal"
