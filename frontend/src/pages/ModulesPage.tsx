@@ -21,12 +21,16 @@ import {
   InputLabel,
   Select,
   MenuItem,
+  Collapse,
+  IconButton,
 } from '@mui/material'
 import type { SelectChangeEvent } from '@mui/material'
 import SearchIcon from '@mui/icons-material/Search'
 import CloudUpload from '@mui/icons-material/CloudUpload'
 import ViewModuleIcon from '@mui/icons-material/ViewModule'
 import CategoryIcon from '@mui/icons-material/Category'
+import ExpandMore from '@mui/icons-material/ExpandMore'
+import ExpandLess from '@mui/icons-material/ExpandLess'
 import api from '../services/api'
 import { queryKeys } from '../services/queryKeys'
 import { Module } from '../types'
@@ -54,6 +58,12 @@ function buildSortValue(sort?: string | null, order?: string | null): string {
 /** Parse a URL ?view= value into a validated ViewMode (grouped is the default). */
 function parseViewMode(value: string | null): ViewMode {
   return value === 'grid' ? 'grid' : 'grouped'
+}
+
+/** Parse the ?collapsed= URL value into a set of collapsed provider keys. */
+function parseCollapsed(value: string | null): Set<string> {
+  if (!value) return new Set()
+  return new Set(value.split(',').filter(Boolean))
 }
 
 /** Group an array of modules by their system (provider) field, alphabetically. */
@@ -136,6 +146,13 @@ const ModulesPage: React.FC = () => {
   // Grouped is the default — only grid is persisted as a query param to keep URLs tidy.
   const viewMode: ViewMode = parseViewMode(searchParams.get('view'))
   const limit = viewMode === 'grouped' ? 100 : 12
+
+  // Collapsed provider sections (grouped view) are URL-backed (?collapsed=aws,gcp)
+  // so the state survives reload and is shareable. Default is all expanded.
+  const collapsedProviders = useMemo(
+    () => parseCollapsed(searchParams.get('collapsed')),
+    [searchParams],
+  )
 
   const { sort: apiSort, order: apiOrder } = parseSortValue(sortValue)
 
@@ -234,6 +251,30 @@ const ModulesPage: React.FC = () => {
           { replace: true },
         )
       }
+    },
+    [setSearchParams],
+  )
+
+  const handleToggleProvider = useCallback(
+    (provider: string) => {
+      setSearchParams(
+        (prev) => {
+          const next = new URLSearchParams(prev)
+          const collapsed = parseCollapsed(next.get('collapsed'))
+          if (collapsed.has(provider)) {
+            collapsed.delete(provider)
+          } else {
+            collapsed.add(provider)
+          }
+          if (collapsed.size > 0) {
+            next.set('collapsed', Array.from(collapsed).join(','))
+          } else {
+            next.delete('collapsed')
+          }
+          return next
+        },
+        { replace: true },
+      )
     },
     [setSearchParams],
   )
@@ -401,27 +442,57 @@ const ModulesPage: React.FC = () => {
       ) : viewMode === 'grouped' ? (
         /* ---- Grouped by provider ---- */
         (<>
-          {groupedModules.map(([provider, providerModules]) => (
-            <Box key={provider} sx={{ mb: 5 }}>
-              {/* Provider section header */}
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, mb: 2 }}>
-                <ProviderIcon provider={provider} size={28} />
-                <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                  {providerDisplayName(provider)}
-                </Typography>
-                <Chip
-                  label={providerModules.length}
-                  size="small"
-                  color="primary"
-                  variant="outlined"
-                />
+          {groupedModules.map(([provider, providerModules]) => {
+            const isCollapsed = collapsedProviders.has(provider)
+            return (
+              <Box key={provider} sx={{ mb: 5 }}>
+                {/* Provider section header — click to collapse/expand its modules */}
+                <Box
+                  role="button"
+                  tabIndex={0}
+                  aria-expanded={!isCollapsed}
+                  aria-label={t('modules.toggleProviderAriaLabel', {
+                    provider: providerDisplayName(provider),
+                  })}
+                  onClick={() => handleToggleProvider(provider)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault()
+                      handleToggleProvider(provider)
+                    }
+                  }}
+                  sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 1.5,
+                    mb: 2,
+                    cursor: 'pointer',
+                    userSelect: 'none',
+                  }}
+                >
+                  <IconButton size="small" tabIndex={-1} aria-hidden="true">
+                    {isCollapsed ? <ExpandMore /> : <ExpandLess />}
+                  </IconButton>
+                  <ProviderIcon provider={provider} size={28} />
+                  <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                    {providerDisplayName(provider)}
+                  </Typography>
+                  <Chip
+                    label={providerModules.length}
+                    size="small"
+                    color="primary"
+                    variant="outlined"
+                  />
+                </Box>
+                <Divider sx={{ mb: 2 }} />
+                <Collapse in={!isCollapsed} unmountOnExit>
+                  <Grid container spacing={3}>
+                    {providerModules.map(renderModuleCard)}
+                  </Grid>
+                </Collapse>
               </Box>
-              <Divider sx={{ mb: 2 }} />
-              <Grid container spacing={3}>
-                {providerModules.map(renderModuleCard)}
-              </Grid>
-            </Box>
-          ))}
+            )
+          })}
           {totalPages > 1 && (
             <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
               <Pagination
