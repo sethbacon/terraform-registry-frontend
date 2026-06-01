@@ -186,6 +186,7 @@
     "viewGridAriaLabel": "vista tabellare",
     "viewByProvider": "Per fornitore",
     "viewByProviderAriaLabel": "raggruppati per fornitore",
+    "toggleProviderAriaLabel": "Attiva/disattiva i moduli di \"{{provider}}\"",
     "loadError": "Impossibile caricare i moduli. Riprovare.",
     "noResultsTitle": "Non sono stati trovati moduli",
     "noResultsTryDifferent": "Prova una query di ricerca diversa o un'altra opzione di ordinamento",

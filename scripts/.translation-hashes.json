@@ -171,6 +171,7 @@
   "modules.viewGridAriaLabel": "065d76c2ff3fc1748e58d151ebfcaef8808c7bfb9ec9f631cc9f2eef719af5f9",
   "modules.viewByProvider": "dae90e80dbb1aaf461f2e091a32cb56345d8584cb2f2c53fc27302ca6da4ce0c",
   "modules.viewByProviderAriaLabel": "eea9ccf5593793d71488267cb7c2051ea3e9d7de0cacb69293b8f06b11b0492d",
+  "modules.toggleProviderAriaLabel": "09658459180ca394b91847f9c346cbb079ed7f45e297923883e5b59ad7541f74",
   "modules.loadError": "7f29a3bba0410052754e83c23dc991724253df6964ba1954f5f048035acb77ed",
   "modules.noResultsTitle": "c165f3511c45780eb59a0d7b2dcf34d286872ff5cc859e77e1e66225f20c9747",
   "modules.noResultsTryDifferent": "74702d41ad834244f2dd4abd84aab1e3ac572517b8b929281eb2aec2e056ee88",

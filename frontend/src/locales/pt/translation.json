@@ -186,6 +186,7 @@
     "viewGridAriaLabel": "visualização em grelha",
     "viewByProvider": "Por prestador",
     "viewByProviderAriaLabel": "agrupados por prestador",
+    "toggleProviderAriaLabel": "ativar/desativar os módulos do {{provider}}",
     "loadError": "Não foi possível carregar os módulos. Por favor, tente novamente.",
     "noResultsTitle": "Não foram encontrados módulos",
     "noResultsTryDifferent": "Experimente uma consulta de pesquisa diferente ou uma opção de ordenação",

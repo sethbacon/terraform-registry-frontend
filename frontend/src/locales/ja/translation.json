@@ -186,6 +186,7 @@
     "viewGridAriaLabel": "グリッド表示",
     "viewByProvider": "提供元",
     "viewByProviderAriaLabel": "プロバイダー別に分類",
+    "toggleProviderAriaLabel": "{{provider}}モジュールの表示/非表示を切り替える",
     "loadError": "モジュールの読み込みに失敗しました。もう一度お試しください。",
     "noResultsTitle": "モジュールが見つかりませんでした",
     "noResultsTryDifferent": "別の検索語句や並べ替えオプションを試してみてください",

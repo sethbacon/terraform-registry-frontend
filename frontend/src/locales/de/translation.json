@@ -186,6 +186,7 @@
     "viewGridAriaLabel": "Tabellenansicht",
     "viewByProvider": "Nach Anbieter",
     "viewByProviderAriaLabel": "nach Anbieter gruppiert",
+    "toggleProviderAriaLabel": "{{provider}}-Module ein- und ausschalten",
     "loadError": "Das Laden der Module ist fehlgeschlagen. Bitte versuche es erneut.",
     "noResultsTitle": "Es wurden keine Module gefunden",
     "noResultsTryDifferent": "Versuchen Sie es mit einer anderen Suchanfrage oder Sortieroption",

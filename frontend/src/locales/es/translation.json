@@ -186,6 +186,7 @@
     "viewGridAriaLabel": "vista en cuadrícula",
     "viewByProvider": "Por proveedor",
     "viewByProviderAriaLabel": "agrupados por proveedor",
+    "toggleProviderAriaLabel": "Activar o desactivar los módulos de «{{provider}}»",
     "loadError": "No se han podido cargar los módulos. Inténtalo de nuevo.",
     "noResultsTitle": "No se han encontrado módulos",
     "noResultsTryDifferent": "Prueba con otra búsqueda u otra opción de ordenación",

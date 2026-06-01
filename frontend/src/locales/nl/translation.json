@@ -186,6 +186,7 @@
     "viewGridAriaLabel": "rasterweergave",
     "viewByProvider": "Per aanbieder",
     "viewByProviderAriaLabel": "gegroepeerd per aanbieder",
+    "toggleProviderAriaLabel": "{{provider}}-modules in- of uitschakelen",
     "loadError": "Het laden van de modules is mislukt. Probeer het nog eens.",
     "noResultsTitle": "Er zijn geen modules gevonden",
     "noResultsTryDifferent": "Probeer een andere zoekopdracht of sorteeroptie",
