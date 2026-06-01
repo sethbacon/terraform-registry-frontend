@@ -186,6 +186,7 @@
     "viewGridAriaLabel": "grid view",
     "viewByProvider": "By Provider",
     "viewByProviderAriaLabel": "grouped by provider",
+    "toggleProviderAriaLabel": "toggle {{provider}} modules",
     "loadError": "Failed to load modules. Please try again.",
     "noResultsTitle": "No modules found",
     "noResultsTryDifferent": "Try a different search query or sort option",

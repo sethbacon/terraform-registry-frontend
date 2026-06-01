@@ -295,4 +295,25 @@ describe('ModulesPage', () => {
     await screen.findByText('consul')
     expect(screen.getByLabelText('Sort By')).toBeInTheDocument()
   })
+
+  // -- Collapsible provider sections --
+
+  it('collapses a provider section when its header is clicked', async () => {
+    const user = userEvent.setup()
+    renderWithRoute()
+    await screen.findByText('consul')
+
+    // Click the aws provider header to collapse it (azure stays expanded).
+    await user.click(screen.getByRole('button', { name: /toggle aws modules/i }))
+
+    await waitFor(() => expect(screen.queryByText('consul')).not.toBeInTheDocument())
+    expect(screen.getByText('vault')).toBeInTheDocument()
+  })
+
+  it('starts with a provider collapsed from the ?collapsed= URL param', async () => {
+    renderWithRoute('/modules?collapsed=aws')
+    await screen.findByText('vault')
+    // aws section is collapsed on first render; azure remains visible.
+    expect(screen.queryByText('consul')).not.toBeInTheDocument()
+  })
 })
