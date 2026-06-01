@@ -69,8 +69,15 @@ test.describe('Admin: Version Approvals', () => {
     await page.goto('/admin/version-approvals');
     await waitForLoad(page);
 
+    // Wait for the data query to settle before asserting. waitForLoad alone is
+    // not enough: isVisible() is an instantaneous check, so if the loading
+    // spinner isn't on screen at that exact instant the helper returns early and
+    // we can race ahead of the first render. The table (with its empty-state row)
+    // or a load-error alert is the settled DOM — wait for one to appear.
+    await page.waitForSelector('table, [class*="MuiAlert"]', { timeout: 10_000 });
+
     // Either gated versions are listed in the table, or the "no versions" empty
-    // state is shown — both are valid depending on test-environment data.
+    // state is shown — both render inside the table, so its presence is enough.
     const hasTable = (await page.locator('table').count()) > 0;
     const hasEmpty = await page
       .getByText(/no versions matching this filter/i)
