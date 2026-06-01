@@ -186,6 +186,7 @@
     "viewGridAriaLabel": "rutenettvisning",
     "viewByProvider": "Etter leverandør",
     "viewByProviderAriaLabel": "gruppert etter leverandør",
+    "toggleProviderAriaLabel": "Veksle mellom «{{provider}}»-modulene",
     "loadError": "Det gikk ikke å laste inn modulene. Prøv på nytt.",
     "noResultsTitle": "Ingen moduler funnet",
     "noResultsTryDifferent": "Prøv et annet søkeord eller en annen sorteringsalternativ",

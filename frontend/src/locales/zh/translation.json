@@ -186,6 +186,7 @@
     "viewGridAriaLabel": "网格视图",
     "viewByProvider": "按服务提供商",
     "viewByProviderAriaLabel": "按服务商分组",
+    "toggleProviderAriaLabel": "切换{{provider}}模块",
     "loadError": "加载模块失败。请重试。",
     "noResultsTitle": "未找到任何模块",
     "noResultsTryDifferent": "请尝试其他搜索词或排序选项",

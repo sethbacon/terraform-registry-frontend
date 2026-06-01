@@ -186,6 +186,7 @@
     "viewGridAriaLabel": "affichage en grille",
     "viewByProvider": "Par prestataire",
     "viewByProviderAriaLabel": "regroupés par prestataire",
+    "toggleProviderAriaLabel": "Activer/désactiver les modules d'{{provider}}",
     "loadError": "Échec du chargement des modules. Veuillez réessayer.",
     "noResultsTitle": "Aucun module trouvé",
     "noResultsTryDifferent": "Essayez une autre requête de recherche ou une autre option de tri",
