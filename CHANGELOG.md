@@ -1,6 +1,14 @@
 <!-- markdownlint-disable MD013 MD024 MD041 -->
 # Changelog
 
+## [2.4.2](https://github.com/sethbacon/terraform-registry-frontend/compare/v2.4.1...v2.4.2) (2026-06-01)
+
+
+### Bug Fixes
+
+* **e2e:** wait for settled DOM in version-approvals table test ([#363](https://github.com/sethbacon/terraform-registry-frontend/issues/363)) ([a3d9559](https://github.com/sethbacon/terraform-registry-frontend/commit/a3d9559a1e5f9ea13c949d0bf4177bd8c07239a8))
+* **modules:** make provider sections collapsible in grouped view ([#359](https://github.com/sethbacon/terraform-registry-frontend/issues/359)) ([7073b46](https://github.com/sethbacon/terraform-registry-frontend/commit/7073b4631124ce87d2dd15268efa51255d5f4265))
+
 ## [2.4.1](https://github.com/sethbacon/terraform-registry-frontend/compare/v2.4.0...v2.4.1) (2026-05-30)
 
 
