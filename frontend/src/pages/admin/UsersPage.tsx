@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import {
-  Container,
   Typography,
   Box,
   Paper,
@@ -42,6 +41,7 @@ import PersonIcon from '@mui/icons-material/Person'
 import DownloadIcon from '@mui/icons-material/Download'
 import PrivacyTipIcon from '@mui/icons-material/PrivacyTip'
 import EmptyState from '../../components/EmptyState'
+import Page from '../../components/Page'
 import api from '../../services/api'
 import { useAuth } from '../../contexts/AuthContext'
 import { User, UserMembership, Organization } from '../../types'
@@ -427,7 +427,7 @@ const UsersPage: React.FC = () => {
   )
 
   return (
-    <Container maxWidth="lg" sx={{ py: 4 }}>
+    <Page maxWidth="lg">
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
         <Box>
           <Typography variant="h4" gutterBottom>
@@ -868,7 +868,7 @@ const UsersPage: React.FC = () => {
           </Button>
         </DialogActions>
       </Dialog>
-    </Container>
+    </Page>
   )
 }
 

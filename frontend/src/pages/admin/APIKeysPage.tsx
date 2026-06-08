@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import {
-  Container,
   Typography,
   Box,
   Paper,
@@ -40,6 +39,7 @@ import DeleteIcon from '@mui/icons-material/Delete'
 import AddIcon from '@mui/icons-material/Add'
 import KeyIcon from '@mui/icons-material/Key'
 import EmptyState from '../../components/EmptyState'
+import Page from '../../components/Page'
 import CopyIcon from '@mui/icons-material/ContentCopy'
 import InfoIcon from '@mui/icons-material/Info'
 import EditIcon from '@mui/icons-material/Edit'
@@ -461,7 +461,7 @@ const APIKeysPage: React.FC = () => {
   )
 
   return (
-    <Container maxWidth="lg" sx={{ py: 4 }} aria-busy={loading} aria-live="polite">
+    <Page maxWidth="lg" aria-busy={loading} aria-live="polite">
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
         <Box>
           <Typography variant="h4" gutterBottom>
@@ -973,7 +973,7 @@ credentials "${REGISTRY_HOST}" {
           </Box>
         </Typography>
       </Paper>
-    </Container>
+    </Page>
   )
 }
 

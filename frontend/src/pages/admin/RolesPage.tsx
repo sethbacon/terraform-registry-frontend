@@ -2,7 +2,6 @@ import React, { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useQuery } from '@tanstack/react-query'
 import {
-  Container,
   Typography,
   Box,
   Paper,
@@ -25,6 +24,7 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import ShieldIcon from '@mui/icons-material/Shield'
 import LockIcon from '@mui/icons-material/Lock'
 import AdminIcon from '@mui/icons-material/AdminPanelSettings'
+import Page from '../../components/Page'
 import api from '../../services/api'
 import { RoleTemplate, AVAILABLE_SCOPES } from '../../types/rbac'
 import { getScopeInfo, getScopeColor } from '../../utils'
@@ -70,7 +70,7 @@ const RolesPage: React.FC = () => {
     }
 
   return (
-    <Container maxWidth="lg" aria-busy={loading} aria-live="polite">
+    <Page maxWidth="lg" aria-busy={loading} aria-live="polite">
       {loading ? (
         <Box
           sx={{
@@ -371,7 +371,7 @@ const RolesPage: React.FC = () => {
           </Paper>
         </>
       )}
-    </Container>
+    </Page>
   )
 }
 

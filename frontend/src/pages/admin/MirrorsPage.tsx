@@ -9,7 +9,6 @@ import {
   Card,
   CardContent,
   CardActions,
-  Container,
   Typography,
   Grid,
   IconButton,
@@ -62,6 +61,7 @@ import ErrorIcon from '@mui/icons-material/Error'
 import ExpandLessIcon from '@mui/icons-material/ExpandLess'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import ScheduleIcon from '@mui/icons-material/Schedule'
+import Page from '../../components/Page'
 import api from '../../services/api'
 import {
   type MirrorConfiguration,
@@ -550,7 +550,7 @@ const MirrorsPage: React.FC = () => {
   }
 
   return (
-    <Container maxWidth="lg" sx={{ py: 4 }} aria-busy={loading} aria-live="polite">
+    <Page maxWidth="lg" aria-busy={loading} aria-live="polite">
       {loading ? (
         <Box
           sx={{
@@ -1187,7 +1187,7 @@ const MirrorsPage: React.FC = () => {
           </Dialog>
         </>
       )}
-    </Container>
+    </Page>
   )
 }
 

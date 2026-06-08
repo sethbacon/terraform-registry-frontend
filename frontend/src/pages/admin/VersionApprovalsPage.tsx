@@ -8,7 +8,6 @@ import {
   Chip,
   CircularProgress,
   Collapse,
-  Container,
   Dialog,
   DialogActions,
   DialogContent,
@@ -35,6 +34,7 @@ import HourglassEmptyIcon from '@mui/icons-material/HourglassEmpty'
 import VerifiedIcon from '@mui/icons-material/Verified'
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown'
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp'
+import Page from '../../components/Page'
 import api from '../../services/api'
 import { queryKeys } from '../../services/queryKeys'
 import { getErrorMessage } from '../../utils/errors'
@@ -393,7 +393,7 @@ const VersionApprovalsPage: React.FC = () => {
   const bulkPending = bulkApproveMutation.isPending || bulkRejectMutation.isPending
 
   return (
-    <Container maxWidth="lg" sx={{ py: 4 }} aria-busy={isLoading} aria-live="polite">
+    <Page maxWidth="lg" aria-busy={isLoading} aria-live="polite">
       <Box sx={{ mb: 3 }}>
         <Typography variant="h4">{t('admin.versionApprovals.pageTitle')}</Typography>
         <Typography variant="body2" sx={{ color: 'text.secondary' }}>
@@ -616,7 +616,7 @@ const VersionApprovalsPage: React.FC = () => {
           </Button>
         </DialogActions>
       </Dialog>
-    </Container>
+    </Page>
   )
 }
 

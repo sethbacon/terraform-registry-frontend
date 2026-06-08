@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { Container, Typography, Box, Grid, Chip, CircularProgress, Alert } from '@mui/material'
+import { Typography, Box, Grid, Chip, CircularProgress, Alert } from '@mui/material'
 import api from '../services/api'
+import Page from '../components/Page'
 import RegistryItemCard from '../components/RegistryItemCard'
 
 interface MirrorSummary {
@@ -74,7 +75,7 @@ const TerraformBinariesPage: React.FC = () => {
   }, [t])
 
   return (
-    <Container maxWidth="lg" sx={{ py: 4 }} aria-busy={loading} aria-live="polite">
+    <Page maxWidth="lg" aria-busy={loading} aria-live="polite">
       <Box sx={{ mb: 2 }}>
         <Typography variant="h4" gutterBottom>
           {t('terraformBinaries.pageTitle')}
@@ -161,7 +162,7 @@ const TerraformBinariesPage: React.FC = () => {
           })}
         </Grid>
       )}
-    </Container>
+    </Page>
   );
 }
 

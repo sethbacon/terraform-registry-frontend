@@ -1,5 +1,6 @@
 import { useState } from 'react'
-import { Box, Container, Typography, Divider, Paper, Chip, Link, Grid, Alert } from '@mui/material'
+import { Box, Typography, Divider, Paper, Chip, Link, Grid, Alert } from '@mui/material'
+import Page from '../../components/Page'
 import RegistryItemCard from '../../components/RegistryItemCard'
 import MarkdownRenderer from '../../components/MarkdownRenderer'
 import ErrorBoundary from '../../components/ErrorBoundary'
@@ -184,7 +185,7 @@ const ComponentShowcase = () => {
   const [migrationWizardOpen, setMigrationWizardOpen] = useState(false)
 
   return (
-    <Container maxWidth="lg" sx={{ py: 4 }}>
+    <Page maxWidth="lg">
       <Typography variant="h3" gutterBottom>
         Component Showcase
       </Typography>
@@ -510,7 +511,7 @@ const ComponentShowcase = () => {
       }}>
         Route: <code>/dev/components</code> &mdash; available only in development mode.
       </Typography>
-    </Container>
+    </Page>
   );
 }
 

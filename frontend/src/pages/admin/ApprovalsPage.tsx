@@ -7,7 +7,6 @@ import {
   Card,
   CardContent,
   CardActions,
-  Container,
   Typography,
   Grid,
   Chip,
@@ -28,6 +27,7 @@ import RefreshIcon from '@mui/icons-material/Refresh'
 import CheckCircleIcon from '@mui/icons-material/CheckCircle'
 import CancelIcon from '@mui/icons-material/Cancel'
 import HourglassEmptyIcon from '@mui/icons-material/HourglassEmpty'
+import Page from '../../components/Page'
 import api from '../../services/api'
 import { formatDate } from '../../utils'
 import { MirrorApprovalRequest } from '../../types/rbac'
@@ -180,7 +180,7 @@ const ApprovalsPage: React.FC = () => {
   }
 
   return (
-    <Container maxWidth="lg" sx={{ py: 4 }} aria-busy={loading} aria-live="polite">
+    <Page maxWidth="lg" aria-busy={loading} aria-live="polite">
       {loading ? (
         <Box
           sx={{
@@ -507,7 +507,7 @@ const ApprovalsPage: React.FC = () => {
           </Dialog>
         </>
       )}
-    </Container>
+    </Page>
   )
 }
 

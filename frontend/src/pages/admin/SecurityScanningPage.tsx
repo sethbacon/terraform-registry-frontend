@@ -3,7 +3,6 @@ import { useTranslation } from 'react-i18next'
 import type { TFunction } from 'i18next'
 import { useQuery } from '@tanstack/react-query'
 import {
-  Container,
   Typography,
   Box,
   Paper,
@@ -29,6 +28,7 @@ import HourglassEmpty from '@mui/icons-material/HourglassEmpty'
 import WarningAmber from '@mui/icons-material/WarningAmber'
 import KeyboardArrowDown from '@mui/icons-material/KeyboardArrowDown'
 import KeyboardArrowRight from '@mui/icons-material/KeyboardArrowRight'
+import Page from '../../components/Page'
 import ScanDiagnostics from '../../components/ScanDiagnostics'
 import ScanFindingsModal from '../../components/ScanFindingsModal'
 import api from '../../services/api'
@@ -192,7 +192,7 @@ const SecurityScanningPage: React.FC = () => {
   const error = configError || statsError
 
   return (
-    <Container maxWidth="lg" sx={{ py: 4 }}>
+    <Page maxWidth="lg">
       <Typography
         variant="h4"
         gutterBottom
@@ -750,7 +750,7 @@ const SecurityScanningPage: React.FC = () => {
         loading={findingsModalLoading}
         moduleLabel={findingsModalLabel}
       />
-    </Container>
+    </Page>
   )
 }
 

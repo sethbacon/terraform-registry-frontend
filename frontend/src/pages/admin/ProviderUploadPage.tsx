@@ -2,7 +2,6 @@ import React, { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate, useLocation } from 'react-router-dom'
 import {
-  Container,
   Typography,
   Box,
   Paper,
@@ -26,6 +25,7 @@ import CloudDownload from '@mui/icons-material/CloudDownload'
 import ArrowBack from '@mui/icons-material/ArrowBack'
 import api from '../../services/api'
 import { getErrorMessage } from '../../utils/errors'
+import Page from '../../components/Page'
 import FileDropZone from '../../components/FileDropZone'
 
 type ProviderMethod = 'choose' | 'upload' | 'mirror'
@@ -333,7 +333,7 @@ const ProviderUploadPage: React.FC = () => {
   )
 
   return (
-    <Container maxWidth="md" sx={{ py: 4 }}>
+    <Page maxWidth="md">
       <Typography variant="h4" gutterBottom>
         {t('admin.providerUpload.pageTitle')}
       </Typography>
@@ -350,7 +350,7 @@ const ProviderUploadPage: React.FC = () => {
         {providerMethod === 'choose' && renderProviderMethodChooser()}
         {providerMethod === 'upload' && renderFileUploadForm()}
       </Paper>
-    </Container>
+    </Page>
   )
 }
 

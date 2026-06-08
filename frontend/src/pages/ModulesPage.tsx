@@ -4,7 +4,6 @@ import { useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import { useDebounce } from '../hooks/useDebounce'
 import {
-  Container,
   Typography,
   Box,
   TextField,
@@ -35,6 +34,7 @@ import api from '../services/api'
 import { queryKeys } from '../services/queryKeys'
 import { Module } from '../types'
 import { useAuth } from '../contexts/AuthContext'
+import Page from '../components/Page'
 import { ProviderIcon, providerDisplayName } from '../components/ProviderIcon'
 import RegistryItemCard from '../components/RegistryItemCard'
 import { RegistryItemGridSkeleton } from '../components/skeletons/RegistryItemCardSkeleton'
@@ -332,7 +332,7 @@ const ModulesPage: React.FC = () => {
   const groupedModules = useMemo(() => groupByProvider(modules), [modules])
 
   return (
-    <Container maxWidth="lg" sx={{ py: 4 }} aria-busy={loading} aria-live="polite">
+    <Page maxWidth="lg" aria-busy={loading} aria-live="polite">
       {/* Header */}
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
         <Box>
@@ -524,7 +524,7 @@ const ModulesPage: React.FC = () => {
           )}
         </>)
       )}
-    </Container>
+    </Page>
   );
 }
 

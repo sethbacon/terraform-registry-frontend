@@ -3,7 +3,6 @@ import { useTranslation } from 'react-i18next'
 import { useNavigate, Link as RouterLink } from 'react-router-dom'
 import MarkdownRenderer from '../components/MarkdownRenderer'
 import {
-  Container,
   Typography,
   Box,
   Paper,
@@ -29,6 +28,7 @@ import Warning from '@mui/icons-material/Warning'
 import EditIcon from '@mui/icons-material/Edit'
 import Check from '@mui/icons-material/Check'
 import Close from '@mui/icons-material/Close'
+import Page from '../components/Page'
 import PublishFromSCMWizard from '../components/PublishFromSCMWizard'
 import ModuleDocumentation from '../components/ModuleDocumentation'
 import SecurityScanPanel from '../components/SecurityScanPanel'
@@ -129,14 +129,14 @@ const ModuleDetailPage: React.FC = () => {
       {loading ? (
         <DetailPageSkeleton />
       ) : error || !module ? (
-        <Container maxWidth="xl" sx={{ py: 4 }}>
+        <Page maxWidth="xl">
           <Alert severity="error">{error || 'Module not found'}</Alert>
           <Button startIcon={<ArrowBack />} onClick={() => navigate('/modules')} sx={{ mt: 2 }}>
             Back to Modules
           </Button>
-        </Container>
+        </Page>
       ) : (
-        <Container maxWidth="xl" sx={{ py: 4 }}>
+        <Page maxWidth="xl">
           {/* Breadcrumbs */}
           <Breadcrumbs sx={{ mb: 3 }}>
             <Link
@@ -742,7 +742,7 @@ const ModuleDetailPage: React.FC = () => {
             loading={deprecatingModule}
             data-testid="undeprecate-module-dialog"
           />
-        </Container>
+        </Page>
       )}
     </Box>
   )
