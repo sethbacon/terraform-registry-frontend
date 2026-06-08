@@ -1,6 +1,13 @@
 <!-- markdownlint-disable MD013 MD024 MD041 -->
 # Changelog
 
+## [2.4.3](https://github.com/sethbacon/terraform-registry-frontend/compare/v2.4.2...v2.4.3) (2026-06-08)
+
+
+### Refactor
+
+* **fe:** add shared &lt;Page&gt; wrapper and migrate pages to it ([#367](https://github.com/sethbacon/terraform-registry-frontend/issues/367)) ([0e7b340](https://github.com/sethbacon/terraform-registry-frontend/commit/0e7b340bfc097cb485785f18245ab9ed92a6c3c6))
+
 ## [2.4.2](https://github.com/sethbacon/terraform-registry-frontend/compare/v2.4.1...v2.4.2) (2026-06-01)
 
 
