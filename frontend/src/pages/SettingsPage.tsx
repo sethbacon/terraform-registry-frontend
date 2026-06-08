@@ -1,5 +1,6 @@
-import { Box, Container, FormControlLabel, Paper, Switch, Typography } from '@mui/material'
+import { Box, FormControlLabel, Paper, Switch, Typography } from '@mui/material'
 import { useTranslation } from 'react-i18next'
+import Page from '../components/Page'
 import { useConsent } from '../contexts/ConsentContext'
 
 /**
@@ -11,7 +12,7 @@ export default function SettingsPage() {
   const { preferences, updatePreferences } = useConsent()
 
   return (
-    <Container maxWidth="sm" sx={{ py: 4 }}>
+    <Page maxWidth="sm">
       <Typography variant="h4" component="h1" gutterBottom>
         {t('settingsPage.title')}
       </Typography>
@@ -75,6 +76,6 @@ export default function SettingsPage() {
         </a>
         .
       </Typography>
-    </Container>
+    </Page>
   )
 }

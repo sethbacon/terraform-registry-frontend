@@ -24,7 +24,6 @@ import {
   CircularProgress,
   Tooltip,
   Divider,
-  Container,
 } from '@mui/material'
 import AddIcon from '@mui/icons-material/Add'
 import EditIcon from '@mui/icons-material/Edit'
@@ -36,6 +35,7 @@ import CloudIcon from '@mui/icons-material/Cloud'
 import ContentCopyIcon from '@mui/icons-material/ContentCopy'
 import CheckCircleIcon from '@mui/icons-material/CheckCircle'
 import LinkOffIcon from '@mui/icons-material/LinkOff'
+import Page from '../../components/Page'
 import api from '../../services/api'
 import { getErrorMessage } from '../../utils/errors'
 import { useAuth } from '../../contexts/AuthContext'
@@ -334,7 +334,7 @@ const SCMProvidersPage: React.FC = () => {
   }
 
   return (
-    <Container maxWidth="lg" sx={{ py: 4 }} aria-busy={loading} aria-live="polite">
+    <Page maxWidth="lg" aria-busy={loading} aria-live="polite">
       {loading ? (
         <Box
           sx={{
@@ -911,7 +911,7 @@ const SCMProvidersPage: React.FC = () => {
           </Dialog>
         </>
       )}
-    </Container>
+    </Page>
   )
 }
 

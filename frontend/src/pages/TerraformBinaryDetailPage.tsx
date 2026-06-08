@@ -2,7 +2,6 @@ import React, { useState, useEffect, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useParams, useNavigate, Link as RouterLink } from 'react-router-dom'
 import {
-  Container,
   Typography,
   Box,
   Breadcrumbs,
@@ -36,6 +35,7 @@ import ExpandLessIcon from '@mui/icons-material/ExpandLess'
 import CheckCircleIcon from '@mui/icons-material/CheckCircle'
 import ErrorIcon from '@mui/icons-material/Error'
 import OpenInNewIcon from '@mui/icons-material/OpenInNew'
+import Page from '../components/Page'
 import api from '../services/api'
 import { getErrorMessage } from '../utils/errors'
 import {
@@ -482,13 +482,13 @@ const TerraformBinaryDetailPage: React.FC = () => {
   return (
     <Box aria-busy={loading} aria-live="polite">
       {loading ? (
-        <Container>
+        <Page>
           <Box sx={{ display: 'flex', justifyContent: 'center', mt: 8 }}>
             <CircularProgress />
           </Box>
-        </Container>
+        </Page>
       ) : error ? (
-        <Container sx={{ py: 4 }}>
+        <Page>
           <Alert severity="error">{error}</Alert>
           <Button
             sx={{ mt: 2 }}
@@ -497,9 +497,9 @@ const TerraformBinaryDetailPage: React.FC = () => {
           >
             Back to Mirrors
           </Button>
-        </Container>
+        </Page>
       ) : (
-        <Container maxWidth="lg" sx={{ py: 4 }}>
+        <Page maxWidth="lg">
           {/* Breadcrumbs */}
           <Breadcrumbs sx={{ mb: 2 }}>
             <Link component={RouterLink} to="/terraform-binaries" underline="hover" color="inherit">
@@ -696,7 +696,7 @@ const TerraformBinaryDetailPage: React.FC = () => {
               </Button>
             </DialogActions>
           </Dialog>
-        </Container>
+        </Page>
       )}
     </Box>
   )

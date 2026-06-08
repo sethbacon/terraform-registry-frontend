@@ -25,7 +25,6 @@ import {
   FormControl,
   InputLabel,
   IconButton,
-  Container,
 } from '@mui/material'
 import AddIcon from '@mui/icons-material/Add'
 import EditIcon from '@mui/icons-material/Edit'
@@ -34,6 +33,7 @@ import RefreshIcon from '@mui/icons-material/Refresh'
 import CheckCircleIcon from '@mui/icons-material/CheckCircle'
 import BlockIcon from '@mui/icons-material/Block'
 import PlayArrowIcon from '@mui/icons-material/PlayArrow'
+import Page from '../../components/Page'
 import api from '../../services/api'
 import { MirrorPolicy } from '../../types/rbac'
 import { getErrorMessage } from '../../utils/errors'
@@ -225,7 +225,7 @@ const MirrorPoliciesPage: React.FC = () => {
   }
 
   return (
-    <Container maxWidth="lg" sx={{ py: 4 }} aria-busy={loading} aria-live="polite">
+    <Page maxWidth="lg" aria-busy={loading} aria-live="polite">
       {loading ? (
         <Box
           sx={{
@@ -667,7 +667,7 @@ const MirrorPoliciesPage: React.FC = () => {
           </Dialog>
         </>
       )}
-    </Container>
+    </Page>
   )
 }
 

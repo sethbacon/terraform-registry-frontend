@@ -2,7 +2,6 @@ import React from 'react'
 import { useTranslation } from 'react-i18next'
 import { useQuery } from '@tanstack/react-query'
 import {
-  Container,
   Typography,
   Paper,
   Table,
@@ -17,6 +16,7 @@ import {
   Chip,
   Stack,
 } from '@mui/material'
+import Page from '../../components/Page'
 import api from '../../services/api'
 import type { MTLSConfigResponse } from '../../types'
 
@@ -32,7 +32,7 @@ const MTLSPage: React.FC = () => {
   })
 
   return (
-    <Container maxWidth="lg" sx={{ py: 4 }}>
+    <Page maxWidth="lg">
       <Typography variant="h4" gutterBottom>
         mTLS Client Certificate Mappings
       </Typography>
@@ -137,7 +137,7 @@ const MTLSPage: React.FC = () => {
           )}
         </>
       )}
-    </Container>
+    </Page>
   )
 }
 

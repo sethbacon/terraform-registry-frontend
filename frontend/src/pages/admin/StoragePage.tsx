@@ -25,7 +25,6 @@ import {
   Step,
   StepLabel,
   Paper,
-  Container,
   Accordion,
   AccordionSummary,
   AccordionDetails,
@@ -59,6 +58,7 @@ import type {
   StorageMigration,
 } from '../../types'
 import { queryKeys } from '../../services/queryKeys'
+import Page from '../../components/Page'
 import StorageMigrationWizard from '../../components/StorageMigrationWizard'
 
 const StoragePage: React.FC = () => {
@@ -658,7 +658,7 @@ const StoragePage: React.FC = () => {
   )
 
   const renderSetupWizard = () => (
-    <Container maxWidth="lg" sx={{ py: 4 }}>
+    <Page maxWidth="lg">
       <Typography variant="h4" gutterBottom>
         {showAddWizard ? t('admin.storage.titleAdd') : t('admin.storage.titleConfigure')}
       </Typography>
@@ -736,11 +736,11 @@ const StoragePage: React.FC = () => {
           )}
         </Box>
       </Box>
-    </Container>
+    </Page>
   )
 
   const renderExistingConfigs = () => (
-    <Container maxWidth="lg" sx={{ py: 4 }}>
+    <Page maxWidth="lg">
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
         <Box>
           <Typography variant="h4">{t('admin.storage.storageSettings')}</Typography>
@@ -1027,7 +1027,7 @@ const StoragePage: React.FC = () => {
         onClose={() => setMigrationWizardOpen(false)}
         configs={configs}
       />
-    </Container>
+    </Page>
   )
 
   return (

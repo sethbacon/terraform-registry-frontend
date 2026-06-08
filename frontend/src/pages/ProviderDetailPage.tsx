@@ -2,7 +2,6 @@ import React, { useState, useEffect, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom'
 import {
-  Container,
   Typography,
   Box,
   Paper,
@@ -46,6 +45,7 @@ import { getErrorMessage } from '../utils/errors'
 import { Provider, ProviderVersion, ProviderDocEntry } from '../types'
 import { useAuth } from '../contexts/AuthContext'
 import { REGISTRY_HOST } from '../config'
+import Page from '../components/Page'
 import ProviderDocsSidebar from '../components/ProviderDocsSidebar'
 import ProviderDocContent from '../components/ProviderDocContent'
 
@@ -390,14 +390,14 @@ provider "${name}" {
           <CircularProgress />
         </Box>
       ) : error || !provider ? (
-        <Container maxWidth="xl" sx={{ py: 4 }}>
+        <Page maxWidth="xl">
           <Alert severity="error">{error || 'Provider not found'}</Alert>
           <Button startIcon={<ArrowBack />} onClick={() => navigate('/providers')} sx={{ mt: 2 }}>
             Back to Providers
           </Button>
-        </Container>
+        </Page>
       ) : (
-        <Container maxWidth="xl" sx={{ py: 4 }}>
+        <Page maxWidth="xl">
           {/* Breadcrumbs */}
           <Breadcrumbs sx={{ mb: 3 }}>
             <Link
@@ -1090,7 +1090,7 @@ provider "${name}" {
               </Button>
             </DialogActions>
           </Dialog>
-        </Container>
+        </Page>
       )}
     </Box>
   )

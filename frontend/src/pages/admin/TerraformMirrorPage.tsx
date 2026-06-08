@@ -13,7 +13,6 @@ import {
   Chip,
   CircularProgress,
   Collapse,
-  Container,
   Dialog,
   DialogActions,
   DialogContent,
@@ -63,6 +62,7 @@ import SyncIcon from '@mui/icons-material/Sync'
 
 import api from '../../services/api'
 import { getErrorMessage } from '../../utils/errors'
+import Page from '../../components/Page'
 import ReleasesGPGKeyStatus from '../../components/ReleasesGPGKeyStatus'
 import {
   type TerraformMirrorConfig,
@@ -740,7 +740,7 @@ const TerraformMirrorPage: React.FC = () => {
           <CircularProgress />
         </Box>
       ) : (
-        <Container maxWidth="lg" sx={{ py: 4 }}>
+        <Page maxWidth="lg">
           {/* Header */}
           <Box
             sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}
@@ -1346,7 +1346,7 @@ const TerraformMirrorPage: React.FC = () => {
               </Button>
             </DialogActions>
           </Dialog>
-        </Container>
+        </Page>
       )}
     </Box>
   )

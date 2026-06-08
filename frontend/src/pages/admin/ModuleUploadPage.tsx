@@ -2,7 +2,6 @@ import React, { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useLocation, useNavigate } from 'react-router-dom'
 import {
-  Container,
   Typography,
   Box,
   Paper,
@@ -22,6 +21,7 @@ import ArrowBack from '@mui/icons-material/ArrowBack'
 import api from '../../services/api'
 import { getErrorMessage } from '../../utils/errors'
 import { isValidRegistrySegment, REGISTRY_SEGMENT_HELP } from '../../utils/registrySegment'
+import Page from '../../components/Page'
 import PublishFromSCMWizard from '../../components/PublishFromSCMWizard'
 import FileDropZone from '../../components/FileDropZone'
 import PolicyResultsPanel from '../../components/PolicyResultsPanel'
@@ -521,7 +521,7 @@ const ModuleUploadPage: React.FC = () => {
   )
 
   return (
-    <Container maxWidth="md" sx={{ py: 4 }}>
+    <Page maxWidth="md">
       <Typography variant="h4" gutterBottom>
         {t('admin.moduleUpload.pageTitle')}
       </Typography>
@@ -539,7 +539,7 @@ const ModuleUploadPage: React.FC = () => {
         {moduleMethod === 'upload' && renderFileUploadForm()}
         {moduleMethod === 'scm' && renderScmMetadataForm()}
       </Paper>
-    </Container>
+    </Page>
   )
 }
 

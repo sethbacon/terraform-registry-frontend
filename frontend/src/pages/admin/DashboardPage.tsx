@@ -5,7 +5,6 @@ import { useNavigate } from 'react-router-dom'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { queryKeys } from '../../services/queryKeys'
 import {
-  Container,
   Typography,
   Box,
   Grid,
@@ -42,6 +41,7 @@ import Security from '@mui/icons-material/Security'
 import VpnKey from '@mui/icons-material/VpnKey'
 import api from '../../services/api'
 import { useAuth } from '../../contexts/AuthContext'
+import Page from '../../components/Page'
 import QuotaUsageChart from '../../components/QuotaUsageChart'
 import { useReleasesGPGKeyStatus } from '../../hooks/useReleasesGPGKeyStatus'
 
@@ -840,7 +840,7 @@ const DashboardPage: React.FC = () => {
   ].filter((l) => l.scope === null || hasScope(l.scope))
 
   return (
-    <Container maxWidth="lg" sx={{ py: 4 }} aria-busy={loading} aria-live="polite">
+    <Page maxWidth="lg" aria-busy={loading} aria-live="polite">
       {loading ? (
         <Box sx={{ display: 'flex', justifyContent: 'center', py: 10 }}>
           <CircularProgress />
@@ -1296,7 +1296,7 @@ const DashboardPage: React.FC = () => {
           </Grid>
         </>
       )}
-    </Container>
+    </Page>
   )
 }
 
