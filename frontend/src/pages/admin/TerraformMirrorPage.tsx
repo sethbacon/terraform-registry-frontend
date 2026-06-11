@@ -13,6 +13,7 @@ import {
   Chip,
   CircularProgress,
   Collapse,
+  Container,
   Dialog,
   DialogActions,
   DialogContent,
@@ -62,7 +63,6 @@ import SyncIcon from '@mui/icons-material/Sync'
 
 import api from '../../services/api'
 import { getErrorMessage } from '../../utils/errors'
-import Page from '../../components/Page'
 import ReleasesGPGKeyStatus from '../../components/ReleasesGPGKeyStatus'
 import {
   type TerraformMirrorConfig,
@@ -456,6 +456,9 @@ const ConfigCard: React.FC<{
 const TOOL_DEFAULT_URLS: Record<string, string> = {
   terraform: 'https://releases.hashicorp.com',
   opentofu: 'https://github.com/opentofu/opentofu',
+  packer: 'https://releases.hashicorp.com',
+  sentinel: 'https://releases.hashicorp.com',
+  opa: 'https://github.com/open-policy-agent/opa',
 }
 
 /** Returns the canonical upstream URL for a known tool, or '' for custom. */
@@ -740,7 +743,7 @@ const TerraformMirrorPage: React.FC = () => {
           <CircularProgress />
         </Box>
       ) : (
-        <Page maxWidth="lg">
+        <Container maxWidth="lg" sx={{ py: 4 }}>
           {/* Header */}
           <Box
             sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}
@@ -869,6 +872,9 @@ const TerraformMirrorPage: React.FC = () => {
                 >
                   <MenuItem value="terraform">Terraform (HashiCorp)</MenuItem>
                   <MenuItem value="opentofu">OpenTofu</MenuItem>
+                  <MenuItem value="packer">Packer (HashiCorp)</MenuItem>
+                  <MenuItem value="sentinel">Sentinel (HashiCorp)</MenuItem>
+                  <MenuItem value="opa">OPA (Open Policy Agent)</MenuItem>
                   <MenuItem value="custom">{t('admin.terraformMirror.menuCustom')}</MenuItem>
                 </TextField>
                 <TextField
@@ -1047,6 +1053,9 @@ const TerraformMirrorPage: React.FC = () => {
                 >
                   <MenuItem value="terraform">Terraform (HashiCorp)</MenuItem>
                   <MenuItem value="opentofu">OpenTofu</MenuItem>
+                  <MenuItem value="packer">Packer (HashiCorp)</MenuItem>
+                  <MenuItem value="sentinel">Sentinel (HashiCorp)</MenuItem>
+                  <MenuItem value="opa">OPA (Open Policy Agent)</MenuItem>
                   <MenuItem value="custom">{t('admin.terraformMirror.menuCustom')}</MenuItem>
                 </TextField>
                 <TextField
@@ -1346,7 +1355,7 @@ const TerraformMirrorPage: React.FC = () => {
               </Button>
             </DialogActions>
           </Dialog>
-        </Page>
+        </Container>
       )}
     </Box>
   )

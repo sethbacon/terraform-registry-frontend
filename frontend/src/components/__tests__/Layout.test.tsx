@@ -101,7 +101,7 @@ describe('Layout', () => {
     expect(screen.getByText('Home')).toBeInTheDocument()
     expect(screen.getByText('Modules')).toBeInTheDocument()
     expect(screen.getByText('Providers')).toBeInTheDocument()
-    expect(screen.getByText('Terraform Binaries')).toBeInTheDocument()
+    expect(screen.getByText('Hosted Binaries')).toBeInTheDocument()
     expect(screen.getByText('API Docs')).toBeInTheDocument()
   })
 
