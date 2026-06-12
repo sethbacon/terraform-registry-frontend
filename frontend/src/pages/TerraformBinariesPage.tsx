@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { Typography, Box, Grid, Chip, CircularProgress, Alert } from '@mui/material'
+import { Container, Typography, Box, Grid, Chip, CircularProgress, Alert } from '@mui/material'
 import api from '../services/api'
-import Page from '../components/Page'
 import RegistryItemCard from '../components/RegistryItemCard'
 
 interface MirrorSummary {
@@ -18,7 +17,13 @@ interface MirrorStats {
 }
 
 const ToolChip: React.FC<{ tool: string }> = ({ tool }) => {
-  const color = tool === 'terraform' ? 'primary' : tool === 'opentofu' ? 'secondary' : 'default'
+  const color =
+    tool === 'terraform' ? 'primary'
+      : tool === 'opentofu' ? 'secondary'
+        : tool === 'packer' ? 'info'
+          : tool === 'sentinel' ? 'warning'
+            : tool === 'opa' ? 'success'
+              : 'default'
   return <Chip label={tool} size="small" color={color} variant="outlined" />
 }
 
@@ -75,7 +80,7 @@ const TerraformBinariesPage: React.FC = () => {
   }, [t])
 
   return (
-    <Page maxWidth="lg" aria-busy={loading} aria-live="polite">
+    <Container maxWidth="lg" sx={{ py: 4 }} aria-busy={loading} aria-live="polite">
       <Box sx={{ mb: 2 }}>
         <Typography variant="h4" gutterBottom>
           {t('terraformBinaries.pageTitle')}
@@ -162,7 +167,7 @@ const TerraformBinariesPage: React.FC = () => {
           })}
         </Grid>
       )}
-    </Page>
+    </Container>
   );
 }
 

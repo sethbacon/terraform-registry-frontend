@@ -6,8 +6,8 @@
     "modulesTooltip": "View Terraform Modules",
     "providers": "Providers",
     "providersTooltip": "View Terraform Providers",
-    "terraformBinaries": "Terraform Binaries",
-    "terraformBinariesTooltip": "View Terraform Binaries",
+    "terraformBinaries": "Hosted Binaries",
+    "terraformBinariesTooltip": "View Hosted Binaries",
     "apiDocs": "API Docs",
     "apiDocsTooltip": "API Documentation",
     "admin": {
@@ -112,7 +112,7 @@
     "heroSubtitle": "Host and manage your custom Terraform modules, providers, and binaries",
     "browseModules": "Browse Modules",
     "browseProviders": "Browse Providers",
-    "terraformBinaries": "Terraform Binaries",
+    "terraformBinaries": "Hosted Binaries",
     "available": "available",
     "findWhatYouNeed": "Find What You Need",
     "searchAcross": "Search across modules and providers in this registry",
@@ -123,7 +123,7 @@
     "browseAllModules": "Browse All Modules \u2192",
     "providersDescription": "Access custom and mirrored Terraform providers for your cloud resources.",
     "browseAllProviders": "Browse All Providers \u2192",
-    "terraformBinariesDescription": "Download Terraform and OpenTofu binaries from internal mirrors.",
+    "terraformBinariesDescription": "Download Terraform, OpenTofu, Packer, Sentinel, and OPA binaries from internal mirrors.",
     "noBinaryMirrors": "No binary mirrors configured",
     "viewBinaries": "View Binaries \u2192",
     "gettingStarted": "Getting Started",
@@ -287,11 +287,11 @@
     }
   },
   "terraformBinaries": {
-    "pageTitle": "Terraform Binary Mirrors",
-    "pageSubtitle": "Download Terraform and OpenTofu binaries from your organisation's internal mirror. Configure your CLI or CI toolchain to point at the mirror URL shown on each detail page.",
+    "pageTitle": "Hosted Binary Mirrors",
+    "pageSubtitle": "Download Terraform, OpenTofu, Packer, Sentinel, and OPA binaries from your organisation's internal mirror. Configure your CLI or CI toolchain to point at the mirror URL shown on each detail page.",
     "loadError": "Failed to load Terraform binary mirrors.",
     "noMirrorsTitle": "No binary mirrors configured",
-    "noMirrorsBody": "Ask an administrator to set up a Terraform or OpenTofu binary mirror.",
+    "noMirrorsBody": "Ask an administrator to set up a binary mirror.",
     "versionCountOne": "{{count}} version",
     "versionCountOther": "{{count}} versions",
     "latestVersion": "Latest version: {{version}}",
@@ -631,8 +631,8 @@
       }
     },
     "terraformBinaries": {
-      "title": "Terraform Binary Mirrors",
-      "overview": "Lists the available Terraform and OpenTofu binary mirrors hosted by this registry. Each mirror caches a set of binary versions from an upstream source so your CI pipelines and developer machines can download them without direct internet access.",
+      "title": "Hosted Binary Mirrors",
+      "overview": "Lists the available binary mirrors hosted by this registry. Each mirror caches a set of binary versions from an upstream source so your CI pipelines and developer machines can download them without direct internet access.",
       "actions": {
         "viewVersions": {
           "heading": "View Versions",
@@ -1126,7 +1126,7 @@
       "infoBannerBefore": "Clients download binaries at ",
       "infoBannerAfter": ". This endpoint is unauthenticated — configure your CI or developer machines to point at your registry host.",
       "emptyState": "No Terraform binary mirror configurations exist yet. Create one to start mirroring Terraform or OpenTofu binaries.",
-      "dialogTitleCreate": "Add Terraform Binary Mirror",
+      "dialogTitleCreate": "Add Binary Mirror Config",
       "labelName": "Name",
       "helpName": "Unique slug used in API paths (e.g. hashicorp-terraform)",
       "labelDescription": "Description",
@@ -1857,7 +1857,7 @@
       "scanErrors": "{{count}} errors",
       "statModules": "Modules",
       "statProviders": "Providers",
-      "statTerraformBinaries": "Terraform Binaries",
+      "statTerraformBinaries": "Hosted Binaries",
       "statTotalDownloads": "Total Downloads",
       "statVersions": "{{count}} versions",
       "statAcrossMirrors_one": "across {{count}} mirror",

@@ -1,6 +1,20 @@
 <!-- markdownlint-disable MD013 MD024 MD041 -->
 # Changelog
 
+## [2.5.1](https://github.com/sethbacon/terraform-registry-frontend/compare/v2.5.0...v2.5.1) (2026-06-12)
+
+
+### Bug Fixes
+
+* update e2e test to match renamed "Hosted Binary Mirrors" heading ([#374](https://github.com/sethbacon/terraform-registry-frontend/issues/374)) ([958f14d](https://github.com/sethbacon/terraform-registry-frontend/commit/958f14d82e9f5edf1a5dc7a93cf9dd3260c0f864))
+
+## [2.5.0](https://github.com/sethbacon/terraform-registry-frontend/compare/v2.4.3...v2.5.0) (2026-06-11)
+
+
+### Features
+
+* add Packer, Sentinel, and OPA to hosted binaries UI ([#371](https://github.com/sethbacon/terraform-registry-frontend/issues/371)) ([1550480](https://github.com/sethbacon/terraform-registry-frontend/commit/15504804a686e12910ba83b6547b291aa47ea53a))
+
 ## [2.4.3](https://github.com/sethbacon/terraform-registry-frontend/compare/v2.4.2...v2.4.3) (2026-06-08)
 
 

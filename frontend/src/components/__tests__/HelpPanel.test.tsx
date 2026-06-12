@@ -59,7 +59,7 @@ describe('HelpPanel', () => {
 
   it('renders terraform binaries help', () => {
     renderAtPath('/terraform-binaries')
-    expect(screen.getByText('Terraform Binary Mirrors')).toBeInTheDocument()
+    expect(screen.getByText('Hosted Binary Mirrors')).toBeInTheDocument()
   })
 
   it('renders terraform binary detail help for parameterized route', () => {

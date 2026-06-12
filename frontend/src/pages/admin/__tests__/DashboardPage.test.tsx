@@ -124,7 +124,7 @@ describe('DashboardPage', () => {
   })
 
   it('shows loading spinner while fetching', () => {
-    getDashboardStatsMock.mockReturnValue(new Promise(() => {}))
+    getDashboardStatsMock.mockReturnValue(new Promise(() => { }))
     renderPage()
     expect(screen.getByRole('progressbar')).toBeInTheDocument()
   })
@@ -146,7 +146,7 @@ describe('DashboardPage', () => {
     })
     expect(screen.getAllByText('Providers').length).toBeGreaterThanOrEqual(1)
     expect(screen.getByText('Total Downloads')).toBeInTheDocument()
-    expect(screen.getByText('Terraform Binaries')).toBeInTheDocument()
+    expect(screen.getByText('Hosted Binaries')).toBeInTheDocument()
   })
 
   it('shows health pills', async () => {
