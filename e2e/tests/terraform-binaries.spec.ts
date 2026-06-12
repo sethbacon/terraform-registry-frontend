@@ -23,7 +23,7 @@ test.describe('Terraform Binaries list', () => {
     }
 
     await expect(
-      page.getByRole('heading', { name: /Terraform Binary Mirrors/i })
+      page.getByRole('heading', { name: /Hosted Binary Mirrors/i })
     ).toBeVisible({ timeout: 10_000 });
   });
 
