@@ -1,6 +1,6 @@
 {
   "name": "terraform-registry-frontend",
-  "version": "2.4.3",
+  "version": "2.5.0",
   "private": true,
   "engines": {
     "node": ">=24.0.0 <25"
@@ -24,6 +24,7 @@
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.1",
     "@eslint/js": "^10.0.1",
+    "@fontsource/inter": "^5.2.8",
     "@fortawesome/fontawesome-svg-core": "^7.2.0",
     "@fortawesome/free-brands-svg-icons": "^7.2.0",
     "@fortawesome/react-fontawesome": "^3.3.1",
