@@ -15,9 +15,10 @@ export default function RegistryItemCardSkeleton({
           direction="row"
           spacing={1}
           sx={{
-            alignItems: "center",
-            mb: 1
-          }}>
+            alignItems: 'center',
+            mb: 1,
+          }}
+        >
           <Skeleton variant="circular" width={24} height={24} />
           <Skeleton variant="text" width="60%" height={28} />
         </Stack>
@@ -34,7 +35,7 @@ export default function RegistryItemCardSkeleton({
         </Stack>
       </CardContent>
     </Card>
-  );
+  )
 }
 
 export interface RegistryItemGridSkeletonProps {

@@ -54,17 +54,22 @@ const EmptyState: React.FC<EmptyStateProps> = ({
         <Typography
           variant="body2"
           sx={{
-            color: "text.secondary",
+            color: 'text.secondary',
             maxWidth: 480,
-            mb: 2
-          }}>
+            mb: 2,
+          }}
+        >
           {description}
         </Typography>
       )}
       {(primaryAction || secondaryAction) && (
-        <Stack direction="row" spacing={1} sx={{
-          justifyContent: "center"
-        }}>
+        <Stack
+          direction="row"
+          spacing={1}
+          sx={{
+            justifyContent: 'center',
+          }}
+        >
           {primaryAction && (
             <Button
               variant="contained"
@@ -88,7 +93,7 @@ const EmptyState: React.FC<EmptyStateProps> = ({
         </Stack>
       )}
     </Box>
-  );
+  )
 }
 
 export default EmptyState

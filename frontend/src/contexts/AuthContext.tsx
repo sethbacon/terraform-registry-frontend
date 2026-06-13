@@ -51,7 +51,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [sessionExpiresSoon, setSessionExpiresSoon] = useState(false)
   const warningTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   // Ref to break the circular dependency between scheduleSessionWarning and refreshToken.
-  const silentRefreshRef = useRef<() => Promise<void>>(async () => { })
+  const silentRefreshRef = useRef<() => Promise<void>>(async () => {})
 
   const clearWarningTimer = useCallback(() => {
     if (warningTimerRef.current !== null) {

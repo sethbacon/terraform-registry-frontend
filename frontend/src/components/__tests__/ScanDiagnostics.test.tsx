@@ -35,11 +35,7 @@ describe('ScanDiagnostics', () => {
 
   it('renders all three sections together', () => {
     render(
-      <ScanDiagnostics
-        errorMessage="boom"
-        executionLog="stderr output"
-        rawResults={{ a: 1 }}
-      />,
+      <ScanDiagnostics errorMessage="boom" executionLog="stderr output" rawResults={{ a: 1 }} />,
     )
     expect(screen.getByTestId('scan-diagnostics-error')).toBeInTheDocument()
     expect(screen.getByTestId('scan-diagnostics-log')).toBeInTheDocument()
