@@ -180,9 +180,7 @@ describe('ModuleUploadPage — upload form (roadmap 2.5)', () => {
     await user.type(byLabel(/Namespace/), 'myns')
     await user.type(byLabel(/Module Name/), 'BAD NAME')
     await user.type(byLabel(/^Provider/), 'aws')
-    expect(
-      screen.getByRole('button', { name: /Continue to Repository Selection/i }),
-    ).toBeDisabled()
+    expect(screen.getByRole('button', { name: /Continue to Repository Selection/i })).toBeDisabled()
   })
 
   it('shows upload progress bar and preserves field state after upload failure', async () => {

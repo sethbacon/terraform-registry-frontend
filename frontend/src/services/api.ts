@@ -56,7 +56,7 @@ class ApiClient {
         }
 
         // Stamp the request start time for breadcrumb duration tracking
-        ; (config as InternalAxiosRequestConfig & { _startTime?: number })._startTime = Date.now()
+        ;(config as InternalAxiosRequestConfig & { _startTime?: number })._startTime = Date.now()
         return config
       },
       (error) => Promise.reject(error),
@@ -255,11 +255,11 @@ class ApiClient {
       },
       onUploadProgress: options?.onUploadProgress
         ? (event) => {
-          if (event.total && event.total > 0) {
-            const percent = Math.round((event.loaded / event.total) * 100)
-            options.onUploadProgress?.(percent)
+            if (event.total && event.total > 0) {
+              const percent = Math.round((event.loaded / event.total) * 100)
+              options.onUploadProgress?.(percent)
+            }
           }
-        }
         : undefined,
     })
     return response.data
@@ -373,11 +373,11 @@ class ApiClient {
       },
       onUploadProgress: options?.onUploadProgress
         ? (event) => {
-          if (event.total && event.total > 0) {
-            const percent = Math.round((event.loaded / event.total) * 100)
-            options.onUploadProgress?.(percent)
+            if (event.total && event.total > 0) {
+              const percent = Math.round((event.loaded / event.total) * 100)
+              options.onUploadProgress?.(percent)
+            }
           }
-        }
         : undefined,
     })
     return response.data
@@ -593,7 +593,12 @@ class ApiClient {
 
   async updateOrganization(
     id: string,
-    data: { name?: string; display_name: string; idp_type?: string | null; idp_name?: string | null },
+    data: {
+      name?: string
+      display_name: string
+      idp_type?: string | null
+      idp_name?: string | null
+    },
   ) {
     const response = await this.client.put(`/api/v1/organizations/${id}`, data)
     return this.transformOrganization(response.data.organization)
@@ -854,7 +859,10 @@ class ApiClient {
     return response.data?.events ?? []
   }
 
-  async updateModule(id: string, data: { description?: string; source?: string; namespace?: string }) {
+  async updateModule(
+    id: string,
+    data: { description?: string; source?: string; namespace?: string },
+  ) {
     const response = await this.client.put(`/api/v1/admin/modules/${id}`, data)
     return response.data
   }

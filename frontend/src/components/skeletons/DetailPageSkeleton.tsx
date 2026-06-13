@@ -15,9 +15,10 @@ export default function DetailPageSkeleton({
         direction="row"
         spacing={2}
         sx={{
-          alignItems: "center",
-          mb: 2
-        }}>
+          alignItems: 'center',
+          mb: 2,
+        }}
+      >
         <Skeleton variant="circular" width={40} height={40} />
         <Skeleton variant="text" width={280} height={40} />
       </Stack>
@@ -48,5 +49,5 @@ export default function DetailPageSkeleton({
         </Box>
       </Box>
     </Container>
-  );
+  )
 }

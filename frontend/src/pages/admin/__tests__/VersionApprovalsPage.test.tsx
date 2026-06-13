@@ -67,7 +67,10 @@ const emptyResponse = { items: [], total: 0 }
 
 beforeEach(() => {
   vi.clearAllMocks()
-  listVersionApprovalsMock.mockResolvedValue({ items: [fakePendingProvider, fakePendingTerraform], total: 2 })
+  listVersionApprovalsMock.mockResolvedValue({
+    items: [fakePendingProvider, fakePendingTerraform],
+    total: 2,
+  })
   getVersionApprovalEventsMock.mockResolvedValue([])
 })
 
@@ -226,9 +229,7 @@ describe('VersionApprovalsPage', () => {
     await user.click(screen.getByRole('button', { name: /Approve Selected/ }))
     const dialog = screen.getByRole('dialog')
     await user.click(within(dialog).getByRole('button', { name: 'Approve Selected' }))
-    await waitFor(() =>
-      expect(bulkApproveVersionsMock).toHaveBeenCalledWith(['mpv-1'], undefined),
-    )
+    await waitFor(() => expect(bulkApproveVersionsMock).toHaveBeenCalledWith(['mpv-1'], undefined))
   })
 
   it('filters by status tab (approved)', async () => {

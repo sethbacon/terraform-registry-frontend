@@ -192,9 +192,10 @@ const ComponentShowcase = () => {
       <Typography
         variant="body1"
         sx={{
-          color: "text.secondary",
-          mb: 3
-        }}>
+          color: 'text.secondary',
+          mb: 3,
+        }}
+      >
         Development-only style guide showing all key UI components with representative sample data.
         This page is only available when <code>import.meta.env.DEV</code> is true.
       </Typography>
@@ -313,9 +314,12 @@ const ComponentShowcase = () => {
             >
               <ProviderIcon provider={slug} size={36} />
               <Typography variant="caption">{providerDisplayName(slug)}</Typography>
-              <Typography variant="caption" sx={{
-                color: "text.secondary"
-              }}>
+              <Typography
+                variant="caption"
+                sx={{
+                  color: 'text.secondary',
+                }}
+              >
                 {slug}
               </Typography>
             </Box>
@@ -330,16 +334,22 @@ const ComponentShowcase = () => {
                 justifyContent: 'center',
               }}
             >
-              <Typography variant="caption" sx={{
-                color: "text.secondary"
-              }}>
+              <Typography
+                variant="caption"
+                sx={{
+                  color: 'text.secondary',
+                }}
+              >
                 (null)
               </Typography>
             </Box>
             <Typography variant="caption">Unknown</Typography>
-            <Typography variant="caption" sx={{
-              color: "text.secondary"
-            }}>
+            <Typography
+              variant="caption"
+              sx={{
+                color: 'text.secondary',
+              }}
+            >
               unknown-provider
             </Typography>
           </Box>
@@ -361,9 +371,10 @@ const ComponentShowcase = () => {
       <Typography
         variant="body2"
         sx={{
-          color: "text.secondary",
-          mb: 2
-        }}>
+          color: 'text.secondary',
+          mb: 2,
+        }}
+      >
         The ErrorBoundary component renders a fallback UI when a child component throws. Below is a
         static recreation of the fallback UI (triggering a real error would be destructive to the
         showcase page).
@@ -454,9 +465,10 @@ const ComponentShowcase = () => {
         <Typography
           variant="body2"
           sx={{
-            color: "text.secondary",
-            mb: 1
-          }}>
+            color: 'text.secondary',
+            mb: 1,
+          }}
+        >
           Click the button below to open the About dialog.
         </Typography>
         <Chip
@@ -480,9 +492,10 @@ const ComponentShowcase = () => {
         <Typography
           variant="body2"
           sx={{
-            color: "text.secondary",
-            mb: 1
-          }}>
+            color: 'text.secondary',
+            mb: 1,
+          }}
+        >
           Click the button below to open the Storage Migration Wizard dialog. Note: API calls will
           fail in this showcase context, but the UI flow is visible.
         </Typography>
@@ -506,13 +519,16 @@ const ComponentShowcase = () => {
         this showcase because they depend on live backend services or deep context providers. See
         the component source files for their prop interfaces.
       </Alert>
-      <Typography variant="caption" sx={{
-        color: "text.secondary"
-      }}>
+      <Typography
+        variant="caption"
+        sx={{
+          color: 'text.secondary',
+        }}
+      >
         Route: <code>/dev/components</code> &mdash; available only in development mode.
       </Typography>
     </Page>
-  );
+  )
 }
 
 // ---------------------------------------------------------------------------
@@ -523,9 +539,12 @@ const ComponentShowcase = () => {
 function SectionHeader({ id, title, category }: { id: string; title: string; category: string }) {
   return (
     <Box id={id} sx={{ scrollMarginTop: '80px', mb: 2 }}>
-      <Typography variant="overline" sx={{
-        color: "text.secondary"
-      }}>
+      <Typography
+        variant="overline"
+        sx={{
+          color: 'text.secondary',
+        }}
+      >
         {category}
       </Typography>
       <Typography variant="h5">
@@ -534,16 +553,20 @@ function SectionHeader({ id, title, category }: { id: string; title: string; cat
         </Link>
       </Typography>
     </Box>
-  );
+  )
 }
 
 /** Static recreation of the ErrorBoundary fallback so we do not crash the page. */
 function ErrorBoundaryFallbackPreview() {
   return (
     <Alert severity="error">
-      <Typography variant="subtitle1" gutterBottom sx={{
-        fontWeight: "bold"
-      }}>
+      <Typography
+        variant="subtitle1"
+        gutterBottom
+        sx={{
+          fontWeight: 'bold',
+        }}
+      >
         Something went wrong
       </Typography>
       <Typography variant="body2" sx={{ mb: 1 }}>
@@ -568,7 +591,7 @@ function ErrorBoundaryFallbackPreview() {
         <Chip label="Reload Page" size="small" color="primary" />
       </Box>
     </Alert>
-  );
+  )
 }
 
 export default ComponentShowcase

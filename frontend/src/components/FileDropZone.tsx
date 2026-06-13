@@ -159,18 +159,27 @@ const FileDropZone: React.FC<FileDropZoneProps> = ({
           data-testid={`${testId}-input`}
         />
         {file ? (
-          <Stack spacing={1} sx={{
-            alignItems: "center"
-          }}>
+          <Stack
+            spacing={1}
+            sx={{
+              alignItems: 'center',
+            }}
+          >
             <InsertDriveFileIcon color="primary" sx={{ fontSize: 40 }} />
-            <Typography variant="body1" sx={{
-              fontWeight: 500
-            }}>
+            <Typography
+              variant="body1"
+              sx={{
+                fontWeight: 500,
+              }}
+            >
               {file.name}
             </Typography>
-            <Typography variant="body2" sx={{
-              color: "text.secondary"
-            }}>
+            <Typography
+              variant="body2"
+              sx={{
+                color: 'text.secondary',
+              }}
+            >
               {formatBytes(file.size)}
             </Typography>
             <Button
@@ -184,14 +193,20 @@ const FileDropZone: React.FC<FileDropZoneProps> = ({
             </Button>
           </Stack>
         ) : (
-          <Stack spacing={1} sx={{
-            alignItems: "center"
-          }}>
+          <Stack
+            spacing={1}
+            sx={{
+              alignItems: 'center',
+            }}
+          >
             <CloudUpload color="action" sx={{ fontSize: 40 }} />
             <Typography variant="body1">{prompt}</Typography>
-            <Typography variant="body2" sx={{
-              color: "text.secondary"
-            }}>
+            <Typography
+              variant="body2"
+              sx={{
+                color: 'text.secondary',
+              }}
+            >
               Maximum {formatBytes(HARD_MAX_BYTES)}
             </Typography>
           </Stack>
@@ -208,7 +223,7 @@ const FileDropZone: React.FC<FileDropZoneProps> = ({
         </Alert>
       )}
     </Stack>
-  );
+  )
 }
 
 export default FileDropZone

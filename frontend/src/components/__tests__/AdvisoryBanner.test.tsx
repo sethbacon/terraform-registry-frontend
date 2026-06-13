@@ -75,7 +75,7 @@ describe('AdvisoryBanner', () => {
   // 2. Nothing rendered while the query is loading (placeholderData=[])
   it('renders nothing while the query has no data yet', () => {
     // Never resolves — simulates loading state.
-    mockGetActiveAdvisories.mockReturnValue(new Promise(() => { }))
+    mockGetActiveAdvisories.mockReturnValue(new Promise(() => {}))
 
     const { container } = renderBanner()
     expect(container.firstChild).toBeNull()
@@ -87,9 +87,7 @@ describe('AdvisoryBanner', () => {
 
     renderBanner()
 
-    await waitFor(() =>
-      expect(screen.getByText(/high severity cve detected/i)).toBeInTheDocument(),
-    )
+    await waitFor(() => expect(screen.getByText(/high severity cve detected/i)).toBeInTheDocument())
     expect(screen.getByText(/CVE-2024-1234/)).toBeInTheDocument()
     expect(screen.getByText(/Remote code execution in terraform binary/)).toBeInTheDocument()
   })
@@ -103,9 +101,7 @@ describe('AdvisoryBanner', () => {
 
     renderBanner()
 
-    await waitFor(() =>
-      expect(screen.getByText(/2 advisories affect/i)).toBeInTheDocument(),
-    )
+    await waitFor(() => expect(screen.getByText(/2 advisories affect/i)).toBeInTheDocument())
   })
 
   // 5. Multiple severities render separate bands
@@ -129,7 +125,9 @@ describe('AdvisoryBanner', () => {
 
     renderBanner()
 
-    await waitFor(() => expect(screen.getByText(/Review in Security Scanning/i)).toBeInTheDocument())
+    await waitFor(() =>
+      expect(screen.getByText(/Review in Security Scanning/i)).toBeInTheDocument(),
+    )
 
     const link = screen.getByRole('link', { name: /Review in Security Scanning/i })
     expect(link).toHaveAttribute('href', '/admin/security-scanning')
@@ -141,9 +139,7 @@ describe('AdvisoryBanner', () => {
 
     renderBanner()
 
-    await waitFor(() =>
-      expect(screen.getByText(/high severity cve detected/i)).toBeInTheDocument(),
-    )
+    await waitFor(() => expect(screen.getByText(/high severity cve detected/i)).toBeInTheDocument())
 
     const dismissBtn = screen.getByRole('button', { name: /dismiss high advisory banner/i })
     fireEvent.click(dismissBtn)
@@ -160,7 +156,9 @@ describe('AdvisoryBanner', () => {
     renderBanner()
 
     await waitFor(() =>
-      expect(screen.getByRole('button', { name: /dismiss high advisory banner/i })).toBeInTheDocument(),
+      expect(
+        screen.getByRole('button', { name: /dismiss high advisory banner/i }),
+      ).toBeInTheDocument(),
     )
 
     fireEvent.click(screen.getByRole('button', { name: /dismiss high advisory banner/i }))

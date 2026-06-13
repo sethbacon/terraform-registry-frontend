@@ -304,11 +304,7 @@ describe('queryKeys', () => {
     })
 
     it('adminList key includes kind when provided', () => {
-      expect(queryKeys.advisories.adminList('binary')).toEqual([
-        'advisories',
-        'admin',
-        'binary',
-      ])
+      expect(queryKeys.advisories.adminList('binary')).toEqual(['advisories', 'admin', 'binary'])
     })
 
     it('adminList produces different keys for different kinds', () => {

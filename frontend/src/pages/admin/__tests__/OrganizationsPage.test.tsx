@@ -419,7 +419,9 @@ describe('OrganizationsPage', () => {
     await userEvent.type(nameInput, 'new-name')
 
     await waitFor(() =>
-      expect(screen.getByText(/Renaming this organization will update all module/i)).toBeInTheDocument(),
+      expect(
+        screen.getByText(/Renaming this organization will update all module/i),
+      ).toBeInTheDocument(),
     )
   })
 

@@ -171,7 +171,7 @@ const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
                 disabled={loading}
                 fullWidth
                 slotProps={{
-                  htmlInput: { 'data-testid': `confirm-dialog-field-${f.id}` }
+                  htmlInput: { 'data-testid': `confirm-dialog-field-${f.id}` },
                 }}
               />
             ))}
@@ -183,9 +183,10 @@ const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
             <Typography
               variant="body2"
               sx={{
-                color: "text.secondary",
-                mb: 1
-              }}>
+                color: 'text.secondary',
+                mb: 1,
+              }}
+            >
               Type <code>{typeToConfirmText}</code> to confirm.
             </Typography>
             <TextField
@@ -205,7 +206,7 @@ const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
                 htmlInput: {
                   'aria-label': 'Type-to-confirm input',
                   'data-testid': 'confirm-dialog-type-input',
-                }
+                },
               }}
             />
           </Box>
@@ -233,7 +234,7 @@ const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
         </Button>
       </DialogActions>
     </Dialog>
-  );
+  )
 }
 
 export default ConfirmDialog
