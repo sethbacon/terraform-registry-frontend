@@ -1,6 +1,13 @@
 <!-- markdownlint-disable MD013 MD024 MD041 -->
 # Changelog
 
+## [2.6.0](https://github.com/sethbacon/terraform-registry-frontend/compare/v2.5.1...v2.6.0) (2026-06-13)
+
+
+### Features
+
+* add suite app-switcher ([#380](https://github.com/sethbacon/terraform-registry-frontend/issues/380)) ([2d14e3f](https://github.com/sethbacon/terraform-registry-frontend/commit/2d14e3f646da3c8b5d282b01ca782c02b140d72a))
+
 ## [2.5.1](https://github.com/sethbacon/terraform-registry-frontend/compare/v2.5.0...v2.5.1) (2026-06-12)
 
 
