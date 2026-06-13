@@ -20,14 +20,15 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, requiredScope
       <Box
         aria-busy="true"
         sx={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          minHeight: "100vh"
-        }}>
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          minHeight: '100vh',
+        }}
+      >
         <CircularProgress />
       </Box>
-    );
+    )
   }
 
   if (!isAuthenticated) {

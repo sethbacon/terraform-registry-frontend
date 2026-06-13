@@ -18,11 +18,16 @@ interface MirrorStats {
 
 const ToolChip: React.FC<{ tool: string }> = ({ tool }) => {
   const color =
-    tool === 'terraform' ? 'primary'
-      : tool === 'opentofu' ? 'secondary'
-        : tool === 'packer' ? 'info'
-          : tool === 'sentinel' ? 'warning'
-            : tool === 'opa' ? 'success'
+    tool === 'terraform'
+      ? 'primary'
+      : tool === 'opentofu'
+        ? 'secondary'
+        : tool === 'packer'
+          ? 'info'
+          : tool === 'sentinel'
+            ? 'warning'
+            : tool === 'opa'
+              ? 'success'
               : 'default'
   return <Chip label={tool} size="small" color={color} variant="outlined" />
 }
@@ -85,9 +90,12 @@ const TerraformBinariesPage: React.FC = () => {
         <Typography variant="h4" gutterBottom>
           {t('terraformBinaries.pageTitle')}
         </Typography>
-        <Typography variant="body1" sx={{
-          color: "text.secondary"
-        }}>
+        <Typography
+          variant="body1"
+          sx={{
+            color: 'text.secondary',
+          }}
+        >
           {t('terraformBinaries.pageSubtitle')}
         </Typography>
       </Box>
@@ -103,17 +111,21 @@ const TerraformBinariesPage: React.FC = () => {
         </Box>
       ) : configs.length === 0 ? (
         <Box sx={{ textAlign: 'center', py: 8 }}>
-          <Typography variant="h6" sx={{
-            color: "text.secondary"
-          }}>
+          <Typography
+            variant="h6"
+            sx={{
+              color: 'text.secondary',
+            }}
+          >
             {t('terraformBinaries.noMirrorsTitle')}
           </Typography>
           <Typography
             variant="body2"
             sx={{
-              color: "text.secondary",
-              mt: 1
-            }}>
+              color: 'text.secondary',
+              mt: 1,
+            }}
+          >
             {t('terraformBinaries.noMirrorsBody')}
           </Typography>
         </Box>
@@ -168,7 +180,7 @@ const TerraformBinariesPage: React.FC = () => {
         </Grid>
       )}
     </Container>
-  );
+  )
 }
 
 export default TerraformBinariesPage

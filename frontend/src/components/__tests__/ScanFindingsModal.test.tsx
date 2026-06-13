@@ -44,12 +44,12 @@ const baseScan: ModuleScan = {
 
 describe('ScanFindingsModal', () => {
   it('does not render content when closed', () => {
-    render(<ScanFindingsModal open={false} onClose={() => { }} scan={baseScan} />)
+    render(<ScanFindingsModal open={false} onClose={() => {}} scan={baseScan} />)
     expect(screen.queryByText('Scan Findings')).not.toBeInTheDocument()
   })
 
   it('renders findings table when open', () => {
-    render(<ScanFindingsModal open={true} onClose={() => { }} scan={baseScan} />)
+    render(<ScanFindingsModal open={true} onClose={() => {}} scan={baseScan} />)
     expect(screen.getByText('Scan Findings')).toBeInTheDocument()
     expect(screen.getByText('AVD-AWS-0001')).toBeInTheDocument()
     expect(screen.getByText('S3 bucket unencrypted')).toBeInTheDocument()
@@ -57,12 +57,12 @@ describe('ScanFindingsModal', () => {
   })
 
   it('shows loading state', () => {
-    render(<ScanFindingsModal open={true} onClose={() => { }} scan={null} loading={true} />)
+    render(<ScanFindingsModal open={true} onClose={() => {}} scan={null} loading={true} />)
     expect(screen.getByTestId('findings-loading')).toBeInTheDocument()
   })
 
   it('shows no data message when scan is null', () => {
-    render(<ScanFindingsModal open={true} onClose={() => { }} scan={null} />)
+    render(<ScanFindingsModal open={true} onClose={() => {}} scan={null} />)
     expect(screen.getByText('No scan data available.')).toBeInTheDocument()
   })
 
@@ -70,7 +70,7 @@ describe('ScanFindingsModal', () => {
     render(
       <ScanFindingsModal
         open={true}
-        onClose={() => { }}
+        onClose={() => {}}
         scan={baseScan}
         moduleLabel="hashicorp/vpc/aws v1.0.0"
       />,
@@ -80,7 +80,7 @@ describe('ScanFindingsModal', () => {
 
   it('toggles raw JSON section', async () => {
     const user = userEvent.setup()
-    render(<ScanFindingsModal open={true} onClose={() => { }} scan={baseScan} />)
+    render(<ScanFindingsModal open={true} onClose={() => {}} scan={baseScan} />)
     const toggle = screen.getByTestId('findings-raw-toggle')
     expect(toggle).toHaveTextContent('Show raw JSON')
     await user.click(toggle)
@@ -88,14 +88,14 @@ describe('ScanFindingsModal', () => {
   })
 
   it('renders severity chips in header', () => {
-    render(<ScanFindingsModal open={true} onClose={() => { }} scan={baseScan} />)
+    render(<ScanFindingsModal open={true} onClose={() => {}} scan={baseScan} />)
     expect(screen.getByText('Critical: 1')).toBeInTheDocument()
     expect(screen.getByText('Medium: 1')).toBeInTheDocument()
   })
 
   it('shows fallback message when findings cannot be parsed', () => {
     const scan = { ...baseScan, raw_results: { unknown_format: true } }
-    render(<ScanFindingsModal open={true} onClose={() => { }} scan={scan} />)
+    render(<ScanFindingsModal open={true} onClose={() => {}} scan={scan} />)
     expect(
       screen.getByText('Could not parse individual findings from scanner output.'),
     ).toBeInTheDocument()
@@ -116,13 +116,13 @@ describe('ScanFindingsModal', () => {
     })
 
     it('shows Export CSV button when findings are present', () => {
-      render(<ScanFindingsModal open={true} onClose={() => { }} scan={baseScan} />)
+      render(<ScanFindingsModal open={true} onClose={() => {}} scan={baseScan} />)
       expect(screen.getByTestId('findings-csv-download')).toBeInTheDocument()
     })
 
     it('does not show Export CSV button when findings cannot be parsed', () => {
       const scan = { ...baseScan, raw_results: { unknown_format: true } }
-      render(<ScanFindingsModal open={true} onClose={() => { }} scan={scan} />)
+      render(<ScanFindingsModal open={true} onClose={() => {}} scan={scan} />)
       expect(screen.queryByTestId('findings-csv-download')).not.toBeInTheDocument()
     })
 
@@ -131,14 +131,16 @@ describe('ScanFindingsModal', () => {
       render(
         <ScanFindingsModal
           open={true}
-          onClose={() => { }}
+          onClose={() => {}}
           scan={baseScan}
           moduleLabel="hashicorp/vpc/aws v1.0.0"
         />,
       )
       await user.click(screen.getByTestId('findings-csv-download'))
       expect(mockLink.click).toHaveBeenCalledOnce()
-      expect(mockLink.download).toMatch(/^scan-findings-hashicorp-vpc-aws-v1-0-0-\d{4}-\d{2}-\d{2}\.csv$/)
+      expect(mockLink.download).toMatch(
+        /^scan-findings-hashicorp-vpc-aws-v1-0-0-\d{4}-\d{2}-\d{2}\.csv$/,
+      )
       expect(URL.createObjectURL).toHaveBeenCalledOnce()
       expect(URL.revokeObjectURL).toHaveBeenCalledWith('blob:mock')
     })
@@ -147,11 +149,14 @@ describe('ScanFindingsModal', () => {
       const user = userEvent.setup()
       let capturedCsv = ''
       vi.spyOn(URL, 'createObjectURL').mockImplementation((blob: Blob | MediaSource) => {
-        if (blob instanceof Blob) blob.text().then((text) => { capturedCsv = text })
+        if (blob instanceof Blob)
+          blob.text().then((text) => {
+            capturedCsv = text
+          })
         return 'blob:mock'
       })
 
-      render(<ScanFindingsModal open={true} onClose={() => { }} scan={baseScan} />)
+      render(<ScanFindingsModal open={true} onClose={() => {}} scan={baseScan} />)
       await user.click(screen.getByTestId('findings-csv-download'))
 
       // Allow the blob.text() promise to resolve

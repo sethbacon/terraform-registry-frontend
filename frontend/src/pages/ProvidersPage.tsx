@@ -206,9 +206,12 @@ const ProvidersPage: React.FC = () => {
           <Typography variant="h4" gutterBottom>
             {t('providers.pageTitle')}
           </Typography>
-          <Typography variant="body1" sx={{
-            color: "text.secondary"
-          }}>
+          <Typography
+            variant="body1"
+            sx={{
+              color: 'text.secondary',
+            }}
+          >
             {t('providers.pageSubtitle')}
           </Typography>
         </Box>
@@ -238,7 +241,7 @@ const ProvidersPage: React.FC = () => {
                   <SearchIcon />
                 </InputAdornment>
               ),
-            }
+            },
           }}
         />
         <FormControl sx={{ minWidth: 180 }} size="medium">
@@ -269,17 +272,21 @@ const ProvidersPage: React.FC = () => {
         <RegistryItemGridSkeleton />
       ) : providers.length === 0 ? (
         <Box sx={{ textAlign: 'center', py: 8 }}>
-          <Typography variant="h6" sx={{
-            color: "text.secondary"
-          }}>
+          <Typography
+            variant="h6"
+            sx={{
+              color: 'text.secondary',
+            }}
+          >
             {t('providers.noResultsTitle')}
           </Typography>
           <Typography
             variant="body2"
             sx={{
-              color: "text.secondary",
-              mt: 1
-            }}>
+              color: 'text.secondary',
+              mt: 1,
+            }}
+          >
             {urlQuery || urlSort
               ? t('providers.noResultsTryDifferent')
               : t('providers.noResultsUploadFirst')}
@@ -351,7 +358,7 @@ const ProvidersPage: React.FC = () => {
         </>
       )}
     </Page>
-  );
+  )
 }
 
 export default ProvidersPage

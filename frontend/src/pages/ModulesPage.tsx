@@ -339,9 +339,12 @@ const ModulesPage: React.FC = () => {
           <Typography variant="h4" gutterBottom>
             {t('modules.pageTitle')}
           </Typography>
-          <Typography variant="body1" sx={{
-            color: "text.secondary"
-          }}>
+          <Typography
+            variant="body1"
+            sx={{
+              color: 'text.secondary',
+            }}
+          >
             {t('modules.pageSubtitle')}
           </Typography>
         </Box>
@@ -371,7 +374,7 @@ const ModulesPage: React.FC = () => {
                   <SearchIcon />
                 </InputAdornment>
               ),
-            }
+            },
           }}
         />
         <FormControl sx={{ minWidth: 180 }} size="medium">
@@ -418,17 +421,21 @@ const ModulesPage: React.FC = () => {
         <RegistryItemGridSkeleton />
       ) : modules.length === 0 ? (
         <Box sx={{ textAlign: 'center', py: 8 }}>
-          <Typography variant="h6" sx={{
-            color: "text.secondary"
-          }}>
+          <Typography
+            variant="h6"
+            sx={{
+              color: 'text.secondary',
+            }}
+          >
             {t('modules.noResultsTitle')}
           </Typography>
           <Typography
             variant="body2"
             sx={{
-              color: "text.secondary",
-              mt: 1
-            }}>
+              color: 'text.secondary',
+              mt: 1,
+            }}
+          >
             {urlQuery || urlSort
               ? t('modules.noResultsTryDifferent')
               : t('modules.noResultsUploadFirst')}
@@ -441,7 +448,7 @@ const ModulesPage: React.FC = () => {
         </Box>
       ) : viewMode === 'grouped' ? (
         /* ---- Grouped by provider ---- */
-        (<>
+        <>
           {groupedModules.map(([provider, providerModules]) => {
             const isCollapsed = collapsedProviders.has(provider)
             return (
@@ -504,10 +511,10 @@ const ModulesPage: React.FC = () => {
               />
             </Box>
           )}
-        </>)
+        </>
       ) : (
         /* ---- Flat paginated grid ---- */
-        (<>
+        <>
           <Grid container spacing={3}>
             {modules.map(renderModuleCard)}
           </Grid>
@@ -522,10 +529,10 @@ const ModulesPage: React.FC = () => {
               />
             </Box>
           )}
-        </>)
+        </>
       )}
     </Page>
-  );
+  )
 }
 
 export default ModulesPage

@@ -118,7 +118,8 @@ function EventsRow({ id, open }: { id: string; open: boolean }) {
                     {ev.performed_by_name &&
                       ' ' + t('admin.versionApprovals.performedBy', { name: ev.performed_by_name })}
                     {ev.auto_approve_rule &&
-                      ' — ' + t('admin.versionApprovals.autoApproveRule', { rule: ev.auto_approve_rule })}
+                      ' — ' +
+                        t('admin.versionApprovals.autoApproveRule', { rule: ev.auto_approve_rule })}
                     {ev.notes && ` — "${ev.notes}"`}
                     {' · ' + formatDate(ev.created_at)}
                   </Typography>

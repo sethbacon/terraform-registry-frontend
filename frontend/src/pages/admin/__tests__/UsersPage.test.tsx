@@ -468,9 +468,7 @@ describe('UsersPage', () => {
       const exportButtons = screen.getAllByLabelText('Export user data')
       fireEvent.click(exportButtons[0])
 
-      await waitFor(() =>
-        expect(screen.getByText(/export blew up/)).toBeInTheDocument(),
-      )
+      await waitFor(() => expect(screen.getByText(/export blew up/)).toBeInTheDocument())
     })
 
     it('opens the erase confirmation dialog and requires email match', async () => {
@@ -482,9 +480,7 @@ describe('UsersPage', () => {
       fireEvent.click(eraseButtons[0])
 
       // Dialog should be open with destructive copy referencing the email.
-      await waitFor(() =>
-        expect(screen.getByText(/permanently anonymizes/i)).toBeInTheDocument(),
-      )
+      await waitFor(() => expect(screen.getByText(/permanently anonymizes/i)).toBeInTheDocument())
 
       // Erase button starts disabled because confirm text is empty.
       const confirm = screen.getByRole('button', { name: /^Erase$/ })
@@ -520,9 +516,7 @@ describe('UsersPage', () => {
       fireEvent.click(screen.getByRole('button', { name: /^Erase$/ }))
 
       await waitFor(() => expect(eraseUserMock).toHaveBeenCalledWith('u1'))
-      await waitFor(() =>
-        expect(screen.getByText(/User data has been erased/)).toBeInTheDocument(),
-      )
+      await waitFor(() => expect(screen.getByText(/User data has been erased/)).toBeInTheDocument())
     })
 
     it('surfaces backend error when erase fails', async () => {
@@ -540,9 +534,7 @@ describe('UsersPage', () => {
 
       fireEvent.click(screen.getByRole('button', { name: /^Erase$/ }))
 
-      await waitFor(() =>
-        expect(screen.getByText(/erase blew up/)).toBeInTheDocument(),
-      )
+      await waitFor(() => expect(screen.getByText(/erase blew up/)).toBeInTheDocument())
     })
   })
 })

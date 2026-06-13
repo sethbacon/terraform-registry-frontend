@@ -146,11 +146,12 @@ export const ProviderIcon: React.FC<ProviderIconProps> = ({ provider, size = 28 
           width: size,
           height: size,
           fill: `#${strategy.icon.hex}`,
-          flexShrink: 0
-        }}>
+          flexShrink: 0,
+        }}
+      >
         <path d={strategy.icon.path} />
       </Box>
-    );
+    )
   }
 
   // avatar fallback

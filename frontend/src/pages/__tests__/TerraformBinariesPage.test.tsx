@@ -37,13 +37,13 @@ describe('TerraformBinariesPage', () => {
   })
 
   it('shows loading spinner initially', () => {
-    listPublicTerraformMirrorConfigsMock.mockReturnValue(new Promise(() => { }))
+    listPublicTerraformMirrorConfigsMock.mockReturnValue(new Promise(() => {}))
     renderPage()
     expect(screen.getByRole('progressbar')).toBeInTheDocument()
   })
 
   it('renders the page heading', () => {
-    listPublicTerraformMirrorConfigsMock.mockReturnValue(new Promise(() => { }))
+    listPublicTerraformMirrorConfigsMock.mockReturnValue(new Promise(() => {}))
     renderPage()
     expect(screen.getByText('Hosted Binary Mirrors')).toBeInTheDocument()
   })

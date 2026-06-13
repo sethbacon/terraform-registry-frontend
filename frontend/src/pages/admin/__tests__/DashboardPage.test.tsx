@@ -124,7 +124,7 @@ describe('DashboardPage', () => {
   })
 
   it('shows loading spinner while fetching', () => {
-    getDashboardStatsMock.mockReturnValue(new Promise(() => { }))
+    getDashboardStatsMock.mockReturnValue(new Promise(() => {}))
     renderPage()
     expect(screen.getByRole('progressbar')).toBeInTheDocument()
   })
