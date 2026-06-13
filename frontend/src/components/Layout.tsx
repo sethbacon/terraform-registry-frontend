@@ -59,6 +59,7 @@ import { useAuth } from '../contexts/AuthContext'
 import { useThemeMode } from '../contexts/ThemeContext'
 import { useHelp } from '../contexts/HelpContext'
 import DevUserSwitcher from './DevUserSwitcher'
+import { SuiteSwitcher } from './SuiteSwitcher'
 import HelpPanel, { HELP_PANEL_WIDTH } from './HelpPanel'
 import AboutModal from './AboutModal'
 import AdminBreadcrumbs from './AdminBreadcrumbs'
@@ -673,6 +674,7 @@ const Layout = () => {
             {productName}
           </Typography>
           {isAuthenticated && <DevUserSwitcher />}
+          {isAuthenticated && <SuiteSwitcher />}
           <Tooltip title={t('header.quickNav')}>
             <IconButton
               color="inherit"

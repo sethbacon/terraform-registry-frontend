@@ -47,6 +47,12 @@ vi.mock('../AdvisoryBanner', () => ({
   default: () => null,
 }))
 
+// SuiteSwitcher uses useQuery (cross-app discovery) — stub it for the same
+// reason as AdvisoryBanner above; it has its own dedicated test.
+vi.mock('../SuiteSwitcher', () => ({
+  SuiteSwitcher: () => null,
+}))
+
 import Layout from '../Layout'
 import i18n from '../../i18n'
 
