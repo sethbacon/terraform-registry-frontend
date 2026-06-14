@@ -37,6 +37,47 @@ it('renders a link when a sibling is active', async () => {
   ).toBeInTheDocument()
 })
 
+it('warns the sibling opens in a new tab until a shared store is confirmed', async () => {
+  vi.spyOn(globalThis, 'fetch').mockResolvedValue(
+    new Response(
+      JSON.stringify({
+        sibling: {
+          app: 'terraform-state-manager',
+          state: 'active',
+          publicUrl: 'https://tfstate.example.com',
+        },
+      }),
+      { status: 200 },
+    ),
+  )
+  render(withQuery(<SuiteSwitcher />))
+  // No sharedStore flag → set expectations that a separate sign-in may be needed.
+  expect(
+    await screen.findByRole('button', { name: /you may need to sign in/i }),
+  ).toBeInTheDocument()
+})
+
+it('drops the sign-in hint when the sibling reports a shared store', async () => {
+  vi.spyOn(globalThis, 'fetch').mockResolvedValue(
+    new Response(
+      JSON.stringify({
+        sibling: {
+          app: 'terraform-state-manager',
+          state: 'active',
+          publicUrl: 'https://tfstate.example.com',
+          sharedStore: true,
+        },
+      }),
+      { status: 200 },
+    ),
+  )
+  render(withQuery(<SuiteSwitcher />))
+  expect(
+    await screen.findByRole('button', { name: 'Open Terraform State Manager' }),
+  ).toBeInTheDocument()
+  expect(screen.queryByRole('button', { name: /sign in/i })).toBeNull()
+})
+
 it('renders nothing when sibling is degraded', async () => {
   vi.spyOn(globalThis, 'fetch').mockResolvedValue(
     new Response(
