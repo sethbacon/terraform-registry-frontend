@@ -5,6 +5,12 @@ export interface SuiteSibling {
   state: 'active' | 'degraded' | 'unreachable' | 'unknown'
   publicUrl?: string
   links?: Record<string, string>
+  // Identity provenance from the sibling's manifest. issuer identifies which app
+  // minted its tokens; sharedStore is true only when an operator has confirmed
+  // both apps use one identity store + IdP (single sign-on). Absent/false ⇒ the
+  // switcher warns that opening the sibling may require a separate sign-in.
+  issuer?: string
+  sharedStore?: boolean
 }
 
 async function fetchUIConfig(): Promise<{ sibling: SuiteSibling | null }> {
