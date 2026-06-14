@@ -1,6 +1,13 @@
 <!-- markdownlint-disable MD013 MD024 MD041 -->
 # Changelog
 
+## [2.7.0](https://github.com/sethbacon/terraform-registry-frontend/compare/v2.6.0...v2.7.0) (2026-06-14)
+
+
+### Features
+
+* **suite:** note possible re-auth when opening the sibling app ([#383](https://github.com/sethbacon/terraform-registry-frontend/issues/383)) ([a79d24a](https://github.com/sethbacon/terraform-registry-frontend/commit/a79d24ab4a976477e8f8e5401b345de498873f49))
+
 ## [2.6.0](https://github.com/sethbacon/terraform-registry-frontend/compare/v2.5.1...v2.6.0) (2026-06-13)
 
 
