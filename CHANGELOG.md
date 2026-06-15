@@ -1,6 +1,13 @@
 <!-- markdownlint-disable MD013 MD024 MD041 -->
 # Changelog
 
+## [2.8.0](https://github.com/sethbacon/terraform-registry-frontend/compare/v2.7.0...v2.8.0) (2026-06-15)
+
+
+### Features
+
+* **suite:** "Consumed by" panel on module detail (Phase 2 keystone) ([#385](https://github.com/sethbacon/terraform-registry-frontend/issues/385)) ([5947ee5](https://github.com/sethbacon/terraform-registry-frontend/commit/5947ee505ab8bd8d7db87a90a1de4cefb7488bd4))
+
 ## [2.7.0](https://github.com/sethbacon/terraform-registry-frontend/compare/v2.6.0...v2.7.0) (2026-06-14)
 
 
