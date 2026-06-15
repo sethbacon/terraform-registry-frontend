@@ -20,6 +20,11 @@
       "method": "POST",
       "path": "/api/v1/dev/impersonate/{}",
       "reason": "Backend route is registered conditionally under DEV_MODE=true and is intentionally undocumented in production swagger. Permanent allowlist entry."
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/suite/modules/{}/{}/{}/consumers",
+      "reason": "Suite 'Consumed by' proxy added in terraform-registry-backend#495, which postdates the pinned contract-check image (1.4.0) and currently ships without swagger annotations. Remove once the backend documents the route (adds @Router) AND docker-compose.contract-check.yml is bumped to a release that includes it."
     }
   ]
 }
