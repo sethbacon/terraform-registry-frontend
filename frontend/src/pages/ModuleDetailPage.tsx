@@ -32,6 +32,7 @@ import Page from '../components/Page'
 import PublishFromSCMWizard from '../components/PublishFromSCMWizard'
 import ModuleDocumentation from '../components/ModuleDocumentation'
 import SecurityScanPanel from '../components/SecurityScanPanel'
+import ConsumedByPanel from '../components/ConsumedByPanel'
 import SCMRepositoryPanel from '../components/SCMRepositoryPanel'
 import WebhookEventsPanel from '../components/WebhookEventsPanel'
 import VersionDetailsPanel from '../components/VersionDetailsPanel'
@@ -119,6 +120,9 @@ const ModuleDetailPage: React.FC = () => {
     handleUpdateDescription,
     handleUpdateNamespace,
     ociEnabled,
+    moduleConsumers,
+    suiteActive,
+    suiteSiblingUrl,
   } = useModuleDetail()
 
   const [editingNamespace, setEditingNamespace] = React.useState(false)
@@ -533,6 +537,12 @@ const ModuleDetailPage: React.FC = () => {
                 scanNotConfigured={scanNotConfigured}
                 onRescan={handleRescan}
                 rescanPending={rescanPending}
+              />
+
+              <ConsumedByPanel
+                active={suiteActive}
+                siblingUrl={suiteSiblingUrl}
+                consumers={moduleConsumers}
               />
             </Box>
           </Box>

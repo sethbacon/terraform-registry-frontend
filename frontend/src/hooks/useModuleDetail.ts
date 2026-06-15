@@ -2,9 +2,11 @@ import { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import api from '../services/api'
+import type { ModuleConsumer } from '../services/api'
 import { ModuleVersion, ModuleScan, ModuleDoc } from '../types'
 import type { ModuleSCMLink, SCMWebhookEvent } from '../types/scm'
 import { useAuth } from '../contexts/AuthContext'
+import { useSuite } from './useSuite'
 import { REGISTRY_HOST } from '../config'
 import { getErrorMessage, getErrorStatus } from '../utils/errors'
 import { queryKeys } from '../services/queryKeys'
@@ -36,6 +38,7 @@ export function useModuleDetail() {
   const navigate = useNavigate()
   const queryClient = useQueryClient()
   const { isAuthenticated, allowedScopes } = useAuth()
+  const { sibling: suiteSibling, active: suiteActive } = useSuite()
   const canManage =
     isAuthenticated && (allowedScopes.includes('admin') || allowedScopes.includes('modules:write'))
 
@@ -205,6 +208,24 @@ export function useModuleDetail() {
       setWebhookEventsLoaded(true)
     }
   }
+
+  // =========================================================================
+  // 7. Suite "Consumed by" query (states in the sibling State Manager that
+  //    reference this module). Inert unless the suite is active AND the user is
+  //    authenticated — the proxy requires auth and a shared service token, and
+  //    returns an empty list when standalone.
+  // =========================================================================
+  const { data: moduleConsumers = [] } = useQuery<ModuleConsumer[]>({
+    queryKey: queryKeys.modules.consumers(namespace ?? '', name ?? '', system ?? ''),
+    queryFn: async () => {
+      try {
+        return await api.getModuleConsumers(namespace!, name!, system!)
+      } catch {
+        return []
+      }
+    },
+    enabled: moduleQueryEnabled && suiteActive && isAuthenticated,
+  })
 
   // =========================================================================
   // Mutations
@@ -575,6 +596,10 @@ export function useModuleDetail() {
     webhookEventsLoading,
     webhookEventsExpanded,
     setWebhookEventsExpanded,
+    // Suite "Consumed by"
+    moduleConsumers,
+    suiteActive,
+    suiteSiblingUrl: suiteSibling?.publicUrl,
     // Security scan
     moduleScan,
     scanLoading,
