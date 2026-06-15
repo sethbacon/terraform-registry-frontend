@@ -2009,6 +2009,13 @@
     "showingCount": "Showing 10 of {{total}} events",
     "refresh": "Refresh"
   },
+  "consumedBy": {
+    "title": "Consumed by",
+    "subtitle": "States in State Manager that reference this module.",
+    "constraintOnly": "constraint only",
+    "showingCount": "Showing {{shown}} of {{total}} states",
+    "openInStateManager": "Open in State Manager"
+  },
   "repositoryBrowser": {
     "searchPlaceholder": "Search repositories...",
     "refresh": "Refresh",

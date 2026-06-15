@@ -17,6 +17,19 @@ function getCookie(name: string): string {
   return match ? decodeURIComponent(match[1]) : ''
 }
 
+/**
+ * A Terraform State Manager state that references this module, surfaced via the
+ * suite consumers proxy. `module_version` is null when the state only carries a
+ * version constraint (no locked version) — rendered as "constraint only".
+ */
+export interface ModuleConsumer {
+  source_id: string
+  source_name: string
+  state_key: string
+  module_version: string | null
+  observed_at: string
+}
+
 class ApiClient {
   private client: AxiosInstance
 
@@ -857,6 +870,20 @@ class ApiClient {
     const response = await this.client.get(`/api/v1/admin/modules/${moduleId}/scm/events`)
     // Backend wraps the list as { events: [...] }; callers expect a bare array.
     return response.data?.events ?? []
+  }
+
+  async getModuleConsumers(
+    namespace: string,
+    name: string,
+    system: string,
+  ): Promise<ModuleConsumer[]> {
+    // Suite proxy: forwarded to the sibling State Manager when a shared service
+    // token is configured, else returns an empty list. Backend wraps the list
+    // as { consumers: [...] }; callers expect a bare array.
+    const response = await this.client.get(
+      `/api/v1/suite/modules/${namespace}/${name}/${system}/consumers`,
+    )
+    return response.data?.consumers ?? []
   }
 
   async updateModule(

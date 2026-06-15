@@ -20,6 +20,8 @@ export const queryKeys = {
       [...queryKeys.modules._def, 'docs', namespace, name, system, version] as const,
     webhookEvents: (moduleId: string) =>
       [...queryKeys.modules._def, 'webhookEvents', moduleId] as const,
+    consumers: (namespace: string, name: string, system: string) =>
+      [...queryKeys.modules._def, 'consumers', namespace, name, system] as const,
   },
   providers: {
     _def: ['providers'] as const,
