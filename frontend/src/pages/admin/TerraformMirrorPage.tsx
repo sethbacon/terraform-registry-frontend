@@ -476,10 +476,10 @@ const emptyCreate = (): CreateTerraformMirrorConfigRequest => ({
   tool: 'terraform',
   upstream_url: toolDefaultUrl('terraform'),
   gpg_verify: true,
-  stable_only: false,
+  stable_only: true,
   enabled: true,
   sync_interval_hours: 24,
-  requires_approval: false,
+  requires_approval: true,
 })
 
 // ---------------------------------------------------------------------------
