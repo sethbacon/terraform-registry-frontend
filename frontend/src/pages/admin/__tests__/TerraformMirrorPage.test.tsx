@@ -80,7 +80,7 @@ describe('TerraformMirrorPage', () => {
   })
 
   it('shows loading spinner initially', () => {
-    listTerraformMirrorConfigsMock.mockReturnValue(new Promise(() => {}))
+    listTerraformMirrorConfigsMock.mockReturnValue(new Promise(() => { }))
     renderPage()
     expect(screen.getByRole('progressbar')).toBeInTheDocument()
   })
@@ -252,6 +252,23 @@ describe('TerraformMirrorPage', () => {
     const createBtn = screen.getByRole('button', { name: /^create$/i })
     await userEvent.click(createBtn)
     await waitFor(() => expect(createMirrorMock).toHaveBeenCalled())
+  })
+
+  it('defaults a new mirror to stable-only and requires-approval', async () => {
+    listTerraformMirrorConfigsMock.mockResolvedValue({ configs: [] })
+    createMirrorMock.mockResolvedValue({ id: 'new-id' })
+    renderPage()
+    await waitFor(() =>
+      expect(screen.getByRole('button', { name: /add mirror/i })).toBeInTheDocument(),
+    )
+    await userEvent.click(screen.getByRole('button', { name: /add mirror/i }))
+    await waitFor(() => expect(screen.getByRole('dialog')).toBeInTheDocument())
+    await userEvent.type(screen.getByLabelText(/^Name/i), 'defaults-tf')
+    await userEvent.click(screen.getByRole('button', { name: /^create$/i }))
+    await waitFor(() => expect(createMirrorMock).toHaveBeenCalled())
+    expect(createMirrorMock).toHaveBeenCalledWith(
+      expect.objectContaining({ stable_only: true, requires_approval: true }),
+    )
   })
 
   it('shows error when create mirror fails', async () => {
