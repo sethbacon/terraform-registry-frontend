@@ -21,7 +21,7 @@ export const defaultCommands: CommandPaletteNavItem[] = [
   { label: 'Home', path: '/', group: 'Navigation' },
   { label: 'Modules', path: '/modules', group: 'Navigation' },
   { label: 'Providers', path: '/providers', group: 'Navigation' },
-  { label: 'Terraform Binaries', path: '/terraform', group: 'Navigation' },
+  { label: 'Terraform Binaries', path: '/terraform-binaries', group: 'Navigation' },
   { label: 'Admin Dashboard', path: '/admin', scope: 'admin', group: 'Admin' },
   {
     label: 'Organizations',
