@@ -1,6 +1,13 @@
 <!-- markdownlint-disable MD013 MD024 MD041 -->
 # Changelog
 
+## [2.8.1](https://github.com/sethbacon/terraform-registry-frontend/compare/v2.8.0...v2.8.1) (2026-06-16)
+
+
+### Bug Fixes
+
+* **csp:** map-derive the nonce so emotion styles aren't blocked (parity) ([#390](https://github.com/sethbacon/terraform-registry-frontend/issues/390)) ([a05ea30](https://github.com/sethbacon/terraform-registry-frontend/commit/a05ea300935ca725bb8bc5232b221d1eeaab74b2))
+
 ## [2.8.0](https://github.com/sethbacon/terraform-registry-frontend/compare/v2.7.0...v2.8.0) (2026-06-15)
 
 
