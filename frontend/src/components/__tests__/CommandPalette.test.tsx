@@ -57,6 +57,11 @@ describe('filterByScope', () => {
     expect(result.find((i) => i.path === '/admin/users')).toBeDefined()
     expect(result.find((i) => i.path === '/admin/storage')).toBeUndefined()
   })
+
+  it('points the Terraform Binaries entry at the hosted-binaries route', () => {
+    const entry = defaultCommands.find((i) => i.label === 'Terraform Binaries')
+    expect(entry?.path).toBe('/terraform-binaries')
+  })
 })
 
 describe('CommandPalette', () => {
