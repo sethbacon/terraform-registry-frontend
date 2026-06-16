@@ -23,7 +23,14 @@ export function SuiteSwitcher() {
         color="inherit"
         aria-label={title}
         sx={{ mr: 1 }}
-        onClick={() => window.open(sibling.publicUrl, '_blank', 'noopener,noreferrer')}
+        onClick={() => {
+          // Reuse one sibling tab across clicks: a stable window name (the
+          // sibling's app id) re-navigates and refocuses the same tab instead of
+          // spawning a new one each time. The sibling is a trusted first-party
+          // suite app, so we intentionally omit noopener/noreferrer here — those
+          // force a fresh browsing context and would defeat the tab reuse.
+          window.open(sibling.publicUrl, sibling.app)?.focus()
+        }}
       >
         <AppsIcon />
       </IconButton>

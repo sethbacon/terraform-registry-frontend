@@ -1,5 +1,5 @@
 import { afterEach, expect, it, vi } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { fireEvent, render, screen } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { SuiteSwitcher } from './SuiteSwitcher'
 
@@ -76,6 +76,29 @@ it('drops the sign-in hint when the sibling reports a shared store', async () =>
     await screen.findByRole('button', { name: 'Open Terraform State Manager' }),
   ).toBeInTheDocument()
   expect(screen.queryByRole('button', { name: /sign in/i })).toBeNull()
+})
+
+it('reuses one sibling tab via a stable window name instead of opening a new one', async () => {
+  vi.spyOn(globalThis, 'fetch').mockResolvedValue(
+    new Response(
+      JSON.stringify({
+        sibling: {
+          app: 'terraform-state-manager',
+          state: 'active',
+          publicUrl: 'https://tfstate.example.com',
+        },
+      }),
+      { status: 200 },
+    ),
+  )
+  const focus = vi.fn()
+  const openSpy = vi.spyOn(window, 'open').mockReturnValue({ focus } as unknown as Window)
+  render(withQuery(<SuiteSwitcher />))
+  fireEvent.click(await screen.findByRole('button', { name: /Open Terraform State Manager/i }))
+  // Stable target name (the sibling app id) so the browser reuses that one tab;
+  // .focus() brings it forward. NOT '_blank' (which spawns a new tab each click).
+  expect(openSpy).toHaveBeenCalledWith('https://tfstate.example.com', 'terraform-state-manager')
+  expect(focus).toHaveBeenCalled()
 })
 
 it('renders nothing when sibling is degraded', async () => {
