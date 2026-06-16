@@ -165,13 +165,21 @@ const PlatformRows: React.FC<{ mirrorName: string; version: string }> = ({
 // ---------------------------------------------------------------------------
 
 /** Derive the upstream release-notes URL for known tools. Returns null for custom/unknown tools. */
-function getChangelogUrl(tool: string, version: string): string | null {
+export function getChangelogUrl(tool: string, version: string): string | null {
   const v = version.startsWith('v') ? version : `v${version}`
   switch (tool) {
     case 'terraform':
       return `https://github.com/hashicorp/terraform/releases/tag/${v}`
     case 'opentofu':
       return `https://github.com/opentofu/opentofu/releases/tag/${v}`
+    case 'opa':
+      return `https://github.com/open-policy-agent/opa/releases/tag/${v}`
+    case 'packer':
+      return `https://github.com/hashicorp/packer/releases/tag/${v}`
+    case 'sentinel':
+      // Sentinel is closed-source with no per-version GitHub releases; link the
+      // consolidated changelog page instead of a per-version tag.
+      return 'https://developer.hashicorp.com/sentinel/docs/changelog'
     default:
       return null
   }
