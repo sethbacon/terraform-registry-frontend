@@ -29,7 +29,7 @@ vi.mock('../../contexts/AuthContext', () => ({
   }),
 }))
 
-import TerraformBinaryDetailPage from '../TerraformBinaryDetailPage'
+import TerraformBinaryDetailPage, { getChangelogUrl } from '../TerraformBinaryDetailPage'
 
 function renderPage(path = '/terraform/binaries/terraform') {
   return render(
@@ -245,5 +245,41 @@ describe('TerraformBinaryDetailPage', () => {
     await waitFor(() =>
       expect(screen.getByText(/No versions have been synced yet/)).toBeInTheDocument(),
     )
+  })
+})
+
+describe('getChangelogUrl', () => {
+  it('builds per-version GitHub release tags for terraform and opentofu', () => {
+    expect(getChangelogUrl('terraform', '1.8.0')).toBe(
+      'https://github.com/hashicorp/terraform/releases/tag/v1.8.0',
+    )
+    expect(getChangelogUrl('opentofu', '1.7.0')).toBe(
+      'https://github.com/opentofu/opentofu/releases/tag/v1.7.0',
+    )
+  })
+
+  it('builds per-version GitHub release tags for opa and packer', () => {
+    expect(getChangelogUrl('opa', '0.60.0')).toBe(
+      'https://github.com/open-policy-agent/opa/releases/tag/v0.60.0',
+    )
+    expect(getChangelogUrl('packer', '1.11.0')).toBe(
+      'https://github.com/hashicorp/packer/releases/tag/v1.11.0',
+    )
+  })
+
+  it('links sentinel to the consolidated changelog page (no per-version tag)', () => {
+    expect(getChangelogUrl('sentinel', '0.40.0')).toBe(
+      'https://developer.hashicorp.com/sentinel/docs/changelog',
+    )
+  })
+
+  it('does not double-prefix a version that already starts with v', () => {
+    expect(getChangelogUrl('opa', 'v1.0.0')).toBe(
+      'https://github.com/open-policy-agent/opa/releases/tag/v1.0.0',
+    )
+  })
+
+  it('returns null for unknown/custom tools', () => {
+    expect(getChangelogUrl('custom-tool', '1.0.0')).toBeNull()
   })
 })
