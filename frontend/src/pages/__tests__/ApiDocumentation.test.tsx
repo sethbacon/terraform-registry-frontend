@@ -354,4 +354,35 @@ describe('ApiDocumentation', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Admin Tools' }))
     expect(scrollSpy).toHaveBeenCalled()
   })
+
+  // Regression: the dependency sweep (MUI v9 / Vite 8) changed Swagger UI's CSS
+  // injection order, so override rules that lacked `!important` lost the cascade
+  // — the info header leaked back in and the scheme bar showed an unthemed
+  // white band. These assertions lock in the `!important` on the rules that
+  // regressed so they win regardless of stylesheet load order.
+  const swaggerStyleContent = (): string =>
+    Array.from(document.querySelectorAll('style'))
+      .map((el) => el.textContent ?? '')
+      .find((css) => css.includes('.swagger-ui .information-container')) ?? ''
+
+  it('hides the Swagger info header and topbar with !important', () => {
+    renderWithTheme()
+    const css = swaggerStyleContent()
+    expect(css).toContain('.swagger-ui .information-container { display: none !important; }')
+    expect(css).toContain('.swagger-ui .topbar { display: none !important; }')
+  })
+
+  it('themes the scheme container background with !important in light mode', () => {
+    renderWithTheme('light')
+    expect(swaggerStyleContent()).toContain(
+      '.swagger-ui .scheme-container { background: #fafafa !important;',
+    )
+  })
+
+  it('themes the scheme container background with !important in dark mode', () => {
+    renderWithTheme('dark')
+    expect(swaggerStyleContent()).toContain(
+      '.swagger-ui .scheme-container { background: #1e1e1e !important;',
+    )
+  })
 })

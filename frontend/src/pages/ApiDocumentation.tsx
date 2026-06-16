@@ -132,10 +132,10 @@ const BASE_CSS = `
   }
 
   /* ---------- hide default top bar ---------- */
-  .swagger-ui .topbar { display: none; }
+  .swagger-ui .topbar { display: none !important; }
 
   /* ---------- hide the info header block (we render our own) ---------- */
-  .swagger-ui .information-container { display: none; }
+  .swagger-ui .information-container { display: none !important; }
 
   /* ---------- scheme selector — sticky below AppBar ---------- */
   .swagger-ui .scheme-container {
@@ -250,7 +250,7 @@ const BASE_CSS = `
 `
 
 const LIGHT_EXTRA = `
-  .swagger-ui .scheme-container { background: #fafafa; border-bottom: 1px solid #e0e0e0; }
+  .swagger-ui .scheme-container { background: #fafafa !important; border-bottom: 1px solid #e0e0e0; }
   .swagger-ui .scheme-container select { border-color: #5C4EE5 !important; }
   .swagger-ui .opblock-tag { border-bottom: 1px solid #e8e8e8; color: #333; }
   .swagger-ui .opblock-tag a,
@@ -298,7 +298,7 @@ const DARK_EXTRA = `
   .swagger-ui section.models,
   .swagger-ui .opblock-tag-section { background: #1e1e1e; }
 
-  .swagger-ui .scheme-container { border-bottom: 1px solid #333; }
+  .swagger-ui .scheme-container { background: #1e1e1e !important; border-bottom: 1px solid #333; }
   .swagger-ui .scheme-container select { color-scheme: dark; border-color: #5C4EE5 !important; }
   .swagger-ui .opblock-tag { border-bottom: 1px solid #333; color: #e0e0e0; }
   .swagger-ui .opblock-tag a,
