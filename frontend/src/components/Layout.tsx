@@ -670,11 +670,11 @@ const Layout = () => {
               <MenuIcon />
             </IconButton>
           )}
+          {isAuthenticated && <SuiteSwitcher />}
           <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
             {productName}
           </Typography>
           {isAuthenticated && <DevUserSwitcher />}
-          {isAuthenticated && <SuiteSwitcher />}
           <Tooltip title={t('header.quickNav')}>
             <IconButton
               color="inherit"
