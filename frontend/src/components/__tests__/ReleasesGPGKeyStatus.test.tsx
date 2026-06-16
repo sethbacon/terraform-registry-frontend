@@ -124,4 +124,25 @@ describe('ReleasesGPGKeyStatus', () => {
 
     await waitFor(() => expect(screen.getByText('expired')).toBeInTheDocument())
   })
+
+  it('renders an unmanaged-key binary row (none source, unknown status)', async () => {
+    const noneResponse: ReleasesGPGKeysResponse = {
+      keys: [
+        {
+          tool: 'opa',
+          cache: null,
+          embedded: null,
+          effective_source: 'none',
+          expiry_warning_days: 60,
+          status: 'unknown',
+        },
+      ],
+    }
+    mockGetReleasesGPGKeys.mockResolvedValue(noneResponse)
+    renderComponent()
+
+    await waitFor(() => expect(screen.getByText('opa')).toBeInTheDocument())
+    expect(screen.getByText('none')).toBeInTheDocument()
+    expect(screen.getByText('unknown')).toBeInTheDocument()
+  })
 })

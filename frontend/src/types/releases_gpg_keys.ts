@@ -19,7 +19,9 @@ export interface ReleasesGPGKeyStatusView {
   tool: string
   cache: ReleasesGPGKeyCacheView | null
   embedded: ReleasesGPGKeyEmbeddedView | null
-  effective_source: 'cache' | 'embedded'
+  // 'none' is used for configured binaries that have no managed signing key yet
+  // (e.g. opa); such rows carry null cache/embedded and an 'unknown' status.
+  effective_source: 'cache' | 'embedded' | 'none'
   expiry_warning_days: number
   status: ReleasesGPGKeyStatus
 }
