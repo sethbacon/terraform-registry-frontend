@@ -33,7 +33,7 @@
       "mirroring": "ミラーリング",
       "providerConfig": "プロバイダー設定",
       "providerConfigTooltip": "プロバイダーのミラーソースと同期スケジュールを設定する",
-      "binariesConfig": "バイナリ設定",
+      "binariesConfig": "バイナリミラー",
       "binariesConfigTooltip": "Terraform および OpenTofu のバイナリミラーソースを設定する",
       "approvals": "承認",
       "approvalsTooltip": "保留中のミラー同期リクエストを確認し、承認する",
@@ -1077,7 +1077,7 @@
       "thLastSynced": "最終同期日時"
     },
     "terraformMirror": {
-      "pageTitle": "ミラーリング — バイナリ設定",
+      "pageTitle": "バイナリミラー",
       "refresh": "更新",
       "addMirror": "ミラーを追加",
       "cancel": "キャンセル",

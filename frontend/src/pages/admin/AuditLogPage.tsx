@@ -40,12 +40,22 @@ const RESOURCE_TYPES = [
   { value: 'module', label: 'Module' },
   { value: 'provider', label: 'Provider' },
   { value: 'terraform_binary', label: 'Terraform Binary' },
+  // Hosted binary mirror configs. The backend still emits the legacy
+  // 'terraform_mirror' resource type; surface it consistently as "Binary Mirror".
+  { value: 'terraform_mirror', label: 'Binary Mirror' },
   { value: 'file', label: 'File' },
   { value: 'user', label: 'User' },
   { value: 'mirror', label: 'Mirror' },
   { value: 'api_key', label: 'API Key' },
   { value: 'organization', label: 'Organization' },
 ]
+
+// Maps a raw audit resource_type to its display label (falling back to the raw
+// value for unknown types) so the table column matches the filter dropdown.
+const resourceTypeLabel = (value: string | null | undefined): string => {
+  if (!value) return '—'
+  return RESOURCE_TYPES.find((rt) => rt.value === value)?.label ?? value
+}
 
 const AuditLogPage: React.FC = () => {
   const { t } = useTranslation()
@@ -355,7 +365,7 @@ const AuditLogPage: React.FC = () => {
                         >
                           {log.action}
                         </TableCell>
-                        <TableCell>{log.resource_type ?? '—'}</TableCell>
+                        <TableCell>{resourceTypeLabel(log.resource_type)}</TableCell>
                         <TableCell>
                           {log.user_email ?? log.user_name ?? log.user_id ?? '—'}
                         </TableCell>
@@ -437,7 +447,9 @@ const AuditLogPage: React.FC = () => {
                   >
                     Resource Type
                   </Typography>
-                  <Typography variant="body2">{selectedLog.resource_type ?? '—'}</Typography>
+                  <Typography variant="body2">
+                    {resourceTypeLabel(selectedLog.resource_type)}
+                  </Typography>
                 </Box>
                 <Box>
                   <Typography

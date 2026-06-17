@@ -33,7 +33,7 @@
       "mirroring": "镜像",
       "providerConfig": "提供商配置",
       "providerConfigTooltip": "配置提供商的镜像源和同步计划",
-      "binariesConfig": "二进制文件配置",
+      "binariesConfig": "二进制镜像",
       "binariesConfigTooltip": "配置 Terraform 和 OpenTofu 二进制镜像源",
       "approvals": "批准",
       "approvalsTooltip": "审核并批准待处理的镜像同步请求",
@@ -1077,7 +1077,7 @@
       "thLastSynced": "最后同步时间"
     },
     "terraformMirror": {
-      "pageTitle": "镜像 — 二进制文件配置",
+      "pageTitle": "二进制镜像",
       "refresh": "刷新",
       "addMirror": "添加镜像",
       "cancel": "取消",

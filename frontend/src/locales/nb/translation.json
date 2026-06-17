@@ -33,7 +33,7 @@
       "mirroring": "Speiling",
       "providerConfig": "Leverandørkonfigurasjon",
       "providerConfigTooltip": "Konfigurer leverandørens speilkilder og synkroniseringsplaner",
-      "binariesConfig": "Konfigurasjon av binærfiler",
+      "binariesConfig": "Binærspeil",
       "binariesConfigTooltip": "Konfigurer Terraform og OpenTofu-kildene for binære speil",
       "approvals": "Godkjenninger",
       "approvalsTooltip": "Gjennomgå og godkjenn ventende forespørsler om speilsynkronisering",
@@ -1077,7 +1077,7 @@
       "thLastSynced": "Sist synkronisert"
     },
     "terraformMirror": {
-      "pageTitle": "Speiling — Konfigurasjon av binærfiler",
+      "pageTitle": "Binærspeil",
       "refresh": "Oppdater",
       "addMirror": "Legg til speil",
       "cancel": "Avbryt",

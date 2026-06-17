@@ -70,13 +70,13 @@ describe('AuditLogPage', () => {
   })
 
   it('shows loading spinner while fetching', () => {
-    listAuditLogsMock.mockReturnValue(new Promise(() => {}))
+    listAuditLogsMock.mockReturnValue(new Promise(() => { }))
     renderPage()
     expect(screen.getByRole('progressbar')).toBeInTheDocument()
   })
 
   it('renders heading "Audit Logs"', () => {
-    listAuditLogsMock.mockReturnValue(new Promise(() => {}))
+    listAuditLogsMock.mockReturnValue(new Promise(() => { }))
     renderPage()
     expect(screen.getByText('Audit Logs')).toBeInTheDocument()
   })
@@ -94,7 +94,7 @@ describe('AuditLogPage', () => {
   })
 
   it('shows filter controls', () => {
-    listAuditLogsMock.mockReturnValue(new Promise(() => {}))
+    listAuditLogsMock.mockReturnValue(new Promise(() => { }))
     renderPage()
     expect(screen.getByLabelText('Resource Type')).toBeInTheDocument()
     expect(screen.getByLabelText('Action')).toBeInTheDocument()
@@ -102,7 +102,7 @@ describe('AuditLogPage', () => {
   })
 
   it('shows Export button', () => {
-    listAuditLogsMock.mockReturnValue(new Promise(() => {}))
+    listAuditLogsMock.mockReturnValue(new Promise(() => { }))
     renderPage()
     expect(screen.getByText('Export')).toBeInTheDocument()
   })
@@ -223,6 +223,43 @@ describe('AuditLogPage', () => {
     await waitFor(() => {
       expect(listAuditLogsMock).toHaveBeenCalledWith(
         expect.objectContaining({ resource_type: 'module' }),
+      )
+    })
+  })
+
+  it('displays the legacy terraform_mirror resource type as "Binary Mirror"', async () => {
+    listAuditLogsMock.mockResolvedValue({
+      logs: [
+        {
+          id: 'log-bm',
+          created_at: '2025-06-03T09:00:00Z',
+          action: 'POST /api/v1/admin/terraform-mirrors',
+          resource_type: 'terraform_mirror',
+          resource_id: 'cfg-1',
+          user_email: 'admin@example.com',
+          ip_address: '10.0.0.2',
+        },
+      ],
+      pagination: { total: 1, page: 1, per_page: 25 },
+    })
+    renderPage()
+    await waitFor(() =>
+      expect(screen.getByText('POST /api/v1/admin/terraform-mirrors')).toBeInTheDocument(),
+    )
+    // Raw backend value is surfaced consistently as the friendly label.
+    expect(screen.getByText('Binary Mirror')).toBeInTheDocument()
+    expect(screen.queryByText('terraform_mirror')).not.toBeInTheDocument()
+  })
+
+  it('filters by the Binary Mirror option using the legacy backend value', async () => {
+    listAuditLogsMock.mockResolvedValue(fakeLogs)
+    renderPage()
+    await waitFor(() => expect(screen.getByText('POST /api/v1/modules')).toBeInTheDocument())
+    await userEvent.click(screen.getByLabelText('Resource Type'))
+    await userEvent.click(screen.getByRole('option', { name: 'Binary Mirror' }))
+    await waitFor(() => {
+      expect(listAuditLogsMock).toHaveBeenCalledWith(
+        expect.objectContaining({ resource_type: 'terraform_mirror' }),
       )
     })
   })
