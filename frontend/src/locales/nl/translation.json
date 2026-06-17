@@ -33,7 +33,7 @@
       "mirroring": "Spiegelen",
       "providerConfig": "Configuratie van de provider",
       "providerConfigTooltip": "De bronnen van de provider-mirrors en de synchronisatieschema’s configureren",
-      "binariesConfig": "Configuratie van binaire bestanden",
+      "binariesConfig": "Binaire mirrors",
       "binariesConfigTooltip": "Configureer de bronnen voor de binaire mirrors van Terraform en OpenTofu",
       "approvals": "Goedkeuringen",
       "approvalsTooltip": "In behandeling zijnde verzoeken voor spiegelsynchronisatie controleren en goedkeuren",
@@ -1077,7 +1077,7 @@
       "thLastSynced": "Laatst gesynchroniseerd"
     },
     "terraformMirror": {
-      "pageTitle": "Spiegelen — Configuratie van binaire bestanden",
+      "pageTitle": "Binaire mirrors",
       "refresh": "Vernieuwen",
       "addMirror": "Spiegel toevoegen",
       "cancel": "Annuleren",

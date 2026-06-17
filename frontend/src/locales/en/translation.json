@@ -33,7 +33,7 @@
       "mirroring": "Mirroring",
       "providerConfig": "Provider Config",
       "providerConfigTooltip": "Configure provider mirror sources and sync schedules",
-      "binariesConfig": "Binaries Config",
+      "binariesConfig": "Binary Mirrors",
       "binariesConfigTooltip": "Configure Terraform and OpenTofu binary mirror sources",
       "approvals": "Approvals",
       "approvalsTooltip": "Review and approve pending mirror sync requests",
@@ -1078,7 +1078,7 @@
       "thLastSynced": "Last Synced"
     },
     "terraformMirror": {
-      "pageTitle": "Mirroring — Binaries Config",
+      "pageTitle": "Binary Mirrors",
       "refresh": "Refresh",
       "addMirror": "Add Mirror",
       "cancel": "Cancel",

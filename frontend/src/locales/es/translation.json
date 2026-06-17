@@ -33,7 +33,7 @@
       "mirroring": "Duplicación",
       "providerConfig": "Configuración del proveedor",
       "providerConfigTooltip": "Configurar las fuentes de réplica de los proveedores y los horarios de sincronización",
-      "binariesConfig": "Configuración de binarios",
+      "binariesConfig": "Réplicas de binarios",
       "binariesConfigTooltip": "Configurar las fuentes de los repositorios binarios de Terraform y OpenTofu",
       "approvals": "Homologaciones",
       "approvalsTooltip": "Revisar y aprobar las solicitudes de sincronización de réplicas pendientes",
@@ -1077,7 +1077,7 @@
       "thLastSynced": "Última sincronización"
     },
     "terraformMirror": {
-      "pageTitle": "Duplicación — Configuración de archivos binarios",
+      "pageTitle": "Réplicas de binarios",
       "refresh": "Actualizar",
       "addMirror": "Añadir espejo",
       "cancel": "Cancelar",

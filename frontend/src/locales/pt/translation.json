@@ -33,7 +33,7 @@
       "mirroring": "Espelhamento",
       "providerConfig": "Configuração do provedor",
       "providerConfigTooltip": "Configurar fontes de espelho do fornecedor e horários de sincronização",
-      "binariesConfig": "Configuração de ficheiros binários",
+      "binariesConfig": "Espelhos de binários",
       "binariesConfigTooltip": "Configurar as fontes dos espelhos binários do Terraform e do OpenTofu",
       "approvals": "Aprovações",
       "approvalsTooltip": "Analisar e aprovar os pedidos de sincronização de espelhos pendentes",
@@ -1077,7 +1077,7 @@
       "thLastSynced": "Última sincronização"
     },
     "terraformMirror": {
-      "pageTitle": "Espelhamento — Configuração de ficheiros binários",
+      "pageTitle": "Espelhos de binários",
       "refresh": "Atualizar",
       "addMirror": "Adicionar espelho",
       "cancel": "Cancelar",

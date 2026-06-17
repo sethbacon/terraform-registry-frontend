@@ -207,7 +207,7 @@ describe('Layout', () => {
     expect(screen.getByText('API Keys')).toBeInTheDocument()
     expect(screen.getByText('Provider Config')).toBeInTheDocument()
     expect(screen.getByText('Approvals')).toBeInTheDocument()
-    expect(screen.getByText('Binaries Config')).toBeInTheDocument()
+    expect(screen.getByText('Binary Mirrors')).toBeInTheDocument()
 
     // Should NOT see admin-only items
     expect(screen.queryByText('OIDC Groups')).not.toBeInTheDocument()
