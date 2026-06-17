@@ -24,6 +24,15 @@ export function SuiteSwitcher() {
         aria-label={title}
         sx={{ mr: 1 }}
         onClick={() => {
+          // Claim this tab's name as our OWN app id before opening the sibling.
+          // The suite has exactly two apps, so "self" is the other entry in
+          // LABELS. Without this the original tab stays unnamed, so the sibling's
+          // switcher can't find it by name and opens a *third* tab — the two apps
+          // then ping-pong between two new tabs while the original is orphaned.
+          // Naming this tab lets the sibling reuse it: only the original + one
+          // sibling tab ever exist.
+          const selfApp = Object.keys(LABELS).find((a) => a !== sibling.app)
+          if (selfApp) window.name = selfApp
           // Reuse one sibling tab across clicks: a stable window name (the
           // sibling's app id) re-navigates and refocuses the same tab instead of
           // spawning a new one each time. The sibling is a trusted first-party
