@@ -8,7 +8,10 @@ function withQuery(ui: React.ReactNode) {
   return <QueryClientProvider client={qc}>{ui}</QueryClientProvider>
 }
 
-afterEach(() => vi.restoreAllMocks())
+afterEach(() => {
+  vi.restoreAllMocks()
+  window.name = ''
+})
 
 it('renders nothing when no sibling', async () => {
   vi.spyOn(globalThis, 'fetch').mockResolvedValue(
@@ -99,6 +102,27 @@ it('reuses one sibling tab via a stable window name instead of opening a new one
   // .focus() brings it forward. NOT '_blank' (which spawns a new tab each click).
   expect(openSpy).toHaveBeenCalledWith('https://tfstate.example.com', 'terraform-state-manager')
   expect(focus).toHaveBeenCalled()
+})
+
+it('claims this tab under its own app id so the sibling reuses the original tab', async () => {
+  vi.spyOn(globalThis, 'fetch').mockResolvedValue(
+    new Response(
+      JSON.stringify({
+        sibling: {
+          app: 'terraform-state-manager',
+          state: 'active',
+          publicUrl: 'https://tfstate.example.com',
+        },
+      }),
+      { status: 200 },
+    ),
+  )
+  vi.spyOn(window, 'open').mockReturnValue({ focus: vi.fn() } as unknown as Window)
+  render(withQuery(<SuiteSwitcher />))
+  fireEvent.click(await screen.findByRole('button', { name: /Open Terraform State Manager/i }))
+  // Self is the other known suite app; naming this tab lets the sibling's
+  // switcher find and refocus it instead of spawning a third tab.
+  expect(window.name).toBe('terraform-registry')
 })
 
 it('renders nothing when sibling is degraded', async () => {
