@@ -1,6 +1,20 @@
 <!-- markdownlint-disable MD013 MD024 MD041 -->
 # Changelog
 
+## [2.8.2](https://github.com/sethbacon/terraform-registry-frontend/compare/v2.8.1...v2.8.2) (2026-06-17)
+
+
+### Bug Fixes
+
+* add release-notes links for opa, packer, and sentinel binaries ([#398](https://github.com/sethbacon/terraform-registry-frontend/issues/398)) ([b8c72ae](https://github.com/sethbacon/terraform-registry-frontend/commit/b8c72ae00d3b3d81bddaad1f90c2c5371f53b37f)), closes [#392](https://github.com/sethbacon/terraform-registry-frontend/issues/392)
+* default new binary mirror form to stable-only and requires-approval ([#400](https://github.com/sethbacon/terraform-registry-frontend/issues/400)) ([d69e796](https://github.com/sethbacon/terraform-registry-frontend/commit/d69e796832d5d664be766dc7bd514f09d8283309))
+* present binary mirror UX labels consistently in the frontend ([#402](https://github.com/sethbacon/terraform-registry-frontend/issues/402)) ([26fe3fd](https://github.com/sethbacon/terraform-registry-frontend/commit/26fe3fd9cd56d206b585238a85bb4f8d9cc66592))
+* restore Swagger UI info-header hiding and dark scheme theming ([#399](https://github.com/sethbacon/terraform-registry-frontend/issues/399)) ([2aaf3de](https://github.com/sethbacon/terraform-registry-frontend/commit/2aaf3de34c7ce383a1033e7785308f5004a139fc)), closes [#394](https://github.com/sethbacon/terraform-registry-frontend/issues/394)
+* route Command Palette Terraform Binaries entry to /terraform-binaries ([#397](https://github.com/sethbacon/terraform-registry-frontend/issues/397)) ([0b8f4b9](https://github.com/sethbacon/terraform-registry-frontend/commit/0b8f4b9317967cee9d7114f9b88c46d5636b6d46)), closes [#393](https://github.com/sethbacon/terraform-registry-frontend/issues/393)
+* **switcher:** reuse one sibling tab + move the icon left of the nav title ([#395](https://github.com/sethbacon/terraform-registry-frontend/issues/395)) ([f5a4868](https://github.com/sethbacon/terraform-registry-frontend/commit/f5a48689966fc81f46dba45ecd9dd78b57f4f6e5))
+* type release signing-key source as none for unmanaged binaries ([#401](https://github.com/sethbacon/terraform-registry-frontend/issues/401)) ([9cf804a](https://github.com/sethbacon/terraform-registry-frontend/commit/9cf804a5cf1ada34809096840ab92811a2cafe11))
+* **ui:** show OPA as "unsigned" (checksum-only) in release signing keys ([#509](https://github.com/sethbacon/terraform-registry-frontend/issues/509)) ([#403](https://github.com/sethbacon/terraform-registry-frontend/issues/403)) ([eb3836a](https://github.com/sethbacon/terraform-registry-frontend/commit/eb3836a713e93d61480ebeb9b44d2612ca2ad165))
+
 ## [2.8.1](https://github.com/sethbacon/terraform-registry-frontend/compare/v2.8.0...v2.8.1) (2026-06-16)
 
 
