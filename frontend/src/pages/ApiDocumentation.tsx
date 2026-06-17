@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import SwaggerUI from 'swagger-ui-react'
 import 'swagger-ui-react/swagger-ui.css'
@@ -406,6 +406,16 @@ const ApiDocumentation: React.FC = () => {
   const theme = useTheme()
   const isDark = theme.palette.mode === 'dark'
 
+  // CSP nonce injected by nginx into <meta name="csp-nonce">. The override
+  // <style> below MUST carry it; otherwise the strict `style-src 'self'
+  // 'nonce-...'` policy blocks the element and strips every Swagger UI theme
+  // override (leaving the bundled light theme). Mirrors the emotion cache nonce
+  // setup in main.tsx; resolves to undefined in dev/tests where no nonce exists.
+  const cspNonce = useMemo(() => {
+    const n = document.querySelector('meta[name="csp-nonce"]')?.getAttribute('content')
+    return n && n !== '__CSP_NONCE__' ? n : undefined
+  }, [])
+
   const [navTags, setNavTags] = useState<NavTag[]>([])
   const [activeTag, setActiveTag] = useState<string>('')
   const specRef = useRef<OpenAPISpec | null>(null)
@@ -613,7 +623,7 @@ const ApiDocumentation: React.FC = () => {
 
         {/* ---- Swagger UI content ---- */}
         <Box ref={contentRef} sx={{ flex: 1, minWidth: 0 }}>
-          <style>{BASE_CSS + (isDark ? DARK_EXTRA : LIGHT_EXTRA)}</style>
+          <style nonce={cspNonce}>{BASE_CSS + (isDark ? DARK_EXTRA : LIGHT_EXTRA)}</style>
 
           <SwaggerUI
             url="/swagger.json"
