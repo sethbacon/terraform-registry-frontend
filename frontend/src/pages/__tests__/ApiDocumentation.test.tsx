@@ -385,4 +385,25 @@ describe('ApiDocumentation', () => {
       '.swagger-ui .scheme-container { background: #1e1e1e !important;',
     )
   })
+
+  // Regression: nginx serves a strict `style-src 'self' 'nonce-...'` CSP. The
+  // injected override <style> must carry that nonce or the browser blocks it,
+  // stripping every theme override (the deployed symptom: an unthemed white
+  // scheme band). The component reads the nonce from <meta name="csp-nonce">.
+  it('applies the CSP nonce from the meta tag to the injected override style', () => {
+    const meta = document.createElement('meta')
+    meta.setAttribute('name', 'csp-nonce')
+    meta.setAttribute('content', 'test-nonce-xyz')
+    document.head.appendChild(meta)
+    try {
+      renderWithTheme()
+      const styleEl = Array.from(document.querySelectorAll('style')).find((el) =>
+        (el.textContent ?? '').includes('.swagger-ui .information-container'),
+      ) as HTMLStyleElement | undefined
+      expect(styleEl).toBeDefined()
+      expect(styleEl?.nonce || styleEl?.getAttribute('nonce') || '').toBe('test-nonce-xyz')
+    } finally {
+      meta.remove()
+    }
+  })
 })
