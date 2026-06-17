@@ -120,7 +120,7 @@ describe('Layout', () => {
   })
 
   // 3. Authenticated state — user menu
-  it('shows account icon and user email in menu when authenticated', async () => {
+  it('shows account icon, user name and email in menu when authenticated', async () => {
     const user = userEvent.setup()
     setAuth({
       isAuthenticated: true,
@@ -135,6 +135,7 @@ describe('Layout', () => {
     const accountBtn = screen.getByLabelText('account of current user')
     await user.click(accountBtn)
 
+    expect(screen.getByText('Alice')).toBeInTheDocument()
     expect(screen.getByText('alice@example.com')).toBeInTheDocument()
     expect(screen.getByText('Logout')).toBeInTheDocument()
   })
