@@ -1,6 +1,14 @@
 <!-- markdownlint-disable MD013 MD024 MD041 -->
 # Changelog
 
+## [2.8.3](https://github.com/sethbacon/terraform-registry-frontend/compare/v2.8.2...v2.8.3) (2026-06-17)
+
+
+### Bug Fixes
+
+* **api-docs:** apply CSP nonce to Swagger UI override styles ([#406](https://github.com/sethbacon/terraform-registry-frontend/issues/406)) ([1a3dfda](https://github.com/sethbacon/terraform-registry-frontend/commit/1a3dfda8fe0fb4142be1320059a259cc90c94d06))
+* **auth:** use "Logout" in the session-expiry warning ([#404](https://github.com/sethbacon/terraform-registry-frontend/issues/404)) ([2d174b4](https://github.com/sethbacon/terraform-registry-frontend/commit/2d174b4460bbc62d4e2247626fb89ecea3554bc0))
+
 ## [2.8.2](https://github.com/sethbacon/terraform-registry-frontend/compare/v2.8.1...v2.8.2) (2026-06-17)
 
 
