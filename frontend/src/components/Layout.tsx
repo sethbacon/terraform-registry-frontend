@@ -25,6 +25,7 @@ import {
 } from '@mui/material'
 import MenuIcon from '@mui/icons-material/Menu'
 import AccountCircle from '@mui/icons-material/AccountCircle'
+import LogoutIcon from '@mui/icons-material/Logout'
 import Dashboard from '@mui/icons-material/Dashboard'
 import ViewModule from '@mui/icons-material/ViewModule'
 import Extension from '@mui/icons-material/Extension'
@@ -783,11 +784,21 @@ const Layout = () => {
                 open={Boolean(anchorEl)}
                 onClose={handleClose}
               >
-                <MenuItem disabled>
-                  <Typography variant="body2">{user?.email}</Typography>
+                <MenuItem disabled sx={{ opacity: 1 }}>
+                  <Box>
+                    <Typography variant="body2">{user?.name}</Typography>
+                    <Typography variant="caption" color="text.secondary">
+                      {user?.email}
+                    </Typography>
+                  </Box>
                 </MenuItem>
                 <Divider />
-                <MenuItem onClick={handleLogout}>{t('header.logout')}</MenuItem>
+                <MenuItem onClick={handleLogout}>
+                  <ListItemIcon>
+                    <LogoutIcon fontSize="small" />
+                  </ListItemIcon>
+                  {t('header.logout')}
+                </MenuItem>
               </Menu>
             </div>
           ) : (
