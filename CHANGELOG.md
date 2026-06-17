@@ -1,6 +1,13 @@
 <!-- markdownlint-disable MD013 MD024 MD041 -->
 # Changelog
 
+## [2.9.0](https://github.com/sethbacon/terraform-registry-frontend/compare/v2.8.3...v2.9.0) (2026-06-17)
+
+
+### Features
+
+* **auth:** match the State Manager account menu (name + logout icon) ([#407](https://github.com/sethbacon/terraform-registry-frontend/issues/407)) ([5611797](https://github.com/sethbacon/terraform-registry-frontend/commit/56117976b85baa282f77e3e84dd9be10ecce9acc))
+
 ## [2.8.3](https://github.com/sethbacon/terraform-registry-frontend/compare/v2.8.2...v2.8.3) (2026-06-17)
 
 
