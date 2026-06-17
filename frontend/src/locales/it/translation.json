@@ -33,7 +33,7 @@
       "mirroring": "Riflessione",
       "providerConfig": "Configurazione provider",
       "providerConfigTooltip": "Configurare le origini mirror dei provider e le pianificazioni di sincronizzazione",
-      "binariesConfig": "Configurazione dei file binari",
+      "binariesConfig": "Mirror dei file binari",
       "binariesConfigTooltip": "Configurare le fonti dei mirror dei file binari di Terraform e OpenTofu",
       "approvals": "Autorizzazioni",
       "approvalsTooltip": "Esaminare e approvare le richieste di sincronizzazione dei mirror in sospeso",
@@ -1077,7 +1077,7 @@
       "thLastSynced": "Ultima sincronizzazione"
     },
     "terraformMirror": {
-      "pageTitle": "Riflessione — Configurazione dei file binari",
+      "pageTitle": "Mirror dei file binari",
       "refresh": "Aggiorna",
       "addMirror": "Aggiungi mirror",
       "cancel": "Annulla",

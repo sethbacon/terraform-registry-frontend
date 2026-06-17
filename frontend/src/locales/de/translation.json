@@ -33,7 +33,7 @@
       "mirroring": "Spiegelung",
       "providerConfig": "Anbieter-Konfiguration",
       "providerConfigTooltip": "Anbieter-Spiegelquellen und Synchronisierungszeitpläne konfigurieren",
-      "binariesConfig": "Binärdateien – Konfiguration",
+      "binariesConfig": "Binär-Mirrors",
       "binariesConfigTooltip": "Konfigurieren der Quellen für die Binär-Mirrors von Terraform und OpenTofu",
       "approvals": "Zulassungen",
       "approvalsTooltip": "Ausstehende Anträge auf Spiegel-Synchronisierung prüfen und genehmigen",
@@ -1077,7 +1077,7 @@
       "thLastSynced": "Zuletzt synchronisiert"
     },
     "terraformMirror": {
-      "pageTitle": "Spiegelung – Konfiguration der Binärdateien",
+      "pageTitle": "Binär-Mirrors",
       "refresh": "Aktualisieren",
       "addMirror": "Spiegel hinzufügen",
       "cancel": "Abbrechen",

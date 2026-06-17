@@ -35,7 +35,7 @@ function setAuth(overrides: { isAuthenticated?: boolean; allowedScopes?: string[
 function renderPalette(open = true) {
   return render(
     <MemoryRouter>
-      <CommandPalette open={open} onClose={() => {}} />
+      <CommandPalette open={open} onClose={() => { }} />
     </MemoryRouter>,
   )
 }
@@ -58,8 +58,9 @@ describe('filterByScope', () => {
     expect(result.find((i) => i.path === '/admin/storage')).toBeUndefined()
   })
 
-  it('points the Terraform Binaries entry at the hosted-binaries route', () => {
-    const entry = defaultCommands.find((i) => i.label === 'Terraform Binaries')
+  it('points the hosted-binaries entry at the hosted-binaries route', () => {
+    const entry = defaultCommands.find((i) => i.path === '/terraform-binaries')
+    expect(entry?.label).toBe('Hosted Binaries')
     expect(entry?.path).toBe('/terraform-binaries')
   })
 })

@@ -33,7 +33,7 @@
       "mirroring": "Mise en miroir",
       "providerConfig": "Configuration du fournisseur",
       "providerConfigTooltip": "Configurer les sources de miroir des fournisseurs et les calendriers de synchronisation",
-      "binariesConfig": "Configuration des fichiers binaires",
+      "binariesConfig": "Miroirs binaires",
       "binariesConfigTooltip": "Configurer les sources des miroirs binaires Terraform et OpenTofu",
       "approvals": "Agréments",
       "approvalsTooltip": "Examiner et approuver les demandes de synchronisation des miroirs en attente",
@@ -1077,7 +1077,7 @@
       "thLastSynced": "Dernière synchronisation"
     },
     "terraformMirror": {
-      "pageTitle": "Mise en miroir — Configuration des fichiers binaires",
+      "pageTitle": "Miroirs binaires",
       "refresh": "Actualiser",
       "addMirror": "Ajouter un miroir",
       "cancel": "Annuler",
