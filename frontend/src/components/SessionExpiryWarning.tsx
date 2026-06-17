@@ -51,7 +51,7 @@ const SessionExpiryWarning: React.FC = () => {
               onClick={logout}
               data-testid="session-expiry-signout"
             >
-              Sign out
+              Logout
             </Button>
           </Stack>
         }
