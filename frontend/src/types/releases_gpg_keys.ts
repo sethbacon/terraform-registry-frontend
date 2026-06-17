@@ -13,14 +13,16 @@ export interface ReleasesGPGKeyEmbeddedView {
   days_until_expiry?: number | null
 }
 
-export type ReleasesGPGKeyStatus = 'ok' | 'warn' | 'expired' | 'unknown'
+export type ReleasesGPGKeyStatus = 'ok' | 'warn' | 'expired' | 'unknown' | 'unsigned'
 
 export interface ReleasesGPGKeyStatusView {
   tool: string
   cache: ReleasesGPGKeyCacheView | null
   embedded: ReleasesGPGKeyEmbeddedView | null
-  // 'none' is used for configured binaries that have no managed signing key yet
-  // (e.g. opa); such rows carry null cache/embedded and an 'unknown' status.
+  // 'none' is used for configured binaries with no managed signing key. Tools
+  // whose upstream publishes no release signature at all (e.g. opa — checksum
+  // only) carry null cache/embedded, a 'none' source, and an 'unsigned' status;
+  // genuinely unclassified tools keep 'unknown'.
   effective_source: 'cache' | 'embedded' | 'none'
   expiry_warning_days: number
   status: ReleasesGPGKeyStatus
