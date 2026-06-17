@@ -2160,7 +2160,9 @@
     "thExpiry": "Expiry",
     "thLastRefresh": "Last Refresh",
     "expiredAgo": "expired {{days}}d ago",
-    "days": "{{days}}d"
+    "days": "{{days}}d",
+    "unsignedLabel": "unsigned",
+    "unsignedTooltip": "This tool's upstream publishes no release signature; binaries are verified by checksum only."
   },
   "scanFindingsModal": {
     "title": "Scan Findings",

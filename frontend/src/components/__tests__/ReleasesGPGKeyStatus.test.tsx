@@ -125,8 +125,8 @@ describe('ReleasesGPGKeyStatus', () => {
     await waitFor(() => expect(screen.getByText('expired')).toBeInTheDocument())
   })
 
-  it('renders an unmanaged-key binary row (none source, unknown status)', async () => {
-    const noneResponse: ReleasesGPGKeysResponse = {
+  it('renders an unsigned-upstream binary row (none source, unsigned status)', async () => {
+    const unsignedResponse: ReleasesGPGKeysResponse = {
       keys: [
         {
           tool: 'opa',
@@ -134,15 +134,17 @@ describe('ReleasesGPGKeyStatus', () => {
           embedded: null,
           effective_source: 'none',
           expiry_warning_days: 60,
-          status: 'unknown',
+          status: 'unsigned',
         },
       ],
     }
-    mockGetReleasesGPGKeys.mockResolvedValue(noneResponse)
+    mockGetReleasesGPGKeys.mockResolvedValue(unsignedResponse)
     renderComponent()
 
     await waitFor(() => expect(screen.getByText('opa')).toBeInTheDocument())
     expect(screen.getByText('none')).toBeInTheDocument()
-    expect(screen.getByText('unknown')).toBeInTheDocument()
+    // OPA shows as "unsigned" (checksum-only), not the misleading "unknown".
+    expect(screen.getByText('unsigned')).toBeInTheDocument()
+    expect(screen.queryByText('unknown')).not.toBeInTheDocument()
   })
 })

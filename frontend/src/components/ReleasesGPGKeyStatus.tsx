@@ -17,6 +17,7 @@ import CheckCircleIcon from '@mui/icons-material/CheckCircle'
 import ErrorIcon from '@mui/icons-material/Error'
 import WarningIcon from '@mui/icons-material/Warning'
 import HelpOutlineIcon from '@mui/icons-material/HelpOutlined'
+import GppMaybeIcon from '@mui/icons-material/GppMaybe'
 import { useTranslation } from 'react-i18next'
 import type { TFunction } from 'i18next'
 import { useReleasesGPGKeyStatus } from '../hooks/useReleasesGPGKeyStatus'
@@ -43,6 +44,8 @@ function StatusIcon({ status }: { status: ReleasesGPGKeyStatus }) {
       return <WarningIcon fontSize="small" color="warning" />
     case 'expired':
       return <ErrorIcon fontSize="small" color="error" />
+    case 'unsigned':
+      return <GppMaybeIcon fontSize="small" color="warning" />
     default:
       return <HelpOutlineIcon fontSize="small" color="disabled" />
   }
@@ -74,7 +77,16 @@ function KeyRow({ row }: { row: ReleasesGPGKeyStatusView }) {
         </Box>
       </TableCell>
       <TableCell>
-        <Chip label={row.status} size="small" color={statusColor(row.status)} />
+        {row.status === 'unsigned' ? (
+          // OPA-style tools: upstream publishes no signature, so this is verified
+          // by checksum only. Show a labelled, explained chip rather than a bare
+          // status code, so the reduced assurance is visible (not silent).
+          <Tooltip title={t('releasesGpgKeys.unsignedTooltip')}>
+            <Chip label={t('releasesGpgKeys.unsignedLabel')} size="small" color="warning" />
+          </Tooltip>
+        ) : (
+          <Chip label={row.status} size="small" color={statusColor(row.status)} />
+        )}
       </TableCell>
       <TableCell>
         <Chip label={row.effective_source} size="small" variant="outlined" />
