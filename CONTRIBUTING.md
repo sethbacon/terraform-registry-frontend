@@ -35,7 +35,7 @@ This project expects all participants to interact with each other professionally
 
 ### Prerequisites
 
-- Node.js 24+ (LTS) and npm
+- Node.js 24.x and npm
 - Docker and Docker Compose (for running the backend during development)
 
 ### Fork and Clone
@@ -60,7 +60,8 @@ Then start the frontend dev server in a second terminal:
 cd frontend
 npm install
 npm run dev
-# App: http://localhost:5173
+# App: https://registry.local:3000 (HTTPS when local dev certs exist, otherwise http)
+# Requires a hosts-file entry: 127.0.0.1 registry.local
 ```
 
 Alternatively, set up the backend manually — see [terraform-registry-backend](https://github.com/sethbacon/terraform-registry-backend).
@@ -154,7 +155,7 @@ npm run build
 | New page / user flow | E2E spec in `e2e/tests/feature-name.spec.ts`                                                      |
 | Bug fix              | Regression test covering the fixed behavior                                                       |
 
-Tests must pass with `npm test`. The coverage thresholds enforced by `vitest.config.ts` for v1.0.0 are **80% statements / 70% branches / 70% functions / 80% lines**. CI fails the build if any threshold is not met. See [TESTING.md](TESTING.md#coverage) for the ratchet history.
+Tests must pass with `npm test`. The current coverage thresholds enforced by `vitest.config.ts` are **80% statements / 70% branches / 70% functions / 80% lines**. CI fails the build if any threshold is not met. See [TESTING.md](TESTING.md#coverage) for the ratchet history.
 
 For detailed test patterns and examples, see [TESTING.md](TESTING.md).
 
@@ -315,7 +316,8 @@ in `scripts/.translation-hashes.json` to detect changes.
 ### Adding a new language
 
 1. Create `frontend/src/locales/<lang>/translation.json` with a copy of the English file.
-2. Add the locale to `SUPPORTED_LANGUAGES` in `frontend/src/components/Layout.tsx` and to the
+2. Add the locale (with its native name) to `LANGUAGE_NATIVE_NAMES` in
+   `frontend/src/components/Layout.tsx` (`SUPPORTED_LANGUAGES` is derived from it) and to the
    `supportedLngs` array in `frontend/src/i18n.ts`.
 3. Add an entry to the `language.*` key in all existing locale JSON files.
 4. Add the language code to `LANG_MAP` and `DEFAULT_PROVIDER` in `scripts/translate.mjs`.

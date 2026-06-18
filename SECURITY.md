@@ -5,8 +5,8 @@
 
 | Version | Supported          |
 | ------- | ------------------ |
-| 1.0.x   | :white_check_mark: |
-| < 1.0   | :x:                |
+| 2.x     | :white_check_mark: |
+| < 2.0   | :x:                |
 
 The frontend is released as a matched pair with the backend. See the
 [backend compatibility matrix](https://github.com/sethbacon/terraform-registry-backend/blob/main/deployments/COMPATIBILITY.md)
@@ -60,7 +60,8 @@ We will credit reporters in the release notes unless anonymity is requested.
 - Dependencies are monitored by Dependabot (npm — frontend + e2e — and GitHub Actions)
 - `npm audit --audit-level=high` runs in the Docker build and the scheduled security workflow
 - Markdown rendering is sanitised with `rehype-sanitize` (XSS mitigation)
-- The frontend follows OWASP Top 10 mitigations applicable to SPAs (output encoding, strict CSP via nginx, no `dangerouslySetInnerHTML` outside the sanitised renderer, JWT stored with conservative defaults)
+- The frontend follows OWASP Top 10 mitigations applicable to SPAs (output encoding, strict CSP via nginx, no `dangerouslySetInnerHTML` outside the sanitised renderer)
+- Authentication uses an HttpOnly session cookie set by the backend (no JWT persisted in `localStorage` outside a transitional migration path); mutating requests are protected by a double-submit CSRF token (the `tfr_csrf` cookie echoed in an `X-CSRF-Token` header)
 
 ## Repository Hardening
 
@@ -69,7 +70,7 @@ the release pipeline and supply chain:
 
 ### Branch Protection (`main`)
 
-- Required status checks (strict — branch must be up-to-date): `Lint`, `Typecheck`, `Unit Tests`, `Contract Check`, `Build`, `Conventional PR Title`
+- Required status checks (strict — branch must be up-to-date): `Lint`, `Typecheck`, `Unit Tests (1/4)`..`(4/4)`, `Unit Test Coverage`, `Contract Check`, `Build`, `Conventional PR Title`
 - Required pull request reviews: 1 approving review, dismiss stale reviews, require code-owner review
 - Required conversation resolution: yes
 - Force pushes: blocked; branch deletion: blocked

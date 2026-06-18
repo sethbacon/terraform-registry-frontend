@@ -1,7 +1,7 @@
 <!-- markdownlint-disable MD013 -->
 # Privacy Policy
 
-> Last updated: 2025-01-01
+> Last updated: 2026-06-17
 
 ## 1. Introduction
 
@@ -65,32 +65,42 @@ Telemetry is **disabled by default** and requires explicit opt-in consent.
 | API request logs | 30 days                                      |
 | Telemetry data   | 90 days                                      |
 
-Audit logs may be held longer under a legal hold — see
-[docs/compliance](docs/compliance/) for details.
+Audit logs may be held longer under a legal hold; contact your instance
+administrator for details.
 
 ## 6. Your Rights
 
 Under GDPR, you have the right to:
 
 - **Access** your personal data (Art 15) — available via the admin API
-  `GET /admin/users/:id/export`
+  `GET /api/v1/admin/users/:id/export`
 - **Rectify** inaccurate data (Art 16) — via your profile settings
 - **Erase** your data (Art 17) — via admin API
-  `POST /admin/users/:id/erase` or by contacting your administrator
+  `POST /api/v1/admin/users/:id/erase` or by contacting your administrator
 - **Restrict** processing (Art 18)
 - **Data portability** (Art 20) — export endpoint provides JSON format
 - **Object** to processing (Art 21)
 - **Withdraw consent** at any time (Art 7(3)) — via the Settings page
 
-## 7. Cookies
+## 7. Cookies and Local Storage
 
-| Cookie                       | Purpose               | Duration   |
+### Cookies
+
+| Cookie                    | Purpose        | Duration |
+| ------------------------- | -------------- | -------- |
+| Session cookie (HttpOnly) | Authentication | Session  |
+
+No third-party tracking cookies are used.
+
+### Local Storage
+
+The following preferences are stored in the browser's `localStorage`, not as
+cookies:
+
+| Key                          | Purpose               | Duration   |
 | ---------------------------- | --------------------- | ---------- |
 | `terraform-registry-theme`   | UI theme (light/dark) | Persistent |
 | `terraform-registry-consent` | Consent preferences   | Persistent |
-| Session cookie (HttpOnly)    | Authentication        | Session    |
-
-No third-party tracking cookies are used.
 
 ## 8. Data Transfers
 
@@ -108,8 +118,7 @@ We implement technical and organizational measures including:
 - Audit logging of administrative actions
 - Automated security scanning of modules and providers
 
-See [SECURITY.md](SECURITY.md) and [docs/threat-model.md](docs/threat-model.md)
-for details.
+See [SECURITY.md](SECURITY.md) for details.
 
 ## 10. Changes to This Policy
 

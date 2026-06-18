@@ -32,8 +32,8 @@ export default defineConfig({
         'src/**/*.d.ts',
       ],
       thresholds: {
-        // v1.0.0 coverage floor — raised incrementally from 70/60/60/70 (v0.8.0)
-        // through 75/65/65/75 (v0.9.0) to reach the 80/70/70/80 v1.0.0 target.
+        // Current coverage floor — raised incrementally from 70/60/60/70 (v0.8.0)
+        // through 75/65/65/75 (v0.9.0) to the current 80/70/70/80 target.
         statements: 80,
         branches: 70,
         functions: 70,

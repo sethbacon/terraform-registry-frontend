@@ -49,6 +49,10 @@ Reports are written to `frontend/coverage/` in `text`, `text-summary`, `lcov`, a
 | [@testing-library/user-event](https://testing-library.com/docs/user-event/intro/)       | User interaction simulation                     |
 | [@testing-library/jest-dom](https://github.com/testing-library/jest-dom)                | Custom DOM matchers (`toBeInTheDocument`, etc.) |
 
+> `jsdom` is also present as a devDependency but is **not** used as the test
+> environment (happy-dom is configured in `vitest.config.ts`). It is effectively
+> unused and a candidate for removal.
+
 Setup file: `frontend/src/setupTests.ts`
 
 ## Unit Test Patterns
@@ -189,7 +193,7 @@ mockUseAuth.mockReturnValue({
 
 ## Unit Test Inventory
 
-The suite contains **~95 Vitest spec files** (count it with
+The suite contains **~100 Vitest spec files** (count it with
 `Get-ChildItem frontend/src -Recurse -Filter *.test.* | Measure-Object`). They
 are organised by domain under `frontend/src/`:
 
