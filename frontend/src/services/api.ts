@@ -69,7 +69,7 @@ class ApiClient {
         }
 
         // Stamp the request start time for breadcrumb duration tracking
-        ;(config as InternalAxiosRequestConfig & { _startTime?: number })._startTime = Date.now()
+        ; (config as InternalAxiosRequestConfig & { _startTime?: number })._startTime = Date.now()
         return config
       },
       (error) => Promise.reject(error),
@@ -268,11 +268,11 @@ class ApiClient {
       },
       onUploadProgress: options?.onUploadProgress
         ? (event) => {
-            if (event.total && event.total > 0) {
-              const percent = Math.round((event.loaded / event.total) * 100)
-              options.onUploadProgress?.(percent)
-            }
+          if (event.total && event.total > 0) {
+            const percent = Math.round((event.loaded / event.total) * 100)
+            options.onUploadProgress?.(percent)
           }
+        }
         : undefined,
     })
     return response.data
@@ -386,11 +386,11 @@ class ApiClient {
       },
       onUploadProgress: options?.onUploadProgress
         ? (event) => {
-            if (event.total && event.total > 0) {
-              const percent = Math.round((event.loaded / event.total) * 100)
-              options.onUploadProgress?.(percent)
-            }
+          if (event.total && event.total > 0) {
+            const percent = Math.round((event.loaded / event.total) * 100)
+            options.onUploadProgress?.(percent)
           }
+        }
         : undefined,
     })
     return response.data
@@ -729,9 +729,14 @@ class ApiClient {
     provider_type: string
     name: string
     base_url?: string | null
+    tenant_id?: string | null
     client_id?: string
     client_secret?: string
     webhook_secret?: string
+    auth_mode?: string
+    github_app_id?: string
+    github_installation_id?: string
+    app_private_key?: string
   }) {
     const response = await this.client.post('/api/v1/scm-providers', data)
     return response.data
@@ -752,6 +757,10 @@ class ApiClient {
       client_secret?: string
       webhook_secret?: string
       is_active?: boolean
+      auth_mode?: string
+      github_app_id?: string
+      github_installation_id?: string
+      app_private_key?: string
     },
   ) {
     const response = await this.client.put(`/api/v1/scm-providers/${id}`, data)
@@ -760,6 +769,14 @@ class ApiClient {
 
   async deleteSCMProvider(id: string) {
     const response = await this.client.delete(`/api/v1/scm-providers/${id}`)
+    return response.data
+  }
+
+  // Verify a provider's shared app credentials by minting a token (app auth modes only)
+  async verifySCMProvider(
+    providerId: string,
+  ): Promise<{ ok: boolean; expires_at?: string | null }> {
+    const response = await this.client.post(`/api/v1/scm-providers/${providerId}/verify`)
     return response.data
   }
 

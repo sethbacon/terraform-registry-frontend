@@ -2,6 +2,8 @@
 
 export type SCMProviderType = 'github' | 'azuredevops' | 'gitlab' | 'bitbucket_dc'
 
+export type SCMAuthMode = 'oauth_user' | 'entra_app' | 'github_app'
+
 export interface SCMProvider {
   id: string
   organization_id: string
@@ -14,6 +16,11 @@ export interface SCMProvider {
   is_active: boolean
   created_at: string
   updated_at: string
+  auth_mode?: SCMAuthMode
+  github_app_id?: string | null
+  github_installation_id?: string | null
+  has_client_secret?: boolean
+  has_app_private_key?: boolean
 }
 
 export interface CreateSCMProviderRequest {
@@ -25,6 +32,10 @@ export interface CreateSCMProviderRequest {
   client_id?: string
   client_secret?: string
   webhook_secret?: string
+  auth_mode?: SCMAuthMode
+  github_app_id?: string
+  github_installation_id?: string
+  app_private_key?: string
 }
 
 export interface UpdateSCMProviderRequest {
@@ -35,6 +46,15 @@ export interface UpdateSCMProviderRequest {
   client_secret?: string
   webhook_secret?: string
   is_active?: boolean
+  auth_mode?: SCMAuthMode
+  github_app_id?: string
+  github_installation_id?: string
+  app_private_key?: string
+}
+
+export interface SCMProviderVerifyResult {
+  ok: boolean
+  expires_at?: string | null
 }
 
 export interface SCMOAuthToken {

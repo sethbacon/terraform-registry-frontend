@@ -1510,7 +1510,21 @@
       "connectToTitle": "Connect to {{name}}",
       "patIntro": "Enter your Bitbucket Data Center Personal Access Token. You can generate one from your Bitbucket account settings under HTTP access tokens.",
       "labelPat": "Personal Access Token",
-      "saveToken": "Save Token"
+      "saveToken": "Save Token",
+      "labelAuthMode": "Authentication",
+      "authModeOAuth": "Per-user OAuth",
+      "authModeApp": "Shared app credential",
+      "helpAuthMode": "App credentials are admin-managed and shared by all users — no per-user Connect is required. Per-user OAuth keeps the legacy flow where each user connects their own account.",
+      "labelGithubAppId": "GitHub App ID",
+      "labelGithubInstallationId": "Installation ID",
+      "labelAppPrivateKey": "Private Key (PEM)",
+      "helpGithubApp": "From your GitHub App settings: the numeric App ID, the Installation ID (from the installation URL), and the app's RSA private key.",
+      "helpAppPrivateKeyKeep": "Leave blank to keep the existing private key",
+      "appCredential": "App credential",
+      "testConnection": "Test connection",
+      "testConnectionOk": "Connection OK",
+      "testConnectionFailed": "Connection failed",
+      "errVerify": "Failed to verify provider"
     },
     "approvals": {
       "pageTitle": "Approval Requests",

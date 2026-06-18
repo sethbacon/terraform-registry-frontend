@@ -13,6 +13,7 @@ const deleteSCMProviderMock = vi.fn()
 const initiateSCMOAuthMock = vi.fn()
 const saveSCMTokenMock = vi.fn()
 const revokeSCMTokenMock = vi.fn()
+const verifySCMProviderMock = vi.fn()
 
 vi.mock('../../../services/api', () => ({
   default: {
@@ -25,6 +26,7 @@ vi.mock('../../../services/api', () => ({
     initiateSCMOAuth: (...args: unknown[]) => initiateSCMOAuthMock(...args),
     saveSCMToken: (...args: unknown[]) => saveSCMTokenMock(...args),
     revokeSCMToken: (...args: unknown[]) => revokeSCMTokenMock(...args),
+    verifySCMProvider: (...args: unknown[]) => verifySCMProviderMock(...args),
   },
 }))
 
@@ -88,7 +90,7 @@ describe('SCMProvidersPage', () => {
   })
 
   it('shows loading spinner initially', () => {
-    listSCMProvidersMock.mockReturnValue(new Promise(() => {}))
+    listSCMProvidersMock.mockReturnValue(new Promise(() => { }))
     renderPage()
     expect(screen.getByRole('progressbar')).toBeInTheDocument()
   })
@@ -261,6 +263,57 @@ describe('SCMProvidersPage', () => {
     await userEvent.type(screen.getByLabelText(/Client Secret/i), 'secret-456')
     await userEvent.click(screen.getByRole('button', { name: /^create$/i }))
     await waitFor(() => expect(createSCMProviderMock).toHaveBeenCalled())
+  })
+
+  it('creates a GitHub App provider with app fields and no client secret', async () => {
+    listSCMProvidersMock.mockResolvedValue([])
+    getCurrentUserMembershipsMock.mockResolvedValue(fakeMemberships)
+    createSCMProviderMock.mockResolvedValue({ id: 'gh-app' })
+    renderPage()
+    await waitFor(() =>
+      expect(screen.getByRole('button', { name: /add provider/i })).toBeInTheDocument(),
+    )
+    await userEvent.click(screen.getByRole('button', { name: /add provider/i }))
+    await waitFor(() => expect(screen.getByText('Add SCM Provider')).toBeInTheDocument())
+    await userEvent.type(screen.getByLabelText(/^Name/i), 'GH App')
+    // provider_type defaults to github; switch to the shared app credential mode.
+    await userEvent.click(screen.getByRole('combobox', { name: /Authentication/i }))
+    await userEvent.click(await screen.findByRole('option', { name: /Shared app credential/i }))
+    await userEvent.type(screen.getByLabelText(/GitHub App ID/i), '12345')
+    await userEvent.type(screen.getByLabelText(/Installation ID/i), '67890')
+    await userEvent.type(screen.getByLabelText(/Private Key/i), 'fake-pem')
+    await userEvent.click(screen.getByRole('button', { name: /^create$/i }))
+    await waitFor(() => expect(createSCMProviderMock).toHaveBeenCalled())
+    const payload = createSCMProviderMock.mock.calls[0][0]
+    expect(payload.auth_mode).toBe('github_app')
+    expect(payload.github_app_id).toBe('12345')
+    expect(payload.github_installation_id).toBe('67890')
+    expect(payload.app_private_key).toBe('fake-pem')
+    // The client secret field is not rendered in app mode, so none is sent.
+    expect(payload.client_secret).toBeFalsy()
+  })
+
+  it('verifies an app-mode provider via Test connection', async () => {
+    const appProvider = [
+      {
+        ...fakeProviders[0],
+        id: 'scm-app',
+        name: 'ADO App',
+        provider_type: 'azuredevops' as const,
+        auth_mode: 'entra_app' as const,
+      },
+    ]
+    listSCMProvidersMock.mockResolvedValue(appProvider)
+    verifySCMProviderMock.mockResolvedValue({ ok: true, expires_at: '2026-01-01T00:00:00Z' })
+    renderPage()
+    await waitFor(() => expect(screen.getByText('ADO App')).toBeInTheDocument())
+    // App-mode providers expose Test connection, not the per-user Connect button.
+    expect(
+      screen.queryByRole('button', { name: /connect scm provider/i }),
+    ).not.toBeInTheDocument()
+    await userEvent.click(screen.getByRole('button', { name: /test connection/i }))
+    await waitFor(() => expect(verifySCMProviderMock).toHaveBeenCalledWith('scm-app'))
+    await waitFor(() => expect(screen.getByText('Connection OK')).toBeInTheDocument())
   })
 
   it('cancels the delete dialog without deleting', async () => {
