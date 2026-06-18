@@ -6,12 +6,16 @@ Closes #<!-- issue number -->
 
 ## Changelog
 <!-- Required: one entry that will be collected into CHANGELOG.md at release time.
-     Use the appropriate type: feat | fix | chore | docs | perf | refactor -->
-- fix:
+     Use the appropriate type: feat | fix | chore | docs | perf | refactor.
+     The PR-title check additionally accepts: style | test | build | ci | revert |
+     deps | security. -->
+- <type>: <description>
 
 ## Checklist
 
 - [ ] `npm run lint` passes
+- [ ] `npx tsc --noEmit` (typecheck) passes
+- [ ] `npm test` (unit tests) passes
 - [ ] `npm run build` succeeds
 - [ ] PR targets `main`
 - [ ] Remote branch will be deleted after merge

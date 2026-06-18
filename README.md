@@ -31,7 +31,7 @@ This repository contains the frontend UI and Playwright E2E test suite for the E
 
 ## Prerequisites
 
-- Node.js 24+ (LTS) and npm
+- Node.js 24.x and npm
 - A running backend API — see [terraform-registry-backend](https://github.com/sethbacon/terraform-registry-backend) for setup
 - Docker & Docker Compose (for the full stack via compose)
 
@@ -45,7 +45,8 @@ npm install
 
 # The Vite dev server proxies /api/* to http://localhost:8080 by default
 npm run dev
-# App: http://localhost:5173
+# App: https://registry.local:3000 (HTTPS when local dev certs exist, otherwise http)
+# Requires a hosts-file entry: 127.0.0.1 registry.local
 ```
 
 Make sure the backend is running at `http://localhost:8080` before starting the dev server.
@@ -67,7 +68,8 @@ Quick start (local dev — backend + frontend in Docker):
 ```bash
 cd deployments
 docker compose up -d
-# Frontend: https://localhost:3000 (self-signed cert — accept the browser warning once)
+# Frontend: https://registry.local:3000 (self-signed cert — accept the browser warning once)
+#           requires a hosts-file entry: 127.0.0.1 registry.local
 # Backend API: http://localhost:8080
 ```
 
@@ -94,9 +96,9 @@ For Docker / production builds served through nginx, the bundled nginx config pr
 | ----------- | ----------------------------------- |
 | Language    | TypeScript 6.0.3 (strict mode)      |
 | Framework   | React 19                            |
-| Build Tool  | Vite 8.0.14                         |
+| Build Tool  | Vite 8                              |
 | UI          | Material-UI v9 + Emotion            |
-| HTTP Client | Axios 1.6.7                         |
+| HTTP Client | Axios 1.x                           |
 | Router      | React Router v6                     |
 | Markdown    | react-markdown + remark-gfm         |
 | Linting     | ESLint 10 with TypeScript ESLint    |
@@ -121,7 +123,9 @@ App
 
 **Data fetching**: API calls go through `services/api.ts` (Axios). Query cache keys are defined in `services/queryKeys.ts` using a factory pattern. Mutations invalidate related queries via `queryClient.invalidateQueries()`.
 
-**Authentication**: `AuthContext` reads a JWT from `localStorage`, attaches it via an Axios request interceptor, and handles 401 responses by clearing the session and redirecting to `/login`.
+**Authentication**: Sessions are cookie-only. The backend sets an HttpOnly auth cookie; the Axios client sends it on every request via `withCredentials: true`, and `AuthContext` detects the session by calling `/api/v1/auth/me`. Mutating requests are protected by a CSRF double-submit: the non-HttpOnly `tfr_csrf` cookie is echoed in an `X-CSRF-Token` header. A 401 clears local session state and redirects to `/login`. (A legacy `localStorage` Bearer token is still honoured as a backward-compatible migration fallback and will be removed once all sessions use cookies.)
+
+**Security posture (CSP nonce)**: When served through nginx, a per-request CSP nonce is derived from `$request_id` and injected into `index.html` (the `__CSP_NONCE__` placeholder), so the `Content-Security-Policy` `style-src` can use `'nonce-…'` instead of `'unsafe-inline'`. The Emotion cache reads the same nonce so MUI styles are allowed. See [`frontend/nginx.conf`](frontend/nginx.conf).
 
 For a full deep-dive, see [ARCHITECTURE.md](ARCHITECTURE.md).
 
@@ -133,12 +137,14 @@ For a full deep-dive, see [ARCHITECTURE.md](ARCHITECTURE.md).
 cd frontend
 
 npm install           # Install dependencies
-npm run dev           # Start development server (http://localhost:5173)
+npm run dev           # Start development server (https://registry.local:3000)
 npm run build         # Build for production
 npm run lint          # Lint (zero warnings enforced)
 npm run format        # Format code with Prettier
 npm run format:check  # Check formatting (CI)
 npm run preview       # Preview production build
+npm run contract:check # Check API client against the backend OpenAPI spec
+                       # (needs the backend running, e.g. deployments/docker-compose.contract-check.yml)
 ```
 
 ### Testing
@@ -153,7 +159,7 @@ npm run test:watch    # Run in watch mode
 npm run test:coverage # Run with V8 coverage report
 ```
 
-Coverage thresholds are enforced in `vitest.config.ts`: statements 80%, branches 70%, functions 70%, lines 80% (the v1.0.0 floor). These are ratcheted up as coverage grows.
+Coverage thresholds are enforced in `vitest.config.ts`: statements 80%, branches 70%, functions 70%, lines 80% (the current floor). These are ratcheted up as coverage grows.
 
 **E2E tests** use Playwright and require the full stack (backend + postgres + frontend):
 
@@ -183,15 +189,17 @@ For test patterns, conventions, and coverage details, see [TESTING.md](TESTING.m
 
 The CI pipeline is defined in `.github/workflows/ci.yml` and runs on pushes to `main` and PRs to `main`. Jobs run in parallel:
 
-| Job           | What it does                                                                                |
-| ------------- | ------------------------------------------------------------------------------------------- |
-| **lint**      | `npm run lint` (zero warnings)                                                              |
-| **typecheck** | `npx tsc --noEmit`                                                                          |
-| **unit-test** | `npm run test:coverage` with artifact upload                                                |
-| **build**     | Production build, uploads `dist/` artifact                                                  |
-| **e2e-gated** | Playwright against the Docker Compose test stack (main branch, manual dispatch, or release) |
+| Job                    | What it does                                                                                |
+| ---------------------- | ------------------------------------------------------------------------------------------- |
+| **lint**               | `npm run lint` (zero warnings)                                                              |
+| **typecheck**          | `npx tsc --noEmit`                                                                          |
+| **unit-test**          | Vitest unit tests, sharded into 4 parallel jobs (`Unit Tests (N/4)`)                        |
+| **unit-test-coverage** | Merges the shard reports and enforces coverage thresholds                                   |
+| **build**              | Production build, uploads `dist/` artifact                                                  |
+| **contract-check**     | Runs `npm run contract:check` against the backend OpenAPI via `docker-compose.contract-check.yml` |
+| **e2e-gated**          | Playwright against the Docker Compose test stack (main branch, manual dispatch, or release) |
 
-Additional workflows: `release-please.yml` (automated versioning + release PR), `release.yml` (tag-triggered image build + GHCR push), `weekly-security.yml` (weekly security checks), `translate.yml` (DeepL/Google Translate sync of new i18n strings), `dependabot-automerge.yml`, `pr-checks.yml`, `update-wiki-manual.yml`.
+Additional workflows: `release-please.yml` (automated versioning + release PR), `release.yml` (tag-triggered image build + GHCR push), `weekly-security.yml` (weekly security checks), `translate.yml` (DeepL/Google Translate sync of new i18n strings), `dependabot-automerge.yml`, `pr-checks.yml`, `wiki-sync.yml`.
 
 ## Documentation
 

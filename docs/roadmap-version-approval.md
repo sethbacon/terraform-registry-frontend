@@ -1,5 +1,16 @@
 # Roadmap: Version Approval UI
 
+> **Status:** Shipped (2.x line). The feature described below is implemented —
+> see `frontend/src/pages/admin/VersionApprovalsPage.tsx`,
+> `frontend/src/types/version_approval.ts`, the `listVersionApprovals` /
+> `approveVersion` / `getPendingVersionApprovalCount` API methods, the
+> `/admin/version-approvals` route, the `admin.versionApprovals` i18n block, and
+> `VersionApprovalsPage.test.tsx`. This document is retained as the original
+> design record; the future-tense prose below reflects the plan as written, not
+> outstanding work.
+>
+> **Owner:** Registry frontend maintainers · **Last updated:** 2026-06-17
+
 ## Summary
 
 Add frontend support for version-level approval of mirrored provider and terraform binary versions. Admins can review pending versions, approve/reject individually or in bulk, configure auto-approve rules, and see pending counts on the dashboard.
