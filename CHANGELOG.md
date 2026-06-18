@@ -1,6 +1,23 @@
 <!-- markdownlint-disable MD013 MD024 MD041 -->
 # Changelog
 
+## [2.10.0](https://github.com/sethbacon/terraform-registry-frontend/compare/v2.9.0...v2.10.0) (2026-06-18)
+
+
+### Features
+
+* **scm:** shared app-credential auth mode in the SCM providers UI ([#412](https://github.com/sethbacon/terraform-registry-frontend/issues/412)) ([a634380](https://github.com/sethbacon/terraform-registry-frontend/commit/a6343800cde50401306e3c18c43599620d85f48f))
+
+
+### Bug Fixes
+
+* name current tab so suite switcher reuses one sibling tab ([#409](https://github.com/sethbacon/terraform-registry-frontend/issues/409)) ([9ca7113](https://github.com/sethbacon/terraform-registry-frontend/commit/9ca7113b278a009bd1a616401e759fac58a3823e))
+
+
+### Documentation
+
+* correct frontend documentation against the current code ([#411](https://github.com/sethbacon/terraform-registry-frontend/issues/411)) ([27d7d08](https://github.com/sethbacon/terraform-registry-frontend/commit/27d7d080e5e728954270647a11a64533b1f5d0fa))
+
 ## [2.9.0](https://github.com/sethbacon/terraform-registry-frontend/compare/v2.8.3...v2.9.0) (2026-06-17)
 
 
