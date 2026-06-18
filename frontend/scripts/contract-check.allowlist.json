@@ -25,6 +25,11 @@
       "method": "GET",
       "path": "/api/v1/suite/modules/{}/{}/{}/consumers",
       "reason": "Suite 'Consumed by' proxy added in terraform-registry-backend#495, which postdates the pinned contract-check image (1.4.0) and currently ships without swagger annotations. Remove once the backend documents the route (adds @Router) AND docker-compose.contract-check.yml is bumped to a release that includes it."
+    },
+    {
+      "method": "POST",
+      "path": "/api/v1/scm-providers/{}/verify",
+      "reason": "Shared SCM app-credential verify endpoint added in terraform-registry-backend#519, which postdates the pinned contract-check image (1.4.0). The backend route is documented (has @Router + swagger). Remove once docker-compose.contract-check.yml is bumped to a release that includes it."
     }
   ]
 }

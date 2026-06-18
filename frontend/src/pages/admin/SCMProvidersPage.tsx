@@ -20,6 +20,7 @@ import {
   MenuItem,
   FormControl,
   InputLabel,
+  FormHelperText,
   Alert,
   CircularProgress,
   Tooltip,
@@ -39,7 +40,12 @@ import Page from '../../components/Page'
 import api from '../../services/api'
 import { getErrorMessage } from '../../utils/errors'
 import { useAuth } from '../../contexts/AuthContext'
-import type { SCMProvider, SCMProviderType, CreateSCMProviderRequest } from '../../types/scm'
+import type {
+  SCMProvider,
+  SCMProviderType,
+  SCMAuthMode,
+  CreateSCMProviderRequest,
+} from '../../types/scm'
 import type { UserMembership } from '../../types'
 import { queryKeys } from '../../services/queryKeys'
 
@@ -72,7 +78,17 @@ const SCMProvidersPage: React.FC = () => {
     client_id: '',
     client_secret: '',
     webhook_secret: '',
+    auth_mode: 'oauth_user',
+    github_app_id: '',
+    github_installation_id: '',
+    app_private_key: '',
   })
+
+  // Per-provider "Test connection" (verify) outcomes for app-mode providers.
+  const [verifyingId, setVerifyingId] = useState<string | null>(null)
+  const [verifyResults, setVerifyResults] = useState<Record<string, { ok: boolean; msg: string }>>(
+    {},
+  )
 
   // Memberships query
   const { data: memberships = [] } = useQuery<UserMembership[]>({
@@ -155,6 +171,10 @@ const SCMProvidersPage: React.FC = () => {
         client_id: formData.client_id,
         client_secret: formData.client_secret,
         webhook_secret: formData.webhook_secret,
+        auth_mode: formData.auth_mode,
+        github_app_id: formData.github_app_id,
+        github_installation_id: formData.github_installation_id,
+        app_private_key: formData.app_private_key,
       })
     },
     onSuccess: () => {
@@ -227,6 +247,35 @@ const SCMProvidersPage: React.FC = () => {
 
   const isPATProvider = (type?: SCMProviderType) => type === 'bitbucket_dc'
 
+  const isAppModeProvider = (p: SCMProvider) =>
+    p.auth_mode === 'entra_app' || p.auth_mode === 'github_app'
+
+  const handleVerify = async (provider: SCMProvider) => {
+    setVerifyingId(provider.id)
+    try {
+      const res = await api.verifySCMProvider(provider.id)
+      setVerifyResults((prev) => ({
+        ...prev,
+        [provider.id]: {
+          ok: !!res.ok,
+          msg: res.ok
+            ? t('admin.scmProviders.testConnectionOk')
+            : t('admin.scmProviders.testConnectionFailed'),
+        },
+      }))
+    } catch (err: unknown) {
+      setVerifyResults((prev) => ({
+        ...prev,
+        [provider.id]: {
+          ok: false,
+          msg: getErrorMessage(err, t('admin.scmProviders.testConnectionFailed')),
+        },
+      }))
+    } finally {
+      setVerifyingId(null)
+    }
+  }
+
   const getCallbackUrl = (providerId: string): string => {
     const baseUrl = window.location.origin
     return `${baseUrl}/api/v1/scm-providers/${providerId}/oauth/callback`
@@ -246,6 +295,10 @@ const SCMProvidersPage: React.FC = () => {
       client_id: '',
       client_secret: '',
       webhook_secret: '',
+      auth_mode: 'oauth_user',
+      github_app_id: '',
+      github_installation_id: '',
+      app_private_key: '',
     })
   }
 
@@ -259,6 +312,10 @@ const SCMProvidersPage: React.FC = () => {
       client_id: provider.client_id,
       client_secret: '', // Don't show existing secret
       webhook_secret: provider.webhook_secret || '',
+      auth_mode: provider.auth_mode || 'oauth_user',
+      github_app_id: provider.github_app_id || '',
+      github_installation_id: provider.github_installation_id || '',
+      app_private_key: '', // Don't show existing private key
     })
   }
 
@@ -529,6 +586,21 @@ const SCMProvidersPage: React.FC = () => {
                           })}
                         </Typography>
                         {(() => {
+                          if (isAppModeProvider(provider)) {
+                            return (
+                              <Box
+                                sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mt: 0.5 }}
+                              >
+                                <CheckCircleIcon sx={{ fontSize: '0.9rem', color: 'info.main' }} />
+                                <Typography
+                                  variant="caption"
+                                  sx={{ color: 'info.main', fontWeight: 600 }}
+                                >
+                                  {t('admin.scmProviders.appCredential')}
+                                </Typography>
+                              </Box>
+                            )
+                          }
                           const status = tokenStatuses[provider.id]
                           if (!status) return null
                           return status.connected ? (
@@ -598,46 +670,73 @@ const SCMProvidersPage: React.FC = () => {
                   </CardContent>
 
                   <CardActions>
-                    <Tooltip
-                      title={
-                        tokenStatuses[provider.id]?.connected
-                          ? provider.provider_type === 'bitbucket_dc'
-                            ? t('admin.scmProviders.tooltipUpdatePat')
-                            : t('admin.scmProviders.tooltipReconnectOauth')
-                          : provider.provider_type === 'bitbucket_dc'
-                            ? t('admin.scmProviders.tooltipConnectPat')
-                            : t('admin.scmProviders.tooltipConnectOauth')
-                      }
-                    >
-                      <IconButton
-                        size="small"
-                        aria-label={t('admin.scmProviders.ariaConnect')}
-                        color="primary"
-                        onClick={() => handleConnect(provider)}
-                      >
-                        <LinkIcon />
-                      </IconButton>
-                    </Tooltip>
-                    {tokenStatuses[provider.id]?.connected && (
-                      <Tooltip title={t('admin.scmProviders.tooltipDisconnect')}>
-                        <IconButton
-                          size="small"
-                          aria-label={t('admin.scmProviders.ariaDisconnect')}
-                          color="warning"
-                          onClick={async () => {
-                            try {
-                              await api.revokeSCMToken(provider.id)
-                              queryClient.invalidateQueries({
-                                queryKey: queryKeys.scmProviders._def,
-                              })
-                            } catch (err: unknown) {
-                              setError(getErrorMessage(err, t('admin.scmProviders.errDisconnect')))
-                            }
-                          }}
+                    {!isAppModeProvider(provider) && (
+                      <>
+                        <Tooltip
+                          title={
+                            tokenStatuses[provider.id]?.connected
+                              ? provider.provider_type === 'bitbucket_dc'
+                                ? t('admin.scmProviders.tooltipUpdatePat')
+                                : t('admin.scmProviders.tooltipReconnectOauth')
+                              : provider.provider_type === 'bitbucket_dc'
+                                ? t('admin.scmProviders.tooltipConnectPat')
+                                : t('admin.scmProviders.tooltipConnectOauth')
+                          }
                         >
-                          <LinkOffIcon />
-                        </IconButton>
-                      </Tooltip>
+                          <IconButton
+                            size="small"
+                            aria-label={t('admin.scmProviders.ariaConnect')}
+                            color="primary"
+                            onClick={() => handleConnect(provider)}
+                          >
+                            <LinkIcon />
+                          </IconButton>
+                        </Tooltip>
+                        {tokenStatuses[provider.id]?.connected && (
+                          <Tooltip title={t('admin.scmProviders.tooltipDisconnect')}>
+                            <IconButton
+                              size="small"
+                              aria-label={t('admin.scmProviders.ariaDisconnect')}
+                              color="warning"
+                              onClick={async () => {
+                                try {
+                                  await api.revokeSCMToken(provider.id)
+                                  queryClient.invalidateQueries({
+                                    queryKey: queryKeys.scmProviders._def,
+                                  })
+                                } catch (err: unknown) {
+                                  setError(
+                                    getErrorMessage(err, t('admin.scmProviders.errDisconnect')),
+                                  )
+                                }
+                              }}
+                            >
+                              <LinkOffIcon />
+                            </IconButton>
+                          </Tooltip>
+                        )}
+                      </>
+                    )}
+                    {isAppModeProvider(provider) && (
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mr: 'auto' }}>
+                        <Button
+                          size="small"
+                          onClick={() => handleVerify(provider)}
+                          disabled={verifyingId === provider.id}
+                        >
+                          {t('admin.scmProviders.testConnection')}
+                        </Button>
+                        {verifyResults[provider.id] && (
+                          <Typography
+                            variant="caption"
+                            sx={{
+                              color: verifyResults[provider.id].ok ? 'success.main' : 'error.main',
+                            }}
+                          >
+                            {verifyResults[provider.id].msg}
+                          </Typography>
+                        )}
+                      </Box>
                     )}
                     <Tooltip title={t('admin.scmProviders.tooltipEdit')}>
                       <IconButton
@@ -735,6 +834,12 @@ const SCMProvidersPage: React.FC = () => {
                         setFormData({
                           ...formData,
                           provider_type: e.target.value as SCMProviderType,
+                          // Reset app-credential fields when the provider type changes
+                          // so an incompatible auth_mode is never submitted.
+                          auth_mode: 'oauth_user',
+                          github_app_id: '',
+                          github_installation_id: '',
+                          app_private_key: '',
                         })
                       }
                     >
@@ -755,6 +860,37 @@ const SCMProvidersPage: React.FC = () => {
                   helperText={t('admin.scmProviders.helpName')}
                 />
 
+                {((editingProvider?.provider_type || formData.provider_type) === 'github' ||
+                  (editingProvider?.provider_type || formData.provider_type) === 'azuredevops') && (
+                    <FormControl fullWidth>
+                      <InputLabel id="auth-mode-label">
+                        {t('admin.scmProviders.labelAuthMode')}
+                      </InputLabel>
+                      <Select
+                        labelId="auth-mode-label"
+                        value={formData.auth_mode || 'oauth_user'}
+                        label={t('admin.scmProviders.labelAuthMode')}
+                        onChange={(e) =>
+                          setFormData({ ...formData, auth_mode: e.target.value as SCMAuthMode })
+                        }
+                      >
+                        <MenuItem value="oauth_user">
+                          {t('admin.scmProviders.authModeOAuth')}
+                        </MenuItem>
+                        <MenuItem
+                          value={
+                            (editingProvider?.provider_type || formData.provider_type) === 'github'
+                              ? 'github_app'
+                              : 'entra_app'
+                          }
+                        >
+                          {t('admin.scmProviders.authModeApp')}
+                        </MenuItem>
+                      </Select>
+                      <FormHelperText>{t('admin.scmProviders.helpAuthMode')}</FormHelperText>
+                    </FormControl>
+                  )}
+
                 {(editingProvider?.provider_type || formData.provider_type) === 'azuredevops' && (
                   <TextField
                     label={t('admin.scmProviders.labelTenantId')}
@@ -768,34 +904,78 @@ const SCMProvidersPage: React.FC = () => {
                   />
                 )}
 
-                {!isPATProvider(editingProvider?.provider_type || formData.provider_type) && (
-                  <>
-                    <TextField
-                      label={getClientIdLabel(
-                        editingProvider?.provider_type || formData.provider_type || 'github',
-                      )}
-                      fullWidth
-                      value={formData.client_id}
-                      onChange={(e) => setFormData({ ...formData, client_id: e.target.value })}
-                      required
-                      helperText={t('admin.scmProviders.helpClientId')}
-                    />
+                {!isPATProvider(editingProvider?.provider_type || formData.provider_type) &&
+                  !(
+                    (editingProvider?.provider_type || formData.provider_type) === 'github' &&
+                    formData.auth_mode === 'github_app'
+                  ) && (
+                    <>
+                      <TextField
+                        label={getClientIdLabel(
+                          editingProvider?.provider_type || formData.provider_type || 'github',
+                        )}
+                        fullWidth
+                        value={formData.client_id}
+                        onChange={(e) => setFormData({ ...formData, client_id: e.target.value })}
+                        required
+                        helperText={t('admin.scmProviders.helpClientId')}
+                      />
 
-                    <TextField
-                      label={getClientSecretLabel(
-                        editingProvider?.provider_type || formData.provider_type || 'github',
-                      )}
-                      type="password"
-                      fullWidth
-                      value={formData.client_secret}
-                      onChange={(e) => setFormData({ ...formData, client_secret: e.target.value })}
-                      required={!editingProvider}
-                      helperText={
-                        editingProvider ? t('admin.scmProviders.helpClientSecretKeep') : ''
-                      }
-                    />
-                  </>
-                )}
+                      <TextField
+                        label={getClientSecretLabel(
+                          editingProvider?.provider_type || formData.provider_type || 'github',
+                        )}
+                        type="password"
+                        fullWidth
+                        value={formData.client_secret}
+                        onChange={(e) => setFormData({ ...formData, client_secret: e.target.value })}
+                        required={!editingProvider}
+                        helperText={
+                          editingProvider ? t('admin.scmProviders.helpClientSecretKeep') : ''
+                        }
+                      />
+                    </>
+                  )}
+
+                {(editingProvider?.provider_type || formData.provider_type) === 'github' &&
+                  formData.auth_mode === 'github_app' && (
+                    <>
+                      <TextField
+                        label={t('admin.scmProviders.labelGithubAppId')}
+                        fullWidth
+                        value={formData.github_app_id}
+                        onChange={(e) =>
+                          setFormData({ ...formData, github_app_id: e.target.value })
+                        }
+                        required
+                      />
+                      <TextField
+                        label={t('admin.scmProviders.labelGithubInstallationId')}
+                        fullWidth
+                        value={formData.github_installation_id}
+                        onChange={(e) =>
+                          setFormData({ ...formData, github_installation_id: e.target.value })
+                        }
+                        required
+                      />
+                      <TextField
+                        label={t('admin.scmProviders.labelAppPrivateKey')}
+                        fullWidth
+                        multiline
+                        minRows={4}
+                        value={formData.app_private_key}
+                        onChange={(e) =>
+                          setFormData({ ...formData, app_private_key: e.target.value })
+                        }
+                        required={!editingProvider}
+                        helperText={
+                          editingProvider
+                            ? t('admin.scmProviders.helpAppPrivateKeyKeep')
+                            : t('admin.scmProviders.helpGithubApp')
+                        }
+                      />
+                    </>
+                  )}
 
                 <TextField
                   label={
@@ -834,12 +1014,20 @@ const SCMProvidersPage: React.FC = () => {
               <Button
                 variant="contained"
                 onClick={editingProvider ? handleUpdate : handleCreate}
-                disabled={
-                  !formData.name ||
-                  (!isPATProvider(formData.provider_type) &&
-                    (!formData.client_id || !formData.client_secret)) ||
-                  (isPATProvider(formData.provider_type) && !formData.base_url)
-                }
+                disabled={(() => {
+                  if (!formData.name) return true
+                  const ptype = editingProvider?.provider_type || formData.provider_type
+                  const authMode = formData.auth_mode || 'oauth_user'
+                  if (isPATProvider(ptype)) return !formData.base_url
+                  if (ptype === 'github' && authMode === 'github_app') {
+                    return (
+                      !formData.github_app_id ||
+                      !formData.github_installation_id ||
+                      (!editingProvider && !formData.app_private_key)
+                    )
+                  }
+                  return !formData.client_id || (!editingProvider && !formData.client_secret)
+                })()}
               >
                 {editingProvider ? t('admin.scmProviders.update') : t('admin.scmProviders.create')}
               </Button>
