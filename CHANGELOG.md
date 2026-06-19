@@ -1,6 +1,16 @@
 <!-- markdownlint-disable MD013 MD024 MD041 -->
 # Changelog
 
+## [2.10.1](https://github.com/sethbacon/terraform-registry-frontend/compare/v2.10.0...v2.10.1) (2026-06-19)
+
+
+### Bug Fixes
+
+* **a11y:** label the account button `Account` ([#417](https://github.com/sethbacon/terraform-registry-frontend/issues/417)) ([a65fdc6](https://github.com/sethbacon/terraform-registry-frontend/commit/a65fdc61fc9f198c051daa3fafd05e722ddaf7d9))
+* **nav:** spell out the `mTLS Certificates` nav label ([#418](https://github.com/sethbacon/terraform-registry-frontend/issues/418)) ([e51463d](https://github.com/sethbacon/terraform-registry-frontend/commit/e51463ded7ad86d52a40806cbdcf9dbce3cd9368))
+* **nav:** strengthen the selected sidebar tint in dark mode ([#422](https://github.com/sethbacon/terraform-registry-frontend/issues/422)) ([588522c](https://github.com/sethbacon/terraform-registry-frontend/commit/588522cec2cafbf2fc72696e1c4fca17d6cbe768))
+* **users:** keep row action icons on a single row ([#419](https://github.com/sethbacon/terraform-registry-frontend/issues/419)) ([ba9489d](https://github.com/sethbacon/terraform-registry-frontend/commit/ba9489d65c3efc2897cc4ffc330689ec43a2a133))
+
 ## [2.10.0](https://github.com/sethbacon/terraform-registry-frontend/compare/v2.9.0...v2.10.0) (2026-06-18)
 
 
