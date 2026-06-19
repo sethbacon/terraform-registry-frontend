@@ -97,6 +97,9 @@ const Layout = () => {
   const { mode, toggleTheme, productName, logoUrl } = useThemeMode()
   const { helpOpen, openHelp } = useHelp()
   const theme = useTheme()
+  // Active nav tint: ~15% in dark mode (an 8% tint is barely visible on the dark
+  // sidebar), ~8% in light — mirrors the API Docs nav.
+  const selectedNavBg = `${theme.palette.primary.main}${theme.palette.mode === 'dark' ? '26' : '14'}`
   const isMobile = useMediaQuery(theme.breakpoints.down('md'))
   const location = useLocation()
 
@@ -467,7 +470,7 @@ const Layout = () => {
                     borderLeft: isActive
                       ? `3px solid ${theme.palette.primary.main}`
                       : '3px solid transparent',
-                    bgcolor: isActive ? `${theme.palette.primary.main}14` : 'transparent',
+                    bgcolor: isActive ? selectedNavBg : 'transparent',
                     pl: isActive ? '13px' : '16px',
                   }}
                 >
@@ -552,7 +555,7 @@ const Layout = () => {
                         borderLeft: isActive
                           ? `3px solid ${theme.palette.primary.main}`
                           : '3px solid transparent',
-                        bgcolor: isActive ? `${theme.palette.primary.main}14` : 'transparent',
+                        bgcolor: isActive ? selectedNavBg : 'transparent',
                         pl: isActive ? '13px' : '16px',
                       }}
                     >
@@ -614,9 +617,7 @@ const Layout = () => {
                                 borderLeft: isActive
                                   ? `3px solid ${theme.palette.primary.main}`
                                   : '3px solid transparent',
-                                bgcolor: isActive
-                                  ? `${theme.palette.primary.main}14`
-                                  : 'transparent',
+                                bgcolor: isActive ? selectedNavBg : 'transparent',
                               }}
                             >
                               <ListItemIcon
