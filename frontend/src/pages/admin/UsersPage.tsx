@@ -560,7 +560,7 @@ const UsersPage: React.FC = () => {
                       )}
                     </TableCell>
                     <TableCell>{new Date(user.created_at).toLocaleDateString()}</TableCell>
-                    <TableCell align="right">
+                    <TableCell align="right" sx={{ whiteSpace: 'nowrap' }}>
                       <Tooltip title={t('admin.users.tooltipEdit')}>
                         <IconButton
                           size="small"
