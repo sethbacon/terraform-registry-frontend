@@ -116,7 +116,7 @@ describe('Layout', () => {
     renderLayout()
 
     expect(screen.getByRole('link', { name: 'Login' })).toBeInTheDocument()
-    expect(screen.queryByLabelText('account of current user')).not.toBeInTheDocument()
+    expect(screen.queryByLabelText('Account')).not.toBeInTheDocument()
   })
 
   // 3. Authenticated state — user menu
@@ -132,7 +132,7 @@ describe('Layout', () => {
     expect(screen.queryByRole('link', { name: 'Login' })).not.toBeInTheDocument()
 
     // Click account icon to open menu
-    const accountBtn = screen.getByLabelText('account of current user')
+    const accountBtn = screen.getByLabelText('Account')
     await user.click(accountBtn)
 
     expect(screen.getByText('Alice')).toBeInTheDocument()
@@ -149,7 +149,7 @@ describe('Layout', () => {
     })
     renderLayout()
 
-    await user.click(screen.getByLabelText('account of current user'))
+    await user.click(screen.getByLabelText('Account'))
     await user.click(screen.getByText('Logout'))
 
     expect(mockLogout).toHaveBeenCalledOnce()
@@ -336,7 +336,7 @@ describe('Layout', () => {
     renderLayout()
 
     // Open the menu
-    await user.click(screen.getByLabelText('account of current user'))
+    await user.click(screen.getByLabelText('Account'))
     expect(screen.getByRole('presentation')).toBeInTheDocument()
 
     // Press Escape to close the menu — MUI backdrop/presentation should disappear
