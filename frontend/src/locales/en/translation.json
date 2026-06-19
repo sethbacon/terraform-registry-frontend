@@ -24,7 +24,7 @@
       "oidcGroupsTooltip": "Map identity provider groups to registry roles",
       "scim": "SCIM",
       "scimTooltip": "SCIM 2.0 user and group provisioning configuration",
-      "mtlsCerts": "mTLS Certs",
+      "mtlsCerts": "mTLS Certificates",
       "mtlsCertsTooltip": "View mTLS client certificate-to-scope mappings",
       "apiKeys": "API Keys",
       "apiKeysTooltip": "Create and manage personal API keys",
@@ -64,7 +64,7 @@
     "about": "About",
     "settings": "Settings",
     "support": "Support",
-    "accountMenu": "account of current user",
+    "accountMenu": "Account",
     "logout": "Logout",
     "login": "Login",
     "language": "Language"
