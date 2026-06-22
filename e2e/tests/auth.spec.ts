@@ -68,15 +68,8 @@ test.describe('Logout', () => {
     await devLoginBtn.click();
     await page.waitForURL((url) => !url.pathname.endsWith('/login'), { timeout: 10_000 });
 
-    // Open account menu (top-right AppBar button)
-    const accountMenuBtn = page.getByRole('button', { name: /account of current user/i });
-    const fallbackMenuBtn = page.locator('[aria-label*="account"]').first();
-
-    const menuBtn = (await accountMenuBtn.isVisible().catch(() => false))
-      ? accountMenuBtn
-      : fallbackMenuBtn;
-
-    await menuBtn.click();
+    // Open account menu (top-right AppBar button, aria-label "Account")
+    await page.getByRole('button', { name: 'Account' }).click();
 
     // Click Logout menu item
     await page.getByRole('menuitem', { name: 'Logout' }).click();
