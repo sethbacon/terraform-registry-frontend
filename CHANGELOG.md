@@ -1,6 +1,13 @@
 <!-- markdownlint-disable MD013 MD024 MD041 -->
 # Changelog
 
+## [2.10.2](https://github.com/sethbacon/terraform-registry-frontend/compare/v2.10.1...v2.10.2) (2026-06-21)
+
+
+### Bug Fixes
+
+* **deps:** override js-yaml and @babel/core to patch CVEs ([#425](https://github.com/sethbacon/terraform-registry-frontend/issues/425)) ([e85722e](https://github.com/sethbacon/terraform-registry-frontend/commit/e85722e1c9eeadecbd64063788caa05babafdaad))
+
 ## [2.10.1](https://github.com/sethbacon/terraform-registry-frontend/compare/v2.10.0...v2.10.1) (2026-06-19)
 
 
