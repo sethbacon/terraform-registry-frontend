@@ -288,7 +288,7 @@ jobs:
         # mitigation that PR #182 originally applied; see #233 post-merge run
         # 25007086815 for the regression that prompted reverting to 2.
         run: >-
-          npx playwright test --workers=2 --max-failures=0 --retries=1
+          npx playwright test --workers=2 --max-failures=1 --retries=1
           --reporter=list --grep-invert="Visual regression"
 
       - name: Upload Playwright artifacts
