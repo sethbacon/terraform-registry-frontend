@@ -1,6 +1,13 @@
 <!-- markdownlint-disable MD013 MD024 MD041 -->
 # Changelog
 
+## [2.10.3](https://github.com/sethbacon/terraform-registry-frontend/compare/v2.10.2...v2.10.3) (2026-06-22)
+
+
+### Dependencies
+
+* align Node typings and action-gh-release ([#428](https://github.com/sethbacon/terraform-registry-frontend/issues/428)) ([dde0259](https://github.com/sethbacon/terraform-registry-frontend/commit/dde025954758f76c15eea4c0a27635b4f3cb0b5e))
+
 ## [2.10.2](https://github.com/sethbacon/terraform-registry-frontend/compare/v2.10.1...v2.10.2) (2026-06-21)
 
 
