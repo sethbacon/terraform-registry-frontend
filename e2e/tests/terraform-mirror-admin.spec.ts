@@ -23,7 +23,7 @@ test.describe('Admin: Terraform Binary Mirrors', () => {
     }
 
     await expect(
-      page.getByRole('heading', { name: /Binaries Config/i })
+      page.getByRole('heading', { name: /Binary Mirrors/i })
     ).toBeVisible({ timeout: 10_000 });
   });
 
