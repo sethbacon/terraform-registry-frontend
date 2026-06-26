@@ -6,8 +6,8 @@
     "modulesTooltip": "Ver módulos do Terraform",
     "providers": "Fornecedores",
     "providersTooltip": "Ver fornecedores do Terraform",
-    "terraformBinaries": "Binários do Terraform",
-    "terraformBinariesTooltip": "Ver binários do Terraform",
+    "terraformBinaries": "Binários alojados",
+    "terraformBinariesTooltip": "Ver binários alojados",
     "apiDocs": "Documentação da API",
     "apiDocsTooltip": "Documentação da API",
     "admin": {
@@ -33,7 +33,7 @@
       "mirroring": "Espelhamento",
       "providerConfig": "Configuração do provedor",
       "providerConfigTooltip": "Configurar fontes de espelho do fornecedor e horários de sincronização",
-      "binariesConfig": "Espelhos de binários",
+      "binariesConfig": "Espelhos binários",
       "binariesConfigTooltip": "Configurar as fontes dos espelhos binários do Terraform e do OpenTofu",
       "approvals": "Aprovações",
       "approvalsTooltip": "Analisar e aprovar os pedidos de sincronização de espelhos pendentes",
@@ -64,7 +64,7 @@
     "about": "Sobre",
     "settings": "Definições",
     "support": "Suporte",
-    "accountMenu": "conta do utilizador atual",
+    "accountMenu": "Conta",
     "logout": "Sair",
     "login": "Iniciar sessão",
     "language": "Idioma"
@@ -112,7 +112,7 @@
     "heroSubtitle": "Hospede e faça a gestão dos seus módulos, fornecedores e binários Terraform personalizados",
     "browseModules": "Explorar módulos",
     "browseProviders": "Pesquisar prestadores",
-    "terraformBinaries": "Binários do Terraform",
+    "terraformBinaries": "Binários alojados",
     "available": "disponível",
     "findWhatYouNeed": "Encontre o que precisa",
     "searchAcross": "Pesquisar por módulos e fornecedores neste registo",
@@ -123,7 +123,7 @@
     "browseAllModules": "Ver todos os módulos →",
     "providersDescription": "Aceda a fornecedores Terraform personalizados e espelhados para os seus recursos na nuvem.",
     "browseAllProviders": "Ver todos os prestadores →",
-    "terraformBinariesDescription": "Descarregue os ficheiros binários do Terraform e do OpenTofu a partir de espelhos internos.",
+    "terraformBinariesDescription": "Descarregue os ficheiros binários do Terraform, OpenTofu, Packer, Sentinel e OPA a partir de espelhos internos.",
     "noBinaryMirrors": "Não existem espelhos binários configurados",
     "viewBinaries": "Ver ficheiros binários →",
     "gettingStarted": "Introdução",
@@ -287,11 +287,11 @@
     }
   },
   "terraformBinaries": {
-    "pageTitle": "Espelhos de binários do Terraform",
-    "pageSubtitle": "Descarregue os ficheiros binários do Terraform e do OpenTofu a partir do espelho interno da sua organização. Configure a sua linha de ferramentas CLI ou CI para apontar para o URL do espelho indicado em cada página de detalhes.",
+    "pageTitle": "Espelhos de ficheiros binários alojados",
+    "pageSubtitle": "Descarregue os ficheiros binários do Terraform, OpenTofu, Packer, Sentinel e OPA a partir do espelho interno da sua organização. Configure a sua linha de comandos (CLI) ou cadeia de ferramentas de integração contínua (CI) para que aponte para o URL do espelho indicado em cada página de detalhes.",
     "loadError": "Não foi possível carregar os espelhos binários do Terraform.",
     "noMirrorsTitle": "Não existem espelhos binários configurados",
-    "noMirrorsBody": "Peça a um administrador para configurar um espelho de binários do Terraform ou do OpenTofu.",
+    "noMirrorsBody": "Peça a um administrador para configurar um espelho de ficheiros binários.",
     "versionCountOne": "{{count}} versão",
     "versionCountOther": "{{count}} versões",
     "latestVersion": "Versão mais recente: {{version}}",
@@ -631,8 +631,8 @@
       }
     },
     "terraformBinaries": {
-      "title": "Espelhos de binários do Terraform",
-      "overview": "Apresenta os espelhos binários disponíveis do Terraform e do OpenTofu alojados neste registo. Cada espelho armazena em cache um conjunto de versões binárias provenientes de uma fonte upstream, para que os seus pipelines de CI e as máquinas dos programadores possam descarregá-las sem acesso direto à Internet.",
+      "title": "Espelhos de ficheiros binários alojados",
+      "overview": "Apresenta a lista de espelhos binários disponíveis alojados neste registo. Cada espelho armazena em cache um conjunto de versões binárias provenientes de uma fonte a montante, para que os seus pipelines de CI e as máquinas dos programadores possam descarregá-las sem acesso direto à Internet.",
       "actions": {
         "viewVersions": {
           "heading": "Ver versões",
@@ -1060,6 +1060,12 @@
       "labelSyncInterval": "Intervalo de sincronização (horas)",
       "helpSyncInterval": "Com que frequência verificar se há atualizações",
       "requiresApproval": "Exigir aprovação para novas versões",
+      "labelAutoApproveRules": "Regras de aprovação automática (JSON)",
+      "helpAutoApproveRules": "Regras JSON que aprovam automaticamente as versões sincronizadas, por exemplo: {\"rules\":[{\"type\":\"patch_only\"}],\"mode\":\"any\"}. Deixe em branco para exigir aprovação manual.",
+      "errAutoApproveRules": "Tem de ser um JSON válido, por exemplo: {\"rules\":[...],\"mode\":\"any\"}",
+      "pullThroughEnabled": "Ativar o armazenamento em cache pull-through",
+      "labelPullThroughTtl": "TTL da cache pull-through (horas)",
+      "helpPullThroughTtl": "Durante quanto tempo as versões espelhadas a pedido permanecem na cache antes de se proceder a uma nova verificação junto da fonte",
       "confirmDeleteTitle": "Confirmar eliminação",
       "confirmDeleteText": "Tem a certeza de que deseja eliminar o espelho «{{name}}»? Esta ação não pode ser desfeita. Os fornecedores espelhados permanecerão no seu registo.",
       "syncHistoryTitle": "Histórico de sincronização — {{name}}",
@@ -1077,7 +1083,7 @@
       "thLastSynced": "Última sincronização"
     },
     "terraformMirror": {
-      "pageTitle": "Espelhos de binários",
+      "pageTitle": "Espelhos binários",
       "refresh": "Atualizar",
       "addMirror": "Adicionar espelho",
       "cancel": "Cancelar",
@@ -1125,7 +1131,7 @@
       "infoBannerBefore": "Os clientes descarregam os ficheiros binários em ",
       "infoBannerAfter": ". Este ponto final não requer autenticação — configure o seu ambiente de CI ou as máquinas dos programadores para que apontem para o servidor do seu registo.",
       "emptyState": "Ainda não existem configurações de espelho para os binários do Terraform. Crie uma para começar a espelhar os binários do Terraform ou do OpenTofu.",
-      "dialogTitleCreate": "Adicionar espelho binário do Terraform",
+      "dialogTitleCreate": "Adicionar configuração do espelho binário",
       "labelName": "Nome",
       "helpName": "Slug exclusivo utilizado nos caminhos da API (por exemplo, hashicorp-terraform)",
       "labelDescription": "Descrição",
@@ -1508,7 +1514,21 @@
       "connectToTitle": "Aceda a {{name}}",
       "patIntro": "Introduza o seu token de acesso pessoal do Bitbucket Data Center. Pode gerar um nas definições da sua conta do Bitbucket, na secção «Tokens de acesso HTTP».",
       "labelPat": "Token de acesso pessoal",
-      "saveToken": "Guardar token"
+      "saveToken": "Guardar token",
+      "labelAuthMode": "Autenticação",
+      "authModeOAuth": "OAuth por utilizador",
+      "authModeApp": "Credenciais partilhadas da aplicação",
+      "helpAuthMode": "As credenciais da aplicação são geridas pelo administrador e partilhadas por todos os utilizadores — não é necessário um Connect específico para cada utilizador. O OAuth por utilizador mantém o fluxo tradicional, em que cada utilizador liga a sua própria conta.",
+      "labelGithubAppId": "ID da aplicação do GitHub",
+      "labelGithubInstallationId": "ID da instalação",
+      "labelAppPrivateKey": "Chave privada (PEM)",
+      "helpGithubApp": "Nas definições da sua aplicação no GitHub: o ID numérico da aplicação, o ID de instalação (obtido a partir do URL de instalação) e a chave privada RSA da aplicação.",
+      "helpAppPrivateKeyKeep": "Deixe em branco para manter a chave privada existente",
+      "appCredential": "Credenciais da aplicação",
+      "testConnection": "Testar ligação",
+      "testConnectionOk": "Ligação OK",
+      "testConnectionFailed": "Falha na ligação",
+      "errVerify": "Não foi possível verificar o fornecedor"
     },
     "approvals": {
       "pageTitle": "Pedidos de aprovação",
@@ -1855,7 +1875,7 @@
       "scanErrors": "{{count}} erros",
       "statModules": "Módulos",
       "statProviders": "Fornecedores",
-      "statTerraformBinaries": "Binários do Terraform",
+      "statTerraformBinaries": "Binários alojados",
       "statTotalDownloads": "Total de downloads",
       "statVersions": "{{count}} versões",
       "statAcrossMirrors_one": "através de um espelho do site {{count}}",
@@ -2007,6 +2027,13 @@
     "showingCount": "A apresentar 10 dos eventos d{{total}}",
     "refresh": "Atualizar"
   },
+  "consumedBy": {
+    "title": "Consumido por",
+    "subtitle": "Estados no State Manager que fazem referência a este módulo.",
+    "constraintOnly": "apenas restrição",
+    "showingCount": "A apresentar {{shown}} dos {{total}} estados",
+    "openInStateManager": "Abrir no Gestor de Estados"
+  },
   "repositoryBrowser": {
     "searchPlaceholder": "Pesquisar repositórios...",
     "refresh": "Atualizar",
@@ -2151,7 +2178,9 @@
     "thExpiry": "Prazo de validade",
     "thLastRefresh": "Última atualização",
     "expiredAgo": "expirou há {{days}} dias",
-    "days": "{{days}} d"
+    "days": "{{days}} d",
+    "unsignedLabel": "sem assinatura",
+    "unsignedTooltip": "O projeto de origem desta ferramenta não publica qualquer assinatura de lançamento; os ficheiros binários são verificados apenas através da soma de verificação."
   },
   "scanFindingsModal": {
     "title": "Resultados do exame",

@@ -6,8 +6,8 @@
     "modulesTooltip": "Vis Terraform-moduler",
     "providers": "Leverandører",
     "providersTooltip": "Vis Terraform-leverandører",
-    "terraformBinaries": "Terraform-binærfiler",
-    "terraformBinariesTooltip": "Vis Terraform-binærfiler",
+    "terraformBinaries": "Hostede binærfiler",
+    "terraformBinariesTooltip": "Vis hostede binærfiler",
     "apiDocs": "API-dokumentasjon",
     "apiDocsTooltip": "API-dokumentasjon",
     "admin": {
@@ -33,7 +33,7 @@
       "mirroring": "Speiling",
       "providerConfig": "Leverandørkonfigurasjon",
       "providerConfigTooltip": "Konfigurer leverandørens speilkilder og synkroniseringsplaner",
-      "binariesConfig": "Binærspeil",
+      "binariesConfig": "Binære speil",
       "binariesConfigTooltip": "Konfigurer Terraform og OpenTofu-kildene for binære speil",
       "approvals": "Godkjenninger",
       "approvalsTooltip": "Gjennomgå og godkjenn ventende forespørsler om speilsynkronisering",
@@ -64,7 +64,7 @@
     "about": "Om",
     "settings": "Innstillinger",
     "support": "Støtte",
-    "accountMenu": "kontoen til den nåværende brukeren",
+    "accountMenu": "Konto",
     "logout": "Logg ut",
     "login": "Logg inn",
     "language": "Språk"
@@ -112,7 +112,7 @@
     "heroSubtitle": "Lagre og administrer dine egne Terraform-moduler, -leverandører og -binærfiler",
     "browseModules": "Bla gjennom moduler",
     "browseProviders": "Se leverandører",
-    "terraformBinaries": "Terraform-binærfiler",
+    "terraformBinaries": "Hostede binærfiler",
     "available": "tilgjengelig",
     "findWhatYouNeed": "Finn det du trenger",
     "searchAcross": "Søk på tvers av moduler og tilbydere i dette registeret",
@@ -123,7 +123,7 @@
     "browseAllModules": "Se alle moduler →",
     "providersDescription": "Få tilgang til tilpassede og speilede Terraform-leverandører for skyressursene dine.",
     "browseAllProviders": "Se alle leverandører →",
-    "terraformBinariesDescription": "Last ned Terraform- og OpenTofu-binærfilene fra interne speil.",
+    "terraformBinariesDescription": "Last ned binærfilene for Terraform, OpenTofu, Packer, Sentinel og OPA fra interne speilservere.",
     "noBinaryMirrors": "Det er ikke konfigurert noen binære speil",
     "viewBinaries": "Vis binærfiler →",
     "gettingStarted": "Kom i gang",
@@ -287,11 +287,11 @@
     }
   },
   "terraformBinaries": {
-    "pageTitle": "Terraform-speilserverne",
-    "pageSubtitle": "Last ned Terraform- og OpenTofu-binærfilene fra organisasjonens interne speilserver. Konfigurer CLI- eller CI-verktøykjeden din slik at den peker mot speilserver-URL-en som vises på hver detaljside.",
+    "pageTitle": "Hostede binære speil",
+    "pageSubtitle": "Last ned Terraform-, OpenTofu-, Packer-, Sentinel- og OPA-binærfilene fra organisasjonens interne speilserver. Konfigurer CLI- eller CI-verktøykjeden din slik at den peker mot speil-URL-en som vises på hver detaljside.",
     "loadError": "Det gikk ikke å laste inn Terraform-binærspeilene.",
     "noMirrorsTitle": "Det er ikke konfigurert noen binære speil",
-    "noMirrorsBody": "Be en administrator om å sette opp et binært speil for Terraform eller OpenTofu.",
+    "noMirrorsBody": "Be en administrator om å sette opp et binært speil.",
     "versionCountOne": "{{count}} versjon",
     "versionCountOther": "{{count}} versjoner",
     "latestVersion": "Siste versjon: {{version}}",
@@ -631,8 +631,8 @@
       }
     },
     "terraformBinaries": {
-      "title": "Terraform-speilserverne",
-      "overview": "Viser en liste over tilgjengelige binære speil for Terraform og OpenTofu som driftes av dette registeret. Hvert speil lagrer et sett med binære versjoner fra en oppstrøms kilde i hurtigbufferen, slik at CI-rørledningene og utviklermaskinene dine kan laste dem ned uten direkte internettilgang.",
+      "title": "Hostede binære speil",
+      "overview": "Viser en liste over tilgjengelige binære speilserverne som driftes av dette registeret. Hver speilserver lagrer et utvalg av binære versjoner fra en oppstrøms kilde i hurtigbufferen, slik at CI-rørledningene og utviklermaskinene dine kan laste dem ned uten direkte internettilgang.",
       "actions": {
         "viewVersions": {
           "heading": "Vis versjoner",
@@ -1060,6 +1060,12 @@
       "labelSyncInterval": "Synkroniseringsintervall (timer)",
       "helpSyncInterval": "Hvor ofte bør man sjekke etter oppdateringer",
       "requiresApproval": "Krev godkjenning for nye versjoner",
+      "labelAutoApproveRules": "Regler for automatisk godkjenning (JSON)",
+      "helpAutoApproveRules": "JSON-regler som automatisk godkjenner synkroniserte versjoner, f.eks. {\"rules\":[{\"type\":\"patch_only\"}],\"mode\":\"any\"}. La feltet stå tomt hvis du ønsker manuell godkjenning.",
+      "errAutoApproveRules": "Må være gyldig JSON, f.eks. {\"rules\":[...],\"mode\":\"any\"}",
+      "pullThroughEnabled": "Aktiver gjennomstrømningsbufring",
+      "labelPullThroughTtl": "TTL for pull-through-cache (timer)",
+      "helpPullThroughTtl": "Hvor lenge forblir speilede versjoner på forespørsel i hurtigbufferen før det foretas en ny sjekk mot oppstrøms",
       "confirmDeleteTitle": "Bekreft sletting",
       "confirmDeleteText": "Er du sikker på at du vil slette speilet «{{name}}»? Denne handlingen kan ikke angres. Speilede leverandører vil forbli i registeret ditt.",
       "syncHistoryTitle": "Synkroniseringshistorikk — {{name}}",
@@ -1077,7 +1083,7 @@
       "thLastSynced": "Sist synkronisert"
     },
     "terraformMirror": {
-      "pageTitle": "Binærspeil",
+      "pageTitle": "Binære speil",
       "refresh": "Oppdater",
       "addMirror": "Legg til speil",
       "cancel": "Avbryt",
@@ -1125,7 +1131,7 @@
       "infoBannerBefore": "Kunder laster ned binærfilene fra ",
       "infoBannerAfter": ". Dette endepunktet krever ikke autentisering — konfigurer CI- eller utviklermaskinene dine slik at de peker mot registerverten din.",
       "emptyState": "Det finnes foreløpig ingen konfigurasjoner for speiling av Terraform-binærfiler. Opprett en for å begynne å speile Terraform- eller OpenTofu-binærfiler.",
-      "dialogTitleCreate": "Legg til Terraform-binærspeil",
+      "dialogTitleCreate": "Legg til konfigurasjon for binær speilserver",
       "labelName": "Navn",
       "helpName": "Unikt slug brukt i API-baner (f.eks. hashicorp-terraform)",
       "labelDescription": "Beskrivelse",
@@ -1508,7 +1514,21 @@
       "connectToTitle": "Gå til {{name}}",
       "patIntro": "Skriv inn din personlige tilgangstoken for Bitbucket Data Center. Du kan opprette en slik token i innstillingene for Bitbucket-kontoen din under «HTTP-tilgangstokener».",
       "labelPat": "Personlig tilgangstoken",
-      "saveToken": "Lagre token"
+      "saveToken": "Lagre token",
+      "labelAuthMode": "Autentisering",
+      "authModeOAuth": "OAuth per bruker",
+      "authModeApp": "Delte påloggingsopplysninger for appen",
+      "helpAuthMode": "Påloggingsopplysningene for appen administreres av administratoren og deles av alle brukere – det er ikke nødvendig med Connect per bruker. OAuth per bruker opprettholder den gamle prosessen der hver bruker kobler til sin egen konto.",
+      "labelGithubAppId": "GitHub-app-ID",
+      "labelGithubInstallationId": "Installasjons-ID",
+      "labelAppPrivateKey": "Privatnøkkel (PEM)",
+      "helpGithubApp": "Fra innstillingene for GitHub-appen din: den numeriske app-ID-en, installasjons-ID-en (fra installasjons-URL-en) og appens private RSA-nøkkel.",
+      "helpAppPrivateKeyKeep": "La feltet stå tomt for å beholde den eksisterende private nøkkelen",
+      "appCredential": "App-påloggingsopplysninger",
+      "testConnection": "Test tilkoblingen",
+      "testConnectionOk": "Tilkobling OK",
+      "testConnectionFailed": "Tilkoblingen mislyktes",
+      "errVerify": "Det lyktes ikke å bekrefte leverandøren"
     },
     "approvals": {
       "pageTitle": "Godkjenningsforespørsler",
@@ -1855,7 +1875,7 @@
       "scanErrors": "{{count}} feil",
       "statModules": "Moduler",
       "statProviders": "Leverandører",
-      "statTerraformBinaries": "Terraform-binærfiler",
+      "statTerraformBinaries": "Hostede binærfiler",
       "statTotalDownloads": "Totalt antall nedlastinger",
       "statVersions": "{{count}} versjoner",
       "statAcrossMirrors_one": "gjennom et speil på {{count}}",
@@ -2007,6 +2027,13 @@
     "showingCount": "Viser 10 av{{total}}-arrangementer",
     "refresh": "Oppdater"
   },
+  "consumedBy": {
+    "title": "Oppslukt av",
+    "subtitle": "Stater i State Manager som refererer til denne modulen.",
+    "constraintOnly": "kun begrensning",
+    "showingCount": "Viser {{shown}} av {{total}} stater",
+    "openInStateManager": "Åpne i State Manager"
+  },
   "repositoryBrowser": {
     "searchPlaceholder": "Søk i arkivene...",
     "refresh": "Oppdater",
@@ -2151,7 +2178,9 @@
     "thExpiry": "Utløpsdato",
     "thLastRefresh": "Siste oppdatering",
     "expiredAgo": "utløpt {{days}} d siden",
-    "days": "{{days}} d"
+    "days": "{{days}} d",
+    "unsignedLabel": "usignert",
+    "unsignedTooltip": "Oppstrømsutvikleren til dette verktøyet publiserer ingen utgivelsessignatur; binærfilene verifiseres utelukkende ved hjelp av sjekksum."
   },
   "scanFindingsModal": {
     "title": "Skanneresultater",
