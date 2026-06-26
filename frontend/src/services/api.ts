@@ -1,6 +1,7 @@
 import axios, { AxiosInstance, AxiosError, InternalAxiosRequestConfig } from 'axios'
 import { addApiBreadcrumb } from './errorReporting'
 import { clearAuthStorage } from '../utils/authStorage'
+import type { CreateMirrorConfigRequest, UpdateMirrorConfigRequest } from '../types/mirror'
 
 // In dev mode, use empty baseURL to use relative paths (goes through Vite proxy)
 // In production, use the configured URL or default to current origin
@@ -979,33 +980,12 @@ class ApiClient {
     return response.data
   }
 
-  async createMirror(data: {
-    name: string
-    description?: string
-    upstream_registry_url: string
-    organization_id?: string
-    namespace_filter?: string[]
-    provider_filter?: string[]
-    enabled?: boolean
-    sync_interval_hours?: number
-  }) {
+  async createMirror(data: CreateMirrorConfigRequest) {
     const response = await this.client.post('/api/v1/admin/mirrors', data)
     return response.data
   }
 
-  async updateMirror(
-    id: string,
-    data: {
-      name?: string
-      description?: string
-      upstream_registry_url?: string
-      organization_id?: string
-      namespace_filter?: string[]
-      provider_filter?: string[]
-      enabled?: boolean
-      sync_interval_hours?: number
-    },
-  ) {
+  async updateMirror(id: string, data: UpdateMirrorConfigRequest) {
     const response = await this.client.put(`/api/v1/admin/mirrors/${id}`, data)
     return response.data
   }
