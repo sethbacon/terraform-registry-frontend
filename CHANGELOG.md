@@ -1,6 +1,13 @@
 <!-- markdownlint-disable MD013 MD024 MD041 -->
 # Changelog
 
+## [2.11.0](https://github.com/sethbacon/terraform-registry-frontend/compare/v2.10.3...v2.11.0) (2026-06-26)
+
+
+### Features
+
+* **mirrors:** expose pull-through and auto-approve fields in the mirror form ([#432](https://github.com/sethbacon/terraform-registry-frontend/issues/432)) ([79b7a92](https://github.com/sethbacon/terraform-registry-frontend/commit/79b7a92b222c71b2137dcb02e1f5a221d025138f)), closes [#431](https://github.com/sethbacon/terraform-registry-frontend/issues/431)
+
 ## [2.10.3](https://github.com/sethbacon/terraform-registry-frontend/compare/v2.10.2...v2.10.3) (2026-06-22)
 
 
