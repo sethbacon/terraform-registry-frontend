@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, screen, waitFor, fireEvent } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
@@ -776,5 +776,167 @@ describe('MirrorsPage', () => {
     await waitFor(() => expect(screen.getByText('hashicorp')).toBeInTheDocument())
     await user.click(screen.getByLabelText('Toggle versions'))
     await waitFor(() => expect(screen.getByText('Pending Approval')).toBeInTheDocument())
+  })
+
+  it('reveals the auto-approve rules field only when approval is required', async () => {
+    listMirrorsMock.mockResolvedValue([])
+    const user = userEvent.setup()
+    renderWithProviders(<MirrorsPage />)
+    await waitFor(() => expect(screen.getByText('Add Mirror')).toBeInTheDocument())
+    await user.click(screen.getByText('Add Mirror'))
+
+    expect(screen.queryByLabelText('Auto-approve rules (JSON)')).not.toBeInTheDocument()
+    await user.click(screen.getByLabelText('Require approval for new versions'))
+    expect(screen.getByLabelText('Auto-approve rules (JSON)')).toBeInTheDocument()
+  })
+
+  it('reveals the pull-through cache TTL field only when pull-through is enabled', async () => {
+    listMirrorsMock.mockResolvedValue([])
+    const user = userEvent.setup()
+    renderWithProviders(<MirrorsPage />)
+    await waitFor(() => expect(screen.getByText('Add Mirror')).toBeInTheDocument())
+    await user.click(screen.getByText('Add Mirror'))
+
+    expect(screen.queryByLabelText('Pull-through cache TTL (hours)')).not.toBeInTheDocument()
+    await user.click(screen.getByLabelText('Enable pull-through caching'))
+    expect(screen.getByLabelText('Pull-through cache TTL (hours)')).toBeInTheDocument()
+  })
+
+  it('sends pull_through_enabled and cache TTL on create when enabled', async () => {
+    listMirrorsMock.mockResolvedValue([])
+    createMirrorMock.mockResolvedValue({ id: 'new-1' })
+    const user = userEvent.setup()
+    renderWithProviders(<MirrorsPage />)
+    await waitFor(() => expect(screen.getByText('Add Mirror')).toBeInTheDocument())
+    await user.click(screen.getByText('Add Mirror'))
+
+    const nameInput = screen.getByLabelText('Name *')
+    await user.clear(nameInput)
+    await user.type(nameInput, 'Pull-through Mirror')
+
+    await user.click(screen.getByLabelText('Enable pull-through caching'))
+    const ttl = screen.getByLabelText('Pull-through cache TTL (hours)')
+    fireEvent.change(ttl, { target: { value: '6' } })
+
+    await user.click(screen.getByText('Create'))
+    await waitFor(() => expect(createMirrorMock).toHaveBeenCalledTimes(1))
+    const callArg = createMirrorMock.mock.calls[0][0]
+    expect(callArg.pull_through_enabled).toBe(true)
+    expect(callArg.pull_through_cache_ttl_hours).toBe(6)
+  })
+
+  it('defaults pull_through_enabled to false on create', async () => {
+    listMirrorsMock.mockResolvedValue([])
+    createMirrorMock.mockResolvedValue({ id: 'new-1' })
+    const user = userEvent.setup()
+    renderWithProviders(<MirrorsPage />)
+    await waitFor(() => expect(screen.getByText('Add Mirror')).toBeInTheDocument())
+    await user.click(screen.getByText('Add Mirror'))
+    const nameInput = screen.getByLabelText('Name *')
+    await user.clear(nameInput)
+    await user.type(nameInput, 'Plain Mirror')
+    await user.click(screen.getByText('Create'))
+    await waitFor(() => expect(createMirrorMock).toHaveBeenCalledTimes(1))
+    expect(createMirrorMock.mock.calls[0][0].pull_through_enabled).toBe(false)
+  })
+
+  it('sends auto_approve_rules when valid JSON and approval is required', async () => {
+    listMirrorsMock.mockResolvedValue([])
+    createMirrorMock.mockResolvedValue({ id: 'new-1' })
+    const user = userEvent.setup()
+    renderWithProviders(<MirrorsPage />)
+    await waitFor(() => expect(screen.getByText('Add Mirror')).toBeInTheDocument())
+    await user.click(screen.getByText('Add Mirror'))
+
+    const nameInput = screen.getByLabelText('Name *')
+    await user.clear(nameInput)
+    await user.type(nameInput, 'Auto-approve Mirror')
+
+    await user.click(screen.getByLabelText('Require approval for new versions'))
+    const rules = '{"rules":[{"type":"patch_only"}],"mode":"any"}'
+    fireEvent.change(screen.getByLabelText('Auto-approve rules (JSON)'), {
+      target: { value: rules },
+    })
+
+    await user.click(screen.getByText('Create'))
+    await waitFor(() => expect(createMirrorMock).toHaveBeenCalledTimes(1))
+    const callArg = createMirrorMock.mock.calls[0][0]
+    expect(callArg.requires_approval).toBe(true)
+    expect(callArg.auto_approve_rules).toBe(rules)
+  })
+
+  it('blocks submit and shows an error when auto-approve rules are invalid JSON', async () => {
+    listMirrorsMock.mockResolvedValue([])
+    createMirrorMock.mockResolvedValue({ id: 'new-1' })
+    const user = userEvent.setup()
+    renderWithProviders(<MirrorsPage />)
+    await waitFor(() => expect(screen.getByText('Add Mirror')).toBeInTheDocument())
+    await user.click(screen.getByText('Add Mirror'))
+
+    const nameInput = screen.getByLabelText('Name *')
+    await user.clear(nameInput)
+    await user.type(nameInput, 'Broken Rules Mirror')
+
+    await user.click(screen.getByLabelText('Require approval for new versions'))
+    fireEvent.change(screen.getByLabelText('Auto-approve rules (JSON)'), {
+      target: { value: 'not-json' },
+    })
+
+    expect(screen.getByText(/Must be valid JSON/)).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Create' })).toBeDisabled()
+    expect(createMirrorMock).not.toHaveBeenCalled()
+  })
+
+  it('re-enables submit and omits rules when approval is toggled off after invalid JSON', async () => {
+    listMirrorsMock.mockResolvedValue([])
+    createMirrorMock.mockResolvedValue({ id: 'new-1' })
+    const user = userEvent.setup()
+    renderWithProviders(<MirrorsPage />)
+    await waitFor(() => expect(screen.getByText('Add Mirror')).toBeInTheDocument())
+    await user.click(screen.getByText('Add Mirror'))
+
+    const nameInput = screen.getByLabelText('Name *')
+    await user.clear(nameInput)
+    await user.type(nameInput, 'Toggle Mirror')
+
+    // Enable approval, enter invalid JSON -> submit blocks.
+    await user.click(screen.getByLabelText('Require approval for new versions'))
+    fireEvent.change(screen.getByLabelText('Auto-approve rules (JSON)'), {
+      target: { value: 'not-json' },
+    })
+    expect(screen.getByRole('button', { name: 'Create' })).toBeDisabled()
+
+    // Toggle approval back off — the hidden field must no longer block submit.
+    await user.click(screen.getByLabelText('Require approval for new versions'))
+    expect(screen.queryByLabelText('Auto-approve rules (JSON)')).not.toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Create' })).toBeEnabled()
+
+    await user.click(screen.getByText('Create'))
+    await waitFor(() => expect(createMirrorMock).toHaveBeenCalledTimes(1))
+    const callArg = createMirrorMock.mock.calls[0][0]
+    expect(callArg.requires_approval).toBe(false)
+    expect(callArg.auto_approve_rules).toBeUndefined()
+  })
+
+  it('prefills pull-through and auto-approve fields in the edit dialog', async () => {
+    const cachedMirror = {
+      ...baseMirror,
+      id: 'mirror-cache',
+      name: 'Cached Mirror',
+      requires_approval: true,
+      auto_approve_rules: '{"rules":[],"mode":"all"}',
+      pull_through_enabled: true,
+      pull_through_cache_ttl_hours: 6,
+    }
+    listMirrorsMock.mockResolvedValue([cachedMirror])
+    const user = userEvent.setup()
+    renderWithProviders(<MirrorsPage />)
+    await waitFor(() => expect(screen.getByText('Cached Mirror')).toBeInTheDocument())
+
+    await user.click(screen.getByLabelText('Edit mirror'))
+    expect(screen.getByLabelText('Require approval for new versions')).toBeChecked()
+    expect(screen.getByLabelText('Auto-approve rules (JSON)')).toHaveValue('{"rules":[],"mode":"all"}')
+    expect(screen.getByLabelText('Enable pull-through caching')).toBeChecked()
+    expect(screen.getByLabelText('Pull-through cache TTL (hours)')).toHaveValue(6)
   })
 })
