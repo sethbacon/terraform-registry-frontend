@@ -6,8 +6,8 @@
     "modulesTooltip": "Visualizza i moduli Terraform",
     "providers": "Fornitori",
     "providersTooltip": "Visualizza i provider Terraform",
-    "terraformBinaries": "File binari di Terraform",
-    "terraformBinariesTooltip": "Visualizza i file binari di Terraform",
+    "terraformBinaries": "File binari ospitati",
+    "terraformBinariesTooltip": "Visualizza i file binari ospitati",
     "apiDocs": "Documentazione API",
     "apiDocsTooltip": "Documentazione API",
     "admin": {
@@ -33,7 +33,7 @@
       "mirroring": "Riflessione",
       "providerConfig": "Configurazione provider",
       "providerConfigTooltip": "Configurare le origini mirror dei provider e le pianificazioni di sincronizzazione",
-      "binariesConfig": "Mirror dei file binari",
+      "binariesConfig": "Specchi binari",
       "binariesConfigTooltip": "Configurare le fonti dei mirror dei file binari di Terraform e OpenTofu",
       "approvals": "Autorizzazioni",
       "approvalsTooltip": "Esaminare e approvare le richieste di sincronizzazione dei mirror in sospeso",
@@ -64,7 +64,7 @@
     "about": "Informazioni su",
     "settings": "Impostazioni",
     "support": "Assistenza",
-    "accountMenu": "account dell'utente corrente",
+    "accountMenu": "Account",
     "logout": "Esci",
     "login": "Accedi",
     "language": "Lingua"
@@ -112,7 +112,7 @@
     "heroSubtitle": "Ospita e gestisci i tuoi moduli, provider e file binari Terraform personalizzati",
     "browseModules": "Sfoglia i moduli",
     "browseProviders": "Cerca fornitori",
-    "terraformBinaries": "File binari di Terraform",
+    "terraformBinaries": "File binari ospitati",
     "available": "disponibile",
     "findWhatYouNeed": "Trova quello che cerchi",
     "searchAcross": "Cerca tra i moduli e i fornitori presenti in questo registro",
@@ -123,7 +123,7 @@
     "browseAllModules": "Sfoglia tutti i moduli →",
     "providersDescription": "Accedi a provider Terraform personalizzati e duplicati per le tue risorse cloud.",
     "browseAllProviders": "Sfoglia tutti i fornitori →",
-    "terraformBinariesDescription": "Scarica i file binari di Terraform e OpenTofu dai mirror interni.",
+    "terraformBinariesDescription": "Scarica i file binari di Terraform, OpenTofu, Packer, Sentinel e OPA dai mirror interni.",
     "noBinaryMirrors": "Non sono stati configurati mirror binari",
     "viewBinaries": "Visualizza i file binari →",
     "gettingStarted": "Per iniziare",
@@ -287,11 +287,11 @@
     }
   },
   "terraformBinaries": {
-    "pageTitle": "Mirror dei file binari di Terraform",
-    "pageSubtitle": "Scarica i file binari di Terraform e OpenTofu dal mirror interno della tua organizzazione. Configura la tua CLI o la tua catena di strumenti CI in modo che puntino all'URL del mirror indicato in ciascuna pagina dei dettagli.",
+    "pageTitle": "Mirror di file binari ospitati",
+    "pageSubtitle": "Scarica i file binari di Terraform, OpenTofu, Packer, Sentinel e OPA dal mirror interno della tua organizzazione. Configura la tua CLI o la tua catena di strumenti CI in modo che puntino all'URL del mirror indicato in ciascuna pagina di dettaglio.",
     "loadError": "Impossibile caricare i mirror dei file binari di Terraform.",
     "noMirrorsTitle": "Non sono stati configurati mirror binari",
-    "noMirrorsBody": "Chiedi a un amministratore di configurare un mirror dei file binari di Terraform o OpenTofu.",
+    "noMirrorsBody": "Chiedi a un amministratore di configurare un mirror binario.",
     "versionCountOne": "{{count}} versione",
     "versionCountOther": "{{count}} versioni",
     "latestVersion": "Ultima versione: {{version}}",
@@ -631,8 +631,8 @@
       }
     },
     "terraformBinaries": {
-      "title": "Mirror dei file binari di Terraform",
-      "overview": "Elenca i mirror binari disponibili di Terraform e OpenTofu ospitati da questo registro. Ogni mirror memorizza nella cache una serie di versioni binarie provenienti da una fonte a monte, in modo che le pipeline di CI e i computer degli sviluppatori possano scaricarle senza bisogno di un accesso diretto a Internet.",
+      "title": "Mirror di file binari ospitati",
+      "overview": "Elenca i mirror binari disponibili ospitati da questo registro. Ogni mirror memorizza nella cache una serie di versioni binarie provenienti da una fonte a monte, in modo che le pipeline di CI e le macchine degli sviluppatori possano scaricarle senza bisogno di un accesso diretto a Internet.",
       "actions": {
         "viewVersions": {
           "heading": "Visualizza le versioni",
@@ -1060,6 +1060,12 @@
       "labelSyncInterval": "Intervallo di sincronizzazione (ore)",
       "helpSyncInterval": "Con quale frequenza controllare la disponibilità di aggiornamenti",
       "requiresApproval": "Richiedere l'approvazione per le nuove versioni",
+      "labelAutoApproveRules": "Regole di approvazione automatica (JSON)",
+      "helpAutoApproveRules": "Regole JSON che approvano automaticamente le versioni sincronizzate, ad esempio {\"rules\":[{\"type\":\"patch_only\"}],\"mode\":\"any\"}. Lasciare vuoto per richiedere l'approvazione manuale.",
+      "errAutoApproveRules": "Deve essere un JSON valido, ad esempio {\"rules\":[...],\"mode\":\"any\"}",
+      "pullThroughEnabled": "Abilita la cache pull-through",
+      "labelPullThroughTtl": "TTL della cache pull-through (ore)",
+      "helpPullThroughTtl": "Per quanto tempo le versioni mirrorate su richiesta rimangono nella cache prima di effettuare una nuova verifica con il server di origine",
       "confirmDeleteTitle": "Conferma eliminazione",
       "confirmDeleteText": "Sei sicuro di voler eliminare il mirror \"{{name}}\"? Questa operazione non può essere annullata. I provider mirrorati rimarranno nel tuo registro.",
       "syncHistoryTitle": "Cronologia sincronizzazioni — {{name}}",
@@ -1077,7 +1083,7 @@
       "thLastSynced": "Ultima sincronizzazione"
     },
     "terraformMirror": {
-      "pageTitle": "Mirror dei file binari",
+      "pageTitle": "Specchi binari",
       "refresh": "Aggiorna",
       "addMirror": "Aggiungi mirror",
       "cancel": "Annulla",
@@ -1125,7 +1131,7 @@
       "infoBannerBefore": "I clienti scaricano i file binari all'indirizzo ",
       "infoBannerAfter": ". Questo endpoint non richiede autenticazione: configura le tue macchine CI o di sviluppo in modo che puntino all'host del tuo registro.",
       "emptyState": "Non esistono ancora configurazioni di mirror per i file binari di Terraform. Creane una per avviare il mirroring dei file binari di Terraform o OpenTofu.",
-      "dialogTitleCreate": "Aggiungi mirror binario di Terraform",
+      "dialogTitleCreate": "Aggiungi configurazione mirror binario",
       "labelName": "Nome",
       "helpName": "Slug univoco utilizzato nei percorsi API (ad es. hashicorp-terraform)",
       "labelDescription": "Descrizione",
@@ -1508,7 +1514,21 @@
       "connectToTitle": "Accedi a {{name}}",
       "patIntro": "Inserisci il tuo token di accesso personale di Bitbucket Data Center. Puoi generarne uno dalle impostazioni del tuo account Bitbucket, nella sezione \"Token di accesso HTTP\".",
       "labelPat": "Token di accesso personale",
-      "saveToken": "Salva token"
+      "saveToken": "Salva token",
+      "labelAuthMode": "Autenticazione",
+      "authModeOAuth": "OAuth per utente",
+      "authModeApp": "Credenziali condivise dell'app",
+      "helpAuthMode": "Le credenziali dell'app sono gestite dall'amministratore e condivise da tutti gli utenti: non è necessario un Connect specifico per ciascun utente. L'OAuth specifico per utente mantiene il flusso tradizionale, in cui ogni utente collega il proprio account.",
+      "labelGithubAppId": "ID app GitHub",
+      "labelGithubInstallationId": "ID installazione",
+      "labelAppPrivateKey": "Chiave privata (PEM)",
+      "helpGithubApp": "Dalle impostazioni della tua app su GitHub: l'ID numerico dell'app, l'ID di installazione (ricavabile dall'URL di installazione) e la chiave privata RSA dell'app.",
+      "helpAppPrivateKeyKeep": "Lasciare vuoto per mantenere la chiave privata esistente",
+      "appCredential": "Credenziali dell'app",
+      "testConnection": "Verifica della connessione",
+      "testConnectionOk": "Connessione OK",
+      "testConnectionFailed": "Connessione non riuscita",
+      "errVerify": "Impossibile verificare il provider"
     },
     "approvals": {
       "pageTitle": "Richieste di approvazione",
@@ -1855,7 +1875,7 @@
       "scanErrors": "{{count}} errori",
       "statModules": "Moduli",
       "statProviders": "Fornitori",
-      "statTerraformBinaries": "File binari di Terraform",
+      "statTerraformBinaries": "File binari ospitati",
       "statTotalDownloads": "Download totali",
       "statVersions": "{{count}} versioni",
       "statAcrossMirrors_one": "attraverso uno specchio dell'{{count}}",
@@ -2007,6 +2027,13 @@
     "showingCount": "Vengono visualizzati 10 eventi su {{total}}",
     "refresh": "Aggiorna"
   },
+  "consumedBy": {
+    "title": "Consumato da",
+    "subtitle": "Stati presenti in State Manager che fanno riferimento a questo modulo.",
+    "constraintOnly": "solo vincolo",
+    "showingCount": "Vengono visualizzati {{shown}} degli {{total}} stati",
+    "openInStateManager": "Apri in State Manager"
+  },
   "repositoryBrowser": {
     "searchPlaceholder": "Cerca nei repository...",
     "refresh": "Aggiorna",
@@ -2151,7 +2178,9 @@
     "thExpiry": "Scadenza",
     "thLastRefresh": "Ultimo aggiornamento",
     "expiredAgo": "scaduto {{days}} giorni fa",
-    "days": "{{days}} d"
+    "days": "{{days}} d",
+    "unsignedLabel": "non firmato",
+    "unsignedTooltip": "Il progetto a monte di questo strumento non pubblica alcuna firma di rilascio; i file binari vengono verificati esclusivamente tramite checksum."
   },
   "scanFindingsModal": {
     "title": "Risultati della scansione",

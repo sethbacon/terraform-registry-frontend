@@ -6,8 +6,8 @@
     "modulesTooltip": "Ver módulos de Terraform",
     "providers": "Proveedores",
     "providersTooltip": "Ver proveedores de Terraform",
-    "terraformBinaries": "Binarios de Terraform",
-    "terraformBinariesTooltip": "Ver binarios de Terraform",
+    "terraformBinaries": "Archivos binarios alojados",
+    "terraformBinariesTooltip": "Ver binarios alojados",
     "apiDocs": "Documentación de la API",
     "apiDocsTooltip": "Documentación de la API",
     "admin": {
@@ -33,7 +33,7 @@
       "mirroring": "Duplicación",
       "providerConfig": "Configuración del proveedor",
       "providerConfigTooltip": "Configurar las fuentes de réplica de los proveedores y los horarios de sincronización",
-      "binariesConfig": "Réplicas de binarios",
+      "binariesConfig": "Espejos binarios",
       "binariesConfigTooltip": "Configurar las fuentes de los repositorios binarios de Terraform y OpenTofu",
       "approvals": "Homologaciones",
       "approvalsTooltip": "Revisar y aprobar las solicitudes de sincronización de réplicas pendientes",
@@ -64,7 +64,7 @@
     "about": "Acerca de",
     "settings": "Configuración",
     "support": "Asistencia",
-    "accountMenu": "perfil del usuario actual",
+    "accountMenu": "Cuenta",
     "logout": "Cerrar sesión",
     "login": "Iniciar sesión",
     "language": "Idioma"
@@ -112,7 +112,7 @@
     "heroSubtitle": "Aloja y gestiona tus módulos, proveedores y binarios personalizados de Terraform",
     "browseModules": "Explorar módulos",
     "browseProviders": "Buscar proveedores",
-    "terraformBinaries": "Binarios de Terraform",
+    "terraformBinaries": "Archivos binarios alojados",
     "available": "disponible",
     "findWhatYouNeed": "Encuentra lo que necesitas",
     "searchAcross": "Buscar entre los módulos y los proveedores de este registro",
@@ -123,7 +123,7 @@
     "browseAllModules": "Ver todos los módulos →",
     "providersDescription": "Accede a proveedores de Terraform personalizados y duplicados para tus recursos en la nube.",
     "browseAllProviders": "Ver todos los proveedores →",
-    "terraformBinariesDescription": "Descarga los binarios de Terraform y OpenTofu desde los servidores de réplica internos.",
+    "terraformBinariesDescription": "Descarga los binarios de Terraform, OpenTofu, Packer, Sentinel y OPA desde los servidores espejo internos.",
     "noBinaryMirrors": "No hay servidores de réplica binarios configurados",
     "viewBinaries": "Ver archivos binarios →",
     "gettingStarted": "Primeros pasos",
@@ -287,11 +287,11 @@
     }
   },
   "terraformBinaries": {
-    "pageTitle": "Servidores de réplica de binarios de Terraform",
-    "pageSubtitle": "Descarga los binarios de Terraform y OpenTofu desde el servidor espejo interno de tu organización. Configura tu interfaz de línea de comandos (CLI) o tu cadena de herramientas de integración continua (CI) para que apunte a la URL del servidor espejo que aparece en cada página de detalles.",
+    "pageTitle": "Servidores de réplica de archivos binarios alojados",
+    "pageSubtitle": "Descarga los binarios de Terraform, OpenTofu, Packer, Sentinel y OPA desde el servidor espejo interno de tu organización. Configura tu línea de comandos o tu cadena de herramientas de integración continua (CI) para que apunte a la URL del servidor espejo que aparece en cada página de detalles.",
     "loadError": "No se han podido cargar los servidores de réplica de los binarios de Terraform.",
     "noMirrorsTitle": "No hay servidores de réplica binarios configurados",
-    "noMirrorsBody": "Pide a un administrador que configure un servidor de réplicas de los binarios de Terraform u OpenTofu.",
+    "noMirrorsBody": "Pide a un administrador que configure un servidor espejo de archivos binarios.",
     "versionCountOne": "{{count}} versión",
     "versionCountOther": "{{count}} versiones",
     "latestVersion": "Última versión: {{version}}",
@@ -631,8 +631,8 @@
       }
     },
     "terraformBinaries": {
-      "title": "Servidores de réplica de binarios de Terraform",
-      "overview": "Muestra los servidores de réplica de binarios de Terraform y OpenTofu disponibles alojados en este registro. Cada servidor de réplica almacena en caché un conjunto de versiones binarias procedentes de una fuente original, de modo que tus procesos de integración continua y tus equipos de desarrollo puedan descargarlas sin necesidad de acceso directo a Internet.",
+      "title": "Servidores de réplica de archivos binarios alojados",
+      "overview": "Muestra los servidores espejo binarios disponibles alojados en este registro. Cada servidor espejo almacena en caché un conjunto de versiones binarias procedentes de una fuente principal, de modo que tus procesos de integración continua y tus equipos de desarrollo puedan descargarlas sin necesidad de acceso directo a Internet.",
       "actions": {
         "viewVersions": {
           "heading": "Ver versiones",
@@ -1060,6 +1060,12 @@
       "labelSyncInterval": "Intervalo de sincronización (horas)",
       "helpSyncInterval": "Con qué frecuencia se deben buscar actualizaciones",
       "requiresApproval": "Exigir la aprobación de las nuevas versiones",
+      "labelAutoApproveRules": "Reglas de aprobación automática (JSON)",
+      "helpAutoApproveRules": "Reglas JSON que aprueban automáticamente las versiones sincronizadas, por ejemplo: {\"rules\":[{\"type\":\"patch_only\"}],\"mode\":\"any\"}. Déjalo en blanco para que se requiera la aprobación manual.",
+      "errAutoApproveRules": "Debe ser un JSON válido, p. ej., {\"rules\":[...],\"mode\":\"any\"}",
+      "pullThroughEnabled": "Habilitar el almacenamiento en caché de tipo «pull-through»",
+      "labelPullThroughTtl": "TTL de la caché «pull-through» (horas)",
+      "helpPullThroughTtl": "Cuánto tiempo permanecen en la caché las versiones duplicadas bajo demanda antes de volver a comprobar la fuente",
       "confirmDeleteTitle": "Confirmar eliminación",
       "confirmDeleteText": "¿Estás seguro de que quieres eliminar el espejo «{{name}}»? Esta acción no se puede deshacer. Los proveedores de los que se ha creado un espejo permanecerán en tu registro.",
       "syncHistoryTitle": "Historial de sincronizaciones — {{name}}",
@@ -1077,7 +1083,7 @@
       "thLastSynced": "Última sincronización"
     },
     "terraformMirror": {
-      "pageTitle": "Réplicas de binarios",
+      "pageTitle": "Espejos binarios",
       "refresh": "Actualizar",
       "addMirror": "Añadir espejo",
       "cancel": "Cancelar",
@@ -1125,7 +1131,7 @@
       "infoBannerBefore": "Los clientes descargan los archivos binarios en ",
       "infoBannerAfter": ". Este punto final no requiere autenticación: configura tus máquinas de integración continua o de desarrollo para que apunten al servidor de tu registro.",
       "emptyState": "Aún no hay configuraciones de réplica de binarios de Terraform. Crea una para empezar a replicar los binarios de Terraform u OpenTofu.",
-      "dialogTitleCreate": "Añadir un espejo de binarios de Terraform",
+      "dialogTitleCreate": "Añadir configuración de espejo binario",
       "labelName": "Nombre",
       "helpName": "Slug único utilizado en las rutas API (p. ej., hashicorp-terraform)",
       "labelDescription": "Descripción",
@@ -1508,7 +1514,21 @@
       "connectToTitle": "Conéctate a {{name}}",
       "patIntro": "Introduce tu token de acceso personal de Bitbucket Data Center. Puedes generar uno desde la configuración de tu cuenta de Bitbucket, en la sección «Tokens de acceso HTTP».",
       "labelPat": "Token de acceso personal",
-      "saveToken": "Guardar token"
+      "saveToken": "Guardar token",
+      "labelAuthMode": "Autenticación",
+      "authModeOAuth": "OAuth por usuario",
+      "authModeApp": "Credenciales compartidas de la aplicación",
+      "helpAuthMode": "Las credenciales de la aplicación las gestiona el administrador y las comparten todos los usuarios; no es necesario utilizar Connect por usuario. El OAuth por usuario mantiene el flujo tradicional, en el que cada usuario conecta su propia cuenta.",
+      "labelGithubAppId": "ID de la aplicación de GitHub",
+      "labelGithubInstallationId": "ID de instalación",
+      "labelAppPrivateKey": "Clave privada (PEM)",
+      "helpGithubApp": "Desde la configuración de tu aplicación de GitHub: el ID numérico de la aplicación, el ID de instalación (que se encuentra en la URL de instalación) y la clave privada RSA de la aplicación.",
+      "helpAppPrivateKeyKeep": "Délo en blanco para conservar la clave privada actual",
+      "appCredential": "Credenciales de la aplicación",
+      "testConnection": "Probar la conexión",
+      "testConnectionOk": "Conexión correcta",
+      "testConnectionFailed": "Error de conexión",
+      "errVerify": "No se ha podido verificar el proveedor"
     },
     "approvals": {
       "pageTitle": "Solicitudes de aprobación",
@@ -1855,7 +1875,7 @@
       "scanErrors": "{{count}} errores",
       "statModules": "Módulos",
       "statProviders": "Proveedores",
-      "statTerraformBinaries": "Binarios de Terraform",
+      "statTerraformBinaries": "Archivos binarios alojados",
       "statTotalDownloads": "Total de descargas",
       "statVersions": "{{count}} versiones",
       "statAcrossMirrors_one": "a través de un espejo de «{{count}}»",
@@ -2007,6 +2027,13 @@
     "showingCount": "Se muestran 10 de los eventos de «{{total}}»",
     "refresh": "Actualizar"
   },
+  "consumedBy": {
+    "title": "Consumido por",
+    "subtitle": "Estados en State Manager que hacen referencia a este módulo.",
+    "constraintOnly": "solo restricción",
+    "showingCount": "Se muestran {{shown}} de {{total}} estados",
+    "openInStateManager": "Abrir en el Gestor de estados"
+  },
   "repositoryBrowser": {
     "searchPlaceholder": "Buscar en los repositorios...",
     "refresh": "Actualizar",
@@ -2151,7 +2178,9 @@
     "thExpiry": "Caducidad",
     "thLastRefresh": "Última actualización",
     "expiredAgo": "caducado hace {{days}} días",
-    "days": "{{days}} d"
+    "days": "{{days}} d",
+    "unsignedLabel": "sin firmar",
+    "unsignedTooltip": "El desarrollador original de esta herramienta no publica ninguna firma de lanzamiento; los binarios se verifican únicamente mediante la suma de comprobación."
   },
   "scanFindingsModal": {
     "title": "Resultados de la exploración",

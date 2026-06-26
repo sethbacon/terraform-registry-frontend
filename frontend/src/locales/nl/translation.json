@@ -6,8 +6,8 @@
     "modulesTooltip": "Terraform-modules bekijken",
     "providers": "Aanbieders",
     "providersTooltip": "Terraform-providers bekijken",
-    "terraformBinaries": "Terraform-binaire bestanden",
-    "terraformBinariesTooltip": "Terraform-binaire bestanden bekijken",
+    "terraformBinaries": "Gehoste binaire bestanden",
+    "terraformBinariesTooltip": "Gehoste binaire bestanden bekijken",
     "apiDocs": "API-documentatie",
     "apiDocsTooltip": "API-documentatie",
     "admin": {
@@ -33,7 +33,7 @@
       "mirroring": "Spiegelen",
       "providerConfig": "Configuratie van de provider",
       "providerConfigTooltip": "De bronnen van de provider-mirrors en de synchronisatieschema’s configureren",
-      "binariesConfig": "Binaire mirrors",
+      "binariesConfig": "Binaire spiegels",
       "binariesConfigTooltip": "Configureer de bronnen voor de binaire mirrors van Terraform en OpenTofu",
       "approvals": "Goedkeuringen",
       "approvalsTooltip": "In behandeling zijnde verzoeken voor spiegelsynchronisatie controleren en goedkeuren",
@@ -64,7 +64,7 @@
     "about": "Over",
     "settings": "Instellingen",
     "support": "Ondersteuning",
-    "accountMenu": "profiel van de huidige gebruiker",
+    "accountMenu": "Account",
     "logout": "Uitloggen",
     "login": "Inloggen",
     "language": "Taal"
@@ -112,7 +112,7 @@
     "heroSubtitle": "Host en beheer uw eigen Terraform-modules, providers en binaire bestanden",
     "browseModules": "Modules bekijken",
     "browseProviders": "Bekijk aanbieders",
-    "terraformBinaries": "Terraform-binaire bestanden",
+    "terraformBinaries": "Gehoste binaire bestanden",
     "available": "beschikbaar",
     "findWhatYouNeed": "Vind wat je zoekt",
     "searchAcross": "Zoek in alle modules en aanbieders in dit register",
@@ -123,7 +123,7 @@
     "browseAllModules": "Bekijk alle modules →",
     "providersDescription": "Krijg toegang tot aangepaste en gespiegelde Terraform-providers voor uw cloudbronnen.",
     "browseAllProviders": "Bekijk alle aanbieders →",
-    "terraformBinariesDescription": "Download de Terraform- en OpenTofu-binaries van interne mirrors.",
+    "terraformBinariesDescription": "Download de binaire bestanden van Terraform, OpenTofu, Packer, Sentinel en OPA van interne mirrors.",
     "noBinaryMirrors": "Er zijn geen binaire mirrors geconfigureerd",
     "viewBinaries": "Binaire bestanden bekijken →",
     "gettingStarted": "Aan de slag",
@@ -287,11 +287,11 @@
     }
   },
   "terraformBinaries": {
-    "pageTitle": "Terraform-binaire mirrors",
-    "pageSubtitle": "Download de Terraform- en OpenTofu-binaries van de interne mirror van je organisatie. Stel je CLI of CI-toolchain zo in dat deze verwijst naar de mirror-URL die op elke detailpagina wordt weergegeven.",
+    "pageTitle": "Gehoste binaire mirrors",
+    "pageSubtitle": "Download de binaire bestanden van Terraform, OpenTofu, Packer, Sentinel en OPA vanaf de interne mirror van je organisatie. Stel je CLI of CI-toolchain zo in dat deze verwijst naar de mirror-URL die op elke detailpagina wordt weergegeven.",
     "loadError": "Het laden van de Terraform-binaire mirrors is mislukt.",
     "noMirrorsTitle": "Er zijn geen binaire mirrors geconfigureerd",
-    "noMirrorsBody": "Vraag een beheerder om een Terraform- of OpenTofu-binaire mirror in te stellen.",
+    "noMirrorsBody": "Vraag een beheerder om een binaire mirror in te stellen.",
     "versionCountOne": "{{count}} versie",
     "versionCountOther": "{{count}} versies",
     "latestVersion": "Laatste versie: {{version}}",
@@ -631,8 +631,8 @@
       }
     },
     "terraformBinaries": {
-      "title": "Terraform-binaire mirrors",
-      "overview": "Geeft een overzicht van de beschikbare Terraform- en OpenTofu-binaire mirrors die door dit register worden gehost. Elke mirror slaat een reeks binaire versies van een upstream-bron op in de cache, zodat je CI-pijplijnen en ontwikkelaarscomputers deze kunnen downloaden zonder directe internettoegang.",
+      "title": "Gehoste binaire mirrors",
+      "overview": "Geeft een overzicht van de beschikbare binaire mirrors die door dit register worden gehost. Elke mirror slaat een reeks binaire versies van een upstream-bron op in de cache, zodat je CI-pijplijnen en ontwikkelaarscomputers deze kunnen downloaden zonder directe internettoegang.",
       "actions": {
         "viewVersions": {
           "heading": "Versies bekijken",
@@ -1060,6 +1060,12 @@
       "labelSyncInterval": "Synchronisatie-interval (uren)",
       "helpSyncInterval": "Hoe vaak moet je controleren of er updates beschikbaar zijn?",
       "requiresApproval": "Goedkeuring vereist voor nieuwe versies",
+      "labelAutoApproveRules": "Regels voor automatische goedkeuring (JSON)",
+      "helpAutoApproveRules": "JSON-regels die gesynchroniseerde versies automatisch goedkeuren, bijvoorbeeld {\"rules\":[{\"type\":\"patch_only\"}],\"mode\":\"any\"}. Laat dit veld leeg om handmatige goedkeuring verplicht te stellen.",
+      "errAutoApproveRules": "Moet geldige JSON zijn, bijvoorbeeld {\"rules\":[...],\"mode\":\"any\"}",
+      "pullThroughEnabled": "Pull-through-caching inschakelen",
+      "labelPullThroughTtl": "TTL van pull-through-cache (uren)",
+      "helpPullThroughTtl": "Hoe lang blijven on-demand gespiegelde versies in de cache opgeslagen voordat er opnieuw bij de upstream wordt gecontroleerd?",
       "confirmDeleteTitle": "Bevestig verwijderen",
       "confirmDeleteText": "Weet u zeker dat u de mirror \"{{name}}\" wilt verwijderen? Deze handeling kan niet ongedaan worden gemaakt. De gespiegelde providers blijven in uw register staan.",
       "syncHistoryTitle": "Synchronisatiegeschiedenis — {{name}}",
@@ -1077,7 +1083,7 @@
       "thLastSynced": "Laatst gesynchroniseerd"
     },
     "terraformMirror": {
-      "pageTitle": "Binaire mirrors",
+      "pageTitle": "Binaire spiegels",
       "refresh": "Vernieuwen",
       "addMirror": "Spiegel toevoegen",
       "cancel": "Annuleren",
@@ -1125,7 +1131,7 @@
       "infoBannerBefore": "Klanten kunnen de binaire bestanden downloaden op ",
       "infoBannerAfter": ". Dit eindpunt vereist geen authenticatie — stel je CI- of ontwikkelomgevingen zo in dat ze naar je registry-host verwijzen.",
       "emptyState": "Er zijn nog geen configuraties voor Terraform-binaire bestanden. Maak er een aan om te beginnen met het spiegelen van Terraform- of OpenTofu-binaire bestanden.",
-      "dialogTitleCreate": "Terraform-binaire mirror toevoegen",
+      "dialogTitleCreate": "Configuratie van binaire mirror toevoegen",
       "labelName": "Naam",
       "helpName": "Unieke slug die in API-paden wordt gebruikt (bijv. hashicorp-terraform)",
       "labelDescription": "Beschrijving",
@@ -1508,7 +1514,21 @@
       "connectToTitle": "Ga naar {{name}}",
       "patIntro": "Voer je persoonlijke toegangstoken voor Bitbucket Data Center in. Je kunt er een aanmaken via de instellingen van je Bitbucket-account onder 'HTTP-toegangstokens'.",
       "labelPat": "Persoonlijk toegangstoken",
-      "saveToken": "Token opslaan"
+      "saveToken": "Token opslaan",
+      "labelAuthMode": "Authenticatie",
+      "authModeOAuth": "OAuth per gebruiker",
+      "authModeApp": "Gedeelde app-inloggegevens",
+      "helpAuthMode": "De inloggegevens voor de app worden door de beheerder beheerd en zijn voor alle gebruikers beschikbaar — er is geen Connect-account per gebruiker nodig. Bij OAuth per gebruiker blijft de oude werkwijze gehandhaafd, waarbij elke gebruiker zijn eigen account koppelt.",
+      "labelGithubAppId": "GitHub-app-ID",
+      "labelGithubInstallationId": "Installatie-ID",
+      "labelAppPrivateKey": "Privésleutel (PEM)",
+      "helpGithubApp": "Uit de instellingen van je GitHub-app: het numerieke app-ID, het installatie-ID (uit de installatie-URL) en de RSA-privésleutel van de app.",
+      "helpAppPrivateKeyKeep": "Laat dit veld leeg om de bestaande privésleutel te behouden",
+      "appCredential": "App-inloggegevens",
+      "testConnection": "Verbinding testen",
+      "testConnectionOk": "Verbinding OK",
+      "testConnectionFailed": "Verbinding mislukt",
+      "errVerify": "De provider kon niet worden geverifieerd"
     },
     "approvals": {
       "pageTitle": "Goedkeuringsverzoeken",
@@ -1855,7 +1875,7 @@
       "scanErrors": "{{count}} fouten",
       "statModules": "Modules",
       "statProviders": "Aanbieders",
-      "statTerraformBinaries": "Terraform-binaire bestanden",
+      "statTerraformBinaries": "Gehoste binaire bestanden",
       "statTotalDownloads": "Totaal aantal downloads",
       "statVersions": "{{count}} versies",
       "statAcrossMirrors_one": "via {{count}} mirror",
@@ -2007,6 +2027,13 @@
     "showingCount": "10 van de {{total}}-evenementen worden weergegeven",
     "refresh": "Vernieuwen"
   },
+  "consumedBy": {
+    "title": "In beslag genomen door",
+    "subtitle": "Staten in State Manager die naar deze module verwijzen.",
+    "constraintOnly": "alleen beperking",
+    "showingCount": "{{shown}}e van de {{total}} staten weergeven",
+    "openInStateManager": "Openen in State Manager"
+  },
   "repositoryBrowser": {
     "searchPlaceholder": "Zoek in repositories...",
     "refresh": "Vernieuwen",
@@ -2151,7 +2178,9 @@
     "thExpiry": "Vervaldatum",
     "thLastRefresh": "Laatste vernieuwing",
     "expiredAgo": "{{days}} dagen geleden verlopen",
-    "days": "{{days}} d"
+    "days": "{{days}} d",
+    "unsignedLabel": "zonder handtekening",
+    "unsignedTooltip": "De upstream van deze tool publiceert geen releasesignatuur; de binaire bestanden worden uitsluitend aan de hand van de checksum gecontroleerd."
   },
   "scanFindingsModal": {
     "title": "Scanresultaten",

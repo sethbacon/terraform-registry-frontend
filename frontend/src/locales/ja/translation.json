@@ -6,8 +6,8 @@
     "modulesTooltip": "Terraformモジュールを表示",
     "providers": "プロバイダー",
     "providersTooltip": "Terraformプロバイダーを表示",
-    "terraformBinaries": "Terraform バイナリ",
-    "terraformBinariesTooltip": "Terraformのバイナリを表示",
+    "terraformBinaries": "ホスト型バイナリ",
+    "terraformBinariesTooltip": "ホストされたバイナリを表示",
     "apiDocs": "APIドキュメント",
     "apiDocsTooltip": "APIドキュメント",
     "admin": {
@@ -64,7 +64,7 @@
     "about": "概要",
     "settings": "設定",
     "support": "サポート",
-    "accountMenu": "現在のユーザーのアカウント",
+    "accountMenu": "アカウント",
     "logout": "ログアウト",
     "login": "ログイン",
     "language": "言語"
@@ -112,7 +112,7 @@
     "heroSubtitle": "独自のTerraformモジュール、プロバイダー、バイナリをホストおよび管理する",
     "browseModules": "モジュールを閲覧する",
     "browseProviders": "プロバイダーを閲覧する",
-    "terraformBinaries": "Terraform バイナリ",
+    "terraformBinaries": "ホスト型バイナリ",
     "available": "利用可能",
     "findWhatYouNeed": "お探しのものを見つける",
     "searchAcross": "この登録簿内のモジュールおよびプロバイダーを横断検索する",
@@ -123,7 +123,7 @@
     "browseAllModules": "すべてのモジュールを閲覧 →",
     "providersDescription": "クラウドリソース向けに、カスタムおよびミラーリングされたTerraformプロバイダーを利用できます。",
     "browseAllProviders": "すべてのプロバイダーを見る →",
-    "terraformBinariesDescription": "社内ミラーからTerraformとOpenTofuのバイナリをダウンロードしてください。",
+    "terraformBinariesDescription": "社内ミラーからTerraform、OpenTofu、Packer、Sentinel、およびOPAのバイナリをダウンロードしてください。",
     "noBinaryMirrors": "バイナリミラーが設定されていません",
     "viewBinaries": "バイナリを表示 →",
     "gettingStarted": "はじめに",
@@ -287,11 +287,11 @@
     }
   },
   "terraformBinaries": {
-    "pageTitle": "Terraform バイナリミラー",
-    "pageSubtitle": "組織内のミラーサイトからTerraformおよびOpenTofuのバイナリをダウンロードしてください。各詳細ページに記載されているミラーサイトのURLを指すように、CLIまたはCIツールチェーンを設定してください。",
+    "pageTitle": "ホスト型バイナリミラー",
+    "pageSubtitle": "組織内のミラーサイトから、Terraform、OpenTofu、Packer、Sentinel、および OPA のバイナリをダウンロードしてください。各詳細ページに記載されているミラーの URL を参照するように、CLI または CI ツールチェーンを設定してください。",
     "loadError": "Terraformのバイナリミラーの読み込みに失敗しました。",
     "noMirrorsTitle": "バイナリミラーが設定されていません",
-    "noMirrorsBody": "管理者にTerraformまたはOpenTofuのバイナリミラーの設定を依頼してください。",
+    "noMirrorsBody": "管理者にバイナリミラーの設定を依頼してください。",
     "versionCountOne": "{{count}} バージョン",
     "versionCountOther": "{{count}} バージョン",
     "latestVersion": "最新バージョン：{{version}}",
@@ -631,8 +631,8 @@
       }
     },
     "terraformBinaries": {
-      "title": "Terraform バイナリミラー",
-      "overview": "このレジストリがホストする、利用可能なTerraformおよびOpenTofuのバイナリミラーを一覧表示します。各ミラーは、アップストリームソースからのバイナリバージョンのセットをキャッシュしているため、CIパイプラインや開発者のマシンは、インターネットに直接接続していなくてもそれらをダウンロードできます。",
+      "title": "ホスト型バイナリミラー",
+      "overview": "このレジストリがホストする利用可能なバイナリミラーの一覧を表示します。各ミラーは、アップストリームソースからのバイナリバージョンのセットをキャッシュしているため、CIパイプラインや開発者のマシンは、インターネットに直接接続していなくてもそれらをダウンロードできます。",
       "actions": {
         "viewVersions": {
           "heading": "バージョンを表示",
@@ -1060,6 +1060,12 @@
       "labelSyncInterval": "同期間隔（時間）",
       "helpSyncInterval": "アップデートの確認頻度",
       "requiresApproval": "新しいバージョンには承認が必要",
+      "labelAutoApproveRules": "自動承認ルール（JSON）",
+      "helpAutoApproveRules": "同期されたバージョンを自動的に承認するJSONルール。例：{\"rules\":[{\"type\":\"patch_only\"}],\"mode\":\"any\"}。手動での承認を必要とする場合は、空のままにします。",
+      "errAutoApproveRules": "有効なJSONでなければなりません。例：{\"rules\":[...],\"mode\":\"any\"}",
+      "pullThroughEnabled": "プルスルーキャッシュを有効にする",
+      "labelPullThroughTtl": "プルスルーキャッシュのTTL（時間）",
+      "helpPullThroughTtl": "オンデマンドのミラー版は、アップストリームを再確認するまで、キャッシュにどのくらいの間保持されるか",
       "confirmDeleteTitle": "削除を確認",
       "confirmDeleteText": "「{{name}}」というミラーを削除してもよろしいですか？この操作は元に戻せません。ミラーされたプロバイダーはレジストリに残ります。",
       "syncHistoryTitle": "同期履歴 — {{name}}",
@@ -1125,7 +1131,7 @@
       "infoBannerBefore": "クライアントはバイナリを以下からダウンロードします ",
       "infoBannerAfter": "このエンドポイントは認証不要です。CI環境または開発用マシンを設定し、レジストリホストを指すようにしてください。",
       "emptyState": "Terraformのバイナリミラー設定はまだ存在しません。TerraformまたはOpenTofuのバイナリのミラーリングを開始するには、設定を作成してください。",
-      "dialogTitleCreate": "Terraformのバイナリミラーを追加する",
+      "dialogTitleCreate": "バイナリミラー設定の追加",
       "labelName": "名前",
       "helpName": "APIパスで使用される一意のスラッグ（例：hashicorp-terraform）",
       "labelDescription": "説明",
@@ -1508,7 +1514,21 @@
       "connectToTitle": "{{name}} に接続する",
       "patIntro": "Bitbucket Data Centerの個人用アクセストークンを入力してください。Bitbucketアカウント設定の「HTTPアクセストークン」から生成できます。",
       "labelPat": "個人用アクセストークン",
-      "saveToken": "トークンを保存"
+      "saveToken": "トークンを保存",
+      "labelAuthMode": "認証",
+      "authModeOAuth": "ユーザーごとのOAuth",
+      "authModeApp": "アプリの認証情報の共有",
+      "helpAuthMode": "アプリの認証情報は管理者が管理し、すべてのユーザーで共有されます。ユーザーごとの Connect は必要ありません。ユーザーごとの OAuth では、各ユーザーが自身のアカウントを接続するという従来のフローが維持されます。",
+      "labelGithubAppId": "GitHub アプリ ID",
+      "labelGithubInstallationId": "インストールID",
+      "labelAppPrivateKey": "秘密鍵（PEM）",
+      "helpGithubApp": "GitHub Appの設定から：数値のApp ID、インストールID（インストールURLに記載）、およびアプリのRSA秘密鍵。",
+      "helpAppPrivateKeyKeep": "既存の秘密鍵を維持する場合は、空欄のままにしてください",
+      "appCredential": "アプリの認証情報",
+      "testConnection": "接続テスト",
+      "testConnectionOk": "接続完了",
+      "testConnectionFailed": "接続に失敗しました",
+      "errVerify": "プロバイダーの確認に失敗しました"
     },
     "approvals": {
       "pageTitle": "承認依頼",
@@ -1855,7 +1875,7 @@
       "scanErrors": "{{count}} エラー",
       "statModules": "モジュール",
       "statProviders": "プロバイダー",
-      "statTerraformBinaries": "Terraform バイナリ",
+      "statTerraformBinaries": "ホスト型バイナリ",
       "statTotalDownloads": "総ダウンロード数",
       "statVersions": "{{count}} バージョン",
       "statAcrossMirrors_one": "{{count}}のミラーサイト",
@@ -2007,6 +2027,13 @@
     "showingCount": "{{total}}のイベントを10件表示中",
     "refresh": "更新"
   },
+  "consumedBy": {
+    "title": "～に心を奪われて",
+    "subtitle": "State Manager 内でこのモジュールを参照しているステート。",
+    "constraintOnly": "制約のみ",
+    "showingCount": "{{total}}州のうち、{{shown}}件を表示しています",
+    "openInStateManager": "ステートマネージャーで開く"
+  },
   "repositoryBrowser": {
     "searchPlaceholder": "リポジトリを検索...",
     "refresh": "更新",
@@ -2151,7 +2178,9 @@
     "thExpiry": "有効期限",
     "thLastRefresh": "最終更新日時",
     "expiredAgo": "{{days}}日前に期限切れ",
-    "days": "{{days}} d"
+    "days": "{{days}} d",
+    "unsignedLabel": "署名なし",
+    "unsignedTooltip": "このツールのアップストリームはリリース署名を公開しておらず、バイナリはチェックサムによる検証のみが行われます。"
   },
   "scanFindingsModal": {
     "title": "スキャン結果",
