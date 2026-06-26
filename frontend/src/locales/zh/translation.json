@@ -6,8 +6,8 @@
     "modulesTooltip": "查看 Terraform 模块",
     "providers": "服务提供商",
     "providersTooltip": "查看 Terraform 提供程序",
-    "terraformBinaries": "Terraform 二进制文件",
-    "terraformBinariesTooltip": "查看 Terraform 二进制文件",
+    "terraformBinaries": "托管二进制文件",
+    "terraformBinariesTooltip": "查看托管二进制文件",
     "apiDocs": "API 文档",
     "apiDocsTooltip": "API 文档",
     "admin": {
@@ -64,7 +64,7 @@
     "about": "关于",
     "settings": "设置",
     "support": "支持",
-    "accountMenu": "当前用户的账户",
+    "accountMenu": "账户",
     "logout": "退出",
     "login": "登录",
     "language": "语言"
@@ -112,7 +112,7 @@
     "heroSubtitle": "托管和管理您的自定义 Terraform 模块、提供程序和二进制文件",
     "browseModules": "浏览模块",
     "browseProviders": "浏览服务提供商",
-    "terraformBinaries": "Terraform 二进制文件",
+    "terraformBinaries": "托管二进制文件",
     "available": "可用",
     "findWhatYouNeed": "找到您需要的内容",
     "searchAcross": "在此注册库中跨模块和提供商进行搜索",
@@ -123,7 +123,7 @@
     "browseAllModules": "浏览所有模块 →",
     "providersDescription": "访问针对您的云资源的自定义和镜像 Terraform 提供程序。",
     "browseAllProviders": "浏览所有服务提供商 →",
-    "terraformBinariesDescription": "从内部镜像下载 Terraform 和 OpenTofu 的二进制文件。",
+    "terraformBinariesDescription": "从内部镜像下载 Terraform、OpenTofu、Packer、Sentinel 和 OPA 的二进制文件。",
     "noBinaryMirrors": "未配置二进制镜像",
     "viewBinaries": "查看二进制文件 →",
     "gettingStarted": "入门指南",
@@ -287,11 +287,11 @@
     }
   },
   "terraformBinaries": {
-    "pageTitle": "Terraform 二进制镜像",
-    "pageSubtitle": "从贵组织的内部镜像站点下载 Terraform 和 OpenTofu 的二进制文件。请配置您的 CLI 或 CI 工具链，使其指向各详情页面上显示的镜像 URL。",
+    "pageTitle": "托管二进制镜像",
+    "pageSubtitle": "从贵组织的内部镜像站点下载 Terraform、OpenTofu、Packer、Sentinel 和 OPA 的二进制文件。配置您的 CLI 或 CI 工具链，使其指向各详情页面上显示的镜像 URL。",
     "loadError": "无法加载 Terraform 二进制镜像。",
     "noMirrorsTitle": "未配置二进制镜像",
-    "noMirrorsBody": "请管理员设置一个 Terraform 或 OpenTofu 二进制镜像。",
+    "noMirrorsBody": "请管理员设置一个二进制镜像。",
     "versionCountOne": "{{count}} 版本",
     "versionCountOther": "{{count}} 版本",
     "latestVersion": "最新版本：{{version}}",
@@ -631,8 +631,8 @@
       }
     },
     "terraformBinaries": {
-      "title": "Terraform 二进制镜像",
-      "overview": "列出了由该注册表托管的可用 Terraform 和 OpenTofu 二进制镜像。每个镜像都会缓存来自上游源的一组二进制版本，因此您的持续集成管道和开发机器无需直接访问互联网即可下载这些版本。",
+      "title": "托管二进制镜像",
+      "overview": "列出了由该注册表托管的可用二进制镜像。每个镜像都会从上游源缓存一组二进制版本，因此您的持续集成管道和开发机器无需直接访问互联网即可下载这些版本。",
       "actions": {
         "viewVersions": {
           "heading": "查看版本",
@@ -1060,6 +1060,12 @@
       "labelSyncInterval": "同步间隔（小时）",
       "helpSyncInterval": "多久检查一次更新",
       "requiresApproval": "新版本需经批准",
+      "labelAutoApproveRules": "自动批准规则（JSON）",
+      "helpAutoApproveRules": "JSON 规则会自动批准同步的版本，例如 {\"rules\":[{\"type\":\"patch_only\"}],\"mode\":\"any\"}。若留空，则需手动批准。",
+      "errAutoApproveRules": "必须是有效的 JSON，例如 {\"rules\":[...],\"mode\":\"any\"}",
+      "pullThroughEnabled": "启用穿透缓存",
+      "labelPullThroughTtl": "穿透缓存 TTL（小时）",
+      "helpPullThroughTtl": "按需镜像版本在重新检查上游之前会在缓存中保留多长时间",
       "confirmDeleteTitle": "确认删除",
       "confirmDeleteText": "您确定要删除镜像“{{name}}”吗？此操作无法撤销。镜像提供程序仍将保留在您的注册表中。",
       "syncHistoryTitle": "同步历史记录 — {{name}}",
@@ -1125,7 +1131,7 @@
       "infoBannerBefore": "客户可在以下位置下载二进制文件： ",
       "infoBannerAfter": ". 此端点无需身份验证——请将您的持续集成（CI）或开发机器配置为指向您的注册表主机。",
       "emptyState": "目前尚无 Terraform 二进制镜像配置。请创建一个配置，以开始镜像 Terraform 或 OpenTofu 二进制文件。",
-      "dialogTitleCreate": "添加 Terraform 二进制镜像",
+      "dialogTitleCreate": "添加二进制镜像配置",
       "labelName": "姓名",
       "helpName": "API 路径中使用的唯一别名（例如 hashicorp-terraform）",
       "labelDescription": "描述",
@@ -1508,7 +1514,21 @@
       "connectToTitle": "访问 {{name}}",
       "patIntro": "请输入您的 Bitbucket Data Center 个人访问令牌。您可以在 Bitbucket 账户设置中的“HTTP 访问令牌”下生成一个。",
       "labelPat": "个人访问令牌",
-      "saveToken": "保存令牌"
+      "saveToken": "保存令牌",
+      "labelAuthMode": "身份验证",
+      "authModeOAuth": "按用户计费的 OAuth",
+      "authModeApp": "共享的应用凭据",
+      "helpAuthMode": "应用凭据由管理员管理，并供所有用户共享——无需为每位用户单独配置 Connect。按用户配置的 OAuth 则保留了传统流程，即每位用户需自行连接自己的账户。",
+      "labelGithubAppId": "GitHub 应用 ID",
+      "labelGithubInstallationId": "安装 ID",
+      "labelAppPrivateKey": "私钥（PEM）",
+      "helpGithubApp": "从您的 GitHub App 设置中获取：数字 App ID、安装 ID（来自安装 URL）以及该应用的 RSA 私钥。",
+      "helpAppPrivateKeyKeep": "若要保留现有的私钥，请留空",
+      "appCredential": "应用凭据",
+      "testConnection": "测试连接",
+      "testConnectionOk": "连接成功",
+      "testConnectionFailed": "连接失败",
+      "errVerify": "无法验证提供商"
     },
     "approvals": {
       "pageTitle": "审批请求",
@@ -1855,7 +1875,7 @@
       "scanErrors": "{{count}} 错误",
       "statModules": "模块",
       "statProviders": "服务提供商",
-      "statTerraformBinaries": "Terraform 二进制文件",
+      "statTerraformBinaries": "托管二进制文件",
       "statTotalDownloads": "总下载量",
       "statVersions": "{{count}} 版本",
       "statAcrossMirrors_one": "通过 {{count}} 镜像站点",
@@ -2007,6 +2027,13 @@
     "showingCount": "显示{{total}}的10个活动",
     "refresh": "刷新"
   },
+  "consumedBy": {
+    "title": "被……吞噬",
+    "subtitle": "在“状态管理器”中引用此模块的状态。",
+    "constraintOnly": "仅限约束",
+    "showingCount": "显示 {{shown}}，共 {{total}} 个州",
+    "openInStateManager": "在“状态管理器”中打开"
+  },
   "repositoryBrowser": {
     "searchPlaceholder": "搜索仓库...",
     "refresh": "刷新",
@@ -2151,7 +2178,9 @@
     "thExpiry": "有效期",
     "thLastRefresh": "最后更新",
     "expiredAgo": "已过期 {{days}} 天前",
-    "days": "{{days}} d"
+    "days": "{{days}} d",
+    "unsignedLabel": "未签名",
+    "unsignedTooltip": "该工具的上游项目未发布任何发布签名；二进制文件仅通过校验和进行验证。"
   },
   "scanFindingsModal": {
     "title": "扫描结果",

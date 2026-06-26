@@ -6,8 +6,8 @@
     "modulesTooltip": "Afficher les modules Terraform",
     "providers": "Prestataires",
     "providersTooltip": "Afficher les fournisseurs Terraform",
-    "terraformBinaries": "Binaires Terraform",
-    "terraformBinariesTooltip": "Afficher les binaires Terraform",
+    "terraformBinaries": "Fichiers binaires hébergés",
+    "terraformBinariesTooltip": "Afficher les binaires hébergés",
     "apiDocs": "Documentation de l'API",
     "apiDocsTooltip": "Documentation de l'API",
     "admin": {
@@ -64,7 +64,7 @@
     "about": "À propos",
     "settings": "Paramètres",
     "support": "Assistance",
-    "accountMenu": "compte de l'utilisateur actuel",
+    "accountMenu": "Compte",
     "logout": "Se déconnecter",
     "login": "Connexion",
     "language": "Langue"
@@ -112,7 +112,7 @@
     "heroSubtitle": "Hébergez et gérez vos modules, fournisseurs et binaires Terraform personnalisés",
     "browseModules": "Parcourir les modules",
     "browseProviders": "Parcourir les prestataires",
-    "terraformBinaries": "Binaires Terraform",
+    "terraformBinaries": "Fichiers binaires hébergés",
     "available": "disponible",
     "findWhatYouNeed": "Trouvez ce qu'il vous faut",
     "searchAcross": "Rechercher parmi les modules et les prestataires de ce registre",
@@ -123,7 +123,7 @@
     "browseAllModules": "Parcourir tous les modules →",
     "providersDescription": "Accédez à des fournisseurs Terraform personnalisés et en miroir pour vos ressources cloud.",
     "browseAllProviders": "Parcourir tous les prestataires →",
-    "terraformBinariesDescription": "Téléchargez les binaires Terraform et OpenTofu à partir des miroirs internes.",
+    "terraformBinariesDescription": "Téléchargez les binaires de Terraform, OpenTofu, Packer, Sentinel et OPA à partir des miroirs internes.",
     "noBinaryMirrors": "Aucun miroir binaire n'est configuré",
     "viewBinaries": "Afficher les fichiers binaires →",
     "gettingStarted": "Pour commencer",
@@ -287,11 +287,11 @@
     }
   },
   "terraformBinaries": {
-    "pageTitle": "Miroirs binaires Terraform",
-    "pageSubtitle": "Téléchargez les binaires Terraform et OpenTofu depuis le miroir interne de votre organisation. Configurez votre interface en ligne de commande (CLI) ou votre chaîne d'outils d'intégration continue (CI) pour qu'elle pointe vers l'URL du miroir indiquée sur chaque page de détails.",
+    "pageTitle": "Miroirs de fichiers binaires hébergés",
+    "pageSubtitle": "Téléchargez les binaires de Terraform, OpenTofu, Packer, Sentinel et OPA à partir du miroir interne de votre organisation. Configurez votre interface en ligne de commande (CLI) ou votre chaîne d'outils d'intégration continue (CI) pour qu'elle pointe vers l'URL du miroir indiquée sur chaque page de détails.",
     "loadError": "Échec du chargement des miroirs binaires Terraform.",
     "noMirrorsTitle": "Aucun miroir binaire n'est configuré",
-    "noMirrorsBody": "Demandez à un administrateur de mettre en place un miroir des binaires Terraform ou OpenTofu.",
+    "noMirrorsBody": "Demandez à un administrateur de mettre en place un miroir binaire.",
     "versionCountOne": "{{count}} version",
     "versionCountOther": "{{count}} versions",
     "latestVersion": "Dernière version : {{version}}",
@@ -631,8 +631,8 @@
       }
     },
     "terraformBinaries": {
-      "title": "Miroirs binaires Terraform",
-      "overview": "Répertorie les miroirs binaires Terraform et OpenTofu disponibles hébergés par ce registre. Chaque miroir met en cache un ensemble de versions binaires provenant d'une source en amont afin que vos pipelines d'intégration continue et vos machines de développement puissent les télécharger sans avoir besoin d'un accès direct à Internet.",
+      "title": "Miroirs de fichiers binaires hébergés",
+      "overview": "Répertorie les miroirs binaires disponibles hébergés par ce registre. Chaque miroir met en cache un ensemble de versions binaires provenant d'une source en amont, afin que vos pipelines d'intégration continue et vos machines de développement puissent les télécharger sans avoir besoin d'un accès direct à Internet.",
       "actions": {
         "viewVersions": {
           "heading": "Afficher les versions",
@@ -1060,6 +1060,12 @@
       "labelSyncInterval": "Intervalle de synchronisation (heures)",
       "helpSyncInterval": "À quelle fréquence vérifier les mises à jour",
       "requiresApproval": "Exiger une validation pour les nouvelles versions",
+      "labelAutoApproveRules": "Règles d'approbation automatique (JSON)",
+      "helpAutoApproveRules": "Règles JSON qui approuvent automatiquement les versions synchronisées, par exemple : {\"rules\":[{\"type\":\"patch_only\"}],\"mode\":\"any\"}. Laissez ce champ vide pour exiger une approbation manuelle.",
+      "errAutoApproveRules": "Doit être un JSON valide, par exemple : {\"rules\":[...],\"mode\":\"any\"}",
+      "pullThroughEnabled": "Activer la mise en cache par transfert",
+      "labelPullThroughTtl": "Durée de vie (TTL) du cache « pull-through » (en heures)",
+      "helpPullThroughTtl": "Combien de temps les versions miroirs à la demande restent-elles en cache avant une nouvelle vérification auprès du serveur d'origine ?",
       "confirmDeleteTitle": "Confirmer la suppression",
       "confirmDeleteText": "Êtes-vous sûr de vouloir supprimer le miroir « {{name}} » ? Cette action ne peut pas être annulée. Les fournisseurs mis en miroir resteront dans votre registre.",
       "syncHistoryTitle": "Historique des synchronisations — {{name}}",
@@ -1125,7 +1131,7 @@
       "infoBannerBefore": "Les clients téléchargent les fichiers binaires à l'adresse ",
       "infoBannerAfter": ". Ce point de terminaison ne nécessite pas d'authentification : configurez vos machines de CI ou de développement pour qu'elles pointent vers votre hôte de registre.",
       "emptyState": "Il n'existe pour l'instant aucune configuration de miroir pour les binaires Terraform. Créez-en une pour commencer à mettre en miroir les binaires Terraform ou OpenTofu.",
-      "dialogTitleCreate": "Ajouter un miroir binaire Terraform",
+      "dialogTitleCreate": "Ajouter une configuration de miroir binaire",
       "labelName": "Nom",
       "helpName": "Slug unique utilisé dans les chemins d'accès API (par exemple, hashicorp-terraform)",
       "labelDescription": "Description",
@@ -1508,7 +1514,21 @@
       "connectToTitle": "Accédez à {{name}}",
       "patIntro": "Saisissez votre jeton d'accès personnel Bitbucket Data Center. Vous pouvez en générer un depuis les paramètres de votre compte Bitbucket, dans la section « Jetons d'accès HTTP ».",
       "labelPat": "Jeton d'accès personnel",
-      "saveToken": "Enregistrer le jeton"
+      "saveToken": "Enregistrer le jeton",
+      "labelAuthMode": "Authentification",
+      "authModeOAuth": "OAuth par utilisateur",
+      "authModeApp": "Identifiants d'application partagés",
+      "helpAuthMode": "Les identifiants de l'application sont gérés par l'administrateur et partagés par tous les utilisateurs ; il n'est pas nécessaire de configurer Connect pour chaque utilisateur. L'authentification OAuth par utilisateur conserve le processus traditionnel, dans lequel chaque utilisateur se connecte à son propre compte.",
+      "labelGithubAppId": "Identifiant de l'application GitHub",
+      "labelGithubInstallationId": "Identifiant d'installation",
+      "labelAppPrivateKey": "Clé privée (PEM)",
+      "helpGithubApp": "Dans les paramètres de votre application GitHub : l'ID numérique de l'application, l'ID d'installation (figurant dans l'URL d'installation) et la clé privée RSA de l'application.",
+      "helpAppPrivateKeyKeep": "Ne rien indiquer pour conserver la clé privée existante",
+      "appCredential": "Identifiants de l'application",
+      "testConnection": "Tester la connexion",
+      "testConnectionOk": "Connexion OK",
+      "testConnectionFailed": "Échec de la connexion",
+      "errVerify": "Échec de la vérification du fournisseur"
     },
     "approvals": {
       "pageTitle": "Demandes d'autorisation",
@@ -1855,7 +1875,7 @@
       "scanErrors": "{{count}} erreurs",
       "statModules": "Modules",
       "statProviders": "Prestataires",
-      "statTerraformBinaries": "Binaires Terraform",
+      "statTerraformBinaries": "Fichiers binaires hébergés",
       "statTotalDownloads": "Nombre total de téléchargements",
       "statVersions": "{{count}} versions",
       "statAcrossMirrors_one": "à travers un miroir d'{{count}}",
@@ -2007,6 +2027,13 @@
     "showingCount": "Affichage de 10 événements sur {{total}}",
     "refresh": "Actualiser"
   },
+  "consumedBy": {
+    "title": "Rongé par",
+    "subtitle": "États dans State Manager qui font référence à ce module.",
+    "constraintOnly": "contrainte uniquement",
+    "showingCount": "Affichage de {{shown}} des {{total}} États",
+    "openInStateManager": "Ouvrir dans le gestionnaire d'états"
+  },
   "repositoryBrowser": {
     "searchPlaceholder": "Rechercher dans les référentiels...",
     "refresh": "Actualiser",
@@ -2151,7 +2178,9 @@
     "thExpiry": "Date d'expiration",
     "thLastRefresh": "Dernière mise à jour",
     "expiredAgo": "{{days}}, il y a [n] jours",
-    "days": "{{days}} d"
+    "days": "{{days}} d",
+    "unsignedLabel": "non signé",
+    "unsignedTooltip": "Le développeur en amont de cet outil ne publie aucune signature de version ; la vérification des binaires s'effectue uniquement à l'aide d'une somme de contrôle."
   },
   "scanFindingsModal": {
     "title": "Résultats de l'examen",

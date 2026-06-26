@@ -6,8 +6,8 @@
     "modulesTooltip": "Terraform-Module anzeigen",
     "providers": "Anbieter",
     "providersTooltip": "Terraform-Anbieter anzeigen",
-    "terraformBinaries": "Terraform-Binärdateien",
-    "terraformBinariesTooltip": "Terraform-Binärdateien anzeigen",
+    "terraformBinaries": "Gehostete Binärdateien",
+    "terraformBinariesTooltip": "Gehostete Binärdateien anzeigen",
     "apiDocs": "API-Dokumentation",
     "apiDocsTooltip": "API-Dokumentation",
     "admin": {
@@ -33,7 +33,7 @@
       "mirroring": "Spiegelung",
       "providerConfig": "Anbieter-Konfiguration",
       "providerConfigTooltip": "Anbieter-Spiegelquellen und Synchronisierungszeitpläne konfigurieren",
-      "binariesConfig": "Binär-Mirrors",
+      "binariesConfig": "Binäre Spiegel",
       "binariesConfigTooltip": "Konfigurieren der Quellen für die Binär-Mirrors von Terraform und OpenTofu",
       "approvals": "Zulassungen",
       "approvalsTooltip": "Ausstehende Anträge auf Spiegel-Synchronisierung prüfen und genehmigen",
@@ -64,7 +64,7 @@
     "about": "Über",
     "settings": "Einstellungen",
     "support": "Support",
-    "accountMenu": "Profil des aktuellen Benutzers",
+    "accountMenu": "Konto",
     "logout": "Abmelden",
     "login": "Anmelden",
     "language": "Sprache"
@@ -112,7 +112,7 @@
     "heroSubtitle": "Hosten und verwalten Sie Ihre benutzerdefinierten Terraform-Module, -Provider und -Binärdateien",
     "browseModules": "Module durchsuchen",
     "browseProviders": "Anbieter durchsuchen",
-    "terraformBinaries": "Terraform-Binärdateien",
+    "terraformBinaries": "Gehostete Binärdateien",
     "available": "verfügbar",
     "findWhatYouNeed": "Finden Sie, was Sie suchen",
     "searchAcross": "In diesem Verzeichnis nach Modulen und Anbietern suchen",
@@ -123,7 +123,7 @@
     "browseAllModules": "Alle Module anzeigen →",
     "providersDescription": "Greifen Sie auf benutzerdefinierte und gespiegelte Terraform-Provider für Ihre Cloud-Ressourcen zu.",
     "browseAllProviders": "Alle Anbieter anzeigen →",
-    "terraformBinariesDescription": "Laden Sie die Terraform- und OpenTofu-Binärdateien von internen Spiegelservern herunter.",
+    "terraformBinariesDescription": "Laden Sie die Binärdateien von Terraform, OpenTofu, Packer, Sentinel und OPA von internen Spiegelservern herunter.",
     "noBinaryMirrors": "Es sind keine Binär-Mirrors konfiguriert",
     "viewBinaries": "Binärdateien anzeigen →",
     "gettingStarted": "Erste Schritte",
@@ -287,11 +287,11 @@
     }
   },
   "terraformBinaries": {
-    "pageTitle": "Terraform-Binär-Mirrors",
-    "pageSubtitle": "Laden Sie die Terraform- und OpenTofu-Binärdateien vom internen Mirror Ihrer Organisation herunter. Konfigurieren Sie Ihre CLI oder CI-Toolchain so, dass sie auf die Mirror-URL verweist, die auf der jeweiligen Detailseite angegeben ist.",
+    "pageTitle": "Gehostete Binär-Mirrors",
+    "pageSubtitle": "Laden Sie die Binärdateien von Terraform, OpenTofu, Packer, Sentinel und OPA vom internen Mirror Ihrer Organisation herunter. Konfigurieren Sie Ihre CLI oder CI-Toolchain so, dass sie auf die auf der jeweiligen Detailseite angegebene Mirror-URL verweist.",
     "loadError": "Das Laden der Terraform-Binär-Mirrors ist fehlgeschlagen.",
     "noMirrorsTitle": "Es sind keine Binär-Mirrors konfiguriert",
-    "noMirrorsBody": "Bitten Sie einen Administrator, einen Binär-Mirror für Terraform oder OpenTofu einzurichten.",
+    "noMirrorsBody": "Bitten Sie einen Administrator, einen Binär-Mirror einzurichten.",
     "versionCountOne": "{{count}} Version",
     "versionCountOther": "{{count}} Versionen",
     "latestVersion": "Aktuelle Version: {{version}}",
@@ -631,8 +631,8 @@
       }
     },
     "terraformBinaries": {
-      "title": "Terraform-Binär-Mirrors",
-      "overview": "Listet die verfügbaren Terraform- und OpenTofu-Binär-Mirrors auf, die von diesem Registry gehostet werden. Jeder Mirror speichert eine Reihe von Binärversionen aus einer Upstream-Quelle im Cache, sodass Ihre CI-Pipelines und Entwicklerrechner diese auch ohne direkten Internetzugang herunterladen können.",
+      "title": "Gehostete Binär-Mirrors",
+      "overview": "Listet die verfügbaren Binär-Mirrors auf, die von dieser Registry gehostet werden. Jeder Mirror speichert eine Reihe von Binärversionen aus einer Upstream-Quelle im Cache, sodass Ihre CI-Pipelines und Entwicklerrechner diese auch ohne direkten Internetzugang herunterladen können.",
       "actions": {
         "viewVersions": {
           "heading": "Versionen anzeigen",
@@ -1060,6 +1060,12 @@
       "labelSyncInterval": "Synchronisierungsintervall (Stunden)",
       "helpSyncInterval": "Wie oft sollte man nach Updates suchen?",
       "requiresApproval": "Genehmigung für neue Versionen erforderlich",
+      "labelAutoApproveRules": "Regeln für die automatische Genehmigung (JSON)",
+      "helpAutoApproveRules": "JSON-Regeln, die synchronisierte Versionen automatisch genehmigen, z. B. {\"rules\":[{\"type\":\"patch_only\"}],\"mode\":\"any\"}. Lassen Sie das Feld leer, wenn eine manuelle Genehmigung erforderlich sein soll.",
+      "errAutoApproveRules": "Muss gültiges JSON sein, z. B. {\"rules\":[...],\"mode\":\"any\"}",
+      "pullThroughEnabled": "Pull-Through-Caching aktivieren",
+      "labelPullThroughTtl": "TTL des Pull-Through-Caches (Stunden)",
+      "helpPullThroughTtl": "Wie lange bleiben On-Demand-Spiegelversionen im Cache, bevor eine erneute Überprüfung des Upstreams erfolgt?",
       "confirmDeleteTitle": "Löschen bestätigen",
       "confirmDeleteText": "Möchten Sie den Mirror „{{name}}“ wirklich löschen? Dieser Vorgang kann nicht rückgängig gemacht werden. Die gespiegelten Anbieter bleiben in Ihrer Registrierung erhalten.",
       "syncHistoryTitle": "Synchronisierungsverlauf — {{name}}",
@@ -1077,7 +1083,7 @@
       "thLastSynced": "Zuletzt synchronisiert"
     },
     "terraformMirror": {
-      "pageTitle": "Binär-Mirrors",
+      "pageTitle": "Binäre Spiegel",
       "refresh": "Aktualisieren",
       "addMirror": "Spiegel hinzufügen",
       "cancel": "Abbrechen",
@@ -1125,7 +1131,7 @@
       "infoBannerBefore": "Kunden laden Binärdateien unter ",
       "infoBannerAfter": ". Dieser Endpunkt ist nicht authentifiziert – konfigurieren Sie Ihre CI- oder Entwickler-Rechner so, dass sie auf Ihren Registry-Host verweisen.",
       "emptyState": "Es gibt noch keine Konfigurationen für Terraform-Binärdateien. Erstellen Sie eine, um mit dem Spiegeln von Terraform- oder OpenTofu-Binärdateien zu beginnen.",
-      "dialogTitleCreate": "Terraform-Binär-Mirror hinzufügen",
+      "dialogTitleCreate": "Binär-Mirror-Konfiguration hinzufügen",
       "labelName": "Name",
       "helpName": "Eindeutiger Slug, der in API-Pfaden verwendet wird (z. B. hashicorp-terraform)",
       "labelDescription": "Beschreibung",
@@ -1508,7 +1514,21 @@
       "connectToTitle": "Verbinden Sie sich mit {{name}}",
       "patIntro": "Geben Sie Ihren persönlichen Zugriffstoken für Bitbucket Data Center ein. Sie können einen solchen Token in den Einstellungen Ihres Bitbucket-Kontos unter „HTTP-Zugriffstoken“ generieren.",
       "labelPat": "Persönliches Zugriffstoken",
-      "saveToken": "Token speichern"
+      "saveToken": "Token speichern",
+      "labelAuthMode": "Authentifizierung",
+      "authModeOAuth": "OAuth pro Benutzer",
+      "authModeApp": "Gemeinsam genutzte App-Anmeldedaten",
+      "helpAuthMode": "Die Anmeldedaten für die App werden vom Administrator verwaltet und von allen Benutzern gemeinsam genutzt – ein benutzerspezifisches „Connect“ ist nicht erforderlich. Bei der benutzerspezifischen OAuth-Authentifizierung wird der bisherige Ablauf beibehalten, bei dem jeder Benutzer sein eigenes Konto verknüpft.",
+      "labelGithubAppId": "GitHub-App-ID",
+      "labelGithubInstallationId": "Installations-ID",
+      "labelAppPrivateKey": "Privater Schlüssel (PEM)",
+      "helpGithubApp": "Aus den Einstellungen Ihrer GitHub-App: die numerische App-ID, die Installations-ID (aus der Installations-URL) und der private RSA-Schlüssel der App.",
+      "helpAppPrivateKeyKeep": "Lassen Sie das Feld leer, um den bestehenden privaten Schlüssel beizubehalten.",
+      "appCredential": "App-Anmeldedaten",
+      "testConnection": "Verbindung testen",
+      "testConnectionOk": "Verbindung OK",
+      "testConnectionFailed": "Verbindung fehlgeschlagen",
+      "errVerify": "Der Anbieter konnte nicht überprüft werden"
     },
     "approvals": {
       "pageTitle": "Genehmigungsanträge",
@@ -1855,7 +1875,7 @@
       "scanErrors": "{{count}} Fehler",
       "statModules": "Module",
       "statProviders": "Anbieter",
-      "statTerraformBinaries": "Terraform-Binärdateien",
+      "statTerraformBinaries": "Gehostete Binärdateien",
       "statTotalDownloads": "Gesamtanzahl der Downloads",
       "statVersions": "{{count}} Versionen",
       "statAcrossMirrors_one": "über den „{{count}}“-Spiegel",
@@ -2007,6 +2027,13 @@
     "showingCount": "Es werden 10 von insgesamt {{total}} Veranstaltungen angezeigt",
     "refresh": "Aktualisieren"
   },
+  "consumedBy": {
+    "title": "Von … verzehrt",
+    "subtitle": "Zustände im State Manager, die auf dieses Modul verweisen.",
+    "constraintOnly": "nur Einschränkung",
+    "showingCount": "Es werden {{shown}} von {{total}} Bundesstaaten angezeigt",
+    "openInStateManager": "Im State Manager öffnen"
+  },
   "repositoryBrowser": {
     "searchPlaceholder": "Repositories durchsuchen...",
     "refresh": "Aktualisieren",
@@ -2151,7 +2178,9 @@
     "thExpiry": "Ablauf",
     "thLastRefresh": "Zuletzt aktualisiert",
     "expiredAgo": "abgelaufen vor {{days}} Tagen",
-    "days": "{{days}} d"
+    "days": "{{days}} d",
+    "unsignedLabel": "ohne Vorzeichen",
+    "unsignedTooltip": "Der Upstream dieses Tools veröffentlicht keine Release-Signatur; die Binärdateien werden ausschließlich anhand der Prüfsumme verifiziert."
   },
   "scanFindingsModal": {
     "title": "Befunde der Untersuchung",
