@@ -14,6 +14,8 @@ export interface MirrorConfiguration {
   sync_interval_hours: number
   requires_approval?: boolean
   auto_approve_rules?: string // JSON: AutoApproveRules
+  pull_through_enabled?: boolean
+  pull_through_cache_ttl_hours?: number
   last_sync_at?: string
   last_sync_status?: 'success' | 'failed' | 'in_progress'
   last_sync_error?: string
@@ -54,6 +56,8 @@ export interface CreateMirrorConfigRequest {
   sync_interval_hours?: number
   requires_approval?: boolean
   auto_approve_rules?: string // JSON: AutoApproveRules
+  pull_through_enabled?: boolean
+  pull_through_cache_ttl_hours?: number
 }
 
 export interface UpdateMirrorConfigRequest {
@@ -69,6 +73,8 @@ export interface UpdateMirrorConfigRequest {
   sync_interval_hours?: number
   requires_approval?: boolean
   auto_approve_rules?: string // JSON: AutoApproveRules
+  pull_through_enabled?: boolean
+  pull_through_cache_ttl_hours?: number
 }
 
 export interface TriggerSyncRequest {

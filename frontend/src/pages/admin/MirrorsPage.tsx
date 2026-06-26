@@ -313,6 +313,9 @@ const MirrorsPage: React.FC = () => {
     enabled: true,
     sync_interval_hours: 24,
     requires_approval: false,
+    auto_approve_rules: '',
+    pull_through_enabled: false,
+    pull_through_cache_ttl_hours: 24,
   })
 
   // For the filters input
@@ -390,6 +393,23 @@ const MirrorsPage: React.FC = () => {
     },
   })
 
+  // auto_approve_rules is a JSON string ({ rules: [...], mode: "any" | "all" }).
+  // It is only meaningful — and only editable — when approval is required, so it
+  // is "active" only when requires_approval is on and the field is non-empty.
+  // Gating on that keeps a hidden field from ever blocking submit or leaking a
+  // stale value into the payload. Validate it parses while active so an invalid
+  // blob can't be saved and then fail silently at sync time.
+  const autoApproveTrimmed = (formData.auto_approve_rules ?? '').trim()
+  const autoApproveActive = (formData.requires_approval ?? false) && autoApproveTrimmed !== ''
+  let autoApproveInvalid = false
+  if (autoApproveActive) {
+    try {
+      JSON.parse(autoApproveTrimmed)
+    } catch {
+      autoApproveInvalid = true
+    }
+  }
+
   const handleCreate = () => {
     setError(null)
     const data = {
@@ -404,6 +424,7 @@ const MirrorsPage: React.FC = () => {
         .filter(Boolean),
       version_filter: versionFilterInput.trim() || undefined,
       platform_filter: platformFilterInput.length > 0 ? platformFilterInput : undefined,
+      auto_approve_rules: autoApproveActive ? autoApproveTrimmed : undefined,
     }
     createMutation.mutate(data as CreateMirrorConfigRequest)
   }
@@ -428,6 +449,9 @@ const MirrorsPage: React.FC = () => {
       enabled: formData.enabled,
       sync_interval_hours: formData.sync_interval_hours,
       requires_approval: formData.requires_approval,
+      auto_approve_rules: autoApproveActive ? autoApproveTrimmed : undefined,
+      pull_through_enabled: formData.pull_through_enabled,
+      pull_through_cache_ttl_hours: formData.pull_through_cache_ttl_hours,
     }
     updateMutation.mutate({ id: editingMirror.id, data })
   }
@@ -488,6 +512,9 @@ const MirrorsPage: React.FC = () => {
       enabled: true,
       sync_interval_hours: 24,
       requires_approval: false,
+      auto_approve_rules: '',
+      pull_through_enabled: false,
+      pull_through_cache_ttl_hours: 24,
     })
     setNamespaceFilterInput('')
     setProviderFilterInput('')
@@ -505,6 +532,9 @@ const MirrorsPage: React.FC = () => {
       enabled: mirror.enabled,
       sync_interval_hours: mirror.sync_interval_hours,
       requires_approval: mirror.requires_approval ?? false,
+      auto_approve_rules: mirror.auto_approve_rules ?? '',
+      pull_through_enabled: mirror.pull_through_enabled ?? false,
+      pull_through_cache_ttl_hours: mirror.pull_through_cache_ttl_hours ?? 24,
     })
     setNamespaceFilterInput(parsed.namespaceFilters.join(', '))
     setProviderFilterInput(parsed.providerFilters.join(', '))
@@ -986,6 +1016,56 @@ const MirrorsPage: React.FC = () => {
                   }
                   label={t('admin.mirrors.requiresApproval')}
                 />
+
+                {formData.requires_approval && (
+                  <TextField
+                    label={t('admin.mirrors.labelAutoApproveRules')}
+                    fullWidth
+                    multiline
+                    minRows={3}
+                    value={formData.auto_approve_rules ?? ''}
+                    onChange={(e) =>
+                      setFormData({ ...formData, auto_approve_rules: e.target.value })
+                    }
+                    error={autoApproveInvalid}
+                    helperText={
+                      autoApproveInvalid
+                        ? t('admin.mirrors.errAutoApproveRules')
+                        : t('admin.mirrors.helpAutoApproveRules')
+                    }
+                  />
+                )}
+
+                <FormControlLabel
+                  control={
+                    <Switch
+                      checked={formData.pull_through_enabled ?? false}
+                      onChange={(e) =>
+                        setFormData({ ...formData, pull_through_enabled: e.target.checked })
+                      }
+                    />
+                  }
+                  label={t('admin.mirrors.pullThroughEnabled')}
+                />
+
+                {formData.pull_through_enabled && (
+                  <TextField
+                    label={t('admin.mirrors.labelPullThroughTtl')}
+                    type="number"
+                    fullWidth
+                    value={formData.pull_through_cache_ttl_hours ?? 24}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        pull_through_cache_ttl_hours: parseInt(e.target.value) || 24,
+                      })
+                    }
+                    helperText={t('admin.mirrors.helpPullThroughTtl')}
+                    slotProps={{
+                      htmlInput: { min: 1 },
+                    }}
+                  />
+                )}
               </Box>
             </DialogContent>
             <DialogActions>
@@ -1001,7 +1081,7 @@ const MirrorsPage: React.FC = () => {
               <Button
                 variant="contained"
                 onClick={editingMirror ? handleUpdate : handleCreate}
-                disabled={!formData.name || !formData.upstream_registry_url}
+                disabled={!formData.name || !formData.upstream_registry_url || autoApproveInvalid}
               >
                 {editingMirror ? t('admin.mirrors.update') : t('admin.mirrors.create')}
               </Button>
