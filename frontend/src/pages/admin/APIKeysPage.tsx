@@ -40,6 +40,8 @@ import AddIcon from '@mui/icons-material/Add'
 import KeyIcon from '@mui/icons-material/Key'
 import EmptyState from '../../components/EmptyState'
 import Page from '../../components/Page'
+import PageHeader from '../../components/PageHeader'
+import PageTitleIcon from '@mui/icons-material/Key'
 import CopyIcon from '@mui/icons-material/ContentCopy'
 import InfoIcon from '@mui/icons-material/Info'
 import EditIcon from '@mui/icons-material/Edit'
@@ -462,24 +464,16 @@ const APIKeysPage: React.FC = () => {
 
   return (
     <Page maxWidth="lg" aria-busy={loading} aria-live="polite">
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-        <Box>
-          <Typography variant="h4" gutterBottom>
-            {t('admin.apiKeys.pageTitle')}
-          </Typography>
-          <Typography
-            variant="body1"
-            sx={{
-              color: 'text.secondary',
-            }}
-          >
-            {t('admin.apiKeys.pageSubtitle')}
-          </Typography>
-        </Box>
-        <Button variant="contained" startIcon={<AddIcon />} onClick={handleOpenDialog}>
-          {t('admin.apiKeys.createApiKey')}
-        </Button>
-      </Box>
+      <PageHeader
+        icon={<PageTitleIcon />}
+        title={t('admin.apiKeys.pageTitle')}
+        description={t('admin.apiKeys.pageSubtitle')}
+        actions={
+          <Button variant="contained" startIcon={<AddIcon />} onClick={handleOpenDialog}>
+            {t('admin.apiKeys.createApiKey')}
+          </Button>
+        }
+      />
       {error && (
         <Alert severity="error" sx={{ mb: 3 }} onClose={() => setError(null)}>
           {error}
@@ -851,8 +845,8 @@ const APIKeysPage: React.FC = () => {
                   {rotateResult.oldStatus === 'revoked'
                     ? t('admin.apiKeys.rotateOldRevoked')
                     : t('admin.apiKeys.rotateOldValid', {
-                        date: new Date(rotateResult.oldExpiresAt!).toLocaleString(),
-                      })}
+                      date: new Date(rotateResult.oldExpiresAt!).toLocaleString(),
+                    })}
                 </Alert>
               )}
             </Box>

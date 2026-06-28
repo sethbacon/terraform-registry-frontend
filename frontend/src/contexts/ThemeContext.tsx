@@ -54,10 +54,6 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     getDirection(i18n.language ?? 'en'),
   )
 
-  useEffect(() => {
-    localStorage.setItem(THEME_KEY, mode)
-  }, [mode])
-
   // Sync direction when i18n language changes, and update <html dir="…">.
   useEffect(() => {
     const handleLanguageChanged = (lng: string) => {
@@ -110,7 +106,13 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   }, [])
 
   const toggleTheme = () => {
-    setMode((prevMode) => (prevMode === 'light' ? 'dark' : 'light'))
+    setMode((prevMode) => {
+      const next: PaletteMode = prevMode === 'light' ? 'dark' : 'light'
+      // Persist only on explicit toggle so the OS-preference listener stays live
+      // until the user makes a choice (matches the state-manager frontend).
+      localStorage.setItem(THEME_KEY, next)
+      return next
+    })
   }
 
   const primaryColor = uiTheme?.primary_color ?? DEFAULT_PRIMARY
@@ -143,18 +145,18 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       },
       transitions: prefersReducedMotion
         ? {
-            // Disable all MUI transitions when reduced motion is preferred
-            create: () => 'none',
-            duration: {
-              shortest: 0,
-              shorter: 0,
-              short: 0,
-              standard: 0,
-              complex: 0,
-              enteringScreen: 0,
-              leavingScreen: 0,
-            },
-          }
+          // Disable all MUI transitions when reduced motion is preferred
+          create: () => 'none',
+          duration: {
+            shortest: 0,
+            shorter: 0,
+            short: 0,
+            standard: 0,
+            complex: 0,
+            enteringScreen: 0,
+            leavingScreen: 0,
+          },
+        }
         : undefined,
       components: {
         MuiCssBaseline: {

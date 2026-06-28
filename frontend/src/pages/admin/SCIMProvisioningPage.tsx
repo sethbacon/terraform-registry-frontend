@@ -2,6 +2,8 @@ import React from 'react'
 import { useTranslation } from 'react-i18next'
 import { Box, Typography, Paper, Alert, TextField, Stack, Chip } from '@mui/material'
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined'
+import PageHeader from '../../components/PageHeader'
+import PageTitleIcon from '@mui/icons-material/SyncAlt'
 
 /**
  * SCIMProvisioningPage displays SCIM 2.0 configuration info and endpoint URLs.
@@ -14,18 +16,11 @@ const SCIMProvisioningPage: React.FC = () => {
 
   return (
     <Box sx={{ pr: { xs: 2, sm: 3 } }}>
-      <Typography variant="h5" gutterBottom>
-        {t('admin.scimProvisioning.title')}
-      </Typography>
-      <Typography
-        variant="body2"
-        sx={{
-          color: 'text.secondary',
-          mb: 3,
-        }}
-      >
-        {t('admin.scimProvisioning.description')}
-      </Typography>
+      <PageHeader
+        icon={<PageTitleIcon />}
+        title={t('admin.scimProvisioning.title')}
+        description={t('admin.scimProvisioning.description')}
+      />
       <Stack spacing={3}>
         <Paper sx={{ p: 3 }}>
           <Typography variant="h6" gutterBottom>

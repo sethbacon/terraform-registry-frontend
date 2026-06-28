@@ -22,6 +22,8 @@ import api from '../../services/api'
 import { getErrorMessage } from '../../utils/errors'
 import { isValidRegistrySegment, REGISTRY_SEGMENT_HELP } from '../../utils/registrySegment'
 import Page from '../../components/Page'
+import PageHeader from '../../components/PageHeader'
+import PageTitleIcon from '@mui/icons-material/ViewModule'
 import PublishFromSCMWizard from '../../components/PublishFromSCMWizard'
 import FileDropZone from '../../components/FileDropZone'
 import PolicyResultsPanel from '../../components/PolicyResultsPanel'
@@ -522,18 +524,11 @@ const ModuleUploadPage: React.FC = () => {
 
   return (
     <Page maxWidth="md">
-      <Typography variant="h4" gutterBottom>
-        {t('admin.moduleUpload.pageTitle')}
-      </Typography>
-      <Typography
-        variant="body1"
-        sx={{
-          color: 'text.secondary',
-          mb: 4,
-        }}
-      >
-        {t('admin.moduleUpload.pageSubtitle')}
-      </Typography>
+      <PageHeader
+        icon={<PageTitleIcon />}
+        title={t('admin.moduleUpload.pageTitle')}
+        description={t('admin.moduleUpload.pageSubtitle')}
+      />
       <Paper sx={{ width: '100%' }}>
         {moduleMethod === 'choose' && renderModuleMethodChooser()}
         {moduleMethod === 'upload' && renderFileUploadForm()}

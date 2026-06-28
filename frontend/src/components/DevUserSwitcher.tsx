@@ -24,7 +24,7 @@ interface DevUser {
 
 const DevUserSwitcher = () => {
   const { t } = useTranslation()
-  const { user, setToken } = useAuth()
+  const { user } = useAuth()
   const [devMode, setDevMode] = useState<boolean | null>(null)
   const [users, setUsers] = useState<DevUser[]>([])
   const [loading, setLoading] = useState(false)
@@ -59,8 +59,8 @@ const DevUserSwitcher = () => {
     setSwitching(true)
     try {
       const result = await apiClient.impersonateUser(targetUserId)
-      // Update the token in auth context and localStorage
-      setToken(result.token)
+      // Update the token in localStorage and reload so the auth context picks it up
+      localStorage.setItem('auth_token', result.token)
       // Reload the page to refresh all data with new user context
       window.location.reload()
     } catch (error) {

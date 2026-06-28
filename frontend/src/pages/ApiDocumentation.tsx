@@ -1,5 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import PageHeader from '../components/PageHeader'
+import PageTitleIcon from '@mui/icons-material/Description'
 import SwaggerUI from 'swagger-ui-react'
 import 'swagger-ui-react/swagger-ui.css'
 import { Box, Typography, List, ListItem, ListItemButton, ListItemText, Paper } from '@mui/material'
@@ -15,16 +17,16 @@ const TagsSorterPlugin = (): any => ({
       wrapSelectors: {
         taggedOperations:
           (origSelector: any) =>
-          (...args: any[]) => {
-            const taggedOps = origSelector(...args)
-            if (taggedOps && typeof taggedOps.sortBy === 'function') {
-              return taggedOps.sortBy(
-                (_val: any, key: string) => key,
-                (a: string, b: string) => a.localeCompare(b),
-              )
-            }
-            return taggedOps
-          },
+            (...args: any[]) => {
+              const taggedOps = origSelector(...args)
+              if (taggedOps && typeof taggedOps.sortBy === 'function') {
+                return taggedOps.sortBy(
+                  (_val: any, key: string) => key,
+                  (a: string, b: string) => a.localeCompare(b),
+                )
+              }
+              return taggedOps
+            },
       },
     },
   },
@@ -528,17 +530,7 @@ const ApiDocumentation: React.FC = () => {
   return (
     <Box sx={{ overflow: 'hidden' }}>
       {/* Page title */}
-      <Box sx={{ mb: 3 }}>
-        <Typography variant="h4">{t('apiDocumentation.title')}</Typography>
-        <Typography
-          variant="body2"
-          sx={{
-            color: 'text.secondary',
-          }}
-        >
-          {t('apiDocumentation.subtitle')}
-        </Typography>
-      </Box>
+      <PageHeader icon={<PageTitleIcon />} title={t('apiDocumentation.title')} description={t('apiDocumentation.subtitle')} />
       {/* Layout: sticky left nav + Swagger UI content */}
       <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 0 }}>
         {/* ---- Left navigation panel ---- */}

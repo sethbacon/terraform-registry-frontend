@@ -37,6 +37,8 @@ import ContentCopyIcon from '@mui/icons-material/ContentCopy'
 import CheckCircleIcon from '@mui/icons-material/CheckCircle'
 import LinkOffIcon from '@mui/icons-material/LinkOff'
 import Page from '../../components/Page'
+import PageHeader from '../../components/PageHeader'
+import PageTitleIcon from '@mui/icons-material/GitHub'
 import api from '../../services/api'
 import { getErrorMessage } from '../../utils/errors'
 import { useAuth } from '../../contexts/AuthContext'
@@ -405,34 +407,33 @@ const SCMProvidersPage: React.FC = () => {
         </Box>
       ) : (
         <>
-          <Box
-            sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}
-          >
-            <Box>
-              <Typography variant="h4">{t('admin.scmProviders.pageTitle')}</Typography>
-            </Box>
-            <Box sx={{ display: 'flex', gap: 1 }}>
-              <Button
-                variant="outlined"
-                startIcon={<RefreshIcon />}
-                onClick={() => {
-                  loadProviders()
-                }}
-              >
-                {t('admin.scmProviders.refresh')}
-              </Button>
-              <Button
-                variant="contained"
-                startIcon={<AddIcon />}
-                onClick={() => {
-                  resetForm()
-                  setCreateDialogOpen(true)
-                }}
-              >
-                {t('admin.scmProviders.addProvider')}
-              </Button>
-            </Box>
-          </Box>
+          <PageHeader
+            icon={<PageTitleIcon />}
+            title={t('admin.scmProviders.pageTitle')}
+            actions={
+              <Box sx={{ display: 'flex', gap: 1 }}>
+                <Button
+                  variant="outlined"
+                  startIcon={<RefreshIcon />}
+                  onClick={() => {
+                    loadProviders()
+                  }}
+                >
+                  {t('admin.scmProviders.refresh')}
+                </Button>
+                <Button
+                  variant="contained"
+                  startIcon={<AddIcon />}
+                  onClick={() => {
+                    resetForm()
+                    setCreateDialogOpen(true)
+                  }}
+                >
+                  {t('admin.scmProviders.addProvider')}
+                </Button>
+              </Box>
+            }
+          />
 
           {error && (
             <Alert severity="error" sx={{ mb: 2 }} onClose={() => setError(null)}>

@@ -42,6 +42,8 @@ import DownloadIcon from '@mui/icons-material/Download'
 import PrivacyTipIcon from '@mui/icons-material/PrivacyTip'
 import EmptyState from '../../components/EmptyState'
 import Page from '../../components/Page'
+import PageHeader from '../../components/PageHeader'
+import PageTitleIcon from '@mui/icons-material/People'
 import api from '../../services/api'
 import { useAuth } from '../../contexts/AuthContext'
 import { User, UserMembership, Organization } from '../../types'
@@ -428,24 +430,16 @@ const UsersPage: React.FC = () => {
 
   return (
     <Page maxWidth="lg">
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-        <Box>
-          <Typography variant="h4" gutterBottom>
-            {t('admin.users.pageTitle')}
-          </Typography>
-          <Typography
-            variant="body1"
-            sx={{
-              color: 'text.secondary',
-            }}
-          >
-            {t('admin.users.pageSubtitle')}
-          </Typography>
-        </Box>
-        <Button variant="contained" startIcon={<AddIcon />} onClick={() => handleOpenDialog()}>
-          {t('admin.users.addUser')}
-        </Button>
-      </Box>
+      <PageHeader
+        icon={<PageTitleIcon />}
+        title={t('admin.users.pageTitle')}
+        description={t('admin.users.pageSubtitle')}
+        actions={
+          <Button variant="contained" startIcon={<AddIcon />} onClick={() => handleOpenDialog()}>
+            {t('admin.users.addUser')}
+          </Button>
+        }
+      />
       {error && (
         <Alert severity="error" sx={{ mb: 3 }} onClose={() => setError(null)}>
           {error}
@@ -526,12 +520,12 @@ const UsersPage: React.FC = () => {
                               title={
                                 m.role_template_display_name
                                   ? t('admin.users.tooltipMembership', {
-                                      org: m.organization_name,
-                                      role: m.role_template_display_name,
-                                    })
+                                    org: m.organization_name,
+                                    role: m.role_template_display_name,
+                                  })
                                   : t('admin.users.tooltipMembershipNoRole', {
-                                      org: m.organization_name,
-                                    })
+                                    org: m.organization_name,
+                                  })
                               }
                             >
                               <Chip

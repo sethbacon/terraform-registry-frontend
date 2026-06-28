@@ -14,15 +14,18 @@ const mockAuth = vi.hoisted(() => ({
     sessionExpiresAt: null,
     sessionExpiresSoon: false,
     login: vi.fn(),
+    devLogin: vi.fn(),
+    ldapLogin: vi.fn(),
     logout: vi.fn(),
-    refreshToken: vi.fn(),
-    setToken: vi.fn(),
+    refreshSession: vi.fn(),
+    hasScope: vi.fn(),
   } as AuthContextType,
 }))
 
-vi.mock('../../contexts/AuthContext', () => ({
-  useAuth: () => mockAuth.value,
-}))
+vi.mock('../../contexts/AuthContext', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('../../contexts/AuthContext')>()
+  return { ...actual, useAuth: () => mockAuth.value }
+})
 
 function setAuth(patch: Partial<AuthContextType>) {
   mockAuth.value = { ...mockAuth.value, ...patch } as AuthContextType
@@ -34,7 +37,7 @@ describe('SessionExpiryWarning (roadmap 4.2)', () => {
       isAuthenticated: true,
       sessionExpiresSoon: false,
       sessionExpiresAt: null,
-      refreshToken: vi.fn().mockResolvedValue(undefined),
+      refreshSession: vi.fn().mockResolvedValue(undefined),
       logout: vi.fn(),
     })
   })
@@ -57,14 +60,14 @@ describe('SessionExpiryWarning (roadmap 4.2)', () => {
     expect(screen.getByText(/your session expires in 2 minutes/i)).toBeInTheDocument()
   })
 
-  it('clicking Refresh session calls refreshToken', async () => {
-    const refreshToken = vi.fn().mockResolvedValue(undefined)
-    setAuth({ sessionExpiresSoon: true, refreshToken })
+  it('clicking Refresh session calls refreshSession', async () => {
+    const refreshSession = vi.fn().mockResolvedValue(undefined)
+    setAuth({ sessionExpiresSoon: true, refreshSession })
     render(<SessionExpiryWarning />)
     await act(async () => {
       fireEvent.click(screen.getByTestId('session-expiry-refresh'))
     })
-    await waitFor(() => expect(refreshToken).toHaveBeenCalledTimes(1))
+    await waitFor(() => expect(refreshSession).toHaveBeenCalledTimes(1))
   })
 
   it('clicking Sign out calls logout', () => {

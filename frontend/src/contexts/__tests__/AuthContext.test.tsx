@@ -8,6 +8,8 @@ const mockApi = vi.hoisted(() => ({
   login: vi.fn(),
   logout: vi.fn(),
   refreshToken: vi.fn(),
+  devLogin: vi.fn(),
+  ldapLogin: vi.fn(),
 }))
 
 vi.mock('../../services/api', () => ({
@@ -43,7 +45,7 @@ describe('AuthContext', () => {
   })
 
   it('throws when useAuth is called outside AuthProvider', () => {
-    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
+    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => { })
 
     function BadConsumer() {
       useAuth()
@@ -114,27 +116,6 @@ describe('AuthContext', () => {
     expect(localStorage.getItem('authorized')).toBeNull()
   })
 
-  it('setToken stores token and sets authenticated', () => {
-    let authState: ReturnType<typeof useAuth> | null = null
-
-    render(
-      <AuthProvider>
-        <AuthConsumer
-          onRender={(auth) => {
-            authState = auth
-          }}
-        />
-      </AuthProvider>,
-    )
-
-    act(() => {
-      authState!.setToken('new-token-value')
-    })
-
-    expect(localStorage.getItem('auth_token')).toBe('new-token-value')
-    expect(authState!.isAuthenticated).toBe(true)
-  })
-
   // ─── New tests: login flow ─────────────────────────────────────────────
 
   it('login with OIDC provider redirects via api.login()', () => {
@@ -177,7 +158,7 @@ describe('AuthContext', () => {
     expect(mockApi.login).toHaveBeenCalledWith('azuread')
   })
 
-  it('login with user object (dev mode) sets authenticated and fetches user from API', async () => {
+  it('devLogin stores the token, sets authenticated and fetches user from API', async () => {
     const mockUser = {
       id: '1',
       email: 'dev@test.com',
@@ -185,8 +166,9 @@ describe('AuthContext', () => {
       created_at: '',
       updated_at: '',
     }
+    mockApi.devLogin.mockResolvedValueOnce({ token: 'dev-token' })
     // First call: mount effect tries /auth/me (no session → reject).
-    // Second call: dev-mode login calls fetchCurrentUser (succeeds).
+    // Second call: devLogin calls fetchCurrentUser (succeeds).
     mockApi.getCurrentUserWithRole
       .mockRejectedValueOnce(new Error('Unauthorized'))
       .mockResolvedValueOnce({
@@ -213,18 +195,19 @@ describe('AuthContext', () => {
     })
 
     await act(async () => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      await authState!.login(mockUser as any)
+      await authState!.devLogin()
     })
 
     expect(authState!.isAuthenticated).toBe(true)
+    expect(mockApi.devLogin).toHaveBeenCalled()
+    expect(localStorage.getItem('auth_token')).toBe('dev-token')
     expect(mockApi.getCurrentUserWithRole).toHaveBeenCalledTimes(2)
     expect(authState!.user).toEqual(mockUser)
   })
 
   // ─── refreshToken flow ─────────────────────────────────────────────────
 
-  it('refreshToken stores new token on success', async () => {
+  it('refreshSession stores new token on success', async () => {
     mockApi.refreshToken.mockResolvedValueOnce({ token: 'refreshed-token' })
 
     let authState: ReturnType<typeof useAuth> | null = null
@@ -240,16 +223,16 @@ describe('AuthContext', () => {
     )
 
     await act(async () => {
-      await authState!.refreshToken()
+      await authState!.refreshSession()
     })
 
     expect(mockApi.refreshToken).toHaveBeenCalled()
     expect(localStorage.getItem('auth_token')).toBe('refreshed-token')
   })
 
-  it('refreshToken calls logout on failure', async () => {
+  it('refreshSession calls logout on failure', async () => {
     mockApi.refreshToken.mockRejectedValueOnce(new Error('Token expired'))
-    vi.spyOn(console, 'error').mockImplementation(() => {})
+    vi.spyOn(console, 'error').mockImplementation(() => { })
 
     let authState: ReturnType<typeof useAuth> | null = null
 
@@ -264,7 +247,7 @@ describe('AuthContext', () => {
     )
 
     await act(async () => {
-      await authState!.refreshToken()
+      await authState!.refreshSession()
     })
 
     // After failed refresh, user should be logged out
@@ -369,7 +352,7 @@ describe('AuthContext', () => {
       'user',
       JSON.stringify({ id: '1', email: 'x@y.com', name: 'X', created_at: '', updated_at: '' }),
     )
-    vi.spyOn(console, 'error').mockImplementation(() => {})
+    vi.spyOn(console, 'error').mockImplementation(() => { })
 
     mockApi.getCurrentUserWithRole.mockRejectedValueOnce(new Error('401 Unauthorized'))
 
@@ -476,10 +459,11 @@ describe('AuthContext session expiry (roadmap 4.2)', () => {
     expect(parseTokenExpiry(null)).toBeNull()
   })
 
-  it('setToken parses expiry and schedules warning', async () => {
+  it('refreshSession parses token expiry and schedules the warning', async () => {
     vi.useFakeTimers()
     vi.setSystemTime(new Date('2026-01-01T00:00:00Z'))
     const exp = Math.floor(new Date('2026-01-01T00:10:00Z').getTime() / 1000) // 10min out
+    mockApi.refreshToken.mockResolvedValueOnce({ token: fakeJwt(exp) })
 
     let authState: ReturnType<typeof useAuth> | null = null
     render(
@@ -492,8 +476,8 @@ describe('AuthContext session expiry (roadmap 4.2)', () => {
       </AuthProvider>,
     )
 
-    act(() => {
-      authState!.setToken(fakeJwt(exp))
+    await act(async () => {
+      await authState!.refreshSession()
     })
     expect(authState!.sessionExpiresAt).not.toBeNull()
     expect(authState!.sessionExpiresSoon).toBe(false)
@@ -504,8 +488,8 @@ describe('AuthContext session expiry (roadmap 4.2)', () => {
     })
     expect(authState!.sessionExpiresSoon).toBe(false)
 
-    // Cross the warning threshold — silent refresh fires and fails (default mock rejects),
-    // then the catch handler sets sessionExpiresSoon = true.
+    // Cross the warning threshold — the silent refresh fires, fails (the mock now
+    // returns undefined), and the catch handler sets sessionExpiresSoon = true.
     await act(async () => {
       vi.advanceTimersByTime(2)
     })
@@ -513,7 +497,9 @@ describe('AuthContext session expiry (roadmap 4.2)', () => {
     vi.useRealTimers()
   })
 
-  it('setToken with malformed JWT does not crash and leaves expiry null', () => {
+  it('refreshSession with a malformed token leaves expiry null', async () => {
+    mockApi.refreshToken.mockResolvedValueOnce({ token: 'not-a-jwt' })
+
     let authState: ReturnType<typeof useAuth> | null = null
     render(
       <AuthProvider>
@@ -525,17 +511,18 @@ describe('AuthContext session expiry (roadmap 4.2)', () => {
       </AuthProvider>,
     )
 
-    act(() => {
-      authState!.setToken('not-a-jwt')
+    await act(async () => {
+      await authState!.refreshSession()
     })
     expect(authState!.sessionExpiresAt).toBeNull()
     expect(authState!.sessionExpiresSoon).toBe(false)
   })
 
-  it('setToken with already-expiring token flags sessionExpiresSoon immediately', async () => {
+  it('refreshSession with an already-expiring token flags sessionExpiresSoon immediately', async () => {
     vi.useFakeTimers()
     vi.setSystemTime(new Date('2026-01-01T00:00:00Z'))
     const exp = Math.floor(Date.now() / 1000) + 30 // 30s from now, inside window
+    mockApi.refreshToken.mockResolvedValueOnce({ token: fakeJwt(exp) })
 
     let authState: ReturnType<typeof useAuth> | null = null
     render(
@@ -548,10 +535,10 @@ describe('AuthContext session expiry (roadmap 4.2)', () => {
       </AuthProvider>,
     )
 
-    // Silent refresh attempt fires immediately and fails (mock rejects),
-    // then catch sets sessionExpiresSoon = true.
+    // The new expiry is already inside the warning window, so the immediate silent
+    // refresh fires, fails, and the catch sets sessionExpiresSoon = true.
     await act(async () => {
-      authState!.setToken(fakeJwt(exp))
+      await authState!.refreshSession()
     })
     expect(authState!.sessionExpiresSoon).toBe(true)
     vi.useRealTimers()
@@ -561,6 +548,7 @@ describe('AuthContext session expiry (roadmap 4.2)', () => {
     vi.useFakeTimers()
     vi.setSystemTime(new Date('2026-01-01T00:00:00Z'))
     const exp = Math.floor(Date.now() / 1000) + 30
+    mockApi.refreshToken.mockResolvedValueOnce({ token: fakeJwt(exp) })
     let authState: ReturnType<typeof useAuth> | null = null
     render(
       <AuthProvider>
@@ -572,7 +560,7 @@ describe('AuthContext session expiry (roadmap 4.2)', () => {
       </AuthProvider>,
     )
     await act(async () => {
-      authState!.setToken(fakeJwt(exp))
+      await authState!.refreshSession()
     })
     expect(authState!.sessionExpiresSoon).toBe(true)
 
@@ -584,15 +572,17 @@ describe('AuthContext session expiry (roadmap 4.2)', () => {
     vi.useRealTimers()
   })
 
-  it('refreshToken reschedules warning with the new expiry', async () => {
+  it('refreshSession reschedules the warning with the new expiry', async () => {
     vi.useFakeTimers()
     vi.setSystemTime(new Date('2026-01-01T00:00:00Z'))
     const initialExp = Math.floor(Date.now() / 1000) + 30 // inside warning window
     const refreshedExp = Math.floor(Date.now() / 1000) + 10 * 60 // 10 min out
 
-    // First call: silent refresh attempt on setToken (already-expiring). Let it reject
-    // so sessionExpiresSoon is set. Second call: manual refresh with new token.
+    // 1st call: refreshSession injects an already-expiring token (schedules + fires the
+    // immediate silent refresh). 2nd call: that silent refresh rejects, setting
+    // sessionExpiresSoon. 3rd call: manual refresh with a token further out.
     mockApi.refreshToken
+      .mockResolvedValueOnce({ token: fakeJwt(initialExp) })
       .mockRejectedValueOnce(new Error('Unauthorized'))
       .mockResolvedValueOnce({ token: fakeJwt(refreshedExp) })
 
@@ -607,12 +597,12 @@ describe('AuthContext session expiry (roadmap 4.2)', () => {
       </AuthProvider>,
     )
     await act(async () => {
-      authState!.setToken(fakeJwt(initialExp))
+      await authState!.refreshSession()
     })
     expect(authState!.sessionExpiresSoon).toBe(true)
 
     await act(async () => {
-      await authState!.refreshToken()
+      await authState!.refreshSession()
     })
     expect(authState!.sessionExpiresSoon).toBe(false)
     expect(authState!.sessionExpiresAt).not.toBeNull()

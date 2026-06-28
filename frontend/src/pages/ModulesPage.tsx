@@ -35,6 +35,8 @@ import { queryKeys } from '../services/queryKeys'
 import { Module } from '../types'
 import { useAuth } from '../contexts/AuthContext'
 import Page from '../components/Page'
+import PageHeader from '../components/PageHeader'
+import PageTitleIcon from '@mui/icons-material/ViewModule'
 import { ProviderIcon, providerDisplayName } from '../components/ProviderIcon'
 import RegistryItemCard from '../components/RegistryItemCard'
 import { RegistryItemGridSkeleton } from '../components/skeletons/RegistryItemCardSkeleton'
@@ -334,32 +336,23 @@ const ModulesPage: React.FC = () => {
   return (
     <Page maxWidth="lg" aria-busy={loading} aria-live="polite">
       {/* Header */}
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-        <Box>
-          <Typography variant="h4" gutterBottom>
-            {t('modules.pageTitle')}
-          </Typography>
-          <Typography
-            variant="body1"
-            sx={{
-              color: 'text.secondary',
-            }}
-          >
-            {t('modules.pageSubtitle')}
-          </Typography>
-        </Box>
-        {isAuthenticated && (
-          <Button
-            variant="contained"
-            color="primary"
-            startIcon={<CloudUpload />}
-            onClick={() => navigate('/admin/upload/module')}
-          >
-            {t('modules.publishModule')}
-          </Button>
-        )}
-      </Box>
-      <Box sx={{ mb: 4 }} />
+      <PageHeader
+        icon={<PageTitleIcon />}
+        title={t('modules.pageTitle')}
+        description={t('modules.pageSubtitle')}
+        actions={
+          isAuthenticated && (
+            <Button
+              variant="contained"
+              color="primary"
+              startIcon={<CloudUpload />}
+              onClick={() => navigate('/admin/upload/module')}
+            >
+              {t('modules.publishModule')}
+            </Button>
+          )
+        }
+      />
       {/* Search Bar + Sort + View Toggle */}
       <Box sx={{ display: 'flex', gap: 2, mb: 4, alignItems: 'flex-start' }}>
         <TextField

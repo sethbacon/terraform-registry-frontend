@@ -17,6 +17,8 @@ import {
   Stack,
 } from '@mui/material'
 import Page from '../../components/Page'
+import PageHeader from '../../components/PageHeader'
+import PageTitleIcon from '@mui/icons-material/VerifiedUser'
 import api from '../../services/api'
 import type { MTLSConfigResponse } from '../../types'
 
@@ -33,19 +35,11 @@ const MTLSPage: React.FC = () => {
 
   return (
     <Page maxWidth="lg">
-      <Typography variant="h4" gutterBottom>
-        mTLS Client Certificate Mappings
-      </Typography>
-      <Typography
-        variant="body1"
-        sx={{
-          color: 'text.secondary',
-          mb: 3,
-        }}
-      >
-        Mutual TLS certificate-subject to scope mappings. These are configured in the server
-        configuration file and are read-only.
-      </Typography>
+      <PageHeader
+        icon={<PageTitleIcon />}
+        title="mTLS Client Certificate Mappings"
+        description="Mutual TLS certificate-subject to scope mappings. These are configured in the server configuration file and are read-only."
+      />
       {isLoading && (
         <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
           <CircularProgress />

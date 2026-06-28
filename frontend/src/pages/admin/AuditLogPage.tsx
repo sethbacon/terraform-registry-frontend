@@ -31,6 +31,8 @@ import DownloadIcon from '@mui/icons-material/Download'
 import HistoryIcon from '@mui/icons-material/History'
 import EmptyState from '../../components/EmptyState'
 import Page from '../../components/Page'
+import PageHeader from '../../components/PageHeader'
+import PageTitleIcon from '@mui/icons-material/History'
 import api from '../../services/api'
 import { AuditLog } from '../../types'
 import { queryKeys } from '../../services/queryKeys'
@@ -204,41 +206,30 @@ const AuditLogPage: React.FC = () => {
 
   return (
     <Page maxWidth="lg" aria-busy={loading} aria-live="polite">
-      {/* Header */}
-      <Box
-        sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 3 }}
-      >
-        <Box>
-          <Typography variant="h4" component="h1" gutterBottom>
-            Audit Logs
-          </Typography>
-          <Typography
-            variant="body2"
-            sx={{
-              color: 'text.secondary',
-            }}
-          >
-            Track system activity across all resources and users
-          </Typography>
-        </Box>
-        <Box>
-          <Button
-            variant="outlined"
-            startIcon={<DownloadIcon />}
-            onClick={(e) => setExportAnchor(e.currentTarget)}
-          >
-            Export
-          </Button>
-          <Menu
-            anchorEl={exportAnchor}
-            open={Boolean(exportAnchor)}
-            onClose={() => setExportAnchor(null)}
-          >
-            <MenuItem onClick={handleExportCSV}>{t('admin.auditLog.exportCsv')}</MenuItem>
-            <MenuItem onClick={handleExportJSON}>{t('admin.auditLog.exportJson')}</MenuItem>
-          </Menu>
-        </Box>
-      </Box>
+      <PageHeader
+        icon={<PageTitleIcon />}
+        title="Audit Logs"
+        description="Track system activity across all resources and users"
+        actions={
+          <Box>
+            <Button
+              variant="outlined"
+              startIcon={<DownloadIcon />}
+              onClick={(e) => setExportAnchor(e.currentTarget)}
+            >
+              Export
+            </Button>
+            <Menu
+              anchorEl={exportAnchor}
+              open={Boolean(exportAnchor)}
+              onClose={() => setExportAnchor(null)}
+            >
+              <MenuItem onClick={handleExportCSV}>{t('admin.auditLog.exportCsv')}</MenuItem>
+              <MenuItem onClick={handleExportJSON}>{t('admin.auditLog.exportJson')}</MenuItem>
+            </Menu>
+          </Box>
+        }
+      />
       {/* Filter Bar */}
       <Paper sx={{ p: 2, mb: 2 }}>
         <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, alignItems: 'center' }}>
