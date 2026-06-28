@@ -1,16 +1,4 @@
-import React from 'react'
-import { Container, type ContainerProps } from '@mui/material'
+// Re-exported from the shared suite package; the local module path is preserved.
+export type { PageProps } from '@sethbacon/terraform-suite-ui'
+export { Page as default } from '@sethbacon/terraform-suite-ui'
 
-export interface PageProps extends Omit<ContainerProps, 'maxWidth'> {
-  maxWidth?: ContainerProps['maxWidth']
-}
-
-/** Standard page shell: width-constrained (default 'lg') + vertical padding.
- *  Forwards sx (merged) and arbitrary props (aria-*, etc.) to MUI Container. */
-const Page: React.FC<PageProps> = ({ maxWidth = 'lg', sx, children, ...rest }) => (
-  <Container maxWidth={maxWidth} sx={{ py: 4, ...sx }} {...rest}>
-    {children}
-  </Container>
-)
-
-export default Page
