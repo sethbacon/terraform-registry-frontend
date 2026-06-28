@@ -101,11 +101,16 @@
     "username": "Brukernavn",
     "password": "Passord",
     "signIn": "Logg inn",
+    "signOut": "Logg ut",
     "noProviders": "Det er ikke konfigurert noen SSO-leverandører. Kontakt administratoren din.",
     "ssoInfo": "Denne applikasjonen bruker enkel pålogging for autentisering.",
     "ssoContact": "Kontakt administratoren din hvis du trenger tilgang.",
     "devLoginFailed": "Innloggingen mislyktes. Sjekk serverloggene.",
     "ldapLoginFailed": "LDAP-påloggingen mislyktes. Kontroller påloggingsopplysningene dine."
+  },
+  "session": {
+    "expiresSoon": "Sesjonen din utløper om {{minutes}} minutter. Oppdater siden for å forbli innlogget.",
+    "refresh": "Oppdater økt"
   },
   "home": {
     "heroTitle": "Privat Terraform-register",
