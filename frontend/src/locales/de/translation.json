@@ -101,11 +101,16 @@
     "username": "Benutzername",
     "password": "Passwort",
     "signIn": "Anmelden",
+    "signOut": "Abmelden",
     "noProviders": "Es sind keine SSO-Anbieter konfiguriert. Wenden Sie sich an Ihren Administrator.",
     "ssoInfo": "Diese Anwendung nutzt Single Sign-On zur Authentifizierung.",
     "ssoContact": "Wenden Sie sich an Ihren Administrator, wenn Sie Zugriff benötigen.",
     "devLoginFailed": "Die Entwickleranmeldung ist fehlgeschlagen. Überprüfen Sie die Serverprotokolle.",
     "ldapLoginFailed": "Die LDAP-Anmeldung ist fehlgeschlagen. Bitte überprüfen Sie Ihre Anmeldedaten."
+  },
+  "session": {
+    "expiresSoon": "Ihre Sitzung läuft in {{minutes}} Minuten ab. Aktualisieren Sie die Seite, um angemeldet zu bleiben.",
+    "refresh": "Sitzung aktualisieren"
   },
   "home": {
     "heroTitle": "Private Terraform-Registrierung",

@@ -101,11 +101,16 @@
     "username": "Nome utente",
     "password": "Password",
     "signIn": "Accedi",
+    "signOut": "Esci",
     "noProviders": "Non sono stati configurati provider SSO. Contatta l'amministratore.",
     "ssoInfo": "Questa applicazione utilizza il Single Sign-On per l'autenticazione.",
     "ssoContact": "Se hai bisogno di accedere, contatta il tuo amministratore.",
     "devLoginFailed": "Accesso amministratore non riuscito. Controllare i log del server.",
     "ldapLoginFailed": "Accesso LDAP non riuscito. Controlla le tue credenziali."
+  },
+  "session": {
+    "expiresSoon": "La tua sessione scadrà tra {{minutes}} minuti. Aggiorna la pagina per rimanere connesso.",
+    "refresh": "Aggiorna sessione"
   },
   "home": {
     "heroTitle": "Registro Terraform privato",

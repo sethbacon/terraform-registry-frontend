@@ -101,11 +101,16 @@
     "username": "用户名",
     "password": "密码",
     "signIn": "登录",
+    "signOut": "退出",
     "noProviders": "未配置任何 SSO 提供商。请联系您的管理员。",
     "ssoInfo": "该应用程序采用单点登录进行身份验证。",
     "ssoContact": "如需访问权限，请联系您的管理员。",
     "devLoginFailed": "开发者登录失败。请检查服务器日志。",
     "ldapLoginFailed": "LDAP 登录失败。请检查您的凭据。"
+  },
+  "session": {
+    "expiresSoon": "您的会话将在{{minutes}}分钟后过期。请刷新页面以保持登录状态。",
+    "refresh": "刷新会话"
   },
   "home": {
     "heroTitle": "私有 Terraform 注册表",

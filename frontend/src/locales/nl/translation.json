@@ -101,11 +101,16 @@
     "username": "Gebruikersnaam",
     "password": "Wachtwoord",
     "signIn": "Inloggen",
+    "signOut": "Uitloggen",
     "noProviders": "Er zijn geen SSO-providers geconfigureerd. Neem contact op met uw beheerder.",
     "ssoInfo": "Deze applicatie maakt gebruik van single sign-on voor authenticatie.",
     "ssoContact": "Neem contact op met uw beheerder als u toegang nodig hebt.",
     "devLoginFailed": "Het inloggen als ontwikkelaar is mislukt. Controleer de serverlogboeken.",
     "ldapLoginFailed": "LDAP-aanmelding mislukt. Controleer uw inloggegevens."
+  },
+  "session": {
+    "expiresSoon": "Je sessie verloopt over {{minutes}} minuten. Vernieuw de pagina om ingelogd te blijven.",
+    "refresh": "Sessie vernieuwen"
   },
   "home": {
     "heroTitle": "Privé-register voor Terraform",

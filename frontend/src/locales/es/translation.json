@@ -101,11 +101,16 @@
     "username": "Nombre de usuario",
     "password": "Contraseña",
     "signIn": "Iniciar sesión",
+    "signOut": "Cerrar sesión",
     "noProviders": "No hay ningún proveedor de SSO configurado. Ponte en contacto con tu administrador.",
     "ssoInfo": "Esta aplicación utiliza el inicio de sesión único para la autenticación.",
     "ssoContact": "Póngase en contacto con su administrador si necesita acceso.",
     "devLoginFailed": "Error al iniciar sesión en el entorno de desarrollo. Comprueba los registros del servidor.",
     "ldapLoginFailed": "Error al iniciar sesión en LDAP. Comprueba tus credenciales."
+  },
+  "session": {
+    "expiresSoon": "Tu sesión caducará en {{minutes}} minutos. Actualiza la página para mantenerte conectado.",
+    "refresh": "Actualizar sesión"
   },
   "home": {
     "heroTitle": "Registro privado de Terraform",
