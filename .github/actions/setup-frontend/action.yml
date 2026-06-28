@@ -41,6 +41,8 @@ runs:
       if: inputs.install-deps == 'true'
       working-directory: frontend
       shell: bash
+      env:
+        NODE_AUTH_TOKEN: ${{ github.token }}
       run: npm ci
 
     - name: Install e2e dependencies

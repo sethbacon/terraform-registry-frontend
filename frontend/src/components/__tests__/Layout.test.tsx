@@ -112,10 +112,10 @@ describe('Layout', () => {
   })
 
   // 2. Unauthenticated state
-  it('shows Login button when not authenticated', () => {
+  it('shows Sign in button when not authenticated', () => {
     renderLayout()
 
-    expect(screen.getByRole('link', { name: 'Login' })).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'Sign in' })).toBeInTheDocument()
     expect(screen.queryByLabelText('Account')).not.toBeInTheDocument()
   })
 
@@ -128,8 +128,8 @@ describe('Layout', () => {
     })
     renderLayout()
 
-    // Login button should not be present
-    expect(screen.queryByRole('link', { name: 'Login' })).not.toBeInTheDocument()
+    // Sign in button should not be present
+    expect(screen.queryByRole('link', { name: 'Sign in' })).not.toBeInTheDocument()
 
     // Click account icon to open menu
     const accountBtn = screen.getByLabelText('Account')
@@ -137,11 +137,11 @@ describe('Layout', () => {
 
     expect(screen.getByText('Alice')).toBeInTheDocument()
     expect(screen.getByText('alice@example.com')).toBeInTheDocument()
-    expect(screen.getByText('Logout')).toBeInTheDocument()
+    expect(screen.getByText('Sign out')).toBeInTheDocument()
   })
 
   // 4. Logout
-  it('calls logout when Logout menu item is clicked', async () => {
+  it('calls logout when Sign out menu item is clicked', async () => {
     const user = userEvent.setup()
     setAuth({
       isAuthenticated: true,
@@ -150,7 +150,7 @@ describe('Layout', () => {
     renderLayout()
 
     await user.click(screen.getByLabelText('Account'))
-    await user.click(screen.getByText('Logout'))
+    await user.click(screen.getByText('Sign out'))
 
     expect(mockLogout).toHaveBeenCalledOnce()
   })

@@ -215,15 +215,16 @@ export interface AuthContextType {
   user: User | null
   roleTemplate: RoleTemplateInfo | null // Primary role template (backward compat)
   allowedScopes: string[] // Combined scopes across all org memberships
-  memberships?: UserMembership[] // Per-org memberships with role templates
   isAuthenticated: boolean
   isLoading: boolean
   sessionExpiresAt: Date | null
   sessionExpiresSoon: boolean
-  login: (userOrProvider: User | 'oidc' | 'azuread') => Promise<void>
+  login: (provider?: string) => void
+  devLogin: () => Promise<void>
+  ldapLogin: (username: string, password: string) => Promise<void>
   logout: () => void
-  refreshToken: () => Promise<void>
-  setToken: (token: string) => void // For dev mode impersonation
+  refreshSession: () => Promise<void>
+  hasScope: (scope: string) => boolean
 }
 
 // Storage Configuration Types

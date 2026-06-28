@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { Snackbar, Alert, Stack, Button, CircularProgress } from '@mui/material'
-import { useAuth } from '../contexts/AuthContext'
+import { useTranslation } from 'react-i18next'
+import { useAuth, SESSION_WARNING_LEAD_MS } from '../contexts/AuthContext'
 
 /**
  * Displays a persistent warning Snackbar when the current session is within the
@@ -9,7 +10,8 @@ import { useAuth } from '../contexts/AuthContext'
  * Mounted once in Layout so the warning appears on every authenticated page.
  */
 const SessionExpiryWarning: React.FC = () => {
-  const { sessionExpiresSoon, isAuthenticated, refreshToken, logout } = useAuth()
+  const { t } = useTranslation()
+  const { sessionExpiresSoon, isAuthenticated, refreshSession, logout } = useAuth()
   const [refreshing, setRefreshing] = useState(false)
 
   if (!isAuthenticated || !sessionExpiresSoon) return null
@@ -17,7 +19,7 @@ const SessionExpiryWarning: React.FC = () => {
   const handleRefresh = async () => {
     setRefreshing(true)
     try {
-      await refreshToken()
+      await refreshSession()
     } finally {
       setRefreshing(false)
     }
@@ -43,7 +45,7 @@ const SessionExpiryWarning: React.FC = () => {
               data-testid="session-expiry-refresh"
               startIcon={refreshing ? <CircularProgress size={14} color="inherit" /> : undefined}
             >
-              Refresh session
+              {t('session.refresh')}
             </Button>
             <Button
               color="inherit"
@@ -51,12 +53,12 @@ const SessionExpiryWarning: React.FC = () => {
               onClick={logout}
               data-testid="session-expiry-signout"
             >
-              Logout
+              {t('auth.signOut')}
             </Button>
           </Stack>
         }
       >
-        Your session expires in 2 minutes. Refresh to stay signed in.
+        {t('session.expiresSoon', { minutes: Math.round(SESSION_WARNING_LEAD_MS / 60000) })}
       </Alert>
     </Snackbar>
   )

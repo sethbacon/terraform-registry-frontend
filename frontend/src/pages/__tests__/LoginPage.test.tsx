@@ -4,8 +4,10 @@ import { MemoryRouter } from 'react-router-dom'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 
 const mockLogin = vi.fn()
+const mockDevLogin = vi.fn().mockResolvedValue(undefined)
+const mockLdapLogin = vi.fn().mockResolvedValue(undefined)
 vi.mock('../../contexts/AuthContext', () => ({
-  useAuth: () => ({ login: mockLogin }),
+  useAuth: () => ({ login: mockLogin, devLogin: mockDevLogin, ldapLogin: mockLdapLogin }),
 }))
 
 const mockNavigate = vi.fn()
@@ -14,16 +16,10 @@ vi.mock('react-router-dom', async () => {
   return { ...actual, useNavigate: () => mockNavigate }
 })
 
-const mockApiLogin = vi.fn()
-const mockDevLogin = vi.fn().mockResolvedValue({ token: 'test-jwt' })
 const mockGetAuthProviders = vi.fn()
-const mockLdapLogin = vi.fn()
 vi.mock('../../services/api', () => ({
   default: {
-    devLogin: (...args: unknown[]) => mockDevLogin(...args),
-    login: (...args: unknown[]) => mockApiLogin(...args),
     getAuthProviders: (...args: unknown[]) => mockGetAuthProviders(...args),
-    ldapLogin: (...args: unknown[]) => mockLdapLogin(...args),
   },
 }))
 
@@ -64,7 +60,7 @@ describe('LoginPage', () => {
   })
 
   it('shows loading skeletons while fetching providers', () => {
-    mockGetAuthProviders.mockReturnValue(new Promise(() => {})) // never resolves
+    mockGetAuthProviders.mockReturnValue(new Promise(() => { })) // never resolves
     renderLoginPage()
     expect(screen.getByTestId('provider-loading')).toBeInTheDocument()
   })
@@ -112,24 +108,24 @@ describe('LoginPage', () => {
     expect(screen.queryByText('Dev Login (Admin)')).not.toBeInTheDocument()
   })
 
-  it('triggers api.login with provider type when SSO button is clicked', async () => {
+  it('triggers login with provider type when SSO button is clicked', async () => {
     mockProviders([{ type: 'oidc', name: 'OpenID Connect' }])
     renderLoginPage()
     const btn = await screen.findByRole('button', { name: 'Sign in with SSO' })
     await act(async () => {
       await userEvent.click(btn)
     })
-    await waitFor(() => expect(mockApiLogin).toHaveBeenCalledWith('oidc'))
+    await waitFor(() => expect(mockLogin).toHaveBeenCalledWith('oidc'))
   })
 
-  it('triggers api.login with provider id for SAML IdPs', async () => {
+  it('triggers login with provider id for SAML IdPs', async () => {
     mockProviders([{ type: 'saml', name: 'Okta', id: 'okta-prod' }])
     renderLoginPage()
     const btn = await screen.findByRole('button', { name: 'Sign in with Okta' })
     await act(async () => {
       await userEvent.click(btn)
     })
-    await waitFor(() => expect(mockApiLogin).toHaveBeenCalledWith('okta-prod'))
+    await waitFor(() => expect(mockLogin).toHaveBeenCalledWith('okta-prod'))
   })
 
   it('renders LDAP form when LDAP provider is configured', async () => {

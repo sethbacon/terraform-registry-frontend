@@ -2,20 +2,13 @@ import { render, screen, waitFor } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 
-// Mock the AuthContext
-const mockSetToken = vi.fn()
-vi.mock('../../contexts/AuthContext', () => ({
-  useAuth: () => ({
-    setToken: mockSetToken,
-  }),
-}))
-
 // Must import after mock setup
 import CallbackPage from '../CallbackPage'
 
 // Mock window.location.replace
 beforeEach(() => {
   vi.clearAllMocks()
+  localStorage.removeItem('auth_token')
   Object.defineProperty(window, 'location', {
     writable: true,
     value: { ...window.location, replace: vi.fn() },
@@ -58,10 +51,10 @@ describe('CallbackPage', () => {
     })
   })
 
-  it('calls setToken when token param is present', async () => {
+  it('stores the token in localStorage when token param is present', async () => {
     renderWithParams('?token=jwt-token-123')
     await waitFor(() => {
-      expect(mockSetToken).toHaveBeenCalledWith('jwt-token-123')
+      expect(localStorage.getItem('auth_token')).toBe('jwt-token-123')
     })
   })
 

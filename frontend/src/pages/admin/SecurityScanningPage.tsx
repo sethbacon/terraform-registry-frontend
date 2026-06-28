@@ -29,6 +29,8 @@ import WarningAmber from '@mui/icons-material/WarningAmber'
 import KeyboardArrowDown from '@mui/icons-material/KeyboardArrowDown'
 import KeyboardArrowRight from '@mui/icons-material/KeyboardArrowRight'
 import Page from '../../components/Page'
+import PageHeader from '../../components/PageHeader'
+import PageTitleIcon from '@mui/icons-material/Security'
 import ScanDiagnostics from '../../components/ScanDiagnostics'
 import ScanFindingsModal from '../../components/ScanFindingsModal'
 import api from '../../services/api'
@@ -193,24 +195,11 @@ const SecurityScanningPage: React.FC = () => {
 
   return (
     <Page maxWidth="lg">
-      <Typography
-        variant="h4"
-        gutterBottom
-        sx={{
-          fontWeight: 700,
-        }}
-      >
-        {t('admin.securityScanning.pageTitle')}
-      </Typography>
-      <Typography
-        variant="body2"
-        sx={{
-          color: 'text.secondary',
-          mb: 3,
-        }}
-      >
-        {t('admin.securityScanning.pageSubtitle')}
-      </Typography>
+      <PageHeader
+        icon={<PageTitleIcon />}
+        title={t('admin.securityScanning.pageTitle')}
+        description={t('admin.securityScanning.pageSubtitle')}
+      />
       {loading ? (
         <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
           <CircularProgress />

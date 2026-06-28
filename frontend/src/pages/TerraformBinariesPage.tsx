@@ -4,6 +4,8 @@ import { useTranslation } from 'react-i18next'
 import { Container, Typography, Box, Grid, Chip, CircularProgress, Alert } from '@mui/material'
 import api from '../services/api'
 import RegistryItemCard from '../components/RegistryItemCard'
+import PageHeader from '../components/PageHeader'
+import PageTitleIcon from '@mui/icons-material/GetApp'
 
 interface MirrorSummary {
   name: string
@@ -86,20 +88,11 @@ const TerraformBinariesPage: React.FC = () => {
 
   return (
     <Container maxWidth="lg" sx={{ py: 4 }} aria-busy={loading} aria-live="polite">
-      <Box sx={{ mb: 2 }}>
-        <Typography variant="h4" gutterBottom>
-          {t('terraformBinaries.pageTitle')}
-        </Typography>
-        <Typography
-          variant="body1"
-          sx={{
-            color: 'text.secondary',
-          }}
-        >
-          {t('terraformBinaries.pageSubtitle')}
-        </Typography>
-      </Box>
-      <Box sx={{ mb: 4 }} />
+      <PageHeader
+        icon={<PageTitleIcon />}
+        title={t('terraformBinaries.pageTitle')}
+        description={t('terraformBinaries.pageSubtitle')}
+      />
       {error && (
         <Alert severity="error" sx={{ mb: 3 }}>
           {error}

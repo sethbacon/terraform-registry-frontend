@@ -62,6 +62,8 @@ import ExpandLessIcon from '@mui/icons-material/ExpandLess'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import ScheduleIcon from '@mui/icons-material/Schedule'
 import Page from '../../components/Page'
+import PageHeader from '../../components/PageHeader'
+import PageTitleIcon from '@mui/icons-material/CloudDownload'
 import api from '../../services/api'
 import {
   type MirrorConfiguration,
@@ -594,42 +596,34 @@ const MirrorsPage: React.FC = () => {
         </Box>
       ) : (
         <>
-          <Box
-            sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}
-          >
-            <Box>
-              <Typography variant="h4">{t('admin.mirrors.pageTitle')}</Typography>
-              <Typography
-                variant="body2"
-                sx={{
-                  color: 'text.secondary',
-                }}
-              >
-                {t('admin.mirrors.pageSubtitle')}
-              </Typography>
-            </Box>
-            <Box sx={{ display: 'flex', gap: 1 }}>
-              <Button
-                variant="outlined"
-                startIcon={<RefreshIcon />}
-                onClick={() => {
-                  loadMirrors()
-                }}
-              >
-                {t('admin.mirrors.refresh')}
-              </Button>
-              <Button
-                variant="contained"
-                startIcon={<AddIcon />}
-                onClick={() => {
-                  resetForm()
-                  setCreateDialogOpen(true)
-                }}
-              >
-                {t('admin.mirrors.addMirror')}
-              </Button>
-            </Box>
-          </Box>
+          <PageHeader
+            icon={<PageTitleIcon />}
+            title={t('admin.mirrors.pageTitle')}
+            description={t('admin.mirrors.pageSubtitle')}
+            actions={
+              <Box sx={{ display: 'flex', gap: 1 }}>
+                <Button
+                  variant="outlined"
+                  startIcon={<RefreshIcon />}
+                  onClick={() => {
+                    loadMirrors()
+                  }}
+                >
+                  {t('admin.mirrors.refresh')}
+                </Button>
+                <Button
+                  variant="contained"
+                  startIcon={<AddIcon />}
+                  onClick={() => {
+                    resetForm()
+                    setCreateDialogOpen(true)
+                  }}
+                >
+                  {t('admin.mirrors.addMirror')}
+                </Button>
+              </Box>
+            }
+          />
 
           {error && (
             <Alert severity="error" sx={{ mb: 2 }} onClose={() => setError(null)}>

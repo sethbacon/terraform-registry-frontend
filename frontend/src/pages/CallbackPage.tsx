@@ -1,12 +1,10 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { Container, Box, CircularProgress, Typography, Alert } from '@mui/material'
-import { useAuth } from '../contexts/AuthContext'
 
 const CallbackPage: React.FC = () => {
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
-  const { setToken } = useAuth()
   const [error, setError] = useState<string | null>(null)
   const exchangedRef = useRef(false)
 
@@ -28,9 +26,10 @@ const CallbackPage: React.FC = () => {
       const token = searchParams.get('token')
 
       if (token) {
-        // Legacy flow: token was passed as a URL parameter.
-        // Store the JWT via AuthContext (writes to localStorage).
-        setToken(token)
+        // Legacy migration flow: token passed as a URL parameter. Persist it so the
+        // api client attaches it as a Bearer header until cookie-only migration
+        // completes. AuthContext resolves the session via /auth/me after the reload below.
+        localStorage.setItem('auth_token', token)
       }
 
       // New flow: The backend set an HttpOnly cookie during the OIDC callback
@@ -53,7 +52,7 @@ const CallbackPage: React.FC = () => {
     }
 
     handleCallback()
-  }, [searchParams, setToken, navigate])
+  }, [searchParams, navigate])
 
   return (
     <Container maxWidth="sm" sx={{ mx: 'auto' }} aria-busy={!error} aria-live="polite">

@@ -34,6 +34,8 @@ import CheckCircleIcon from '@mui/icons-material/CheckCircle'
 import BlockIcon from '@mui/icons-material/Block'
 import PlayArrowIcon from '@mui/icons-material/PlayArrow'
 import Page from '../../components/Page'
+import PageHeader from '../../components/PageHeader'
+import PageTitleIcon from '@mui/icons-material/Policy'
 import api from '../../services/api'
 import { MirrorPolicy } from '../../types/rbac'
 import { getErrorMessage } from '../../utils/errors'
@@ -239,48 +241,40 @@ const MirrorPoliciesPage: React.FC = () => {
         </Box>
       ) : (
         <>
-          <Box
-            sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}
-          >
-            <Box>
-              <Typography variant="h4">{t('admin.mirrorPolicies.pageTitle')}</Typography>
-              <Typography
-                variant="body2"
-                sx={{
-                  color: 'text.secondary',
-                }}
-              >
-                {t('admin.mirrorPolicies.pageSubtitle')}
-              </Typography>
-            </Box>
-            <Box sx={{ display: 'flex', gap: 1 }}>
-              <Tooltip title={t('admin.mirrorPolicies.tooltipEvaluate')}>
+          <PageHeader
+            icon={<PageTitleIcon />}
+            title={t('admin.mirrorPolicies.pageTitle')}
+            description={t('admin.mirrorPolicies.pageSubtitle')}
+            actions={
+              <Box sx={{ display: 'flex', gap: 1 }}>
+                <Tooltip title={t('admin.mirrorPolicies.tooltipEvaluate')}>
+                  <Button
+                    variant="outlined"
+                    startIcon={<PlayArrowIcon />}
+                    onClick={() => {
+                      setEvaluateForm({ registry: '', namespace: '', provider: '' })
+                      setEvaluateResult(null)
+                      setEvaluateDialogOpen(true)
+                    }}
+                  >
+                    {t('admin.mirrorPolicies.evaluate')}
+                  </Button>
+                </Tooltip>
                 <Button
                   variant="outlined"
-                  startIcon={<PlayArrowIcon />}
+                  startIcon={<RefreshIcon />}
                   onClick={() => {
-                    setEvaluateForm({ registry: '', namespace: '', provider: '' })
-                    setEvaluateResult(null)
-                    setEvaluateDialogOpen(true)
+                    loadPolicies()
                   }}
                 >
-                  {t('admin.mirrorPolicies.evaluate')}
+                  {t('admin.mirrorPolicies.refresh')}
                 </Button>
-              </Tooltip>
-              <Button
-                variant="outlined"
-                startIcon={<RefreshIcon />}
-                onClick={() => {
-                  loadPolicies()
-                }}
-              >
-                {t('admin.mirrorPolicies.refresh')}
-              </Button>
-              <Button variant="contained" startIcon={<AddIcon />} onClick={openCreateDialog}>
-                {t('admin.mirrorPolicies.createPolicy')}
-              </Button>
-            </Box>
-          </Box>
+                <Button variant="contained" startIcon={<AddIcon />} onClick={openCreateDialog}>
+                  {t('admin.mirrorPolicies.createPolicy')}
+                </Button>
+              </Box>
+            }
+          />
 
           {error && (
             <Alert severity="error" sx={{ mb: 2 }} onClose={() => setError(null)}>

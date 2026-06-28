@@ -18,7 +18,6 @@ import { useAuth } from '../contexts/AuthContext'
 import { useThemeMode } from '../contexts/ThemeContext'
 import { useNavigate } from 'react-router-dom'
 import api from '../services/api'
-import type { User } from '../types'
 
 interface AuthProvider {
   type: string
@@ -51,7 +50,7 @@ function providerSx(p: AuthProvider): Record<string, unknown> | undefined {
 
 const LoginPage: React.FC = () => {
   const { t } = useTranslation()
-  const { login } = useAuth()
+  const { login, devLogin, ldapLogin } = useAuth()
   const { productName } = useThemeMode()
   const navigate = useNavigate()
   const [loginError, setLoginError] = React.useState<string | null>(null)
@@ -85,12 +84,7 @@ const LoginPage: React.FC = () => {
   const handleDevLogin = async () => {
     setLoginError(null)
     try {
-      const response = await api.devLogin()
-      localStorage.setItem('auth_token', response.token)
-      localStorage.removeItem('user')
-      localStorage.removeItem('role_template')
-      localStorage.removeItem('allowed_scopes')
-      await login({} as User)
+      await devLogin()
       navigate('/')
     } catch (err) {
       const message = err instanceof Error ? err.message : t('auth.devLoginFailed')
@@ -101,7 +95,7 @@ const LoginPage: React.FC = () => {
   const handleProviderLogin = (provider: AuthProvider) => {
     setLoginError(null)
     const providerParam = provider.id || provider.type
-    api.login(providerParam)
+    login(providerParam)
   }
 
   const handleLdapLogin = async (e: React.FormEvent) => {
@@ -109,12 +103,7 @@ const LoginPage: React.FC = () => {
     setLoginError(null)
     setLdapLoading(true)
     try {
-      const response = await api.ldapLogin(ldapUsername, ldapPassword)
-      localStorage.setItem('auth_token', response.token)
-      localStorage.removeItem('user')
-      localStorage.removeItem('role_template')
-      localStorage.removeItem('allowed_scopes')
-      await login({} as User)
+      await ldapLogin(ldapUsername, ldapPassword)
       navigate('/')
     } catch (err) {
       const message = err instanceof Error ? err.message : t('auth.ldapLoginFailed')

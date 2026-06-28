@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { queryKeys } from '../../services/queryKeys'
+import PageHeader from '../../components/PageHeader'
+import PageTitleIcon from '@mui/icons-material/GetApp'
 import {
   Autocomplete,
   Alert,
@@ -744,38 +746,36 @@ const TerraformMirrorPage: React.FC = () => {
         </Box>
       ) : (
         <Container maxWidth="lg" sx={{ py: 4 }}>
-          {/* Header */}
-          <Box
-            sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}
-          >
-            <Box>
-              <Typography variant="h4">{t('admin.terraformMirror.pageTitle')}</Typography>
-            </Box>
-            <Box sx={{ display: 'flex', gap: 1 }}>
-              <Button
-                variant="outlined"
-                startIcon={<RefreshIcon />}
-                onClick={() =>
-                  queryClient.invalidateQueries({ queryKey: queryKeys.terraformMirrors._def })
-                }
-                disabled={loading}
-              >
-                {t('admin.terraformMirror.refresh')}
-              </Button>
-              <Button
-                variant="contained"
-                startIcon={<AddIcon />}
-                onClick={() => {
-                  setCreateForm(emptyCreate())
-                  setCreateVersionFilter('')
-                  setCreatePlatformFilter([])
-                  setCreateOpen(true)
-                }}
-              >
-                {t('admin.terraformMirror.addMirror')}
-              </Button>
-            </Box>
-          </Box>
+          <PageHeader
+            icon={<PageTitleIcon />}
+            title={t('admin.terraformMirror.pageTitle')}
+            actions={
+              <Box sx={{ display: 'flex', gap: 1 }}>
+                <Button
+                  variant="outlined"
+                  startIcon={<RefreshIcon />}
+                  onClick={() =>
+                    queryClient.invalidateQueries({ queryKey: queryKeys.terraformMirrors._def })
+                  }
+                  disabled={loading}
+                >
+                  {t('admin.terraformMirror.refresh')}
+                </Button>
+                <Button
+                  variant="contained"
+                  startIcon={<AddIcon />}
+                  onClick={() => {
+                    setCreateForm(emptyCreate())
+                    setCreateVersionFilter('')
+                    setCreatePlatformFilter([])
+                    setCreateOpen(true)
+                  }}
+                >
+                  {t('admin.terraformMirror.addMirror')}
+                </Button>
+              </Box>
+            }
+          />
 
           {/* Help / info banner */}
           <Alert severity="info" sx={{ mb: 2 }}>

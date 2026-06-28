@@ -1,6 +1,8 @@
 import { Box, FormControlLabel, Paper, Switch, Typography } from '@mui/material'
 import { useTranslation } from 'react-i18next'
 import Page from '../components/Page'
+import PageHeader from '../components/PageHeader'
+import PageTitleIcon from '@mui/icons-material/Settings'
 import { useConsent } from '../contexts/ConsentContext'
 
 /**
@@ -13,9 +15,7 @@ export default function SettingsPage() {
 
   return (
     <Page maxWidth="sm">
-      <Typography variant="h4" component="h1" gutterBottom>
-        {t('settingsPage.title')}
-      </Typography>
+      <PageHeader icon={<PageTitleIcon />} title={t('settingsPage.title')} />
       <Paper sx={{ p: 3, mb: 3 }}>
         <Typography variant="h6" gutterBottom>
           {t('settingsPage.telemetryPrivacy')}

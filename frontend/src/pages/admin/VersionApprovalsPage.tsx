@@ -35,6 +35,8 @@ import VerifiedIcon from '@mui/icons-material/Verified'
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown'
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp'
 import Page from '../../components/Page'
+import PageHeader from '../../components/PageHeader'
+import PageTitleIcon from '@mui/icons-material/HourglassEmpty'
 import api from '../../services/api'
 import { queryKeys } from '../../services/queryKeys'
 import { getErrorMessage } from '../../utils/errors'
@@ -119,7 +121,7 @@ function EventsRow({ id, open }: { id: string; open: boolean }) {
                       ' ' + t('admin.versionApprovals.performedBy', { name: ev.performed_by_name })}
                     {ev.auto_approve_rule &&
                       ' — ' +
-                        t('admin.versionApprovals.autoApproveRule', { rule: ev.auto_approve_rule })}
+                      t('admin.versionApprovals.autoApproveRule', { rule: ev.auto_approve_rule })}
                     {ev.notes && ` — "${ev.notes}"`}
                     {' · ' + formatDate(ev.created_at)}
                   </Typography>
@@ -395,12 +397,11 @@ const VersionApprovalsPage: React.FC = () => {
 
   return (
     <Page maxWidth="lg" aria-busy={isLoading} aria-live="polite">
-      <Box sx={{ mb: 3 }}>
-        <Typography variant="h4">{t('admin.versionApprovals.pageTitle')}</Typography>
-        <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-          {t('admin.versionApprovals.pageSubtitle')}
-        </Typography>
-      </Box>
+      <PageHeader
+        icon={<PageTitleIcon />}
+        title={t('admin.versionApprovals.pageTitle')}
+        description={t('admin.versionApprovals.pageSubtitle')}
+      />
 
       {error && (
         <Alert severity="error" sx={{ mb: 2 }} onClose={() => setError(null)}>

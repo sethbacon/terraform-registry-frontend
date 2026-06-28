@@ -26,6 +26,8 @@ import { queryKeys } from '../services/queryKeys'
 import { Provider } from '../types'
 import { useAuth } from '../contexts/AuthContext'
 import Page from '../components/Page'
+import PageHeader from '../components/PageHeader'
+import PageTitleIcon from '@mui/icons-material/Extension'
 import RegistryItemCard from '../components/RegistryItemCard'
 import { RegistryItemGridSkeleton } from '../components/skeletons/RegistryItemCardSkeleton'
 
@@ -201,32 +203,23 @@ const ProvidersPage: React.FC = () => {
   return (
     <Page maxWidth="lg" aria-busy={loading} aria-live="polite">
       {/* Header */}
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-        <Box>
-          <Typography variant="h4" gutterBottom>
-            {t('providers.pageTitle')}
-          </Typography>
-          <Typography
-            variant="body1"
-            sx={{
-              color: 'text.secondary',
-            }}
-          >
-            {t('providers.pageSubtitle')}
-          </Typography>
-        </Box>
-        {isAuthenticated && (
-          <Button
-            variant="contained"
-            color="secondary"
-            startIcon={<CloudUpload />}
-            onClick={() => navigate('/admin/upload/provider')}
-          >
-            {t('providers.publishProvider')}
-          </Button>
-        )}
-      </Box>
-      <Box sx={{ mb: 4 }} />
+      <PageHeader
+        icon={<PageTitleIcon />}
+        title={t('providers.pageTitle')}
+        description={t('providers.pageSubtitle')}
+        actions={
+          isAuthenticated && (
+            <Button
+              variant="contained"
+              color="secondary"
+              startIcon={<CloudUpload />}
+              onClick={() => navigate('/admin/upload/provider')}
+            >
+              {t('providers.publishProvider')}
+            </Button>
+          )
+        }
+      />
       {/* Search Bar + Sort */}
       <Box sx={{ display: 'flex', gap: 2, mb: 4, alignItems: 'flex-start' }}>
         <TextField

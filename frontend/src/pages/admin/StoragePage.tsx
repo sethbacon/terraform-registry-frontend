@@ -59,6 +59,8 @@ import type {
 } from '../../types'
 import { queryKeys } from '../../services/queryKeys'
 import Page from '../../components/Page'
+import PageHeader from '../../components/PageHeader'
+import PageTitleIcon from '@mui/icons-material/Storage'
 import StorageMigrationWizard from '../../components/StorageMigrationWizard'
 
 const StoragePage: React.FC = () => {
@@ -659,18 +661,13 @@ const StoragePage: React.FC = () => {
 
   const renderSetupWizard = () => (
     <Page maxWidth="lg">
-      <Typography variant="h4" gutterBottom>
-        {showAddWizard ? t('admin.storage.titleAdd') : t('admin.storage.titleConfigure')}
-      </Typography>
-      <Typography
-        variant="body1"
-        sx={{
-          color: 'text.secondary',
-          marginBottom: '16px',
-        }}
-      >
-        {showAddWizard ? t('admin.storage.subtitleAdd') : t('admin.storage.subtitleConfigure')}
-      </Typography>
+      <PageHeader
+        icon={<PageTitleIcon />}
+        title={showAddWizard ? t('admin.storage.titleAdd') : t('admin.storage.titleConfigure')}
+        description={
+          showAddWizard ? t('admin.storage.subtitleAdd') : t('admin.storage.subtitleConfigure')
+        }
+      />
 
       <Stepper activeStep={activeStep} sx={{ mb: 4 }}>
         {steps.map((label) => (
@@ -741,42 +738,43 @@ const StoragePage: React.FC = () => {
 
   const renderExistingConfigs = () => (
     <Page maxWidth="lg">
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-        <Box>
-          <Typography variant="h4">{t('admin.storage.storageSettings')}</Typography>
-        </Box>
-        <Box sx={{ display: 'flex', gap: 1 }}>
-          {configs.length >= 2 ? (
+      <PageHeader
+        icon={<PageTitleIcon />}
+        title={t('admin.storage.storageSettings')}
+        actions={
+          <Box sx={{ display: 'flex', gap: 1 }}>
+            {configs.length >= 2 ? (
+              <Button
+                variant="outlined"
+                startIcon={<SyncIcon />}
+                onClick={() => setMigrationWizardOpen(true)}
+              >
+                {t('admin.storage.migrateData')}
+              </Button>
+            ) : (
+              <Button
+                variant="outlined"
+                startIcon={<AddIcon />}
+                onClick={() => {
+                  setActiveStep(0)
+                  setShowAddWizard(true)
+                }}
+              >
+                {t('admin.storage.addConfiguration')}
+              </Button>
+            )}
             <Button
               variant="outlined"
-              startIcon={<SyncIcon />}
-              onClick={() => setMigrationWizardOpen(true)}
+              startIcon={<RefreshIcon />}
+              onClick={() =>
+                queryClient.invalidateQueries({ queryKey: queryKeys.storageConfigs._def })
+              }
             >
-              {t('admin.storage.migrateData')}
+              {t('admin.storage.refresh')}
             </Button>
-          ) : (
-            <Button
-              variant="outlined"
-              startIcon={<AddIcon />}
-              onClick={() => {
-                setActiveStep(0)
-                setShowAddWizard(true)
-              }}
-            >
-              {t('admin.storage.addConfiguration')}
-            </Button>
-          )}
-          <Button
-            variant="outlined"
-            startIcon={<RefreshIcon />}
-            onClick={() =>
-              queryClient.invalidateQueries({ queryKey: queryKeys.storageConfigs._def })
-            }
-          >
-            {t('admin.storage.refresh')}
-          </Button>
-        </Box>
-      </Box>
+          </Box>
+        }
+      />
 
       {error && (
         <Alert severity="error" sx={{ mb: 2 }} onClose={() => setError(null)}>

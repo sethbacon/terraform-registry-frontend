@@ -28,6 +28,8 @@ import CheckCircleIcon from '@mui/icons-material/CheckCircle'
 import CancelIcon from '@mui/icons-material/Cancel'
 import HourglassEmptyIcon from '@mui/icons-material/HourglassEmpty'
 import Page from '../../components/Page'
+import PageHeader from '../../components/PageHeader'
+import PageTitleIcon from '@mui/icons-material/HourglassEmpty'
 import api from '../../services/api'
 import { formatDate } from '../../utils'
 import { MirrorApprovalRequest } from '../../types/rbac'
@@ -194,52 +196,44 @@ const ApprovalsPage: React.FC = () => {
         </Box>
       ) : (
         <>
-          <Box
-            sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}
-          >
-            <Box>
-              <Typography variant="h4">{t('admin.approvals.pageTitle')}</Typography>
-              <Typography
-                variant="body2"
-                sx={{
-                  color: 'text.secondary',
-                }}
-              >
-                {t('admin.approvals.pageSubtitle')}
-              </Typography>
-            </Box>
-            <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
-              <FormControl size="small" sx={{ minWidth: 140 }}>
-                <InputLabel>{t('admin.approvals.labelStatus')}</InputLabel>
-                <Select
-                  label={t('admin.approvals.labelStatus')}
-                  value={statusFilter}
-                  onChange={(e) => setStatusFilter(e.target.value)}
+          <PageHeader
+            icon={<PageTitleIcon />}
+            title={t('admin.approvals.pageTitle')}
+            description={t('admin.approvals.pageSubtitle')}
+            actions={
+              <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+                <FormControl size="small" sx={{ minWidth: 140 }}>
+                  <InputLabel>{t('admin.approvals.labelStatus')}</InputLabel>
+                  <Select
+                    label={t('admin.approvals.labelStatus')}
+                    value={statusFilter}
+                    onChange={(e) => setStatusFilter(e.target.value)}
+                  >
+                    <MenuItem value="">{t('admin.approvals.filterAll')}</MenuItem>
+                    <MenuItem value="pending">{t('admin.approvals.statusPending')}</MenuItem>
+                    <MenuItem value="approved">{t('admin.approvals.statusApproved')}</MenuItem>
+                    <MenuItem value="rejected">{t('admin.approvals.statusRejected')}</MenuItem>
+                  </Select>
+                </FormControl>
+                <Button
+                  variant="outlined"
+                  startIcon={<RefreshIcon />}
+                  onClick={() => {
+                    loadApprovals()
+                  }}
                 >
-                  <MenuItem value="">{t('admin.approvals.filterAll')}</MenuItem>
-                  <MenuItem value="pending">{t('admin.approvals.statusPending')}</MenuItem>
-                  <MenuItem value="approved">{t('admin.approvals.statusApproved')}</MenuItem>
-                  <MenuItem value="rejected">{t('admin.approvals.statusRejected')}</MenuItem>
-                </Select>
-              </FormControl>
-              <Button
-                variant="outlined"
-                startIcon={<RefreshIcon />}
-                onClick={() => {
-                  loadApprovals()
-                }}
-              >
-                {t('admin.approvals.refresh')}
-              </Button>
-              <Button
-                variant="contained"
-                startIcon={<AddIcon />}
-                onClick={() => setCreateDialogOpen(true)}
-              >
-                {t('admin.approvals.createRequest')}
-              </Button>
-            </Box>
-          </Box>
+                  {t('admin.approvals.refresh')}
+                </Button>
+                <Button
+                  variant="contained"
+                  startIcon={<AddIcon />}
+                  onClick={() => setCreateDialogOpen(true)}
+                >
+                  {t('admin.approvals.createRequest')}
+                </Button>
+              </Box>
+            }
+          />
 
           {error && (
             <Alert severity="error" sx={{ mb: 2 }} onClose={() => setError(null)}>

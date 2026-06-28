@@ -51,7 +51,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [sessionExpiresSoon, setSessionExpiresSoon] = useState(false)
   const warningTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   // Ref to break the circular dependency between scheduleSessionWarning and refreshToken.
-  const silentRefreshRef = useRef<() => Promise<void>>(async () => {})
+  const silentRefreshRef = useRef<() => Promise<void>>(async () => { })
 
   const clearWarningTimer = useCallback(() => {
     if (warningTimerRef.current !== null) {
@@ -196,22 +196,37 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   }, [fetchCurrentUser, scheduleSessionWarning])
 
-  const login = async (userOrProvider: User | 'oidc' | 'azuread'): Promise<void> => {
-    if (typeof userOrProvider === 'string') {
-      // OAuth login - redirects to OAuth provider
-      api.login(userOrProvider)
-    } else {
-      // Direct user object (dev mode) - SECURITY: Always fetch actual user data from API
-      // Never trust client-provided user data for authorization decisions
-      console.log('AuthContext: Dev login initiated, fetching user from API')
-      setIsAuthenticated(true)
-      // Immediately fetch actual user data including scopes from the server
-      // and wait for it to complete before returning
-      await fetchCurrentUser()
-    }
-  }
+  const login = useCallback((provider = 'oidc') => {
+    // Redirect to the OAuth/OIDC provider. Dev and LDAP logins use devLogin/ldapLogin.
+    api.login(provider)
+  }, [])
 
-  const refreshToken = async () => {
+  // Dev-only login. Stores the legacy token (the api client attaches it as a Bearer
+  // header during the cookie migration), then resolves the user from the server.
+  const devLogin = useCallback(async () => {
+    const response = await api.devLogin()
+    localStorage.setItem('auth_token', response.token)
+    localStorage.removeItem('user')
+    localStorage.removeItem('role_template')
+    localStorage.removeItem('allowed_scopes')
+    setIsAuthenticated(true)
+    await fetchCurrentUser()
+  }, [fetchCurrentUser])
+
+  const ldapLogin = useCallback(
+    async (username: string, password: string) => {
+      const response = await api.ldapLogin(username, password)
+      localStorage.setItem('auth_token', response.token)
+      localStorage.removeItem('user')
+      localStorage.removeItem('role_template')
+      localStorage.removeItem('allowed_scopes')
+      setIsAuthenticated(true)
+      await fetchCurrentUser()
+    },
+    [fetchCurrentUser],
+  )
+
+  const refreshSession = async () => {
     try {
       const response = await api.refreshToken()
       // The backend sets the new JWT as an HttpOnly cookie in the response.
@@ -221,7 +236,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         scheduleSessionWarning(response.token)
       }
     } catch (error) {
-      console.error('Failed to refresh token:', error)
+      console.error('Failed to refresh session:', error)
       logout()
     }
   }
@@ -246,14 +261,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   }
   silentRefreshRef.current = silentRefresh
 
-  const setToken = (token: string) => {
-    // Legacy method: store token in localStorage. Used by CallbackPage during
-    // migration period. New flow uses HttpOnly cookies set by the backend.
-    localStorage.setItem('auth_token', token)
-    setIsAuthenticated(true)
-    scheduleSessionWarning(token)
-    // User data will be refreshed on page reload
-  }
+  const hasScope = useCallback(
+    (scope: string) => allowedScopes.includes('admin') || allowedScopes.includes(scope),
+    [allowedScopes],
+  )
 
   // Cleanup timer on unmount.
   useEffect(() => {
@@ -271,9 +282,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     sessionExpiresAt,
     sessionExpiresSoon,
     login,
+    devLogin,
+    ldapLogin,
     logout,
-    refreshToken,
-    setToken,
+    refreshSession,
+    hasScope,
   }
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

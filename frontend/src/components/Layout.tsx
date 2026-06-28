@@ -41,7 +41,7 @@ import Brightness7 from '@mui/icons-material/Brightness7'
 import HelpOutline from '@mui/icons-material/HelpOutlined'
 import InfoOutlined from '@mui/icons-material/InfoOutlined'
 import SearchIcon from '@mui/icons-material/Search'
-import AdminPanelSettings from '@mui/icons-material/AdminPanelSettings'
+import Badge from '@mui/icons-material/Badge'
 import VerifiedUser from '@mui/icons-material/VerifiedUser'
 import Security from '@mui/icons-material/Security'
 import Storage from '@mui/icons-material/Storage'
@@ -225,7 +225,7 @@ const Layout = () => {
           },
           {
             text: t('nav.admin.roles'),
-            icon: <AdminPanelSettings />,
+            icon: <Badge />,
             path: '/admin/roles',
             tooltip: t('nav.admin.rolesTooltip'),
             scope: 'users:read',
@@ -421,11 +421,11 @@ const Layout = () => {
     () =>
       isAuthenticated
         ? adminNavGroups
-            .map((group) => ({
-              ...group,
-              items: group.items.filter((item) => item.scope === null || hasScope(item.scope)),
-            }))
-            .filter((group) => group.items.length > 0)
+          .map((group) => ({
+            ...group,
+            items: group.items.filter((item) => item.scope === null || hasScope(item.scope)),
+          }))
+          .filter((group) => group.items.length > 0)
         : [],
     [isAuthenticated, adminNavGroups, hasScope],
   )

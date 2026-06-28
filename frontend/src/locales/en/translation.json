@@ -65,8 +65,8 @@
     "settings": "Settings",
     "support": "Support",
     "accountMenu": "Account",
-    "logout": "Logout",
-    "login": "Login",
+    "logout": "Sign out",
+    "login": "Sign in",
     "language": "Language"
   },
   "about": {
@@ -101,11 +101,16 @@
     "username": "Username",
     "password": "Password",
     "signIn": "Sign In",
+    "signOut": "Sign out",
     "noProviders": "No SSO providers configured. Contact your administrator.",
     "ssoInfo": "This application uses single sign-on for authentication.",
     "ssoContact": "Contact your administrator if you need access.",
     "devLoginFailed": "Dev login failed. Check server logs.",
     "ldapLoginFailed": "LDAP login failed. Check your credentials."
+  },
+  "session": {
+    "expiresSoon": "Your session expires in {{minutes}} minutes. Refresh to stay signed in.",
+    "refresh": "Refresh session"
   },
   "home": {
     "heroTitle": "Private Terraform Registry",

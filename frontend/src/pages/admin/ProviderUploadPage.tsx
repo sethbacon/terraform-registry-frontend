@@ -26,6 +26,8 @@ import ArrowBack from '@mui/icons-material/ArrowBack'
 import api from '../../services/api'
 import { getErrorMessage } from '../../utils/errors'
 import Page from '../../components/Page'
+import PageHeader from '../../components/PageHeader'
+import PageTitleIcon from '@mui/icons-material/Extension'
 import FileDropZone from '../../components/FileDropZone'
 
 type ProviderMethod = 'choose' | 'upload' | 'mirror'
@@ -334,18 +336,11 @@ const ProviderUploadPage: React.FC = () => {
 
   return (
     <Page maxWidth="md">
-      <Typography variant="h4" gutterBottom>
-        {t('admin.providerUpload.pageTitle')}
-      </Typography>
-      <Typography
-        variant="body1"
-        sx={{
-          color: 'text.secondary',
-          mb: 4,
-        }}
-      >
-        {t('admin.providerUpload.pageSubtitle')}
-      </Typography>
+      <PageHeader
+        icon={<PageTitleIcon />}
+        title={t('admin.providerUpload.pageTitle')}
+        description={t('admin.providerUpload.pageSubtitle')}
+      />
       <Paper sx={{ width: '100%' }}>
         {providerMethod === 'choose' && renderProviderMethodChooser()}
         {providerMethod === 'upload' && renderFileUploadForm()}
