@@ -89,6 +89,7 @@ describe('AuthProvider', () => {
     expect(latest.isAuthenticated).toBe(false)
     await act(() => latest.devLogin())
     expect(mockApi.devLogin).toHaveBeenCalled()
+    expect(localStorage.getItem('auth_token')).toBe('t')
     expect(latest.isAuthenticated).toBe(true)
   })
 
@@ -99,6 +100,7 @@ describe('AuthProvider', () => {
     await renderAuth()
     await act(() => latest.ldapLogin('alice', 'secret'))
     expect(mockApi.ldapLogin).toHaveBeenCalledWith('alice', 'secret')
+    expect(localStorage.getItem('auth_token')).toBe('t')
     expect(latest.isAuthenticated).toBe(true)
   })
 

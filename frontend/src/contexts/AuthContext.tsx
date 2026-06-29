@@ -34,8 +34,19 @@ const authApi: AuthApi = {
     }
   },
   login: (provider) => api.login(provider),
-  devLogin: () => api.devLogin(),
-  ldapLogin: (username, password) => api.ldapLogin(username, password),
+  // Registry dev/LDAP logins return a JWT in the body (no cookie is set). Persist it so
+  // the api client attaches it as a Bearer header on the subsequent /me call; logout
+  // clears it via clearAuthStorage (onClearStorage).
+  devLogin: async () => {
+    const r = await api.devLogin()
+    if (r?.token) localStorage.setItem('auth_token', r.token)
+    return r
+  },
+  ldapLogin: async (username, password) => {
+    const r = await api.ldapLogin(username, password)
+    if (r?.token) localStorage.setItem('auth_token', r.token)
+    return r
+  },
   logout: () => api.logout(),
   refreshToken: async () => {
     const r = await api.refreshToken()
