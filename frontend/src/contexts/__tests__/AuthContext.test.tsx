@@ -44,7 +44,7 @@ beforeEach(() => {
 
 describe('AuthProvider', () => {
   it('throws when used outside the provider', () => {
-    const spy = vi.spyOn(console, 'error').mockImplementation(() => {})
+    const spy = vi.spyOn(console, 'error').mockImplementation(() => { })
     expect(() => render(<Consumer />)).toThrow(/within an AuthProvider/)
     spy.mockRestore()
   })
