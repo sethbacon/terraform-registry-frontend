@@ -94,6 +94,10 @@ services:
         # development enables the Dev Login button so Playwright can log in without real credentials
         # Must match DEV_MODE=true on the backend. Never use in production.
         VITE_MODE: development
+      # GitHub Packages read token so the build can install the private @sethbacon/* dep
+      # (consumed via --mount=type=secret in the Dockerfile).
+      secrets:
+        - node_auth_token
     ports:
       # Playwright expects https://localhost:3000; nginx serves HTTPS on port 443
       # The self-signed cert is baked into the image at build time.
@@ -107,3 +111,9 @@ services:
 volumes:
   postgres-data-test:
     driver: local
+
+# Build-time secret sourced from the NODE_AUTH_TOKEN env var (set by CI to
+# github.token). Lets the frontend image install the private @sethbacon/* dep.
+secrets:
+  node_auth_token:
+    environment: NODE_AUTH_TOKEN
