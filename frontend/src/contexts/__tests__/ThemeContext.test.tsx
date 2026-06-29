@@ -42,7 +42,7 @@ describe('ThemeContext', () => {
     }
 
     expect(() => render(<BadConsumer />)).toThrow(
-      'useThemeMode must be used within a ThemeProvider',
+      /must be used within (a ThemeProvider|SuiteThemeProvider)/,
     )
   })
 
