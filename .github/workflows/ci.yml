@@ -257,6 +257,10 @@ jobs:
 
       - name: Start test compose
         # Pulls backend from ghcr.io; builds frontend locally
+        env:
+          # GitHub Packages read token so the frontend image build can install the
+          # private @sethbacon/* dep (consumed via the compose build secret).
+          NODE_AUTH_TOKEN: ${{ github.token }}
         run: >-
           docker compose -f deployments/docker-compose.test.yml up -d
 
