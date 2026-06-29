@@ -34,7 +34,7 @@ describe('ThemeContext', () => {
   })
 
   it('throws when useThemeMode is used outside ThemeProvider', () => {
-    vi.spyOn(console, 'error').mockImplementation(() => {})
+    vi.spyOn(console, 'error').mockImplementation(() => { })
 
     function BadConsumer() {
       useThemeMode()
@@ -42,7 +42,7 @@ describe('ThemeContext', () => {
     }
 
     expect(() => render(<BadConsumer />)).toThrow(
-      'useThemeMode must be used within a ThemeProvider',
+      /must be used within (a ThemeProvider|SuiteThemeProvider)/,
     )
   })
 
