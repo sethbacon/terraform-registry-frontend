@@ -13,13 +13,18 @@ WORKDIR /app
 # Copy package files
 COPY package.json package-lock.json .npmrc ./
 
+# NODE_AUTH_TOKEN (a GitHub Packages read token) is injected as a BuildKit secret so npm
+# can install the private @sethbacon/* dependency without baking the token into a layer.
 # Install dependencies (use npm install so lockfile mismatches don't fail in CI for dev)
-RUN npm install --no-audit --no-fund
+RUN --mount=type=secret,id=node_auth_token \
+    NODE_AUTH_TOKEN="$(cat /run/secrets/node_auth_token)" npm install --no-audit --no-fund
 
 # Fix what can be auto-fixed, then gate on production-dependency vulnerabilities only.
 # Dev-only packages (e.g. eslint tooling) are excluded: they are not present
 # in the final nginx image and cannot be force-fixed without breaking build tooling.
-RUN npm audit fix || true && \
+RUN --mount=type=secret,id=node_auth_token \
+    export NODE_AUTH_TOKEN="$(cat /run/secrets/node_auth_token)" && \
+    npm audit fix || true && \
     npm audit --audit-level=high --omit=dev
 
 # Copy source code
