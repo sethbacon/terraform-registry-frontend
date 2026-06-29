@@ -1,6 +1,20 @@
 <!-- markdownlint-disable MD013 MD024 MD041 -->
 # Changelog
 
+## [2.12.0](https://github.com/sethbacon/terraform-registry-frontend/compare/v2.11.1...v2.12.0) (2026-06-28)
+
+
+### Features
+
+* UX alignment + consume @sethbacon/terraform-suite-ui ([#438](https://github.com/sethbacon/terraform-registry-frontend/issues/438)) ([a8c739f](https://github.com/sethbacon/terraform-registry-frontend/commit/a8c739f769f31299bdeea32e184b8578bb76795b))
+
+## [2.11.1](https://github.com/sethbacon/terraform-registry-frontend/compare/v2.11.0...v2.11.1) (2026-06-27)
+
+
+### Refactor
+
+* **api:** use canonical mirror request types in createMirror/updateMirror ([#435](https://github.com/sethbacon/terraform-registry-frontend/issues/435)) ([9d8fea7](https://github.com/sethbacon/terraform-registry-frontend/commit/9d8fea7837e9fed7ae13708430af01bc2667f620))
+
 ## [2.11.0](https://github.com/sethbacon/terraform-registry-frontend/compare/v2.10.3...v2.11.0) (2026-06-26)
 
 

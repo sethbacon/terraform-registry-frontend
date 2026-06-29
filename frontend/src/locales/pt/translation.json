@@ -101,11 +101,16 @@
     "username": "Nome de utilizador",
     "password": "Palavra-passe",
     "signIn": "Iniciar sessão",
+    "signOut": "Sair",
     "noProviders": "Não há fornecedores de SSO configurados. Contacte o seu administrador.",
     "ssoInfo": "Esta aplicação utiliza o início de sessão único para autenticação.",
     "ssoContact": "Contacte o seu administrador se precisar de acesso.",
     "devLoginFailed": "Falha no início de sessão do desenvolvedor. Verifique os registos do servidor.",
     "ldapLoginFailed": "Falha no início de sessão LDAP. Verifique as suas credenciais."
+  },
+  "session": {
+    "expiresSoon": "A sua sessão expira daqui a {{minutes}} minutos. Atualize a página para permanecer com a sessão ativa.",
+    "refresh": "Atualizar sessão"
   },
   "home": {
     "heroTitle": "Registo privado do Terraform",
