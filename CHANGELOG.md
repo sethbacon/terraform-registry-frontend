@@ -1,6 +1,21 @@
 <!-- markdownlint-disable MD013 MD024 MD041 -->
 # Changelog
 
+## [2.12.1](https://github.com/sethbacon/terraform-registry-frontend/compare/v2.12.0...v2.12.1) (2026-06-30)
+
+
+### Bug Fixes
+
+* **ci:** authenticate npm in the e2e test-compose build ([#445](https://github.com/sethbacon/terraform-registry-frontend/issues/445)) ([49b7e5b](https://github.com/sethbacon/terraform-registry-frontend/commit/49b7e5be414bed8c530f33323c06eb033aaca8e0))
+* **ci:** authenticate npm to GitHub Packages in the release Docker build ([#444](https://github.com/sethbacon/terraform-registry-frontend/issues/444)) ([75d242b](https://github.com/sethbacon/terraform-registry-frontend/commit/75d242b11925952bd6b65e35fff9c8763cc14f09))
+
+
+### Refactor
+
+* consume suite-ui consent, theme & identity ([#442](https://github.com/sethbacon/terraform-registry-frontend/issues/442)) ([c445c1e](https://github.com/sethbacon/terraform-registry-frontend/commit/c445c1ef1c4b7db5f197750f05add075c2c2f89e))
+* **shell:** consume SuiteLayout from @sethbacon/terraform-suite-ui ([#447](https://github.com/sethbacon/terraform-registry-frontend/issues/447)) ([68a1b40](https://github.com/sethbacon/terraform-registry-frontend/commit/68a1b4056e8c69ab4da29ae56c3bb2677269acfc))
+* **shell:** consume SuiteSwitcher from @sethbacon/terraform-suite-ui ([#446](https://github.com/sethbacon/terraform-registry-frontend/issues/446)) ([c8e7c56](https://github.com/sethbacon/terraform-registry-frontend/commit/c8e7c56e49b70573aab0c964995c29f11d81059e))
+
 ## [2.12.0](https://github.com/sethbacon/terraform-registry-frontend/compare/v2.11.1...v2.12.0) (2026-06-28)
 
 
