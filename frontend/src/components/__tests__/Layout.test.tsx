@@ -43,10 +43,10 @@ function makeApi(scopes: string[] | null): AuthApi {
       scopes === null
         ? vi.fn().mockRejectedValue(new Error('unauthenticated'))
         : vi.fn().mockResolvedValue({
-            user: { id: '1', email: 'alice@example.com', name: 'Alice' },
-            memberships: [],
-            allowed_scopes: scopes,
-          }),
+          user: { id: '1', email: 'alice@example.com', name: 'Alice' },
+          memberships: [],
+          allowed_scopes: scopes,
+        }),
     login: vi.fn(),
     devLogin: vi.fn().mockResolvedValue(undefined),
     ldapLogin: vi.fn().mockResolvedValue(undefined),
