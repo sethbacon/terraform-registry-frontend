@@ -69,6 +69,11 @@
     "login": "Accedi",
     "language": "Lingua"
   },
+  "settings": {
+    "title": "Impostazioni",
+    "themeLight": "Modalità chiara",
+    "themeDark": "Modalità scura"
+  },
   "about": {
     "title": "Informazioni su {{productName}}",
     "description": "Un registro di moduli e provider Terraform self-hosted con supporto per l'integrazione con sistemi di controllo del codice sorgente (SCM), il mirroring dei provider, la distribuzione dei binari Terraform e il multi-tenancy.",

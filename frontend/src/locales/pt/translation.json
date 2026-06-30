@@ -69,6 +69,11 @@
     "login": "Iniciar sessão",
     "language": "Idioma"
   },
+  "settings": {
+    "title": "Definições",
+    "themeLight": "Modo claro",
+    "themeDark": "Modo escuro"
+  },
   "about": {
     "title": "Sobre a {{productName}}",
     "description": "Um registo de módulos e fornecedores Terraform auto-hospedado, com suporte para integração com SCM, espelhamento de fornecedores, distribuição de binários Terraform e multilocação.",

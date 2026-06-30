@@ -69,6 +69,11 @@
     "login": "ログイン",
     "language": "言語"
   },
+  "settings": {
+    "title": "設定",
+    "themeLight": "ライトモード",
+    "themeDark": "ダークモード"
+  },
   "about": {
     "title": "{{productName}}について",
     "description": "SCM統合、プロバイダーのミラーリング、Terraformバイナリの配布、およびマルチテナント機能をサポートする、セルフホスト型のTerraformモジュールおよびプロバイダーレジストリ。",

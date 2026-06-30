@@ -69,6 +69,11 @@
     "login": "Se connecter",
     "language": "Langue"
   },
+  "settings": {
+    "title": "Paramètres",
+    "themeLight": "Mode clair",
+    "themeDark": "Mode sombre"
+  },
   "about": {
     "title": "À propos d'{{productName}}",
     "description": "Un registre de modules et de fournisseurs Terraform auto-hébergé, prenant en charge l'intégration SCM, la mise en miroir des fournisseurs, la distribution des binaires Terraform et la multi-location.",
