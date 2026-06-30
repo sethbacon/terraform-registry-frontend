@@ -69,6 +69,11 @@
     "login": "Sign in",
     "language": "Language"
   },
+  "settings": {
+    "title": "Settings",
+    "themeLight": "Light mode",
+    "themeDark": "Dark mode"
+  },
   "about": {
     "title": "About {{productName}}",
     "description": "A self-hosted Terraform module and provider registry with support for SCM integration, provider mirroring, Terraform binary distribution, and multi-tenancy.",
