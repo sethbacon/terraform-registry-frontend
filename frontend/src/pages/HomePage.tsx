@@ -180,26 +180,25 @@ const HomePage: React.FC = () => {
         </Alert>
       )}
       {/* Hero Section */}
-      <Box
-        sx={{
-          background: 'linear-gradient(135deg, #5C4EE5 0%, #00D9C0 100%)',
-          color: 'white',
-          py: 8,
-          mb: 6,
-        }}
-      >
-        <Container maxWidth="lg">
+      <Container maxWidth="lg" disableGutters>
+        <Box
+          sx={{
+            background: 'linear-gradient(135deg, #5C4EE5 0%, #00D9C0 100%)',
+            color: 'white',
+            borderRadius: 2,
+            px: { xs: 3, md: 6 },
+            py: { xs: 6, md: 8 },
+            mb: 6,
+          }}
+        >
           <Typography
-            variant="h2"
+            variant="h3"
             component="h1"
-            gutterBottom
-            sx={{
-              fontWeight: 'bold',
-            }}
+            sx={{ fontWeight: 'bold', mb: 1.5 }}
           >
             {t('home.heroTitle')}
           </Typography>
-          <Typography variant="h5" sx={{ mb: 4, opacity: 0.9 }}>
+          <Typography variant="h6" sx={{ mb: 4, opacity: 0.9, maxWidth: 720 }}>
             {t('home.heroSubtitle')}
           </Typography>
           <Stack
@@ -257,8 +256,8 @@ const HomePage: React.FC = () => {
               {summaryParts.join(' · ')} {t('home.available')}
             </Typography>
           ) : null}
-        </Container>
-      </Box>
+        </Box>
+      </Container>
       {/* Quick Search */}
       <Container maxWidth="sm" sx={{ mb: 8, textAlign: 'center' }}>
         <Typography
