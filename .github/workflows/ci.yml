@@ -255,8 +255,28 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Pull test images (retry transient Docker Hub timeouts)
+        # postgres:16-alpine (the postgres + seed-db services) is pulled from
+        # Docker Hub, whose unauthenticated rate limit on shared GitHub runners
+        # intermittently causes "context deadline exceeded" pull timeouts. Because
+        # this E2E is a required release gate, that flake fails the job and blocks
+        # releases. Retry the pull so the subsequent `compose up` finds the images
+        # cached. The backend is pulled from ghcr.io (authenticated above) and the
+        # frontend is built locally, so --ignore-buildable skips it.
+        run: |
+          compose="docker compose -f deployments/docker-compose.test.yml"
+          for attempt in 1 2 3 4 5; do
+            if $compose pull --ignore-buildable; then
+              exit 0
+            fi
+            echo "::warning::Image pull failed (attempt ${attempt}/5); retrying in 15s..."
+            sleep 15
+          done
+          echo "::error::Image pull failed after 5 attempts"
+          exit 1
+
       - name: Start test compose
-        # Pulls backend from ghcr.io; builds frontend locally
+        # Images are pre-pulled above; this builds the frontend and starts everything.
         env:
           # GitHub Packages read token so the frontend image build can install the
           # private @sethbacon/* dep (consumed via the compose build secret).
