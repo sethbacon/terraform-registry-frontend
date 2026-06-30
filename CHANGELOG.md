@@ -1,6 +1,13 @@
 <!-- markdownlint-disable MD013 MD024 MD041 -->
 # Changelog
 
+## [2.12.2](https://github.com/sethbacon/terraform-registry-frontend/compare/v2.12.1...v2.12.2) (2026-06-30)
+
+
+### Bug Fixes
+
+* **ci:** retry e2e image pulls to tolerate Docker Hub rate-limit timeouts ([#450](https://github.com/sethbacon/terraform-registry-frontend/issues/450)) ([5d34466](https://github.com/sethbacon/terraform-registry-frontend/commit/5d344669e476bac0ab989b41cac4497ddecf25be))
+
 ## [2.12.1](https://github.com/sethbacon/terraform-registry-frontend/compare/v2.12.0...v2.12.1) (2026-06-30)
 
 
