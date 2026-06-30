@@ -1,6 +1,13 @@
 <!-- markdownlint-disable MD013 MD024 MD041 -->
 # Changelog
 
+## [2.12.3](https://github.com/sethbacon/terraform-registry-frontend/compare/v2.12.2...v2.12.3) (2026-06-30)
+
+
+### Bug Fixes
+
+* **home:** match the landing hero to the shared rounded-card style ([#452](https://github.com/sethbacon/terraform-registry-frontend/issues/452)) ([f52be1a](https://github.com/sethbacon/terraform-registry-frontend/commit/f52be1a97ef4b8a3ddd69d372684184b9c08135a))
+
 ## [2.12.2](https://github.com/sethbacon/terraform-registry-frontend/compare/v2.12.1...v2.12.2) (2026-06-30)
 
 
