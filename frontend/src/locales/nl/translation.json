@@ -69,6 +69,11 @@
     "login": "Inloggen",
     "language": "Taal"
   },
+  "settings": {
+    "title": "Instellingen",
+    "themeLight": "Lichte modus",
+    "themeDark": "Donkere modus"
+  },
   "about": {
     "title": "Over {{productName}}",
     "description": "Een zelfgehost Terraform-register voor modules en providers, met ondersteuning voor SCM-integratie, het spiegelen van providers, de distributie van Terraform-binaire bestanden en multi-tenancy.",
