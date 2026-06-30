@@ -69,6 +69,11 @@
     "login": "Logg inn",
     "language": "Språk"
   },
+  "settings": {
+    "title": "Innstillinger",
+    "themeLight": "Lysmodus",
+    "themeDark": "Mørk modus"
+  },
   "about": {
     "title": "Om {{productName}}",
     "description": "Et selvhostet register for Terraform-moduler og -leverandører med støtte for SCM-integrasjon, speiling av leverandører, distribusjon av Terraform-binærfiler og flerbrukerfunksjonalitet.",

@@ -69,6 +69,11 @@
     "login": "登录",
     "language": "语言"
   },
+  "settings": {
+    "title": "设置",
+    "themeLight": "浅色模式",
+    "themeDark": "深色模式"
+  },
   "about": {
     "title": "关于{{productName}}",
     "description": "一个支持 SCM 集成、提供程序镜像、Terraform 二进制分发以及多租户功能的自托管 Terraform 模块和提供程序注册表。",

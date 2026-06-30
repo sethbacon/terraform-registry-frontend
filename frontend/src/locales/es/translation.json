@@ -69,6 +69,11 @@
     "login": "Iniciar sesión",
     "language": "Idioma"
   },
+  "settings": {
+    "title": "Configuración",
+    "themeLight": "Modo claro",
+    "themeDark": "Modo oscuro"
+  },
   "about": {
     "title": "Acerca de «{{productName}}»",
     "description": "Un registro de módulos y proveedores de Terraform autohospedado que admite la integración con sistemas de control de versiones (SCM), la duplicación de proveedores, la distribución de binarios de Terraform y la multitenencia.",
