@@ -133,7 +133,7 @@
     "browseAllModules": "Sfoglia tutti i moduli →",
     "providersDescription": "Accedi a provider Terraform personalizzati e duplicati per le tue risorse cloud.",
     "browseAllProviders": "Sfoglia tutti i fornitori →",
-    "terraformBinariesDescription": "Scarica i file binari di Terraform, OpenTofu, Packer, Sentinel e OPA dai mirror interni.",
+    "terraformBinariesDescription": "Scarica i file binari di Terraform, OpenTofu, Packer, Sentinel, OPA e terraform-docs dai mirror interni.",
     "noBinaryMirrors": "Non sono stati configurati mirror binari",
     "viewBinaries": "Visualizza i file binari →",
     "gettingStarted": "Per iniziare",
@@ -298,7 +298,7 @@
   },
   "terraformBinaries": {
     "pageTitle": "Mirror di file binari ospitati",
-    "pageSubtitle": "Scarica i file binari di Terraform, OpenTofu, Packer, Sentinel e OPA dal mirror interno della tua organizzazione. Configura la tua CLI o la tua catena di strumenti CI in modo che puntino all'URL del mirror indicato in ciascuna pagina di dettaglio.",
+    "pageSubtitle": "Scarica i file binari di Terraform, OpenTofu, Packer, Sentinel, OPA e terraform-docs dal mirror interno della tua organizzazione. Configura la tua CLI o la tua catena di strumenti CI in modo che puntino all'URL del mirror indicato in ciascuna pagina di dettaglio.",
     "loadError": "Impossibile caricare i mirror dei file binari di Terraform.",
     "noMirrorsTitle": "Non sono stati configurati mirror binari",
     "noMirrorsBody": "Chiedi a un amministratore di configurare un mirror binario.",
@@ -690,7 +690,7 @@
       "actions": {
         "createMirrorConfig": {
           "heading": "Crea una configurazione mirror",
-          "text": "Fai clic su \"Aggiungi mirror\" per definire un nuovo mirror. Assegnagli un nome, seleziona il tipo di strumento (Terraform, OpenTofu o personalizzato) e specifica l'URL upstream da cui eseguire la sincronizzazione."
+          "text": "Fai clic su \"Aggiungi mirror\" per definire un nuovo mirror. Assegnagli un nome, seleziona il tipo di strumento (terraform, opentofu, packer, sentinel, opa, terraform-docs o personalizzato) e specifica l'URL upstream da cui effettuare la sincronizzazione."
         },
         "syncVersions": {
           "heading": "Versioni di sincronizzazione",

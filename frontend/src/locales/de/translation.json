@@ -133,7 +133,7 @@
     "browseAllModules": "Alle Module anzeigen →",
     "providersDescription": "Greifen Sie auf benutzerdefinierte und gespiegelte Terraform-Provider für Ihre Cloud-Ressourcen zu.",
     "browseAllProviders": "Alle Anbieter anzeigen →",
-    "terraformBinariesDescription": "Laden Sie die Binärdateien von Terraform, OpenTofu, Packer, Sentinel und OPA von internen Spiegelservern herunter.",
+    "terraformBinariesDescription": "Laden Sie die Binärdateien von Terraform, OpenTofu, Packer, Sentinel, OPA und terraform-docs von internen Mirrors herunter.",
     "noBinaryMirrors": "Es sind keine Binär-Mirrors konfiguriert",
     "viewBinaries": "Binärdateien anzeigen →",
     "gettingStarted": "Erste Schritte",
@@ -298,7 +298,7 @@
   },
   "terraformBinaries": {
     "pageTitle": "Gehostete Binär-Mirrors",
-    "pageSubtitle": "Laden Sie die Binärdateien von Terraform, OpenTofu, Packer, Sentinel und OPA vom internen Mirror Ihrer Organisation herunter. Konfigurieren Sie Ihre CLI oder CI-Toolchain so, dass sie auf die auf der jeweiligen Detailseite angegebene Mirror-URL verweist.",
+    "pageSubtitle": "Laden Sie die Binärdateien von Terraform, OpenTofu, Packer, Sentinel, OPA und terraform-docs vom internen Mirror Ihrer Organisation herunter. Konfigurieren Sie Ihre CLI- oder CI-Toolchain so, dass sie auf die auf der jeweiligen Detailseite angegebene Mirror-URL verweist.",
     "loadError": "Das Laden der Terraform-Binär-Mirrors ist fehlgeschlagen.",
     "noMirrorsTitle": "Es sind keine Binär-Mirrors konfiguriert",
     "noMirrorsBody": "Bitten Sie einen Administrator, einen Binär-Mirror einzurichten.",
@@ -690,7 +690,7 @@
       "actions": {
         "createMirrorConfig": {
           "heading": "Spiegelkonfiguration erstellen",
-          "text": "Klicken Sie auf „Spiegel hinzufügen“, um einen neuen Spiegel zu definieren. Geben Sie ihm einen Namen, wählen Sie den Tool-Typ (Terraform, Opentofu oder Benutzerdefiniert) aus und geben Sie die Upstream-URL an, von der synchronisiert werden soll."
+          "text": "Klicken Sie auf „Spiegel hinzufügen“, um einen neuen Spiegel zu definieren. Geben Sie ihm einen Namen, wählen Sie den Tool-Typ aus (terraform, opentofu, packer, sentinel, opa, terraform-docs oder benutzerdefiniert) und geben Sie die Upstream-URL an, von der synchronisiert werden soll."
         },
         "syncVersions": {
           "heading": "Versionen synchronisieren",

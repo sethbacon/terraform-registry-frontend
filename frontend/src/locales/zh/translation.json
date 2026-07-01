@@ -133,7 +133,7 @@
     "browseAllModules": "浏览所有模块 →",
     "providersDescription": "访问针对您的云资源的自定义和镜像 Terraform 提供程序。",
     "browseAllProviders": "浏览所有服务提供商 →",
-    "terraformBinariesDescription": "从内部镜像下载 Terraform、OpenTofu、Packer、Sentinel 和 OPA 的二进制文件。",
+    "terraformBinariesDescription": "从内部镜像下载 Terraform、OpenTofu、Packer、Sentinel、OPA 和 terraform-docs 的二进制文件。",
     "noBinaryMirrors": "未配置二进制镜像",
     "viewBinaries": "查看二进制文件 →",
     "gettingStarted": "入门指南",
@@ -298,7 +298,7 @@
   },
   "terraformBinaries": {
     "pageTitle": "托管二进制镜像",
-    "pageSubtitle": "从贵组织的内部镜像站点下载 Terraform、OpenTofu、Packer、Sentinel 和 OPA 的二进制文件。配置您的 CLI 或 CI 工具链，使其指向各详情页面上显示的镜像 URL。",
+    "pageSubtitle": "从贵组织的内部镜像下载 Terraform、OpenTofu、Packer、Sentinel、OPA 和 terraform-docs 的二进制文件。配置您的 CLI 或 CI 工具链，使其指向各详情页面上显示的镜像 URL。",
     "loadError": "无法加载 Terraform 二进制镜像。",
     "noMirrorsTitle": "未配置二进制镜像",
     "noMirrorsBody": "请管理员设置一个二进制镜像。",
@@ -690,7 +690,7 @@
       "actions": {
         "createMirrorConfig": {
           "heading": "创建镜像配置",
-          "text": "点击“添加镜像”以定义一个新的镜像。为其命名，选择工具类型（Terraform、OpenTofu 或自定义），并指定要同步的上游 URL。"
+          "text": "点击“添加镜像”以定义一个新的镜像。为其命名，选择工具类型（terraform、opentofu、packer、sentinel、opa、terraform-docs 或自定义），并指定要同步的上游 URL。"
         },
         "syncVersions": {
           "heading": "同步版本",

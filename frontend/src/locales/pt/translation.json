@@ -133,7 +133,7 @@
     "browseAllModules": "Ver todos os módulos →",
     "providersDescription": "Aceda a fornecedores Terraform personalizados e espelhados para os seus recursos na nuvem.",
     "browseAllProviders": "Ver todos os prestadores →",
-    "terraformBinariesDescription": "Descarregue os ficheiros binários do Terraform, OpenTofu, Packer, Sentinel e OPA a partir de espelhos internos.",
+    "terraformBinariesDescription": "Descarregue os ficheiros binários do Terraform, OpenTofu, Packer, Sentinel, OPA e terraform-docs a partir de espelhos internos.",
     "noBinaryMirrors": "Não existem espelhos binários configurados",
     "viewBinaries": "Ver ficheiros binários →",
     "gettingStarted": "Introdução",
@@ -298,7 +298,7 @@
   },
   "terraformBinaries": {
     "pageTitle": "Espelhos de ficheiros binários alojados",
-    "pageSubtitle": "Descarregue os ficheiros binários do Terraform, OpenTofu, Packer, Sentinel e OPA a partir do espelho interno da sua organização. Configure a sua linha de comandos (CLI) ou cadeia de ferramentas de integração contínua (CI) para que aponte para o URL do espelho indicado em cada página de detalhes.",
+    "pageSubtitle": "Descarregue os ficheiros binários do Terraform, OpenTofu, Packer, Sentinel, OPA e terraform-docs a partir do espelho interno da sua organização. Configure a sua CLI ou cadeia de ferramentas de CI para apontar para o URL do espelho indicado em cada página de detalhes.",
     "loadError": "Não foi possível carregar os espelhos binários do Terraform.",
     "noMirrorsTitle": "Não existem espelhos binários configurados",
     "noMirrorsBody": "Peça a um administrador para configurar um espelho de ficheiros binários.",
@@ -690,7 +690,7 @@
       "actions": {
         "createMirrorConfig": {
           "heading": "Criar uma configuração de espelho",
-          "text": "Clique em «Adicionar espelho» para definir um novo espelho. Atribua-lhe um nome, selecione o tipo de ferramenta (terraform, opentofu ou personalizado) e especifique o URL de origem a partir do qual deseja sincronizar."
+          "text": "Clique em «Adicionar espelho» para definir um novo espelho. Atribua-lhe um nome, selecione o tipo de ferramenta (terraform, opentofu, packer, sentinel, opa, terraform-docs ou personalizado) e especifique o URL de origem a partir do qual pretende sincronizar."
         },
         "syncVersions": {
           "heading": "Versões sincronizadas",
