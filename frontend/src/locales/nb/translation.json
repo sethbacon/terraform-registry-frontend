@@ -133,7 +133,7 @@
     "browseAllModules": "Se alle moduler →",
     "providersDescription": "Få tilgang til tilpassede og speilede Terraform-leverandører for skyressursene dine.",
     "browseAllProviders": "Se alle leverandører →",
-    "terraformBinariesDescription": "Last ned binærfilene for Terraform, OpenTofu, Packer, Sentinel og OPA fra interne speilservere.",
+    "terraformBinariesDescription": "Last ned binærfilene for Terraform, OpenTofu, Packer, Sentinel, OPA og terraform-docs fra interne speilservere.",
     "noBinaryMirrors": "Det er ikke konfigurert noen binære speil",
     "viewBinaries": "Vis binærfiler →",
     "gettingStarted": "Kom i gang",
@@ -298,7 +298,7 @@
   },
   "terraformBinaries": {
     "pageTitle": "Hostede binære speil",
-    "pageSubtitle": "Last ned Terraform-, OpenTofu-, Packer-, Sentinel- og OPA-binærfilene fra organisasjonens interne speilserver. Konfigurer CLI- eller CI-verktøykjeden din slik at den peker mot speil-URL-en som vises på hver detaljside.",
+    "pageSubtitle": "Last ned binærfilene for Terraform, OpenTofu, Packer, Sentinel, OPA og terraform-docs fra organisasjonens interne speilserver. Konfigurer CLI- eller CI-verktøykjeden din slik at den peker mot speilserver-URL-en som vises på hver detaljside.",
     "loadError": "Det gikk ikke å laste inn Terraform-binærspeilene.",
     "noMirrorsTitle": "Det er ikke konfigurert noen binære speil",
     "noMirrorsBody": "Be en administrator om å sette opp et binært speil.",
@@ -690,7 +690,7 @@
       "actions": {
         "createMirrorConfig": {
           "heading": "Opprett en speilkonfigurasjon",
-          "text": "Klikk på «Legg til speil» for å opprette et nytt speil. Gi det et navn, velg verktøytype (terraform, opentofu eller tilpasset) og angi oppstrøms-URL-en som skal synkroniseres fra."
+          "text": "Klikk på «Legg til speil» for å opprette et nytt speil. Gi det et navn, velg verktøytype (terraform, opentofu, packer, sentinel, opa, terraform-docs eller tilpasset), og angi oppstrøms-URL-en som skal synkroniseres fra."
         },
         "syncVersions": {
           "heading": "Synkroniseringsversjoner",

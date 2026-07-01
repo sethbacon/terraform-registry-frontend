@@ -133,7 +133,7 @@
     "browseAllModules": "Ver todos los módulos →",
     "providersDescription": "Accede a proveedores de Terraform personalizados y duplicados para tus recursos en la nube.",
     "browseAllProviders": "Ver todos los proveedores →",
-    "terraformBinariesDescription": "Descarga los binarios de Terraform, OpenTofu, Packer, Sentinel y OPA desde los servidores espejo internos.",
+    "terraformBinariesDescription": "Descarga los binarios de Terraform, OpenTofu, Packer, Sentinel, OPA y terraform-docs desde los servidores espejo internos.",
     "noBinaryMirrors": "No hay servidores de réplica binarios configurados",
     "viewBinaries": "Ver archivos binarios →",
     "gettingStarted": "Primeros pasos",
@@ -298,7 +298,7 @@
   },
   "terraformBinaries": {
     "pageTitle": "Servidores de réplica de archivos binarios alojados",
-    "pageSubtitle": "Descarga los binarios de Terraform, OpenTofu, Packer, Sentinel y OPA desde el servidor espejo interno de tu organización. Configura tu línea de comandos o tu cadena de herramientas de integración continua (CI) para que apunte a la URL del servidor espejo que aparece en cada página de detalles.",
+    "pageSubtitle": "Descarga los binarios de Terraform, OpenTofu, Packer, Sentinel, OPA y terraform-docs desde el servidor espejo interno de tu organización. Configura tu CLI o tu cadena de herramientas de CI para que apunte a la URL del servidor espejo que aparece en cada página de detalles.",
     "loadError": "No se han podido cargar los servidores de réplica de los binarios de Terraform.",
     "noMirrorsTitle": "No hay servidores de réplica binarios configurados",
     "noMirrorsBody": "Pide a un administrador que configure un servidor espejo de archivos binarios.",
@@ -690,7 +690,7 @@
       "actions": {
         "createMirrorConfig": {
           "heading": "Crear una configuración de espejo",
-          "text": "Haz clic en «Añadir espejo» para definir un nuevo espejo. Dale un nombre, selecciona el tipo de herramienta (Terraform, OpenTofu o personalizada) y especifica la URL de origen desde la que se va a sincronizar."
+          "text": "Haz clic en «Añadir espejo» para definir un nuevo espejo. Asigna un nombre, selecciona el tipo de herramienta (terraform, opentofu, packer, sentinel, opa, terraform-docs o personalizada) y especifica la URL de origen desde la que se va a sincronizar."
         },
         "syncVersions": {
           "heading": "Versiones sincronizadas",
