@@ -135,6 +135,33 @@ describe('TerraformMirrorPage', () => {
     await waitFor(() => expect(screen.getByRole('dialog')).toBeInTheDocument())
   })
 
+  it('offers terraform-docs as a tool option in the Create dialog', async () => {
+    listTerraformMirrorConfigsMock.mockResolvedValue({ configs: [] })
+    renderPage()
+    await waitFor(() =>
+      expect(screen.getByRole('button', { name: /add mirror/i })).toBeInTheDocument(),
+    )
+    await userEvent.click(screen.getByRole('button', { name: /add mirror/i }))
+    await waitFor(() => expect(screen.getByRole('dialog')).toBeInTheDocument())
+    await userEvent.click(screen.getByRole('combobox', { name: /tool/i }))
+    expect(screen.getByRole('option', { name: 'terraform-docs' })).toBeInTheDocument()
+  })
+
+  it('auto-fills the terraform-docs upstream URL when the tool is selected', async () => {
+    listTerraformMirrorConfigsMock.mockResolvedValue({ configs: [] })
+    renderPage()
+    await waitFor(() =>
+      expect(screen.getByRole('button', { name: /add mirror/i })).toBeInTheDocument(),
+    )
+    await userEvent.click(screen.getByRole('button', { name: /add mirror/i }))
+    await waitFor(() => expect(screen.getByRole('dialog')).toBeInTheDocument())
+    await userEvent.click(screen.getByRole('combobox', { name: /tool/i }))
+    await userEvent.click(screen.getByRole('option', { name: 'terraform-docs' }))
+    expect(
+      screen.getByDisplayValue('https://github.com/terraform-docs/terraform-docs'),
+    ).toBeInTheDocument()
+  })
+
   it('opens edit dialog via Edit mirror action', async () => {
     listTerraformMirrorConfigsMock.mockResolvedValue({ configs: fakeConfigs })
     renderPage()

@@ -176,6 +176,8 @@ export function getChangelogUrl(tool: string, version: string): string | null {
       return `https://github.com/open-policy-agent/opa/releases/tag/${v}`
     case 'packer':
       return `https://github.com/hashicorp/packer/releases/tag/${v}`
+    case 'terraform-docs':
+      return `https://github.com/terraform-docs/terraform-docs/releases/tag/${v}`
     case 'sentinel':
       // Sentinel is closed-source with no per-version GitHub releases; link the
       // consolidated changelog page instead of a per-version tag.

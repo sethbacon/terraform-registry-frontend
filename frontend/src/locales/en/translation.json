@@ -133,7 +133,7 @@
     "browseAllModules": "Browse All Modules \u2192",
     "providersDescription": "Access custom and mirrored Terraform providers for your cloud resources.",
     "browseAllProviders": "Browse All Providers \u2192",
-    "terraformBinariesDescription": "Download Terraform, OpenTofu, Packer, Sentinel, and OPA binaries from internal mirrors.",
+    "terraformBinariesDescription": "Download Terraform, OpenTofu, Packer, Sentinel, OPA, and terraform-docs binaries from internal mirrors.",
     "noBinaryMirrors": "No binary mirrors configured",
     "viewBinaries": "View Binaries \u2192",
     "gettingStarted": "Getting Started",
@@ -298,7 +298,7 @@
   },
   "terraformBinaries": {
     "pageTitle": "Hosted Binary Mirrors",
-    "pageSubtitle": "Download Terraform, OpenTofu, Packer, Sentinel, and OPA binaries from your organisation's internal mirror. Configure your CLI or CI toolchain to point at the mirror URL shown on each detail page.",
+    "pageSubtitle": "Download Terraform, OpenTofu, Packer, Sentinel, OPA, and terraform-docs binaries from your organisation's internal mirror. Configure your CLI or CI toolchain to point at the mirror URL shown on each detail page.",
     "loadError": "Failed to load Terraform binary mirrors.",
     "noMirrorsTitle": "No binary mirrors configured",
     "noMirrorsBody": "Ask an administrator to set up a binary mirror.",
@@ -690,7 +690,7 @@
       "actions": {
         "createMirrorConfig": {
           "heading": "Create a Mirror Config",
-          "text": "Click \"Add Mirror\" to define a new mirror. Give it a name, select the tool type (terraform, opentofu, or custom), and specify the upstream URL to sync from."
+          "text": "Click \"Add Mirror\" to define a new mirror. Give it a name, select the tool type (terraform, opentofu, packer, sentinel, opa, terraform-docs, or custom), and specify the upstream URL to sync from."
         },
         "syncVersions": {
           "heading": "Sync Versions",
