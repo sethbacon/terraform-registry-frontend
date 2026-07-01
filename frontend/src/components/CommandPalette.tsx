@@ -25,7 +25,7 @@ export const defaultCommands: CommandPaletteNavItem[] = [
     label: 'Hosted Binaries',
     path: '/terraform-binaries',
     group: 'Navigation',
-    keywords: ['terraform', 'opentofu', 'binary', 'mirror', 'packer', 'sentinel', 'opa'],
+    keywords: ['terraform', 'opentofu', 'binary', 'mirror', 'packer', 'sentinel', 'opa', 'terraform-docs'],
   },
   { label: 'Admin Dashboard', path: '/admin', scope: 'admin', group: 'Admin' },
   {
@@ -45,7 +45,7 @@ export const defaultCommands: CommandPaletteNavItem[] = [
     path: '/admin/terraform-mirror',
     scope: 'mirrors:read',
     group: 'Admin',
-    keywords: ['terraform', 'opentofu', 'binaries', 'config', 'packer', 'sentinel', 'opa'],
+    keywords: ['terraform', 'opentofu', 'binaries', 'config', 'packer', 'sentinel', 'opa', 'terraform-docs'],
   },
   { label: 'Mirror Approvals', path: '/admin/approvals', scope: 'mirrors:read', group: 'Admin' },
   { label: 'Mirror Policies', path: '/admin/policies', scope: 'admin', group: 'Admin' },

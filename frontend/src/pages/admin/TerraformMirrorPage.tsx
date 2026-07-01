@@ -461,12 +461,27 @@ const TOOL_DEFAULT_URLS: Record<string, string> = {
   packer: 'https://releases.hashicorp.com',
   sentinel: 'https://releases.hashicorp.com',
   opa: 'https://github.com/open-policy-agent/opa',
+  'terraform-docs': 'https://github.com/terraform-docs/terraform-docs',
 }
 
 /** Returns the canonical upstream URL for a known tool, or '' for custom. */
 function toolDefaultUrl(tool: string): string {
   return TOOL_DEFAULT_URLS[tool] ?? ''
 }
+
+/**
+ * SUPPORTED_TOOLS is the single source of truth for the selectable upstream
+ * tools in both the create and edit dialogs, so a new tool is added in exactly
+ * one place. "custom" is rendered separately because its label is translated.
+ */
+const SUPPORTED_TOOLS: readonly { value: string; label: string }[] = [
+  { value: 'terraform', label: 'Terraform (HashiCorp)' },
+  { value: 'opentofu', label: 'OpenTofu' },
+  { value: 'packer', label: 'Packer (HashiCorp)' },
+  { value: 'sentinel', label: 'Sentinel (HashiCorp)' },
+  { value: 'opa', label: 'OPA (Open Policy Agent)' },
+  { value: 'terraform-docs', label: 'terraform-docs' },
+]
 
 // ---------------------------------------------------------------------------
 // Empty config form helpers
@@ -870,11 +885,11 @@ const TerraformMirrorPage: React.FC = () => {
                   }}
                   fullWidth
                 >
-                  <MenuItem value="terraform">Terraform (HashiCorp)</MenuItem>
-                  <MenuItem value="opentofu">OpenTofu</MenuItem>
-                  <MenuItem value="packer">Packer (HashiCorp)</MenuItem>
-                  <MenuItem value="sentinel">Sentinel (HashiCorp)</MenuItem>
-                  <MenuItem value="opa">OPA (Open Policy Agent)</MenuItem>
+                  {SUPPORTED_TOOLS.map((toolOption) => (
+                    <MenuItem key={toolOption.value} value={toolOption.value}>
+                      {toolOption.label}
+                    </MenuItem>
+                  ))}
                   <MenuItem value="custom">{t('admin.terraformMirror.menuCustom')}</MenuItem>
                 </TextField>
                 <TextField
@@ -1051,11 +1066,11 @@ const TerraformMirrorPage: React.FC = () => {
                   }}
                   fullWidth
                 >
-                  <MenuItem value="terraform">Terraform (HashiCorp)</MenuItem>
-                  <MenuItem value="opentofu">OpenTofu</MenuItem>
-                  <MenuItem value="packer">Packer (HashiCorp)</MenuItem>
-                  <MenuItem value="sentinel">Sentinel (HashiCorp)</MenuItem>
-                  <MenuItem value="opa">OPA (Open Policy Agent)</MenuItem>
+                  {SUPPORTED_TOOLS.map((toolOption) => (
+                    <MenuItem key={toolOption.value} value={toolOption.value}>
+                      {toolOption.label}
+                    </MenuItem>
+                  ))}
                   <MenuItem value="custom">{t('admin.terraformMirror.menuCustom')}</MenuItem>
                 </TextField>
                 <TextField

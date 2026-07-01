@@ -87,7 +87,7 @@ describe('TerraformBinaryDetailPage', () => {
   })
 
   it('shows loading spinner initially', () => {
-    listPublicTerraformMirrorConfigsMock.mockReturnValue(new Promise(() => {}))
+    listPublicTerraformMirrorConfigsMock.mockReturnValue(new Promise(() => { }))
     renderPage()
     expect(screen.getByRole('progressbar')).toBeInTheDocument()
   })
@@ -264,6 +264,12 @@ describe('getChangelogUrl', () => {
     )
     expect(getChangelogUrl('packer', '1.11.0')).toBe(
       'https://github.com/hashicorp/packer/releases/tag/v1.11.0',
+    )
+  })
+
+  it('builds a per-version GitHub release tag for terraform-docs', () => {
+    expect(getChangelogUrl('terraform-docs', '0.24.0')).toBe(
+      'https://github.com/terraform-docs/terraform-docs/releases/tag/v0.24.0',
     )
   })
 
