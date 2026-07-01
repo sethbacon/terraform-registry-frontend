@@ -133,7 +133,7 @@
     "browseAllModules": "Parcourir tous les modules →",
     "providersDescription": "Accédez à des fournisseurs Terraform personnalisés et en miroir pour vos ressources cloud.",
     "browseAllProviders": "Parcourir tous les prestataires →",
-    "terraformBinariesDescription": "Téléchargez les binaires de Terraform, OpenTofu, Packer, Sentinel et OPA à partir des miroirs internes.",
+    "terraformBinariesDescription": "Téléchargez les binaires de Terraform, OpenTofu, Packer, Sentinel, OPA et terraform-docs à partir des miroirs internes.",
     "noBinaryMirrors": "Aucun miroir binaire n'est configuré",
     "viewBinaries": "Afficher les fichiers binaires →",
     "gettingStarted": "Pour commencer",
@@ -298,7 +298,7 @@
   },
   "terraformBinaries": {
     "pageTitle": "Miroirs de fichiers binaires hébergés",
-    "pageSubtitle": "Téléchargez les binaires de Terraform, OpenTofu, Packer, Sentinel et OPA à partir du miroir interne de votre organisation. Configurez votre interface en ligne de commande (CLI) ou votre chaîne d'outils d'intégration continue (CI) pour qu'elle pointe vers l'URL du miroir indiquée sur chaque page de détails.",
+    "pageSubtitle": "Téléchargez les binaires de Terraform, OpenTofu, Packer, Sentinel, OPA et terraform-docs depuis le miroir interne de votre organisation. Configurez votre interface en ligne de commande (CLI) ou votre chaîne d'outils d'intégration continue (CI) pour qu'elle pointe vers l'URL du miroir indiquée sur chaque page de détails.",
     "loadError": "Échec du chargement des miroirs binaires Terraform.",
     "noMirrorsTitle": "Aucun miroir binaire n'est configuré",
     "noMirrorsBody": "Demandez à un administrateur de mettre en place un miroir binaire.",
@@ -690,7 +690,7 @@
       "actions": {
         "createMirrorConfig": {
           "heading": "Créer une configuration de miroir",
-          "text": "Cliquez sur « Ajouter un miroir » pour définir un nouveau miroir. Donnez-lui un nom, sélectionnez le type d'outil (Terraform, OpenTofu ou personnalisé), puis indiquez l'URL en amont à partir de laquelle effectuer la synchronisation."
+          "text": "Cliquez sur « Ajouter un miroir » pour définir un nouveau miroir. Donnez-lui un nom, sélectionnez le type d'outil (terraform, opentofu, packer, sentinel, opa, terraform-docs ou personnalisé), puis indiquez l'URL en amont à partir de laquelle effectuer la synchronisation."
         },
         "syncVersions": {
           "heading": "Versions synchronisées",

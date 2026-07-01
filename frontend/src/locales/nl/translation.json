@@ -133,7 +133,7 @@
     "browseAllModules": "Bekijk alle modules →",
     "providersDescription": "Krijg toegang tot aangepaste en gespiegelde Terraform-providers voor uw cloudbronnen.",
     "browseAllProviders": "Bekijk alle aanbieders →",
-    "terraformBinariesDescription": "Download de binaire bestanden van Terraform, OpenTofu, Packer, Sentinel en OPA van interne mirrors.",
+    "terraformBinariesDescription": "Download de binaire bestanden van Terraform, OpenTofu, Packer, Sentinel, OPA en terraform-docs van interne mirrors.",
     "noBinaryMirrors": "Er zijn geen binaire mirrors geconfigureerd",
     "viewBinaries": "Binaire bestanden bekijken →",
     "gettingStarted": "Aan de slag",
@@ -298,7 +298,7 @@
   },
   "terraformBinaries": {
     "pageTitle": "Gehoste binaire mirrors",
-    "pageSubtitle": "Download de binaire bestanden van Terraform, OpenTofu, Packer, Sentinel en OPA vanaf de interne mirror van je organisatie. Stel je CLI of CI-toolchain zo in dat deze verwijst naar de mirror-URL die op elke detailpagina wordt weergegeven.",
+    "pageSubtitle": "Download de binaire bestanden van Terraform, OpenTofu, Packer, Sentinel, OPA en terraform-docs vanaf de interne mirror van je organisatie. Stel je CLI of CI-toolchain zo in dat deze verwijst naar de mirror-URL die op elke detailpagina wordt weergegeven.",
     "loadError": "Het laden van de Terraform-binaire mirrors is mislukt.",
     "noMirrorsTitle": "Er zijn geen binaire mirrors geconfigureerd",
     "noMirrorsBody": "Vraag een beheerder om een binaire mirror in te stellen.",
@@ -690,7 +690,7 @@
       "actions": {
         "createMirrorConfig": {
           "heading": "Een spiegelconfiguratie aanmaken",
-          "text": "Klik op \"Spiegel toevoegen\" om een nieuwe spiegel aan te maken. Geef deze een naam, selecteer het type tool (terraform, opentofu of aangepast) en geef de upstream-URL op waarvan je wilt synchroniseren."
+          "text": "Klik op „Add Mirror“ om een nieuwe mirror aan te maken. Geef de mirror een naam, selecteer het type tool (terraform, opentofu, packer, sentinel, opa, terraform-docs of aangepast) en geef de upstream-URL op waarvan je wilt synchroniseren."
         },
         "syncVersions": {
           "heading": "Versies synchroniseren",

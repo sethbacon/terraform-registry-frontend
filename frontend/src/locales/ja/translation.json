@@ -133,7 +133,7 @@
     "browseAllModules": "すべてのモジュールを閲覧 →",
     "providersDescription": "クラウドリソース向けに、カスタムおよびミラーリングされたTerraformプロバイダーを利用できます。",
     "browseAllProviders": "すべてのプロバイダーを見る →",
-    "terraformBinariesDescription": "社内ミラーからTerraform、OpenTofu、Packer、Sentinel、およびOPAのバイナリをダウンロードしてください。",
+    "terraformBinariesDescription": "Terraform、OpenTofu、Packer、Sentinel、OPA、およびterraform-docsのバイナリを内部ミラーからダウンロードしてください。",
     "noBinaryMirrors": "バイナリミラーが設定されていません",
     "viewBinaries": "バイナリを表示 →",
     "gettingStarted": "はじめに",
@@ -298,7 +298,7 @@
   },
   "terraformBinaries": {
     "pageTitle": "ホスト型バイナリミラー",
-    "pageSubtitle": "組織内のミラーサイトから、Terraform、OpenTofu、Packer、Sentinel、および OPA のバイナリをダウンロードしてください。各詳細ページに記載されているミラーの URL を参照するように、CLI または CI ツールチェーンを設定してください。",
+    "pageSubtitle": "Terraform、OpenTofu、Packer、Sentinel、OPA、およびterraform-docsのバイナリを、所属組織の内部ミラーからダウンロードしてください。各詳細ページに表示されているミラーのURLを指定するように、CLIまたはCIツールチェーンを設定してください。",
     "loadError": "Terraformのバイナリミラーの読み込みに失敗しました。",
     "noMirrorsTitle": "バイナリミラーが設定されていません",
     "noMirrorsBody": "管理者にバイナリミラーの設定を依頼してください。",
@@ -690,7 +690,7 @@
       "actions": {
         "createMirrorConfig": {
           "heading": "ミラー設定を作成する",
-          "text": "「ミラーを追加」をクリックして、新しいミラーを定義します。名前を付け、ツールの種類（terraform、opentofu、またはカスタム）を選択し、同期元となるアップストリームのURLを指定します。"
+          "text": "「ミラーを追加」をクリックして、新しいミラーを定義します。名前を付け、ツールの種類（terraform、opentofu、packer、sentinel、opa、terraform-docs、またはカスタム）を選択し、同期元のアップストリームURLを指定します。"
         },
         "syncVersions": {
           "heading": "バージョンの同期",
