@@ -1,6 +1,13 @@
 <!-- markdownlint-disable MD013 MD024 MD041 -->
 # Changelog
 
+## [2.13.0](https://github.com/sethbacon/terraform-registry-frontend/compare/v2.12.3...v2.13.0) (2026-07-01)
+
+
+### Features
+
+* **mirror:** add terraform-docs to the binary mirror admin UI ([#454](https://github.com/sethbacon/terraform-registry-frontend/issues/454)) ([008959a](https://github.com/sethbacon/terraform-registry-frontend/commit/008959a527885fb0dee4e8d1460820f7f892f1ca))
+
 ## [2.12.3](https://github.com/sethbacon/terraform-registry-frontend/compare/v2.12.2...v2.12.3) (2026-06-30)
 
 
