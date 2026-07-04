@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { TFunction } from 'i18next'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
@@ -25,6 +25,7 @@ import {
   TextField,
   FormControlLabel,
   Checkbox,
+  Switch,
 } from '@mui/material'
 import CheckCircle from '@mui/icons-material/CheckCircle'
 import Error from '@mui/icons-material/Error'
@@ -41,7 +42,7 @@ import api from '../../services/api'
 import { queryKeys } from '../../services/queryKeys'
 import { useAuth } from '../../contexts/AuthContext'
 import { getErrorMessage } from '../../utils/errors'
-import type { ModuleScan, RecentScanEntry, ScannerLatestInfo } from '../../types'
+import type { ModuleScan, RecentScanEntry, ScannerLatestInfo, ScannerAutoUpdateInput } from '../../types'
 
 function statusChip(t: TFunction, status: string, onClick?: () => void) {
   const clickProps = onClick ? { onClick, sx: { cursor: 'pointer' } } : {}
@@ -195,6 +196,46 @@ const SecurityScanningPage: React.FC = () => {
     },
     onError: (err: unknown) => {
       setScannerError(getErrorMessage(err, t('admin.securityScanning.scanner.checkError')))
+    },
+  })
+
+  const [autoUpdateForm, setAutoUpdateForm] = useState<ScannerAutoUpdateInput>({
+    enabled: false,
+    interval_hours: 24,
+    requires_approval: true,
+    auto_approve_rules: '',
+  })
+
+  useEffect(() => {
+    if (config?.auto_update) {
+      setAutoUpdateForm({
+        enabled: config.auto_update.enabled,
+        interval_hours: config.auto_update.interval_hours,
+        requires_approval: config.auto_update.requires_approval,
+        auto_approve_rules: config.auto_update.auto_approve_rules ?? '',
+      })
+    }
+  }, [config?.auto_update])
+
+  const autoApproveRulesTrimmed = autoUpdateForm.auto_approve_rules.trim()
+  let autoUpdateRulesInvalid = false
+  if (autoApproveRulesTrimmed !== '') {
+    try {
+      JSON.parse(autoApproveRulesTrimmed)
+    } catch {
+      autoUpdateRulesInvalid = true
+    }
+  }
+
+  const saveAutoUpdateMutation = useMutation({
+    mutationFn: () => api.saveScannerAutoUpdate(autoUpdateForm),
+    onSuccess: () => {
+      setScannerSuccess(t('admin.securityScanning.scanner.autoUpdate.saveSuccess'))
+      setScannerError(null)
+      queryClient.invalidateQueries({ queryKey: ['scanning'] })
+    },
+    onError: (err: unknown) => {
+      setScannerError(getErrorMessage(err, t('admin.securityScanning.scanner.autoUpdate.saveError')))
     },
   })
 
@@ -559,6 +600,87 @@ const SecurityScanningPage: React.FC = () => {
                   t('admin.securityScanning.scanner.install')
                 )}
               </Button>
+            </Box>
+
+            <Divider sx={{ my: 2 }} />
+            <Typography variant="subtitle1" gutterBottom>
+              {t('admin.securityScanning.scanner.autoUpdate.title')}
+            </Typography>
+            <Typography variant="body2" sx={{ color: 'text.secondary', mb: 2 }}>
+              {t('admin.securityScanning.scanner.autoUpdate.description')}
+            </Typography>
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, maxWidth: 480 }}>
+              <FormControlLabel
+                control={
+                  <Switch
+                    checked={autoUpdateForm.enabled}
+                    onChange={(e) =>
+                      setAutoUpdateForm({ ...autoUpdateForm, enabled: e.target.checked })
+                    }
+                    disabled={!isAdmin}
+                  />
+                }
+                label={t('admin.securityScanning.scanner.autoUpdate.enabled')}
+              />
+              <TextField
+                label={t('admin.securityScanning.scanner.autoUpdate.intervalHours')}
+                type="number"
+                value={autoUpdateForm.interval_hours}
+                onChange={(e) =>
+                  setAutoUpdateForm({
+                    ...autoUpdateForm,
+                    interval_hours: parseInt(e.target.value) || 24,
+                  })
+                }
+                disabled={!isAdmin}
+                slotProps={{
+                  htmlInput: { min: 1 },
+                }}
+              />
+              <FormControlLabel
+                control={
+                  <Switch
+                    checked={autoUpdateForm.requires_approval}
+                    onChange={(e) =>
+                      setAutoUpdateForm({
+                        ...autoUpdateForm,
+                        requires_approval: e.target.checked,
+                      })
+                    }
+                    disabled={!isAdmin}
+                  />
+                }
+                label={t('admin.securityScanning.scanner.autoUpdate.requiresApproval')}
+              />
+              <TextField
+                label={t('admin.securityScanning.scanner.autoUpdate.autoApproveRules')}
+                multiline
+                minRows={3}
+                value={autoUpdateForm.auto_approve_rules}
+                onChange={(e) =>
+                  setAutoUpdateForm({ ...autoUpdateForm, auto_approve_rules: e.target.value })
+                }
+                error={autoUpdateRulesInvalid}
+                helperText={
+                  autoUpdateRulesInvalid
+                    ? t('admin.securityScanning.scanner.autoUpdate.autoApproveRulesInvalid')
+                    : t('admin.securityScanning.scanner.autoUpdate.autoApproveRulesHelp')
+                }
+                disabled={!isAdmin}
+              />
+              <Box>
+                <Button
+                  variant="contained"
+                  disabled={!isAdmin || autoUpdateRulesInvalid || saveAutoUpdateMutation.isPending}
+                  onClick={() => saveAutoUpdateMutation.mutate()}
+                >
+                  {saveAutoUpdateMutation.isPending ? (
+                    <CircularProgress size={20} />
+                  ) : (
+                    t('admin.securityScanning.scanner.autoUpdate.save')
+                  )}
+                </Button>
+              </Box>
             </Box>
           </Paper>
 

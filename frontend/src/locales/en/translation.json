@@ -1833,7 +1833,20 @@
         "installSuccess": "Installed scanner version {{version}} at {{path}}",
         "installError": "Failed to install scanner",
         "checkError": "Failed to check for scanner updates",
-        "signatureSupported": "This tool supports signature verification"
+        "signatureSupported": "This tool supports signature verification",
+        "autoUpdate": {
+          "title": "Automatic Updates",
+          "description": "Periodically check upstream for newer scanner versions. New versions are downloaded, verified, and filed for approval before activation.",
+          "enabled": "Enable scheduled update checks",
+          "intervalHours": "Check interval (hours)",
+          "requiresApproval": "Require approval before activating",
+          "autoApproveRules": "Auto-approve rules (JSON)",
+          "autoApproveRulesHelp": "Optional JSON rules to auto-approve matching versions (e.g. patch-only). Leave blank to require manual approval.",
+          "autoApproveRulesInvalid": "Must be valid JSON",
+          "save": "Save Auto-Update Settings",
+          "saveSuccess": "Auto-update settings saved.",
+          "saveError": "Failed to save auto-update settings."
+        }
       }
     },
     "scimProvisioning": {

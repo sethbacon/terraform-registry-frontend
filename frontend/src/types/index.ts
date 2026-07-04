@@ -604,6 +604,21 @@ export interface ScanningConfig {
   // Added in backend #263 — optional until backend is updated
   binary_path?: string
   detected_version?: string
+  auto_update?: ScannerAutoUpdateSettings
+}
+
+export interface ScannerAutoUpdateSettings {
+  enabled: boolean
+  interval_hours: number
+  requires_approval: boolean
+  auto_approve_rules?: string
+}
+
+export interface ScannerAutoUpdateInput {
+  enabled: boolean
+  interval_hours: number
+  requires_approval: boolean
+  auto_approve_rules: string
 }
 
 export interface RecentScanEntry {

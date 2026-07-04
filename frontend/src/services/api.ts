@@ -960,6 +960,13 @@ class ApiClient {
     return response.data
   }
 
+  async saveScannerAutoUpdate(
+    data: import('../types').ScannerAutoUpdateInput,
+  ): Promise<import('../types').ScannerAutoUpdateSettings> {
+    const response = await this.client.put('/api/v1/admin/scanning/auto-update', data)
+    return response.data
+  }
+
   async getModuleDocs(
     namespace: string,
     name: string,
