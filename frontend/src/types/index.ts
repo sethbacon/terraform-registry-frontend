@@ -350,6 +350,32 @@ export interface ScanningInstallResult {
   error?: string
 }
 
+export interface ScannerLatestInfo {
+  tool: string
+  current_version: string
+  latest_version: string
+  update_available: boolean
+  signature_supported: boolean
+}
+export interface ScannerInstallRequest { tool: string; version?: string; activate?: boolean }
+export interface ScannerInstallResult extends ScanningInstallResult { activated?: boolean }
+export interface NotificationsSmtpConfig { host: string; port: number; username: string; from: string; use_tls: boolean }
+export interface NotificationsConfig {
+  enabled: boolean
+  smtp: NotificationsSmtpConfig
+  api_key_expiry_warning_days: number
+  api_key_expiry_check_interval_hours: number
+  password_configured: boolean
+}
+export interface NotificationsConfigInput {
+  enabled: boolean
+  smtp: NotificationsSmtpConfig & { password: string }
+  api_key_expiry_warning_days: number
+  api_key_expiry_check_interval_hours: number
+}
+export interface NotificationsTestRequest { recipients?: string[]; subject?: string; smtp?: Partial<NotificationsSmtpConfig & { password: string }> }
+export interface NotificationsTestResult { success: boolean; message: string }
+
 // Setup Wizard — LDAP configuration
 export interface LDAPConfigInput {
   host: string

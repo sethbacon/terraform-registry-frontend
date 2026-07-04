@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { TFunction } from 'i18next'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import {
   Typography,
   Box,
@@ -21,6 +21,10 @@ import {
   IconButton,
   Collapse,
   TablePagination,
+  Button,
+  TextField,
+  FormControlLabel,
+  Checkbox,
 } from '@mui/material'
 import CheckCircle from '@mui/icons-material/CheckCircle'
 import Error from '@mui/icons-material/Error'
@@ -34,7 +38,10 @@ import PageTitleIcon from '@mui/icons-material/Security'
 import ScanDiagnostics from '../../components/ScanDiagnostics'
 import ScanFindingsModal from '../../components/ScanFindingsModal'
 import api from '../../services/api'
-import type { ModuleScan, RecentScanEntry } from '../../types'
+import { queryKeys } from '../../services/queryKeys'
+import { useAuth } from '../../contexts/AuthContext'
+import { getErrorMessage } from '../../utils/errors'
+import type { ModuleScan, RecentScanEntry, ScannerLatestInfo } from '../../types'
 
 function statusChip(t: TFunction, status: string, onClick?: () => void) {
   const clickProps = onClick ? { onClick, sx: { cursor: 'pointer' } } : {}
@@ -124,6 +131,9 @@ function computeScannerHealth(scans: RecentScanEntry[]): ScannerHealth {
 
 const SecurityScanningPage: React.FC = () => {
   const { t } = useTranslation()
+  const queryClient = useQueryClient()
+  const { allowedScopes } = useAuth()
+  const isAdmin = allowedScopes.includes('admin')
   const {
     data: config,
     isLoading: configLoading,
@@ -136,6 +146,57 @@ const SecurityScanningPage: React.FC = () => {
   const [statusFilter, setStatusFilter] = useState<string | undefined>(undefined)
   const [page, setPage] = useState(0)
   const [rowsPerPage, setRowsPerPage] = useState(20)
+
+  const [scannerSuccess, setScannerSuccess] = useState<string | null>(null)
+  const [scannerError, setScannerError] = useState<string | null>(null)
+  const [scannerVersionInput, setScannerVersionInput] = useState('')
+  const [scannerActivate, setScannerActivate] = useState(true)
+  const [scannerLatest, setScannerLatest] = useState<ScannerLatestInfo | null>(null)
+
+  const checkLatestMutation = useMutation({
+    mutationFn: () => api.checkScannerLatest(config!.tool),
+    onSuccess: (data) => {
+      setScannerLatest(data)
+      setScannerError(null)
+    },
+    onError: (err: unknown) => {
+      setScannerError(getErrorMessage(err, t('admin.securityScanning.scanner.checkError')))
+    },
+  })
+
+  const installMutation = useMutation({
+    mutationFn: () =>
+      api.adminInstallScanner({
+        tool: config!.tool,
+        version: scannerVersionInput || undefined,
+        activate: scannerActivate,
+      }),
+    onSuccess: (data) => {
+      setScannerSuccess(
+        t('admin.securityScanning.scanner.installSuccess', {
+          version: data.version,
+          path: data.binary_path,
+        }),
+      )
+      setScannerError(null)
+      queryClient.invalidateQueries({ queryKey: ['scanning'] })
+      queryClient.invalidateQueries({ queryKey: queryKeys.scanner._def })
+    },
+    onError: (err: unknown) => {
+      setScannerError(getErrorMessage(err, t('admin.securityScanning.scanner.installError')))
+    },
+  })
+
+  const triggerCheckMutation = useMutation({
+    mutationFn: () => api.triggerScannerCheck(),
+    onSuccess: () => {
+      setScannerSuccess(t('admin.securityScanning.scanner.checkQueued'))
+      setScannerError(null)
+    },
+    onError: (err: unknown) => {
+      setScannerError(getErrorMessage(err, t('admin.securityScanning.scanner.checkError')))
+    },
+  })
 
   const {
     data: stats,
@@ -402,6 +463,103 @@ const SecurityScanningPage: React.FC = () => {
                 )}
               </Grid>
             </Grid>
+          </Paper>
+
+          {/* Scanner Tool Management */}
+          <Paper sx={{ p: 3, mb: 3 }}>
+            <Typography variant="h6" gutterBottom>
+              {t('admin.securityScanning.scanner.title')}
+            </Typography>
+            <Divider sx={{ mb: 2 }} />
+            {scannerSuccess && (
+              <Alert severity="success" sx={{ mb: 2 }} onClose={() => setScannerSuccess(null)}>
+                {scannerSuccess}
+              </Alert>
+            )}
+            {scannerError && (
+              <Alert severity="error" sx={{ mb: 2 }} onClose={() => setScannerError(null)}>
+                {scannerError}
+              </Alert>
+            )}
+            <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', flexWrap: 'wrap', mb: 2 }}>
+              <Button
+                variant="outlined"
+                disabled={!isAdmin || !config?.tool || checkLatestMutation.isPending}
+                onClick={() => checkLatestMutation.mutate()}
+              >
+                {checkLatestMutation.isPending ? (
+                  <CircularProgress size={20} />
+                ) : (
+                  t('admin.securityScanning.scanner.checkForUpdates')
+                )}
+              </Button>
+              {scannerLatest && (
+                <>
+                  <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                    {t('admin.securityScanning.scanner.currentVersion')}:{' '}
+                    <strong>{scannerLatest.current_version || '—'}</strong>{' '}
+                    {t('admin.securityScanning.scanner.latestVersion')}:{' '}
+                    <strong>{scannerLatest.latest_version}</strong>
+                  </Typography>
+                  <Chip
+                    label={
+                      scannerLatest.update_available
+                        ? t('admin.securityScanning.scanner.updateAvailable')
+                        : t('admin.securityScanning.scanner.upToDate')
+                    }
+                    color={scannerLatest.update_available ? 'warning' : 'success'}
+                    size="small"
+                    variant="outlined"
+                  />
+                  {scannerLatest.signature_supported && (
+                    <Tooltip title={t('admin.securityScanning.scanner.signatureSupported')}>
+                      <CheckCircle fontSize="small" color="success" />
+                    </Tooltip>
+                  )}
+                </>
+              )}
+            </Box>
+            <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', flexWrap: 'wrap', mb: 2 }}>
+              <TextField
+                label={t('admin.securityScanning.scanner.versionOptional')}
+                size="small"
+                value={scannerVersionInput}
+                onChange={(e) => setScannerVersionInput(e.target.value)}
+                disabled={!isAdmin}
+              />
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={scannerActivate}
+                    onChange={(e) => setScannerActivate(e.target.checked)}
+                    disabled={!isAdmin}
+                  />
+                }
+                label={t('admin.securityScanning.scanner.activateNow')}
+              />
+              <Button
+                variant="contained"
+                disabled={!isAdmin || !config?.tool || installMutation.isPending}
+                onClick={() => installMutation.mutate()}
+              >
+                {installMutation.isPending ? (
+                  <CircularProgress size={20} />
+                ) : (
+                  t('admin.securityScanning.scanner.installAndActivate')
+                )}
+              </Button>
+              <Button
+                variant="text"
+                disabled={!isAdmin || triggerCheckMutation.isPending}
+                onClick={() => triggerCheckMutation.mutate()}
+              >
+                {triggerCheckMutation.isPending ? (
+                  <CircularProgress size={20} />
+                ) : (
+                  t('admin.securityScanning.scanner.install')
+                )}
+              </Button>
+            </Box>
           </Paper>
 
           {/* Summary Stats */}

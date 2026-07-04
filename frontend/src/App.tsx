@@ -45,6 +45,7 @@ const SCIMProvisioningPage = lazy(() => import('./pages/admin/SCIMProvisioningPa
 const MTLSPage = lazy(() => import('./pages/admin/MTLSPage'))
 const AuditLogPage = lazy(() => import('./pages/admin/AuditLogPage'))
 const SecurityScanningPage = lazy(() => import('./pages/admin/SecurityScanningPage'))
+const NotificationsPage = lazy(() => import('./pages/admin/NotificationsPage'))
 const ComponentShowcase = lazy(() => import('./pages/dev/ComponentShowcase'))
 const SettingsPage = lazy(() => import('./pages/SettingsPage'))
 
@@ -373,6 +374,18 @@ function App() {
                               <ErrorBoundary>
                                 <Suspense fallback={loader}>
                                   <SecurityScanningPage />
+                                </Suspense>
+                              </ErrorBoundary>
+                            </ProtectedRoute>
+                          }
+                        />
+                        <Route
+                          path="/admin/notifications"
+                          element={
+                            <ProtectedRoute requiredScope="admin">
+                              <ErrorBoundary>
+                                <Suspense fallback={loader}>
+                                  <NotificationsPage />
                                 </Suspense>
                               </ErrorBoundary>
                             </ProtectedRoute>

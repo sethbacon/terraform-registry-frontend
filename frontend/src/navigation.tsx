@@ -19,6 +19,7 @@ import Policy from '@mui/icons-material/Policy'
 import Storage from '@mui/icons-material/Storage'
 import Security from '@mui/icons-material/Security'
 import History from '@mui/icons-material/History'
+import Notifications from '@mui/icons-material/Notifications'
 import type { NavItem, NavGroup } from '@sethbacon/terraform-suite-ui'
 
 // Home — shown standalone at the top of the drawer.
@@ -103,6 +104,7 @@ export const adminNavGroups: NavGroup[] = [
     items: [
       { path: '/admin/storage', labelKey: 'nav.admin.storage', tooltipKey: 'nav.admin.storageTooltip', icon: <Storage />, scope: 'admin' },
       { path: '/admin/security-scanning', labelKey: 'nav.admin.securityScanning', tooltipKey: 'nav.admin.securityScanningTooltip', icon: <Security />, scope: 'admin' },
+      { path: '/admin/notifications', labelKey: 'nav.admin.notifications', tooltipKey: 'nav.admin.notificationsTooltip', icon: <Notifications />, scope: 'admin' },
       { path: '/admin/audit-logs', labelKey: 'nav.admin.auditLogs', tooltipKey: 'nav.admin.auditLogsTooltip', icon: <History />, scope: 'audit:read' },
     ],
   },

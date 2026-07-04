@@ -136,4 +136,12 @@ export const queryKeys = {
     pendingCount: () => [...queryKeys.versionApprovals._def, 'pendingCount'] as const,
     events: (id: string) => [...queryKeys.versionApprovals._def, 'events', id] as const,
   },
+  scanner: {
+    _def: ['scanner'] as const,
+    latest: (tool: string) => [...queryKeys.scanner._def, 'latest', tool] as const,
+  },
+  notifications: {
+    _def: ['notifications'] as const,
+    config: () => [...queryKeys.notifications._def, 'config'] as const,
+  },
 } as const
