@@ -1,5 +1,5 @@
 export type VersionApprovalStatus = 'pending_approval' | 'approved' | 'rejected'
-export type VersionApprovalType = 'provider' | 'terraform'
+export type VersionApprovalType = 'provider' | 'terraform' | 'scanner'
 
 export interface VersionApproval {
   id: string
@@ -13,6 +13,7 @@ export interface VersionApproval {
   gpg_verified?: boolean
   shasum_verified?: boolean
   synced_at: string
+  tool?: string
 }
 
 export interface VersionApprovalEvent {

@@ -943,6 +943,23 @@ class ApiClient {
     return response.data
   }
 
+  async checkScannerLatest(tool: string): Promise<import('../types').ScannerLatestInfo> {
+    const response = await this.client.get('/api/v1/admin/scanning/latest', { params: { tool } })
+    return response.data
+  }
+
+  async adminInstallScanner(
+    data: import('../types').ScannerInstallRequest,
+  ): Promise<import('../types').ScannerInstallResult> {
+    const response = await this.client.post('/api/v1/admin/scanning/install', data)
+    return response.data
+  }
+
+  async triggerScannerCheck(): Promise<{ message: string }> {
+    const response = await this.client.post('/api/v1/admin/scanning/check')
+    return response.data
+  }
+
   async getModuleDocs(
     namespace: string,
     name: string,
@@ -1793,7 +1810,7 @@ class ApiClient {
   // ============================================================================
 
   async listVersionApprovals(params?: {
-    type?: 'provider' | 'terraform'
+    type?: 'provider' | 'terraform' | 'scanner'
     status?: 'pending_approval' | 'approved' | 'rejected'
     config_id?: string
     limit?: number
@@ -1850,6 +1867,29 @@ class ApiClient {
 
   async getPendingVersionApprovalCount(): Promise<{ count: number }> {
     const response = await this.client.get('/api/v1/admin/version-approvals/pending-count')
+    return response.data
+  }
+
+  // ============================================================================
+  // Notifications
+  // ============================================================================
+
+  async getNotificationsConfig(): Promise<import('../types').NotificationsConfig> {
+    const response = await this.client.get('/api/v1/admin/notifications/config')
+    return response.data
+  }
+
+  async saveNotificationsConfig(
+    data: import('../types').NotificationsConfigInput,
+  ): Promise<import('../types').NotificationsConfig> {
+    const response = await this.client.put('/api/v1/admin/notifications/config', data)
+    return response.data
+  }
+
+  async sendTestNotification(
+    data?: import('../types').NotificationsTestRequest,
+  ): Promise<import('../types').NotificationsTestResult> {
+    const response = await this.client.post('/api/v1/admin/notifications/test', data ?? {})
     return response.data
   }
 }

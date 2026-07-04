@@ -180,6 +180,13 @@ function VersionRow({
             <Typography variant="body2">
               {item.provider_namespace}/{item.provider_name}
             </Typography>
+          ) : item.type === 'scanner' ? (
+            <Chip
+              label={item.tool ?? t('admin.versionApprovals.scanner')}
+              size="small"
+              color="secondary"
+              variant="outlined"
+            />
           ) : (
             <Chip label="Terraform" size="small" variant="outlined" />
           )}
@@ -247,7 +254,7 @@ const VersionApprovalsPage: React.FC = () => {
   const queryClient = useQueryClient()
 
   const [statusTab, setStatusTab] = useState<VersionApprovalStatus | ''>('pending_approval')
-  const [typeFilter, setTypeFilter] = useState<'provider' | 'terraform' | ''>('')
+  const [typeFilter, setTypeFilter] = useState<'provider' | 'terraform' | 'scanner' | ''>('')
   const [selected, setSelected] = useState<Set<string>>(new Set())
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
@@ -440,6 +447,7 @@ const VersionApprovalsPage: React.FC = () => {
           <ToggleButton value="terraform">
             {t('admin.versionApprovals.terraformVersions')}
           </ToggleButton>
+          <ToggleButton value="scanner">{t('admin.versionApprovals.scannerVersions')}</ToggleButton>
         </ToggleButtonGroup>
       </Box>
 

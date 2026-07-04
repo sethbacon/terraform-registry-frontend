@@ -6,11 +6,21 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 // Mock api
 const getScanningConfigMock = vi.fn()
 const getScanningStatsMock = vi.fn()
+const checkScannerLatestMock = vi.fn()
+const adminInstallScannerMock = vi.fn()
+const triggerScannerCheckMock = vi.fn()
 vi.mock('../../../services/api', () => ({
   default: {
     getScanningConfig: (...args: unknown[]) => getScanningConfigMock(...args),
     getScanningStats: (...args: unknown[]) => getScanningStatsMock(...args),
+    checkScannerLatest: (...args: unknown[]) => checkScannerLatestMock(...args),
+    adminInstallScanner: (...args: unknown[]) => adminInstallScannerMock(...args),
+    triggerScannerCheck: (...args: unknown[]) => triggerScannerCheckMock(...args),
   },
+}))
+
+vi.mock('../../../contexts/AuthContext', () => ({
+  useAuth: () => ({ allowedScopes: ['admin'] }),
 }))
 
 import SecurityScanningPage from '../../admin/SecurityScanningPage'
@@ -70,15 +80,15 @@ describe('SecurityScanningPage', () => {
   })
 
   it('shows loading spinner initially', () => {
-    getScanningConfigMock.mockReturnValue(new Promise(() => {}))
-    getScanningStatsMock.mockReturnValue(new Promise(() => {}))
+    getScanningConfigMock.mockReturnValue(new Promise(() => { }))
+    getScanningStatsMock.mockReturnValue(new Promise(() => { }))
     renderPage()
     expect(screen.getByRole('progressbar')).toBeInTheDocument()
   })
 
   it('renders page heading', () => {
-    getScanningConfigMock.mockReturnValue(new Promise(() => {}))
-    getScanningStatsMock.mockReturnValue(new Promise(() => {}))
+    getScanningConfigMock.mockReturnValue(new Promise(() => { }))
+    getScanningStatsMock.mockReturnValue(new Promise(() => { }))
     renderPage()
     expect(screen.getByText('Security Scanning')).toBeInTheDocument()
   })
@@ -135,6 +145,17 @@ describe('SecurityScanningPage', () => {
     await waitFor(() => {
       expect(screen.getByText('No scans recorded yet.')).toBeInTheDocument()
     })
+  })
+
+  it('renders the Scanner Tool Management card', async () => {
+    getScanningConfigMock.mockResolvedValue(fakeConfig)
+    getScanningStatsMock.mockResolvedValue(fakeStats)
+    renderPage()
+    await waitFor(() => {
+      expect(screen.getByText('Scanner Tool Management')).toBeInTheDocument()
+    })
+    expect(screen.getByRole('button', { name: 'Check for Updates' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Install & Activate' })).toBeInTheDocument()
   })
 
   // Scanner Health + diagnostics — added in #199
