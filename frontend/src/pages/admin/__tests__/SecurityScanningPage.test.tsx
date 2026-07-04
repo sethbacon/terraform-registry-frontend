@@ -9,6 +9,7 @@ const getScanningStatsMock = vi.fn()
 const checkScannerLatestMock = vi.fn()
 const adminInstallScannerMock = vi.fn()
 const triggerScannerCheckMock = vi.fn()
+const saveScannerAutoUpdateMock = vi.fn()
 vi.mock('../../../services/api', () => ({
   default: {
     getScanningConfig: (...args: unknown[]) => getScanningConfigMock(...args),
@@ -16,6 +17,7 @@ vi.mock('../../../services/api', () => ({
     checkScannerLatest: (...args: unknown[]) => checkScannerLatestMock(...args),
     adminInstallScanner: (...args: unknown[]) => adminInstallScannerMock(...args),
     triggerScannerCheck: (...args: unknown[]) => triggerScannerCheckMock(...args),
+    saveScannerAutoUpdate: (...args: unknown[]) => saveScannerAutoUpdateMock(...args),
   },
 }))
 
@@ -48,6 +50,12 @@ const fakeConfig = {
   timeout: '5m',
   worker_count: 2,
   scan_interval_mins: 60,
+  auto_update: {
+    enabled: false,
+    interval_hours: 24,
+    requires_approval: true,
+    auto_approve_rules: '',
+  },
 }
 
 const fakeStats = {
@@ -77,6 +85,7 @@ const fakeStats = {
 describe('SecurityScanningPage', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    saveScannerAutoUpdateMock.mockResolvedValue(fakeConfig.auto_update)
   })
 
   it('shows loading spinner initially', () => {
@@ -156,6 +165,17 @@ describe('SecurityScanningPage', () => {
     })
     expect(screen.getByRole('button', { name: 'Check for Updates' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Install & Activate' })).toBeInTheDocument()
+  })
+
+  it('renders the Automatic Updates section', async () => {
+    getScanningConfigMock.mockResolvedValue(fakeConfig)
+    getScanningStatsMock.mockResolvedValue(fakeStats)
+    renderPage()
+    await waitFor(() => {
+      expect(screen.getByText('Automatic Updates')).toBeInTheDocument()
+    })
+    expect(screen.getByLabelText('Check interval (hours)')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Save Auto-Update Settings' })).toBeInTheDocument()
   })
 
   // Scanner Health + diagnostics — added in #199
