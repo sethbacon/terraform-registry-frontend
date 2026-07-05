@@ -1,6 +1,14 @@
 <!-- markdownlint-disable MD013 MD024 MD041 -->
 # Changelog
 
+## [2.14.0](https://github.com/sethbacon/terraform-registry-frontend/compare/v2.13.0...v2.14.0) (2026-07-05)
+
+
+### Features
+
+* **admin:** scanner auto-update settings editor on Security Scanning page ([#460](https://github.com/sethbacon/terraform-registry-frontend/issues/460)) ([6fc0810](https://github.com/sethbacon/terraform-registry-frontend/commit/6fc0810d611fa16f011d5ec9e8003a78525ab13e))
+* **admin:** scanner update UI + notifications settings page (Phases B-UI, E) ([#457](https://github.com/sethbacon/terraform-registry-frontend/issues/457)) ([0950a3f](https://github.com/sethbacon/terraform-registry-frontend/commit/0950a3f094bf90f7f40bbf7f75e202904b129f9e))
+
 ## [2.13.0](https://github.com/sethbacon/terraform-registry-frontend/compare/v2.12.3...v2.13.0) (2026-07-01)
 
 
