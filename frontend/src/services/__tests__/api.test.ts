@@ -295,6 +295,155 @@ describe('ApiClient', () => {
     })
   })
 
+  // ─── Scanner management admin API ──────────────────────────────────────
+
+  describe('scanner management API', () => {
+    it('getScanByID calls GET /api/v1/admin/scanning/scans/:id', async () => {
+      const client = await getApiClient()
+
+      const mockResponse = { data: { id: 'scan-1', status: 'completed' } }
+        ; (mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce(mockResponse)
+
+      const result = await client.getScanByID('scan-1')
+
+      expect(mockAxiosInstance.get).toHaveBeenCalledWith('/api/v1/admin/scanning/scans/scan-1')
+      expect(result).toEqual(mockResponse.data)
+    })
+
+    it('checkScannerLatest calls GET /api/v1/admin/scanning/latest with the tool param', async () => {
+      const client = await getApiClient()
+
+      const mockResponse = {
+        data: {
+          tool: 'trivy',
+          current_version: '0.49.0',
+          latest_version: '0.50.0',
+          update_available: true,
+          signature_supported: true,
+        },
+      }
+        ; (mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce(mockResponse)
+
+      const result = await client.checkScannerLatest('trivy')
+
+      expect(mockAxiosInstance.get).toHaveBeenCalledWith('/api/v1/admin/scanning/latest', {
+        params: { tool: 'trivy' },
+      })
+      expect(result).toEqual(mockResponse.data)
+    })
+
+    it('adminInstallScanner calls POST /api/v1/admin/scanning/install with the body', async () => {
+      const client = await getApiClient()
+
+      const mockResponse = { data: { tool: 'trivy', installed_version: '0.50.0', activated: true } }
+        ; (mockAxiosInstance.post as ReturnType<typeof vi.fn>).mockResolvedValueOnce(mockResponse)
+
+      const payload = { tool: 'trivy', version: '0.50.0', activate: true }
+      const result = await client.adminInstallScanner(payload)
+
+      expect(mockAxiosInstance.post).toHaveBeenCalledWith('/api/v1/admin/scanning/install', payload)
+      expect(result).toEqual(mockResponse.data)
+    })
+
+    it('triggerScannerCheck calls POST /api/v1/admin/scanning/check', async () => {
+      const client = await getApiClient()
+
+      const mockResponse = { data: { message: 'check queued' } }
+        ; (mockAxiosInstance.post as ReturnType<typeof vi.fn>).mockResolvedValueOnce(mockResponse)
+
+      const result = await client.triggerScannerCheck()
+
+      expect(mockAxiosInstance.post).toHaveBeenCalledWith('/api/v1/admin/scanning/check')
+      expect(result).toEqual(mockResponse.data)
+    })
+
+    it('saveScannerAutoUpdate calls PUT /api/v1/admin/scanning/auto-update with the body', async () => {
+      const client = await getApiClient()
+
+      const mockResponse = {
+        data: { enabled: true, interval_hours: 24, requires_approval: true, auto_approve_rules: '' },
+      }
+        ; (mockAxiosInstance.put as ReturnType<typeof vi.fn>).mockResolvedValueOnce(mockResponse)
+
+      const payload = {
+        enabled: true,
+        interval_hours: 24,
+        requires_approval: true,
+        auto_approve_rules: '',
+      }
+      const result = await client.saveScannerAutoUpdate(payload)
+
+      expect(mockAxiosInstance.put).toHaveBeenCalledWith('/api/v1/admin/scanning/auto-update', payload)
+      expect(result).toEqual(mockResponse.data)
+    })
+  })
+
+  // ─── Notifications admin API ───────────────────────────────────────────
+
+  describe('notifications admin API', () => {
+    it('getNotificationsConfig calls GET /api/v1/admin/notifications/config', async () => {
+      const client = await getApiClient()
+
+      const mockResponse = { data: { enabled: true, password_configured: false } }
+        ; (mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce(mockResponse)
+
+      const result = await client.getNotificationsConfig()
+
+      expect(mockAxiosInstance.get).toHaveBeenCalledWith('/api/v1/admin/notifications/config')
+      expect(result).toEqual(mockResponse.data)
+    })
+
+    it('saveNotificationsConfig calls PUT /api/v1/admin/notifications/config with the body', async () => {
+      const client = await getApiClient()
+
+      const mockResponse = { data: { enabled: true } }
+        ; (mockAxiosInstance.put as ReturnType<typeof vi.fn>).mockResolvedValueOnce(mockResponse)
+
+      const payload = {
+        enabled: true,
+        smtp: {
+          host: 'smtp.example.com',
+          port: 587,
+          username: 'mailer',
+          from: 'noreply@example.com',
+          use_tls: true,
+          password: 'secret',
+        },
+        api_key_expiry_warning_days: 7,
+        api_key_expiry_check_interval_hours: 24,
+      }
+      const result = await client.saveNotificationsConfig(payload)
+
+      expect(mockAxiosInstance.put).toHaveBeenCalledWith('/api/v1/admin/notifications/config', payload)
+      expect(result).toEqual(mockResponse.data)
+    })
+
+    it('sendTestNotification posts the provided recipients', async () => {
+      const client = await getApiClient()
+
+      const mockResponse = { data: { success: true, message: 'sent' } }
+        ; (mockAxiosInstance.post as ReturnType<typeof vi.fn>).mockResolvedValueOnce(mockResponse)
+
+      const payload = { recipients: ['ops@example.com'] }
+      const result = await client.sendTestNotification(payload)
+
+      expect(mockAxiosInstance.post).toHaveBeenCalledWith('/api/v1/admin/notifications/test', payload)
+      expect(result).toEqual(mockResponse.data)
+    })
+
+    it('sendTestNotification falls back to an empty body when no request is given', async () => {
+      const client = await getApiClient()
+
+      const mockResponse = { data: { success: true, message: 'sent' } }
+        ; (mockAxiosInstance.post as ReturnType<typeof vi.fn>).mockResolvedValueOnce(mockResponse)
+
+      const result = await client.sendTestNotification()
+
+      expect(mockAxiosInstance.post).toHaveBeenCalledWith('/api/v1/admin/notifications/test', {})
+      expect(result).toEqual(mockResponse.data)
+    })
+  })
+
   // ─── Structural checks ────────────────────────────────────────────────
 
   describe('exports', () => {
