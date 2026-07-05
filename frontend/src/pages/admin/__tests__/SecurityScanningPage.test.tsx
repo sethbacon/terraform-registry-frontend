@@ -1,4 +1,4 @@
-import { render, screen, waitFor, within } from '@testing-library/react'
+import { render, screen, waitFor, within, fireEvent } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
@@ -10,6 +10,8 @@ const checkScannerLatestMock = vi.fn()
 const adminInstallScannerMock = vi.fn()
 const triggerScannerCheckMock = vi.fn()
 const saveScannerAutoUpdateMock = vi.fn()
+const getScanByIDMock = vi.fn()
+const getModuleScanMock = vi.fn()
 vi.mock('../../../services/api', () => ({
   default: {
     getScanningConfig: (...args: unknown[]) => getScanningConfigMock(...args),
@@ -18,11 +20,14 @@ vi.mock('../../../services/api', () => ({
     adminInstallScanner: (...args: unknown[]) => adminInstallScannerMock(...args),
     triggerScannerCheck: (...args: unknown[]) => triggerScannerCheckMock(...args),
     saveScannerAutoUpdate: (...args: unknown[]) => saveScannerAutoUpdateMock(...args),
+    getScanByID: (...args: unknown[]) => getScanByIDMock(...args),
+    getModuleScan: (...args: unknown[]) => getModuleScanMock(...args),
   },
 }))
 
+let mockAllowedScopes: string[] = ['admin']
 vi.mock('../../../contexts/AuthContext', () => ({
-  useAuth: () => ({ allowedScopes: ['admin'] }),
+  useAuth: () => ({ allowedScopes: mockAllowedScopes }),
 }))
 
 import SecurityScanningPage from '../../admin/SecurityScanningPage'
@@ -85,6 +90,7 @@ const fakeStats = {
 describe('SecurityScanningPage', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    mockAllowedScopes = ['admin']
     saveScannerAutoUpdateMock.mockResolvedValue(fakeConfig.auto_update)
   })
 
@@ -258,6 +264,295 @@ describe('SecurityScanningPage', () => {
       await user.click(toggle)
       expect(await screen.findByText(/panic: runtime error/)).toBeInTheDocument()
       expect(screen.getByText('scanner exited 1')).toBeInTheDocument()
+    })
+  })
+
+  describe('scanner tool management', () => {
+    async function renderReady() {
+      getScanningConfigMock.mockResolvedValue(fakeConfig)
+      getScanningStatsMock.mockResolvedValue(fakeStats)
+      renderPage()
+      await waitFor(() => {
+        expect(screen.getByText('Scanner Tool Management')).toBeInTheDocument()
+      })
+    }
+
+    it('checks for updates and shows the update-available status', async () => {
+      const user = userEvent.setup()
+      checkScannerLatestMock.mockResolvedValue({
+        tool: 'trivy',
+        current_version: '0.50.0',
+        latest_version: '0.51.0',
+        update_available: true,
+        signature_supported: true,
+      })
+      await renderReady()
+
+      await user.click(screen.getByRole('button', { name: 'Check for Updates' }))
+
+      await waitFor(() => {
+        expect(checkScannerLatestMock).toHaveBeenCalledWith('trivy')
+      })
+      expect(await screen.findByText('Update available')).toBeInTheDocument()
+      expect(screen.getByText('0.51.0')).toBeInTheDocument()
+    })
+
+    it('shows up-to-date status when no update is available', async () => {
+      const user = userEvent.setup()
+      checkScannerLatestMock.mockResolvedValue({
+        tool: 'trivy',
+        current_version: '0.50.0',
+        latest_version: '0.50.0',
+        update_available: false,
+        signature_supported: false,
+      })
+      await renderReady()
+
+      await user.click(screen.getByRole('button', { name: 'Check for Updates' }))
+
+      expect(await screen.findByText('Up to date')).toBeInTheDocument()
+    })
+
+    it('shows an error alert when checking for updates fails', async () => {
+      const user = userEvent.setup()
+      checkScannerLatestMock.mockRejectedValue(new Error('latest check failed'))
+      await renderReady()
+
+      await user.click(screen.getByRole('button', { name: 'Check for Updates' }))
+
+      expect(await screen.findByText('latest check failed')).toBeInTheDocument()
+    })
+
+    it('installs and activates the latest version on success', async () => {
+      const user = userEvent.setup()
+      adminInstallScannerMock.mockResolvedValue({
+        success: true,
+        tool: 'trivy',
+        version: '0.51.0',
+        binary_path: '/opt/scanners/trivy',
+        sha256: 'abc123',
+        source_url: 'https://example.com/trivy',
+        activated: true,
+      })
+      await renderReady()
+
+      await user.click(screen.getByRole('button', { name: 'Install & Activate' }))
+
+      await waitFor(() => {
+        expect(adminInstallScannerMock).toHaveBeenCalledWith({
+          tool: 'trivy',
+          version: undefined,
+          activate: true,
+        })
+      })
+      expect(
+        await screen.findByText('Installed scanner version 0.51.0 at /opt/scanners/trivy'),
+      ).toBeInTheDocument()
+    })
+
+    it('installs a specific version without activating when unchecked', async () => {
+      const user = userEvent.setup()
+      adminInstallScannerMock.mockResolvedValue({
+        success: true,
+        tool: 'trivy',
+        version: '0.49.0',
+        binary_path: '/opt/scanners/trivy-0.49.0',
+        sha256: 'def456',
+        source_url: 'https://example.com/trivy',
+        activated: false,
+      })
+      await renderReady()
+
+      fireEvent.change(screen.getByLabelText('Version (optional, defaults to latest)'), {
+        target: { value: '0.49.0' },
+      })
+      await user.click(screen.getByRole('checkbox', { name: 'Activate after install' }))
+      await user.click(screen.getByRole('button', { name: 'Install & Activate' }))
+
+      await waitFor(() => {
+        expect(adminInstallScannerMock).toHaveBeenCalledWith({
+          tool: 'trivy',
+          version: '0.49.0',
+          activate: false,
+        })
+      })
+    }, 30000)
+
+    it('shows an error alert when install fails', async () => {
+      const user = userEvent.setup()
+      adminInstallScannerMock.mockRejectedValue(new Error('install failed'))
+      await renderReady()
+
+      await user.click(screen.getByRole('button', { name: 'Install & Activate' }))
+
+      expect(await screen.findByText('install failed')).toBeInTheDocument()
+    }, 30000)
+
+    it('triggers a scheduled check on success', async () => {
+      const user = userEvent.setup()
+      triggerScannerCheckMock.mockResolvedValue({ message: 'queued' })
+      await renderReady()
+
+      await user.click(screen.getByRole('button', { name: 'Run Scheduled Check Now' }))
+
+      await waitFor(() => {
+        expect(triggerScannerCheckMock).toHaveBeenCalled()
+      })
+      expect(await screen.findByText('Update check queued.')).toBeInTheDocument()
+    })
+
+    it('shows an error alert when triggering a scheduled check fails', async () => {
+      const user = userEvent.setup()
+      triggerScannerCheckMock.mockRejectedValue(new Error('trigger failed'))
+      await renderReady()
+
+      await user.click(screen.getByRole('button', { name: 'Run Scheduled Check Now' }))
+
+      expect(await screen.findByText('trigger failed')).toBeInTheDocument()
+    })
+
+    it('opens the findings modal for a scan with findings', async () => {
+      const user = userEvent.setup()
+      const findingsScan = {
+        ...fakeStats.recent_scans[0],
+        id: 's-findings',
+        status: 'findings',
+      }
+      getScanningConfigMock.mockResolvedValue(fakeConfig)
+      getScanningStatsMock.mockResolvedValue({ ...fakeStats, recent_scans: [findingsScan] })
+      getScanByIDMock.mockResolvedValue({
+        id: 's-findings',
+        module_version_id: 'mv-1',
+        scanner: 'trivy',
+        scanner_version: '0.50.0',
+        expected_version: '0.50.0',
+        status: 'findings',
+        scanned_at: new Date().toISOString(),
+        critical_count: 0,
+        high_count: 0,
+        medium_count: 1,
+        low_count: 3,
+        raw_results: {},
+        error_message: null,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      })
+      renderPage()
+      await waitFor(() => {
+        expect(screen.getByText('hashicorp/consul/aws')).toBeInTheDocument()
+      })
+
+      await user.click(screen.getByRole('button', { name: 'Findings' }))
+
+      await waitFor(() => {
+        expect(getScanByIDMock).toHaveBeenCalledWith('s-findings')
+      })
+      expect(await screen.findByText('Scan Findings')).toBeInTheDocument()
+    })
+  })
+
+  describe('automatic updates', () => {
+    async function renderReady() {
+      getScanningConfigMock.mockResolvedValue(fakeConfig)
+      getScanningStatsMock.mockResolvedValue(fakeStats)
+      renderPage()
+      await waitFor(() => {
+        expect(screen.getByText('Automatic Updates')).toBeInTheDocument()
+      })
+    }
+
+    it('toggles enabled and requires-approval switches and edits the interval', async () => {
+      const user = userEvent.setup()
+      await renderReady()
+
+      const enabledSwitch = screen.getByRole('switch', {
+        name: 'Enable scheduled update checks',
+      })
+      expect(enabledSwitch).not.toBeChecked()
+      await user.click(enabledSwitch)
+      expect(enabledSwitch).toBeChecked()
+
+      const approvalSwitch = screen.getByRole('switch', {
+        name: 'Require approval before activating',
+      })
+      expect(approvalSwitch).toBeChecked()
+      await user.click(approvalSwitch)
+      expect(approvalSwitch).not.toBeChecked()
+
+      const intervalField = screen.getByLabelText('Check interval (hours)')
+      fireEvent.change(intervalField, { target: { value: '48' } })
+      expect(screen.getByDisplayValue('48')).toBeInTheDocument()
+    })
+
+    it('disables Save and shows an error when auto_approve_rules is invalid JSON', async () => {
+      await renderReady()
+
+      const rulesField = screen.getByLabelText('Auto-approve rules (JSON)')
+      fireEvent.change(rulesField, { target: { value: '{invalid json' } })
+
+      expect(await screen.findByText('Must be valid JSON')).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: 'Save Auto-Update Settings' })).toBeDisabled()
+
+      fireEvent.change(rulesField, { target: { value: '{"patch_only": true}' } })
+
+      await waitFor(() => {
+        expect(
+          screen.getByText('Optional JSON rules to auto-approve matching versions (e.g. patch-only). Leave blank to require manual approval.'),
+        ).toBeInTheDocument()
+      })
+      expect(screen.getByRole('button', { name: 'Save Auto-Update Settings' })).not.toBeDisabled()
+    })
+
+    it('saves auto-update settings on success', async () => {
+      const user = userEvent.setup()
+      await renderReady()
+
+      await user.click(screen.getByRole('button', { name: 'Save Auto-Update Settings' }))
+
+      await waitFor(() => {
+        expect(saveScannerAutoUpdateMock).toHaveBeenCalledWith({
+          enabled: false,
+          interval_hours: 24,
+          requires_approval: true,
+          auto_approve_rules: '',
+        })
+      })
+      expect(await screen.findByText('Auto-update settings saved.')).toBeInTheDocument()
+    })
+
+    it('shows an error alert when saving auto-update settings fails', async () => {
+      const user = userEvent.setup()
+      saveScannerAutoUpdateMock.mockRejectedValue(new Error('auto update save failed'))
+      await renderReady()
+
+      await user.click(screen.getByRole('button', { name: 'Save Auto-Update Settings' }))
+
+      expect(await screen.findByText('auto update save failed')).toBeInTheDocument()
+    })
+  })
+
+  describe('non-admin gating', () => {
+    beforeEach(() => {
+      mockAllowedScopes = []
+    })
+
+    it('disables all scanner and auto-update controls for non-admin users', async () => {
+      getScanningConfigMock.mockResolvedValue(fakeConfig)
+      getScanningStatsMock.mockResolvedValue(fakeStats)
+      renderPage()
+      await waitFor(() => {
+        expect(screen.getByText('Scanner Tool Management')).toBeInTheDocument()
+      })
+
+      expect(screen.getByRole('button', { name: 'Check for Updates' })).toBeDisabled()
+      expect(screen.getByRole('button', { name: 'Install & Activate' })).toBeDisabled()
+      expect(screen.getByRole('button', { name: 'Run Scheduled Check Now' })).toBeDisabled()
+      expect(screen.getByLabelText('Version (optional, defaults to latest)')).toBeDisabled()
+      expect(screen.getByRole('checkbox', { name: 'Activate after install' })).toBeDisabled()
+      expect(screen.getByRole('button', { name: 'Save Auto-Update Settings' })).toBeDisabled()
+      expect(
+        screen.getByRole('switch', { name: 'Enable scheduled update checks' }),
+      ).toBeDisabled()
     })
   })
 })
