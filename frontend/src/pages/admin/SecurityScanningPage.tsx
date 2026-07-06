@@ -42,7 +42,12 @@ import api from '../../services/api'
 import { queryKeys } from '../../services/queryKeys'
 import { useAuth } from '../../contexts/AuthContext'
 import { getErrorMessage } from '../../utils/errors'
-import type { ModuleScan, RecentScanEntry, ScannerLatestInfo, ScannerAutoUpdateInput } from '../../types'
+import type {
+  ModuleScan,
+  RecentScanEntry,
+  ScannerLatestInfo,
+  ScannerAutoUpdateInput,
+} from '../../types'
 
 function statusChip(t: TFunction, status: string, onClick?: () => void) {
   const clickProps = onClick ? { onClick, sx: { cursor: 'pointer' } } : {}
@@ -153,6 +158,8 @@ const SecurityScanningPage: React.FC = () => {
   const [scannerVersionInput, setScannerVersionInput] = useState('')
   const [scannerActivate, setScannerActivate] = useState(true)
   const [scannerLatest, setScannerLatest] = useState<ScannerLatestInfo | null>(null)
+  const [configExpanded, setConfigExpanded] = useState(true)
+  const [scannerMgmtExpanded, setScannerMgmtExpanded] = useState(true)
 
   const checkLatestMutation = useMutation({
     mutationFn: () => api.checkScannerLatest(config!.tool),
@@ -235,7 +242,9 @@ const SecurityScanningPage: React.FC = () => {
       queryClient.invalidateQueries({ queryKey: ['scanning'] })
     },
     onError: (err: unknown) => {
-      setScannerError(getErrorMessage(err, t('admin.securityScanning.scanner.autoUpdate.saveError')))
+      setScannerError(
+        getErrorMessage(err, t('admin.securityScanning.scanner.autoUpdate.saveError')),
+      )
     },
   })
 
@@ -312,376 +321,420 @@ const SecurityScanningPage: React.FC = () => {
         <>
           {/* Configuration */}
           <Paper sx={{ p: 3, mb: 3 }}>
-            <Typography variant="h6" gutterBottom>
-              {t('admin.securityScanning.configuration')}
-            </Typography>
-            <Divider sx={{ mb: 2 }} />
-            <Grid container spacing={2}>
-              <Grid size={{ xs: 12, sm: 6, md: 4 }}>
-                <Typography
-                  variant="caption"
-                  sx={{
-                    color: 'text.secondary',
-                  }}
-                >
-                  {t('admin.securityScanning.status')}
-                </Typography>
-                <Box sx={{ mt: 0.5 }}>
-                  <Chip
-                    icon={config?.enabled ? <CheckCircle /> : <Error />}
-                    label={
-                      config?.enabled
-                        ? t('admin.securityScanning.enabled')
-                        : t('admin.securityScanning.disabled')
-                    }
-                    color={config?.enabled ? 'success' : 'default'}
-                    variant="outlined"
-                  />
-                </Box>
-              </Grid>
-              <Grid size={{ xs: 12, sm: 6, md: 4 }}>
-                <Typography
-                  variant="caption"
-                  sx={{
-                    color: 'text.secondary',
-                  }}
-                >
-                  {t('admin.securityScanning.scannerTool')}
-                </Typography>
-                <Typography
-                  variant="body1"
-                  sx={{
-                    fontFamily: 'monospace',
-                  }}
-                >
-                  {config?.tool || '—'}
-                </Typography>
-              </Grid>
-              <Grid size={{ xs: 12, sm: 6, md: 4 }}>
-                <Typography
-                  variant="caption"
-                  sx={{
-                    color: 'text.secondary',
-                  }}
-                >
-                  {t('admin.securityScanning.expectedVersion')}
-                </Typography>
-                <Typography
-                  variant="body1"
-                  sx={{
-                    fontFamily: 'monospace',
-                  }}
-                >
-                  {config?.expected_version || t('admin.securityScanning.notPinned')}
-                </Typography>
-              </Grid>
-              <Grid size={{ xs: 12, sm: 6, md: 4 }}>
-                <Typography
-                  variant="caption"
-                  sx={{
-                    color: 'text.secondary',
-                  }}
-                >
-                  {t('admin.securityScanning.severityThreshold')}
-                </Typography>
-                <Typography
-                  variant="body1"
-                  sx={{
-                    fontFamily: 'monospace',
-                  }}
-                >
-                  {config?.severity_threshold || '—'}
-                </Typography>
-              </Grid>
-              <Grid size={{ xs: 12, sm: 6, md: 4 }}>
-                <Typography
-                  variant="caption"
-                  sx={{
-                    color: 'text.secondary',
-                  }}
-                >
-                  {t('admin.securityScanning.timeout')}
-                </Typography>
-                <Typography
-                  variant="body1"
-                  sx={{
-                    fontFamily: 'monospace',
-                  }}
-                >
-                  {config?.timeout || '—'}
-                </Typography>
-              </Grid>
-              <Grid size={{ xs: 12, sm: 6, md: 4 }}>
-                <Typography
-                  variant="caption"
-                  sx={{
-                    color: 'text.secondary',
-                  }}
-                >
-                  {t('admin.securityScanning.workersInterval')}
-                </Typography>
-                <Typography
-                  variant="body1"
-                  sx={{
-                    fontFamily: 'monospace',
-                  }}
-                >
-                  {t('admin.securityScanning.workersValue', {
-                    workers: config?.worker_count ?? '—',
-                    mins: config?.scan_interval_mins ?? '—',
-                  })}
-                </Typography>
-              </Grid>
-              <Grid size={{ xs: 12, sm: 6, md: 4 }}>
-                <Typography
-                  variant="caption"
-                  sx={{
-                    color: 'text.secondary',
-                  }}
-                >
-                  {t('admin.securityScanning.binaryPath')}
-                </Typography>
-                {config?.binary_path ? (
+            <Box
+              role="button"
+              tabIndex={0}
+              aria-expanded={configExpanded}
+              onClick={() => setConfigExpanded((v) => !v)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault()
+                  setConfigExpanded((v) => !v)
+                }
+              }}
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                cursor: 'pointer',
+                userSelect: 'none',
+              }}
+            >
+              <Typography variant="h6">{t('admin.securityScanning.configuration')}</Typography>
+              {configExpanded ? <KeyboardArrowDown /> : <KeyboardArrowRight />}
+            </Box>
+            <Collapse in={configExpanded} timeout="auto">
+              <Divider sx={{ mb: 2, mt: 1 }} />
+              <Grid container spacing={2}>
+                <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+                  <Typography
+                    variant="caption"
+                    sx={{
+                      color: 'text.secondary',
+                    }}
+                  >
+                    {t('admin.securityScanning.status')}
+                  </Typography>
+                  <Box sx={{ mt: 0.5 }}>
+                    <Chip
+                      icon={config?.enabled ? <CheckCircle /> : <Error />}
+                      label={
+                        config?.enabled
+                          ? t('admin.securityScanning.enabled')
+                          : t('admin.securityScanning.disabled')
+                      }
+                      color={config?.enabled ? 'success' : 'default'}
+                      variant="outlined"
+                    />
+                  </Box>
+                </Grid>
+                <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+                  <Typography
+                    variant="caption"
+                    sx={{
+                      color: 'text.secondary',
+                    }}
+                  >
+                    {t('admin.securityScanning.scannerTool')}
+                  </Typography>
                   <Typography
                     variant="body1"
                     sx={{
                       fontFamily: 'monospace',
-                      wordBreak: 'break-all',
                     }}
                   >
-                    {config.binary_path}
+                    {config?.tool || '—'}
                   </Typography>
-                ) : (
+                </Grid>
+                <Grid size={{ xs: 12, sm: 6, md: 4 }}>
                   <Typography
-                    variant="body2"
+                    variant="caption"
                     sx={{
-                      color: 'text.disabled',
+                      color: 'text.secondary',
                     }}
                   >
-                    {t('admin.securityScanning.notReported')}
+                    {t('admin.securityScanning.expectedVersion')}
                   </Typography>
-                )}
-              </Grid>
-              <Grid size={{ xs: 12, sm: 6, md: 4 }}>
-                <Typography
-                  variant="caption"
-                  sx={{
-                    color: 'text.secondary',
-                  }}
-                >
-                  {t('admin.securityScanning.detectedVersion')}
-                </Typography>
-                {config?.detected_version ? (
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mt: 0.5 }}>
+                  <Typography
+                    variant="body1"
+                    sx={{
+                      fontFamily: 'monospace',
+                    }}
+                  >
+                    {config?.expected_version || t('admin.securityScanning.notPinned')}
+                  </Typography>
+                </Grid>
+                <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+                  <Typography
+                    variant="caption"
+                    sx={{
+                      color: 'text.secondary',
+                    }}
+                  >
+                    {t('admin.securityScanning.severityThreshold')}
+                  </Typography>
+                  <Typography
+                    variant="body1"
+                    sx={{
+                      fontFamily: 'monospace',
+                    }}
+                  >
+                    {config?.severity_threshold || '—'}
+                  </Typography>
+                </Grid>
+                <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+                  <Typography
+                    variant="caption"
+                    sx={{
+                      color: 'text.secondary',
+                    }}
+                  >
+                    {t('admin.securityScanning.timeout')}
+                  </Typography>
+                  <Typography
+                    variant="body1"
+                    sx={{
+                      fontFamily: 'monospace',
+                    }}
+                  >
+                    {config?.timeout || '—'}
+                  </Typography>
+                </Grid>
+                <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+                  <Typography
+                    variant="caption"
+                    sx={{
+                      color: 'text.secondary',
+                    }}
+                  >
+                    {t('admin.securityScanning.workersInterval')}
+                  </Typography>
+                  <Typography
+                    variant="body1"
+                    sx={{
+                      fontFamily: 'monospace',
+                    }}
+                  >
+                    {t('admin.securityScanning.workersValue', {
+                      workers: config?.worker_count ?? '—',
+                      mins: config?.scan_interval_mins ?? '—',
+                    })}
+                  </Typography>
+                </Grid>
+                <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+                  <Typography
+                    variant="caption"
+                    sx={{
+                      color: 'text.secondary',
+                    }}
+                  >
+                    {t('admin.securityScanning.binaryPath')}
+                  </Typography>
+                  {config?.binary_path ? (
                     <Typography
                       variant="body1"
                       sx={{
                         fontFamily: 'monospace',
+                        wordBreak: 'break-all',
                       }}
                     >
-                      {config.detected_version}
+                      {config.binary_path}
                     </Typography>
-                    {config.expected_version &&
-                      config.detected_version !== config.expected_version && (
-                        <Tooltip
-                          title={t('admin.securityScanning.expectedTooltip', {
-                            version: config.expected_version,
-                          })}
-                        >
-                          <WarningAmber fontSize="small" color="warning" />
-                        </Tooltip>
-                      )}
-                  </Box>
-                ) : (
+                  ) : (
+                    <Typography
+                      variant="body2"
+                      sx={{
+                        color: 'text.disabled',
+                      }}
+                    >
+                      {t('admin.securityScanning.notReported')}
+                    </Typography>
+                  )}
+                </Grid>
+                <Grid size={{ xs: 12, sm: 6, md: 4 }}>
                   <Typography
-                    variant="body2"
+                    variant="caption"
                     sx={{
-                      color: 'text.disabled',
+                      color: 'text.secondary',
                     }}
                   >
-                    {t('admin.securityScanning.notReported')}
+                    {t('admin.securityScanning.detectedVersion')}
                   </Typography>
-                )}
+                  {config?.detected_version ? (
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mt: 0.5 }}>
+                      <Typography
+                        variant="body1"
+                        sx={{
+                          fontFamily: 'monospace',
+                        }}
+                      >
+                        {config.detected_version}
+                      </Typography>
+                      {config.expected_version &&
+                        config.detected_version !== config.expected_version && (
+                          <Tooltip
+                            title={t('admin.securityScanning.expectedTooltip', {
+                              version: config.expected_version,
+                            })}
+                          >
+                            <WarningAmber fontSize="small" color="warning" />
+                          </Tooltip>
+                        )}
+                    </Box>
+                  ) : (
+                    <Typography
+                      variant="body2"
+                      sx={{
+                        color: 'text.disabled',
+                      }}
+                    >
+                      {t('admin.securityScanning.notReported')}
+                    </Typography>
+                  )}
+                </Grid>
               </Grid>
-            </Grid>
+            </Collapse>
           </Paper>
 
           {/* Scanner Tool Management */}
           <Paper sx={{ p: 3, mb: 3 }}>
-            <Typography variant="h6" gutterBottom>
-              {t('admin.securityScanning.scanner.title')}
-            </Typography>
-            <Divider sx={{ mb: 2 }} />
-            {scannerSuccess && (
-              <Alert severity="success" sx={{ mb: 2 }} onClose={() => setScannerSuccess(null)}>
-                {scannerSuccess}
-              </Alert>
-            )}
-            {scannerError && (
-              <Alert severity="error" sx={{ mb: 2 }} onClose={() => setScannerError(null)}>
-                {scannerError}
-              </Alert>
-            )}
-            <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', flexWrap: 'wrap', mb: 2 }}>
-              <Button
-                variant="outlined"
-                disabled={!isAdmin || !config?.tool || checkLatestMutation.isPending}
-                onClick={() => checkLatestMutation.mutate()}
-              >
-                {checkLatestMutation.isPending ? (
-                  <CircularProgress size={20} />
-                ) : (
-                  t('admin.securityScanning.scanner.checkForUpdates')
-                )}
-              </Button>
-              {scannerLatest && (
-                <>
-                  <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                    {t('admin.securityScanning.scanner.currentVersion')}:{' '}
-                    <strong>{scannerLatest.current_version || '—'}</strong>{' '}
-                    {t('admin.securityScanning.scanner.latestVersion')}:{' '}
-                    <strong>{scannerLatest.latest_version}</strong>
-                  </Typography>
-                  <Chip
-                    label={
-                      scannerLatest.update_available
-                        ? t('admin.securityScanning.scanner.updateAvailable')
-                        : t('admin.securityScanning.scanner.upToDate')
-                    }
-                    color={scannerLatest.update_available ? 'warning' : 'success'}
-                    size="small"
-                    variant="outlined"
-                  />
-                  {scannerLatest.signature_supported && (
-                    <Tooltip title={t('admin.securityScanning.scanner.signatureSupported')}>
-                      <CheckCircle fontSize="small" color="success" />
-                    </Tooltip>
-                  )}
-                </>
+            <Box
+              role="button"
+              tabIndex={0}
+              aria-expanded={scannerMgmtExpanded}
+              onClick={() => setScannerMgmtExpanded((v) => !v)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault()
+                  setScannerMgmtExpanded((v) => !v)
+                }
+              }}
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                cursor: 'pointer',
+                userSelect: 'none',
+              }}
+            >
+              <Typography variant="h6">{t('admin.securityScanning.scanner.title')}</Typography>
+              {scannerMgmtExpanded ? <KeyboardArrowDown /> : <KeyboardArrowRight />}
+            </Box>
+            <Collapse in={scannerMgmtExpanded} timeout="auto">
+              <Divider sx={{ mb: 2, mt: 1 }} />
+              {scannerSuccess && (
+                <Alert severity="success" sx={{ mb: 2 }} onClose={() => setScannerSuccess(null)}>
+                  {scannerSuccess}
+                </Alert>
               )}
-            </Box>
-            <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', flexWrap: 'wrap', mb: 2 }}>
-              <TextField
-                label={t('admin.securityScanning.scanner.versionOptional')}
-                size="small"
-                value={scannerVersionInput}
-                onChange={(e) => setScannerVersionInput(e.target.value)}
-                disabled={!isAdmin}
-              />
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    checked={scannerActivate}
-                    onChange={(e) => setScannerActivate(e.target.checked)}
-                    disabled={!isAdmin}
-                  />
-                }
-                label={t('admin.securityScanning.scanner.activateNow')}
-              />
-              <Button
-                variant="contained"
-                disabled={!isAdmin || !config?.tool || installMutation.isPending}
-                onClick={() => installMutation.mutate()}
-              >
-                {installMutation.isPending ? (
-                  <CircularProgress size={20} />
-                ) : (
-                  t('admin.securityScanning.scanner.installAndActivate')
-                )}
-              </Button>
-              <Button
-                variant="text"
-                disabled={!isAdmin || triggerCheckMutation.isPending}
-                onClick={() => triggerCheckMutation.mutate()}
-              >
-                {triggerCheckMutation.isPending ? (
-                  <CircularProgress size={20} />
-                ) : (
-                  t('admin.securityScanning.scanner.install')
-                )}
-              </Button>
-            </Box>
-
-            <Divider sx={{ my: 2 }} />
-            <Typography variant="subtitle1" gutterBottom>
-              {t('admin.securityScanning.scanner.autoUpdate.title')}
-            </Typography>
-            <Typography variant="body2" sx={{ color: 'text.secondary', mb: 2 }}>
-              {t('admin.securityScanning.scanner.autoUpdate.description')}
-            </Typography>
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, maxWidth: 480 }}>
-              <FormControlLabel
-                control={
-                  <Switch
-                    checked={autoUpdateForm.enabled}
-                    onChange={(e) =>
-                      setAutoUpdateForm({ ...autoUpdateForm, enabled: e.target.checked })
-                    }
-                    disabled={!isAdmin}
-                  />
-                }
-                label={t('admin.securityScanning.scanner.autoUpdate.enabled')}
-              />
-              <TextField
-                label={t('admin.securityScanning.scanner.autoUpdate.intervalHours')}
-                type="number"
-                value={autoUpdateForm.interval_hours}
-                onChange={(e) =>
-                  setAutoUpdateForm({
-                    ...autoUpdateForm,
-                    interval_hours: parseInt(e.target.value) || 24,
-                  })
-                }
-                disabled={!isAdmin}
-                slotProps={{
-                  htmlInput: { min: 1 },
-                }}
-              />
-              <FormControlLabel
-                control={
-                  <Switch
-                    checked={autoUpdateForm.requires_approval}
-                    onChange={(e) =>
-                      setAutoUpdateForm({
-                        ...autoUpdateForm,
-                        requires_approval: e.target.checked,
-                      })
-                    }
-                    disabled={!isAdmin}
-                  />
-                }
-                label={t('admin.securityScanning.scanner.autoUpdate.requiresApproval')}
-              />
-              <TextField
-                label={t('admin.securityScanning.scanner.autoUpdate.autoApproveRules')}
-                multiline
-                minRows={3}
-                value={autoUpdateForm.auto_approve_rules}
-                onChange={(e) =>
-                  setAutoUpdateForm({ ...autoUpdateForm, auto_approve_rules: e.target.value })
-                }
-                error={autoUpdateRulesInvalid}
-                helperText={
-                  autoUpdateRulesInvalid
-                    ? t('admin.securityScanning.scanner.autoUpdate.autoApproveRulesInvalid')
-                    : t('admin.securityScanning.scanner.autoUpdate.autoApproveRulesHelp')
-                }
-                disabled={!isAdmin}
-              />
-              <Box>
+              {scannerError && (
+                <Alert severity="error" sx={{ mb: 2 }} onClose={() => setScannerError(null)}>
+                  {scannerError}
+                </Alert>
+              )}
+              <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', flexWrap: 'wrap', mb: 2 }}>
                 <Button
-                  variant="contained"
-                  disabled={!isAdmin || autoUpdateRulesInvalid || saveAutoUpdateMutation.isPending}
-                  onClick={() => saveAutoUpdateMutation.mutate()}
+                  variant="outlined"
+                  disabled={!isAdmin || !config?.tool || checkLatestMutation.isPending}
+                  onClick={() => checkLatestMutation.mutate()}
                 >
-                  {saveAutoUpdateMutation.isPending ? (
+                  {checkLatestMutation.isPending ? (
                     <CircularProgress size={20} />
                   ) : (
-                    t('admin.securityScanning.scanner.autoUpdate.save')
+                    t('admin.securityScanning.scanner.checkForUpdates')
+                  )}
+                </Button>
+                {scannerLatest && (
+                  <>
+                    <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                      {t('admin.securityScanning.scanner.currentVersion')}:{' '}
+                      <strong>{scannerLatest.current_version || '—'}</strong>{' '}
+                      {t('admin.securityScanning.scanner.latestVersion')}:{' '}
+                      <strong>{scannerLatest.latest_version}</strong>
+                    </Typography>
+                    <Chip
+                      label={
+                        scannerLatest.update_available
+                          ? t('admin.securityScanning.scanner.updateAvailable')
+                          : t('admin.securityScanning.scanner.upToDate')
+                      }
+                      color={scannerLatest.update_available ? 'warning' : 'success'}
+                      size="small"
+                      variant="outlined"
+                    />
+                    {scannerLatest.signature_supported && (
+                      <Tooltip title={t('admin.securityScanning.scanner.signatureSupported')}>
+                        <CheckCircle fontSize="small" color="success" />
+                      </Tooltip>
+                    )}
+                  </>
+                )}
+              </Box>
+              <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', flexWrap: 'wrap', mb: 2 }}>
+                <TextField
+                  label={t('admin.securityScanning.scanner.versionOptional')}
+                  size="small"
+                  value={scannerVersionInput}
+                  onChange={(e) => setScannerVersionInput(e.target.value)}
+                  disabled={!isAdmin}
+                />
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      checked={scannerActivate}
+                      onChange={(e) => setScannerActivate(e.target.checked)}
+                      disabled={!isAdmin}
+                    />
+                  }
+                  label={t('admin.securityScanning.scanner.activateNow')}
+                />
+                <Button
+                  variant="contained"
+                  disabled={!isAdmin || !config?.tool || installMutation.isPending}
+                  onClick={() => installMutation.mutate()}
+                >
+                  {installMutation.isPending ? (
+                    <CircularProgress size={20} />
+                  ) : (
+                    t('admin.securityScanning.scanner.installAndActivate')
+                  )}
+                </Button>
+                <Button
+                  variant="text"
+                  disabled={!isAdmin || triggerCheckMutation.isPending}
+                  onClick={() => triggerCheckMutation.mutate()}
+                >
+                  {triggerCheckMutation.isPending ? (
+                    <CircularProgress size={20} />
+                  ) : (
+                    t('admin.securityScanning.scanner.install')
                   )}
                 </Button>
               </Box>
-            </Box>
+
+              <Divider sx={{ my: 2 }} />
+              <Typography variant="subtitle1" gutterBottom>
+                {t('admin.securityScanning.scanner.autoUpdate.title')}
+              </Typography>
+              <Typography variant="body2" sx={{ color: 'text.secondary', mb: 2 }}>
+                {t('admin.securityScanning.scanner.autoUpdate.description')}
+              </Typography>
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, maxWidth: 480 }}>
+                <FormControlLabel
+                  control={
+                    <Switch
+                      checked={autoUpdateForm.enabled}
+                      onChange={(e) =>
+                        setAutoUpdateForm({ ...autoUpdateForm, enabled: e.target.checked })
+                      }
+                      disabled={!isAdmin}
+                    />
+                  }
+                  label={t('admin.securityScanning.scanner.autoUpdate.enabled')}
+                />
+                <TextField
+                  label={t('admin.securityScanning.scanner.autoUpdate.intervalHours')}
+                  type="number"
+                  value={autoUpdateForm.interval_hours}
+                  onChange={(e) =>
+                    setAutoUpdateForm({
+                      ...autoUpdateForm,
+                      interval_hours: parseInt(e.target.value) || 24,
+                    })
+                  }
+                  disabled={!isAdmin}
+                  slotProps={{
+                    htmlInput: { min: 1 },
+                  }}
+                />
+                <FormControlLabel
+                  control={
+                    <Switch
+                      checked={autoUpdateForm.requires_approval}
+                      onChange={(e) =>
+                        setAutoUpdateForm({
+                          ...autoUpdateForm,
+                          requires_approval: e.target.checked,
+                        })
+                      }
+                      disabled={!isAdmin}
+                    />
+                  }
+                  label={t('admin.securityScanning.scanner.autoUpdate.requiresApproval')}
+                />
+                <TextField
+                  label={t('admin.securityScanning.scanner.autoUpdate.autoApproveRules')}
+                  multiline
+                  minRows={3}
+                  value={autoUpdateForm.auto_approve_rules}
+                  onChange={(e) =>
+                    setAutoUpdateForm({ ...autoUpdateForm, auto_approve_rules: e.target.value })
+                  }
+                  error={autoUpdateRulesInvalid}
+                  helperText={
+                    autoUpdateRulesInvalid
+                      ? t('admin.securityScanning.scanner.autoUpdate.autoApproveRulesInvalid')
+                      : t('admin.securityScanning.scanner.autoUpdate.autoApproveRulesHelp')
+                  }
+                  disabled={!isAdmin}
+                />
+                <Box>
+                  <Button
+                    variant="contained"
+                    disabled={
+                      !isAdmin || autoUpdateRulesInvalid || saveAutoUpdateMutation.isPending
+                    }
+                    onClick={() => saveAutoUpdateMutation.mutate()}
+                  >
+                    {saveAutoUpdateMutation.isPending ? (
+                      <CircularProgress size={20} />
+                    ) : (
+                      t('admin.securityScanning.scanner.autoUpdate.save')
+                    )}
+                  </Button>
+                </Box>
+              </Box>
+            </Collapse>
           </Paper>
 
           {/* Summary Stats */}
