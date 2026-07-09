@@ -62,13 +62,22 @@ jobs:
             --lockfile=e2e/package-lock.json
 
   # ── CodeQL ────────────────────────────────────────────
+  # Scans both the application source (javascript-typescript) and the repo's
+  # GitHub Actions workflows (actions). The `actions` leg is required to keep the
+  # code-scanning tool-status configuration for this workflow current: a
+  # previously-registered `actions` configuration reports a stale "configuration
+  # error" on the Code scanning status page when no analysis refreshes it.
   codeql:
-    name: CodeQL (JavaScript/TypeScript)
+    name: CodeQL (${{ matrix.language }})
     runs-on: ubuntu-latest
     permissions:
       security-events: write
       actions: read
       contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        language: [javascript-typescript, actions]
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
 
@@ -76,7 +85,7 @@ jobs:
         # v4
         uses: github/codeql-action/init@7211b7c8077ea37d8641b6271f6a365a22a5fbfa
         with:
-          languages: javascript-typescript
+          languages: ${{ matrix.language }}
           queries: security-and-quality
 
       - name: Autobuild
@@ -87,7 +96,7 @@ jobs:
         # v4
         uses: github/codeql-action/analyze@7211b7c8077ea37d8641b6271f6a365a22a5fbfa
         with:
-          category: /language:javascript-typescript
+          category: /language:${{ matrix.language }}
 
   # ── Flag stale Dependabot PRs ──────────────────────────
   stale-dependabot:
