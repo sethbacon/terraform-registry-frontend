@@ -33,6 +33,20 @@ import type { SCMRepository, SCMTag, SCMBranch } from '../types/scm'
 import apiClient from '../services/api'
 import { getErrorMessage, getErrorStatus } from '../utils/errors'
 
+/**
+ * Composes a server error message with its HTTP status, or falls back to the
+ * default message when there's no server message (e.g. a network failure with
+ * no response, where status is undefined and there's nothing to prefix).
+ */
+function formatApiError(
+  status: number | undefined,
+  serverMessage: string,
+  defaultMessage: string,
+): string {
+  if (!serverMessage) return defaultMessage
+  return status != null ? `Error ${status}: ${serverMessage}` : serverMessage
+}
+
 interface RepositoryBrowserProps {
   providerId: string
   onRepositorySelect?: (repository: SCMRepository) => void
@@ -79,9 +93,11 @@ const RepositoryBrowser: React.FC<RepositoryBrowserProps> = ({
         )
       } else {
         setError(
-          serverMessage
-            ? `Error ${status}: ${serverMessage}`
-            : `Failed to load repositories (HTTP ${status ?? 'unknown'})`,
+          formatApiError(
+            status,
+            serverMessage,
+            `Failed to load repositories (HTTP ${status ?? 'unknown'})`,
+          ),
         )
       }
     } finally {
@@ -108,9 +124,11 @@ const RepositoryBrowser: React.FC<RepositoryBrowserProps> = ({
         const serverMessage = getErrorMessage(err, '')
         console.error('[RepositoryBrowser] loadTagsAndBranches failed', err)
         setError(
-          serverMessage
-            ? `Error ${status}: ${serverMessage}`
-            : `Failed to load tags and branches (HTTP ${status ?? 'unknown'})`,
+          formatApiError(
+            status,
+            serverMessage,
+            `Failed to load tags and branches (HTTP ${status ?? 'unknown'})`,
+          ),
         )
         setTags([])
         setBranches([])

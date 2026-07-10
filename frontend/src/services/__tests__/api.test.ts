@@ -121,6 +121,21 @@ describe('ApiClient', () => {
       const result = capturedReqFulfilled(config)
       expect(result.headers.Authorization).toBeUndefined()
     })
+
+    it('does not overwrite an explicit Authorization header set by the caller', async () => {
+      // A stray legacy JWT in localStorage (e.g. left over from a prior session in a
+      // shared browser profile) must not clobber a caller-supplied auth scheme, such
+      // as the Setup Wizard's bootstrap "SetupToken <token>" calls.
+      localStorage.setItem('auth_token', 'my-jwt-token')
+      await getApiClient()
+
+      const config = {
+        headers: { Authorization: 'SetupToken setup-abc123' } as Record<string, string>,
+      } as InternalAxiosRequestConfig
+
+      const result = capturedReqFulfilled(config)
+      expect(result.headers.Authorization).toBe('SetupToken setup-abc123')
+    })
   })
 
   // ─── 401 Interceptor ──────────────────────────────────────────────────
@@ -158,6 +173,26 @@ describe('ApiClient', () => {
       await expect(capturedResRejected(error)).rejects.toBe(error)
       // No token to clear - localStorage stays empty
       expect(localStorage.getItem('auth_token')).toBeNull()
+    })
+
+    it('redirects to /login on 401 for a cookie-only session (no localStorage token)', async () => {
+      // The intended auth model: no auth_token/user ever written to localStorage,
+      // just the HttpOnly auth cookie + the readable tfr_csrf double-submit cookie.
+      document.cookie = 'tfr_csrf=some-csrf-token'
+      await getApiClient()
+
+      const error = {
+        response: { status: 401 },
+        config: { url: '/api/v1/modules/search' },
+        isAxiosError: true,
+      } as AxiosError
+
+      const authRejectedHandler = capturedResRejectedHandlers[0]
+      await expect(authRejectedHandler(error)).rejects.toBe(error)
+      expect(window.location.href).toContain('/login')
+
+      // Clean up so this cookie doesn't leak into later tests.
+      document.cookie = 'tfr_csrf=; Max-Age=0'
     })
 
     it('does not clear auth for SCM OAuth 401 (repository endpoint)', async () => {

@@ -53,8 +53,11 @@ class ApiClient {
         // For backward compatibility: if an auth token is in localStorage (migration
         // period), include it as a Bearer header. Once all sessions have migrated to
         // HttpOnly cookies this block can be removed.
+        // Skip when the caller already set an explicit Authorization header (e.g. the
+        // Setup Wizard's "SetupToken <token>" bootstrap calls) -- a stray legacy JWT in
+        // localStorage must never silently override a caller's own auth scheme.
         const legacyToken = localStorage.getItem('auth_token')
-        if (legacyToken) {
+        if (legacyToken && !config.headers.Authorization) {
           config.headers.Authorization = `Bearer ${legacyToken}`
         }
 
@@ -99,11 +102,17 @@ class ApiClient {
 
           if (!isSCMOAuthFailure) {
             // Only redirect when the user previously had an active session
-            // (token or cached user). Fresh anonymous visitors receive 401 on
-            // probing endpoints like /auth/me — this is expected and should
-            // NOT trigger a redirect so public pages remain accessible.
+            // (legacy token/cached user, or the cookie-only session model). Fresh
+            // anonymous visitors receive 401 on probing endpoints like /auth/me —
+            // this is expected and should NOT trigger a redirect so public pages
+            // remain accessible. The "tfr_csrf" cookie is set only when the backend
+            // issues or refreshes the auth cookie (see middleware/csrf.go) and cleared
+            // on logout, so its presence is a reliable cookie-session signal even
+            // though the HttpOnly auth cookie itself isn't readable from JS.
             const hadSession =
-              !!localStorage.getItem('auth_token') || !!localStorage.getItem('user')
+              !!localStorage.getItem('auth_token') ||
+              !!localStorage.getItem('user') ||
+              !!getCookie('tfr_csrf')
             clearAuthStorage()
             if (hadSession) {
               window.location.href = '/login'
