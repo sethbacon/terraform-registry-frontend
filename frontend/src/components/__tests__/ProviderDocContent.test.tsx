@@ -72,4 +72,44 @@ describe('ProviderDocContent', () => {
       expect(screen.getByTestId('markdown')).toHaveTextContent('Plain markdown content.')
     })
   })
+
+  // Every test above mocks MarkdownRenderer to a plain <div>, so none of them exercise
+  // the real sanitizer. Only the isolated MarkdownRenderer unit test does -- a future
+  // change to this fetch-to-render path (e.g. swapping in a different renderer, or
+  // adding rehype-raw) could bypass sanitization with no test catching it end-to-end.
+  // Use the REAL MarkdownRenderer here, through a fresh module instance, to prove the
+  // full ProviderDocContent pipeline (fetch -> strip frontmatter -> render) sanitizes
+  // attacker-controlled README content, not just the isolated component.
+  //
+  // Payload uses markdown link/image syntax, not raw <script>/<img onerror> HTML:
+  // this component has no rehype-raw plugin, so react-markdown never renders raw HTML
+  // nodes at all (verified: they produce zero DOM elements, not sanitized-and-kept
+  // ones) -- raw HTML injection is a non-issue here by construction. The reachable
+  // attack surface is a dangerous protocol in a real markdown link/image URL.
+  describe('end-to-end sanitization (real MarkdownRenderer, not mocked)', () => {
+    it('strips javascript: and data: URIs from fetched README content', async () => {
+      vi.resetModules()
+      vi.doUnmock('../MarkdownRenderer')
+      vi.doMock('../../services/api', () => ({
+        default: { getProviderDocContent: getProviderDocContentMock },
+      }))
+      getProviderDocContentMock.mockResolvedValue({
+        content:
+          '[click me](javascript:alert(1))\n\n![alt text](javascript:alert(1))\n\n[data payload](data:text/html,<script>alert(1)</script>)',
+      })
+
+      const { default: RealProviderDocContent } = await import('../ProviderDocContent')
+      const { container } = render(<RealProviderDocContent {...defaultProps} />)
+
+      await waitFor(() => {
+        expect(container.querySelectorAll('a, img').length).toBeGreaterThan(0)
+      })
+      container.querySelectorAll('a').forEach((a) => {
+        expect(a.getAttribute('href')).toBeNull()
+      })
+      container.querySelectorAll('img').forEach((img) => {
+        expect(img.getAttribute('src')).toBeNull()
+      })
+    })
+  })
 })
