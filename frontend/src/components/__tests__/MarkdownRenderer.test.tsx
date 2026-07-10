@@ -90,6 +90,34 @@ describe('MarkdownRenderer', () => {
     }
   })
 
+  it('strips a javascript: URI from a markdown link href', () => {
+    renderWithTheme(<MarkdownRenderer>{'[click me](javascript:alert(1))'}</MarkdownRenderer>)
+    const link = screen.getByText('click me')
+    expect(link.tagName).toBe('A')
+    expect(link.getAttribute('href')).toBeNull()
+  })
+
+  it('strips a javascript: URI from a markdown image src', () => {
+    const { container } = renderWithTheme(
+      <MarkdownRenderer>{'![alt text](javascript:alert(1))'}</MarkdownRenderer>,
+    )
+    const img = container.querySelector('img')
+    expect(img).not.toBeNull()
+    expect(img?.getAttribute('src')).toBeNull()
+  })
+
+  it('strips a data:text/html URI from a markdown link href', () => {
+    const { container } = renderWithTheme(
+      <MarkdownRenderer>
+        {'[data payload](data:text/html,<script>alert(1)</script>)'}
+      </MarkdownRenderer>,
+    )
+    const link = screen.getByText('data payload')
+    expect(link.tagName).toBe('A')
+    expect(link.getAttribute('href')).toBeNull()
+    expect(container.querySelectorAll('script').length).toBe(0)
+  })
+
   it('handles empty string content', () => {
     const { container } = renderWithTheme(<MarkdownRenderer>{''}</MarkdownRenderer>)
 
