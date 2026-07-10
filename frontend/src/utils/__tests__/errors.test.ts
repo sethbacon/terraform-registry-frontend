@@ -42,6 +42,21 @@ describe('getErrorMessage', () => {
     expect(getErrorMessage(error, 'Something went wrong')).toBe('Something went wrong')
   })
 
+  it('returns a friendly localized message when the AxiosError has no response', () => {
+    const error = new AxiosError('Network Error')
+    expect(error.response).toBeUndefined()
+    expect(getErrorMessage(error)).toBe(
+      'Unable to reach the server — check your connection and try again.',
+    )
+  })
+
+  it('prefers the friendly network message over a caller-provided fallback when there is no response', () => {
+    const error = new AxiosError('Network Error')
+    expect(getErrorMessage(error, 'Failed to delete provider. Please try again.')).toBe(
+      'Unable to reach the server — check your connection and try again.',
+    )
+  })
+
   it('extracts message from native Error', () => {
     const error = new Error('File not found')
     expect(getErrorMessage(error)).toBe('File not found')
