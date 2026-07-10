@@ -121,6 +121,21 @@ describe('ApiClient', () => {
       const result = capturedReqFulfilled(config)
       expect(result.headers.Authorization).toBeUndefined()
     })
+
+    it('does not overwrite an explicit Authorization header set by the caller', async () => {
+      // A stray legacy JWT in localStorage (e.g. left over from a prior session in a
+      // shared browser profile) must not clobber a caller-supplied auth scheme, such
+      // as the Setup Wizard's bootstrap "SetupToken <token>" calls.
+      localStorage.setItem('auth_token', 'my-jwt-token')
+      await getApiClient()
+
+      const config = {
+        headers: { Authorization: 'SetupToken setup-abc123' } as Record<string, string>,
+      } as InternalAxiosRequestConfig
+
+      const result = capturedReqFulfilled(config)
+      expect(result.headers.Authorization).toBe('SetupToken setup-abc123')
+    })
   })
 
   // ─── 401 Interceptor ──────────────────────────────────────────────────
