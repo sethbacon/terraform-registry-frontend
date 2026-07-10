@@ -9,12 +9,13 @@ import { CacheProvider } from '@emotion/react'
 import App from './App'
 import './index.css'
 import './i18n'
-import { init as initErrorReporting, captureError } from './services/errorReporting'
-import { init as initPerformanceReporting } from './services/performanceReporting'
+import { captureError } from './services/errorReporting'
 
-initErrorReporting()
-initPerformanceReporting()
-
+// Error/performance reporting are started by <TelemetryGate> once the user has
+// opted in (PRIVACY.md section 3.3) -- not here, unconditionally, before any
+// consent state is even known. captureError() below is still safe to call
+// pre-consent: it always logs to the console, but only transmits externally
+// once init() has set a DSN, which happens exclusively via that opt-in gate.
 window.addEventListener('unhandledrejection', (event) => {
   const error = event.reason instanceof Error ? event.reason : new Error(String(event.reason))
   captureError(error, { type: 'unhandledrejection' })
