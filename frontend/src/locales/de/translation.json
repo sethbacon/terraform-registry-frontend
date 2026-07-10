@@ -179,7 +179,8 @@
     "search": "Suchen",
     "error": "Fehler",
     "success": "Erfolg",
-    "warning": "Warnung"
+    "warning": "Warnung",
+    "networkError": "Der Server konnte nicht erreicht werden – bitte überprüfen Sie Ihre Verbindung und versuchen Sie es erneut."
   },
   "modules": {
     "pageTitle": "Terraform-Module",
