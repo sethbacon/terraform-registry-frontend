@@ -71,8 +71,11 @@ test.describe('Logout', () => {
     // Open account menu (top-right AppBar button, aria-label "Account")
     await page.getByRole('button', { name: 'Account' }).click();
 
-    // Click Logout menu item
-    await page.getByRole('menuitem', { name: 'Logout' }).click();
+    // Click the logout menu item. Labelled "Sign out" since #438 moved this menu into
+    // the shared @sethbacon/terraform-suite-ui AppBar, whose SuiteLayout renders
+    // t('auth.signOut', { defaultValue: 'Sign out' }) -- a key this app doesn't
+    // override, so the literal default is what's actually on screen.
+    await page.getByRole('menuitem', { name: 'Sign out' }).click();
 
     // Logout redirects to the backend /auth/logout endpoint which terminates any
     // OIDC SSO session and then redirects back to the frontend home page ('/').
