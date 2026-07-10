@@ -99,11 +99,17 @@ class ApiClient {
 
           if (!isSCMOAuthFailure) {
             // Only redirect when the user previously had an active session
-            // (token or cached user). Fresh anonymous visitors receive 401 on
-            // probing endpoints like /auth/me — this is expected and should
-            // NOT trigger a redirect so public pages remain accessible.
+            // (legacy token/cached user, or the cookie-only session model). Fresh
+            // anonymous visitors receive 401 on probing endpoints like /auth/me —
+            // this is expected and should NOT trigger a redirect so public pages
+            // remain accessible. The "tfr_csrf" cookie is set only when the backend
+            // issues or refreshes the auth cookie (see middleware/csrf.go) and cleared
+            // on logout, so its presence is a reliable cookie-session signal even
+            // though the HttpOnly auth cookie itself isn't readable from JS.
             const hadSession =
-              !!localStorage.getItem('auth_token') || !!localStorage.getItem('user')
+              !!localStorage.getItem('auth_token') ||
+              !!localStorage.getItem('user') ||
+              !!getCookie('tfr_csrf')
             clearAuthStorage()
             if (hadSession) {
               window.location.href = '/login'
