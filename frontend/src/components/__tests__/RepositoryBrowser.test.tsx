@@ -187,8 +187,19 @@ describe('RepositoryBrowser', () => {
     listSCMRepositoriesMock.mockRejectedValue(makeAxiosError(500, 'server down'))
     render(<RepositoryBrowser providerId="scm-1" />)
     await waitFor(() => {
-      expect(screen.getByText(/server down/i)).toBeInTheDocument()
+      expect(screen.getByText('Error 500: server down')).toBeInTheDocument()
     })
+  })
+
+  it('does not prefix "Error undefined:" on a network failure with no HTTP response', async () => {
+    listSCMRepositoriesMock.mockRejectedValue(new AxiosError('Network Error'))
+    render(<RepositoryBrowser providerId="scm-1" />)
+    await waitFor(() => {
+      expect(
+        screen.getByText('Unable to reach the server — check your connection and try again.'),
+      ).toBeInTheDocument()
+    })
+    expect(screen.queryByText(/error undefined/i)).not.toBeInTheDocument()
   })
 
   it('hides repos that do not match nameFilter and shows the hidden-count alert', async () => {
