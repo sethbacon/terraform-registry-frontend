@@ -1,4 +1,4 @@
-import { Suspense, lazy } from 'react'
+import { lazy } from 'react'
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
@@ -13,8 +13,9 @@ import ConsentBanner from './components/ConsentBanner'
 import TelemetryGate from './components/TelemetryGate'
 import OfflineBanner from './components/OfflineBanner'
 import ErrorBoundary from './components/ErrorBoundary'
-import ProtectedRoute from './components/ProtectedRoute'
+import LazyRoute from './components/LazyRoute'
 import RouteFocusManager from './components/RouteFocusManager'
+import { ADMIN_ROUTE_SCOPES } from './routeScopes'
 // Critical-path pages loaded eagerly (small, always needed on first visit)
 import HomePage from './pages/HomePage'
 import LoginPage from './pages/LoginPage'
@@ -61,8 +62,6 @@ const queryClient = new QueryClient({
   },
 })
 
-const loader = <div>Loading...</div>
-
 function App() {
   return (
     <ThemeProvider>
@@ -89,124 +88,76 @@ function App() {
                         <Route path="/modules" element={<ModulesPage />} />
                         <Route
                           path="/modules/:namespace/:name/:system"
-                          element={
-                            <ErrorBoundary>
-                              <Suspense fallback={loader}>
-                                <ModuleDetailPage />
-                              </Suspense>
-                            </ErrorBoundary>
-                          }
+                          element={<LazyRoute Component={ModuleDetailPage} />}
                         />
 
                         {/* Providers */}
                         <Route path="/providers" element={<ProvidersPage />} />
                         <Route
                           path="/providers/:namespace/:type"
-                          element={
-                            <ErrorBoundary>
-                              <Suspense fallback={loader}>
-                                <ProviderDetailPage />
-                              </Suspense>
-                            </ErrorBoundary>
-                          }
+                          element={<LazyRoute Component={ProviderDetailPage} />}
                         />
 
                         {/* Terraform Binaries */}
                         <Route path="/terraform-binaries" element={<TerraformBinariesPage />} />
                         <Route
                           path="/terraform-binaries/:name"
-                          element={
-                            <ErrorBoundary>
-                              <Suspense fallback={loader}>
-                                <TerraformBinaryDetailPage />
-                              </Suspense>
-                            </ErrorBoundary>
-                          }
+                          element={<LazyRoute Component={TerraformBinaryDetailPage} />}
                         />
 
                         {/* API Documentation */}
                         <Route
                           path="/api-docs"
-                          element={
-                            <ErrorBoundary>
-                              <Suspense fallback={loader}>
-                                <ApiDocumentation />
-                              </Suspense>
-                            </ErrorBoundary>
-                          }
+                          element={<LazyRoute Component={ApiDocumentation} />}
                         />
 
                         {/* Settings & Privacy */}
-                        <Route
-                          path="/settings"
-                          element={
-                            <ErrorBoundary>
-                              <Suspense fallback={loader}>
-                                <SettingsPage />
-                              </Suspense>
-                            </ErrorBoundary>
-                          }
-                        />
+                        <Route path="/settings" element={<LazyRoute Component={SettingsPage} />} />
 
-                        {/* Admin routes (protected with scope requirements) */}
+                        {/* Admin routes (protected with scope requirements from routeScopes.ts) */}
                         <Route
                           path="/admin"
                           element={
-                            <ProtectedRoute>
-                              <ErrorBoundary>
-                                <Suspense fallback={loader}>
-                                  <DashboardPage />
-                                </Suspense>
-                              </ErrorBoundary>
-                            </ProtectedRoute>
+                            <LazyRoute
+                              Component={DashboardPage}
+                              requiredScope={ADMIN_ROUTE_SCOPES['/admin']}
+                            />
                           }
                         />
                         <Route
                           path="/admin/users"
                           element={
-                            <ProtectedRoute requiredScope="users:read">
-                              <ErrorBoundary>
-                                <Suspense fallback={loader}>
-                                  <UsersPage />
-                                </Suspense>
-                              </ErrorBoundary>
-                            </ProtectedRoute>
+                            <LazyRoute
+                              Component={UsersPage}
+                              requiredScope={ADMIN_ROUTE_SCOPES['/admin/users']}
+                            />
                           }
                         />
                         <Route
                           path="/admin/organizations"
                           element={
-                            <ProtectedRoute requiredScope="organizations:read">
-                              <ErrorBoundary>
-                                <Suspense fallback={loader}>
-                                  <OrganizationsPage />
-                                </Suspense>
-                              </ErrorBoundary>
-                            </ProtectedRoute>
+                            <LazyRoute
+                              Component={OrganizationsPage}
+                              requiredScope={ADMIN_ROUTE_SCOPES['/admin/organizations']}
+                            />
                           }
                         />
                         <Route
                           path="/admin/roles"
                           element={
-                            <ProtectedRoute requiredScope="users:read">
-                              <ErrorBoundary>
-                                <Suspense fallback={loader}>
-                                  <RolesPage />
-                                </Suspense>
-                              </ErrorBoundary>
-                            </ProtectedRoute>
+                            <LazyRoute
+                              Component={RolesPage}
+                              requiredScope={ADMIN_ROUTE_SCOPES['/admin/roles']}
+                            />
                           }
                         />
                         <Route
                           path="/admin/apikeys"
                           element={
-                            <ProtectedRoute>
-                              <ErrorBoundary>
-                                <Suspense fallback={loader}>
-                                  <APIKeysPage />
-                                </Suspense>
-                              </ErrorBoundary>
-                            </ProtectedRoute>
+                            <LazyRoute
+                              Component={APIKeysPage}
+                              requiredScope={ADMIN_ROUTE_SCOPES['/admin/apikeys']}
+                            />
                           }
                         />
                         <Route
@@ -216,181 +167,136 @@ function App() {
                         <Route
                           path="/admin/upload/module"
                           element={
-                            <ProtectedRoute requiredScope="modules:write">
-                              <ErrorBoundary>
-                                <Suspense fallback={loader}>
-                                  <ModuleUploadPage />
-                                </Suspense>
-                              </ErrorBoundary>
-                            </ProtectedRoute>
+                            <LazyRoute
+                              Component={ModuleUploadPage}
+                              requiredScope={ADMIN_ROUTE_SCOPES['/admin/upload/module']}
+                            />
                           }
                         />
                         <Route
                           path="/admin/upload/provider"
                           element={
-                            <ProtectedRoute requiredScope="providers:write">
-                              <ErrorBoundary>
-                                <Suspense fallback={loader}>
-                                  <ProviderUploadPage />
-                                </Suspense>
-                              </ErrorBoundary>
-                            </ProtectedRoute>
+                            <LazyRoute
+                              Component={ProviderUploadPage}
+                              requiredScope={ADMIN_ROUTE_SCOPES['/admin/upload/provider']}
+                            />
                           }
                         />
                         <Route
                           path="/admin/scm-providers"
                           element={
-                            <ProtectedRoute requiredScope="scm:read">
-                              <ErrorBoundary>
-                                <Suspense fallback={loader}>
-                                  <SCMProvidersPage />
-                                </Suspense>
-                              </ErrorBoundary>
-                            </ProtectedRoute>
+                            <LazyRoute
+                              Component={SCMProvidersPage}
+                              requiredScope={ADMIN_ROUTE_SCOPES['/admin/scm-providers']}
+                            />
                           }
                         />
                         <Route
                           path="/admin/mirrors"
                           element={
-                            <ProtectedRoute requiredScope="mirrors:read">
-                              <ErrorBoundary>
-                                <Suspense fallback={loader}>
-                                  <MirrorsPage />
-                                </Suspense>
-                              </ErrorBoundary>
-                            </ProtectedRoute>
+                            <LazyRoute
+                              Component={MirrorsPage}
+                              requiredScope={ADMIN_ROUTE_SCOPES['/admin/mirrors']}
+                            />
                           }
                         />
                         <Route
                           path="/admin/terraform-mirror"
                           element={
-                            <ProtectedRoute requiredScope="mirrors:read">
-                              <ErrorBoundary>
-                                <Suspense fallback={loader}>
-                                  <TerraformMirrorPage />
-                                </Suspense>
-                              </ErrorBoundary>
-                            </ProtectedRoute>
+                            <LazyRoute
+                              Component={TerraformMirrorPage}
+                              requiredScope={ADMIN_ROUTE_SCOPES['/admin/terraform-mirror']}
+                            />
                           }
                         />
                         <Route
                           path="/admin/storage"
                           element={
-                            <ProtectedRoute requiredScope="admin">
-                              <ErrorBoundary>
-                                <Suspense fallback={loader}>
-                                  <StoragePage />
-                                </Suspense>
-                              </ErrorBoundary>
-                            </ProtectedRoute>
+                            <LazyRoute
+                              Component={StoragePage}
+                              requiredScope={ADMIN_ROUTE_SCOPES['/admin/storage']}
+                            />
                           }
                         />
                         <Route
                           path="/admin/approvals"
                           element={
-                            <ProtectedRoute requiredScope="mirrors:read">
-                              <ErrorBoundary>
-                                <Suspense fallback={loader}>
-                                  <ApprovalsPage />
-                                </Suspense>
-                              </ErrorBoundary>
-                            </ProtectedRoute>
+                            <LazyRoute
+                              Component={ApprovalsPage}
+                              requiredScope={ADMIN_ROUTE_SCOPES['/admin/approvals']}
+                            />
                           }
                         />
                         <Route
                           path="/admin/version-approvals"
                           element={
-                            <ProtectedRoute requiredScope="mirrors:read">
-                              <ErrorBoundary>
-                                <Suspense fallback={loader}>
-                                  <VersionApprovalsPage />
-                                </Suspense>
-                              </ErrorBoundary>
-                            </ProtectedRoute>
+                            <LazyRoute
+                              Component={VersionApprovalsPage}
+                              requiredScope={ADMIN_ROUTE_SCOPES['/admin/version-approvals']}
+                            />
                           }
                         />
                         <Route
                           path="/admin/policies"
                           element={
-                            <ProtectedRoute requiredScope="admin">
-                              <ErrorBoundary>
-                                <Suspense fallback={loader}>
-                                  <MirrorPoliciesPage />
-                                </Suspense>
-                              </ErrorBoundary>
-                            </ProtectedRoute>
+                            <LazyRoute
+                              Component={MirrorPoliciesPage}
+                              requiredScope={ADMIN_ROUTE_SCOPES['/admin/policies']}
+                            />
                           }
                         />
                         <Route
                           path="/admin/oidc"
                           element={
-                            <ProtectedRoute requiredScope="admin">
-                              <ErrorBoundary>
-                                <Suspense fallback={loader}>
-                                  <OIDCSettingsPage />
-                                </Suspense>
-                              </ErrorBoundary>
-                            </ProtectedRoute>
+                            <LazyRoute
+                              Component={OIDCSettingsPage}
+                              requiredScope={ADMIN_ROUTE_SCOPES['/admin/oidc']}
+                            />
                           }
                         />
                         <Route
                           path="/admin/scim"
                           element={
-                            <ProtectedRoute requiredScope="admin">
-                              <ErrorBoundary>
-                                <Suspense fallback={loader}>
-                                  <SCIMProvisioningPage />
-                                </Suspense>
-                              </ErrorBoundary>
-                            </ProtectedRoute>
+                            <LazyRoute
+                              Component={SCIMProvisioningPage}
+                              requiredScope={ADMIN_ROUTE_SCOPES['/admin/scim']}
+                            />
                           }
                         />
                         <Route
                           path="/admin/mtls"
                           element={
-                            <ProtectedRoute requiredScope="admin">
-                              <ErrorBoundary>
-                                <Suspense fallback={loader}>
-                                  <MTLSPage />
-                                </Suspense>
-                              </ErrorBoundary>
-                            </ProtectedRoute>
+                            <LazyRoute
+                              Component={MTLSPage}
+                              requiredScope={ADMIN_ROUTE_SCOPES['/admin/mtls']}
+                            />
                           }
                         />
                         <Route
                           path="/admin/audit-logs"
                           element={
-                            <ProtectedRoute requiredScope="audit:read">
-                              <ErrorBoundary>
-                                <Suspense fallback={loader}>
-                                  <AuditLogPage />
-                                </Suspense>
-                              </ErrorBoundary>
-                            </ProtectedRoute>
+                            <LazyRoute
+                              Component={AuditLogPage}
+                              requiredScope={ADMIN_ROUTE_SCOPES['/admin/audit-logs']}
+                            />
                           }
                         />
                         <Route
                           path="/admin/security-scanning"
                           element={
-                            <ProtectedRoute requiredScope="admin">
-                              <ErrorBoundary>
-                                <Suspense fallback={loader}>
-                                  <SecurityScanningPage />
-                                </Suspense>
-                              </ErrorBoundary>
-                            </ProtectedRoute>
+                            <LazyRoute
+                              Component={SecurityScanningPage}
+                              requiredScope={ADMIN_ROUTE_SCOPES['/admin/security-scanning']}
+                            />
                           }
                         />
                         <Route
                           path="/admin/notifications"
                           element={
-                            <ProtectedRoute requiredScope="admin">
-                              <ErrorBoundary>
-                                <Suspense fallback={loader}>
-                                  <NotificationsPage />
-                                </Suspense>
-                              </ErrorBoundary>
-                            </ProtectedRoute>
+                            <LazyRoute
+                              Component={NotificationsPage}
+                              requiredScope={ADMIN_ROUTE_SCOPES['/admin/notifications']}
+                            />
                           }
                         />
 
@@ -398,11 +304,7 @@ function App() {
                         {import.meta.env.DEV && (
                           <Route
                             path="/dev/components"
-                            element={
-                              <Suspense fallback={loader}>
-                                <ComponentShowcase />
-                              </Suspense>
-                            }
+                            element={<LazyRoute Component={ComponentShowcase} />}
                           />
                         )}
 
