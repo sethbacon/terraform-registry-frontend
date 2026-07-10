@@ -28,6 +28,16 @@ describe('sanitizeUrl', () => {
     expect(sanitizeUrl(url)).toBe(url)
   })
 
+  it('strips a token from a root-relative path (Sentry navigation breadcrumb from/to)', () => {
+    expect(sanitizeUrl('/auth/callback?token=super-secret-jwt')).toBe('/auth/callback')
+  })
+
+  it('preserves other params and the hash on a root-relative path', () => {
+    expect(sanitizeUrl('/modules?namespace=hashicorp&token=super-secret-jwt#readme')).toBe(
+      '/modules?namespace=hashicorp#readme',
+    )
+  })
+
   it('falls back to the original string for an unparsable URL', () => {
     expect(sanitizeUrl('not a url')).toBe('not a url')
   })

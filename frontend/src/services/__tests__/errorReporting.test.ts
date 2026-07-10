@@ -154,7 +154,7 @@ describe('errorReporting', () => {
 
       const config = initMock.mock.calls[0][0] as {
         beforeSend: (event: { request?: { url?: string } }) => unknown
-        beforeBreadcrumb: (breadcrumb: { data?: { url?: string } }) => unknown
+        beforeBreadcrumb: (breadcrumb: { data?: Record<string, string> }) => unknown
       }
 
       const sentEvent = config.beforeSend({
@@ -166,6 +166,14 @@ describe('errorReporting', () => {
         data: { url: 'https://app.example.com/callback?token=super-secret-jwt' },
       }) as { data: { url: string } }
       expect(breadcrumb.data.url).not.toContain('super-secret-jwt')
+
+      // History (navigation) breadcrumbs carry root-relative from/to — the OIDC
+      // callback transition places the token in exactly those fields.
+      const navBreadcrumb = config.beforeBreadcrumb({
+        data: { from: '/auth/callback?token=super-secret-jwt', to: '/' },
+      }) as { data: { from: string; to: string } }
+      expect(navBreadcrumb.data.from).toBe('/auth/callback')
+      expect(navBreadcrumb.data.to).toBe('/')
     })
   })
 

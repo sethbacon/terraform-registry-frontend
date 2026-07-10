@@ -144,14 +144,19 @@ export function init(): void {
           // Sentry's default browser integrations record the current window.location.href
           // both on the event itself (request.url) and on navigation/history breadcrumbs.
           // Sanitize both so a live session token in the URL (the OIDC callback's ?token=)
-          // never reaches the DSN.
+          // never reaches the DSN. fetch/xhr breadcrumbs carry data.url; history
+          // (navigation) breadcrumbs carry root-relative data.from/data.to — the OIDC
+          // callback transition puts ?token= in exactly those.
           beforeSend(event) {
             if (event.request?.url) event.request.url = sanitizeUrl(event.request.url)
             return event
           },
           beforeBreadcrumb(breadcrumb) {
-            if (typeof breadcrumb.data?.url === 'string') {
-              breadcrumb.data.url = sanitizeUrl(breadcrumb.data.url)
+            const data = breadcrumb.data
+            if (data) {
+              for (const key of ['url', 'from', 'to']) {
+                if (typeof data[key] === 'string') data[key] = sanitizeUrl(data[key])
+              }
             }
             return breadcrumb
           },
