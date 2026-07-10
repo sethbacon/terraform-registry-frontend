@@ -86,19 +86,24 @@ Under GDPR, you have the right to:
 
 ### Cookies
 
-| Cookie                    | Purpose        | Duration |
-| ------------------------- | -------------- | -------- |
-| Session cookie (HttpOnly) | Authentication | Session  |
+| Cookie              | Purpose                                                      | Duration |
+| -------------------- | ------------------------------------------------------------ | -------- |
+| `tfr_auth_token` (HttpOnly) | Authentication session                                 | 24 hours |
+| `tfr_csrf`           | CSRF double-submit token, echoed back in the `X-CSRF-Token` header on mutating requests. Not HttpOnly (must be readable by the frontend) but is not usable on its own without the paired HttpOnly session cookie. | 24 hours |
 
 No third-party tracking cookies are used.
 
 ### Local Storage
 
-The following preferences are stored in the browser's `localStorage`, not as
-cookies:
+The following are stored in the browser's `localStorage`, not as cookies:
 
-| Key                          | Purpose               | Duration   |
-| ---------------------------- | --------------------- | ---------- |
+| Key                           | Purpose                                                             | Duration |
+| ------------------------------ | --------------------------------------------------------------------- | -------- |
+| `auth_token`                   | **Sensitive.** Legacy session JWT, used only during the transitional migration away from `localStorage`-based auth (see `SECURITY.md`); new sessions use the HttpOnly cookie above instead. Cleared on logout or session expiry. | Session  |
+| `user`                         | Cached profile info (id, email, name) for the signed-in user. Cleared on logout or session expiry. | Session  |
+| `role_template`                | Cached role template for the signed-in user. Cleared on logout or session expiry. | Session  |
+| `allowed_scopes`                | Cached authorization scopes for the signed-in user. Cleared on logout or session expiry. | Session  |
+| `authorized`                   | Swagger UI's own "Authorize" dialog state (`/api-docs`), persisted by the third-party `swagger-ui-react` component when a user authorizes a request there. May contain an API key if one was entered. Cleared on logout or session expiry. | Session  |
 | `terraform-registry-theme`   | UI theme (light/dark) | Persistent |
 | `terraform-registry-consent` | Consent preferences   | Persistent |
 

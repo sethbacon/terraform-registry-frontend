@@ -10,6 +10,7 @@ import { AnnouncerProvider } from './contexts/AnnouncerContext'
 import { ConsentProvider } from './contexts/ConsentContext'
 import Layout from './components/Layout'
 import ConsentBanner from './components/ConsentBanner'
+import TelemetryGate from './components/TelemetryGate'
 import OfflineBanner from './components/OfflineBanner'
 import ErrorBoundary from './components/ErrorBoundary'
 import ProtectedRoute from './components/ProtectedRoute'
@@ -417,6 +418,7 @@ function App() {
           </HelpProvider>
         </AuthProvider>
         <ConsentBanner />
+        <TelemetryGate />
       </ConsentProvider>
       <OfflineBanner />
     </ThemeProvider>
