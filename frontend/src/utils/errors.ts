@@ -8,7 +8,11 @@ import i18n from '../i18n'
  */
 export function getErrorMessage(err: unknown, fallback = 'An unexpected error occurred'): string {
   if (err instanceof AxiosError) {
-    // No response at all (offline, DNS failure, CORS, timeout) means err.message is
+    // A request that hit the client-side timeout has no response either, but is a
+    // distinct, more actionable condition than "can't reach the server at all" --
+    // check it first so it doesn't fall into the generic network-error branch below.
+    if (err.code === 'ECONNABORTED') return i18n.t('common.timeoutError')
+    // No response at all (offline, DNS failure, CORS) means err.message is
     // axios/browser boilerplate like "Network Error" -- show a friendly, localized
     // message instead of surfacing that raw string to the user.
     if (!err.response) return i18n.t('common.networkError')
