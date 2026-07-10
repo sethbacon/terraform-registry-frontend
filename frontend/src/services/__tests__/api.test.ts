@@ -14,6 +14,7 @@ let capturedReqFulfilled: ReqFulfilled
 let capturedResRejected: ResRejected
 let capturedResRejectedHandlers: ResRejected[]
 let mockAxiosInstance: AxiosInstance
+let capturedCreateConfig: Record<string, unknown>
 
 vi.mock('axios', () => {
   const mockInstance = {
@@ -37,9 +38,10 @@ vi.mock('axios', () => {
 
   return {
     default: {
-      create: vi.fn(() => {
+      create: vi.fn((config: Record<string, unknown>) => {
         // Expose for tests
         mockAxiosInstance = mockInstance as unknown as AxiosInstance
+        capturedCreateConfig = config
         return mockInstance
       }),
     },
@@ -76,8 +78,9 @@ function getApiClient() {
     }
     return {
       default: {
-        create: vi.fn(() => {
+        create: vi.fn((config: Record<string, unknown>) => {
           mockAxiosInstance = mockInstance as unknown as AxiosInstance
+          capturedCreateConfig = config
           return mockInstance
         }),
       },
@@ -94,6 +97,15 @@ describe('ApiClient', () => {
 
   afterEach(() => {
     vi.restoreAllMocks()
+  })
+
+  // ─── Client configuration ──────────────────────────────────────────────
+
+  describe('client configuration', () => {
+    it('sets a default request timeout so a hung backend does not hang forever', async () => {
+      await getApiClient()
+      expect(capturedCreateConfig.timeout).toBe(30_000)
+    })
   })
 
   // ─── Auth Interceptor ──────────────────────────────────────────────────
@@ -863,7 +875,11 @@ describe('ApiClient', () => {
       expect(mockAxiosInstance.post).toHaveBeenCalledWith(
         '/api/v1/modules',
         fd,
-        expect.objectContaining({ headers: { 'Content-Type': 'multipart/form-data' } }),
+        expect.objectContaining({
+          headers: { 'Content-Type': 'multipart/form-data' },
+          // Large archives can legitimately exceed the default request timeout.
+          timeout: 0,
+        }),
       )
     })
 
@@ -988,7 +1004,11 @@ describe('ApiClient', () => {
       expect(mockAxiosInstance.post).toHaveBeenCalledWith(
         '/api/v1/providers',
         fd,
-        expect.objectContaining({ headers: { 'Content-Type': 'multipart/form-data' } }),
+        expect.objectContaining({
+          headers: { 'Content-Type': 'multipart/form-data' },
+          // Large archives can legitimately exceed the default request timeout.
+          timeout: 0,
+        }),
       )
     })
 

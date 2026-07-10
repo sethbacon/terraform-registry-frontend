@@ -57,6 +57,14 @@ describe('getErrorMessage', () => {
     )
   })
 
+  it('returns a distinct timeout message for ECONNABORTED, not the generic network message', () => {
+    const error = new AxiosError('timeout of 30000ms exceeded', 'ECONNABORTED')
+    expect(error.response).toBeUndefined()
+    expect(getErrorMessage(error)).toBe(
+      'The request took too long and timed out. Please try again.',
+    )
+  })
+
   it('extracts message from native Error', () => {
     const error = new Error('File not found')
     expect(getErrorMessage(error)).toBe('File not found')

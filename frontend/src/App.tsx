@@ -10,6 +10,7 @@ import { AnnouncerProvider } from './contexts/AnnouncerContext'
 import { ConsentProvider } from './contexts/ConsentContext'
 import Layout from './components/Layout'
 import ConsentBanner from './components/ConsentBanner'
+import OfflineBanner from './components/OfflineBanner'
 import ErrorBoundary from './components/ErrorBoundary'
 import ProtectedRoute from './components/ProtectedRoute'
 import RouteFocusManager from './components/RouteFocusManager'
@@ -417,6 +418,7 @@ function App() {
         </AuthProvider>
         <ConsentBanner />
       </ConsentProvider>
+      <OfflineBanner />
     </ThemeProvider>
   )
 }
