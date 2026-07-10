@@ -1,8 +1,26 @@
 name: Dependabot Auto-Merge
 
-# Auto-merge Dependabot security PRs that pass CI (patch-level bumps only).
-# This reduces toil for low-risk security fixes while requiring manual review
-# for minor/major version bumps.
+# Two independent Dependabot mechanisms feed this workflow, both opening PRs as
+# github.actor == 'dependabot[bot]' with no first-class signal distinguishing them:
+#   - Security updates: a native GitHub feature (Settings -> Code security) that
+#     reacts to GHSA advisories in real time, always one PR per dependency.
+#   - Version updates: this repo's .github/dependabot.yml biweekly schedule.
+#
+# The only reliable way to tell them apart is fetch-metadata's alert-lookup, which
+# needs a token with "Dependabot alerts: read" -- the ambient secrets.GITHUB_TOKEN
+# is documented as insufficient for that GraphQL lookup. A GitHub App installation
+# token (DEPENDABOT_APP_ID / DEPENDABOT_APP_PRIVATE_KEY secrets) provides that one
+# narrow, read-only permission; see the setup steps in PR #519's description.
+#
+# Once alert-state is known, two distinct policies apply:
+#   - Security-driven fixes (alert-state == OPEN): auto-merge patch OR minor bumps
+#     of direct-production deps. Some advisories are only patched starting at a
+#     minor version if the maintainer didn't backport a fix -- restricting
+#     security auto-merge to patch-only would silently skip exactly the fixes
+#     this automation exists for. Major bumps still always require manual review.
+#   - Routine version bumps (no open alert): auto-merge patch-only,
+#     direct-production only -- unchanged from the original, more conservative
+#     default that isn't specifically security-motivated.
 on:
   pull_request:
 
@@ -12,18 +30,37 @@ permissions:
 
 jobs:
   auto-merge:
-    name: Auto-merge Dependabot (patch security)
+    name: Auto-merge Dependabot
     runs-on: ubuntu-latest
     if: github.actor == 'dependabot[bot]'
     steps:
+      - name: Generate a Dependabot-alerts-read token
+        id: app-token
+        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+        with:
+          app-id: ${{ secrets.DEPENDABOT_APP_ID }}
+          private-key: ${{ secrets.DEPENDABOT_APP_PRIVATE_KEY }}
+
       - name: Fetch Dependabot metadata
         id: metadata
         uses: dependabot/fetch-metadata@25dd0e34f4fe68f24cc83900b1fe3fe149efef98 # v3.1.0
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+          github-token: ${{ steps.app-token.outputs.token }}
+          alert-lookup: true
 
-      - name: Auto-merge patch-level security updates
+      - name: Auto-merge security-driven patch/minor updates
         if: >-
+          steps.metadata.outputs.alert-state == 'OPEN' &&
+          steps.metadata.outputs.dependency-type == 'direct:production' &&
+          steps.metadata.outputs.update-type != 'version-update:semver-major'
+        run: gh pr merge --auto --squash "$PR_URL"
+        env:
+          PR_URL: ${{ github.event.pull_request.html_url }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Auto-merge routine patch-level updates
+        if: >-
+          steps.metadata.outputs.alert-state != 'OPEN' &&
           steps.metadata.outputs.update-type == 'version-update:semver-patch' &&
           steps.metadata.outputs.dependency-type == 'direct:production'
         run: gh pr merge --auto --squash "$PR_URL"
