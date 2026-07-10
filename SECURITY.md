@@ -120,4 +120,5 @@ matching `v*.*.*` with a "Restrict deletions" rule.
 - `rehype-sanitize` for Markdown rendering (XSS mitigation)
 - Scheduled weekly security workflow with auto-issue on failure
 - **SLSA provenance attestation** on Docker images via `actions/attest-build-provenance`
+- **SBOM (SPDX) generation and attestation** on Docker images via Syft (`anchore/sbom-action`) and `actions/attest-sbom`
 - **Cosign keyless signing** on Docker images via Sigstore (verify with `cosign verify`)
