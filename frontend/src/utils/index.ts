@@ -6,3 +6,4 @@ export {
   REGISTRY_SEGMENT_HELP,
   isValidRegistrySegment,
 } from './registrySegment'
+export { sanitizeUrl } from './sanitizeUrl'

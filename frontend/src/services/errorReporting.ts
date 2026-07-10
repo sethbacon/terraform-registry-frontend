@@ -8,6 +8,8 @@
  *   - Neither set                – errors are logged to the console only.
  */
 
+import { sanitizeUrl } from '../utils/sanitizeUrl'
+
 // ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
@@ -139,6 +141,20 @@ export function init(): void {
           dsn: sentryDsn,
           release: getRelease(),
           environment: import.meta.env.MODE,
+          // Sentry's default browser integrations record the current window.location.href
+          // both on the event itself (request.url) and on navigation/history breadcrumbs.
+          // Sanitize both so a live session token in the URL (the OIDC callback's ?token=)
+          // never reaches the DSN.
+          beforeSend(event) {
+            if (event.request?.url) event.request.url = sanitizeUrl(event.request.url)
+            return event
+          },
+          beforeBreadcrumb(breadcrumb) {
+            if (typeof breadcrumb.data?.url === 'string') {
+              breadcrumb.data.url = sanitizeUrl(breadcrumb.data.url)
+            }
+            return breadcrumb
+          },
         })
         console.log('[ErrorReporting] Sentry SDK initialized')
       })
@@ -197,7 +213,7 @@ function enqueueError(error: Error, context?: Record<string, unknown>): void {
     stack: error.stack,
     context,
     timestamp: new Date().toISOString(),
-    url: window.location.href,
+    url: sanitizeUrl(window.location.href),
     userAgent: navigator.userAgent,
     userId: currentUser,
     sessionId,
