@@ -179,7 +179,8 @@
     "search": "Cerca",
     "error": "Errore",
     "success": "Successo",
-    "warning": "Avviso"
+    "warning": "Avviso",
+    "networkError": "Impossibile connettersi al server: controlla la connessione e riprova."
   },
   "modules": {
     "pageTitle": "Moduli Terraform",

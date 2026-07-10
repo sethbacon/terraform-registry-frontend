@@ -179,7 +179,8 @@
     "search": "Søk",
     "error": "Feil",
     "success": "Suksess",
-    "warning": "Advarsel"
+    "warning": "Advarsel",
+    "networkError": "Det går ikke an å få kontakt med serveren — sjekk tilkoblingen din og prøv på nytt."
   },
   "modules": {
     "pageTitle": "Terraform-moduler",
