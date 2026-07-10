@@ -52,7 +52,7 @@ const OrganizationsPage: React.FC = () => {
   const queryClient = useQueryClient()
   const { allowedScopes } = useAuth()
   const canManage =
-    allowedScopes.includes('admin') || allowedScopes.includes('organizations:manage')
+    allowedScopes.includes('admin') || allowedScopes.includes('organizations:write')
   const [error, setError] = useState<string | null>(null)
 
   // Dialog state
