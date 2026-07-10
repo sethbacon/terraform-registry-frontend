@@ -53,8 +53,11 @@ class ApiClient {
         // For backward compatibility: if an auth token is in localStorage (migration
         // period), include it as a Bearer header. Once all sessions have migrated to
         // HttpOnly cookies this block can be removed.
+        // Skip when the caller already set an explicit Authorization header (e.g. the
+        // Setup Wizard's "SetupToken <token>" bootstrap calls) -- a stray legacy JWT in
+        // localStorage must never silently override a caller's own auth scheme.
         const legacyToken = localStorage.getItem('auth_token')
-        if (legacyToken) {
+        if (legacyToken && !config.headers.Authorization) {
           config.headers.Authorization = `Bearer ${legacyToken}`
         }
 
