@@ -179,7 +179,9 @@
     "error": "Error",
     "success": "Éxito",
     "warning": "Advertencia",
-    "networkError": "No se puede acceder al servidor: comprueba tu conexión e inténtalo de nuevo."
+    "networkError": "No se puede acceder al servidor: comprueba tu conexión e inténtalo de nuevo.",
+    "timeoutError": "La solicitud tardó demasiado y se agotó el tiempo de espera. Inténtalo de nuevo.",
+    "offlineWarning": "Estás sin conexión. Es posible que algunas funciones no funcionen hasta que se restablezca la conexión."
   },
   "modules": {
     "pageTitle": "Módulos de Terraform",

@@ -179,7 +179,9 @@
     "error": "Erro",
     "success": "Sucesso",
     "warning": "Aviso",
-    "networkError": "Não foi possível estabelecer ligação com o servidor — verifique a sua ligação e tente novamente."
+    "networkError": "Não foi possível estabelecer ligação com o servidor — verifique a sua ligação e tente novamente.",
+    "timeoutError": "A solicitação demorou demasiado tempo e atingiu o limite de tempo. Por favor, tente novamente.",
+    "offlineWarning": "Está sem ligação à Internet. Algumas funcionalidades poderão não funcionar até que a ligação seja restabelecida."
   },
   "modules": {
     "pageTitle": "Módulos do Terraform",

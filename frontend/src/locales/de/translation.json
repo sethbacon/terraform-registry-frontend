@@ -179,7 +179,9 @@
     "error": "Fehler",
     "success": "Erfolg",
     "warning": "Warnung",
-    "networkError": "Der Server konnte nicht erreicht werden – bitte überprüfen Sie Ihre Verbindung und versuchen Sie es erneut."
+    "networkError": "Der Server konnte nicht erreicht werden – bitte überprüfen Sie Ihre Verbindung und versuchen Sie es erneut.",
+    "timeoutError": "Die Anfrage hat zu lange gedauert und ist abgelaufen. Bitte versuchen Sie es erneut.",
+    "offlineWarning": "Sie sind offline. Einige Funktionen stehen möglicherweise erst wieder zur Verfügung, wenn Ihre Verbindung wiederhergestellt ist."
   },
   "modules": {
     "pageTitle": "Terraform-Module",

@@ -179,7 +179,9 @@
     "error": "错误",
     "success": "成功",
     "warning": "警告",
-    "networkError": "无法连接到服务器——请检查网络连接，然后重试。"
+    "networkError": "无法连接到服务器——请检查网络连接，然后重试。",
+    "timeoutError": "请求耗时过长，已超时。请重试。",
+    "offlineWarning": "您当前处于离线状态。在恢复网络连接之前，部分功能可能无法使用。"
   },
   "modules": {
     "pageTitle": "Terraform 模块",
