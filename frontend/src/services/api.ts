@@ -10,6 +10,12 @@ const API_BASE_URL = import.meta.env.DEV ? '' : import.meta.env.VITE_API_URL || 
 // Only use mock responses when explicitly enabled (e.g., when backend is not running)
 const USE_MOCK_DATA = import.meta.env.VITE_USE_MOCK_DATA === 'true'
 
+// Default request timeout. A hung backend would otherwise leave requests pending
+// indefinitely with no feedback to the user. File uploads (uploadModule,
+// uploadProvider) explicitly opt out with timeout: 0 -- large archives on a slow
+// connection can legitimately take longer than this.
+const DEFAULT_REQUEST_TIMEOUT_MS = 30_000
+
 /** Read a cookie value by name. Returns empty string if not found. */
 function getCookie(name: string): string {
   const match = document.cookie.match(
@@ -37,6 +43,7 @@ class ApiClient {
   constructor() {
     this.client = axios.create({
       baseURL: API_BASE_URL,
+      timeout: DEFAULT_REQUEST_TIMEOUT_MS,
       headers: {
         'Content-Type': 'application/json',
       },
@@ -288,6 +295,9 @@ class ApiClient {
     options?: { onUploadProgress?: (percent: number) => void },
   ) {
     const response = await this.client.post('/api/v1/modules', formData, {
+      // Large archives on a slow connection can legitimately exceed the default
+      // request timeout; onUploadProgress gives the user feedback instead.
+      timeout: 0,
       headers: {
         'Content-Type': 'multipart/form-data',
       },
@@ -406,6 +416,9 @@ class ApiClient {
     options?: { onUploadProgress?: (percent: number) => void },
   ) {
     const response = await this.client.post('/api/v1/providers', formData, {
+      // Large archives on a slow connection can legitimately exceed the default
+      // request timeout; onUploadProgress gives the user feedback instead.
+      timeout: 0,
       headers: {
         'Content-Type': 'multipart/form-data',
       },
