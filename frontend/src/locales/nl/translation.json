@@ -179,7 +179,9 @@
     "error": "Fout",
     "success": "Succes",
     "warning": "Waarschuwing",
-    "networkError": "De server kan niet worden bereikt — controleer je verbinding en probeer het opnieuw."
+    "networkError": "De server kan niet worden bereikt — controleer je verbinding en probeer het opnieuw.",
+    "timeoutError": "Het verzoek duurde te lang en er is een time-out opgetreden. Probeer het nog eens.",
+    "offlineWarning": "Je bent offline. Sommige functies werken mogelijk pas weer als je verbinding is hersteld."
   },
   "modules": {
     "pageTitle": "Terraform-modules",

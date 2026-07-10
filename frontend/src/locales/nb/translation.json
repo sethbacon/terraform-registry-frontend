@@ -179,7 +179,9 @@
     "error": "Feil",
     "success": "Suksess",
     "warning": "Advarsel",
-    "networkError": "Det går ikke an å få kontakt med serveren — sjekk tilkoblingen din og prøv på nytt."
+    "networkError": "Det går ikke an å få kontakt med serveren — sjekk tilkoblingen din og prøv på nytt.",
+    "timeoutError": "Forespørselen tok for lang tid, og tidsfristen gikk ut. Prøv på nytt.",
+    "offlineWarning": "Du er frakoblet. Noen funksjoner fungerer kanskje ikke før tilkoblingen din er gjenopprettet."
   },
   "modules": {
     "pageTitle": "Terraform-moduler",

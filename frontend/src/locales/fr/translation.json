@@ -179,7 +179,9 @@
     "error": "Erreur",
     "success": "Succès",
     "warning": "Avertissement",
-    "networkError": "Impossible d'accéder au serveur — vérifiez votre connexion et réessayez."
+    "networkError": "Impossible d'accéder au serveur — vérifiez votre connexion et réessayez.",
+    "timeoutError": "La requête a pris trop de temps et a expiré. Veuillez réessayer.",
+    "offlineWarning": "Vous n'êtes pas connecté. Certaines fonctionnalités risquent de ne pas fonctionner tant que votre connexion n'aura pas été rétablie."
   },
   "modules": {
     "pageTitle": "Modules Terraform",
