@@ -179,7 +179,8 @@
     "search": "検索",
     "error": "エラー",
     "success": "成功",
-    "warning": "警告"
+    "warning": "警告",
+    "networkError": "サーバーに接続できません。接続状態を確認して、もう一度お試しください。"
   },
   "modules": {
     "pageTitle": "Terraform モジュール",

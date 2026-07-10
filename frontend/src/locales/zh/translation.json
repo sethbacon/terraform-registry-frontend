@@ -179,7 +179,8 @@
     "search": "搜索",
     "error": "错误",
     "success": "成功",
-    "warning": "警告"
+    "warning": "警告",
+    "networkError": "无法连接到服务器——请检查网络连接，然后重试。"
   },
   "modules": {
     "pageTitle": "Terraform 模块",
