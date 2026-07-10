@@ -30,8 +30,10 @@ vi.mock('../../../services/api', () => ({
   },
 }))
 
+let mockAllowedScopes: string[] = ['admin']
+
 vi.mock('../../../contexts/AuthContext', () => ({
-  useAuth: () => ({ allowedScopes: ['admin'], user: { id: 'u1' } }),
+  useAuth: () => ({ allowedScopes: mockAllowedScopes, user: { id: 'u1' } }),
 }))
 
 import OrganizationsPage from '../OrganizationsPage'
@@ -73,6 +75,7 @@ const fakeOrgs = [
 describe('OrganizationsPage', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    mockAllowedScopes = ['admin']
   })
 
   it('shows loading spinner initially', () => {
@@ -440,6 +443,48 @@ describe('OrganizationsPage', () => {
     await waitFor(() => expect(updateOrganizationMock).toHaveBeenCalled())
     const callArg = updateOrganizationMock.mock.calls[0][1]
     expect(callArg).not.toHaveProperty('name')
+  })
+
+  // ── canManage scope gate (regression guard for #483) ──────────────────────
+
+  const aliceMember = {
+    user_id: 'u1',
+    organization_id: 'org-1',
+    user_email: 'alice@example.com',
+    user_name: 'Alice',
+    role_template_id: 'rt-admin',
+    role_template_name: 'admin',
+    role_template_display_name: 'Administrator',
+  }
+
+  it('shows member-management UI for the canonical organizations:write scope', async () => {
+    mockAllowedScopes = ['organizations:write']
+    listOrganizationsMock.mockResolvedValue(fakeOrgs)
+    listOrganizationMembersMock.mockResolvedValue([aliceMember])
+    listRoleTemplatesMock.mockResolvedValue([
+      { id: 'rt-admin', name: 'admin', display_name: 'Administrator' },
+    ])
+    renderPage()
+    await waitFor(() => expect(screen.getByText('acme-corp')).toBeInTheDocument())
+    await userEvent.click(screen.getAllByRole('button', { name: /view members/i })[0])
+    await waitFor(() => expect(screen.getByText('Alice')).toBeInTheDocument())
+    expect(screen.getByRole('button', { name: /add.*member/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /remove member/i })).toBeInTheDocument()
+  })
+
+  it('hides member-management UI for the organizations:read scope', async () => {
+    mockAllowedScopes = ['organizations:read']
+    listOrganizationsMock.mockResolvedValue(fakeOrgs)
+    listOrganizationMembersMock.mockResolvedValue([aliceMember])
+    listRoleTemplatesMock.mockResolvedValue([
+      { id: 'rt-admin', name: 'admin', display_name: 'Administrator' },
+    ])
+    renderPage()
+    await waitFor(() => expect(screen.getByText('acme-corp')).toBeInTheDocument())
+    await userEvent.click(screen.getAllByRole('button', { name: /view members/i })[0])
+    await waitFor(() => expect(screen.getByText('Alice')).toBeInTheDocument())
+    expect(screen.queryByRole('button', { name: /add.*member/i })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /remove member/i })).not.toBeInTheDocument()
   })
 
   it('blocks save and shows field error when name format is invalid', async () => {
