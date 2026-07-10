@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, screen, waitFor, fireEvent, within } from '@testing-library/react'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 
 const getDevStatusMock = vi.fn()
@@ -32,6 +32,9 @@ import DevUserSwitcher from '../DevUserSwitcher'
 describe('DevUserSwitcher', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    // Reset in case a previous test mutated the shared mock (e.g. "shows select
+    // user placeholder" below reassigns mockAuth.user).
+    mockAuth.user = { id: 'u1', email: 'admin@example.com', name: 'Admin', primary_role: 'admin' }
   })
 
   it('renders nothing when dev mode is not enabled', async () => {
@@ -73,6 +76,36 @@ describe('DevUserSwitcher', () => {
     })
     // The Select should show the current user
     expect(screen.getByText('Admin')).toBeInTheDocument()
+  })
+
+  it('selecting a user writes the impersonation token to localStorage and reloads', async () => {
+    // The security-relevant side effect (impersonateUser -> token write -> reload)
+    // was previously untested; only the surrounding dev-mode gating/rendering was
+    // covered. vi.spyOn preserves the real Location object (see the CallbackPage
+    // lesson: `{...window.location, reload: vi.fn()}` silently drops origin/href/
+    // etc. because Location's props are prototype getters, not own properties).
+    const reloadSpy = vi.spyOn(window.location, 'reload').mockImplementation(() => {})
+    localStorage.removeItem('auth_token')
+
+    getDevStatusMock.mockResolvedValue({ dev_mode: true })
+    listUsersForImpersonationMock.mockResolvedValue({
+      users: [
+        { id: 'u1', email: 'admin@example.com', name: 'Admin', primary_role: 'admin' },
+        { id: 'u2', email: 'user@example.com', name: 'Regular User', primary_role: 'viewer' },
+      ],
+    })
+    impersonateUserMock.mockResolvedValue({ token: 'impersonation-jwt-for-u2' })
+
+    render(<DevUserSwitcher />)
+    await waitFor(() => expect(screen.getByText(/DEV/)).toBeInTheDocument())
+
+    fireEvent.mouseDown(screen.getByRole('combobox'))
+    const listbox = await screen.findByRole('listbox')
+    fireEvent.click(within(listbox).getByText('Regular User'))
+
+    await waitFor(() => expect(impersonateUserMock).toHaveBeenCalledWith('u2'))
+    await waitFor(() => expect(localStorage.getItem('auth_token')).toBe('impersonation-jwt-for-u2'))
+    expect(reloadSpy).toHaveBeenCalled()
   })
 
   it('renders nothing when dev status endpoint fails', async () => {
