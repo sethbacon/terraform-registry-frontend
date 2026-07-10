@@ -136,6 +136,24 @@ describe('ApiClient', () => {
       const result = capturedReqFulfilled(config)
       expect(result.headers.Authorization).toBe('SetupToken setup-abc123')
     })
+
+    it('does not overwrite an explicit Authorization header regardless of key casing', async () => {
+      // AxiosHeaders preserves the caller's key casing for property access, so a
+      // lowercase "authorization" would bypass a plain property check -- the guard
+      // must use the case-insensitive .has() to catch it.
+      localStorage.setItem('auth_token', 'my-jwt-token')
+      await getApiClient()
+
+      const { AxiosHeaders } = await vi.importActual<typeof import('axios')>('axios')
+      const config = {
+        headers: AxiosHeaders.concat({}, { authorization: 'SetupToken setup-abc123' }),
+      } as InternalAxiosRequestConfig
+
+      const result = capturedReqFulfilled(config)
+      expect(result.headers.get('Authorization')).toBe('SetupToken setup-abc123')
+      // The broken path would have added a second, canonically-cased key.
+      expect(result.headers.Authorization).toBeUndefined()
+    })
   })
 
   // ─── 401 Interceptor ──────────────────────────────────────────────────
@@ -193,6 +211,33 @@ describe('ApiClient', () => {
 
       // Clean up so this cookie doesn't leak into later tests.
       document.cookie = 'tfr_csrf=; Max-Age=0'
+    })
+
+    it('expires the tfr_csrf cookie on 401 so the redirect is one-shot (no reload loop)', async () => {
+      // /login renders inside AuthProvider, which probes /auth/me on mount. If the
+      // cookie survived the first 401, the probe's own 401 would re-trigger the
+      // redirect and reload /login forever. The cookie signal must be consumed,
+      // exactly like clearAuthStorage() consumes the localStorage signals.
+      // path=/ matches how the backend really sets it (SetCSRFCookie, Path: "/").
+      document.cookie = 'tfr_csrf=some-csrf-token; path=/'
+      await getApiClient()
+
+      const error = {
+        response: { status: 401 },
+        config: { url: '/api/v1/auth/me' },
+        isAxiosError: true,
+      } as AxiosError
+
+      const authRejectedHandler = capturedResRejectedHandlers[0]
+      await expect(authRejectedHandler(error)).rejects.toBe(error)
+      // Real browsers remove the cookie on Max-Age=0; happy-dom keeps the name with
+      // an emptied value. Either way the token is gone, which is what getCookie sees.
+      expect(document.cookie).not.toContain('some-csrf-token')
+
+      // A second 401 (the /auth/me probe on the login page itself) must not redirect.
+      window.history.pushState({}, '', '/somewhere-else')
+      await expect(authRejectedHandler(error)).rejects.toBe(error)
+      expect(window.location.href).toContain('/somewhere-else')
     })
 
     it('does not clear auth for SCM OAuth 401 (repository endpoint)', async () => {

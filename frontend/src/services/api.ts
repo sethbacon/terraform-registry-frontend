@@ -56,8 +56,15 @@ class ApiClient {
         // Skip when the caller already set an explicit Authorization header (e.g. the
         // Setup Wizard's "SetupToken <token>" bootstrap calls) -- a stray legacy JWT in
         // localStorage must never silently override a caller's own auth scheme.
+        // AxiosHeaders preserves the caller's key casing for property access, so use
+        // the case-insensitive .has() when available (a lowercase "authorization"
+        // would otherwise slip past a plain property check).
         const legacyToken = localStorage.getItem('auth_token')
-        if (legacyToken && !config.headers.Authorization) {
+        const hasExplicitAuth =
+          typeof config.headers.has === 'function'
+            ? config.headers.has('Authorization')
+            : !!config.headers.Authorization
+        if (legacyToken && !hasExplicitAuth) {
           config.headers.Authorization = `Bearer ${legacyToken}`
         }
 
@@ -114,6 +121,14 @@ class ApiClient {
               !!localStorage.getItem('user') ||
               !!getCookie('tfr_csrf')
             clearAuthStorage()
+            // Expire the CSRF cookie so the session signal is ONE-SHOT, exactly like
+            // the localStorage keys clearAuthStorage() just removed. Without this, a
+            // session invalidated server-side (revocation, secret rotation, clock
+            // skew) redirects in a loop: /login mounts AuthProvider, which probes
+            // /auth/me, 401s, and re-triggers this handler with the cookie still set.
+            // Safe to clear from JS -- the cookie is non-HttpOnly by design and a dead
+            // session's CSRF token has no value.
+            document.cookie = 'tfr_csrf=; Max-Age=0; path=/'
             if (hadSession) {
               window.location.href = '/login'
             }
