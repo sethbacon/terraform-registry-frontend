@@ -179,7 +179,8 @@
     "search": "Zoeken",
     "error": "Fout",
     "success": "Succes",
-    "warning": "Waarschuwing"
+    "warning": "Waarschuwing",
+    "networkError": "De server kan niet worden bereikt — controleer je verbinding en probeer het opnieuw."
   },
   "modules": {
     "pageTitle": "Terraform-modules",

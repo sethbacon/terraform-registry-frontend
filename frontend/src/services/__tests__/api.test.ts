@@ -160,6 +160,26 @@ describe('ApiClient', () => {
       expect(localStorage.getItem('auth_token')).toBeNull()
     })
 
+    it('redirects to /login on 401 for a cookie-only session (no localStorage token)', async () => {
+      // The intended auth model: no auth_token/user ever written to localStorage,
+      // just the HttpOnly auth cookie + the readable tfr_csrf double-submit cookie.
+      document.cookie = 'tfr_csrf=some-csrf-token'
+      await getApiClient()
+
+      const error = {
+        response: { status: 401 },
+        config: { url: '/api/v1/modules/search' },
+        isAxiosError: true,
+      } as AxiosError
+
+      const authRejectedHandler = capturedResRejectedHandlers[0]
+      await expect(authRejectedHandler(error)).rejects.toBe(error)
+      expect(window.location.href).toContain('/login')
+
+      // Clean up so this cookie doesn't leak into later tests.
+      document.cookie = 'tfr_csrf=; Max-Age=0'
+    })
+
     it('does not clear auth for SCM OAuth 401 (repository endpoint)', async () => {
       localStorage.setItem('auth_token', 'valid-token')
       await getApiClient()

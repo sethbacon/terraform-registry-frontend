@@ -179,7 +179,8 @@
     "search": "Buscar",
     "error": "Error",
     "success": "Éxito",
-    "warning": "Advertencia"
+    "warning": "Advertencia",
+    "networkError": "No se puede acceder al servidor: comprueba tu conexión e inténtalo de nuevo."
   },
   "modules": {
     "pageTitle": "Módulos de Terraform",

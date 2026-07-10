@@ -179,7 +179,8 @@
     "search": "Pesquisar",
     "error": "Erro",
     "success": "Sucesso",
-    "warning": "Aviso"
+    "warning": "Aviso",
+    "networkError": "Não foi possível estabelecer ligação com o servidor — verifique a sua ligação e tente novamente."
   },
   "modules": {
     "pageTitle": "Módulos do Terraform",
