@@ -7,6 +7,7 @@
  * to `VITE_PERFORMANCE_DSN` (or `VITE_ERROR_REPORTING_DSN` as fallback).
  */
 import type { Metric } from 'web-vitals'
+import { sanitizeUrl } from '../utils/sanitizeUrl'
 
 // ---------------------------------------------------------------------------
 // Config
@@ -83,7 +84,7 @@ function handleMetric(metric: Metric): void {
     rating: metric.rating,
     navigationType: metric.navigationType,
     timestamp: new Date().toISOString(),
-    url: window.location.href,
+    url: sanitizeUrl(window.location.href),
     sessionId,
   }
 
@@ -149,7 +150,7 @@ export function reportNavigation(routeName: string, durationMs: number): void {
     name: routeName,
     value: durationMs,
     timestamp: new Date().toISOString(),
-    url: window.location.href,
+    url: sanitizeUrl(window.location.href),
     sessionId,
   }
 

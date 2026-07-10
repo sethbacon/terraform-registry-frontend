@@ -132,6 +132,62 @@ describe('performanceReporting', () => {
 
       mod.destroy()
     })
+
+    it('strips a session token from reportNavigation entries', async () => {
+      vi.stubEnv('VITE_PERFORMANCE_DSN', 'https://perf.example.com/report')
+      vi.resetModules()
+
+      const originalLocation = window.location.href
+      window.history.pushState({}, '', '/auth/callback?token=super-secret-jwt')
+
+      const mod = await import('../performanceReporting')
+      mod.init()
+      mod.reportNavigation('/test', 100)
+
+      vi.spyOn(navigator, 'sendBeacon').mockReturnValue(false)
+      const fetchSpy = vi.spyOn(globalThis, 'fetch').mockResolvedValue(new Response())
+      mod.flush()
+
+      const body = JSON.parse(fetchSpy.mock.calls[0][1]?.body as string)
+      expect(body.entries[0].url).not.toContain('super-secret-jwt')
+      expect(body.entries[0].url).toContain('/auth/callback')
+
+      window.history.pushState({}, '', originalLocation)
+      mod.destroy()
+    })
+
+    it('strips a session token from web-vitals metric entries', async () => {
+      vi.stubEnv('VITE_PERFORMANCE_DSN', 'https://perf.example.com/report')
+      vi.resetModules()
+
+      const originalLocation = window.location.href
+      window.history.pushState({}, '', '/auth/callback?token=super-secret-jwt')
+
+      const webVitals = await import('web-vitals')
+      const mod = await import('../performanceReporting')
+      mod.init()
+      await vi.dynamicImportSettled()
+
+      // Invoke the callback this test's init() registered with onCLS (mock.calls
+      // accumulates across tests in this file, so grab the most recent registration
+      // rather than the first -- an earlier test's stale handler closes over an
+      // already-destroyed module instance's buffer).
+      const onCLSMock = webVitals.onCLS as unknown as { mock: { calls: unknown[][] } }
+      const lastCall = onCLSMock.mock.calls[onCLSMock.mock.calls.length - 1]
+      const handleMetric = lastCall[0] as (metric: unknown) => void
+      handleMetric({ name: 'CLS', value: 0.05, rating: 'good', navigationType: 'navigate' })
+
+      vi.spyOn(navigator, 'sendBeacon').mockReturnValue(false)
+      const fetchSpy = vi.spyOn(globalThis, 'fetch').mockResolvedValue(new Response())
+      mod.flush()
+
+      const body = JSON.parse(fetchSpy.mock.calls[0][1]?.body as string)
+      expect(body.entries[0].url).not.toContain('super-secret-jwt')
+      expect(body.entries[0].url).toContain('/auth/callback')
+
+      window.history.pushState({}, '', originalLocation)
+      mod.destroy()
+    })
   })
 
   describe('web vitals callback', () => {

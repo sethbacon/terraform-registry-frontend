@@ -91,6 +91,29 @@ describe('errorReporting', () => {
       })
     })
 
+    it('strips a session token from the recorded url', async () => {
+      vi.stubEnv('VITE_ERROR_REPORTING_DSN', 'https://errors.example.com/report')
+      vi.stubEnv('VITE_SENTRY_DSN', '')
+
+      const originalLocation = window.location.href
+      window.history.pushState({}, '', '/auth/callback?token=super-secret-jwt')
+
+      const {
+        init: freshInit,
+        captureError: freshCapture,
+        flush: freshFlush,
+      } = await import('../errorReporting')
+      freshInit()
+      freshCapture(new Error('Test error'))
+      freshFlush()
+
+      const body = JSON.parse((globalThis.fetch as ReturnType<typeof vi.fn>).mock.calls[0][1].body)
+      expect(body.entries[0].url).not.toContain('super-secret-jwt')
+      expect(body.entries[0].url).toContain('/auth/callback')
+
+      window.history.pushState({}, '', originalLocation)
+    })
+
     it('does not call fetch when no DSN is configured', () => {
       const error = new Error('No DSN error')
       captureError(error)
@@ -110,6 +133,47 @@ describe('errorReporting', () => {
       expect(() => {
         freshCapture(new Error('Test error'))
       }).not.toThrow()
+    })
+  })
+
+  describe('Sentry URL sanitization', () => {
+    afterEach(() => {
+      vi.doUnmock('@sentry/react')
+    })
+
+    it('wires beforeSend/beforeBreadcrumb hooks that strip sensitive query params', async () => {
+      const initMock = vi.fn()
+      vi.doMock('@sentry/react', () => ({ init: initMock }))
+      vi.stubEnv('VITE_SENTRY_DSN', 'https://sentry.example.com/dsn')
+
+      const { init: freshInit } = await import('../errorReporting')
+      freshInit()
+
+      // Sentry is dynamically imported -- wait for the .then() to run.
+      await vi.waitFor(() => expect(initMock).toHaveBeenCalled())
+
+      const config = initMock.mock.calls[0][0] as {
+        beforeSend: (event: { request?: { url?: string } }) => unknown
+        beforeBreadcrumb: (breadcrumb: { data?: Record<string, string> }) => unknown
+      }
+
+      const sentEvent = config.beforeSend({
+        request: { url: 'https://app.example.com/callback?token=super-secret-jwt' },
+      }) as { request: { url: string } }
+      expect(sentEvent.request.url).not.toContain('super-secret-jwt')
+
+      const breadcrumb = config.beforeBreadcrumb({
+        data: { url: 'https://app.example.com/callback?token=super-secret-jwt' },
+      }) as { data: { url: string } }
+      expect(breadcrumb.data.url).not.toContain('super-secret-jwt')
+
+      // History (navigation) breadcrumbs carry root-relative from/to — the OIDC
+      // callback transition places the token in exactly those fields.
+      const navBreadcrumb = config.beforeBreadcrumb({
+        data: { from: '/auth/callback?token=super-secret-jwt', to: '/' },
+      }) as { data: { from: string; to: string } }
+      expect(navBreadcrumb.data.from).toBe('/auth/callback')
+      expect(navBreadcrumb.data.to).toBe('/')
     })
   })
 
