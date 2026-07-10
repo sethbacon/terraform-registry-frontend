@@ -61,6 +61,7 @@ We will credit reporters in the release notes unless anonymity is requested.
 - `npm audit --audit-level=high` runs in the Docker build and the scheduled security workflow
 - Markdown rendering is sanitised with `rehype-sanitize` (XSS mitigation)
 - The frontend follows OWASP Top 10 mitigations applicable to SPAs (output encoding, strict CSP via nginx, no `dangerouslySetInnerHTML` outside the sanitised renderer)
+- HSTS (`Strict-Transport-Security`) is sent by `nginx.conf`, which terminates TLS directly. `nginx-ecs.conf.template` (ECS/Cloud Run/ACA) and any deployment that fronts the container with an external reverse proxy/ALB (see `deployments/docker-compose.prod.yml`) deliberately do **not** set it themselves -- HSTS only has effect on the hop that actually terminates TLS, so it must be configured at that edge/ALB, not on the origin container behind it
 - Authentication uses an HttpOnly session cookie set by the backend (no JWT persisted in `localStorage` outside a transitional migration path); mutating requests are protected by a double-submit CSRF token (the `tfr_csrf` cookie echoed in an `X-CSRF-Token` header)
 
 ## Repository Hardening
