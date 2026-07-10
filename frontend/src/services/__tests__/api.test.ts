@@ -168,6 +168,114 @@ describe('ApiClient', () => {
     })
   })
 
+  // ─── CSRF Interceptor ──────────────────────────────────────────────────
+  // This is the app's entire client-side CSRF defense (double-submit cookie):
+  // echo the non-HttpOnly tfr_csrf cookie back as X-CSRF-Token on mutating
+  // requests so the server can validate the pair.
+
+  describe('request interceptor – CSRF token', () => {
+    afterEach(() => {
+      // Clear any cookie a test set so it doesn't leak into the next one.
+      document.cookie = 'tfr_csrf=; Max-Age=0; path=/'
+    })
+
+    it.each(['post', 'put', 'patch', 'delete'])(
+      'attaches X-CSRF-Token on %s when the tfr_csrf cookie is present',
+      async (method) => {
+        document.cookie = 'tfr_csrf=csrf-token-value; path=/'
+        await getApiClient()
+
+        const config = {
+          method,
+          headers: {} as Record<string, string>,
+        } as InternalAxiosRequestConfig
+        const result = capturedReqFulfilled(config)
+        expect(result.headers['X-CSRF-Token']).toBe('csrf-token-value')
+      },
+    )
+
+    it.each(['post', 'PUT', 'Patch', 'DELETE'])(
+      'is case-insensitive on the HTTP method (%s)',
+      async (method) => {
+        document.cookie = 'tfr_csrf=csrf-token-value; path=/'
+        await getApiClient()
+
+        const config = {
+          method,
+          headers: {} as Record<string, string>,
+        } as InternalAxiosRequestConfig
+        const result = capturedReqFulfilled(config)
+        expect(result.headers['X-CSRF-Token']).toBe('csrf-token-value')
+      },
+    )
+
+    it.each(['get', 'head'])(
+      'omits X-CSRF-Token on %s even when the cookie is present',
+      async (method) => {
+        document.cookie = 'tfr_csrf=csrf-token-value; path=/'
+        await getApiClient()
+
+        const config = {
+          method,
+          headers: {} as Record<string, string>,
+        } as InternalAxiosRequestConfig
+        const result = capturedReqFulfilled(config)
+        expect(result.headers['X-CSRF-Token']).toBeUndefined()
+      },
+    )
+
+    it('defaults to GET (no header) when method is unspecified', async () => {
+      document.cookie = 'tfr_csrf=csrf-token-value; path=/'
+      await getApiClient()
+
+      const config = { headers: {} as Record<string, string> } as InternalAxiosRequestConfig
+      const result = capturedReqFulfilled(config)
+      expect(result.headers['X-CSRF-Token']).toBeUndefined()
+    })
+
+    it('omits X-CSRF-Token on a mutating request when no CSRF cookie exists yet', async () => {
+      await getApiClient()
+
+      const config = {
+        method: 'post',
+        headers: {} as Record<string, string>,
+      } as InternalAxiosRequestConfig
+      const result = capturedReqFulfilled(config)
+      expect(result.headers['X-CSRF-Token']).toBeUndefined()
+    })
+
+    it('extracts tfr_csrf when other cookies surround it', async () => {
+      document.cookie = 'some_other=abc; path=/'
+      document.cookie = 'tfr_csrf=csrf-token-value; path=/'
+      document.cookie = 'yet_another=xyz; path=/'
+      await getApiClient()
+
+      const config = {
+        method: 'post',
+        headers: {} as Record<string, string>,
+      } as InternalAxiosRequestConfig
+      const result = capturedReqFulfilled(config)
+      expect(result.headers['X-CSRF-Token']).toBe('csrf-token-value')
+
+      document.cookie = 'some_other=; Max-Age=0; path=/'
+      document.cookie = 'yet_another=; Max-Age=0; path=/'
+    })
+
+    it('URL-decodes a tfr_csrf value containing encoded characters', async () => {
+      // A base64url token wouldn't normally need encoding, but the cookie itself
+      // could still carry percent-encoded characters -- getCookie must decode them.
+      document.cookie = `tfr_csrf=${encodeURIComponent('token/with+special=chars')}; path=/`
+      await getApiClient()
+
+      const config = {
+        method: 'post',
+        headers: {} as Record<string, string>,
+      } as InternalAxiosRequestConfig
+      const result = capturedReqFulfilled(config)
+      expect(result.headers['X-CSRF-Token']).toBe('token/with+special=chars')
+    })
+  })
+
   // ─── 401 Interceptor ──────────────────────────────────────────────────
 
   describe('response interceptor – 401 handling', () => {
