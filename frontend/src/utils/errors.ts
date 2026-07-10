@@ -1,4 +1,5 @@
 import { AxiosError } from 'axios'
+import i18n from '../i18n'
 
 /**
  * Extracts a human-readable error message from an unknown catch-block value.
@@ -7,7 +8,11 @@ import { AxiosError } from 'axios'
  */
 export function getErrorMessage(err: unknown, fallback = 'An unexpected error occurred'): string {
   if (err instanceof AxiosError) {
-    const serverMessage = (err.response?.data as Record<string, unknown>)?.error
+    // No response at all (offline, DNS failure, CORS, timeout) means err.message is
+    // axios/browser boilerplate like "Network Error" -- show a friendly, localized
+    // message instead of surfacing that raw string to the user.
+    if (!err.response) return i18n.t('common.networkError')
+    const serverMessage = (err.response.data as Record<string, unknown>)?.error
     if (typeof serverMessage === 'string') return serverMessage
     return err.message || fallback
   }
