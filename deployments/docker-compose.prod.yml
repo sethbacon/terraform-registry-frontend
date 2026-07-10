@@ -7,10 +7,18 @@
 #   REGISTRY_TAG    Image tag, e.g. v1.0.0 (default: latest — pin to an immutable tag in production)
 #
 # Prerequisites:
-#   1. Pull or build the production frontend image
+#   1. Pull the production frontend image (this file uses the published image, not
+#      a local build -- FRONTEND_IMAGE/REGISTRY_TAG select the tag, they do not
+#      rebuild it, so build-time values like VITE_API_URL cannot be reconfigured
+#      here at deploy time).
 #   2. Place a reverse proxy (Traefik, Caddy, nginx) in front of port 80 for TLS termination
-#   3. Ensure the backend stack is reachable; configure VITE_API_URL at build time
-#      if the frontend is served from a different origin than the backend.
+#   3. This image's nginx config proxies /api/* to a backend reachable at the
+#      Docker Compose service name "backend" (see docker-compose.yml, which this
+#      file overrides) -- no frontend-side configuration is needed as long as that
+#      service is on the same network. If your backend genuinely lives at a
+#      different origin, route it through the same reverse proxy instead of
+#      pointing the frontend at it directly: the shipped Content-Security-Policy's
+#      connect-src 'self' blocks direct cross-origin API calls from the browser.
 
 services:
   frontend:

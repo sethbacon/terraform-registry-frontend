@@ -82,13 +82,13 @@ Frontend configuration is provided via Vite environment variables. All variables
 
 | Variable                   | Default                  | Description                                                                                                                                                          |
 | -------------------------- | ------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `VITE_API_URL`             | (proxied by Vite in dev) | Backend API base URL for production builds. Example: `https://registry.example.com` or `https://registry.example.com/api/v1` depending on your reverse-proxy layout. |
+| `VITE_API_URL`             | (proxied by Vite in dev) | Backend API **origin** for production builds, e.g. `https://registry.example.com`. Must not include a path: every API call already hardcodes its own `/api/v1/...` prefix, so a path here (e.g. `.../api/v1`) would double it. |
 | `VITE_PROXY_TARGET`        | `http://localhost:8080`  | Backend URL the Vite dev server proxies `/api/*` to. Override for TLS or non-local backend during development.                                                       |
 | `VITE_USE_MOCK_DATA`       | `false`                  | When `true`, the API client returns static mock data instead of calling the backend (offline development).                                                           |
 | `VITE_ERROR_REPORTING_DSN` | _(unset)_                | URL for batched browser error reports (Sentry-compatible DSN or any HTTP endpoint). When unset, errors log to console only.                                          |
 
 In development the Vite proxy handles `/api/*` routing, so no env var is needed locally.
-For Docker / production builds served through nginx, the bundled nginx config proxies `/api/*` to the backend, so `VITE_API_URL` only needs to be set when the frontend is served from a different origin than the backend.
+For Docker / production builds served through nginx, the bundled nginx config already proxies `/api/*` to the backend, so `VITE_API_URL` is normally left unset. Only set it if the frontend is genuinely served from a different origin than the backend -- and note the shipped Content-Security-Policy's `connect-src 'self'` will block that origin's requests unless you also route both through the same reverse proxy (see `nginx-ecs.conf.template`'s `BACKEND_URL` pattern) instead of calling the other origin directly from the browser. This value is compiled into the public JS bundle, so it must stay public-facing -- never an internal-only hostname.
 
 ## Tech Stack
 
