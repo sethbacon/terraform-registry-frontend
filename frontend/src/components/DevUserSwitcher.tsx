@@ -58,10 +58,9 @@ const DevUserSwitcher = () => {
 
     setSwitching(true)
     try {
-      const result = await apiClient.impersonateUser(targetUserId)
-      // Update the token in localStorage and reload so the auth context picks it up
-      localStorage.setItem('auth_token', result.token)
-      // Reload the page to refresh all data with new user context
+      await apiClient.impersonateUser(targetUserId)
+      // The backend swapped the HttpOnly auth cookie to the impersonated user;
+      // reload the page so the auth context picks up the new session via /auth/me.
       window.location.reload()
     } catch (error) {
       console.error('Failed to impersonate user:', error)

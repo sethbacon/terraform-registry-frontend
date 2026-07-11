@@ -33,7 +33,7 @@ function renderWithParams(search: string) {
 
 describe('CallbackPage', () => {
   it('shows loading spinner initially', () => {
-    renderWithParams('?token=abc123')
+    renderWithParams('')
     expect(screen.getByText('Completing authentication...')).toBeInTheDocument()
   })
 
@@ -52,18 +52,22 @@ describe('CallbackPage', () => {
     })
   })
 
-  it('redirects to home when no token param (cookie-based auth)', async () => {
+  it('redirects to home on the cookie-only callback (no params)', async () => {
     renderWithParams('')
     await waitFor(() => {
       expect(window.location.replace).toHaveBeenCalledWith('/')
     })
   })
 
-  it('stores the token in localStorage when token param is present', async () => {
+  it('never persists a ?token= query param to localStorage (cookie-only, #467)', async () => {
+    // The backend no longer sends ?token= on callbacks. Even if a crafted or
+    // stale URL carries one, it must be ignored — never written to localStorage
+    // — and the navigation away from /auth/callback leaves no token in the URL.
     renderWithParams('?token=jwt-token-123')
     await waitFor(() => {
-      expect(localStorage.getItem('auth_token')).toBe('jwt-token-123')
+      expect(window.location.replace).toHaveBeenCalledWith('/')
     })
+    expect(localStorage.getItem('auth_token')).toBeNull()
   })
 
   it('shows redirecting message on error', async () => {

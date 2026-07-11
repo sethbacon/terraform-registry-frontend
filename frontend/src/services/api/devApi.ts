@@ -9,8 +9,8 @@ export async function getDevStatus(): Promise<{ dev_mode: boolean; message?: str
   return response.data
 }
 
+// Sets the HttpOnly auth cookie (plus tfr_csrf) via Set-Cookie; no token in the body.
 export async function devLogin(): Promise<{
-  token: string
   user: Record<string, unknown>
   expires_in: number
 }> {
@@ -31,8 +31,8 @@ export async function listUsersForImpersonation(): Promise<{
   return response.data
 }
 
+// Swaps the HttpOnly auth cookie to the impersonated user; no token in the body.
 export async function impersonateUser(userId: string): Promise<{
-  token: string
   user: {
     id: string
     email: string

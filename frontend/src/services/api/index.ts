@@ -3,8 +3,8 @@
  *
  * The old 1900-line ApiClient god object (issue #474) is split into per-domain
  * modules that all share the single configured axios instance in ./http.ts
- * (interceptors: legacy-token auth fallback, CSRF double-submit echo, 401
- * session handling, error-reporting breadcrumbs).
+ * (interceptors: CSRF double-submit echo, 401 session handling,
+ * error-reporting breadcrumbs).
  *
  * This barrel spreads every domain module into one flat `apiClient` object so
  * the existing `import apiClient from '../services/api'` call sites keep

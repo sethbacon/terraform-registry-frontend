@@ -16,7 +16,7 @@ const USE_MOCK_DATA = import.meta.env.VITE_USE_MOCK_DATA === 'true'
 const DEFAULT_REQUEST_TIMEOUT_MS = 30_000
 
 /** Read a cookie value by name. Returns empty string if not found. */
-function getCookie(name: string): string {
+export function getCookie(name: string): string {
   const match = document.cookie.match(
     new RegExp('(?:^|; )' + name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '=([^;]*)'),
   )
@@ -52,9 +52,9 @@ function getMockResponse(url: string): { data: unknown; status: number } {
 
 /**
  * The single shared Axios instance behind every domain API module. All
- * cross-cutting behavior — auth header fallback, CSRF double-submit echo,
- * 401 session handling, breadcrumb timing — lives in the interceptors below
- * so domain modules stay pure endpoint bindings.
+ * cross-cutting behavior — CSRF double-submit echo, 401 session handling,
+ * breadcrumb timing — lives in the interceptors below so domain modules
+ * stay pure endpoint bindings.
  */
 export const http = axios.create({
   baseURL: API_BASE_URL,
@@ -72,24 +72,6 @@ export const http = axios.create({
 // Request interceptor to add CSRF token on mutating requests
 http.interceptors.request.use(
   (config) => {
-    // For backward compatibility: if an auth token is in localStorage (migration
-    // period), include it as a Bearer header. Once all sessions have migrated to
-    // HttpOnly cookies this block can be removed.
-    // Skip when the caller already set an explicit Authorization header (e.g. the
-    // Setup Wizard's "SetupToken <token>" bootstrap calls) -- a stray legacy JWT in
-    // localStorage must never silently override a caller's own auth scheme.
-    // AxiosHeaders preserves the caller's key casing for property access, so use
-    // the case-insensitive .has() when available (a lowercase "authorization"
-    // would otherwise slip past a plain property check).
-    const legacyToken = localStorage.getItem('auth_token')
-    const hasExplicitAuth =
-      typeof config.headers.has === 'function'
-        ? config.headers.has('Authorization')
-        : !!config.headers.Authorization
-    if (legacyToken && !hasExplicitAuth) {
-      config.headers.Authorization = `Bearer ${legacyToken}`
-    }
-
     // Add CSRF token header on mutating requests. The backend sets a non-HttpOnly
     // "tfr_csrf" cookie; we read it and echo it in X-CSRF-Token so the server can
     // validate the double-submit pattern.
@@ -130,18 +112,15 @@ http.interceptors.response.use(
         (url.includes('/repositories') || url.includes('/tags') || url.includes('/branches'))
 
       if (!isSCMOAuthFailure) {
-        // Only redirect when the user previously had an active session
-        // (legacy token/cached user, or the cookie-only session model). Fresh
-        // anonymous visitors receive 401 on probing endpoints like /auth/me —
-        // this is expected and should NOT trigger a redirect so public pages
-        // remain accessible. The "tfr_csrf" cookie is set only when the backend
-        // issues or refreshes the auth cookie (see middleware/csrf.go) and cleared
-        // on logout, so its presence is a reliable cookie-session signal even
-        // though the HttpOnly auth cookie itself isn't readable from JS.
-        const hadSession =
-          !!localStorage.getItem('auth_token') ||
-          !!localStorage.getItem('user') ||
-          !!getCookie('tfr_csrf')
+        // Only redirect when the user previously had an active cookie session.
+        // Fresh anonymous visitors receive 401 on probing endpoints like
+        // /auth/me — this is expected and should NOT trigger a redirect so
+        // public pages remain accessible. The "tfr_csrf" cookie is set only
+        // when the backend issues or refreshes the auth cookie (see
+        // middleware/csrf.go) and cleared on logout, so its presence is a
+        // reliable session signal even though the HttpOnly auth cookie itself
+        // isn't readable from JS.
+        const hadSession = !!getCookie('tfr_csrf')
         clearAuthStorage()
         // Expire the CSRF cookie so the session signal is ONE-SHOT, exactly like
         // the localStorage keys clearAuthStorage() just removed. Without this, a

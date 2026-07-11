@@ -78,10 +78,11 @@ describe('DevUserSwitcher', () => {
     expect(screen.getByText('Admin')).toBeInTheDocument()
   })
 
-  it('selecting a user writes the impersonation token to localStorage and reloads', async () => {
-    // The security-relevant side effect (impersonateUser -> token write -> reload)
-    // was previously untested; only the surrounding dev-mode gating/rendering was
-    // covered. vi.spyOn preserves the real Location object (see the CallbackPage
+  it('selecting a user reloads on the backend cookie swap without touching localStorage', async () => {
+    // Cookie-only auth (#467): impersonation swaps the HttpOnly auth cookie
+    // server-side; the token-less response body must never be persisted to
+    // localStorage — the reload alone picks up the new session via /auth/me.
+    // vi.spyOn preserves the real Location object (see the CallbackPage
     // lesson: `{...window.location, reload: vi.fn()}` silently drops origin/href/
     // etc. because Location's props are prototype getters, not own properties).
     const reloadSpy = vi.spyOn(window.location, 'reload').mockImplementation(() => {})
@@ -94,7 +95,10 @@ describe('DevUserSwitcher', () => {
         { id: 'u2', email: 'user@example.com', name: 'Regular User', primary_role: 'viewer' },
       ],
     })
-    impersonateUserMock.mockResolvedValue({ token: 'impersonation-jwt-for-u2' })
+    impersonateUserMock.mockResolvedValue({
+      user: { id: 'u2', email: 'user@example.com', name: 'Regular User' },
+      message: 'impersonation cookie set',
+    })
 
     render(<DevUserSwitcher />)
     await waitFor(() => expect(screen.getByText(/DEV/)).toBeInTheDocument())
@@ -104,8 +108,9 @@ describe('DevUserSwitcher', () => {
     fireEvent.click(within(listbox).getByText('Regular User'))
 
     await waitFor(() => expect(impersonateUserMock).toHaveBeenCalledWith('u2'))
-    await waitFor(() => expect(localStorage.getItem('auth_token')).toBe('impersonation-jwt-for-u2'))
-    expect(reloadSpy).toHaveBeenCalled()
+    await waitFor(() => expect(reloadSpy).toHaveBeenCalled())
+    // Nothing token-shaped may land in client-readable storage.
+    expect(localStorage.getItem('auth_token')).toBeNull()
   })
 
   it('renders nothing when dev status endpoint fails', async () => {

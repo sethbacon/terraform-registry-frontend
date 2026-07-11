@@ -22,19 +22,10 @@ const CallbackPage: React.FC = () => {
         return
       }
 
-      // Check URL param first (backward compat / dev mode)
-      const token = searchParams.get('token')
-
-      if (token) {
-        // Legacy migration flow: token passed as a URL parameter. Persist it so the
-        // api client attaches it as a Bearer header until cookie-only migration
-        // completes. AuthContext resolves the session via /auth/me after the reload below.
-        localStorage.setItem('auth_token', token)
-      }
-
-      // New flow: The backend set an HttpOnly cookie during the OIDC callback
-      // redirect. AuthContext will detect the session via /auth/me on mount.
-      // Navigate to the return URL; AuthContext handles the rest.
+      // Cookie-only flow: the backend set an HttpOnly cookie during the OIDC
+      // callback redirect (no token ever transits the URL). AuthContext will
+      // detect the session via /auth/me on mount. Navigate to the return URL;
+      // AuthContext handles the rest.
       const raw = sessionStorage.getItem('returnUrl') || '/'
       sessionStorage.removeItem('returnUrl')
       // Reject absolute and protocol-relative URLs to prevent open redirect.

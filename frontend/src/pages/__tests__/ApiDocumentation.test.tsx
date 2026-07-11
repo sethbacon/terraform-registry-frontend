@@ -8,7 +8,7 @@ import { ThemeProvider, createTheme } from '@mui/material/styles'
 interface SwaggerProps {
   url: string
   onComplete?: (system: unknown) => void
-  requestInterceptor?: (req: { headers: Record<string, string> }) => unknown
+  requestInterceptor?: (req: { method?: string; headers: Record<string, string> }) => unknown
   plugins?: Array<() => unknown>
 }
 
@@ -243,20 +243,58 @@ describe('ApiDocumentation', () => {
     }
   })
 
-  it('requestInterceptor adds the bearer token when present in localStorage', () => {
-    localStorage.setItem('auth_token', 'tok-abc')
+  // Cookie-only auth (#467): "Try it out" rides on the HttpOnly session cookie
+  // (same-origin fetch sends it automatically). The interceptor must never
+  // re-attach a Bearer header from localStorage, and must echo the tfr_csrf
+  // cookie as X-CSRF-Token on mutating methods for the double-submit check.
+  it('requestInterceptor does not attach Authorization even when a stray legacy token exists in localStorage', () => {
+    localStorage.setItem('auth_token', 'stale-legacy-jwt')
     renderWithTheme()
-    const req = { headers: {} as Record<string, string> }
+    const req = { method: 'GET', headers: {} as Record<string, string> }
     const result = capturedProps?.requestInterceptor?.(req)
     expect(result).toBe(req)
-    expect(req.headers['Authorization']).toBe('Bearer tok-abc')
+    expect(req.headers['Authorization']).toBeUndefined()
   })
 
-  it('requestInterceptor leaves headers untouched when no token is stored', () => {
+  it.each(['POST', 'PUT', 'PATCH', 'DELETE'])(
+    'requestInterceptor echoes tfr_csrf as X-CSRF-Token on %s',
+    (method) => {
+      document.cookie = 'tfr_csrf=swagger-csrf-token; path=/'
+      try {
+        renderWithTheme()
+        const req = { method, headers: {} as Record<string, string> }
+        capturedProps?.requestInterceptor?.(req)
+        expect(req.headers['X-CSRF-Token']).toBe('swagger-csrf-token')
+        expect(req.headers['Authorization']).toBeUndefined()
+      } finally {
+        document.cookie = 'tfr_csrf=; Max-Age=0; path=/'
+      }
+    },
+  )
+
+  it('requestInterceptor omits X-CSRF-Token on GET even when the cookie is present', () => {
+    document.cookie = 'tfr_csrf=swagger-csrf-token; path=/'
+    try {
+      renderWithTheme()
+      const req = { method: 'GET', headers: {} as Record<string, string> }
+      capturedProps?.requestInterceptor?.(req)
+      expect(req.headers['X-CSRF-Token']).toBeUndefined()
+    } finally {
+      document.cookie = 'tfr_csrf=; Max-Age=0; path=/'
+    }
+  })
+
+  it('requestInterceptor leaves headers untouched on a mutating request when no CSRF cookie exists', () => {
     renderWithTheme()
-    const req = { headers: {} as Record<string, string> }
+    const req = { method: 'POST', headers: {} as Record<string, string> }
     capturedProps?.requestInterceptor?.(req)
+    expect(req.headers['X-CSRF-Token']).toBeUndefined()
     expect(req.headers['Authorization']).toBeUndefined()
+  })
+
+  it('does not enable persistAuthorization (nothing auth-shaped may persist to localStorage)', () => {
+    renderWithTheme()
+    expect('persistAuthorization' in ((capturedProps ?? {}) as Record<string, unknown>)).toBe(false)
   })
 
   it('TagsSorterPlugin wraps taggedOperations with a sortBy selector', () => {

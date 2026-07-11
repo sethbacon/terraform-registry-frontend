@@ -20,11 +20,11 @@ export async function login(provider: string) {
 
 /**
  * Authenticate via LDAP with username and password.
- * Returns a JWT token on success.
+ * On success the backend sets the HttpOnly auth cookie (plus tfr_csrf); the
+ * response body carries no token.
  */
-export async function ldapLogin(username: string, password: string): Promise<{ token: string }> {
-  const response = await http.post('/api/v1/auth/ldap/login', { username, password })
-  return response.data
+export async function ldapLogin(username: string, password: string): Promise<void> {
+  await http.post('/api/v1/auth/ldap/login', { username, password })
 }
 
 /**
@@ -38,8 +38,8 @@ export function logout() {
   window.location.href = `${API_BASE_URL}/api/v1/auth/logout`
 }
 
-export async function refreshToken(): Promise<{ token: string; expires_in: number }> {
-  const response = await http.post<{ token: string; expires_in: number }>('/api/v1/auth/refresh')
+export async function refreshToken(): Promise<{ expires_in: number }> {
+  const response = await http.post<{ expires_in: number }>('/api/v1/auth/refresh')
   return response.data
 }
 

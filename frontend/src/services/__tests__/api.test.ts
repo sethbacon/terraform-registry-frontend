@@ -11,7 +11,6 @@ type ResFulfilled = (response: AxiosResponse) => AxiosResponse
 type ResRejected = (error: AxiosError) => unknown
 
 let capturedReqFulfilled: ReqFulfilled
-let capturedResRejected: ResRejected
 let capturedResRejectedHandlers: ResRejected[]
 let mockAxiosInstance: AxiosInstance
 let capturedCreateConfig: Record<string, unknown>
@@ -29,9 +28,7 @@ vi.mock('axios', () => {
         }),
       },
       response: {
-        use: vi.fn((_fulfilled: ResFulfilled, rejected: ResRejected) => {
-          capturedResRejected = rejected
-        }),
+        use: vi.fn(),
       },
     },
   }
@@ -69,7 +66,6 @@ function getApiClient() {
         },
         response: {
           use: vi.fn((_fulfilled: ResFulfilled, rejected: ResRejected) => {
-            capturedResRejected = rejected
             resRejectedHandlers.push(rejected)
             capturedResRejectedHandlers = resRejectedHandlers
           }),
@@ -109,21 +105,16 @@ describe('ApiClient', () => {
   })
 
   // ─── Auth Interceptor ──────────────────────────────────────────────────
+  // Cookie-only auth (#467): the HttpOnly session cookie is the sole ambient
+  // credential. The interceptor must never synthesize an Authorization header
+  // from client-readable storage — any JWT in localStorage is XSS-exfiltratable
+  // and is treated as compromised, not re-attached.
 
-  describe('request interceptor – auth token', () => {
-    it('adds Authorization Bearer header when token exists in localStorage', async () => {
-      localStorage.setItem('auth_token', 'my-jwt-token')
-      await getApiClient()
-
-      const config = {
-        headers: {} as Record<string, string>,
-      } as InternalAxiosRequestConfig
-
-      const result = capturedReqFulfilled(config)
-      expect(result.headers.Authorization).toBe('Bearer my-jwt-token')
-    })
-
-    it('does not add Authorization header when no token is stored', async () => {
+  describe('request interceptor – no Authorization from localStorage', () => {
+    it('does not attach Authorization even when a stray legacy token exists in localStorage', async () => {
+      // Regression guard: a leftover pre-migration JWT in a shared browser
+      // profile must stay inert — never silently promoted to a Bearer header.
+      localStorage.setItem('auth_token', 'stale-legacy-jwt')
       await getApiClient()
 
       const config = {
@@ -134,11 +125,22 @@ describe('ApiClient', () => {
       expect(result.headers.Authorization).toBeUndefined()
     })
 
-    it('does not overwrite an explicit Authorization header set by the caller', async () => {
-      // A stray legacy JWT in localStorage (e.g. left over from a prior session in a
-      // shared browser profile) must not clobber a caller-supplied auth scheme, such
-      // as the Setup Wizard's bootstrap "SetupToken <token>" calls.
-      localStorage.setItem('auth_token', 'my-jwt-token')
+    it('does not add Authorization header when nothing is stored', async () => {
+      await getApiClient()
+
+      const config = {
+        headers: {} as Record<string, string>,
+      } as InternalAxiosRequestConfig
+
+      const result = capturedReqFulfilled(config)
+      expect(result.headers.Authorization).toBeUndefined()
+    })
+
+    it('leaves a caller-supplied Authorization header untouched', async () => {
+      // The Setup Wizard's bootstrap calls set "SetupToken <token>" explicitly
+      // (see setupRequest) — the interceptor must pass it through unmodified,
+      // even with a stray legacy JWT sitting in localStorage.
+      localStorage.setItem('auth_token', 'stale-legacy-jwt')
       await getApiClient()
 
       const config = {
@@ -147,24 +149,6 @@ describe('ApiClient', () => {
 
       const result = capturedReqFulfilled(config)
       expect(result.headers.Authorization).toBe('SetupToken setup-abc123')
-    })
-
-    it('does not overwrite an explicit Authorization header regardless of key casing', async () => {
-      // AxiosHeaders preserves the caller's key casing for property access, so a
-      // lowercase "authorization" would bypass a plain property check -- the guard
-      // must use the case-insensitive .has() to catch it.
-      localStorage.setItem('auth_token', 'my-jwt-token')
-      await getApiClient()
-
-      const { AxiosHeaders } = await vi.importActual<typeof import('axios')>('axios')
-      const config = {
-        headers: AxiosHeaders.concat({}, { authorization: 'SetupToken setup-abc123' }),
-      } as InternalAxiosRequestConfig
-
-      const result = capturedReqFulfilled(config)
-      expect(result.headers.get('Authorization')).toBe('SetupToken setup-abc123')
-      // The broken path would have added a second, canonically-cased key.
-      expect(result.headers.Authorization).toBeUndefined()
     })
   })
 
@@ -279,8 +263,12 @@ describe('ApiClient', () => {
   // ─── 401 Interceptor ──────────────────────────────────────────────────
 
   describe('response interceptor – 401 handling', () => {
-    it('clears auth and redirects to /login on 401 when token exists', async () => {
-      localStorage.setItem('auth_token', 'expired-token')
+    it('does not treat stray legacy localStorage keys as a session (clears them, no redirect)', async () => {
+      // Pre-migration sessions left auth_token/user in localStorage. Those keys
+      // are no longer a session signal — only the tfr_csrf cookie is. A 401
+      // must still sweep them out (one-time cleanup) without redirecting an
+      // otherwise-anonymous visitor to /login.
+      localStorage.setItem('auth_token', 'stale-legacy-jwt')
       localStorage.setItem('user', '{"id":"1"}')
       await getApiClient()
 
@@ -290,16 +278,18 @@ describe('ApiClient', () => {
         isAxiosError: true,
       } as AxiosError
 
-      // window.location.href is mocked by happy-dom
+      window.history.pushState({}, '', '/public-page')
 
       // Use the first response rejected handler (401 auth handler), not the last (breadcrumb handler)
       const authRejectedHandler = capturedResRejectedHandlers[0]
       await expect(authRejectedHandler(error)).rejects.toBe(error)
       expect(localStorage.getItem('auth_token')).toBeNull()
       expect(localStorage.getItem('user')).toBeNull()
+      // No cookie signal → anonymous visitor → no redirect.
+      expect(window.location.href).toContain('/public-page')
     })
 
-    it('does not redirect on 401 when no token exists (public endpoint)', async () => {
+    it('does not redirect on 401 when no session cookie exists (public endpoint)', async () => {
       await getApiClient()
 
       const error = {
@@ -308,14 +298,16 @@ describe('ApiClient', () => {
         isAxiosError: true,
       } as AxiosError
 
-      await expect(capturedResRejected(error)).rejects.toBe(error)
-      // No token to clear - localStorage stays empty
-      expect(localStorage.getItem('auth_token')).toBeNull()
+      window.history.pushState({}, '', '/public-page')
+
+      const authRejectedHandler = capturedResRejectedHandlers[0]
+      await expect(authRejectedHandler(error)).rejects.toBe(error)
+      expect(window.location.href).toContain('/public-page')
     })
 
-    it('redirects to /login on 401 for a cookie-only session (no localStorage token)', async () => {
-      // The intended auth model: no auth_token/user ever written to localStorage,
-      // just the HttpOnly auth cookie + the readable tfr_csrf double-submit cookie.
+    it('redirects to /login on 401 for a cookie session (tfr_csrf present)', async () => {
+      // The auth model: no token is ever written to localStorage, just the
+      // HttpOnly auth cookie + the readable tfr_csrf double-submit cookie.
       document.cookie = 'tfr_csrf=some-csrf-token'
       await getApiClient()
 
@@ -360,47 +352,32 @@ describe('ApiClient', () => {
       expect(window.location.href).toContain('/somewhere-else')
     })
 
-    it('does not clear auth for SCM OAuth 401 (repository endpoint)', async () => {
-      localStorage.setItem('auth_token', 'valid-token')
+    // SCM provider endpoints 401 when the SCM OAuth token has expired — that is
+    // not a user session failure, so the tfr_csrf session signal must survive
+    // (no cookie expiry, no redirect) and the reconnect prompt can render.
+    it.each([
+      ['repository endpoint', '/api/v1/scm-providers/123/repositories'],
+      ['tags endpoint', '/api/v1/scm-providers/456/repositories/owner/repo/tags'],
+      ['branches endpoint', '/api/v1/scm-providers/789/repositories/owner/repo/branches'],
+    ])('does not clear the cookie session for SCM OAuth 401 (%s)', async (_label, url) => {
+      document.cookie = 'tfr_csrf=live-session-csrf; path=/'
       await getApiClient()
 
       const error = {
         response: { status: 401 },
-        config: { url: '/api/v1/scm-providers/123/repositories' },
+        config: { url },
         isAxiosError: true,
       } as AxiosError
 
-      await expect(capturedResRejected(error)).rejects.toBe(error)
-      // Token should NOT be cleared for SCM OAuth failures
-      expect(localStorage.getItem('auth_token')).toBe('valid-token')
-    })
+      window.history.pushState({}, '', '/scm-page')
 
-    it('does not clear auth for SCM OAuth 401 (tags endpoint)', async () => {
-      localStorage.setItem('auth_token', 'valid-token')
-      await getApiClient()
+      const authRejectedHandler = capturedResRejectedHandlers[0]
+      await expect(authRejectedHandler(error)).rejects.toBe(error)
+      // Session signal must NOT be consumed and no redirect issued.
+      expect(document.cookie).toContain('tfr_csrf=live-session-csrf')
+      expect(window.location.href).toContain('/scm-page')
 
-      const error = {
-        response: { status: 401 },
-        config: { url: '/api/v1/scm-providers/456/repositories/owner/repo/tags' },
-        isAxiosError: true,
-      } as AxiosError
-
-      await expect(capturedResRejected(error)).rejects.toBe(error)
-      expect(localStorage.getItem('auth_token')).toBe('valid-token')
-    })
-
-    it('does not clear auth for SCM OAuth 401 (branches endpoint)', async () => {
-      localStorage.setItem('auth_token', 'valid-token')
-      await getApiClient()
-
-      const error = {
-        response: { status: 401 },
-        config: { url: '/api/v1/scm-providers/789/repositories/owner/repo/branches' },
-        isAxiosError: true,
-      } as AxiosError
-
-      await expect(capturedResRejected(error)).rejects.toBe(error)
-      expect(localStorage.getItem('auth_token')).toBe('valid-token')
+      document.cookie = 'tfr_csrf=; Max-Age=0; path=/'
     })
   })
 
@@ -771,14 +748,14 @@ describe('ApiClient', () => {
 
   // ─── Auth ─────────────────────────────────────────────────────────────────
   describe('auth methods', () => {
-    it('refreshToken calls POST /api/v1/auth/refresh', async () => {
+    it('refreshToken calls POST /api/v1/auth/refresh and returns expires_in (no token)', async () => {
       const client = await getApiClient()
         ; (mockAxiosInstance.post as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
-          data: { token: 'new' },
+          data: { expires_in: 900 },
         })
       const result = await client.refreshToken()
       expect(mockAxiosInstance.post).toHaveBeenCalledWith('/api/v1/auth/refresh')
-      expect(result.token).toBe('new')
+      expect(result.expires_in).toBe(900)
     })
 
     it('getCurrentUser calls GET /api/v1/auth/me', async () => {
@@ -812,14 +789,14 @@ describe('ApiClient', () => {
       expect(result.allowed_scopes).toEqual([])
     })
 
-    it('devLogin calls POST /api/v1/dev/login', async () => {
+    it('devLogin calls POST /api/v1/dev/login (cookie is set server-side, token-less body)', async () => {
       const client = await getApiClient()
         ; (mockAxiosInstance.post as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
-          data: { token: 'dev-tok' },
+          data: { user: { id: 'u1' }, expires_in: 3600 },
         })
       const result = await client.devLogin()
       expect(mockAxiosInstance.post).toHaveBeenCalledWith('/api/v1/dev/login')
-      expect(result.token).toBe('dev-tok')
+      expect(result.expires_in).toBe(3600)
     })
 
     it('getDevStatus calls GET /api/v1/dev/status', async () => {
@@ -842,14 +819,14 @@ describe('ApiClient', () => {
       expect(result.dev_mode).toBe(true)
     })
 
-    it('impersonateUser calls POST /api/v1/dev/impersonate/:id', async () => {
+    it('impersonateUser calls POST /api/v1/dev/impersonate/:id (cookie swap, token-less body)', async () => {
       const client = await getApiClient()
         ; (mockAxiosInstance.post as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
-          data: { token: 'imp-tok', message: 'ok' },
+          data: { user: { id: 'u1', email: 'a@b.com', name: 'A' }, message: 'ok' },
         })
       const result = await client.impersonateUser('u1')
       expect(mockAxiosInstance.post).toHaveBeenCalledWith('/api/v1/dev/impersonate/u1')
-      expect(result.token).toBe('imp-tok')
+      expect(result.message).toBe('ok')
     })
   })
 
@@ -2603,17 +2580,16 @@ describe('ApiClient', () => {
       expect(result.providers[1].type).toBe('saml')
     })
 
-    it('ldapLogin calls POST /api/v1/auth/ldap/login with credentials', async () => {
+    it('ldapLogin calls POST /api/v1/auth/ldap/login with credentials (cookie is set server-side)', async () => {
       const client = await getApiClient()
         ; (mockAxiosInstance.post as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
-          data: { token: 'ldap-jwt-token' },
+          data: {},
         })
-      const result = await client.ldapLogin('admin', 'secret')
+      await client.ldapLogin('admin', 'secret')
       expect(mockAxiosInstance.post).toHaveBeenCalledWith('/api/v1/auth/ldap/login', {
         username: 'admin',
         password: 'secret',
       })
-      expect(result.token).toBe('ldap-jwt-token')
     })
 
     it('getIdentityGroupMappings calls GET /api/v1/admin/identity/group-mappings', async () => {
