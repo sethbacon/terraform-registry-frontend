@@ -307,6 +307,30 @@ Enhanced error reporter with:
 
 Critical-path pages (HomePage, LoginPage, ModulesPage, ProvidersPage, etc.) are loaded eagerly. Non-critical pages (detail pages, admin pages, API docs) are loaded lazily via `React.lazy()` with `<Suspense fallback={<div>Loading...</div>}>`.
 
+## Shared Suite Package (`@sethbacon/terraform-suite-ui`)
+
+Cross-cutting concerns shared with the other Terraform Suite apps live in the
+private package [`@sethbacon/terraform-suite-ui`](https://github.com/sethbacon/terraform-suite-ui),
+published to the GitHub Packages npm registry and pinned to an **exact**
+version in `package.json` (see the "Shared private package" section of
+`SECURITY.md` for the audit/provenance/update policy — the package carries the
+auth/session provider and is treated as load-bearing security code).
+
+The following local files are thin wrappers or re-exports around it:
+
+| Local file                     | Wraps / re-exports from the package                                 |
+| ------------------------------ | ------------------------------------------------------------------- |
+| `contexts/AuthContext.tsx`     | `AuthProvider`, `useAuth` (session lifecycle, expiry, scopes)       |
+| `contexts/ConsentContext.tsx`  | `ConsentProvider`, `useConsent` (GDPR consent preferences)          |
+| `contexts/ThemeContext.tsx`    | `SuiteThemeProvider`, `useThemeMode` (light/dark, RTL, whitelabel)  |
+| `components/Layout.tsx`        | `SuiteLayout` (sidebar/topbar app shell)                            |
+| `components/Page.tsx`          | `Page` + `PageProps`                                                |
+| `components/PageHeader.tsx`    | `PageHeader` + `PageHeaderProps`                                    |
+| `components/DashboardCard.tsx` | `DashboardCard` + `DashboardCardProps`                              |
+| `components/ConsentBanner.tsx` | `ConsentBanner`                                                     |
+| `components/SuiteSwitcher.tsx` | `SuiteSwitcher` (cross-app switcher)                                |
+| `navigation.tsx`               | `NavItem` / `NavGroup` types for the sidebar config                 |
+
 ## Shared Components
 
 | Component                | Purpose                                                                        |
