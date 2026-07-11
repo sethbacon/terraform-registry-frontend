@@ -2619,4 +2619,69 @@ describe('ApiClient', () => {
       expect(result.version).toBe('1.0.0')
     })
   })
+
+  // ─── UI Theme (whitelabel) ──────────────────────────────────────────────
+  // getUITheme() must tolerate a 404 (endpoint not implemented by the backend
+  // yet) silently, but report any other failure so a broken theme endpoint
+  // doesn't fail invisibly -- see issue #498.
+  describe('getUITheme', () => {
+    it('returns the theme config on success', async () => {
+      const client = await getApiClient()
+      const theme = { product_name: 'Acme Registry', primary_color: '#5C4EE5' }
+        ; (mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+          data: theme,
+        })
+
+      const result = await client.getUITheme()
+
+      expect(mockAxiosInstance.get).toHaveBeenCalledWith('/api/v1/ui/theme')
+      expect(result).toEqual(theme)
+    })
+
+    it('returns null without reporting an error on 404 (endpoint not implemented)', async () => {
+      const client = await getApiClient()
+      const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
+        ; (mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockRejectedValueOnce({
+          isAxiosError: true,
+          response: { status: 404 },
+        })
+
+      const result = await client.getUITheme()
+
+      expect(result).toBeNull()
+      expect(errorSpy).not.toHaveBeenCalled()
+    })
+
+    it('returns null and reports the error on a non-404 failure', async () => {
+      const client = await getApiClient()
+      const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
+      const serverError = Object.assign(new Error('Internal Server Error'), {
+        isAxiosError: true,
+        response: { status: 500 },
+      })
+        ; (mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockRejectedValueOnce(serverError)
+
+      const result = await client.getUITheme()
+
+      expect(result).toBeNull()
+      expect(errorSpy).toHaveBeenCalledWith('[ErrorReporting]', 'Internal Server Error', {
+        endpoint: '/api/v1/ui/theme',
+      })
+    })
+
+    it('returns null and reports the error on a network failure with no response', async () => {
+      const client = await getApiClient()
+      const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
+        ; (mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockRejectedValueOnce(
+          new Error('Network Error'),
+        )
+
+      const result = await client.getUITheme()
+
+      expect(result).toBeNull()
+      expect(errorSpy).toHaveBeenCalledWith('[ErrorReporting]', 'Network Error', {
+        endpoint: '/api/v1/ui/theme',
+      })
+    })
+  })
 })

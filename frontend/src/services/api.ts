@@ -1,5 +1,5 @@
 import axios, { AxiosInstance, AxiosError, InternalAxiosRequestConfig } from 'axios'
-import { addApiBreadcrumb } from './errorReporting'
+import { addApiBreadcrumb, captureError } from './errorReporting'
 import { clearAuthStorage } from '../utils/authStorage'
 import type { CreateMirrorConfigRequest, UpdateMirrorConfigRequest } from '../types/mirror'
 
@@ -1787,14 +1787,22 @@ class ApiClient {
   /**
    * Fetch the runtime whitelabel theme config from the backend.
    * Returns null if the endpoint does not exist (pre-phase-5 backends) so
-   * callers can gracefully fall back to built-in defaults.
+   * callers can gracefully fall back to built-in defaults. Other failures
+   * (network errors, 5xx, auth) also fall back to defaults -- theming must
+   * never block the app -- but are reported via captureError instead of
+   * being silently treated as "no override".
    */
   async getUITheme(): Promise<import('../types').UIThemeConfig | null> {
     try {
       const response = await this.client.get('/api/v1/ui/theme')
       return response.data as import('../types').UIThemeConfig
-    } catch {
-      // 404 means the backend hasn't implemented the endpoint yet; treat as no override.
+    } catch (error) {
+      if ((error as AxiosError)?.response?.status === 404) {
+        return null
+      }
+      captureError(error instanceof Error ? error : new Error(String(error)), {
+        endpoint: '/api/v1/ui/theme',
+      })
       return null
     }
   }
