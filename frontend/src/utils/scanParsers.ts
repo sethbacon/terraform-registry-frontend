@@ -30,10 +30,51 @@ function sarifLevelToSeverity(level: string): Severity | null {
   }
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function parseTrivy(raw: any): FindingRow[] {
+// A boundary type guard: confirms `value` is at least a non-null object so it
+// can be cast to one of the loosely-typed raw shapes below. The cast trusts
+// the shape for property *names* (so a typo like `v.Severty` is a compile
+// error) but every field stays optional and every array access still goes
+// through Array.isArray -- the runtime tolerance for malformed scanner
+// output is unchanged, only the `any` escape hatch is removed.
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null
+}
+
+// ---------------------------------------------------------------------------
+// Trivy
+// ---------------------------------------------------------------------------
+interface TrivyVulnerability {
+  Severity?: string
+  VulnerabilityID?: string
+  AVDID?: string
+  Title?: string
+  PkgName?: string
+  FixedVersion?: string
+}
+
+interface TrivyMisconfiguration {
+  Severity?: string
+  ID?: string
+  AVDID?: string
+  Title?: string
+  CauseMetadata?: { Resource?: string }
+  Resolution?: string
+}
+
+interface TrivyResult {
+  Target?: string
+  Vulnerabilities?: TrivyVulnerability[]
+  Misconfigurations?: TrivyMisconfiguration[]
+}
+
+interface TrivyRaw {
+  Results?: TrivyResult[]
+}
+
+function parseTrivy(raw: unknown): FindingRow[] {
   const rows: FindingRow[] = []
-  const results = Array.isArray(raw?.Results) ? raw.Results : []
+  const data = isRecord(raw) ? (raw as TrivyRaw) : {}
+  const results = Array.isArray(data.Results) ? data.Results : []
   for (const result of results) {
     const target = String(result?.Target ?? '')
     for (const v of Array.isArray(result?.Vulnerabilities) ? result.Vulnerabilities : []) {
@@ -64,10 +105,24 @@ function parseTrivy(raw: any): FindingRow[] {
   return rows
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function parseCheckovSingle(obj: any): FindingRow[] {
+// ---------------------------------------------------------------------------
+// Checkov
+// ---------------------------------------------------------------------------
+interface CheckovFailedCheck {
+  check?: { id?: string; name?: string; severity?: string }
+  resource?: string
+  file_path?: string
+  guideline?: string
+}
+
+interface CheckovRaw {
+  results?: { failed_checks?: CheckovFailedCheck[] }
+}
+
+function parseCheckovSingle(raw: unknown): FindingRow[] {
   const rows: FindingRow[] = []
-  const checks = Array.isArray(obj?.results?.failed_checks) ? obj.results.failed_checks : []
+  const obj = isRecord(raw) ? (raw as CheckovRaw) : {}
+  const checks = Array.isArray(obj.results?.failed_checks) ? obj.results.failed_checks : []
   for (const fc of checks) {
     const sev = normalizeSeverity(fc?.check?.severity ?? '')
     if (!sev) continue
@@ -83,18 +138,33 @@ function parseCheckovSingle(obj: any): FindingRow[] {
   return rows
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function parseCheckov(raw: any): FindingRow[] {
+function parseCheckov(raw: unknown): FindingRow[] {
   if (Array.isArray(raw)) {
     return raw.flatMap(parseCheckovSingle)
   }
   return parseCheckovSingle(raw)
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function parseTerrascan(raw: any): FindingRow[] {
+// ---------------------------------------------------------------------------
+// Terrascan
+// ---------------------------------------------------------------------------
+interface TerrascanViolation {
+  severity?: string
+  rule_id?: string
+  rule_name?: string
+  description?: string
+  resource_name?: string
+  file?: string
+}
+
+interface TerrascanRaw {
+  results?: { violations?: TerrascanViolation[] }
+}
+
+function parseTerrascan(raw: unknown): FindingRow[] {
   const rows: FindingRow[] = []
-  const violations = Array.isArray(raw?.results?.violations) ? raw.results.violations : []
+  const data = isRecord(raw) ? (raw as TerrascanRaw) : {}
+  const violations = Array.isArray(data.results?.violations) ? data.results.violations : []
   for (const v of violations) {
     const sev = normalizeSeverity(v?.severity ?? '')
     if (!sev) continue
@@ -110,10 +180,24 @@ function parseTerrascan(raw: any): FindingRow[] {
   return rows
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function parseSnykSingle(obj: any): FindingRow[] {
+// ---------------------------------------------------------------------------
+// Snyk
+// ---------------------------------------------------------------------------
+interface SnykVulnerability {
+  severity?: string
+  id?: string
+  title?: string
+  remediation?: { advice?: string }
+}
+
+interface SnykRaw {
+  vulnerabilities?: SnykVulnerability[]
+}
+
+function parseSnykSingle(raw: unknown): FindingRow[] {
   const rows: FindingRow[] = []
-  const vulns = Array.isArray(obj?.vulnerabilities) ? obj.vulnerabilities : []
+  const obj = isRecord(raw) ? (raw as SnykRaw) : {}
+  const vulns = Array.isArray(obj.vulnerabilities) ? obj.vulnerabilities : []
   for (const v of vulns) {
     const sev = normalizeSeverity(v?.severity ?? '')
     if (!sev) continue
@@ -129,18 +213,35 @@ function parseSnykSingle(obj: any): FindingRow[] {
   return rows
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function parseSnyk(raw: any): FindingRow[] {
+function parseSnyk(raw: unknown): FindingRow[] {
   if (Array.isArray(raw)) {
     return raw.flatMap(parseSnykSingle)
   }
   return parseSnykSingle(raw)
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function parseSarif(raw: any): FindingRow[] {
+// ---------------------------------------------------------------------------
+// SARIF
+// ---------------------------------------------------------------------------
+interface SarifResult {
+  level?: string
+  ruleId?: string
+  message?: { text?: string }
+  locations?: Array<{ physicalLocation?: { artifactLocation?: { uri?: string } } }>
+}
+
+interface SarifRun {
+  results?: SarifResult[]
+}
+
+interface SarifRaw {
+  runs?: SarifRun[]
+}
+
+function parseSarif(raw: unknown): FindingRow[] {
   const rows: FindingRow[] = []
-  const runs = Array.isArray(raw?.runs) ? raw.runs : []
+  const data = isRecord(raw) ? (raw as SarifRaw) : {}
+  const runs = Array.isArray(data.runs) ? data.runs : []
   for (const run of runs) {
     for (const r of Array.isArray(run?.results) ? run.results : []) {
       const sev = sarifLevelToSeverity(r?.level ?? '')
@@ -177,17 +278,13 @@ export function parseScanFindings(
     rows = parseSnyk(rawResults)
   } else if (rawResults.runs) {
     rows = parseSarif(rawResults)
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  } else if (Array.isArray((rawResults as any)?.Results)) {
+  } else if (Array.isArray(rawResults.Results)) {
     rows = parseTrivy(rawResults)
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  } else if (Array.isArray((rawResults as any)?.results?.failed_checks)) {
+  } else if (Array.isArray((rawResults.results as { failed_checks?: unknown })?.failed_checks)) {
     rows = parseCheckov(rawResults)
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  } else if (Array.isArray((rawResults as any)?.results?.violations)) {
+  } else if (Array.isArray((rawResults.results as { violations?: unknown })?.violations)) {
     rows = parseTerrascan(rawResults)
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  } else if (Array.isArray((rawResults as any)?.vulnerabilities)) {
+  } else if (Array.isArray(rawResults.vulnerabilities)) {
     rows = parseSnyk(rawResults)
   } else {
     rows = []
