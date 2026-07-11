@@ -33,6 +33,21 @@ export default [
       // TypeScript rules
       '@typescript-eslint/no-explicit-any': 'error',
       '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_', varsIgnorePattern: '^_' }],
+      // XSS defense-in-depth: i18n.ts sets escapeValue:false, which is only safe
+      // while every translated string renders through React JSX auto-escaping.
+      // Banning dangerouslySetInnerHTML locks that invariant in (markdown is
+      // rendered via the rehype-sanitize pipeline in MarkdownRenderer, which
+      // does not need this attribute). See issue #478.
+      'no-restricted-syntax': [
+        'error',
+        {
+          selector: "JSXAttribute[name.name='dangerouslySetInnerHTML']",
+          message:
+            'dangerouslySetInnerHTML is banned: i18n escapeValue:false relies on React JSX ' +
+            'escaping as the only XSS barrier for translated/interpolated strings. Render rich ' +
+            'text through MarkdownRenderer (rehype-sanitize) instead.',
+        },
+      ],
       // React hooks — enforce both rules to prevent stale closures and rule violations
       'react-hooks/rules-of-hooks': 'error',
       'react-hooks/exhaustive-deps': 'error',
