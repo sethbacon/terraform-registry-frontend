@@ -451,11 +451,12 @@ export function useModuleDetail() {
   // Handler wrappers (preserve existing call signatures for the page)
   // =========================================================================
 
-  const loadSCMLink = useCallback(
-    (_moduleId: string) => {
-      // SCM link is now loaded via React Query; this is a no-op kept for
-      // backward compatibility with the page component.
-      queryClient.invalidateQueries({ queryKey: queryKeys.modules.scm(_moduleId) })
+  // SCM link data comes from React Query (see query #2 above); this just
+  // forces an immediate refetch after an external event (e.g. the SCM link
+  // wizard completing) instead of waiting for the query to naturally revalidate.
+  const invalidateSCMLink = useCallback(
+    (moduleId: string) => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.modules.scm(moduleId) })
     },
     [queryClient],
   )
@@ -657,7 +658,7 @@ export function useModuleDetail() {
     // OCI distribution
     ociEnabled,
     // Handlers
-    loadSCMLink,
+    invalidateSCMLink,
     loadWebhookEvents,
     pollForVersions,
     handleSCMSync,
