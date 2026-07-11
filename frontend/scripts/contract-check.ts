@@ -9,9 +9,10 @@
  * is the cheapest 80% of contract testing.
  *
  * Process:
- *   1. Walk frontend/src/services/api.ts AST. Collect every (method, path) tuple
- *      from `this.client.{get,post,put,patch,delete}(...)` calls. Template literals
- *      like `/api/v1/modules/${ns}/${name}/${system}` normalize to /api/v1/modules/{}/{}/{}.
+ *   1. Walk the AST of every domain module in frontend/src/services/api/. Collect
+ *      every (method, path) tuple from `http.{get,post,put,patch,delete}(...)` calls
+ *      on the shared axios instance. Template literals like
+ *      `/api/v1/modules/${ns}/${name}/${system}` normalize to /api/v1/modules/{}/{}/{}.
  *   2. Fetch swagger from the running backend. Parse path templates the same way:
  *      `/api/v1/modules/{namespace}/{name}/{system}` -> /api/v1/modules/{}/{}/{}.
  *   3. Diff. If any (method, path) the frontend calls has no backend match, exit 1
@@ -33,10 +34,10 @@ const HTTP_METHODS = new Set(['get', 'post', 'put', 'patch', 'delete'])
 const SCRIPT_DIR = path.dirname(fileURLToPath(import.meta.url))
 // scripts/ -> frontend/ -> repo root
 const REPO_ROOT = path.resolve(SCRIPT_DIR, '..', '..')
-const API_TS_PATH = path.join(REPO_ROOT, 'frontend', 'src', 'services', 'api.ts')
+const API_DIR = path.join(REPO_ROOT, 'frontend', 'src', 'services', 'api')
 const ALLOWLIST_PATH = path.join(SCRIPT_DIR, 'contract-check.allowlist.json')
 
-type CallSite = { method: string; rawPath: string; normalized: string; line: number }
+type CallSite = { method: string; rawPath: string; normalized: string; file: string; line: number }
 
 /** Replace every `{...}` segment with `{}` so different param names match. */
 function normalize(p: string): string {
@@ -83,14 +84,14 @@ function extractCallSites(sourcePath: string): CallSite[] {
   const text = fs.readFileSync(sourcePath, 'utf8')
   const sf = ts.createSourceFile(sourcePath, text, ts.ScriptTarget.Latest, true)
   const sites: CallSite[] = []
+  const relPath = path.relative(REPO_ROOT, sourcePath)
 
   function walk(node: ts.Node) {
     if (
       ts.isCallExpression(node) &&
       ts.isPropertyAccessExpression(node.expression) &&
-      ts.isPropertyAccessExpression(node.expression.expression) &&
-      node.expression.expression.expression.kind === ts.SyntaxKind.ThisKeyword &&
-      node.expression.expression.name.text === 'client' &&
+      ts.isIdentifier(node.expression.expression) &&
+      node.expression.expression.text === 'http' &&
       HTTP_METHODS.has(node.expression.name.text)
     ) {
       const method = node.expression.name.text.toUpperCase()
@@ -103,12 +104,13 @@ function extractCallSites(sourcePath: string): CallSite[] {
             method,
             rawPath,
             normalized: normalizeFrontendPath(rawPath),
+            file: relPath,
             line: line + 1,
           })
         } else {
           const { line } = sf.getLineAndCharacterOfPosition(node.getStart(sf))
           console.warn(
-            `WARN: ${path.relative(REPO_ROOT, sourcePath)}:${line + 1} — could not statically resolve path argument to this.client.${node.expression.name.text}(); skipping. Fix by inlining the path literal at the call site.`,
+            `WARN: ${relPath}:${line + 1} — could not statically resolve path argument to http.${node.expression.name.text}(); skipping. Fix by inlining the path literal at the call site.`,
           )
         }
       }
@@ -118,6 +120,15 @@ function extractCallSites(sourcePath: string): CallSite[] {
 
   walk(sf)
   return sites
+}
+
+/** Every domain module under frontend/src/services/api/, sorted for stable output. */
+function listApiModules(): string[] {
+  return fs
+    .readdirSync(API_DIR)
+    .filter((f) => f.endsWith('.ts'))
+    .sort()
+    .map((f) => path.join(API_DIR, f))
 }
 
 type SwaggerSpec = {
@@ -201,8 +212,11 @@ function loadAllowlist(): Allowlist {
 async function main() {
   const backendURL = process.env.BACKEND_URL || 'http://localhost:8080'
 
-  console.log(`==> Extracting frontend API calls from ${path.relative(REPO_ROOT, API_TS_PATH)}`)
-  const sites = extractCallSites(API_TS_PATH)
+  const moduleFiles = listApiModules()
+  console.log(
+    `==> Extracting frontend API calls from ${moduleFiles.length} modules in ${path.relative(REPO_ROOT, API_DIR)}/`,
+  )
+  const sites = moduleFiles.flatMap((f) => extractCallSites(f))
   console.log(`    Found ${sites.length} call sites`)
 
   console.log(`==> Fetching swagger from ${backendURL}/swagger.json`)
@@ -273,7 +287,7 @@ async function main() {
   console.error(`\nFAIL: ${missing.length} frontend route(s) have no matching backend route:\n`)
   for (const m of missing) {
     console.error(
-      `  ${m.site.method} ${m.site.normalized}\n    at frontend/src/services/api.ts:${m.site.line} (raw: ${m.site.rawPath})`,
+      `  ${m.site.method} ${m.site.normalized}\n    at ${m.site.file}:${m.site.line} (raw: ${m.site.rawPath})`,
     )
     if (m.suggestions.length > 0) {
       console.error(`    closest backend paths:`)
