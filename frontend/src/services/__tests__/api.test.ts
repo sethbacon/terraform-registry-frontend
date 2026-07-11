@@ -1257,7 +1257,15 @@ describe('ApiClient', () => {
         ; (mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
           data: {
             organizations: [
-              { id: 'o1', name: 'org1', display_name: 'Org 1', created_at: '', updated_at: '' },
+              {
+                id: 'o1',
+                name: 'org1',
+                display_name: 'Org 1',
+                idp_type: 'saml',
+                idp_name: 'corp-idp',
+                created_at: '',
+                updated_at: '',
+              },
             ],
           },
         })
@@ -1266,6 +1274,10 @@ describe('ApiClient', () => {
         params: { page: 1, per_page: 20 },
       })
       expect(result).toHaveLength(1)
+      // The transform must pass the IdP binding through — dropping it made the
+      // binding invisible and un-clearable in the admin UI (#538).
+      expect(result[0].idp_type).toBe('saml')
+      expect(result[0].idp_name).toBe('corp-idp')
     })
 
     it('searchOrganizations', async () => {

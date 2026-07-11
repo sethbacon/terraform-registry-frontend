@@ -18,6 +18,10 @@ function transformOrganization(org: Record<string, unknown>): Organization {
     id: org.id as string,
     name: org.name as string,
     display_name: org.display_name as string,
+    // IdP binding — always present in the wire response (null when unbound).
+    // Dropping these here made the binding invisible in the admin UI (#538).
+    idp_type: (org.idp_type ?? null) as string | null,
+    idp_name: (org.idp_name ?? null) as string | null,
     created_at: org.created_at as string,
     updated_at: org.updated_at as string,
   }

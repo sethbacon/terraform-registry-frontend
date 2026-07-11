@@ -6,7 +6,7 @@ import type {
   MirroredProvider,
   UpdateMirrorConfigRequest,
 } from '../../types/mirror'
-import type { MirrorApprovalRequest, MirrorPolicy } from '../../types/rbac'
+import type { MirrorApprovalRequest, MirrorPolicy, PolicyEvaluationResult } from '../../types/rbac'
 
 // Mirror Management
 export async function listMirrors(enabledOnly = false): Promise<MirrorConfiguration[]> {
@@ -165,8 +165,12 @@ export async function evaluateMirrorPolicy(
     provider: string
   },
   organizationId?: string,
-) {
+): Promise<PolicyEvaluationResult> {
   const params = organizationId ? { organization_id: organizationId } : {}
-  const response = await http.post('/api/v1/admin/policies/evaluate', data, { params })
+  const response = await http.post<PolicyEvaluationResult>(
+    '/api/v1/admin/policies/evaluate',
+    data,
+    { params },
+  )
   return response.data
 }

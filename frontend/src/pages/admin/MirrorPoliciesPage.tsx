@@ -37,7 +37,7 @@ import Page from '../../components/Page'
 import PageHeader from '../../components/PageHeader'
 import PageTitleIcon from '@mui/icons-material/Policy'
 import api from '../../services/api'
-import { MirrorPolicy } from '../../types/rbac'
+import { MirrorPolicy, PolicyEvaluationResult } from '../../types/rbac'
 import { getErrorMessage } from '../../utils/errors'
 import { queryKeys } from '../../services/queryKeys'
 
@@ -83,11 +83,7 @@ const MirrorPoliciesPage: React.FC = () => {
   // Evaluate dialog
   const [evaluateDialogOpen, setEvaluateDialogOpen] = useState(false)
   const [evaluateForm, setEvaluateForm] = useState({ registry: '', namespace: '', provider: '' })
-  const [evaluateResult, setEvaluateResult] = useState<{
-    allowed: boolean
-    matched_policy?: string
-    reason?: string
-  } | null>(null)
+  const [evaluateResult, setEvaluateResult] = useState<PolicyEvaluationResult | null>(null)
   const [evaluating, setEvaluating] = useState(false)
 
   const {
@@ -629,7 +625,7 @@ const MirrorPoliciesPage: React.FC = () => {
                       </strong>
                       {evaluateResult.matched_policy &&
                         t('admin.mirrorPolicies.resultMatchedPolicy', {
-                          policy: evaluateResult.matched_policy,
+                          policy: evaluateResult.matched_policy.name,
                         })}
                       {evaluateResult.reason &&
                         t('admin.mirrorPolicies.resultReason', { reason: evaluateResult.reason })}
