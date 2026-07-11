@@ -1,5 +1,12 @@
 import { http } from './http'
-import type { SCMProvider, SCMRepository } from '../../types/scm'
+import type {
+  ModuleSCMLink,
+  SCMBranch,
+  SCMProvider,
+  SCMRepository,
+  SCMTag,
+  SCMWebhookEvent,
+} from '../../types/scm'
 
 // SCM Provider Management
 export async function listSCMProviders(organizationId?: string): Promise<SCMProvider[] | null> {
@@ -98,15 +105,23 @@ export async function listSCMRepositories(
   return response.data
 }
 
-export async function listSCMRepositoryTags(providerId: string, owner: string, repo: string) {
-  const response = await http.get(
+export async function listSCMRepositoryTags(
+  providerId: string,
+  owner: string,
+  repo: string,
+): Promise<{ tags: SCMTag[] | null }> {
+  const response = await http.get<{ tags: SCMTag[] | null }>(
     `/api/v1/scm-providers/${providerId}/repositories/${owner}/${repo}/tags`,
   )
   return response.data
 }
 
-export async function listSCMRepositoryBranches(providerId: string, owner: string, repo: string) {
-  const response = await http.get(
+export async function listSCMRepositoryBranches(
+  providerId: string,
+  owner: string,
+  repo: string,
+): Promise<{ branches: SCMBranch[] | null }> {
+  const response = await http.get<{ branches: SCMBranch[] | null }>(
     `/api/v1/scm-providers/${providerId}/repositories/${owner}/${repo}/branches`,
   )
   return response.data
@@ -150,8 +165,8 @@ export async function linkModuleToSCM(
   return response.data
 }
 
-export async function getModuleSCMInfo(moduleId: string) {
-  const response = await http.get(`/api/v1/admin/modules/${moduleId}/scm`)
+export async function getModuleSCMInfo(moduleId: string): Promise<ModuleSCMLink> {
+  const response = await http.get<ModuleSCMLink>(`/api/v1/admin/modules/${moduleId}/scm`)
   return response.data
 }
 
@@ -181,8 +196,10 @@ export async function triggerManualSync(
   return response.data
 }
 
-export async function getWebhookEvents(moduleId: string) {
-  const response = await http.get(`/api/v1/admin/modules/${moduleId}/scm/events`)
+export async function getWebhookEvents(moduleId: string): Promise<SCMWebhookEvent[]> {
+  const response = await http.get<{ events?: SCMWebhookEvent[] }>(
+    `/api/v1/admin/modules/${moduleId}/scm/events`,
+  )
   // Backend wraps the list as { events: [...] }; callers expect a bare array.
   return response.data?.events ?? []
 }

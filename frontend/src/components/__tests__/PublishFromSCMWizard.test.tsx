@@ -47,7 +47,13 @@ vi.mock('../RepositoryBrowser', () => ({
               html_url: '',
               private: false,
             },
-            { tag_name: 'v1.0.0', target_commit: 'abc1234567890' },
+            {
+              name: 'v1.0.0',
+              commit_sha: 'abc1234567890',
+              message: '',
+              tagger: '',
+              created_at: '2025-01-01T00:00:00Z',
+            },
           )
         }
       >

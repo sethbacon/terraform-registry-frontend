@@ -64,7 +64,10 @@ export interface APIKey {
   id: string
   user_id?: string
   user_name?: string // User name who created this key (joined from users table)
-  organization_id: string
+  // Not sent by GET /api/v1/apikeys (backend admin.APIKeyItem has no such
+  // field) — always undefined on listed keys; org context comes from
+  // memberships instead.
+  organization_id?: string
   name: string
   description?: string
   key_prefix: string

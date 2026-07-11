@@ -118,10 +118,18 @@ describe('RepositoryBrowser', () => {
     const onRepositorySelect = vi.fn()
     listSCMRepositoriesMock.mockResolvedValue({ repositories: fakeRepos })
     listSCMRepositoryTagsMock.mockResolvedValue({
-      tags: [{ tag_name: 'v1.0.0', target_commit: 'abc1234567890' }],
+      tags: [
+        {
+          name: 'v1.0.0',
+          commit_sha: 'abc1234567890',
+          message: '',
+          tagger: '',
+          created_at: '2025-01-01T00:00:00Z',
+        },
+      ],
     })
     listSCMRepositoryBranchesMock.mockResolvedValue({
-      branches: [{ branch_name: 'main', head_commit: 'def1234567890', is_protected: true }],
+      branches: [{ name: 'main', commit_sha: 'def1234567890', protected: true, default: true }],
     })
     render(<RepositoryBrowser providerId="scm-1" onRepositorySelect={onRepositorySelect} />)
     await waitFor(() => expect(screen.getByText('hashicorp/terraform-aws-vpc')).toBeInTheDocument())
@@ -134,7 +142,15 @@ describe('RepositoryBrowser', () => {
     const onTagSelect = vi.fn()
     listSCMRepositoriesMock.mockResolvedValue({ repositories: fakeRepos })
     listSCMRepositoryTagsMock.mockResolvedValue({
-      tags: [{ tag_name: 'v1.0.0', target_commit: 'abc1234567890' }],
+      tags: [
+        {
+          name: 'v1.0.0',
+          commit_sha: 'abc1234567890',
+          message: '',
+          tagger: '',
+          created_at: '2025-01-01T00:00:00Z',
+        },
+      ],
     })
     listSCMRepositoryBranchesMock.mockResolvedValue({ branches: [] })
     const { rerender } = render(

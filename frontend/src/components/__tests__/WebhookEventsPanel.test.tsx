@@ -7,40 +7,49 @@ import type { ModuleSCMLink, SCMWebhookEvent } from '../../types/scm'
 const defaultLink: ModuleSCMLink = {
   id: 'link-1',
   module_id: 'mod-1',
-  provider_id: 'scm-1',
+  scm_provider_id: 'scm-1',
   repository_owner: 'myorg',
   repository_name: 'terraform-vpc',
   default_branch: 'main',
+  module_path: '',
   tag_pattern: 'v*',
   auto_publish_enabled: true,
-  webhook_secret: '',
+  webhook_enabled: true,
   created_at: '2025-01-01T00:00:00Z',
   updated_at: '2025-06-01T00:00:00Z',
 }
 
+// Fixtures mirror the real wire shape (backend scm.SCMWebhookEvent): the
+// display status is derived from processed/error, not a server `state` field.
 const fakeEvents: SCMWebhookEvent[] = [
   {
     id: 'evt-1',
-    module_source_repo_id: 'link-1',
+    module_scm_repo_id: 'link-1',
     event_type: 'tag_push',
-    ref_name: 'v1.0.0',
+    tag_name: 'v1.0.0',
     commit_sha: 'abc123',
     payload: {},
-    state: 'succeeded',
+    processed: true,
+    processed_at: '2025-06-01T12:05:00Z',
+    retry_count: 0,
+    max_retries: 3,
     created_at: '2025-06-01T12:00:00Z',
-    updated_at: '2025-06-01T12:05:00Z',
   },
   {
     id: 'evt-2',
-    module_source_repo_id: 'link-1',
+    module_scm_repo_id: 'link-1',
     event_type: 'tag_push',
-    ref_name: 'v1.1.0',
+    ref: 'refs/tags/v1.1.0',
+    // The backend serializes tag_name as "" (never absent) on non-tag events —
+    // the display must fall back to ref through an empty string, not just null.
+    tag_name: '',
     commit_sha: 'def456',
     payload: {},
-    state: 'failed',
-    error_message: 'Archive extraction failed',
+    processed: true,
+    error: 'Archive extraction failed',
+    retry_count: 1,
+    max_retries: 3,
     created_at: '2025-06-02T12:00:00Z',
-    updated_at: '2025-06-02T12:01:00Z',
   },
 ]
 
@@ -75,7 +84,10 @@ describe('WebhookEventsPanel', () => {
   it('renders event list when expanded', () => {
     render(<WebhookEventsPanel {...defaultProps} />)
     expect(screen.getByText(/tag_push — v1.0.0/)).toBeInTheDocument()
+    // tag_name wins over ref when both could identify the event
+    expect(screen.getByText(/tag_push — refs\/tags\/v1.1.0/)).toBeInTheDocument()
     expect(screen.getByText('succeeded')).toBeInTheDocument()
+    // processed with an error must read as failed, not succeeded
     expect(screen.getByText('failed')).toBeInTheDocument()
   })
 

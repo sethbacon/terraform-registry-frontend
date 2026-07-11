@@ -2,7 +2,7 @@
  * API Keys domain API — key listing, CRUD, and rotation.
  */
 import { http } from './http'
-import type { APIKey } from '../../types'
+import type { APIKey, RotateAPIKeyResponse } from '../../types'
 
 /**
  * Wire shape of POST /api/v1/apikeys (swagger: admin.CreateAPIKeyResponse).
@@ -75,8 +75,11 @@ export async function deleteAPIKey(id: string): Promise<{ message: string }> {
   return response.data
 }
 
-export async function rotateAPIKey(id: string, gracePeriodHours: number = 0) {
-  const response = await http.post(`/api/v1/apikeys/${id}/rotate`, {
+export async function rotateAPIKey(
+  id: string,
+  gracePeriodHours: number = 0,
+): Promise<RotateAPIKeyResponse> {
+  const response = await http.post<RotateAPIKeyResponse>(`/api/v1/apikeys/${id}/rotate`, {
     grace_period_hours: gracePeriodHours,
   })
   return response.data
