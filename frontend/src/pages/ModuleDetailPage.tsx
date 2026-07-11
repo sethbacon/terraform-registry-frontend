@@ -1,44 +1,32 @@
 import React from 'react'
 import { useTranslation } from 'react-i18next'
-import { useNavigate, Link as RouterLink } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import MarkdownRenderer from '../components/MarkdownRenderer'
 import {
   Typography,
   Box,
   Paper,
-  Breadcrumbs,
-  Link,
-  Chip,
   Divider,
   Alert,
   Button,
-  Stack,
-  IconButton,
-  Tooltip,
   Dialog,
   DialogTitle,
   DialogContent,
-  TextField,
   Tabs,
   Tab,
 } from '@mui/material'
 import ArrowBack from '@mui/icons-material/ArrowBack'
-import Add from '@mui/icons-material/Add'
-import Warning from '@mui/icons-material/Warning'
-import EditIcon from '@mui/icons-material/Edit'
-import Check from '@mui/icons-material/Check'
-import Close from '@mui/icons-material/Close'
 import Page from '../components/Page'
 import PublishFromSCMWizard from '../components/PublishFromSCMWizard'
+import ModuleDetailHeader from '../components/ModuleDetailHeader'
 import ModuleDocumentation from '../components/ModuleDocumentation'
+import ModuleInfoPanel from '../components/ModuleInfoPanel'
 import SecurityScanPanel from '../components/SecurityScanPanel'
 import ConsumedByPanel from '../components/ConsumedByPanel'
 import SCMRepositoryPanel from '../components/SCMRepositoryPanel'
 import WebhookEventsPanel from '../components/WebhookEventsPanel'
 import VersionDetailsPanel from '../components/VersionDetailsPanel'
 import ConfirmDialog from '../components/ConfirmDialog'
-import VersionSelector from '../components/VersionSelector'
-import ModuleActionsMenu from '../components/ModuleActionsMenu'
 import DetailPageSkeleton from '../components/skeletons/DetailPageSkeleton'
 import UsageExample from '../components/UsageExample'
 import { REGISTRY_HOST } from '../config'
@@ -47,8 +35,6 @@ import { useModuleDetail } from '../hooks/useModuleDetail'
 const ModuleDetailPage: React.FC = () => {
   const { t } = useTranslation()
   const navigate = useNavigate()
-  const [editingDescription, setEditingDescription] = React.useState(false)
-  const [editDescription, setEditDescription] = React.useState('')
   const [docTab, setDocTab] = React.useState(0)
   const {
     namespace,
@@ -125,9 +111,6 @@ const ModuleDetailPage: React.FC = () => {
     suiteSiblingUrl,
   } = useModuleDetail()
 
-  const [editingNamespace, setEditingNamespace] = React.useState(false)
-  const [editNamespace, setEditNamespace] = React.useState('')
-
   return (
     <Box aria-busy={loading} aria-live="polite">
       {loading ? (
@@ -141,216 +124,21 @@ const ModuleDetailPage: React.FC = () => {
         </Page>
       ) : (
         <Page maxWidth="xl">
-          {/* Breadcrumbs */}
-          <Breadcrumbs sx={{ mb: 3 }}>
-            <Link
-              component="button"
-              variant="body1"
-              onClick={() => navigate('/modules')}
-              sx={{ cursor: 'pointer' }}
-            >
-              Modules
-            </Link>
-            <Typography
-              sx={{
-                color: 'text.primary',
-              }}
-            >
-              {namespace}
-            </Typography>
-            <Typography
-              sx={{
-                color: 'text.primary',
-              }}
-            >
-              {name}
-            </Typography>
-            <Typography
-              sx={{
-                color: 'text.primary',
-              }}
-            >
-              {system}
-            </Typography>
-            {selectedVersion && (
-              <Typography
-                sx={{
-                  color: 'text.primary',
-                }}
-              >
-                v{selectedVersion.version}
-              </Typography>
-            )}
-          </Breadcrumbs>
-
-          {/* Module Deprecation Banner */}
-          {module.deprecated && (
-            <Alert severity="warning" sx={{ mb: 2 }}>
-              This module is deprecated. {module.deprecation_message}
-              {module.successor_module && (
-                <>
-                  {' '}
-                  Consider using{' '}
-                  <Link
-                    component={RouterLink}
-                    to={`/modules/${module.successor_module.namespace}/${module.successor_module.name}/${module.successor_module.system}`}
-                  >
-                    {module.successor_module.namespace}/{module.successor_module.name}/
-                    {module.successor_module.system}
-                  </Link>{' '}
-                  instead.
-                </>
-              )}
-            </Alert>
-          )}
-
-          {/* Header */}
-          <Box sx={{ mb: 4 }}>
-            <Stack
-              direction="row"
-              sx={{
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                mb: 2,
-              }}
-            >
-              <Stack
-                direction="row"
-                spacing={2}
-                sx={{
-                  alignItems: 'center',
-                }}
-              >
-                <IconButton
-                  aria-label={t('modules.detail.ariaBack')}
-                  onClick={() => navigate('/modules')}
-                >
-                  <ArrowBack />
-                </IconButton>
-                <Typography variant="h4" component="h1">
-                  {name}
-                </Typography>
-              </Stack>
-              {canManage && (
-                <Button variant="contained" startIcon={<Add />} onClick={handlePublishNewVersion}>
-                  {t('modules.detail.publishNewVersion')}
-                </Button>
-              )}
-            </Stack>
-            <Stack
-              direction="row"
-              spacing={1}
-              sx={{
-                alignItems: 'center',
-                mb: 0,
-              }}
-            >
-              {editingDescription ? (
-                <>
-                  <TextField
-                    size="small"
-                    fullWidth
-                    value={editDescription}
-                    onChange={(e) => setEditDescription(e.target.value)}
-                    placeholder={t('modules.detail.placeholderDescription')}
-                    autoFocus
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter') {
-                        handleUpdateDescription(editDescription)
-                        setEditingDescription(false)
-                      } else if (e.key === 'Escape') {
-                        setEditingDescription(false)
-                      }
-                    }}
-                  />
-                  <Tooltip title={t('modules.detail.tooltipSaveDescription')}>
-                    <IconButton
-                      size="small"
-                      color="primary"
-                      onClick={() => {
-                        handleUpdateDescription(editDescription)
-                        setEditingDescription(false)
-                      }}
-                      aria-label={t('modules.detail.ariaSaveDescription')}
-                    >
-                      <Check fontSize="small" />
-                    </IconButton>
-                  </Tooltip>
-                  <Tooltip title={t('modules.detail.tooltipCancelEditing')}>
-                    <IconButton
-                      size="small"
-                      onClick={() => setEditingDescription(false)}
-                      aria-label={t('modules.detail.ariaCancelEditing')}
-                    >
-                      <Close fontSize="small" />
-                    </IconButton>
-                  </Tooltip>
-                </>
-              ) : (
-                <>
-                  <Typography
-                    variant="body1"
-                    sx={{
-                      color: 'text.secondary',
-                    }}
-                  >
-                    {module.description || 'No description available'}
-                  </Typography>
-                  {canManage && (
-                    <Tooltip title={t('modules.detail.tooltipEditDescription')}>
-                      <IconButton
-                        size="small"
-                        onClick={() => {
-                          setEditDescription(module.description || '')
-                          setEditingDescription(true)
-                        }}
-                        aria-label={t('modules.detail.ariaEditDescription')}
-                      >
-                        <EditIcon fontSize="small" />
-                      </IconButton>
-                    </Tooltip>
-                  )}
-                </>
-              )}
-            </Stack>
-            <Stack
-              direction="row"
-              spacing={1}
-              sx={{
-                alignItems: 'center',
-                flexWrap: 'wrap',
-                mt: 2,
-              }}
-            >
-              <Chip label={`${namespace}/${system}`} />
-              <VersionSelector
-                versions={versions}
-                selectedVersion={selectedVersion}
-                onSelectVersion={setSelectedVersion}
-                data-testid="module-version-selector"
-              />
-              {selectedVersion?.deprecated && (
-                <Chip
-                  label={t('modules.detail.chipDeprecated')}
-                  color="warning"
-                  size="small"
-                  icon={<Warning />}
-                />
-              )}
-              <Chip label={`${module.download_count ?? 0} downloads`} />
-              <ModuleActionsMenu
-                canManage={canManage}
-                deprecated={!!module.deprecated}
-                onEditDescription={() => {
-                  setEditDescription(module.description || '')
-                  setEditingDescription(true)
-                }}
-                onDeprecateModule={() => setDeprecateModuleDialogOpen(true)}
-                onUndeprecateModule={() => setUndeprecateModuleDialogOpen(true)}
-                onDeleteModule={() => setDeleteModuleDialogOpen(true)}
-              />
-            </Stack>
-          </Box>
+          <ModuleDetailHeader
+            module={module}
+            namespace={namespace}
+            name={name}
+            system={system}
+            canManage={canManage}
+            versions={versions}
+            selectedVersion={selectedVersion}
+            onSelectVersion={setSelectedVersion}
+            onPublishNewVersion={handlePublishNewVersion}
+            onUpdateDescription={handleUpdateDescription}
+            onOpenDeprecateModuleDialog={() => setDeprecateModuleDialogOpen(true)}
+            onOpenUndeprecateModuleDialog={() => setUndeprecateModuleDialogOpen(true)}
+            onOpenDeleteModuleDialog={() => setDeleteModuleDialogOpen(true)}
+          />
 
           <Box sx={{ display: 'flex', gap: 3, flexDirection: { xs: 'column', md: 'row' } }}>
             {/* Main Content */}
@@ -395,106 +183,15 @@ const ModuleDetailPage: React.FC = () => {
 
             {/* Sidebar - Module Information and Version Details */}
             <Box sx={{ width: { xs: '100%', md: 350 } }}>
-              {/* Module Information */}
-              <Paper sx={{ p: 3, mb: 3 }}>
-                <Typography variant="h6" gutterBottom>
-                  {t('modules.detail.sidebarTitle')}
-                </Typography>
-                <Divider sx={{ mb: 2 }} />
-                <Box sx={{ '& > *': { mb: 1 } }}>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                    <Typography variant="body2">
-                      <strong>Namespace:</strong>
-                    </Typography>
-                    {editingNamespace ? (
-                      <>
-                        <TextField
-                          size="small"
-                          value={editNamespace}
-                          onChange={(e) => setEditNamespace(e.target.value)}
-                          placeholder={t('modules.detail.placeholderNamespace')}
-                          autoFocus
-                          sx={{ ml: 0.5, flex: 1 }}
-                          onKeyDown={(e) => {
-                            if (e.key === 'Enter' && editNamespace.trim()) {
-                              handleUpdateNamespace(editNamespace.trim())
-                              setEditingNamespace(false)
-                            } else if (e.key === 'Escape') {
-                              setEditingNamespace(false)
-                            }
-                          }}
-                        />
-                        <Tooltip title={t('modules.detail.tooltipSaveNamespace')}>
-                          <IconButton
-                            size="small"
-                            color="primary"
-                            onClick={() => {
-                              if (editNamespace.trim()) {
-                                handleUpdateNamespace(editNamespace.trim())
-                                setEditingNamespace(false)
-                              }
-                            }}
-                            aria-label={t('modules.detail.ariaSaveNamespace')}
-                          >
-                            <Check fontSize="small" />
-                          </IconButton>
-                        </Tooltip>
-                        <Tooltip title={t('modules.detail.tooltipCancelNamespace')}>
-                          <IconButton
-                            size="small"
-                            onClick={() => setEditingNamespace(false)}
-                            aria-label={t('modules.detail.ariaCancelNamespace')}
-                          >
-                            <Close fontSize="small" />
-                          </IconButton>
-                        </Tooltip>
-                      </>
-                    ) : (
-                      <>
-                        <Typography variant="body2">{namespace}</Typography>
-                        {canManage && (
-                          <Tooltip title={t('modules.detail.tooltipEditNamespace')}>
-                            <IconButton
-                              size="small"
-                              onClick={() => {
-                                setEditNamespace(namespace || '')
-                                setEditingNamespace(true)
-                              }}
-                              aria-label={t('modules.detail.ariaEditNamespace')}
-                            >
-                              <EditIcon fontSize="small" />
-                            </IconButton>
-                          </Tooltip>
-                        )}
-                      </>
-                    )}
-                  </Box>
-                  <Typography variant="body2">
-                    <strong>Name:</strong> {name}
-                  </Typography>
-                  <Typography variant="body2">
-                    <strong>Provider:</strong> {system}
-                  </Typography>
-                  <Typography variant="body2">
-                    <strong>{t('modules.detail.labelLatestVersion')}</strong>{' '}
-                    {versions.length > 0
-                      ? (versions.find((v) => !v.deprecated) ?? versions[0]).version
-                      : 'N/A'}
-                  </Typography>
-                  <Typography variant="body2">
-                    <strong>{t('modules.detail.labelTotalDownloads')}</strong>{' '}
-                    {module.download_count ?? 0}
-                  </Typography>
-                  <Typography variant="body2">
-                    <strong>Organization:</strong> {module.organization_name || namespace}
-                  </Typography>
-                  {module.created_by_name && (
-                    <Typography variant="body2">
-                      <strong>{t('modules.detail.labelCreatedBy')}</strong> {module.created_by_name}
-                    </Typography>
-                  )}
-                </Box>
-              </Paper>
+              <ModuleInfoPanel
+                module={module}
+                namespace={namespace}
+                name={name}
+                system={system}
+                versions={versions}
+                canManage={canManage}
+                onUpdateNamespace={handleUpdateNamespace}
+              />
 
               <SCMRepositoryPanel
                 isAuthenticated={isAuthenticated}
