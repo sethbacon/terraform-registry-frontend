@@ -129,7 +129,10 @@ const OrganizationsPage: React.FC = () => {
         await api.updateOrganization(editingOrg.id, {
           ...(formData.name !== editingOrg.name ? { name: formData.name } : {}),
           display_name: formData.display_name,
-          idp_type: formData.idp_type || null,
+          // The backend clears the IdP binding only on an explicit empty string;
+          // a JSON null unmarshals to a nil pointer and is silently skipped, so
+          // sending `|| null` here made "None" a no-op (#538).
+          idp_type: formData.idp_type,
           idp_name: formData.idp_name || null,
         })
       } else {

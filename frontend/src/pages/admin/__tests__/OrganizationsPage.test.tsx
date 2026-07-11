@@ -60,6 +60,8 @@ const fakeOrgs = [
     id: 'org-1',
     name: 'acme-corp',
     display_name: 'Acme Corporation',
+    idp_type: 'oidc',
+    idp_name: 'corp-okta',
     created_at: '2025-03-15T10:00:00Z',
     updated_at: '2025-03-15T10:00:00Z',
   },
@@ -67,6 +69,8 @@ const fakeOrgs = [
     id: 'org-2',
     name: 'globex',
     display_name: 'Globex Inc',
+    idp_type: null,
+    idp_name: null,
     created_at: '2025-04-20T08:00:00Z',
     updated_at: '2025-04-20T08:00:00Z',
   },
@@ -230,7 +234,29 @@ describe('OrganizationsPage', () => {
     await waitFor(() =>
       expect(updateOrganizationMock).toHaveBeenCalledWith(
         'org-1',
-        expect.objectContaining({ display_name: 'Acme Corporation' }),
+        // idp_type must round-trip from the fetched org (pre-filled dialog),
+        // proving the API transform no longer drops the binding (#538).
+        expect.objectContaining({ display_name: 'Acme Corporation', idp_type: 'oidc' }),
+      ),
+    )
+  })
+
+  it('clearing the IdP binding sends an explicit empty string, not null', async () => {
+    // The backend only clears on idp_type === ""; null is silently ignored (#538).
+    listOrganizationsMock.mockResolvedValue(fakeOrgs)
+    updateOrganizationMock.mockResolvedValue({})
+    renderPage()
+    await waitFor(() => expect(screen.getByText('acme-corp')).toBeInTheDocument())
+    const editBtns = screen.getAllByRole('button', { name: /edit organization/i })
+    await userEvent.click(editBtns[0])
+    await waitFor(() => expect(screen.getByText('Edit Organization')).toBeInTheDocument())
+    await userEvent.click(screen.getByRole('combobox'))
+    await userEvent.click(await screen.findByRole('option', { name: /any \(no restriction\)/i }))
+    await userEvent.click(screen.getByRole('button', { name: /^save$/i }))
+    await waitFor(() =>
+      expect(updateOrganizationMock).toHaveBeenCalledWith(
+        'org-1',
+        expect.objectContaining({ idp_type: '', idp_name: null }),
       ),
     )
   })
@@ -376,7 +402,7 @@ describe('OrganizationsPage', () => {
   })
 
   it('shows IdP chip without name when idp_name is empty', async () => {
-    const orgsWithIdp = [{ ...fakeOrgs[0], idp_type: 'ldap' }]
+    const orgsWithIdp = [{ ...fakeOrgs[0], idp_type: 'ldap', idp_name: null }]
     listOrganizationsMock.mockResolvedValue(orgsWithIdp)
     renderPage()
     await waitFor(() => expect(screen.getByText('acme-corp')).toBeInTheDocument())

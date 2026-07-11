@@ -224,9 +224,12 @@ describe('MirrorPoliciesPage', () => {
 
   it('opens Evaluate dialog and evaluates a policy', async () => {
     listMirrorPoliciesMock.mockResolvedValue(fakePolicies)
+    // matched_policy is a full MirrorPolicy object on the wire (backend
+    // models.PolicyEvaluationResult), not a string — mock the real shape.
     evaluateMirrorPolicyMock.mockResolvedValue({
       allowed: true,
-      matched_policy: 'Allow HashiCorp',
+      requires_approval: false,
+      matched_policy: { ...fakePolicies[0], name: 'Allow HashiCorp' },
       reason: 'namespace matched',
     })
     renderPage()
@@ -243,13 +246,17 @@ describe('MirrorPoliciesPage', () => {
     await userEvent.click(evaluateBtns[evaluateBtns.length - 1])
     await waitFor(() => expect(evaluateMirrorPolicyMock).toHaveBeenCalled())
     await waitFor(() => expect(screen.getByText(/Allowed/)).toBeInTheDocument())
+    // The dialog must render the policy's *name*, not "[object Object]".
+    expect(screen.getByText(/matched policy: Allow HashiCorp/)).toBeInTheDocument()
+    expect(screen.queryByText(/\[object Object\]/)).not.toBeInTheDocument()
   })
 
   it('shows Denied result when evaluate returns allowed:false', async () => {
     listMirrorPoliciesMock.mockResolvedValue(fakePolicies)
     evaluateMirrorPolicyMock.mockResolvedValue({
       allowed: false,
-      matched_policy: 'Deny External',
+      requires_approval: false,
+      matched_policy: { ...fakePolicies[0], name: 'Deny External', policy_type: 'deny' },
       reason: 'blocked',
     })
     renderPage()
