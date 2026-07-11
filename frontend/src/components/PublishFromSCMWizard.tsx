@@ -120,7 +120,7 @@ const PublishFromSCMWizard: React.FC<PublishFromSCMWizardProps> = ({
           repository_path: settings.repository_path || undefined,
           default_branch: settings.default_branch,
           auto_publish_enabled: false,
-          tag_pattern: selectedTag.tag_name,
+          tag_pattern: selectedTag.name,
         })
         try {
           await api.triggerManualSync(moduleId)
@@ -395,10 +395,10 @@ const PublishFromSCMWizard: React.FC<PublishFromSCMWizardProps> = ({
                         flexWrap: 'wrap',
                       }}
                     >
-                      <Chip label={selectedTag.tag_name} color="primary" size="small" />
+                      <Chip label={selectedTag.name} color="primary" size="small" />
                       <Chip
                         label={t('scmWizard.commitLabel', {
-                          commit: selectedTag.target_commit.substring(0, 7),
+                          commit: selectedTag.commit_sha.substring(0, 7),
                         })}
                         size="small"
                         variant="outlined"

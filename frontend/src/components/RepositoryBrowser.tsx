@@ -330,11 +330,11 @@ const RepositoryBrowser: React.FC<RepositoryBrowserProps> = ({
                         ) : (
                           <List dense>
                             {tags.map((tag) => (
-                              <ListItem key={tag.tag_name} disablePadding>
+                              <ListItem key={tag.name} disablePadding>
                                 <ListItemButton
                                   onClick={() => handleTagClick(repo, tag)}
                                   selected={
-                                    selectedTag?.tag_name === tag.tag_name &&
+                                    selectedTag?.name === tag.name &&
                                     selectedRepository?.full_name === repo.full_name
                                   }
                                   sx={{ borderRadius: 1 }}
@@ -343,11 +343,9 @@ const RepositoryBrowser: React.FC<RepositoryBrowserProps> = ({
                                     <TagIcon fontSize="small" />
                                   </ListItemIcon>
                                   <ListItemText
-                                    primary={tag.tag_name}
+                                    primary={tag.name}
                                     secondary={
-                                      tag.target_commit
-                                        ? tag.target_commit.substring(0, 7)
-                                        : undefined
+                                      tag.commit_sha ? tag.commit_sha.substring(0, 7) : undefined
                                     }
                                   />
                                 </ListItemButton>
@@ -365,9 +363,9 @@ const RepositoryBrowser: React.FC<RepositoryBrowserProps> = ({
                         <List dense>
                           {branches.map((branch) => (
                             <ListItem
-                              key={branch.branch_name}
+                              key={branch.name}
                               secondaryAction={
-                                branch.is_protected && (
+                                branch.protected && (
                                   <Chip
                                     label={t('repositoryBrowser.protected')}
                                     size="small"
@@ -380,9 +378,9 @@ const RepositoryBrowser: React.FC<RepositoryBrowserProps> = ({
                                 <CodeIcon fontSize="small" />
                               </ListItemIcon>
                               <ListItemText
-                                primary={branch.branch_name}
+                                primary={branch.name}
                                 secondary={
-                                  branch.head_commit ? branch.head_commit.substring(0, 7) : 'N/A'
+                                  branch.commit_sha ? branch.commit_sha.substring(0, 7) : 'N/A'
                                 }
                               />
                             </ListItem>

@@ -32,6 +32,18 @@ interface WebhookEventsPanelProps {
   onLoadEvents: (moduleId: string) => Promise<void>
 }
 
+/**
+ * The wire event carries no `state` field — derive a display status from the
+ * processing flags (error wins even when processed, so failed retries read
+ * as failures rather than successes).
+ */
+function eventStatus(event: SCMWebhookEvent): 'pending' | 'processing' | 'succeeded' | 'failed' {
+  if (event.error) return 'failed'
+  if (event.processed) return 'succeeded'
+  if (event.processing_started_at) return 'processing'
+  return 'pending'
+}
+
 const WebhookEventsPanel: React.FC<WebhookEventsPanelProps> = ({
   isAuthenticated,
   scmLink,
@@ -101,62 +113,68 @@ const WebhookEventsPanel: React.FC<WebhookEventsPanelProps> = ({
           </Typography>
         ) : (
           <List dense disablePadding>
-            {webhookEvents.slice(0, 10).map((event) => (
-              <ListItem key={event.id} disableGutters sx={{ py: 0.5 }}>
-                <ListItemText
-                  primary={
-                    <Box
-                      sx={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: 1,
-                      }}
-                    >
-                      <Chip
-                        label={event.state}
-                        size="small"
-                        color={
-                          event.state === 'succeeded'
-                            ? 'success'
-                            : event.state === 'failed'
-                              ? 'error'
-                              : event.state === 'processing'
-                                ? 'info'
-                                : 'default'
-                        }
-                      />
-                      <Typography variant="body2">
-                        {event.event_type} — {event.ref_name}
-                      </Typography>
-                    </Box>
-                  }
-                  secondary={
-                    <Box>
-                      <Typography
-                        variant="caption"
+            {webhookEvents.slice(0, 10).map((event) => {
+              const status = eventStatus(event)
+              return (
+                <ListItem key={event.id} disableGutters sx={{ py: 0.5 }}>
+                  <ListItemText
+                    primary={
+                      <Box
                         sx={{
-                          color: 'text.secondary',
-                          display: 'block',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 1,
                         }}
                       >
-                        {new Date(event.created_at).toLocaleString()}
-                      </Typography>
-                      {event.error_message && (
+                        <Chip
+                          label={status}
+                          size="small"
+                          color={
+                            status === 'succeeded'
+                              ? 'success'
+                              : status === 'failed'
+                                ? 'error'
+                                : status === 'processing'
+                                  ? 'info'
+                                  : 'default'
+                          }
+                        />
+                        <Typography variant="body2">
+                          {/* `||`, not `??`: the backend serializes tag_name as ""
+                              (never absent) on branch pushes, so nullish coalescing
+                              would never fall back to ref. */}
+                          {event.event_type} — {event.tag_name || event.ref || ''}
+                        </Typography>
+                      </Box>
+                    }
+                    secondary={
+                      <Box>
                         <Typography
                           variant="caption"
-                          color="error"
                           sx={{
+                            color: 'text.secondary',
                             display: 'block',
                           }}
                         >
-                          {event.error_message}
+                          {new Date(event.created_at).toLocaleString()}
                         </Typography>
-                      )}
-                    </Box>
-                  }
-                />
-              </ListItem>
-            ))}
+                        {event.error && (
+                          <Typography
+                            variant="caption"
+                            color="error"
+                            sx={{
+                              display: 'block',
+                            }}
+                          >
+                            {event.error}
+                          </Typography>
+                        )}
+                      </Box>
+                    }
+                  />
+                </ListItem>
+              )
+            })}
             {webhookEvents.length > 10 && (
               <Typography
                 variant="caption"

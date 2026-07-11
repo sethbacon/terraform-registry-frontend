@@ -85,35 +85,46 @@ export interface SCMRepository {
   private: boolean
 }
 
+/** Git tag as returned by the repository tags endpoint (backend scm.Tag). */
 export interface SCMTag {
-  tag_name: string
-  target_commit: string
-  annotation_msg?: string
-  tagger_name?: string
-  tagged_at?: string
+  name: string
+  commit_sha: string
+  message: string
+  tagger: string
+  created_at: string
 }
 
+/** Git branch as returned by the repository branches endpoint (backend scm.Branch). */
 export interface SCMBranch {
-  branch_name: string
-  head_commit: string
-  is_protected: boolean
-  is_main_branch?: boolean
+  name: string
+  commit_sha: string
+  protected: boolean
+  default: boolean
 }
 
+/**
+ * SCM link for a module as returned by GET /api/v1/admin/modules/{id}/scm
+ * (backend scm.ModuleSCMRepo, marshaled bare). Note the field names differ
+ * from CreateModuleSCMLinkRequest below — the create/update REQUESTS use
+ * provider_id/repository_path, the RESPONSE uses scm_provider_id/module_path.
+ * The webhook secret is never sent to the frontend.
+ */
 export interface ModuleSCMLink {
   id: string
   module_id: string
-  provider_id: string
+  scm_provider_id: string
   repository_owner: string
   repository_name: string
-  repository_path?: string
+  repository_url?: string
   default_branch: string
+  module_path: string
+  tag_pattern: string
   auto_publish_enabled: boolean
-  tag_pattern?: string
   webhook_id?: string
   webhook_url?: string
-  webhook_secret: string
+  webhook_enabled: boolean
   last_sync_at?: string | null
+  last_sync_commit?: string | null
   created_at: string
   updated_at: string
 }
@@ -135,18 +146,33 @@ export interface UpdateModuleSCMLinkRequest {
   tag_pattern?: string
 }
 
+/**
+ * Webhook event as returned by GET /api/v1/admin/modules/{id}/scm/events
+ * (backend scm.SCMWebhookEvent). There is no server-side `state` field —
+ * derive a display status from `processed` / `processing_started_at` / `error`.
+ */
 export interface SCMWebhookEvent {
   id: string
-  module_source_repo_id: string
+  module_scm_repo_id: string
+  event_id?: string
   event_type: string
-  ref_name: string
-  commit_sha: string
+  ref?: string
+  commit_sha?: string
+  tag_name?: string
   payload: Record<string, unknown>
-  state: 'pending' | 'processing' | 'succeeded' | 'failed'
-  error_message?: string | null
-  version_id?: string | null
+  headers?: Record<string, unknown>
+  signature?: string
+  signature_valid?: boolean
+  processed: boolean
+  processing_started_at?: string | null
+  processed_at?: string | null
+  result_version_id?: string | null
+  error?: string | null
+  retry_count: number
+  max_retries: number
+  next_retry_at?: string | null
+  last_error?: string | null
   created_at: string
-  updated_at: string
 }
 
 export interface ImmutabilityViolation {
@@ -167,9 +193,9 @@ export interface ManualSyncRequest {
   commit_sha?: string
 }
 
+/** POST /api/v1/admin/modules/{id}/scm/sync returns 202 with a message only. */
 export interface ManualSyncResponse {
   message: string
-  webhook_event_id: string
 }
 
 // Helper type for provider-specific configurations

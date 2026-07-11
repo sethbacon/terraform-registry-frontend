@@ -261,7 +261,7 @@ const APIKeysPage: React.FC = () => {
       const hours = rotateMode === 'immediate' ? 0 : gracePeriodHours
       const response = await api.rotateAPIKey(keyToRotate.id, hours)
       const newKey = response.new_key
-      setRotatedKeyValue(newKey?.key || newKey?.Key || '')
+      setRotatedKeyValue(newKey?.key || '')
       setRotateResult({
         oldStatus: response.old_key_status,
         oldExpiresAt: response.old_expires_at,
