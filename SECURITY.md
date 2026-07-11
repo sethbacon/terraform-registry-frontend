@@ -122,3 +122,42 @@ matching `v*.*.*` with a "Restrict deletions" rule.
 - **SLSA provenance attestation** on Docker images via `actions/attest-build-provenance`
 - **SBOM (SPDX) generation and attestation** on Docker images via Syft (`anchore/sbom-action`) and `actions/attest-sbom`
 - **Cosign keyless signing** on Docker images via Sigstore (verify with `cosign verify`)
+
+### Shared private package: `@sethbacon/terraform-suite-ui`
+
+This app depends on the private, out-of-tree package
+[`@sethbacon/terraform-suite-ui`](https://github.com/sethbacon/terraform-suite-ui)
+(GitHub Packages npm registry), which carries **load-bearing security code**
+shared across the Terraform Suite apps: the authentication/session provider
+(`SuiteAuthProvider` — session lifecycle, expiry warnings, scope checks),
+the GDPR consent provider, the theme provider, and the app shell/navigation.
+Local files under `src/contexts/` and several `src/components/` are thin
+wrappers around it (see the "Shared Suite Package" section of
+`ARCHITECTURE.md` for the full mapping).
+
+Because a compromised or regressed publish of this package would affect
+authentication in every consuming app, it is subject to the following
+controls:
+
+- **Exact version pin** — `package.json` pins the package to an exact
+  version (no semver range), and `package-lock.json` enforces the tarball's
+  `sha512` integrity. A malicious re-publish of the same version cannot be
+  installed without an integrity failure, and a new version cannot arrive
+  via a routine floating-range install.
+- **Audited** — the package received the same blind security audit
+  methodology as this repo on 2026-07-10 (26 findings: 2 high, 16 medium,
+  remainder low/info). All findings were remediated in
+  [v0.5.3](https://github.com/sethbacon/terraform-suite-ui/releases/tag/v0.5.3)
+  (2026-07-11), which is the version pinned here. The package repo now
+  carries its own `SECURITY.md` and a security-model section in its README.
+- **Upstream supply-chain gates** — the package's own CI runs typecheck,
+  tests, build, and CodeQL; its publish workflow verifies the tarball
+  contains only `dist/` + docs before publishing and attaches a build
+  provenance attestation (`actions/attest-build-provenance`) to each
+  release.
+- **Manual, reviewed updates** — Dependabot does not have credentials for
+  the private registry, so this dependency is deliberately outside
+  Dependabot's reach. Version bumps are manual PRs that must update the
+  exact pin and lockfile together and review the upstream
+  [CHANGELOG](https://github.com/sethbacon/terraform-suite-ui/blob/main/CHANGELOG.md)
+  for auth/consent-relevant changes.
