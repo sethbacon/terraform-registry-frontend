@@ -42,6 +42,15 @@ i18n
     },
     interpolation: {
       // React already escapes output — no double-escaping needed.
+      //
+      // SAFETY INVARIANT (issue #478): escapeValue:false is only safe while
+      // every translated string is rendered through React JSX, which escapes
+      // for us. That holds today: locale resources are statically bundled,
+      // there is no <Trans> usage, and dangerouslySetInnerHTML is banned by
+      // lint (no-restricted-syntax in eslint.config.js). If a <Trans>-based
+      // rich-text pattern or any HTML sink for translated/interpolated values
+      // is ever introduced, re-enable escaping for user-supplied interpolation
+      // values (or sanitize them explicitly) as part of that change.
       escapeValue: false,
     },
   })
