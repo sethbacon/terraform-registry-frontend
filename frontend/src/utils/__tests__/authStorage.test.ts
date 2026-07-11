@@ -2,10 +2,12 @@ import { describe, it, expect, beforeEach } from 'vitest'
 import { AUTH_STORAGE_KEYS, clearAuthStorage } from '../authStorage'
 
 describe('AUTH_STORAGE_KEYS', () => {
-  it('names every known auth-related localStorage key', () => {
+  it('names every known legacy auth-related localStorage key', () => {
     // Locks in the authoritative set so an accidental deletion from the array
     // (as opposed to an addition, which the tests below already catch by
-    // iterating the array) is also caught.
+    // iterating the array) is also caught. Nothing writes these keys anymore
+    // (cookie-only auth, #467) — they exist purely so clearAuthStorage() sweeps
+    // out values persisted by pre-migration sessions.
     expect(AUTH_STORAGE_KEYS).toEqual([
       'auth_token',
       'user',
@@ -21,7 +23,7 @@ describe('clearAuthStorage', () => {
     localStorage.clear()
   })
 
-  it('removes every key in AUTH_STORAGE_KEYS', () => {
+  it('removes every key in AUTH_STORAGE_KEYS (one-time cleanup of legacy sessions)', () => {
     AUTH_STORAGE_KEYS.forEach((key) => localStorage.setItem(key, 'seed-value'))
 
     clearAuthStorage()

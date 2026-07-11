@@ -147,7 +147,9 @@ describe('LoginPage', () => {
   })
 
   it('calls ldapLogin and navigates on successful LDAP sign-in', async () => {
-    mockLdapLogin.mockResolvedValue({ token: 'ldap-jwt' })
+    // Cookie-only auth (#467): ldapLogin resolves with no body — the session
+    // arrives via Set-Cookie.
+    mockLdapLogin.mockResolvedValue(undefined)
     mockProviders([{ type: 'ldap', name: 'LDAP' }])
     renderLoginPage()
     const usernameInput = await screen.findByRole('textbox', { name: /username/i })

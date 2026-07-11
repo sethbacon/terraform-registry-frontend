@@ -7,6 +7,7 @@ import 'swagger-ui-react/swagger-ui.css'
 import { Box, Typography, List, ListItem, ListItemButton, ListItemText, Paper } from '@mui/material'
 import { useTheme } from '@mui/material/styles'
 import { enforceSwaggerA11yStyles, getSwaggerThemeCss } from '../utils/swaggerTheme'
+import { getCookie } from '../services/api/http'
 
 // swagger-ui-react's wrapper only forwards a fixed set of props to the
 // underlying SwaggerUIBundle.  tagsSorter is not one of them, so we inject
@@ -91,11 +92,18 @@ const ApiDocumentation: React.FC = () => {
   const contentRef = useRef<HTMLDivElement>(null)
   const mutationObserverRef = useRef<MutationObserver | null>(null)
 
-  // Forward the user's bearer token so "Try it out" works on auth'd endpoints.
+  // "Try it out" auth rides on the HttpOnly session cookie (same-origin fetch
+  // sends it automatically) — no Authorization header is attached client-side.
+  // Echo the non-HttpOnly tfr_csrf cookie as X-CSRF-Token on mutating methods
+  // so those requests pass the double-submit CSRF middleware (mirrors the axios
+  // interceptor in services/api/http.ts).
   // eslint-disable-next-line @typescript-eslint/no-explicit-any -- swagger-ui-react's Request type lacks headers
   const requestInterceptor = useCallback((req: any) => {
-    const token = localStorage.getItem('auth_token')
-    if (token) req.headers['Authorization'] = `Bearer ${token}`
+    const method = String(req.method || 'GET').toUpperCase()
+    if (method === 'POST' || method === 'PUT' || method === 'PATCH' || method === 'DELETE') {
+      const csrfToken = getCookie('tfr_csrf')
+      if (csrfToken) req.headers['X-CSRF-Token'] = csrfToken
+    }
     return req
   }, [])
 
@@ -289,7 +297,6 @@ const ApiDocumentation: React.FC = () => {
             deepLinking
             tryItOutEnabled
             requestInterceptor={requestInterceptor}
-            persistAuthorization
             onComplete={onComplete}
             plugins={[TagsSorterPlugin]}
           />

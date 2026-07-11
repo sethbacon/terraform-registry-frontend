@@ -81,26 +81,27 @@ describe('AuthProvider', () => {
     expect(latest.sessionExpiresSoon).toBe(true)
   })
 
-  it('devLogin establishes a session then re-resolves the user', async () => {
+  it('devLogin establishes a cookie session then re-resolves the user (no localStorage write)', async () => {
     mockApi.getCurrentUserWithRole.mockRejectedValueOnce(new Error('401'))
-    mockApi.devLogin.mockResolvedValue({ token: 't', user: {}, expires_in: 3600 })
+    // Token-less body (#467): the backend sets the HttpOnly cookie via Set-Cookie.
+    mockApi.devLogin.mockResolvedValue({ user: {}, expires_in: 3600 })
     mockApi.getCurrentUserWithRole.mockResolvedValue(me)
     await renderAuth()
     expect(latest.isAuthenticated).toBe(false)
     await act(() => latest.devLogin())
     expect(mockApi.devLogin).toHaveBeenCalled()
-    expect(localStorage.getItem('auth_token')).toBe('t')
+    expect(localStorage.getItem('auth_token')).toBeNull()
     expect(latest.isAuthenticated).toBe(true)
   })
 
-  it('ldapLogin posts credentials then re-resolves the user', async () => {
+  it('ldapLogin posts credentials then re-resolves the user (no localStorage write)', async () => {
     mockApi.getCurrentUserWithRole.mockRejectedValueOnce(new Error('401'))
-    mockApi.ldapLogin.mockResolvedValue({ token: 't' })
+    mockApi.ldapLogin.mockResolvedValue(undefined)
     mockApi.getCurrentUserWithRole.mockResolvedValue(me)
     await renderAuth()
     await act(() => latest.ldapLogin('alice', 'secret'))
     expect(mockApi.ldapLogin).toHaveBeenCalledWith('alice', 'secret')
-    expect(localStorage.getItem('auth_token')).toBe('t')
+    expect(localStorage.getItem('auth_token')).toBeNull()
     expect(latest.isAuthenticated).toBe(true)
   })
 
