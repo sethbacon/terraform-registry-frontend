@@ -29,6 +29,16 @@ function sortVersionsDesc(raw: ModuleVersion[]): ModuleVersion[] {
 
 const POLL_DELAYS = [2000, 5000, 12000] as const
 
+// Route params, narrowed once from possibly-undefined useParams() values. Query
+// and mutation functions take this instead of asserting namespace!/name!/system!
+// individually, so a query's `enabled` flag and its queryFn can't drift out of
+// sync -- the same narrowed object gates both.
+interface ModuleRouteParams {
+  namespace: string
+  name: string
+  system: string
+}
+
 export function useModuleDetail() {
   const { namespace, name, system } = useParams<{
     namespace: string
@@ -68,7 +78,11 @@ export function useModuleDetail() {
   // =========================================================================
   // 1. Module + versions query (primary)
   // =========================================================================
-  const moduleQueryEnabled = !!(namespace && name && system)
+  const routeParams: ModuleRouteParams | null = useMemo(
+    () => (namespace && name && system ? { namespace, name, system } : null),
+    [namespace, name, system],
+  )
+  const moduleQueryEnabled = !!routeParams
 
   const {
     data: moduleData,
@@ -77,9 +91,10 @@ export function useModuleDetail() {
   } = useQuery({
     queryKey: queryKeys.modules.detail(namespace ?? '', name ?? '', system ?? ''),
     queryFn: async () => {
+      if (!routeParams) throw new Error('Module route params missing')
       const [mod, versionsData] = await Promise.all([
-        api.getModule(namespace!, name!, system!),
-        api.getModuleVersions(namespace!, name!, system!),
+        api.getModule(routeParams.namespace, routeParams.name, routeParams.system),
+        api.getModuleVersions(routeParams.namespace, routeParams.name, routeParams.system),
       ])
       if (!mod) throw new Error('Module not found')
 
@@ -126,8 +141,9 @@ export function useModuleDetail() {
   const { data: scmLink = null, isSuccess: scmLinkLoaded } = useQuery<ModuleSCMLink | null>({
     queryKey: queryKeys.modules.scm(module?.id ?? ''),
     queryFn: async () => {
+      if (!module) return null
       try {
-        return await api.getModuleSCMInfo(module!.id)
+        return await api.getModuleSCMInfo(module.id)
       } catch {
         return null // 404 = not linked, which is fine
       }
@@ -143,8 +159,14 @@ export function useModuleDetail() {
   const { data: scanData, isLoading: scanLoading } = useQuery({
     queryKey: queryKeys.modules.scan(namespace ?? '', name ?? '', system ?? '', scanVersion),
     queryFn: async () => {
+      if (!routeParams) return { scan: null, notFound: false }
       try {
-        const scan = await api.getModuleScan(namespace!, name!, system!, scanVersion)
+        const scan = await api.getModuleScan(
+          routeParams.namespace,
+          routeParams.name,
+          routeParams.system,
+          scanVersion,
+        )
         return { scan, notFound: false }
       } catch (err: unknown) {
         if (getErrorStatus(err) === 404) {
@@ -169,8 +191,14 @@ export function useModuleDetail() {
   const { data: moduleDocs = null, isLoading: docsLoading } = useQuery<ModuleDoc | null>({
     queryKey: queryKeys.modules.docs(namespace ?? '', name ?? '', system ?? '', scanVersion),
     queryFn: async () => {
+      if (!routeParams) return null
       try {
-        return await api.getModuleDocs(namespace!, name!, system!, scanVersion)
+        return await api.getModuleDocs(
+          routeParams.namespace,
+          routeParams.name,
+          routeParams.system,
+          scanVersion,
+        )
       } catch {
         return null
       }
@@ -218,8 +246,13 @@ export function useModuleDetail() {
   const { data: moduleConsumers = [] } = useQuery<ModuleConsumer[]>({
     queryKey: queryKeys.modules.consumers(namespace ?? '', name ?? '', system ?? ''),
     queryFn: async () => {
+      if (!routeParams) return []
       try {
-        return await api.getModuleConsumers(namespace!, name!, system!)
+        return await api.getModuleConsumers(
+          routeParams.namespace,
+          routeParams.name,
+          routeParams.system,
+        )
       } catch {
         return []
       }
@@ -232,7 +265,8 @@ export function useModuleDetail() {
   // =========================================================================
 
   const deleteModuleMutation = useMutation({
-    mutationFn: () => api.deleteModule(namespace!, name!, system!),
+    mutationFn: (params: ModuleRouteParams) =>
+      api.deleteModule(params.namespace, params.name, params.system),
     onSuccess: () => {
       navigate('/modules')
     },
@@ -245,7 +279,8 @@ export function useModuleDetail() {
   })
 
   const deleteVersionMutation = useMutation({
-    mutationFn: (version: string) => api.deleteModuleVersion(namespace!, name!, system!, version),
+    mutationFn: (args: ModuleRouteParams & { version: string }) =>
+      api.deleteModuleVersion(args.namespace, args.name, args.system, args.version),
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: queryKeys.modules.detail(namespace ?? '', name ?? '', system ?? ''),
@@ -261,11 +296,13 @@ export function useModuleDetail() {
   })
 
   const deprecateVersionMutation = useMutation({
-    mutationFn: (args: { version: string; message?: string; replacementSource?: string }) =>
+    mutationFn: (
+      args: ModuleRouteParams & { version: string; message?: string; replacementSource?: string },
+    ) =>
       api.deprecateModuleVersion(
-        namespace!,
-        name!,
-        system!,
+        args.namespace,
+        args.name,
+        args.system,
         args.version,
         args.message,
         args.replacementSource,
@@ -286,8 +323,8 @@ export function useModuleDetail() {
   })
 
   const undeprecateVersionMutation = useMutation({
-    mutationFn: (version: string) =>
-      api.undeprecateModuleVersion(namespace!, name!, system!, version),
+    mutationFn: (args: ModuleRouteParams & { version: string }) =>
+      api.undeprecateModuleVersion(args.namespace, args.name, args.system, args.version),
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: queryKeys.modules.detail(namespace ?? '', name ?? '', system ?? ''),
@@ -299,8 +336,11 @@ export function useModuleDetail() {
   })
 
   const deprecateModuleMutation = useMutation({
-    mutationFn: (args: { message: string; successor_module_id?: string }) =>
-      api.deprecateModule(namespace!, name!, system!, args),
+    mutationFn: (args: ModuleRouteParams & { message: string; successor_module_id?: string }) =>
+      api.deprecateModule(args.namespace, args.name, args.system, {
+        message: args.message,
+        successor_module_id: args.successor_module_id,
+      }),
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: queryKeys.modules.detail(namespace ?? '', name ?? '', system ?? ''),
@@ -317,7 +357,8 @@ export function useModuleDetail() {
   })
 
   const undeprecateModuleMutation = useMutation({
-    mutationFn: () => api.undeprecateModule(namespace!, name!, system!),
+    mutationFn: (params: ModuleRouteParams) =>
+      api.undeprecateModule(params.namespace, params.name, params.system),
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: queryKeys.modules.detail(namespace ?? '', name ?? '', system ?? ''),
@@ -332,14 +373,14 @@ export function useModuleDetail() {
   })
 
   const updateDescriptionMutation = useMutation({
-    mutationFn: (newDescription: string) =>
-      api.updateModule(module!.id, { description: newDescription }),
-    onSuccess: (_data, newDescription) => {
+    mutationFn: (args: { moduleId: string; description: string }) =>
+      api.updateModule(args.moduleId, { description: args.description }),
+    onSuccess: (_data, args) => {
       // Optimistically update the cached module
       queryClient.setQueryData(
         queryKeys.modules.detail(namespace ?? '', name ?? '', system ?? ''),
         (old: typeof moduleData) =>
-          old ? { ...old, module: { ...old.module, description: newDescription } } : old,
+          old ? { ...old, module: { ...old.module, description: args.description } } : old,
       )
     },
     onError: (err: unknown) => {
@@ -348,7 +389,7 @@ export function useModuleDetail() {
   })
 
   const scmUnlinkMutation = useMutation({
-    mutationFn: () => api.unlinkModuleFromSCM(module!.id),
+    mutationFn: (moduleId: string) => api.unlinkModuleFromSCM(moduleId),
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: queryKeys.modules.scm(module?.id ?? ''),
@@ -360,9 +401,9 @@ export function useModuleDetail() {
   })
 
   const rescanMutation = useMutation({
-    mutationFn: () => {
+    mutationFn: (args: ModuleRouteParams & { version: string }) => {
       setScanNotConfigured(false)
-      return api.reanalyzeModuleVersion(namespace!, name!, system!, selectedVersion!.version)
+      return api.reanalyzeModuleVersion(args.namespace, args.name, args.system, args.version)
     },
     onSuccess: (data: { scan?: string }) => {
       if (data?.scan === 'not_configured') {
@@ -396,7 +437,7 @@ export function useModuleDetail() {
   }, [queryClient, namespace, name, system])
 
   const scmSyncMutation = useMutation({
-    mutationFn: () => api.triggerManualSync(module!.id),
+    mutationFn: (moduleId: string) => api.triggerManualSync(moduleId),
     onSuccess: () => {
       setError(null)
       pollForVersions()
@@ -420,16 +461,16 @@ export function useModuleDetail() {
   )
 
   const handleRescan = () => {
-    if (!namespace || !name || !system || !selectedVersion) return
-    rescanMutation.mutate()
+    if (!routeParams || !selectedVersion) return
+    rescanMutation.mutate({ ...routeParams, version: selectedVersion.version })
   }
 
   const handleSCMSync = () => {
-    if (!module?.id) {
+    if (!module) {
       console.error('Cannot sync: module.id is not available')
       return
     }
-    scmSyncMutation.mutate()
+    scmSyncMutation.mutate(module.id)
   }
 
   useEffect(() => {
@@ -439,8 +480,8 @@ export function useModuleDetail() {
   }, [])
 
   const handleSCMUnlink = () => {
-    if (!module?.id) return
-    scmUnlinkMutation.mutate()
+    if (!module) return
+    scmUnlinkMutation.mutate(module.id)
   }
 
   const handleCopySource = () => {
@@ -464,13 +505,13 @@ export function useModuleDetail() {
   }
 
   const handleDeleteModule = () => {
-    if (!namespace || !name || !system) return
-    deleteModuleMutation.mutate()
+    if (!routeParams) return
+    deleteModuleMutation.mutate(routeParams)
   }
 
   const handleDeleteVersion = () => {
-    if (!namespace || !name || !system || !versionToDelete) return
-    deleteVersionMutation.mutate(versionToDelete)
+    if (!routeParams || !versionToDelete) return
+    deleteVersionMutation.mutate({ ...routeParams, version: versionToDelete })
   }
 
   const openDeleteVersionDialog = (version: string) => {
@@ -479,8 +520,9 @@ export function useModuleDetail() {
   }
 
   const handleDeprecateVersion = () => {
-    if (!namespace || !name || !system || !selectedVersion) return
+    if (!routeParams || !selectedVersion) return
     deprecateVersionMutation.mutate({
+      ...routeParams,
       version: selectedVersion.version,
       message: deprecationMessage || undefined,
       replacementSource: deprecationReplacementSource || undefined,
@@ -488,22 +530,23 @@ export function useModuleDetail() {
   }
 
   const handleUndeprecateVersion = () => {
-    if (!namespace || !name || !system || !selectedVersion) return
-    undeprecateVersionMutation.mutate(selectedVersion.version)
+    if (!routeParams || !selectedVersion) return
+    undeprecateVersionMutation.mutate({ ...routeParams, version: selectedVersion.version })
   }
 
   const handleUpdateDescription = (newDescription: string) => {
-    if (!module?.id) return
-    updateDescriptionMutation.mutate(newDescription)
+    if (!module) return
+    updateDescriptionMutation.mutate({ moduleId: module.id, description: newDescription })
   }
 
   const updateNamespaceMutation = useMutation({
-    mutationFn: (newNamespace: string) => api.updateModule(module!.id, { namespace: newNamespace }),
-    onSuccess: (_data, newNamespace) => {
+    mutationFn: (args: { moduleId: string; newNamespace: string }) =>
+      api.updateModule(args.moduleId, { namespace: args.newNamespace }),
+    onSuccess: (_data, args) => {
       // Navigate to the new namespace URL since it has changed
-      navigate(`/modules/${newNamespace}/${name}/${system}`)
+      navigate(`/modules/${args.newNamespace}/${name}/${system}`)
       queryClient.invalidateQueries({
-        queryKey: queryKeys.modules.detail(newNamespace, name ?? '', system ?? ''),
+        queryKey: queryKeys.modules.detail(args.newNamespace, name ?? '', system ?? ''),
       })
     },
     onError: (err: unknown) => {
@@ -512,21 +555,22 @@ export function useModuleDetail() {
   })
 
   const handleUpdateNamespace = (newNamespace: string) => {
-    if (!module?.id) return
-    updateNamespaceMutation.mutate(newNamespace)
+    if (!module) return
+    updateNamespaceMutation.mutate({ moduleId: module.id, newNamespace })
   }
 
   const handleDeprecateModule = () => {
-    if (!namespace || !name || !system) return
+    if (!routeParams) return
     deprecateModuleMutation.mutate({
+      ...routeParams,
       message: moduleDeprecationMessage,
       successor_module_id: successorModuleId || undefined,
     })
   }
 
   const handleUndeprecateModule = () => {
-    if (!namespace || !name || !system) return
-    undeprecateModuleMutation.mutate()
+    if (!routeParams) return
+    undeprecateModuleMutation.mutate(routeParams)
   }
 
   const getTerraformExample = () => {
