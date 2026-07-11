@@ -664,6 +664,25 @@ describe('ApiClient', () => {
       expect(typeof client.listAdminAdvisories).toBe('function')
       expect(typeof client.triggerAdvisoryPoll).toBe('function')
     })
+
+    it('composes every domain module function exactly once (no cross-domain collisions)', async () => {
+      // A duplicate function name across two domain modules would silently drop
+      // one of them in the barrel's object spread — this is the parity guard the
+      // index.ts doc comment refers to.
+      const mod = await import('../api')
+      const domainFnNames = Object.values(mod.apiDomains).flatMap((domain) =>
+        Object.entries(domain)
+          .filter(([, value]) => typeof value === 'function')
+          .map(([name]) => name),
+      )
+      expect(new Set(domainFnNames).size).toBe(domainFnNames.length)
+
+      const composed = mod.default as Record<string, unknown>
+      const composedFnNames = Object.keys(composed).filter(
+        (name) => typeof composed[name] === 'function',
+      )
+      expect([...composedFnNames].sort()).toEqual([...domainFnNames].sort())
+    })
   })
 
   // ─── CVE Advisories ───────────────────────────────────────────────────────
