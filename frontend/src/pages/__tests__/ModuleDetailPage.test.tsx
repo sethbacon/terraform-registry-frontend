@@ -54,7 +54,7 @@ const mockHookReturn = {
   scanNotFound: false,
   moduleDocs: null,
   docsLoading: false,
-  loadSCMLink: vi.fn(),
+  invalidateSCMLink: vi.fn(),
   loadWebhookEvents: vi.fn(),
   pollForVersions: vi.fn(),
   handleSCMSync: vi.fn(),

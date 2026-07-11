@@ -103,7 +103,7 @@ const ModuleDetailPage: React.FC = () => {
     handleRescan,
     moduleDocs,
     docsLoading,
-    loadSCMLink,
+    invalidateSCMLink,
     loadWebhookEvents,
     pollForVersions,
     handleSCMSync,
@@ -614,7 +614,7 @@ const ModuleDetailPage: React.FC = () => {
                     setScmWizardOpen(false)
                     // Reload SCM link immediately, then poll for versions the
                     // background sync will create over the next several seconds.
-                    if (module?.id) loadSCMLink(module.id)
+                    if (module?.id) invalidateSCMLink(module.id)
                     pollForVersions()
                   }}
                   onCancel={() => setScmWizardOpen(false)}
