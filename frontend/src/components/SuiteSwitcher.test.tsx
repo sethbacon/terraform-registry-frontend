@@ -100,7 +100,13 @@ it('reuses one sibling tab via a stable window name instead of opening a new one
   fireEvent.click(await screen.findByRole('button', { name: /Open Terraform State Manager/i }))
   // Stable target name (the sibling app id) so the browser reuses that one tab;
   // .focus() brings it forward. NOT '_blank' (which spawns a new tab each click).
-  expect(openSpy).toHaveBeenCalledWith('https://tfstate.example.com', 'terraform-state-manager')
+  // noopener,noreferrer is always passed (suite-ui >=0.5.3) so the opened tab
+  // cannot reach back via window.opener.
+  expect(openSpy).toHaveBeenCalledWith(
+    'https://tfstate.example.com',
+    'terraform-state-manager',
+    'noopener,noreferrer',
+  )
   expect(focus).toHaveBeenCalled()
 })
 
