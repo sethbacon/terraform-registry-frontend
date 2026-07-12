@@ -1,6 +1,54 @@
 <!-- markdownlint-disable MD013 MD024 MD041 -->
 # Changelog
 
+## [2.16.0](https://github.com/sethbacon/terraform-registry-frontend/compare/v2.15.0...v2.16.0) (2026-07-11)
+
+
+### Features
+
+* gate Dependabot auto-merge on real security-alert status ([#519](https://github.com/sethbacon/terraform-registry-frontend/issues/519)) ([ce50e6f](https://github.com/sethbacon/terraform-registry-frontend/commit/ce50e6fc880409151739c3ffa98ae0f3dc8023dd)), closes [#471](https://github.com/sethbacon/terraform-registry-frontend/issues/471)
+* generate and attest an SBOM for the published release image ([#523](https://github.com/sethbacon/terraform-registry-frontend/issues/523)) ([fd0b7f6](https://github.com/sethbacon/terraform-registry-frontend/commit/fd0b7f65fe5376a3fd847d622f765fc55aab51bf)), closes [#470](https://github.com/sethbacon/terraform-registry-frontend/issues/470)
+
+
+### Bug Fixes
+
+* actually enforce opt-in telemetry consent; document missing cookie/localStorage keys ([#522](https://github.com/sethbacon/terraform-registry-frontend/issues/522)) ([ba62c00](https://github.com/sethbacon/terraform-registry-frontend/commit/ba62c00ed13280086db833afa063ab285bb001ad)), closes [#475](https://github.com/sethbacon/terraform-registry-frontend/issues/475)
+* add a request timeout and offline detection to the API layer ([#511](https://github.com/sethbacon/terraform-registry-frontend/issues/511)) ([8fa156a](https://github.com/sethbacon/terraform-registry-frontend/commit/8fa156a100f7b885d73ed0c1a61185d83513af52)), closes [#473](https://github.com/sethbacon/terraform-registry-frontend/issues/473)
+* **admin:** render matched policy name and make org IdP binding visible and clearable ([#541](https://github.com/sethbacon/terraform-registry-frontend/issues/541)) ([548f98c](https://github.com/sethbacon/terraform-registry-frontend/commit/548f98cb4d651ee83319e488b139d303a3b09e71))
+* **auth:** remove the legacy localStorage JWT path — cookie-only sessions ([#543](https://github.com/sethbacon/terraform-registry-frontend/issues/543)) ([3fedcc3](https://github.com/sethbacon/terraform-registry-frontend/commit/3fedcc342b20da4946769f7c50d10d157f1e444d))
+* disclose and exact-pin the @sethbacon/terraform-suite-ui auth package ([#532](https://github.com/sethbacon/terraform-registry-frontend/issues/532)) ([5af0364](https://github.com/sethbacon/terraform-registry-frontend/commit/5af036411c46e84c85b7b9460d93684d5fb0f83f))
+* don't let a stray legacy JWT clobber an explicit Authorization header ([#502](https://github.com/sethbacon/terraform-registry-frontend/issues/502)) ([d64e924](https://github.com/sethbacon/terraform-registry-frontend/commit/d64e9245d0a499e25d41d3a8d3c98d88695f1469)), closes [#486](https://github.com/sethbacon/terraform-registry-frontend/issues/486)
+* don't prefix "Error undefined:" on RepositoryBrowser network failures ([#500](https://github.com/sethbacon/terraform-registry-frontend/issues/500)) ([1577c21](https://github.com/sethbacon/terraform-registry-frontend/commit/1577c21a6fd0707f583d614939240980b40aef5d)), closes [#497](https://github.com/sethbacon/terraform-registry-frontend/issues/497)
+* lint-ban dangerouslySetInnerHTML to lock in the JSX-escaping posture ([#531](https://github.com/sethbacon/terraform-registry-frontend/issues/531)) ([0c520e9](https://github.com/sethbacon/terraform-registry-frontend/commit/0c520e904c5876fb8634438f5c078cce9fe03f68)), closes [#478](https://github.com/sethbacon/terraform-registry-frontend/issues/478)
+* make the 401 CSRF session signal one-shot and the auth guard case-insensitive ([#507](https://github.com/sethbacon/terraform-registry-frontend/issues/507)) ([a3d2f9e](https://github.com/sethbacon/terraform-registry-frontend/commit/a3d2f9e91ba947a702724fee2b04956c3a2e47ec))
+* pin the frontend builder stage's base image to a digest ([#510](https://github.com/sethbacon/terraform-registry-frontend/issues/510)) ([37001c8](https://github.com/sethbacon/terraform-registry-frontend/commit/37001c86ffb84bf3bc99d69f0d992478f3162a6a)), closes [#481](https://github.com/sethbacon/terraform-registry-frontend/issues/481)
+* remove unused jwt-decode dependency ([#501](https://github.com/sethbacon/terraform-registry-frontend/issues/501)) ([2e23f0f](https://github.com/sethbacon/terraform-registry-frontend/commit/2e23f0fec1f6144cf345e673e0633017fabd84b4)), closes [#476](https://github.com/sethbacon/terraform-registry-frontend/issues/476)
+* report non-404 getUITheme() failures instead of swallowing them ([#525](https://github.com/sethbacon/terraform-registry-frontend/issues/525)) ([2b7e20b](https://github.com/sethbacon/terraform-registry-frontend/commit/2b7e20b611026efbb8b23734b216f92c865aadb9))
+* **scm:** align SCM response types with the backend wire shapes ([#542](https://github.com/sethbacon/terraform-registry-frontend/issues/542)) ([72144fe](https://github.com/sethbacon/terraform-registry-frontend/commit/72144feee9de311568e798a1d39a418289d6818e))
+* send HSTS from the TLS-terminating nginx config, document the ECS gap ([#521](https://github.com/sethbacon/terraform-registry-frontend/issues/521)) ([0252d32](https://github.com/sethbacon/terraform-registry-frontend/commit/0252d328e7213ec9a5b0114b7c5c593aa42d8922)), closes [#482](https://github.com/sethbacon/terraform-registry-frontend/issues/482)
+* show a friendly localized message on network errors instead of raw Axios text ([#495](https://github.com/sethbacon/terraform-registry-frontend/issues/495)) ([d60ed63](https://github.com/sethbacon/terraform-registry-frontend/commit/d60ed631dbf4ef71bc9a94e86522333391a20190)), closes [#485](https://github.com/sethbacon/terraform-registry-frontend/issues/485)
+* strip session tokens from telemetry URLs before reporting ([#504](https://github.com/sethbacon/terraform-registry-frontend/issues/504)) ([8e3a60d](https://github.com/sethbacon/terraform-registry-frontend/commit/8e3a60d2b150f6d53d7301f09db2e9881510041d))
+* trigger 401 session-clear/redirect for cookie-only sessions too ([#503](https://github.com/sethbacon/terraform-registry-frontend/issues/503)) ([199158e](https://github.com/sethbacon/terraform-registry-frontend/commit/199158e5b420ef99fa984150a4a2e41e456a337b)), closes [#479](https://github.com/sethbacon/terraform-registry-frontend/issues/479)
+* update stale E2E logout locator to match the shared AppBar's actual text ([#508](https://github.com/sethbacon/terraform-registry-frontend/issues/508)) ([60dde99](https://github.com/sethbacon/terraform-registry-frontend/commit/60dde9917bab502e5acafc79d5ca021c5d1b38c6))
+* use canonical org scope string and declare missing DSN env vars ([#493](https://github.com/sethbacon/terraform-registry-frontend/issues/493)) ([5472d58](https://github.com/sethbacon/terraform-registry-frontend/commit/5472d581b9ec2b8c7b540314249c96e4401f20e7))
+* use npm ci and drop in-build npm audit fix in the release Dockerfile ([#518](https://github.com/sethbacon/terraform-registry-frontend/issues/518)) ([e8ff3b9](https://github.com/sethbacon/terraform-registry-frontend/commit/e8ff3b91e41d9f718be6964049d90510054409b1)), closes [#469](https://github.com/sethbacon/terraform-registry-frontend/issues/469)
+
+
+### Documentation
+
+* fix VITE_API_URL guidance -- wrong example, unreachable build-time advice ([#520](https://github.com/sethbacon/terraform-registry-frontend/issues/520)) ([dcd6b9c](https://github.com/sethbacon/terraform-registry-frontend/commit/dcd6b9ce1ddc5a53082004fc4b144a47b49fdcae))
+
+
+### Refactor
+
+* **api:** split ApiClient god object into typed per-domain modules ([#540](https://github.com/sethbacon/terraform-registry-frontend/issues/540)) ([396b672](https://github.com/sethbacon/terraform-registry-frontend/commit/396b672d2d5b82966f9cdd1b386a2247648928e1))
+* extract LazyRoute helper and shared admin route-scope map ([#524](https://github.com/sethbacon/terraform-registry-frontend/issues/524)) ([b361218](https://github.com/sethbacon/terraform-registry-frontend/commit/b361218cb7b3104ee07cfe80514c470808de3650)), closes [#480](https://github.com/sethbacon/terraform-registry-frontend/issues/480)
+* extract ModuleDetailHeader and ModuleInfoPanel from ModuleDetailPage ([#530](https://github.com/sethbacon/terraform-registry-frontend/issues/530)) ([01c4c4c](https://github.com/sethbacon/terraform-registry-frontend/commit/01c4c4c2b17fef9da1fd8de60088422d8c60ce60)), closes [#102](https://github.com/sethbacon/terraform-registry-frontend/issues/102)
+* isolate swagger-ui-react DOM/CSS theming into swaggerTheme.ts ([#529](https://github.com/sethbacon/terraform-registry-frontend/issues/529)) ([76f0cda](https://github.com/sethbacon/terraform-registry-frontend/commit/76f0cda8776c39903b6d4430175fd2907f0f186e))
+* rename loadSCMLink to invalidateSCMLink ([#528](https://github.com/sethbacon/terraform-registry-frontend/issues/528)) ([66f556d](https://github.com/sethbacon/terraform-registry-frontend/commit/66f556d8b6a7eb62437cfcc00b396309a93334e1))
+* replace non-null assertions with narrowed route/module params ([#526](https://github.com/sethbacon/terraform-registry-frontend/issues/526)) ([921319c](https://github.com/sethbacon/terraform-registry-frontend/commit/921319c29301981a70cffa8e326ba7c2744c6da2))
+* type scanner report parsers with unknown + interfaces, not any ([#527](https://github.com/sethbacon/terraform-registry-frontend/issues/527)) ([ce00f53](https://github.com/sethbacon/terraform-registry-frontend/commit/ce00f53b4e58b4cce97546863355be681b5e313a))
+
 ## [2.15.0](https://github.com/sethbacon/terraform-registry-frontend/compare/v2.14.0...v2.15.0) (2026-07-06)
 
 
