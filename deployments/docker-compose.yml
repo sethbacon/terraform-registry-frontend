@@ -82,6 +82,10 @@ services:
       # DEV_MODE enables the /api/v1/dev/login shortcut used by local dev and E2E tests.
       # Must be false in production.
       DEV_MODE: "true"
+      # This stack runs at the default logging.level ("info"), which
+      # devModeProductionGuard (issue #559) can no longer distinguish from a
+      # production deployment left at its default -- confirm explicitly.
+      TFR_CONFIRM_NON_PRODUCTION: "true"
     ports:
       - "8080:8080"
       - "9090:9090"
