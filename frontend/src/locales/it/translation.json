@@ -2251,7 +2251,9 @@
     "expiredAgo": "scaduto {{days}} giorni fa",
     "days": "{{days}} d",
     "unsignedLabel": "non firmato",
-    "unsignedTooltip": "Il progetto a monte di questo strumento non pubblica alcuna firma di rilascio; i file binari vengono verificati esclusivamente tramite checksum."
+    "unsignedTooltip": "Il progetto a monte di questo strumento non pubblica alcuna firma di rilascio; i file binari vengono verificati esclusivamente tramite checksum.",
+    "attestedLabel": "attestato",
+    "attestedTooltip": "L'autore originale di questo strumento non pubblica alcuna firma di rilascio, ma i file binari vengono verificati tramite checksum e un attestato di autenticità GitHub (Sigstore) con identità fissa."
   },
   "scanFindingsModal": {
     "title": "Risultati della scansione",

@@ -2251,7 +2251,9 @@
     "expiredAgo": "caducado hace {{days}} días",
     "days": "{{days}} d",
     "unsignedLabel": "sin firmar",
-    "unsignedTooltip": "El desarrollador original de esta herramienta no publica ninguna firma de lanzamiento; los binarios se verifican únicamente mediante la suma de comprobación."
+    "unsignedTooltip": "El desarrollador original de esta herramienta no publica ninguna firma de lanzamiento; los binarios se verifican únicamente mediante la suma de comprobación.",
+    "attestedLabel": "certificado",
+    "attestedTooltip": "El desarrollador original de esta herramienta no publica ninguna firma de lanzamiento, pero los binarios se verifican mediante una suma de comprobación y un certificado de GitHub Artifact Attestation (Sigstore) con identidad fija."
   },
   "scanFindingsModal": {
     "title": "Resultados de la exploración",

@@ -2251,7 +2251,9 @@
     "expiredAgo": "utløpt {{days}} d siden",
     "days": "{{days}} d",
     "unsignedLabel": "usignert",
-    "unsignedTooltip": "Oppstrømsutvikleren til dette verktøyet publiserer ingen utgivelsessignatur; binærfilene verifiseres utelukkende ved hjelp av sjekksum."
+    "unsignedTooltip": "Oppstrømsutvikleren til dette verktøyet publiserer ingen utgivelsessignatur; binærfilene verifiseres utelukkende ved hjelp av sjekksum.",
+    "attestedLabel": "bekreftet",
+    "attestedTooltip": "Oppstrømsutvikleren til dette verktøyet publiserer ingen utgivelsessignatur, men binærfilene verifiseres ved hjelp av sjekksum samt en GitHub Artifact Attestation (Sigstore) med fastlåst identitet."
   },
   "scanFindingsModal": {
     "title": "Skanneresultater",
