@@ -131,6 +131,17 @@ jobs:
           secrets: |
             node_auth_token=${{ secrets.GITHUB_TOKEN }}
 
+      - name: Trivy image scan (published digest)
+        # Scan the real pushed digest for OS-package and dependency CVEs
+        # before it's attested/signed.
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          scan-type: image
+          image-ref: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}@${{ steps.build.outputs.digest }}
+          severity: HIGH,CRITICAL
+          exit-code: 1
+          format: table
+
       - name: Attest build provenance (SLSA)
         uses: actions/attest-build-provenance@a2bbfa25375fe432b6a289bc6b6cd05ecd0c4c32 # v4.1.0
         with:
