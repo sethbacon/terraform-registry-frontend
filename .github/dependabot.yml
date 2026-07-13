@@ -7,7 +7,7 @@ updates:
   - package-ecosystem: npm
     directory: /frontend
     schedule:
-      interval: biweekly
+      interval: weekly
       day: monday
       time: "09:00"
       timezone: UTC
@@ -39,7 +39,7 @@ updates:
   - package-ecosystem: npm
     directory: /e2e
     schedule:
-      interval: biweekly
+      interval: weekly
       day: monday
       time: "09:00"
       timezone: UTC
@@ -62,7 +62,7 @@ updates:
   - package-ecosystem: docker
     directory: /frontend
     schedule:
-      interval: biweekly
+      interval: weekly
       day: monday
       time: "09:00"
       timezone: UTC
@@ -80,7 +80,7 @@ updates:
   - package-ecosystem: github-actions
     directory: /
     schedule:
-      interval: biweekly
+      interval: weekly
       day: monday
       time: "09:00"
       timezone: UTC
