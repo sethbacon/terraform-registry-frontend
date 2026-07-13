@@ -2251,7 +2251,9 @@
     "expiredAgo": "{{days}}, il y a [n] jours",
     "days": "{{days}} d",
     "unsignedLabel": "non signé",
-    "unsignedTooltip": "Le développeur en amont de cet outil ne publie aucune signature de version ; la vérification des binaires s'effectue uniquement à l'aide d'une somme de contrôle."
+    "unsignedTooltip": "Le développeur en amont de cet outil ne publie aucune signature de version ; la vérification des binaires s'effectue uniquement à l'aide d'une somme de contrôle.",
+    "attestedLabel": "certifié",
+    "attestedTooltip": "Le développeur en amont de cet outil ne publie aucune signature de version, mais les binaires sont vérifiés à l'aide d'une somme de contrôle ainsi que d'une attestation d'artefact GitHub (Sigstore) à identité fixe."
   },
   "scanFindingsModal": {
     "title": "Résultats de l'examen",

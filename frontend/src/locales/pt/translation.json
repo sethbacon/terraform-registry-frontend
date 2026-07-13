@@ -2251,7 +2251,9 @@
     "expiredAgo": "expirou há {{days}} dias",
     "days": "{{days}} d",
     "unsignedLabel": "sem assinatura",
-    "unsignedTooltip": "O projeto de origem desta ferramenta não publica qualquer assinatura de lançamento; os ficheiros binários são verificados apenas através da soma de verificação."
+    "unsignedTooltip": "O projeto de origem desta ferramenta não publica qualquer assinatura de lançamento; os ficheiros binários são verificados apenas através da soma de verificação.",
+    "attestedLabel": "autenticado",
+    "attestedTooltip": "O projeto de origem desta ferramenta não publica qualquer assinatura de lançamento, mas os ficheiros binários são verificados através de uma soma de verificação e de um Atestado de Artifacto do GitHub (Sigstore) com identidade fixa."
   },
   "scanFindingsModal": {
     "title": "Resultados do exame",

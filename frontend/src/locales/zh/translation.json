@@ -2251,7 +2251,9 @@
     "expiredAgo": "已过期 {{days}} 天前",
     "days": "{{days}} d",
     "unsignedLabel": "未签名",
-    "unsignedTooltip": "该工具的上游项目未发布任何发布签名；二进制文件仅通过校验和进行验证。"
+    "unsignedTooltip": "该工具的上游项目未发布任何发布签名；二进制文件仅通过校验和进行验证。",
+    "attestedLabel": "经认证",
+    "attestedTooltip": "该工具的上游未发布任何发布签名，但二进制文件通过校验和以及基于固定身份的 GitHub Artifact Attestation（Sigstore）进行了验证。"
   },
   "scanFindingsModal": {
     "title": "扫描结果",

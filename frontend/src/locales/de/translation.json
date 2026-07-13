@@ -2251,7 +2251,9 @@
     "expiredAgo": "abgelaufen vor {{days}} Tagen",
     "days": "{{days}} d",
     "unsignedLabel": "ohne Vorzeichen",
-    "unsignedTooltip": "Der Upstream dieses Tools veröffentlicht keine Release-Signatur; die Binärdateien werden ausschließlich anhand der Prüfsumme verifiziert."
+    "unsignedTooltip": "Der Upstream dieses Tools veröffentlicht keine Release-Signatur; die Binärdateien werden ausschließlich anhand der Prüfsumme verifiziert.",
+    "attestedLabel": "bestätigt",
+    "attestedTooltip": "Der Upstream dieses Tools veröffentlicht keine Release-Signatur, doch die Binärdateien werden anhand einer Prüfsumme sowie einer GitHub Artifact Attestation (Sigstore) mit festgelegter Identität verifiziert."
   },
   "scanFindingsModal": {
     "title": "Befunde der Untersuchung",

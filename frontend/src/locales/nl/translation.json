@@ -2251,7 +2251,9 @@
     "expiredAgo": "{{days}} dagen geleden verlopen",
     "days": "{{days}} d",
     "unsignedLabel": "zonder handtekening",
-    "unsignedTooltip": "De upstream van deze tool publiceert geen releasesignatuur; de binaire bestanden worden uitsluitend aan de hand van de checksum gecontroleerd."
+    "unsignedTooltip": "De upstream van deze tool publiceert geen releasesignatuur; de binaire bestanden worden uitsluitend aan de hand van de checksum gecontroleerd.",
+    "attestedLabel": "verklaard",
+    "attestedTooltip": "De upstream van deze tool publiceert geen releasesignatuur, maar de binaire bestanden worden geverifieerd aan de hand van een checksum en een GitHub Artifact Attestation (Sigstore) met een vastgelegde identiteit."
   },
   "scanFindingsModal": {
     "title": "Scanresultaten",

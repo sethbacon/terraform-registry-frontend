@@ -2251,7 +2251,9 @@
     "expiredAgo": "{{days}}日前に期限切れ",
     "days": "{{days}} d",
     "unsignedLabel": "署名なし",
-    "unsignedTooltip": "このツールのアップストリームはリリース署名を公開しておらず、バイナリはチェックサムによる検証のみが行われます。"
+    "unsignedTooltip": "このツールのアップストリームはリリース署名を公開しておらず、バイナリはチェックサムによる検証のみが行われます。",
+    "attestedLabel": "証明された",
+    "attestedTooltip": "このツールのアップストリームではリリース署名は公開されていませんが、バイナリはチェックサムに加え、IDが固定されたGitHub Artifact Attestation（Sigstore）によって検証されています。"
   },
   "scanFindingsModal": {
     "title": "スキャン結果",
