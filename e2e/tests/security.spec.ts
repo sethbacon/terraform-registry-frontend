@@ -130,32 +130,29 @@ test.describe('XSS: malicious README is rendered inert', () => {
 // 2. CSRF — a cookie-authenticated mutation without X-CSRF-Token is rejected
 // ---------------------------------------------------------------------------
 // The double-submit CSRF middleware only guards *cookie*-authenticated
-// mutations; Bearer-token requests are exempt (and the dev-login harness is
-// Bearer-based). So we mint a dev JWT and install it as the tfr_auth_token
-// cookie (with a matching tfr_csrf cookie) to create a genuine cookie session,
-// then fire a real mutating request (POST /auth/refresh) against the live
-// backend with and without the header.
+// mutations; Bearer-token requests are exempt. Dev-login is cookie-native
+// (issue #584: it sets tfr_auth_token/tfr_csrf via Set-Cookie and no longer
+// returns a JWT in the response body), so calling it through context.request
+// — which shares its cookie jar with `context`/`page`, unlike the isolated
+// top-level `request` fixture — gives this test a genuine cookie session for
+// free. We then read back the real tfr_csrf value the server set and fire a
+// real mutating request (POST /auth/refresh) against the live backend with
+// and without it.
 test.describe('CSRF: mutation missing the token header is rejected by the backend', () => {
   test('POST without X-CSRF-Token gets 403; the same request with it does not', async ({
     page,
     context,
-    request,
   }) => {
-    // Mint a JWT from the dev-login endpoint (dev-mode only). Skip cleanly if
-    // the backend is not in DEV_MODE, matching the rest of the suite.
-    const loginResp = await request.post('/api/v1/dev/login');
+    // Dev-login (dev-mode only) sets the session cookies directly on this
+    // context. Skip cleanly if the backend is not in DEV_MODE, matching the
+    // rest of the suite.
+    const loginResp = await context.request.post('/api/v1/dev/login');
     test.skip(!loginResp.ok(), 'Dev login unavailable — backend not in DEV_MODE');
-    const { token } = (await loginResp.json()) as { token: string };
-    expect(token, 'dev login returned a JWT').toBeTruthy();
 
-    const CSRF_VALUE = 'e2e-csrf-double-submit-token';
-    await context.addCookies([
-      // Auth via cookie (no Authorization header) => auth_method "jwt_cookie"
-      // => CSRF is enforced. Playwright can set the HttpOnly auth cookie
-      // directly even though the server normally marks it HttpOnly.
-      { name: 'tfr_auth_token', value: token, url: ORIGIN, httpOnly: true, secure: true },
-      { name: 'tfr_csrf', value: CSRF_VALUE, url: ORIGIN, secure: true },
-    ]);
+    const cookies = await context.cookies();
+    const csrfCookie = cookies.find((c) => c.name === 'tfr_csrf');
+    expect(csrfCookie?.value, 'dev login set the tfr_csrf cookie').toBeTruthy();
+    const CSRF_VALUE = csrfCookie!.value;
 
     // Need a document in this origin so the fetch() below is same-origin and
     // carries the cookies. /login is public and cheap.
