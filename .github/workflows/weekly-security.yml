@@ -31,7 +31,7 @@ jobs:
     name: Dependency Audit
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v6
       - uses: ./.github/actions/setup-frontend
         with:
           install-e2e-deps: "true"
@@ -51,7 +51,7 @@ jobs:
     permissions:
       security-events: write
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v6
 
       - name: Run OSV Scanner
         # v2.3.8
@@ -79,22 +79,22 @@ jobs:
       matrix:
         language: [javascript-typescript, actions]
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v6
 
       - name: Initialize CodeQL
         # v4
-        uses: github/codeql-action/init@7211b7c8077ea37d8641b6271f6a365a22a5fbfa
+        uses: github/codeql-action/init@99df26d4f13ea111d4ec1a7dddef6063f76b97e9
         with:
           languages: ${{ matrix.language }}
           queries: security-and-quality
 
       - name: Autobuild
         # v4
-        uses: github/codeql-action/autobuild@7211b7c8077ea37d8641b6271f6a365a22a5fbfa
+        uses: github/codeql-action/autobuild@99df26d4f13ea111d4ec1a7dddef6063f76b97e9
 
       - name: Analyze
         # v4
-        uses: github/codeql-action/analyze@7211b7c8077ea37d8641b6271f6a365a22a5fbfa
+        uses: github/codeql-action/analyze@99df26d4f13ea111d4ec1a7dddef6063f76b97e9
         with:
           category: /language:${{ matrix.language }}
 
