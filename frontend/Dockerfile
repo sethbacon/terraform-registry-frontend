@@ -37,7 +37,7 @@ COPY . .
 RUN npx vite build --mode ${VITE_MODE}
 
 # Stage 2: Serve with nginx
-FROM nginx:1.25-alpine@sha256:516475cc129da42866742567714ddc681e5eed7b9ee0b9e9c015e464b4221a00
+FROM nginx:1.31-alpine@sha256:54f2a904c251d5a34adf545a72d32515a15e08418dae0266e23be2e18c66fefa
 
 # Copy built files from builder
 COPY --from=builder /app/dist /usr/share/nginx/html
