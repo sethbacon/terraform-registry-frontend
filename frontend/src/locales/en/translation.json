@@ -2253,7 +2253,9 @@
     "expiredAgo": "expired {{days}}d ago",
     "days": "{{days}}d",
     "unsignedLabel": "unsigned",
-    "unsignedTooltip": "This tool's upstream publishes no release signature; binaries are verified by checksum only."
+    "unsignedTooltip": "This tool's upstream publishes no release signature; binaries are verified by checksum only.",
+    "attestedLabel": "attested",
+    "attestedTooltip": "This tool's upstream publishes no release signature, but binaries are verified by checksum plus a pinned-identity GitHub Artifact Attestation (Sigstore)."
   },
   "scanFindingsModal": {
     "title": "Scan Findings",

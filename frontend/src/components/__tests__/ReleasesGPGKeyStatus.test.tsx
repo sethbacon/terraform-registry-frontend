@@ -147,4 +147,29 @@ describe('ReleasesGPGKeyStatus', () => {
     expect(screen.getByText('unsigned')).toBeInTheDocument()
     expect(screen.queryByText('unknown')).not.toBeInTheDocument()
   })
+
+  it('renders an attested unsigned-upstream binary row (attestation source, attested status)', async () => {
+    const attestedResponse: ReleasesGPGKeysResponse = {
+      keys: [
+        {
+          tool: 'opa',
+          cache: null,
+          embedded: null,
+          effective_source: 'attestation',
+          expiry_warning_days: 60,
+          status: 'attested',
+        },
+      ],
+    }
+    mockGetReleasesGPGKeys.mockResolvedValue(attestedResponse)
+    renderComponent()
+
+    await waitFor(() => expect(screen.getByText('opa')).toBeInTheDocument())
+    expect(screen.getByText('attestation')).toBeInTheDocument()
+    // Attested (checksum + GitHub Artifact Attestation) is distinct from
+    // both bare "unsigned" and "unknown".
+    expect(screen.getByText('attested')).toBeInTheDocument()
+    expect(screen.queryByText('unsigned')).not.toBeInTheDocument()
+    expect(screen.queryByText('unknown')).not.toBeInTheDocument()
+  })
 })
