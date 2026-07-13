@@ -31,6 +31,10 @@ services:
       - TFR_DATABASE_SSL_MODE=disable
       # DEV_MODE enables /api/v1/dev/login for Playwright fixtures — test/CI only, never production
       - DEV_MODE=true
+      # This stack runs at the default logging.level ("info"), which
+      # devModeProductionGuard (issue #559) can no longer distinguish from a
+      # production deployment left at its default -- confirm explicitly.
+      - TFR_CONFIRM_NON_PRODUCTION=true
       - TFR_SERVER_HOST=0.0.0.0
       - TFR_SERVER_PORT=8080
       # JWT secret required by backend — fixed value for test environment only
