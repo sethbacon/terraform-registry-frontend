@@ -32,6 +32,12 @@ updates:
         update-types: [ "version-update:semver-major" ]
       - dependency-name: "@mui/icons-material"
         update-types: [ "version-update:semver-major" ]
+      # Major TypeScript bumps break the toolchain before app code: tsup's
+      # bundled rollup-plugin-dts and @typescript-eslint/typescript-estree
+      # both crash against TS7's changed internals (2026-07-13 incident).
+      # Revisit once both ship TS7-compatible releases.
+      - dependency-name: "typescript"
+        update-types: [ "version-update:semver-major" ]
 
   # ---------------------------------------------------------------------------
   # npm (e2e/)
