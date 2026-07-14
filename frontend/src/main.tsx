@@ -7,6 +7,7 @@ import ReactDOM from 'react-dom/client'
 import createCache from '@emotion/cache'
 import { CacheProvider } from '@emotion/react'
 import App from './App'
+import ErrorBoundary from './components/ErrorBoundary'
 import './index.css'
 import './i18n'
 import { captureError } from './services/errorReporting'
@@ -42,7 +43,9 @@ const emotionCache = createCache({
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <CacheProvider value={emotionCache}>
-      <App />
+      <ErrorBoundary>
+        <App />
+      </ErrorBoundary>
     </CacheProvider>
   </React.StrictMode>,
 )
