@@ -1,5 +1,6 @@
 import { useSuite } from '../hooks/useSuite'
 import { SuiteSwitcher as SuiteSwitcherBase } from '@sethbacon/terraform-suite-ui'
+import { isSafeExternalUrl } from '../utils/externalUrl'
 
 const LABELS: Record<string, string> = {
   'terraform-registry': 'Terraform Registry',
@@ -10,7 +11,9 @@ const LABELS: Record<string, string> = {
 // AppBar button + single-tab reuse now live in the shared package's SuiteSwitcher.
 export function SuiteSwitcher() {
   const { sibling, active } = useSuite()
-  if (!active || !sibling?.publicUrl) return null
+  // Defense-in-depth: the sibling URL comes from the backend /api/v1/ui/config; validate it at
+  // the app boundary before handing it to the shared switcher's navigation sink.
+  if (!active || !sibling?.publicUrl || !isSafeExternalUrl(sibling.publicUrl)) return null
   const label = LABELS[sibling.app] ?? sibling.app
   // Until both apps are confirmed to share one identity store + IdP
   // (sibling.sharedStore), opening the sibling in a new tab may require a
