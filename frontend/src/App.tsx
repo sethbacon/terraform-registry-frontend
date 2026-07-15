@@ -1,6 +1,6 @@
 import { lazy } from 'react'
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { QueryClientProvider } from '@tanstack/react-query'
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import { CssBaseline } from '@mui/material'
 import { ThemeProvider } from './contexts/ThemeContext'
@@ -13,6 +13,7 @@ import ConsentBanner from './components/ConsentBanner'
 import TelemetryGate from './components/TelemetryGate'
 import OfflineBanner from './components/OfflineBanner'
 import ErrorBoundary from './components/ErrorBoundary'
+import { queryClient } from './queryClient'
 import LazyRoute from './components/LazyRoute'
 import RouteFocusManager from './components/RouteFocusManager'
 import { ADMIN_ROUTE_SCOPES } from './routeScopes'
@@ -51,16 +52,6 @@ const SecurityScanningPage = lazy(() => import('./pages/admin/SecurityScanningPa
 const NotificationsPage = lazy(() => import('./pages/admin/NotificationsPage'))
 const ComponentShowcase = lazy(() => import('./pages/dev/ComponentShowcase'))
 const SettingsPage = lazy(() => import('./pages/SettingsPage'))
-
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      staleTime: 30_000,
-      retry: 1,
-      refetchOnWindowFocus: false,
-    },
-  },
-})
 
 function App() {
   return (
