@@ -143,5 +143,6 @@ export const queryKeys = {
   notifications: {
     _def: ['notifications'] as const,
     config: () => [...queryKeys.notifications._def, 'config'] as const,
+    channels: () => [...queryKeys.notifications._def, 'channels'] as const,
   },
 } as const

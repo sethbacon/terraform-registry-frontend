@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
@@ -6,11 +6,21 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 const getNotificationsConfigMock = vi.fn()
 const saveNotificationsConfigMock = vi.fn()
 const sendTestNotificationMock = vi.fn()
+const listNotificationChannelsMock = vi.fn()
+const createNotificationChannelMock = vi.fn()
+const updateNotificationChannelMock = vi.fn()
+const deleteNotificationChannelMock = vi.fn()
+const testNotificationChannelMock = vi.fn()
 vi.mock('../../../services/api', () => ({
   default: {
     getNotificationsConfig: (...args: unknown[]) => getNotificationsConfigMock(...args),
     saveNotificationsConfig: (...args: unknown[]) => saveNotificationsConfigMock(...args),
     sendTestNotification: (...args: unknown[]) => sendTestNotificationMock(...args),
+    listNotificationChannels: (...args: unknown[]) => listNotificationChannelsMock(...args),
+    createNotificationChannel: (...args: unknown[]) => createNotificationChannelMock(...args),
+    updateNotificationChannel: (...args: unknown[]) => updateNotificationChannelMock(...args),
+    deleteNotificationChannel: (...args: unknown[]) => deleteNotificationChannelMock(...args),
+    testNotificationChannel: (...args: unknown[]) => testNotificationChannelMock(...args),
   },
 }))
 
@@ -45,6 +55,14 @@ const fakeConfig = {
     from: 'notify@example.com',
     use_tls: true,
   },
+  recipients: [] as string[],
+  events: {
+    api_key_expiring: true,
+    module_published: true,
+    approval_pending: true,
+    cve_detected: true,
+    scanner_update_available: true,
+  },
   api_key_expiry_warning_days: 7,
   api_key_expiry_check_interval_hours: 24,
   password_configured: true,
@@ -54,6 +72,7 @@ describe('NotificationsPage', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     mockAllowedScopes = ['admin']
+    listNotificationChannelsMock.mockResolvedValue([])
   })
 
   it('renders SMTP fields from mocked config', async () => {
@@ -264,6 +283,103 @@ describe('NotificationsPage', () => {
       expect(screen.getByRole('button', { name: 'Send Test Email' })).toBeDisabled()
       expect(screen.getByRole('switch', { name: 'Enable notifications' })).toBeDisabled()
       expect(screen.getByLabelText('Host')).toBeDisabled()
+    })
+  })
+
+  describe('notification channels', () => {
+    const channel = {
+      id: 'c1',
+      name: 'ops-slack',
+      type: 'slack',
+      has_target: true,
+      events: ['cve_detected'],
+      enabled: true,
+      last_status: 'sent',
+      last_error: null,
+      last_sent_at: '2026-07-01T00:00:00Z',
+      created_at: '2026-06-01',
+      updated_at: '2026-06-10',
+    }
+
+    it('lists channels with event chips and delivery status', async () => {
+      getNotificationsConfigMock.mockResolvedValue(fakeConfig)
+      listNotificationChannelsMock.mockResolvedValue([channel])
+      renderPage()
+
+      const row = await screen.findByRole('row', { name: /ops-slack/ })
+      expect(within(row).getByText('CVE detected')).toBeInTheDocument()
+      expect(within(row).getByText('sent')).toBeInTheDocument()
+    })
+
+    it('shows the empty hint when no channels exist', async () => {
+      getNotificationsConfigMock.mockResolvedValue(fakeConfig)
+      listNotificationChannelsMock.mockResolvedValue([])
+      renderPage()
+
+      expect(
+        await screen.findByText('No notification channels yet. Add one to receive alerts.'),
+      ).toBeInTheDocument()
+    })
+
+    it('creates a webhook channel with selected events', async () => {
+      const user = userEvent.setup()
+      getNotificationsConfigMock.mockResolvedValue(fakeConfig)
+      listNotificationChannelsMock.mockResolvedValue([])
+      createNotificationChannelMock.mockResolvedValue({ ...channel, type: 'webhook' })
+      renderPage()
+
+      await screen.findByText('No notification channels yet. Add one to receive alerts.')
+
+      await user.click(screen.getByRole('button', { name: 'Add channel' }))
+      const dialog = await screen.findByRole('dialog')
+      await user.type(within(dialog).getByLabelText('Name', { exact: false }), 'ops-webhook')
+      await user.type(
+        within(dialog).getByLabelText('Destination URL', { exact: false }),
+        'https://example.com/hook',
+      )
+      await user.click(within(dialog).getByLabelText('CVE detected'))
+      await user.click(within(dialog).getByRole('button', { name: 'Save' }))
+
+      await waitFor(() => {
+        expect(createNotificationChannelMock).toHaveBeenCalledWith(
+          expect.objectContaining({
+            name: 'ops-webhook',
+            type: 'webhook',
+            target: 'https://example.com/hook',
+            events: ['cve_detected'],
+          }),
+        )
+      })
+    })
+
+    it('sends a test notification through a channel', async () => {
+      const user = userEvent.setup()
+      getNotificationsConfigMock.mockResolvedValue(fakeConfig)
+      listNotificationChannelsMock.mockResolvedValue([channel])
+      testNotificationChannelMock.mockResolvedValue({ status: 'sent' })
+      renderPage()
+
+      const row = await screen.findByRole('row', { name: /ops-slack/ })
+      const [sendButton] = within(row).getAllByRole('button')
+      await user.click(sendButton)
+
+      await waitFor(() => expect(testNotificationChannelMock).toHaveBeenCalledWith('c1', expect.anything()))
+      expect(await screen.findByText('Test notification sent.')).toBeInTheDocument()
+    })
+
+    it('deletes a channel after confirmation', async () => {
+      const user = userEvent.setup()
+      getNotificationsConfigMock.mockResolvedValue(fakeConfig)
+      listNotificationChannelsMock.mockResolvedValue([channel])
+      deleteNotificationChannelMock.mockResolvedValue(undefined)
+      renderPage()
+
+      const row = await screen.findByRole('row', { name: /ops-slack/ })
+      const rowButtons = within(row).getAllByRole('button')
+      await user.click(rowButtons[rowButtons.length - 1])
+      await user.click(await screen.findByTestId('confirm-dialog-confirm'))
+
+      await waitFor(() => expect(deleteNotificationChannelMock).toHaveBeenCalledWith('c1', expect.anything()))
     })
   })
 })
