@@ -1,6 +1,24 @@
 <!-- markdownlint-disable MD013 MD024 MD041 -->
 # Changelog
 
+## [2.17.0](https://github.com/sethbacon/terraform-registry-frontend/compare/v2.16.0...v2.17.0) (2026-07-16)
+
+
+### Features
+
+* **notifications:** channel management UI and per-event controls ([#563](https://github.com/sethbacon/terraform-registry-frontend/issues/563)) ([0ca9a8b](https://github.com/sethbacon/terraform-registry-frontend/commit/0ca9a8ba28881ee9c24a0d8bc0f1382aa6136a6b))
+* surface OPA GitHub attestation status ("attested") in mirror UI ([#554](https://github.com/sethbacon/terraform-registry-frontend/issues/554)) ([0921538](https://github.com/sethbacon/terraform-registry-frontend/commit/09215382bbdf8345ca1274b926c344c0943939ba))
+
+
+### Bug Fixes
+
+* **ci:** add blocking Trivy image scan to the release pipeline ([#551](https://github.com/sethbacon/terraform-registry-frontend/issues/551)) ([f1d430b](https://github.com/sethbacon/terraform-registry-frontend/commit/f1d430b65a15da4c36096821c37ca495bbc0a13b))
+* **ci:** correct dependabot schedule interval from biweekly to weekly ([#544](https://github.com/sethbacon/terraform-registry-frontend/issues/544)) ([bb0e69c](https://github.com/sethbacon/terraform-registry-frontend/commit/bb0e69cb9ba36a0adc697ac4546992de7be02d78))
+* **ci:** ignore major TypeScript bumps in dependabot config ([#552](https://github.com/sethbacon/terraform-registry-frontend/issues/552)) ([3f96f7e](https://github.com/sethbacon/terraform-registry-frontend/commit/3f96f7eb97f8af40ab4d10c6b0a360312527a7a1))
+* **e2e:** adapt CSRF test to cookie-native dev-login ([#558](https://github.com/sethbacon/terraform-registry-frontend/issues/558)) ([c03a13c](https://github.com/sethbacon/terraform-registry-frontend/commit/c03a13c2845d9690a2ef4b2c84cac489f60ec7d2))
+* **e2e:** set TFR_CONFIRM_NON_PRODUCTION for the backend's dev-mode guard ([#557](https://github.com/sethbacon/terraform-registry-frontend/issues/557)) ([e95905d](https://github.com/sethbacon/terraform-registry-frontend/commit/e95905d68ac8e2b2d581b45d94304b6b20c06157))
+* validate backend URLs, add error boundary, and clear query cache on logout ([#562](https://github.com/sethbacon/terraform-registry-frontend/issues/562)) ([6a5f0bb](https://github.com/sethbacon/terraform-registry-frontend/commit/6a5f0bb07b29baeb5d92b840d38073c247ef9379))
+
 ## [2.16.0](https://github.com/sethbacon/terraform-registry-frontend/compare/v2.15.0...v2.16.0) (2026-07-11)
 
 
