@@ -20,31 +20,6 @@
       "method": "POST",
       "path": "/api/v1/dev/impersonate/{}",
       "reason": "Backend route is registered conditionally under DEV_MODE=true and is intentionally undocumented in production swagger. Permanent allowlist entry."
-    },
-    {
-      "method": "GET",
-      "path": "/api/v1/admin/notifications/channels",
-      "reason": "Notification delivery channels added in backend PR https://github.com/sethbacon/terraform-registry-backend/pull/625 (not yet in the pinned contract-check backend image). Remove once that PR is released and the backend image tag is bumped."
-    },
-    {
-      "method": "POST",
-      "path": "/api/v1/admin/notifications/channels",
-      "reason": "Notification delivery channels added in backend PR https://github.com/sethbacon/terraform-registry-backend/pull/625 (not yet in the pinned contract-check backend image). Remove once that PR is released and the backend image tag is bumped."
-    },
-    {
-      "method": "PUT",
-      "path": "/api/v1/admin/notifications/channels/{}",
-      "reason": "Notification delivery channels added in backend PR https://github.com/sethbacon/terraform-registry-backend/pull/625 (not yet in the pinned contract-check backend image). Remove once that PR is released and the backend image tag is bumped."
-    },
-    {
-      "method": "DELETE",
-      "path": "/api/v1/admin/notifications/channels/{}",
-      "reason": "Notification delivery channels added in backend PR https://github.com/sethbacon/terraform-registry-backend/pull/625 (not yet in the pinned contract-check backend image). Remove once that PR is released and the backend image tag is bumped."
-    },
-    {
-      "method": "POST",
-      "path": "/api/v1/admin/notifications/channels/{}/test",
-      "reason": "Notification delivery channels added in backend PR https://github.com/sethbacon/terraform-registry-backend/pull/625 (not yet in the pinned contract-check backend image). Remove once that PR is released and the backend image tag is bumped."
     }
   ]
 }
