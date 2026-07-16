@@ -20,7 +20,9 @@ services:
     # Pinned backend image. Bump this tag in lockstep with backend releases
     # whose API surface the frontend wants to depend on. The contract check
     # validates that every route api.ts calls exists on this exact backend.
-    image: ${BACKEND_IMAGE:-ghcr.io/sethbacon/terraform-registry-backend:2.7.2}
+    # 3.2.0 is the first release with the admin notification-channel routes
+    # (/api/v1/admin/notifications/channels[/{id}][/test]) the UI now calls.
+    image: ${BACKEND_IMAGE:-ghcr.io/sethbacon/terraform-registry-backend:3.2.0}
     environment:
       - TFR_DATABASE_HOST=postgres
       - TFR_DATABASE_PORT=5432
