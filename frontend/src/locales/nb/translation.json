@@ -1986,6 +1986,16 @@
       "apiKeyExpirySection": "Varsler om utløp av API-nøkler",
       "warningDays": "Varsel noen dager før utløpsdatoen",
       "checkIntervalHours": "Kontrollintervall (timer)",
+      "eventsSection": "Varslingsalternativer",
+      "recipients": "Mottakere",
+      "recipientsHelp": "E-postadresser, atskilt med komma, for varsler om publiserte moduler, ventende godkjenning, oppdagede CVE-er og oppdateringer av skanneren. Hvis feltet er tomt, brukes CVE-mottakerlisten som standard.",
+      "event": {
+        "api_key_expiring": "API-nøkkelen utløper",
+        "module_published": "Ny modulversjon publisert",
+        "approval_pending": "Ny godkjenning venter",
+        "cve_detected": "CVE oppdaget",
+        "scanner_update_available": "Oppdatering til skanneren er tilgjengelig"
+      },
       "save": "Lagre",
       "saveSuccess": "Varslingsinnstillingene er lagret",
       "saveError": "Det gikk ikke å lagre varslingsinnstillingene",
@@ -1993,7 +2003,41 @@
       "testRecipients": "Mottakere (kommaseparert, valgfritt)",
       "testSuccess": "Test-e-posten ble sendt",
       "testError": "Det lyktes ikke å sende test-e-posten",
-      "loadError": "Det gikk ikke å laste inn varslingsinnstillingene"
+      "loadError": "Det gikk ikke å laste inn varslingsinnstillingene",
+      "channels": {
+        "title": "Varslingskanaler",
+        "description": "Send varsler om publiserte moduler, ventende godkjenninger, oppdagede CVE-er og skanneroppdateringer til en webhook, Slack, Microsoft Teams eller en ad hoc-liste over e-postmottakere. Mottakeropplysningene lagres kryptert og vises aldri igjen.",
+        "add": "Legg til kanal",
+        "edit": "Rediger kanal",
+        "noChannels": "Det finnes ingen varslingskanaler ennå. Legg til en for å motta varsler.",
+        "name": "Navn",
+        "typeLabel": "Type",
+        "actions": "Handlinger",
+        "events": "Arrangementer",
+        "allEvents": "Alle arrangementer",
+        "target": "Mål-URL",
+        "targetHelp": "URL-adressen til webhooken, Slack eller Teams som skal brukes for innkommende webhooker, som det skal sendes en POST-forespørsel til.",
+        "targetKeep": "La feltet stå tomt for å beholde den nåværende URL-adressen.",
+        "targetEmail": "Mottakerens e-postadresser",
+        "targetEmailHelp": "E-postadresser atskilt med komma. Sendt via det konfigurerte SMTP-reléet.",
+        "targetEmailKeep": "La feltet stå tomt for å beholde de nåværende mottakerne.",
+        "type": {
+          "webhook": "Webhook (JSON)",
+          "slack": "Slack",
+          "teams": "Microsoft Teams",
+          "email": "E-post"
+        },
+        "eventsHelp": "La alle avmerkingsboksene være umerkede for å motta alle hendelser.",
+        "enabled": "Aktivert",
+        "test": "Send test",
+        "testSent": "Testmelding sendt.",
+        "testError": "Det lyktes ikke å sende testvarselet",
+        "lastDelivery": "Siste levering",
+        "neverSent": "Aldri sendt",
+        "deleteTitle": "Slett kanal",
+        "deleteConfirm": "Skal kanalen «{{name}}» slettes?",
+        "saveError": "Det gikk ikke å lagre kanalen"
+      }
     }
   },
   "scmWizard": {

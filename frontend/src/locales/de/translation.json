@@ -1986,6 +1986,16 @@
       "apiKeyExpirySection": "Benachrichtigungen zum Ablauf von API-Schlüsseln",
       "warningDays": "Warnung einige Tage vor Ablauf",
       "checkIntervalHours": "Prüfintervall (Stunden)",
+      "eventsSection": "Benachrichtigungsoptionen",
+      "recipients": "Empfänger",
+      "recipientsHelp": "Durch Kommas getrennte E-Mail-Adressen für Benachrichtigungen zu veröffentlichten Modulen, ausstehenden Genehmigungen, erkannten CVEs und Scanner-Updates. Wenn das Feld leer bleibt, wird auf die CVE-Empfängerliste zurückgegriffen.",
+      "event": {
+        "api_key_expiring": "Ablauf des API-Schlüssels",
+        "module_published": "Neue Modulversion veröffentlicht",
+        "approval_pending": "Neue Genehmigung steht noch aus",
+        "cve_detected": "CVE erkannt",
+        "scanner_update_available": "Scanner-Update verfügbar"
+      },
       "save": "Speichern",
       "saveSuccess": "Benachrichtigungseinstellungen gespeichert",
       "saveError": "Das Speichern der Benachrichtigungseinstellungen ist fehlgeschlagen",
@@ -1993,7 +2003,41 @@
       "testRecipients": "Empfänger (durch Kommas getrennt, optional)",
       "testSuccess": "Test-E-Mail erfolgreich versendet",
       "testError": "Das Versenden der Test-E-Mail ist fehlgeschlagen",
-      "loadError": "Die Benachrichtigungseinstellungen konnten nicht geladen werden"
+      "loadError": "Die Benachrichtigungseinstellungen konnten nicht geladen werden",
+      "channels": {
+        "title": "Benachrichtigungskanäle",
+        "description": "Senden Sie Benachrichtigungen zu veröffentlichten Modulen, ausstehenden Genehmigungen, erkannten CVEs und Scanner-Updates an einen Webhook, an Slack, Microsoft Teams oder an eine Ad-hoc-E-Mail-Empfängerliste. Die Empfängeradressen werden verschlüsselt gespeichert und nie wieder angezeigt.",
+        "add": "Kanal hinzufügen",
+        "edit": "Kanal bearbeiten",
+        "noChannels": "Es sind noch keine Benachrichtigungskanäle vorhanden. Fügen Sie einen hinzu, um Benachrichtigungen zu erhalten.",
+        "name": "Name",
+        "typeLabel": "Typ",
+        "actions": "Aktionen",
+        "events": "Veranstaltungen",
+        "allEvents": "Alle Veranstaltungen",
+        "target": "Ziel-URL",
+        "targetHelp": "Die URL des Webhooks, von Slack oder Teams, an die ein POST-Request gesendet werden soll.",
+        "targetKeep": "Lassen Sie das Feld leer, um die aktuelle URL beizubehalten.",
+        "targetEmail": "E-Mail-Adressen der Empfänger",
+        "targetEmailHelp": "Durch Kommas getrennte E-Mail-Adressen. Versand über den konfigurierten SMTP-Relay.",
+        "targetEmailKeep": "Lassen Sie das Feld leer, um die aktuellen Empfänger beizubehalten.",
+        "type": {
+          "webhook": "Webhook (JSON)",
+          "slack": "Slack",
+          "teams": "Microsoft Teams",
+          "email": "E-Mail"
+        },
+        "eventsHelp": "Lassen Sie alle Kontrollkästchen deaktiviert, um alle Ereignisse zu erhalten.",
+        "enabled": "Aktiviert",
+        "test": "Test senden",
+        "testSent": "Testbenachrichtigung gesendet.",
+        "testError": "Das Senden der Testbenachrichtigung ist fehlgeschlagen",
+        "lastDelivery": "Letzte Lieferung",
+        "neverSent": "Wurde nie gesendet",
+        "deleteTitle": "Kanal löschen",
+        "deleteConfirm": "Den Kanal „{{name}}“ löschen?",
+        "saveError": "Kanal konnte nicht gespeichert werden"
+      }
     }
   },
   "scmWizard": {

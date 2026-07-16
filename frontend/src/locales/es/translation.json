@@ -1986,6 +1986,16 @@
       "apiKeyExpirySection": "Notificaciones sobre la caducidad de las claves API",
       "warningDays": "Aviso unos días antes de la fecha de vencimiento",
       "checkIntervalHours": "Intervalo de revisión (horas)",
+      "eventsSection": "Opciones de notificación",
+      "recipients": "Destinatarios",
+      "recipientsHelp": "Direcciones de correo electrónico separadas por comas para las notificaciones de módulos publicados, pendientes de aprobación, CVE detectados y actualizaciones del escáner. Si se deja en blanco, se recurre a la lista de destinatarios de CVE.",
+      "event": {
+        "api_key_expiring": "Caducidad de la clave API",
+        "module_published": "Se ha publicado una nueva versión del módulo",
+        "approval_pending": "A la espera de una nueva autorización",
+        "cve_detected": "Se ha detectado una vulnerabilidad CVE",
+        "scanner_update_available": "Hay una actualización disponible para el escáner"
+      },
       "save": "Guardar",
       "saveSuccess": "Configuración de notificaciones guardada",
       "saveError": "No se ha podido guardar la configuración de notificaciones",
@@ -1993,7 +2003,41 @@
       "testRecipients": "Destinatarios (separados por comas, opcional)",
       "testSuccess": "El correo electrónico de prueba se ha enviado correctamente",
       "testError": "No se ha podido enviar el correo electrónico de prueba",
-      "loadError": "No se han podido cargar los ajustes de notificaciones"
+      "loadError": "No se han podido cargar los ajustes de notificaciones",
+      "channels": {
+        "title": "Canales de notificación",
+        "description": "Envía alertas sobre módulos publicados, pendientes de aprobación, CVE detectados y actualizaciones de escáneres a un webhook, a Slack, a Microsoft Teams o a una lista de destinatarios de correo electrónico creada ad hoc. Los destinos se almacenan cifrados y nunca se vuelven a mostrar.",
+        "add": "Añadir canal",
+        "edit": "Editar canal",
+        "noChannels": "Aún no hay canales de notificación. Añade uno para recibir alertas.",
+        "name": "Nombre",
+        "typeLabel": "Tipo",
+        "actions": "Acciones",
+        "events": "Eventos",
+        "allEvents": "Todos los eventos",
+        "target": "URL de destino",
+        "targetHelp": "La URL del webhook, de Slack o de Teams a la que se debe enviar la solicitud POST.",
+        "targetKeep": "Délo en blanco para mantener la URL actual.",
+        "targetEmail": "Correos electrónicos de los destinatarios",
+        "targetEmailHelp": "Direcciones de correo electrónico separadas por comas. Enviadas a través del servidor SMTP de retransmisión configurado.",
+        "targetEmailKeep": "Déjalo en blanco para mantener los destinatarios actuales.",
+        "type": {
+          "webhook": "Webhook (JSON)",
+          "slack": "Slack",
+          "teams": "Microsoft Teams",
+          "email": "Correo electrónico"
+        },
+        "eventsHelp": "Deja todas las casillas sin marcar para recibir todos los eventos.",
+        "enabled": "Activado",
+        "test": "Enviar prueba",
+        "testSent": "Se ha enviado la notificación de prueba.",
+        "testError": "No se ha podido enviar la notificación de prueba",
+        "lastDelivery": "Última entrega",
+        "neverSent": "Nunca se envió",
+        "deleteTitle": "Eliminar canal",
+        "deleteConfirm": "¿Deseas eliminar el canal «{{name}}»?",
+        "saveError": "No se ha podido guardar el canal"
+      }
     }
   },
   "scmWizard": {

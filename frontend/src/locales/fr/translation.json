@@ -1986,6 +1986,16 @@
       "apiKeyExpirySection": "Notifications d'expiration des clés API",
       "warningDays": "Avertissement quelques jours avant l'expiration",
       "checkIntervalHours": "Fréquence des contrôles (heures)",
+      "eventsSection": "Options de notification",
+      "recipients": "Destinataires",
+      "recipientsHelp": "Adresses e-mail séparées par des virgules pour les notifications relatives à la publication d'un module, aux demandes d'approbation en attente, aux CVE détectés et aux mises à jour du scanner. Si ce champ est laissé vide, le système utilise par défaut la liste des destinataires CVE.",
+      "event": {
+        "api_key_expiring": "Expiration de la clé API",
+        "module_published": "Publication d'une nouvelle version du module",
+        "approval_pending": "Nouvelle autorisation en attente",
+        "cve_detected": "CVE détecté",
+        "scanner_update_available": "Mise à jour du scanner disponible"
+      },
       "save": "Enregistrer",
       "saveSuccess": "Paramètres de notification enregistrés",
       "saveError": "Échec de l'enregistrement des paramètres de notification",
@@ -1993,7 +2003,41 @@
       "testRecipients": "Destinataires (séparés par des virgules, facultatif)",
       "testSuccess": "L'e-mail de test a bien été envoyé",
       "testError": "Échec de l'envoi de l'e-mail de test",
-      "loadError": "Échec du chargement des paramètres de notification"
+      "loadError": "Échec du chargement des paramètres de notification",
+      "channels": {
+        "title": "Canaux de notification",
+        "description": "Envoyez les alertes concernant la publication d'un module, les demandes d'approbation en attente, la détection d'un CVE et les mises à jour du scanner vers un webhook, Slack, Microsoft Teams ou une liste de destinataires e-mail définie au cas par cas. Les destinations sont stockées sous forme chiffrée et ne sont plus jamais affichées.",
+        "add": "Ajouter une chaîne",
+        "edit": "Modifier la chaîne",
+        "noChannels": "Il n'y a pas encore de canaux de notification. Ajoutez-en un pour recevoir des alertes.",
+        "name": "Nom",
+        "typeLabel": "Type",
+        "actions": "Actions",
+        "events": "Événements",
+        "allEvents": "Tous les événements",
+        "target": "URL de destination",
+        "targetHelp": "L'URL du webhook, de Slack ou de Teams vers laquelle envoyer la requête POST.",
+        "targetKeep": "Laissez ce champ vide pour conserver l'URL actuelle.",
+        "targetEmail": "Adresses e-mail des destinataires",
+        "targetEmailHelp": "Adresses e-mail séparées par des virgules. Envoyées via le relais SMTP configuré.",
+        "targetEmailKeep": "Ne rien indiquer pour conserver les destinataires actuels.",
+        "type": {
+          "webhook": "Webhook (JSON)",
+          "slack": "Slack",
+          "teams": "Microsoft Teams",
+          "email": "E-mail"
+        },
+        "eventsHelp": "Ne cochez aucune case pour recevoir toutes les notifications.",
+        "enabled": "Activé",
+        "test": "Envoyer un test",
+        "testSent": "Notification de test envoyée.",
+        "testError": "Échec de l'envoi de la notification de test",
+        "lastDelivery": "Dernière livraison",
+        "neverSent": "Jamais envoyé",
+        "deleteTitle": "Supprimer la chaîne",
+        "deleteConfirm": "Supprimer la chaîne « {{name}} » ?",
+        "saveError": "Échec de l'enregistrement de la chaîne"
+      }
     }
   },
   "scmWizard": {
