@@ -363,9 +363,18 @@ export interface ScannerLatestInfo {
 export interface ScannerInstallRequest { tool: string; version?: string; activate?: boolean }
 export interface ScannerInstallResult extends ScanningInstallResult { activated?: boolean }
 export interface NotificationsSmtpConfig { host: string; port: number; username: string; from: string; use_tls: boolean }
+export interface NotificationEvents {
+  api_key_expiring: boolean
+  module_published: boolean
+  approval_pending: boolean
+  cve_detected: boolean
+  scanner_update_available: boolean
+}
 export interface NotificationsConfig {
   enabled: boolean
   smtp: NotificationsSmtpConfig
+  recipients: string[]
+  events: NotificationEvents
   api_key_expiry_warning_days: number
   api_key_expiry_check_interval_hours: number
   password_configured: boolean
@@ -373,11 +382,44 @@ export interface NotificationsConfig {
 export interface NotificationsConfigInput {
   enabled: boolean
   smtp: NotificationsSmtpConfig & { password: string }
+  recipients: string[]
+  events: NotificationEvents
   api_key_expiry_warning_days: number
   api_key_expiry_check_interval_hours: number
 }
 export interface NotificationsTestRequest { recipients?: string[]; subject?: string; smtp?: Partial<NotificationsSmtpConfig & { password: string }> }
 export interface NotificationsTestResult { success: boolean; message: string }
+
+// Notification channels — additional delivery destinations (webhook, Slack,
+// Microsoft Teams, or an ad-hoc email recipient list) for the
+// module_published, approval_pending, cve_detected, and
+// scanner_update_available events, alongside the shared SMTP recipients list.
+export type NotificationChannelType = 'webhook' | 'slack' | 'teams' | 'email'
+export type NotificationChannelEvent =
+  | 'module_published'
+  | 'approval_pending'
+  | 'cve_detected'
+  | 'scanner_update_available'
+export interface NotificationChannel {
+  id: string
+  name: string
+  type: NotificationChannelType
+  has_target: boolean
+  events: NotificationChannelEvent[] // empty = all events
+  enabled: boolean
+  last_status: string | null
+  last_error: string | null
+  last_sent_at: string | null
+  created_at: string
+  updated_at: string
+}
+export interface NotificationChannelInput {
+  name: string
+  type: NotificationChannelType
+  target?: string // destination URL or recipient list; omit on edit to keep existing
+  events: NotificationChannelEvent[]
+  enabled: boolean
+}
 
 // Setup Wizard — LDAP configuration
 export interface LDAPConfigInput {

@@ -586,6 +586,14 @@ describe('ApiClient', () => {
           use_tls: true,
           password: 'secret',
         },
+        recipients: [] as string[],
+        events: {
+          api_key_expiring: true,
+          module_published: true,
+          approval_pending: true,
+          cve_detected: true,
+          scanner_update_available: true,
+        },
         api_key_expiry_warning_days: 7,
         api_key_expiry_check_interval_hours: 24,
       }
@@ -2647,7 +2655,7 @@ describe('ApiClient', () => {
 
     it('returns null without reporting an error on 404 (endpoint not implemented)', async () => {
       const client = await getApiClient()
-      const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
+      const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => { })
         ; (mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockRejectedValueOnce({
           isAxiosError: true,
           response: { status: 404 },
@@ -2661,7 +2669,7 @@ describe('ApiClient', () => {
 
     it('returns null and reports the error on a non-404 failure', async () => {
       const client = await getApiClient()
-      const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
+      const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => { })
       const serverError = Object.assign(new Error('Internal Server Error'), {
         isAxiosError: true,
         response: { status: 500 },
@@ -2678,7 +2686,7 @@ describe('ApiClient', () => {
 
     it('returns null and reports the error on a network failure with no response', async () => {
       const client = await getApiClient()
-      const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
+      const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => { })
         ; (mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockRejectedValueOnce(
           new Error('Network Error'),
         )

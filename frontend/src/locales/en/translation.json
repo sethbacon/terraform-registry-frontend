@@ -1988,6 +1988,16 @@
       "apiKeyExpirySection": "API Key Expiry Notifications",
       "warningDays": "Warning days before expiry",
       "checkIntervalHours": "Check interval (hours)",
+      "eventsSection": "Notification Options",
+      "recipients": "Recipients",
+      "recipientsHelp": "Comma-separated email addresses for module published, approval pending, CVE detected, and scanner update notifications. Falls back to the CVE recipients list when left blank.",
+      "event": {
+        "api_key_expiring": "API key expiring",
+        "module_published": "New module version published",
+        "approval_pending": "New approval pending",
+        "cve_detected": "CVE detected",
+        "scanner_update_available": "Scanner update available"
+      },
       "save": "Save",
       "saveSuccess": "Notification settings saved",
       "saveError": "Failed to save notification settings",
@@ -1995,7 +2005,41 @@
       "testRecipients": "Recipients (comma-separated, optional)",
       "testSuccess": "Test email sent successfully",
       "testError": "Failed to send test email",
-      "loadError": "Failed to load notification settings"
+      "loadError": "Failed to load notification settings",
+      "channels": {
+        "title": "Notification Channels",
+        "description": "Send module published, approval pending, CVE detected, and scanner update alerts to a webhook, Slack, Microsoft Teams, or an ad-hoc email recipient list. Destinations are stored encrypted and never shown again.",
+        "add": "Add channel",
+        "edit": "Edit channel",
+        "noChannels": "No notification channels yet. Add one to receive alerts.",
+        "name": "Name",
+        "typeLabel": "Type",
+        "actions": "Actions",
+        "events": "Events",
+        "allEvents": "All events",
+        "target": "Destination URL",
+        "targetHelp": "The webhook, Slack, or Teams incoming-webhook URL to POST to.",
+        "targetKeep": "Leave blank to keep the current URL.",
+        "targetEmail": "Recipient emails",
+        "targetEmailHelp": "Comma-separated email addresses. Sent via the configured SMTP relay.",
+        "targetEmailKeep": "Leave blank to keep the current recipients.",
+        "type": {
+          "webhook": "Webhook (JSON)",
+          "slack": "Slack",
+          "teams": "Microsoft Teams",
+          "email": "Email"
+        },
+        "eventsHelp": "Leave all unchecked to receive every event.",
+        "enabled": "Enabled",
+        "test": "Send test",
+        "testSent": "Test notification sent.",
+        "testError": "Failed to send test notification",
+        "lastDelivery": "Last delivery",
+        "neverSent": "Never sent",
+        "deleteTitle": "Delete channel",
+        "deleteConfirm": "Delete the channel \"{{name}}\"?",
+        "saveError": "Failed to save channel"
+      }
     }
   },
   "scmWizard": {
