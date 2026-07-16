@@ -1986,6 +1986,16 @@
       "apiKeyExpirySection": "Meldingen over het verlopen van API-sleutels",
       "warningDays": "Waarschuwing enkele dagen voor het verstrijken van de geldigheidsduur",
       "checkIntervalHours": "Controle-interval (uren)",
+      "eventsSection": "Meldingsopties",
+      "recipients": "Ontvangers",
+      "recipientsHelp": "Door komma’s gescheiden e-mailadressen voor meldingen over gepubliceerde modules, in afwachting van goedkeuring, gedetecteerde CVE’s en scannerupdates. Als dit veld leeg wordt gelaten, wordt de CVE-ontvangerslijst gebruikt.",
+      "event": {
+        "api_key_expiring": "API-sleutel verloopt",
+        "module_published": "Nieuwe moduleversie gepubliceerd",
+        "approval_pending": "Nieuwe goedkeuring in behandeling",
+        "cve_detected": "CVE gedetecteerd",
+        "scanner_update_available": "Er is een update voor de scanner beschikbaar"
+      },
       "save": "Opslaan",
       "saveSuccess": "Meldingsinstellingen opgeslagen",
       "saveError": "Het opslaan van de meldingsinstellingen is mislukt",
@@ -1993,7 +2003,41 @@
       "testRecipients": "Ontvangers (gescheiden door komma’s, optioneel)",
       "testSuccess": "Test-e-mail succesvol verzonden",
       "testError": "Het verzenden van de test-e-mail is mislukt",
-      "loadError": "Het laden van de meldingsinstellingen is mislukt"
+      "loadError": "Het laden van de meldingsinstellingen is mislukt",
+      "channels": {
+        "title": "Meldingskanalen",
+        "description": "Stuur meldingen over gepubliceerde modules, modules in afwachting van goedkeuring, gedetecteerde CVE’s en scannerupdates naar een webhook, Slack, Microsoft Teams of een ad-hoclijst met e-mailontvangers. De bestemmingen worden versleuteld opgeslagen en worden nooit meer weergegeven.",
+        "add": "Kanaal toevoegen",
+        "edit": "Kanaal bewerken",
+        "noChannels": "Er zijn nog geen meldingskanalen. Voeg er een toe om meldingen te ontvangen.",
+        "name": "Naam",
+        "typeLabel": "Type",
+        "actions": "Acties",
+        "events": "Evenementen",
+        "allEvents": "Alle evenementen",
+        "target": "Doel-URL",
+        "targetHelp": "De URL van de webhook, Slack of Teams waarnaar je een POST-verzoek moet sturen.",
+        "targetKeep": "Laat dit veld leeg om de huidige URL te behouden.",
+        "targetEmail": "E-mailadressen van ontvangers",
+        "targetEmailHelp": "E-mailadressen, gescheiden door komma’s. Verzonden via de geconfigureerde SMTP-relay.",
+        "targetEmailKeep": "Laat dit veld leeg om de huidige ontvangers te behouden.",
+        "type": {
+          "webhook": "Webhook (JSON)",
+          "slack": "Slack",
+          "teams": "Microsoft Teams",
+          "email": "E-mail"
+        },
+        "eventsHelp": "Laat alle vakjes leeg om alle gebeurtenissen te ontvangen.",
+        "enabled": "Ingeschakeld",
+        "test": "Test verzenden",
+        "testSent": "Testmelding verzonden.",
+        "testError": "Het verzenden van de testmelding is mislukt",
+        "lastDelivery": "Laatste levering",
+        "neverSent": "Nooit verzonden",
+        "deleteTitle": "Kanaal verwijderen",
+        "deleteConfirm": "Het kanaal \"{{name}}\" verwijderen?",
+        "saveError": "Het opslaan van het kanaal is mislukt"
+      }
     }
   },
   "scmWizard": {

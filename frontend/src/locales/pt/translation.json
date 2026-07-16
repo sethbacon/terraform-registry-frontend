@@ -1986,6 +1986,16 @@
       "apiKeyExpirySection": "Notificações de expiração da chave API",
       "warningDays": "Aviso alguns dias antes do vencimento",
       "checkIntervalHours": "Intervalo de verificação (horas)",
+      "eventsSection": "Opções de notificação",
+      "recipients": "Destinatários",
+      "recipientsHelp": "Endereços de e-mail separados por vírgulas para notificações relativas a módulos publicados, aprovações pendentes, deteções de CVE e atualizações do scanner. Se este campo for deixado em branco, recorre-se à lista de destinatários de CVE.",
+      "event": {
+        "api_key_expiring": "Chave da API a expirar",
+        "module_published": "Nova versão do módulo publicada",
+        "approval_pending": "A aguardar nova aprovação",
+        "cve_detected": "CVE detetado",
+        "scanner_update_available": "Está disponível uma atualização para o scanner"
+      },
       "save": "Guardar",
       "saveSuccess": "Definições de notificações guardadas",
       "saveError": "Não foi possível guardar as definições de notificações",
@@ -1993,7 +2003,41 @@
       "testRecipients": "Destinatários (separados por vírgulas, opcional)",
       "testSuccess": "E-mail de teste enviado com sucesso",
       "testError": "Não foi possível enviar o e-mail de teste",
-      "loadError": "Não foi possível carregar as definições de notificações"
+      "loadError": "Não foi possível carregar as definições de notificações",
+      "channels": {
+        "title": "Canais de notificação",
+        "description": "Envie alertas relativos à publicação de módulos, aprovação pendente, deteção de CVE e atualizações do scanner para um webhook, para o Slack, para o Microsoft Teams ou para uma lista de destinatários de e-mail ad hoc. Os destinos são armazenados de forma encriptada e nunca mais são apresentados.",
+        "add": "Adicionar canal",
+        "edit": "Editar canal",
+        "noChannels": "Ainda não há canais de notificação. Adicione um para receber alertas.",
+        "name": "Nome",
+        "typeLabel": "Tipo",
+        "actions": "Ações",
+        "events": "Eventos",
+        "allEvents": "Todos os eventos",
+        "target": "URL de destino",
+        "targetHelp": "O URL do webhook, do Slack ou do Teams para o qual se deve enviar o pedido POST.",
+        "targetKeep": "Deixe em branco para manter o URL atual.",
+        "targetEmail": "Endereços de e-mail dos destinatários",
+        "targetEmailHelp": "Endereços de e-mail separados por vírgulas. Enviados através do servidor SMTP de retransmissão configurado.",
+        "targetEmailKeep": "Deixe em branco para manter os destinatários atuais.",
+        "type": {
+          "webhook": "Webhook (JSON)",
+          "slack": "Slack",
+          "teams": "Microsoft Teams",
+          "email": "E-mail"
+        },
+        "eventsHelp": "Deixe todas as opções desmarcadas para receber todos os eventos.",
+        "enabled": "Ativado",
+        "test": "Enviar teste",
+        "testSent": "Notificação de teste enviada.",
+        "testError": "Não foi possível enviar a notificação de teste",
+        "lastDelivery": "Última entrega",
+        "neverSent": "Nunca enviado",
+        "deleteTitle": "Eliminar canal",
+        "deleteConfirm": "Apagar o canal «{{name}}»?",
+        "saveError": "Não foi possível guardar o canal"
+      }
     }
   },
   "scmWizard": {
