@@ -11,6 +11,22 @@ if [ -n "$BACKEND_URL" ]; then
     envsubst '${BACKEND_URL}' \
         < /etc/nginx/nginx-ecs.conf.template \
         > /etc/nginx/conf.d/default.conf
+else
+    # Local Docker Compose / E2E: nginx.conf serves HTTPS on 443 with a
+    # throwaway self-signed localhost cert. Generate it here at startup rather
+    # than at image-build time, so the private key is never baked into -- or
+    # published with -- the image (Trivy's secret scanner flags a baked-in key).
+    # Production sets BACKEND_URL, terminates TLS at the ALB/ingress, and never
+    # reaches this branch.
+    if [ ! -f /etc/nginx/certs/server.key ]; then
+        openssl req -x509 -newkey rsa:2048 \
+            -keyout /etc/nginx/certs/server.key \
+            -out /etc/nginx/certs/server.crt \
+            -days 365 -nodes \
+            -subj '/CN=localhost' \
+            -addext 'subjectAltName=DNS:localhost,DNS:registry.local,IP:127.0.0.1'
+        chmod 600 /etc/nginx/certs/server.key
+    fi
 fi
 
 exec nginx -g 'daemon off;'

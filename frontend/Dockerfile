@@ -57,17 +57,22 @@ COPY nginx-ecs.conf.template /etc/nginx/nginx-ecs.conf.template
 COPY docker-entrypoint.sh /docker-entrypoint-custom.sh
 RUN chmod +x /docker-entrypoint-custom.sh
 
-# Generate a self-signed TLS certificate for local Docker Compose use.
-# In ECS the ALB handles TLS; the container only listens on port 80.
-RUN apk add --no-cache openssl && \
+# Apply the latest Alpine security patches on top of the digest-pinned base
+# image. The digest pin freezes the base package set, so without this a rebuild
+# keeps shipping whatever OS CVEs the base layer was built with (e.g. c-ares,
+# curl, libexpat). This is an OS security-patch step and is deliberately
+# distinct from application dependencies, which stay lockfile-pinned (npm ci).
+#
+# openssl is kept for the entrypoint's runtime cert generation (see
+# docker-entrypoint.sh): the throwaway self-signed localhost cert used for local
+# Docker Compose HTTPS is created at container startup and is never baked into
+# the published image. A private key in an image trips Trivy's secret scanner
+# and is a supply-chain smell; production terminates TLS at the ALB/ingress and
+# never uses this cert.
+RUN apk upgrade --no-cache && \
+    apk add --no-cache openssl && \
     mkdir -p /etc/nginx/certs && \
-    openssl req -x509 -newkey rsa:2048 \
-    -keyout /etc/nginx/certs/server.key \
-    -out /etc/nginx/certs/server.crt \
-    -days 365 -nodes \
-    -subj '/CN=localhost' \
-    -addext 'subjectAltName=DNS:localhost,DNS:registry.local,IP:127.0.0.1' && \
-    chmod 600 /etc/nginx/certs/server.key
+    chown 101:101 /etc/nginx/certs
 
 # Pre-create nginx temp dirs owned by the nginx user (uid 101) so the
 # container can run without the CHOWN capability (dropped by the Helm chart
