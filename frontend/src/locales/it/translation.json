@@ -1986,6 +1986,16 @@
       "apiKeyExpirySection": "Notifiche relative alla scadenza delle chiavi API",
       "warningDays": "Avviso alcuni giorni prima della scadenza",
       "checkIntervalHours": "Intervallo di controllo (ore)",
+      "eventsSection": "Opzioni di notifica",
+      "recipients": "Destinatari",
+      "recipientsHelp": "Indirizzi e-mail separati da virgola per le notifiche relative alla pubblicazione di moduli, alle richieste di approvazione in sospeso, ai CVE rilevati e agli aggiornamenti dello scanner. Se lasciato vuoto, si ricorre all’elenco dei destinatari CVE.",
+      "event": {
+        "api_key_expiring": "Scadenza della chiave API",
+        "module_published": "Pubblicata la nuova versione del modulo",
+        "approval_pending": "In attesa di una nuova approvazione",
+        "cve_detected": "CVE rilevato",
+        "scanner_update_available": "È disponibile un aggiornamento per lo scanner"
+      },
       "save": "Salva",
       "saveSuccess": "Impostazioni di notifica salvate",
       "saveError": "Impossibile salvare le impostazioni delle notifiche",
@@ -1993,7 +2003,41 @@
       "testRecipients": "Destinatari (separati da virgola, facoltativo)",
       "testSuccess": "L'e-mail di prova è stata inviata con successo",
       "testError": "Impossibile inviare l'e-mail di prova",
-      "loadError": "Impossibile caricare le impostazioni delle notifiche"
+      "loadError": "Impossibile caricare le impostazioni delle notifiche",
+      "channels": {
+        "title": "Canali di notifica",
+        "description": "Invia gli avvisi relativi alla pubblicazione dei moduli, alle richieste di approvazione in sospeso, al rilevamento di CVE e agli aggiornamenti dello scanner a un webhook, a Slack, a Microsoft Teams o a un elenco di destinatari e-mail creato ad hoc. Le destinazioni vengono memorizzate in forma crittografata e non vengono mai più visualizzate.",
+        "add": "Aggiungi canale",
+        "edit": "Modifica canale",
+        "noChannels": "Non ci sono ancora canali di notifica. Aggiungine uno per ricevere gli avvisi.",
+        "name": "Nome",
+        "typeLabel": "Tipo",
+        "actions": "Azioni",
+        "events": "Eventi",
+        "allEvents": "Tutti gli eventi",
+        "target": "URL di destinazione",
+        "targetHelp": "L'URL del webhook, di Slack o di Teams a cui inviare la richiesta POST.",
+        "targetKeep": "Lasciare vuoto per mantenere l'URL attuale.",
+        "targetEmail": "Indirizzi e-mail dei destinatari",
+        "targetEmailHelp": "Indirizzi e-mail separati da virgole. Inviati tramite il relay SMTP configurato.",
+        "targetEmailKeep": "Lasciare vuoto per mantenere i destinatari attuali.",
+        "type": {
+          "webhook": "Webhook (JSON)",
+          "slack": "Slack",
+          "teams": "Microsoft Teams",
+          "email": "E-mail"
+        },
+        "eventsHelp": "Lascia tutte le caselle deselezionate per ricevere tutti gli eventi.",
+        "enabled": "Abilitato",
+        "test": "Invia test",
+        "testSent": "Notifica di test inviata.",
+        "testError": "Impossibile inviare la notifica di prova",
+        "lastDelivery": "Ultima consegna",
+        "neverSent": "Mai inviato",
+        "deleteTitle": "Elimina canale",
+        "deleteConfirm": "Elimina il canale \"{{name}}\"?",
+        "saveError": "Impossibile salvare il canale"
+      }
     }
   },
   "scmWizard": {

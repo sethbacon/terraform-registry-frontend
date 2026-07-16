@@ -1986,6 +1986,16 @@
       "apiKeyExpirySection": "API 密钥过期通知",
       "warningDays": "到期前几天的提醒",
       "checkIntervalHours": "检查间隔（小时）",
+      "eventsSection": "通知选项",
+      "recipients": "收件人",
+      "recipientsHelp": "用于“模块已发布”、“待审批”、“检测到 CVE”以及“扫描器更新”通知的以逗号分隔的电子邮件地址。若留空，则默认使用 CVE 收件人列表。",
+      "event": {
+        "api_key_expiring": "API密钥即将过期",
+        "module_published": "新模块版本已发布",
+        "approval_pending": "正在等待新批准",
+        "cve_detected": "检测到 CVE",
+        "scanner_update_available": "扫描仪更新已发布"
+      },
       "save": "保存",
       "saveSuccess": "已保存通知设置",
       "saveError": "无法保存通知设置",
@@ -1993,7 +2003,41 @@
       "testRecipients": "收件人（以逗号分隔，可选）",
       "testSuccess": "测试邮件已成功发送",
       "testError": "发送测试邮件失败",
-      "loadError": "无法加载通知设置"
+      "loadError": "无法加载通知设置",
+      "channels": {
+        "title": "通知频道",
+        "description": "将模块发布、待审批、检测到 CVE 以及扫描器更新等警报发送至 Webhook、Slack、Microsoft Teams 或临时电子邮件收件人列表。接收目标以加密形式存储，且不会再次显示。",
+        "add": "添加频道",
+        "edit": "编辑频道",
+        "noChannels": "目前尚无通知频道。请添加一个以接收提醒。",
+        "name": "姓名",
+        "typeLabel": "类型",
+        "actions": "操作",
+        "events": "活动",
+        "allEvents": "所有活动",
+        "target": "目标网址",
+        "targetHelp": "要发送 POST 请求的 webhook、Slack 或 Teams 的传入 webhook URL。",
+        "targetKeep": "若要保留当前网址，请留空。",
+        "targetEmail": "收件人电子邮件",
+        "targetEmailHelp": "以逗号分隔的电子邮件地址。通过已配置的 SMTP 中继发送。",
+        "targetEmailKeep": "如需保留当前收件人，请留空。",
+        "type": {
+          "webhook": "Webhook（JSON）",
+          "slack": "Slack",
+          "teams": "Microsoft Teams",
+          "email": "电子邮件"
+        },
+        "eventsHelp": "请保持所有选项未勾选，以接收所有事件。",
+        "enabled": "已启用",
+        "test": "发送测试",
+        "testSent": "已发送测试通知。",
+        "testError": "发送测试通知失败",
+        "lastDelivery": "最后一次配送",
+        "neverSent": "从未发送过",
+        "deleteTitle": "删除频道",
+        "deleteConfirm": "删除频道“{{name}}”？",
+        "saveError": "无法保存频道"
+      }
     }
   },
   "scmWizard": {

@@ -1986,6 +1986,16 @@
       "apiKeyExpirySection": "APIキーの有効期限切れ通知",
       "warningDays": "有効期限切れの数日前の警告",
       "checkIntervalHours": "点検間隔（時間）",
+      "eventsSection": "通知設定",
+      "recipients": "受取人",
+      "recipientsHelp": "「モジュールの公開」、「承認待ち」、「CVEの検出」、および「スキャナーの更新」に関する通知の宛先として、カンマ区切りのメールアドレスを指定します。空欄の場合は、CVEの受信者リストが自動的に適用されます。",
+      "event": {
+        "api_key_expiring": "APIキーの有効期限切れ",
+        "module_published": "新しいモジュールのバージョンが公開されました",
+        "approval_pending": "新たな承認待ち",
+        "cve_detected": "CVEが検出されました",
+        "scanner_update_available": "スキャナーのアップデートが利用可能です"
+      },
       "save": "保存",
       "saveSuccess": "通知設定が保存されました",
       "saveError": "通知設定の保存に失敗しました",
@@ -1993,7 +2003,41 @@
       "testRecipients": "受信者（カンマ区切り、任意）",
       "testSuccess": "テストメールの送信に成功しました",
       "testError": "テストメールの送信に失敗しました",
-      "loadError": "通知設定の読み込みに失敗しました"
+      "loadError": "通知設定の読み込みに失敗しました",
+      "channels": {
+        "title": "通知チャネル",
+        "description": "モジュールの公開、承認待ち、CVEの検出、およびスキャナーの更新に関するアラートを、Webhook、Slack、Microsoft Teams、またはその都度作成するメール受信者リストに送信します。送信先は暗号化されて保存され、二度と表示されることはありません。",
+        "add": "チャンネルを追加",
+        "edit": "チャンネルを編集する",
+        "noChannels": "まだ通知チャネルはありません。アラートを受け取るには、チャネルを追加してください。",
+        "name": "名前",
+        "typeLabel": "種類",
+        "actions": "アクション",
+        "events": "イベント",
+        "allEvents": "すべてのイベント",
+        "target": "リンク先URL",
+        "targetHelp": "POSTリクエストを送信するWebhook、Slack、またはTeamsの着信Webhook URL。",
+        "targetKeep": "現在のURLを維持する場合は、空欄のままにしてください。",
+        "targetEmail": "受信者のメールアドレス",
+        "targetEmailHelp": "カンマ区切りのメールアドレス。設定されたSMTPリレー経由で送信されます。",
+        "targetEmailKeep": "現在の受信者を維持する場合は、空欄のままにしてください。",
+        "type": {
+          "webhook": "Webhook（JSON）",
+          "slack": "Slack",
+          "teams": "Microsoft Teams",
+          "email": "電子メール"
+        },
+        "eventsHelp": "すべてのチェックを外すと、すべてのイベントを受信できます。",
+        "enabled": "有効",
+        "test": "テストを送信",
+        "testSent": "テスト通知を送信しました。",
+        "testError": "テスト通知の送信に失敗しました",
+        "lastDelivery": "最終配送",
+        "neverSent": "送信されなかった",
+        "deleteTitle": "チャンネルを削除する",
+        "deleteConfirm": "チャンネル「{{name}}」を削除しますか？",
+        "saveError": "チャンネルの保存に失敗しました"
+      }
     }
   },
   "scmWizard": {
