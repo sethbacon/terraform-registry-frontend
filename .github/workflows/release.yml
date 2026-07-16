@@ -139,6 +139,9 @@ jobs:
           scan-type: image
           image-ref: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}@${{ steps.build.outputs.digest }}
           severity: HIGH,CRITICAL
+          # Only fail on vulnerabilities that have a fix available; un-actionable
+          # (no-fix-yet) CVEs shouldn't block a release.
+          ignore-unfixed: true
           exit-code: 1
           format: table
 
