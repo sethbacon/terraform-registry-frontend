@@ -883,6 +883,32 @@
           "text": "Users support full CRUD and soft-delete. Groups are read-only and map to registry organizations. Filtering and pagination are supported."
         }
       }
+    },
+    "notifications": {
+      "title": "Notifications",
+      "overview": "Configure the shared outbound SMTP relay and add notification channels (webhook, Slack, Microsoft Teams, or email) that deliver alerts for module publishing, approval requests, CVE detections, and scanner updates.",
+      "actions": {
+        "smtpConfig": {
+          "heading": "SMTP Configuration",
+          "text": "Set the relay host, port, credentials, and From address used by every email-based notification. Toggle \"Use TLS\" to require an encrypted connection (implicit TLS or STARTTLS) — a relay that can't satisfy it will fail rather than silently send in the clear."
+        },
+        "testEmail": {
+          "heading": "Send Test Email",
+          "text": "After saving SMTP settings, send a test message to one or more comma-separated addresses to confirm the relay accepts your configuration before relying on it for real alerts."
+        },
+        "notificationChannels": {
+          "heading": "Notification Channels",
+          "text": "Add a channel to deliver alerts to a webhook, Slack, Microsoft Teams, or an ad-hoc email recipient list. Each channel can subscribe to specific events or all of them, and can be tested, toggled, or deleted independently. Destination targets are stored encrypted and never shown again after creation."
+        },
+        "recipientsEvents": {
+          "heading": "Recipients & Event Toggles",
+          "text": "The Recipients field and event checkboxes control the shared SMTP fallback used by module published, approval pending, CVE detected, and scanner update alerts when no dedicated channel is configured for that event."
+        },
+        "apiKeyExpiry": {
+          "heading": "API Key Expiry Notifications",
+          "text": "Set how many days before expiry a warning email is sent, and how often (in hours) the background job checks for keys nearing expiration."
+        }
+      }
     }
   },
   "admin": {
