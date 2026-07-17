@@ -1,6 +1,13 @@
 <!-- markdownlint-disable MD013 MD024 MD041 -->
 # Changelog
 
+## [2.17.2](https://github.com/sethbacon/terraform-registry-frontend/compare/v2.17.1...v2.17.2) (2026-07-17)
+
+
+### Bug Fixes
+
+* **notifications:** guard against a null recipients array from the API ([#569](https://github.com/sethbacon/terraform-registry-frontend/issues/569)) ([1115d90](https://github.com/sethbacon/terraform-registry-frontend/commit/1115d90325ad4ccc730f50ec78581fd1d59d443a))
+
 ## [2.17.1](https://github.com/sethbacon/terraform-registry-frontend/compare/v2.17.0...v2.17.1) (2026-07-17)
 
 
