@@ -84,7 +84,7 @@ RUN mkdir -p /var/cache/nginx/client_temp \
     /var/cache/nginx/scgi_temp && \
     chown -R 101:101 /var/cache/nginx && \
     chown -R 101:101 /var/log/nginx && \
-    sed -i 's|pid\s*/var/run/nginx.pid;|pid /tmp/nginx.pid;|' /etc/nginx/nginx.conf
+    sed -i -E 's#pid[[:space:]]+/(var/run|run)/nginx\.pid;#pid /tmp/nginx.pid;#' /etc/nginx/nginx.conf
 
 # Expose ports
 EXPOSE 80 443
