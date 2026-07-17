@@ -86,6 +86,18 @@ describe('NotificationsPage', () => {
     expect(screen.getByDisplayValue('notify@example.com')).toBeInTheDocument()
   })
 
+  // Regression test: a never-configured backend can return recipients: null
+  // (a nil Go slice marshals to JSON null). config.recipients.join(', ') on a
+  // null value threw "Cannot read properties of null (reading 'join')" and
+  // crashed the whole page. Guard: (config.recipients ?? []).join(', ').
+  it('renders without crashing when recipients is null', async () => {
+    getNotificationsConfigMock.mockResolvedValue({ ...fakeConfig, recipients: null })
+    renderPage()
+    await waitFor(() => {
+      expect(screen.getByDisplayValue('smtp.example.com')).toBeInTheDocument()
+    })
+  })
+
   it('shows "configured" helper when password_configured is true', async () => {
     getNotificationsConfigMock.mockResolvedValue(fakeConfig)
     renderPage()
