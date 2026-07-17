@@ -1,6 +1,14 @@
 <!-- markdownlint-disable MD013 MD024 MD041 -->
 # Changelog
 
+## [2.17.1](https://github.com/sethbacon/terraform-registry-frontend/compare/v2.17.0...v2.17.1) (2026-07-17)
+
+
+### Bug Fixes
+
+* **docker:** match /run/nginx.pid in newer nginx base images ([#567](https://github.com/sethbacon/terraform-registry-frontend/issues/567)) ([3ca9036](https://github.com/sethbacon/terraform-registry-frontend/commit/3ca9036eba81ebe45fdba82daf306fdcaccda8ff))
+* **docker:** patch OS CVEs, stop baking the dev TLS key, ignore unfixed CVEs ([#566](https://github.com/sethbacon/terraform-registry-frontend/issues/566)) ([5333305](https://github.com/sethbacon/terraform-registry-frontend/commit/53333054077d9e627335cf914319d989e5ae39c3))
+
 ## [2.17.0](https://github.com/sethbacon/terraform-registry-frontend/compare/v2.16.0...v2.17.0) (2026-07-16)
 
 
