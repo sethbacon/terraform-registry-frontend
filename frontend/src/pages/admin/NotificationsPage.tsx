@@ -457,7 +457,7 @@ const NotificationsPage: React.FC = () => {
         password: '',
         from: config.smtp.from,
         use_tls: config.smtp.use_tls,
-        recipients: config.recipients.join(', '),
+        recipients: (config.recipients ?? []).join(', '),
         events: config.events,
         api_key_expiry_warning_days: config.api_key_expiry_warning_days,
         api_key_expiry_check_interval_hours: config.api_key_expiry_check_interval_hours,
