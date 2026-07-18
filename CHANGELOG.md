@@ -1,6 +1,13 @@
 <!-- markdownlint-disable MD013 MD024 MD041 -->
 # Changelog
 
+## [2.19.0](https://github.com/sethbacon/terraform-registry-frontend/compare/v2.18.0...v2.19.0) (2026-07-18)
+
+
+### Features
+
+* **notifications:** adopt shared NotificationChannelsSection, move API-key-expiry to APIKeysPage ([312b9f3](https://github.com/sethbacon/terraform-registry-frontend/commit/312b9f325b5baf173c37c21511d924005511dd9f))
+
 ## [2.18.0](https://github.com/sethbacon/terraform-registry-frontend/compare/v2.17.2...v2.18.0) (2026-07-18)
 
 
