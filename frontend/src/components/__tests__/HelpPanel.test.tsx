@@ -150,6 +150,13 @@ describe('HelpPanel', () => {
     expect(screen.getByText('Auto-Approval')).toBeInTheDocument()
   })
 
+  it('renders notifications help', () => {
+    renderAtPath('/admin/notifications')
+    expect(screen.getByText('Notifications')).toBeInTheDocument()
+    expect(screen.getByText(/shared outbound SMTP relay/)).toBeInTheDocument()
+    expect(screen.getByText('Notification Channels')).toBeInTheDocument()
+  })
+
   it('renders default help for unknown paths', () => {
     renderAtPath('/some/unknown/path')
     expect(screen.getByText('Help')).toBeInTheDocument()

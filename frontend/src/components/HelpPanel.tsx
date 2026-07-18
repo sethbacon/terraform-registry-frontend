@@ -89,6 +89,7 @@ const HELP_ACTION_KEYS: Record<string, string[]> = {
   securityScanning: ['viewConfiguration', 'summaryStatistics', 'reviewScanResults'],
   mtls: ['viewStatus', 'certificateMappings', 'configurationSource'],
   scim: ['endpointUrls', 'authentication', 'supportedOperations'],
+  notifications: ['smtpConfig', 'testEmail', 'notificationChannels', 'recipientsEvents', 'apiKeyExpiry'],
 }
 
 function makeContent(key: string, t: TStr): HelpContent {
@@ -158,6 +159,8 @@ function getHelpContent(pathname: string, t: TStr): HelpContent {
       return makeContent('mtls', t)
     case '/admin/scim':
       return makeContent('scim', t)
+    case '/admin/notifications':
+      return makeContent('notifications', t)
     default:
       return makeContent('default', t)
   }
