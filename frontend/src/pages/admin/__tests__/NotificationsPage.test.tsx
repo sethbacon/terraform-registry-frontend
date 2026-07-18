@@ -329,7 +329,7 @@ describe('NotificationsPage', () => {
       renderPage()
 
       expect(
-        await screen.findByText('No notification channels yet. Add one to receive alerts.'),
+        await screen.findByText('No notification channels configured yet.'),
       ).toBeInTheDocument()
     })
 
@@ -340,13 +340,13 @@ describe('NotificationsPage', () => {
       createNotificationChannelMock.mockResolvedValue({ ...channel, type: 'webhook' })
       renderPage()
 
-      await screen.findByText('No notification channels yet. Add one to receive alerts.')
+      await screen.findByText('No notification channels configured yet.')
 
       await user.click(screen.getByRole('button', { name: 'Add channel' }))
       const dialog = await screen.findByRole('dialog')
       await user.type(within(dialog).getByLabelText('Name', { exact: false }), 'ops-webhook')
       await user.type(
-        within(dialog).getByLabelText('Destination URL', { exact: false }),
+        within(dialog).getByLabelText('Target URL', { exact: false }),
         'https://example.com/hook',
       )
       await user.click(within(dialog).getByLabelText('CVE detected'))
@@ -375,7 +375,7 @@ describe('NotificationsPage', () => {
       const [sendButton] = within(row).getAllByRole('button')
       await user.click(sendButton)
 
-      await waitFor(() => expect(testNotificationChannelMock).toHaveBeenCalledWith('c1', expect.anything()))
+      await waitFor(() => expect(testNotificationChannelMock).toHaveBeenCalledWith('c1'))
       expect(await screen.findByText('Test notification sent.')).toBeInTheDocument()
     })
 
@@ -389,9 +389,10 @@ describe('NotificationsPage', () => {
       const row = await screen.findByRole('row', { name: /ops-slack/ })
       const rowButtons = within(row).getAllByRole('button')
       await user.click(rowButtons[rowButtons.length - 1])
-      await user.click(await screen.findByTestId('confirm-dialog-confirm'))
+      const dialog = await screen.findByRole('dialog')
+      await user.click(within(dialog).getByRole('button', { name: 'Delete' }))
 
-      await waitFor(() => expect(deleteNotificationChannelMock).toHaveBeenCalledWith('c1', expect.anything()))
+      await waitFor(() => expect(deleteNotificationChannelMock).toHaveBeenCalledWith('c1'))
     })
   })
 })

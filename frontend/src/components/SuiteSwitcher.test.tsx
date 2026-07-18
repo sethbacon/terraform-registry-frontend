@@ -82,13 +82,17 @@ it('drops the sign-in hint when the sibling reports a shared store', async () =>
 })
 
 it('reuses one sibling tab via a stable window name instead of opening a new one', async () => {
+  // Same-origin sibling URL: the stable-name tab-reuse path only applies when the
+  // sibling resolves to this app's own origin (SuiteSwitcher's isSameOrigin gate) —
+  // cross-origin siblings always open via '_blank' + noopener,noreferrer instead.
+  const siblingUrl = `${window.location.origin}/state-manager`
   vi.spyOn(globalThis, 'fetch').mockResolvedValue(
     new Response(
       JSON.stringify({
         sibling: {
           app: 'terraform-state-manager',
           state: 'active',
-          publicUrl: 'https://tfstate.example.com',
+          publicUrl: siblingUrl,
         },
       }),
       { status: 200 },
@@ -100,24 +104,21 @@ it('reuses one sibling tab via a stable window name instead of opening a new one
   fireEvent.click(await screen.findByRole('button', { name: /Open Terraform State Manager/i }))
   // Stable target name (the sibling app id) so the browser reuses that one tab;
   // .focus() brings it forward. NOT '_blank' (which spawns a new tab each click).
-  // noopener,noreferrer added in suite-ui 0.5.3 (audit hardening) severs the
-  // opener relationship so the sibling tab cannot script this one.
-  expect(openSpy).toHaveBeenCalledWith(
-    'https://tfstate.example.com',
-    'terraform-state-manager',
-    'noopener,noreferrer',
-  )
+  // The opener relationship is severed via `opened.opener = null` afterward, not a
+  // noopener flag (which would also drop the stable target name for this origin).
+  expect(openSpy).toHaveBeenCalledWith(siblingUrl, 'terraform-state-manager')
   expect(focus).toHaveBeenCalled()
 })
 
 it('claims this tab under its own app id so the sibling reuses the original tab', async () => {
+  // Same-origin sibling URL — see the previous test for why this matters.
   vi.spyOn(globalThis, 'fetch').mockResolvedValue(
     new Response(
       JSON.stringify({
         sibling: {
           app: 'terraform-state-manager',
           state: 'active',
-          publicUrl: 'https://tfstate.example.com',
+          publicUrl: `${window.location.origin}/state-manager`,
         },
       }),
       { status: 200 },

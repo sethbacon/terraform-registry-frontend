@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import {
   Typography,
   Box,
@@ -38,6 +38,7 @@ import {
 import DeleteIcon from '@mui/icons-material/Delete'
 import AddIcon from '@mui/icons-material/Add'
 import KeyIcon from '@mui/icons-material/Key'
+import { ApiKeyExpirySettingsCard, type ApiKeyExpirySettingsInput } from '@sethbacon/terraform-suite-ui'
 import EmptyState from '../../components/EmptyState'
 import Page from '../../components/Page'
 import PageHeader from '../../components/PageHeader'
@@ -48,6 +49,7 @@ import EditIcon from '@mui/icons-material/Edit'
 import AutorenewIcon from '@mui/icons-material/Autorenew'
 import api from '../../services/api'
 import { APIKey } from '../../types'
+import type { NotificationsConfigInput } from '../../types'
 import { REGISTRY_HOST } from '../../config'
 import { useAuth } from '../../contexts/AuthContext'
 import { AVAILABLE_SCOPES } from '../../types/rbac'
@@ -81,7 +83,34 @@ const APIKeysPage: React.FC = () => {
   const { t } = useTranslation()
   const queryClient = useQueryClient()
   const { allowedScopes, roleTemplate, user } = useAuth()
+  const isAdmin = allowedScopes.includes('admin')
   const [error, setError] = useState<string | null>(null)
+
+  // API-key-expiry notification settings (admin-only). Shares the notifications
+  // config query/endpoint with admin/NotificationsPage -- saving here reads the
+  // full current config and overrides only the expiry-related fields, since
+  // the backend endpoint is a single full-replace PUT.
+  const expiryConfigQuery = useQuery({
+    queryKey: queryKeys.notifications.config(),
+    queryFn: () => api.getNotificationsConfig(),
+    enabled: isAdmin,
+  })
+  const saveExpiryMutation = useMutation({
+    mutationFn: (input: ApiKeyExpirySettingsInput) => {
+      const current = expiryConfigQuery.data
+      if (!current) throw new Error(t('admin.apiKeys.expiryLoadError'))
+      const payload: NotificationsConfigInput = {
+        enabled: current.enabled,
+        smtp: { ...current.smtp, password: '' },
+        recipients: current.recipients,
+        events: { ...current.events, api_key_expiring: input.apiKeyExpiring },
+        api_key_expiry_warning_days: input.warningDays,
+        api_key_expiry_check_interval_hours: input.checkIntervalHours,
+      }
+      return api.saveNotificationsConfig(payload)
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: queryKeys.notifications.config() }),
+  })
 
   // Memberships query
   const { data: memberships = [], isLoading: membershipsLoading } = useQuery({
@@ -483,6 +512,20 @@ const APIKeysPage: React.FC = () => {
         <Alert severity="warning" sx={{ mb: 3 }}>
           {t('admin.apiKeys.warnNoOrg')}
         </Alert>
+      )}
+      {isAdmin && (
+        <ApiKeyExpirySettingsCard
+          value={{
+            enabled: expiryConfigQuery.data?.enabled ?? false,
+            apiKeyExpiring: expiryConfigQuery.data?.events.api_key_expiring ?? false,
+            warningDays: expiryConfigQuery.data?.api_key_expiry_warning_days ?? 7,
+            checkIntervalHours: expiryConfigQuery.data?.api_key_expiry_check_interval_hours ?? 24,
+          }}
+          isLoading={expiryConfigQuery.isLoading}
+          onSave={async (input) => {
+            await saveExpiryMutation.mutateAsync(input)
+          }}
+        />
       )}
       {/* API Keys Table */}
       <Paper>
