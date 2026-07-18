@@ -1,6 +1,13 @@
 <!-- markdownlint-disable MD013 MD024 MD041 -->
 # Changelog
 
+## [2.18.0](https://github.com/sethbacon/terraform-registry-frontend/compare/v2.17.2...v2.18.0) (2026-07-18)
+
+
+### Features
+
+* **help:** add context help for the admin Notifications page ([#571](https://github.com/sethbacon/terraform-registry-frontend/issues/571)) ([7ae704a](https://github.com/sethbacon/terraform-registry-frontend/commit/7ae704a8723ede2af89f459ab039398107d73839))
+
 ## [2.17.2](https://github.com/sethbacon/terraform-registry-frontend/compare/v2.17.1...v2.17.2) (2026-07-17)
 
 
