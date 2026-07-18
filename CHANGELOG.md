@@ -1,6 +1,13 @@
 <!-- markdownlint-disable MD013 MD024 MD041 -->
 # Changelog
 
+## [2.19.1](https://github.com/sethbacon/terraform-registry-frontend/compare/v2.19.0...v2.19.1) (2026-07-18)
+
+
+### Bug Fixes
+
+* **ci:** grant contents:write to the docker job for SBOM release-asset upload ([#576](https://github.com/sethbacon/terraform-registry-frontend/issues/576)) ([ccff351](https://github.com/sethbacon/terraform-registry-frontend/commit/ccff351258826486e989165adf926bc39e97667e))
+
 ## [2.19.0](https://github.com/sethbacon/terraform-registry-frontend/compare/v2.18.0...v2.19.0) (2026-07-18)
 
 
