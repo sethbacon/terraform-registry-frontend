@@ -11,6 +11,8 @@ const updateAPIKeyMock = vi.fn()
 const deleteAPIKeyMock = vi.fn()
 const rotateAPIKeyMock = vi.fn()
 const getCurrentUserMembershipsMock = vi.fn()
+const getNotificationsConfigMock = vi.fn()
+const saveNotificationsConfigMock = vi.fn()
 
 vi.mock('../../../services/api', () => ({
   default: {
@@ -20,6 +22,8 @@ vi.mock('../../../services/api', () => ({
     deleteAPIKey: (...args: unknown[]) => deleteAPIKeyMock(...args),
     rotateAPIKey: (...args: unknown[]) => rotateAPIKeyMock(...args),
     getCurrentUserMemberships: (...args: unknown[]) => getCurrentUserMembershipsMock(...args),
+    getNotificationsConfig: (...args: unknown[]) => getNotificationsConfigMock(...args),
+    saveNotificationsConfig: (...args: unknown[]) => saveNotificationsConfigMock(...args),
   },
 }))
 
@@ -101,13 +105,28 @@ describe('APIKeysPage', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     getCurrentUserMembershipsMock.mockResolvedValue(fakeMemberships)
+    getNotificationsConfigMock.mockResolvedValue({
+      enabled: true,
+      smtp: { host: 'smtp.example.com', port: 587, username: '', from: 'notify@example.com', use_tls: true },
+      recipients: [],
+      events: {
+        api_key_expiring: true,
+        module_published: true,
+        approval_pending: true,
+        cve_detected: true,
+        scanner_update_available: true,
+      },
+      api_key_expiry_warning_days: 7,
+      api_key_expiry_check_interval_hours: 24,
+      password_configured: true,
+    })
   })
 
   // 1. Loading state
   it('shows a loading spinner while API keys are being fetched', () => {
     listAPIKeysMock.mockReturnValue(new Promise(() => {}))
     renderPage()
-    expect(screen.getByRole('progressbar')).toBeInTheDocument()
+    expect(screen.getAllByRole('progressbar').length).toBeGreaterThan(0)
   })
 
   // 2. Heading and subheading
