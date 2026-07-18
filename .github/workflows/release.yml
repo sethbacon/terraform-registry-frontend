@@ -83,7 +83,11 @@ jobs:
     runs-on: ubuntu-latest
     needs: [guard, ci]
     permissions:
-      contents: read
+      # write (not read): anchore/sbom-action's upload-release-assets default
+      # attaches the generated SBOM to the tag's GitHub Release (already created
+      # by release-please) — that upload 403s ("Resource not accessible by
+      # integration") without contents: write.
+      contents: write
       packages: write # required to push to ghcr.io
       id-token: write # required for Sigstore OIDC (cosign keyless signing)
       attestations: write # required for SLSA provenance attestation
