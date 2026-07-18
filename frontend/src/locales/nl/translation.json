@@ -883,6 +883,32 @@
           "text": "Gebruikers ondersteunen volledige CRUD-functionaliteit en soft-delete. Groepen zijn alleen-lezen en zijn gekoppeld aan organisaties in het register. Filteren en paginering worden ondersteund."
         }
       }
+    },
+    "notifications": {
+      "title": "Meldingen",
+      "overview": "Configureer de gedeelde uitgaande SMTP-relay en voeg meldingskanalen toe (webhook, Slack, Microsoft Teams of e-mail) die meldingen versturen bij het publiceren van modules, goedkeuringsverzoeken, CVE-detecties en scannerupdates.",
+      "actions": {
+        "smtpConfig": {
+          "heading": "SMTP-configuratie",
+          "text": "Stel de relay-host, poort, inloggegevens en het ‘Van’-adres in die bij elke e-mailmelding worden gebruikt. Schakel ‘TLS gebruiken’ in om een versleutelde verbinding te vereisen (impliciete TLS of STARTTLS) — een relay die hier niet aan voldoet, zal de verzending afbreken in plaats van de e-mail onversleuteld te versturen."
+        },
+        "testEmail": {
+          "heading": "Test-e-mail verzenden",
+          "text": "Nadat u de SMTP-instellingen hebt opgeslagen, stuurt u een testbericht naar een of meer adressen (gescheiden door komma’s) om te controleren of de relay uw configuratie accepteert, voordat u deze gaat gebruiken voor echte meldingen."
+        },
+        "notificationChannels": {
+          "heading": "Meldingskanalen",
+          "text": "Voeg een kanaal toe om meldingen te versturen naar een webhook, Slack, Microsoft Teams of een ad-hoclijst met e-mailontvangers. Elk kanaal kan zich abonneren op specifieke gebeurtenissen of op alle gebeurtenissen, en kan afzonderlijk worden getest, in- of uitgeschakeld of verwijderd. De bestemmingen worden versleuteld opgeslagen en worden na aanmaak nooit meer weergegeven."
+        },
+        "recipientsEvents": {
+          "heading": "Ontvangers en evenementschakelaars",
+          "text": "Het veld ‘Ontvangers’ en de selectievakjes voor gebeurtenissen bepalen de gedeelde SMTP-fallback die wordt gebruikt voor waarschuwingen van het type ‘module gepubliceerd’, ‘goedkeuring in behandeling’, ‘CVE gedetecteerd’ en ‘scannerupdate’, wanneer er voor die gebeurtenis geen specifiek kanaal is geconfigureerd."
+        },
+        "apiKeyExpiry": {
+          "heading": "Meldingen over het verlopen van API-sleutels",
+          "text": "Stel in hoeveel dagen voor het verstrijken van de geldigheidsduur er een waarschuwingsmail wordt verzonden, en hoe vaak (in uren) de achtergrondtaak controleert of er sleutels zijn waarvan de geldigheidsduur bijna afloopt."
+        }
+      }
     }
   },
   "admin": {

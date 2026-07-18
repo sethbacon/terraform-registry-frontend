@@ -883,6 +883,32 @@
           "text": "Les utilisateurs disposent de toutes les fonctionnalités CRUD et de la suppression temporaire. Les groupes sont en lecture seule et correspondent aux organisations du registre. Le filtrage et la pagination sont pris en charge."
         }
       }
+    },
+    "notifications": {
+      "title": "Notifications",
+      "overview": "Configurez le relais SMTP sortant partagé et ajoutez des canaux de notification (webhook, Slack, Microsoft Teams ou e-mail) qui envoient des alertes concernant la publication de modules, les demandes d'approbation, les détections de CVE et les mises à jour du scanner.",
+      "actions": {
+        "smtpConfig": {
+          "heading": "Configuration SMTP",
+          "text": "Configurez l'hôte du relais, le port, les identifiants et l'adresse d'expéditeur utilisés pour chaque notification par e-mail. Activez ou désactivez l'option « Utiliser TLS » pour exiger une connexion chiffrée (TLS implicite ou STARTTLS) — un relais ne pouvant pas satisfaire cette exigence échouera plutôt que d'envoyer silencieusement les messages en clair."
+        },
+        "testEmail": {
+          "heading": "Envoyer un e-mail de test",
+          "text": "Après avoir enregistré les paramètres SMTP, envoyez un message de test à une ou plusieurs adresses séparées par des virgules afin de vérifier que le relais accepte votre configuration avant de l'utiliser pour les alertes réelles."
+        },
+        "notificationChannels": {
+          "heading": "Canaux de notification",
+          "text": "Ajoutez un canal pour envoyer des alertes vers un webhook, Slack, Microsoft Teams ou une liste de destinataires e-mail définie au cas par cas. Chaque canal peut être abonné à des événements spécifiques ou à l'ensemble des événements, et peut être testé, activé ou désactivé, ou encore supprimé de manière indépendante. Les cibles de destination sont stockées sous forme chiffrée et ne sont plus jamais affichées après leur création."
+        },
+        "recipientsEvents": {
+          "heading": "Destinataires et boutons de sélection des événements",
+          "text": "Le champ « Destinataires » et les cases à cocher des événements permettent de contrôler le canal SMTP de secours partagé utilisé par les alertes « Module publié », « En attente d'approbation », « CVE détecté » et « Mise à jour du scanner » lorsqu'aucun canal dédié n'est configuré pour cet événement."
+        },
+        "apiKeyExpiry": {
+          "heading": "Notifications d'expiration des clés API",
+          "text": "Définissez le nombre de jours avant l'expiration à partir duquel un e-mail d'avertissement est envoyé, ainsi que la fréquence (en heures) à laquelle la tâche d'arrière-plan vérifie les clés dont l'expiration est proche."
+        }
+      }
     }
   },
   "admin": {

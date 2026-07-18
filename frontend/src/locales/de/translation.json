@@ -883,6 +883,32 @@
           "text": "Benutzer unterstützen vollständige CRUD-Funktionen und Soft-Delete. Gruppen sind schreibgeschützt und werden den Organisationen im Register zugeordnet. Filterung und Paginierung werden unterstützt."
         }
       }
+    },
+    "notifications": {
+      "title": "Benachrichtigungen",
+      "overview": "Konfigurieren Sie den gemeinsam genutzten SMTP-Relay für den ausgehenden Datenverkehr und fügen Sie Benachrichtigungskanäle (Webhook, Slack, Microsoft Teams oder E-Mail) hinzu, über die Benachrichtigungen zu Modulveröffentlichungen, Genehmigungsanfragen, CVE-Erkennungen und Scanner-Updates versendet werden.",
+      "actions": {
+        "smtpConfig": {
+          "heading": "SMTP-Konfiguration",
+          "text": "Legen Sie den Relay-Host, den Port, die Anmeldedaten und die Absenderadresse fest, die für jede E-Mail-Benachrichtigung verwendet werden. Aktivieren Sie die Option „TLS verwenden“, um eine verschlüsselte Verbindung (implizites TLS oder STARTTLS) zu erzwingen – ein Relay, das diese Anforderung nicht erfüllen kann, wird den Vorgang abbrechen, anstatt die E-Mail stillschweigend unverschlüsselt zu versenden."
+        },
+        "testEmail": {
+          "heading": "Test-E-Mail senden",
+          "text": "Nachdem Sie die SMTP-Einstellungen gespeichert haben, senden Sie eine Testnachricht an eine oder mehrere durch Kommas getrennte Adressen, um sicherzustellen, dass der Relay-Server Ihre Konfiguration akzeptiert, bevor Sie ihn für echte Benachrichtigungen nutzen."
+        },
+        "notificationChannels": {
+          "heading": "Benachrichtigungskanäle",
+          "text": "Fügen Sie einen Kanal hinzu, um Benachrichtigungen an einen Webhook, an Slack, Microsoft Teams oder an eine Ad-hoc-E-Mail-Empfängerliste zu senden. Jeder Kanal kann bestimmte Ereignisse oder alle Ereignisse abonnieren und kann unabhängig von anderen Kanälen getestet, aktiviert oder deaktiviert bzw. gelöscht werden. Die Zieladressen werden verschlüsselt gespeichert und nach ihrer Erstellung nicht mehr angezeigt."
+        },
+        "recipientsEvents": {
+          "heading": "Empfänger & Veranstaltungsschalter",
+          "text": "Das Feld „Empfänger“ und die Kontrollkästchen für Ereignisse steuern den gemeinsamen SMTP-Fallback, der bei Warnmeldungen zu veröffentlichten Modulen, ausstehenden Genehmigungen, erkannten CVEs und Scanner-Updates verwendet wird, wenn für das jeweilige Ereignis kein dedizierter Kanal konfiguriert ist."
+        },
+        "apiKeyExpiry": {
+          "heading": "Benachrichtigungen zum Ablauf von API-Schlüsseln",
+          "text": "Legen Sie fest, wie viele Tage vor Ablauf eine Warn-E-Mail versendet wird und in welchen Zeitabständen (in Stunden) der Hintergrundjob nach Schlüsseln sucht, deren Gültigkeit bald abläuft."
+        }
+      }
     }
   },
   "admin": {

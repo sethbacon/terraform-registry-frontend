@@ -883,6 +883,32 @@
           "text": "Gli utenti dispongono di funzionalità CRUD complete e della funzione di eliminazione temporanea. I gruppi sono di sola lettura e corrispondono alle organizzazioni presenti nel registro. Sono supportate le funzioni di filtraggio e paginazione."
         }
       }
+    },
+    "notifications": {
+      "title": "Notifiche",
+      "overview": "Configurare il relay SMTP in uscita condiviso e aggiungere canali di notifica (webhook, Slack, Microsoft Teams o e-mail) che inviano avvisi relativi alla pubblicazione dei moduli, alle richieste di approvazione, ai rilevamenti CVE e agli aggiornamenti dello scanner.",
+      "actions": {
+        "smtpConfig": {
+          "heading": "Configurazione SMTP",
+          "text": "Imposta l'host del relay, la porta, le credenziali e l'indirizzo del mittente utilizzati per ogni notifica via e-mail. Attiva/disattiva l'opzione \"Usa TLS\" per richiedere una connessione crittografata (TLS implicito o STARTTLS): un relay che non soddisfa tale requisito genererà un errore anziché inviare silenziosamente il messaggio in chiaro."
+        },
+        "testEmail": {
+          "heading": "Invia email di prova",
+          "text": "Dopo aver salvato le impostazioni SMTP, invia un messaggio di prova a uno o più indirizzi separati da virgole per verificare che il relay accetti la tua configurazione prima di utilizzarla per gli avvisi effettivi."
+        },
+        "notificationChannels": {
+          "heading": "Canali di notifica",
+          "text": "Aggiungi un canale per inviare notifiche a un webhook, a Slack, a Microsoft Teams o a un elenco di destinatari e-mail creato ad hoc. Ogni canale può essere associato a eventi specifici o a tutti gli eventi e può essere testato, attivato o disattivato oppure eliminato in modo indipendente. Le destinazioni vengono memorizzate in forma crittografata e non vengono mai più visualizzate dopo la creazione."
+        },
+        "recipientsEvents": {
+          "heading": "Destinatari e opzioni di attivazione/disattivazione degli eventi",
+          "text": "Il campo “Destinatari” e le caselle di selezione degli eventi controllano il fallback SMTP condiviso utilizzato dagli avvisi relativi a moduli pubblicati, approvazioni in sospeso, rilevamento di CVE e aggiornamenti dello scanner, quando non è configurato alcun canale dedicato per quell’evento."
+        },
+        "apiKeyExpiry": {
+          "heading": "Notifiche relative alla scadenza delle chiavi API",
+          "text": "Imposta il numero di giorni prima della scadenza in cui inviare un'e-mail di avviso e la frequenza (in ore) con cui il processo in background verifica la presenza di chiavi in scadenza."
+        }
+      }
     }
   },
   "admin": {

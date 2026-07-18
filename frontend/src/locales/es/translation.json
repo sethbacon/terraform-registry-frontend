@@ -883,6 +883,32 @@
           "text": "Los usuarios disponen de funciones completas de CRUD y eliminación temporal. Los grupos son de solo lectura y se corresponden con las organizaciones del registro. Se admiten funciones de filtrado y paginación."
         }
       }
+    },
+    "notifications": {
+      "title": "Notificaciones",
+      "overview": "Configura el relé SMTP de salida compartido y añade canales de notificación (webhook, Slack, Microsoft Teams o correo electrónico) que envíen alertas sobre la publicación de módulos, las solicitudes de aprobación, las detecciones de CVE y las actualizaciones del escáner.",
+      "actions": {
+        "smtpConfig": {
+          "heading": "Configuración de SMTP",
+          "text": "Configura el servidor de retransmisión, el puerto, las credenciales y la dirección de remitente que se utilizan en todas las notificaciones por correo electrónico. Activa o desactiva la opción «Usar TLS» para exigir una conexión cifrada (TLS implícito o STARTTLS); un servidor de retransmisión que no cumpla este requisito fallará en lugar de enviar el mensaje de forma silenciosa sin cifrar."
+        },
+        "testEmail": {
+          "heading": "Enviar correo electrónico de prueba",
+          "text": "Después de guardar la configuración de SMTP, envía un mensaje de prueba a una o varias direcciones separadas por comas para confirmar que el servidor de retransmisión acepta tu configuración antes de utilizarlo para alertas reales."
+        },
+        "notificationChannels": {
+          "heading": "Canales de notificación",
+          "text": "Añade un canal para enviar alertas a un webhook, a Slack, a Microsoft Teams o a una lista de destinatarios de correo electrónico ad hoc. Cada canal puede suscribirse a eventos específicos o a todos ellos, y se puede probar, activar o desactivar, o eliminar de forma independiente. Los destinos se almacenan cifrados y nunca vuelven a mostrarse tras su creación."
+        },
+        "recipientsEvents": {
+          "heading": "Destinatarios y opciones de eventos",
+          "text": "El campo «Destinatarios» y las casillas de selección de eventos controlan el canal SMTP alternativo compartido que utilizan las alertas de módulos publicados, pendientes de aprobación, con CVE detectado y de actualización del escáner cuando no se ha configurado ningún canal específico para ese evento."
+        },
+        "apiKeyExpiry": {
+          "heading": "Notificaciones sobre la caducidad de las claves API",
+          "text": "Establece con cuántos días de antelación al vencimiento se envía un correo electrónico de aviso y con qué frecuencia (en horas) la tarea en segundo plano comprueba si hay claves a punto de caducar."
+        }
+      }
     }
   },
   "admin": {

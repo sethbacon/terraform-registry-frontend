@@ -883,6 +883,32 @@
           "text": "Brukerne har tilgang til full CRUD-funksjonalitet og midlertidig sletting. Grupper er skrivebeskyttet og tilordnes organisasjoner i registeret. Filtrering og paginering støttes."
         }
       }
+    },
+    "notifications": {
+      "title": "Varsler",
+      "overview": "Konfigurer det delte utgående SMTP-reléet og legg til varslingskanaler (webhook, Slack, Microsoft Teams eller e-post) som sender varsler om modulpublisering, godkjenningsforespørsler, CVE-deteksjoner og skanneroppdateringer.",
+      "actions": {
+        "smtpConfig": {
+          "heading": "SMTP-konfigurasjon",
+          "text": "Angi relévært, port, påloggingsopplysninger og «Fra»-adresse som skal brukes i alle e-postbaserte varsler. Slå på «Bruk TLS» for å kreve en kryptert tilkobling (implicit TLS eller STARTTLS) – et relé som ikke oppfyller dette kravet, vil mislykkes i stedet for å sende meldingen ukryptert uten å gi beskjed om det."
+        },
+        "testEmail": {
+          "heading": "Send test-e-post",
+          "text": "Etter at du har lagret SMTP-innstillingene, bør du sende en testmelding til én eller flere adresser, adskilt med komma, for å bekrefte at reléet godtar konfigurasjonen din før du bruker den til egentlige varsler."
+        },
+        "notificationChannels": {
+          "heading": "Varslingskanaler",
+          "text": "Legg til en kanal for å sende varsler til en webhook, Slack, Microsoft Teams eller en ad hoc-liste over e-postmottakere. Hver kanal kan abonnere på bestemte hendelser eller alle hendelser, og kan testes, aktiveres eller deaktiveres eller slettes hver for seg. Målene lagres kryptert og vises aldri igjen etter at de er opprettet."
+        },
+        "recipientsEvents": {
+          "heading": "Mottakere og hendelsesbrytere",
+          "text": "Feltet «Mottakere» og avmerkingsboksene for hendelser styrer den delte SMTP-reservekanalen som brukes av varsler om publiserte moduler, ventende godkjenninger, oppdagede CVE-er og skanneroppdateringer når det ikke er konfigurert noen egen kanal for den aktuelle hendelsen."
+        },
+        "apiKeyExpiry": {
+          "heading": "Varsler om utløp av API-nøkler",
+          "text": "Angi hvor mange dager før utløpsdatoen det skal sendes en varslings-e-post, og hvor ofte (i timer) bakgrunnsjobben skal sjekke om det finnes nøkler som snart utløper."
+        }
+      }
     }
   },
   "admin": {
