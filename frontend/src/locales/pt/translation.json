@@ -883,6 +883,32 @@
           "text": "Os utilizadores têm acesso a todas as funcionalidades CRUD e à eliminação temporária. Os grupos são de leitura apenas e correspondem às organizações do registo. São suportadas as funcionalidades de filtragem e paginação."
         }
       }
+    },
+    "notifications": {
+      "title": "Notificações",
+      "overview": "Configure o relé SMTP de saída partilhado e adicione canais de notificação (webhook, Slack, Microsoft Teams ou e-mail) que enviem alertas relativos à publicação de módulos, pedidos de aprovação, deteções de CVE e atualizações do scanner.",
+      "actions": {
+        "smtpConfig": {
+          "heading": "Configuração do SMTP",
+          "text": "Defina o servidor de retransmissão, a porta, as credenciais e o endereço de remetente utilizados em todas as notificações por e-mail. Ative ou desative a opção «Utilizar TLS» para exigir uma ligação encriptada (TLS implícito ou STARTTLS) — um servidor de retransmissão que não cumpra este requisito irá falhar, em vez de enviar a mensagem em texto simples sem aviso prévio."
+        },
+        "testEmail": {
+          "heading": "Enviar e-mail de teste",
+          "text": "Depois de guardar as definições SMTP, envie uma mensagem de teste para um ou mais endereços separados por vírgulas, para confirmar que o servidor de retransmissão aceita a sua configuração antes de a utilizar para alertas reais."
+        },
+        "notificationChannels": {
+          "heading": "Canais de notificação",
+          "text": "Adicione um canal para enviar alertas para um webhook, para o Slack, para o Microsoft Teams ou para uma lista de destinatários de e-mail ad hoc. Cada canal pode subscrever eventos específicos ou todos eles, e pode ser testado, ativado ou desativado, ou eliminado de forma independente. Os destinos são armazenados de forma encriptada e nunca mais são apresentados após a criação."
+        },
+        "recipientsEvents": {
+          "heading": "Destinatários e botões de ativação/desativação de eventos",
+          "text": "O campo «Destinatários» e as caixas de seleção de eventos controlam o recurso SMTP partilhado utilizado pelos alertas de módulos publicados, em espera de aprovação, deteção de CVE e atualização do scanner, quando não está configurado nenhum canal dedicado para esse evento."
+        },
+        "apiKeyExpiry": {
+          "heading": "Notificações de expiração da chave API",
+          "text": "Defina quantos dias antes do prazo de validade é enviado um e-mail de aviso e com que frequência (em horas) a tarefa em segundo plano verifica as chaves que estão prestes a expirar."
+        }
+      }
     }
   },
   "admin": {
