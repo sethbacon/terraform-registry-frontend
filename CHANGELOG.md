@@ -1,6 +1,13 @@
 <!-- markdownlint-disable MD013 MD024 MD041 -->
 # Changelog
 
+## [2.19.2](https://github.com/sethbacon/terraform-registry-frontend/compare/v2.19.1...v2.19.2) (2026-07-19)
+
+
+### Bug Fixes
+
+* **ci:** disable SBOM release-asset upload (releases are immutable here) ([#578](https://github.com/sethbacon/terraform-registry-frontend/issues/578)) ([89ddb86](https://github.com/sethbacon/terraform-registry-frontend/commit/89ddb864815baebeb29d43385fdf8df625a23c5f))
+
 ## [2.19.1](https://github.com/sethbacon/terraform-registry-frontend/compare/v2.19.0...v2.19.1) (2026-07-18)
 
 
