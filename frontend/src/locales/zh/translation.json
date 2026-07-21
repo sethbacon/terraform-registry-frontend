@@ -1999,8 +1999,8 @@
     "notifications": {
       "pageTitle": "通知",
       "pageSubtitle": "配置电子邮件通知和 SMTP 设置",
-      "enabled": "启用通知",
-      "smtpSection": "SMTP 配置",
+      "smtpSection": "SMTP 中继设置",
+      "smtpSectionDescription": "用于发送通知频道邮件、CVE 警报和扫描器更新警报的共享外发邮件服务器。",
       "host": "主持人",
       "port": "港口",
       "username": "用户名",
@@ -2012,11 +2012,7 @@
       "apiKeyExpirySection": "API 密钥过期通知",
       "warningDays": "到期前几天的提醒",
       "checkIntervalHours": "检查间隔（小时）",
-      "eventsSection": "通知选项",
-      "recipients": "收件人",
-      "recipientsHelp": "用于“模块已发布”、“待审批”、“检测到 CVE”以及“扫描器更新”通知的以逗号分隔的电子邮件地址。若留空，则默认使用 CVE 收件人列表。",
       "event": {
-        "api_key_expiring": "API密钥即将过期",
         "module_published": "新模块版本已发布",
         "approval_pending": "正在等待新批准",
         "cve_detected": "检测到 CVE",

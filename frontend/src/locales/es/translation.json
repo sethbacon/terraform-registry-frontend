@@ -1999,8 +1999,8 @@
     "notifications": {
       "pageTitle": "Notificaciones",
       "pageSubtitle": "Configurar las notificaciones por correo electrónico y los ajustes de SMTP",
-      "enabled": "Activar notificaciones",
-      "smtpSection": "Configuración de SMTP",
+      "smtpSection": "Configuración del relé SMTP",
+      "smtpSectionDescription": "El servidor de correo saliente compartido que se utiliza para los correos electrónicos del canal de notificaciones, las alertas CVE y las alertas de actualización del escáner.",
       "host": "Anfitrión",
       "port": "Puerto",
       "username": "Nombre de usuario",
@@ -2012,11 +2012,7 @@
       "apiKeyExpirySection": "Notificaciones sobre la caducidad de las claves API",
       "warningDays": "Aviso unos días antes de la fecha de vencimiento",
       "checkIntervalHours": "Intervalo de revisión (horas)",
-      "eventsSection": "Opciones de notificación",
-      "recipients": "Destinatarios",
-      "recipientsHelp": "Direcciones de correo electrónico separadas por comas para las notificaciones de módulos publicados, pendientes de aprobación, CVE detectados y actualizaciones del escáner. Si se deja en blanco, se recurre a la lista de destinatarios de CVE.",
       "event": {
-        "api_key_expiring": "Caducidad de la clave API",
         "module_published": "Se ha publicado una nueva versión del módulo",
         "approval_pending": "A la espera de una nueva autorización",
         "cve_detected": "Se ha detectado una vulnerabilidad CVE",

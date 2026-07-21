@@ -1999,8 +1999,8 @@
     "notifications": {
       "pageTitle": "Meldingen",
       "pageSubtitle": "E-mailmeldingen en SMTP-instellingen configureren",
-      "enabled": "Meldingen inschakelen",
-      "smtpSection": "SMTP-configuratie",
+      "smtpSection": "SMTP-relay-instellingen",
+      "smtpSectionDescription": "De gedeelde uitgaande mailserver die wordt gebruikt voor e-mails via het meldingskanaal, CVE-waarschuwingen en meldingen over scannerupdates.",
       "host": "Gastheer",
       "port": "Haven",
       "username": "Gebruikersnaam",
@@ -2012,11 +2012,7 @@
       "apiKeyExpirySection": "Meldingen over het verlopen van API-sleutels",
       "warningDays": "Waarschuwing enkele dagen voor het verstrijken van de geldigheidsduur",
       "checkIntervalHours": "Controle-interval (uren)",
-      "eventsSection": "Meldingsopties",
-      "recipients": "Ontvangers",
-      "recipientsHelp": "Door komma’s gescheiden e-mailadressen voor meldingen over gepubliceerde modules, in afwachting van goedkeuring, gedetecteerde CVE’s en scannerupdates. Als dit veld leeg wordt gelaten, wordt de CVE-ontvangerslijst gebruikt.",
       "event": {
-        "api_key_expiring": "API-sleutel verloopt",
         "module_published": "Nieuwe moduleversie gepubliceerd",
         "approval_pending": "Nieuwe goedkeuring in behandeling",
         "cve_detected": "CVE gedetecteerd",

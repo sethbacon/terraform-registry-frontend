@@ -1999,8 +1999,8 @@
     "notifications": {
       "pageTitle": "Varsler",
       "pageSubtitle": "Konfigurer e-postvarsler og SMTP-innstillinger",
-      "enabled": "Aktiver varsler",
-      "smtpSection": "SMTP-konfigurasjon",
+      "smtpSection": "Innstillinger for SMTP-videresending",
+      "smtpSectionDescription": "Den delte utgående e-postserveren som brukes til e-poster fra varslingskanaler, CVE-varsler og varsler om skanneroppdateringer.",
       "host": "Vert",
       "port": "Havn",
       "username": "Brukernavn",
@@ -2012,11 +2012,7 @@
       "apiKeyExpirySection": "Varsler om utløp av API-nøkler",
       "warningDays": "Varsel noen dager før utløpsdatoen",
       "checkIntervalHours": "Kontrollintervall (timer)",
-      "eventsSection": "Varslingsalternativer",
-      "recipients": "Mottakere",
-      "recipientsHelp": "E-postadresser, atskilt med komma, for varsler om publiserte moduler, ventende godkjenning, oppdagede CVE-er og oppdateringer av skanneren. Hvis feltet er tomt, brukes CVE-mottakerlisten som standard.",
       "event": {
-        "api_key_expiring": "API-nøkkelen utløper",
         "module_published": "Ny modulversjon publisert",
         "approval_pending": "Ny godkjenning venter",
         "cve_detected": "CVE oppdaget",
