@@ -1,6 +1,14 @@
 <!-- markdownlint-disable MD013 MD024 MD041 -->
 # Changelog
 
+## [2.19.3](https://github.com/sethbacon/terraform-registry-frontend/compare/v2.19.2...v2.19.3) (2026-07-21)
+
+
+### Bug Fixes
+
+* **admin:** align Notifications page UX with State Manager's cleaner layout ([#584](https://github.com/sethbacon/terraform-registry-frontend/issues/584)) ([cd5226f](https://github.com/sethbacon/terraform-registry-frontend/commit/cd5226f571305963bd59a320071da236bccf4c77))
+* **security:** resolve high-severity vulns and CodeQL Python gap ([#588](https://github.com/sethbacon/terraform-registry-frontend/issues/588)) ([695585f](https://github.com/sethbacon/terraform-registry-frontend/commit/695585f8a59f5c120f81300ef0f9fcfc8214beb7))
+
 ## [2.19.2](https://github.com/sethbacon/terraform-registry-frontend/compare/v2.19.1...v2.19.2) (2026-07-19)
 
 
