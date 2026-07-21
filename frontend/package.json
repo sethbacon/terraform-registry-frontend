@@ -31,7 +31,7 @@
     "@mui/icons-material": "^9.2.0",
     "@mui/material": "^9.2.0",
     "@mui/material-pigment-css": "^9.2.0",
-    "@sethbacon/terraform-suite-ui": "0.6.0",
+    "@sethbacon/terraform-suite-ui": "0.6.1",
     "@tanstack/react-query": "^5.101.2",
     "@tanstack/react-query-devtools": "^5.101.2",
     "@testing-library/dom": "^10.4.1",
