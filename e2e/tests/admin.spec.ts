@@ -262,16 +262,14 @@ test.describe('Admin: Dashboard', () => {
   test('dashboard page loads with stat cards', async ({ loggedInPage: page }) => {
     await page.goto('/admin');
 
-    // Wait for loading to finish
-    await page.waitForSelector(
-      '[class*="MuiPaper"], [class*="MuiCard"], [class*="MuiCircularProgress"]',
-      { timeout: 10_000 }
-    );
-
-    const loadingSpinner = page.locator('[class*="MuiCircularProgress"]').first();
-    if (await loadingSpinner.isVisible()) {
-      await expect(loadingSpinner).toBeHidden({ timeout: 15_000 });
-    }
+    // Wait directly for settled content -- either stat-card/health-pill Paper
+    // elements (success) or the error Alert -- instead of a spinner-check
+    // dance, which races a fast backend (MuiPaper/MuiContainer can appear
+    // while the stats call is still in-flight; see dcf87d6/7c1646c for the
+    // same fix applied to the API Keys/Storage E2E tests).
+    const paper = page.locator('[class*="MuiPaper"]');
+    const alert = page.locator('[class*="MuiAlert"]');
+    await expect(paper.or(alert).first()).toBeVisible({ timeout: 15_000 });
 
     // Stat cards or content should be present
     const content = await page.locator('main, [class*="MuiContainer"]').first().textContent();
@@ -282,31 +280,18 @@ test.describe('Admin: Dashboard', () => {
   test('dashboard page shows at least one stat card', async ({ loggedInPage: page }) => {
     await page.goto('/admin');
 
-    // Wait for loading to finish
-    const loadingSpinner = page.locator('[class*="MuiCircularProgress"]').first();
-    if (await loadingSpinner.isVisible()) {
-      await expect(loadingSpinner).toBeHidden({ timeout: 15_000 });
-    }
-
-    await page.waitForSelector('[class*="MuiPaper"], [class*="MuiCard"]', { timeout: 10_000 });
-
     const cards = page.locator('[class*="MuiPaper"], [class*="MuiCard"]');
+    await expect(cards.first()).toBeVisible({ timeout: 15_000 });
+
     expect(await cards.count()).toBeGreaterThan(0);
   });
 
   test('dashboard quick action buttons are present', async ({ loggedInPage: page }) => {
     await page.goto('/admin');
 
-    const loadingSpinner = page.locator('[class*="MuiCircularProgress"]').first();
-    if (await loadingSpinner.isVisible()) {
-      await expect(loadingSpinner).toBeHidden({ timeout: 15_000 });
-    }
-
-    await page.waitForSelector('[class*="MuiButton"], [class*="MuiIconButton"]', {
-      timeout: 10_000,
-    });
-
     const actionBtns = page.locator('[class*="MuiButton"]');
+    await expect(actionBtns.first()).toBeVisible({ timeout: 15_000 });
+
     expect(await actionBtns.count()).toBeGreaterThan(0);
   });
 });
