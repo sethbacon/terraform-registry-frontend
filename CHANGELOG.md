@@ -1,6 +1,14 @@
 <!-- markdownlint-disable MD013 MD024 MD041 -->
 # Changelog
 
+## [2.19.4](https://github.com/sethbacon/terraform-registry-frontend/compare/v2.19.3...v2.19.4) (2026-07-21)
+
+
+### Bug Fixes
+
+* **e2e:** replace Dashboard spinner-check dance with settled-content wait ([#589](https://github.com/sethbacon/terraform-registry-frontend/issues/589)) ([10ed025](https://github.com/sethbacon/terraform-registry-frontend/commit/10ed02519a5146401c7aba8cbecd26ec510c2517))
+* use the same .or()/toBeVisible() auto-retrying pattern already proven for Storage/API Keys -- wait directly for a settled end state (stat-card Paper or the error Alert) instead of racing a one-shot spinner check. ([10ed025](https://github.com/sethbacon/terraform-registry-frontend/commit/10ed02519a5146401c7aba8cbecd26ec510c2517))
+
 ## [2.19.3](https://github.com/sethbacon/terraform-registry-frontend/compare/v2.19.2...v2.19.3) (2026-07-21)
 
 
