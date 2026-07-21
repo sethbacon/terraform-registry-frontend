@@ -2001,8 +2001,8 @@
     "notifications": {
       "pageTitle": "Notifications",
       "pageSubtitle": "Configure email notifications and SMTP settings",
-      "enabled": "Enable notifications",
-      "smtpSection": "SMTP Configuration",
+      "smtpSection": "SMTP Relay Settings",
+      "smtpSectionDescription": "The shared outbound mail server used for notification-channel emails, CVE alerts, and scanner update alerts.",
       "host": "Host",
       "port": "Port",
       "username": "Username",
@@ -2014,11 +2014,7 @@
       "apiKeyExpirySection": "API Key Expiry Notifications",
       "warningDays": "Warning days before expiry",
       "checkIntervalHours": "Check interval (hours)",
-      "eventsSection": "Notification Options",
-      "recipients": "Recipients",
-      "recipientsHelp": "Comma-separated email addresses for module published, approval pending, CVE detected, and scanner update notifications. Falls back to the CVE recipients list when left blank.",
       "event": {
-        "api_key_expiring": "API key expiring",
         "module_published": "New module version published",
         "approval_pending": "New approval pending",
         "cve_detected": "CVE detected",
