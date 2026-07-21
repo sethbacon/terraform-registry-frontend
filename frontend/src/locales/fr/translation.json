@@ -1999,8 +1999,8 @@
     "notifications": {
       "pageTitle": "Notifications",
       "pageSubtitle": "Configurer les notifications par e-mail et les paramètres SMTP",
-      "enabled": "Activer les notifications",
-      "smtpSection": "Configuration SMTP",
+      "smtpSection": "Paramètres de relais SMTP",
+      "smtpSectionDescription": "Le serveur de courrier sortant partagé utilisé pour les e-mails du canal de notification, les alertes CVE et les alertes de mise à jour du scanner.",
       "host": "Hôte",
       "port": "Port",
       "username": "Nom d'utilisateur",
@@ -2012,11 +2012,7 @@
       "apiKeyExpirySection": "Notifications d'expiration des clés API",
       "warningDays": "Avertissement quelques jours avant l'expiration",
       "checkIntervalHours": "Fréquence des contrôles (heures)",
-      "eventsSection": "Options de notification",
-      "recipients": "Destinataires",
-      "recipientsHelp": "Adresses e-mail séparées par des virgules pour les notifications relatives à la publication d'un module, aux demandes d'approbation en attente, aux CVE détectés et aux mises à jour du scanner. Si ce champ est laissé vide, le système utilise par défaut la liste des destinataires CVE.",
       "event": {
-        "api_key_expiring": "Expiration de la clé API",
         "module_published": "Publication d'une nouvelle version du module",
         "approval_pending": "Nouvelle autorisation en attente",
         "cve_detected": "CVE détecté",

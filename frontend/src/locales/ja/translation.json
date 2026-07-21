@@ -1999,8 +1999,8 @@
     "notifications": {
       "pageTitle": "通知",
       "pageSubtitle": "メール通知とSMTP設定の構成",
-      "enabled": "通知を有効にする",
-      "smtpSection": "SMTPの設定",
+      "smtpSection": "SMTPリレーの設定",
+      "smtpSectionDescription": "通知チャネルのメール、CVEアラート、およびスキャナーの更新アラートに使用される共有送信メールサーバー。",
       "host": "ホスト",
       "port": "ポート",
       "username": "ユーザー名",
@@ -2012,11 +2012,7 @@
       "apiKeyExpirySection": "APIキーの有効期限切れ通知",
       "warningDays": "有効期限切れの数日前の警告",
       "checkIntervalHours": "点検間隔（時間）",
-      "eventsSection": "通知設定",
-      "recipients": "受取人",
-      "recipientsHelp": "「モジュールの公開」、「承認待ち」、「CVEの検出」、および「スキャナーの更新」に関する通知の宛先として、カンマ区切りのメールアドレスを指定します。空欄の場合は、CVEの受信者リストが自動的に適用されます。",
       "event": {
-        "api_key_expiring": "APIキーの有効期限切れ",
         "module_published": "新しいモジュールのバージョンが公開されました",
         "approval_pending": "新たな承認待ち",
         "cve_detected": "CVEが検出されました",
