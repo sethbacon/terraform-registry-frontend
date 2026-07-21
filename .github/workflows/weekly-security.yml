@@ -62,11 +62,14 @@ jobs:
             --lockfile=e2e/package-lock.json
 
   # ── CodeQL ────────────────────────────────────────────
-  # Scans both the application source (javascript-typescript) and the repo's
-  # GitHub Actions workflows (actions). The `actions` leg is required to keep the
-  # code-scanning tool-status configuration for this workflow current: a
-  # previously-registered `actions` configuration reports a stale "configuration
-  # error" on the Code scanning status page when no analysis refreshes it.
+  # Scans the application source (javascript-typescript), the repo's GitHub
+  # Actions workflows (actions), and the wiki-sync helper script (python).
+  # The `actions` leg is required to keep the code-scanning tool-status
+  # configuration for this workflow current: a previously-registered `actions`
+  # configuration reports a stale "configuration error" on the Code scanning
+  # status page when no analysis refreshes it. `python` was added to close a
+  # coverage gap flagged on the Code scanning overview page (scripts/sync-wiki.py
+  # was auto-detected as an analyzable language but never actually scanned).
   codeql:
     name: CodeQL (${{ matrix.language }})
     runs-on: ubuntu-latest
@@ -77,7 +80,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        language: [javascript-typescript, actions]
+        language: [javascript-typescript, actions, python]
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v6
 
