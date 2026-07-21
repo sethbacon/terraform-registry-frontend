@@ -12,8 +12,6 @@ import {
   TextField,
   Switch,
   FormControlLabel,
-  FormGroup,
-  Checkbox,
   Button,
 } from '@mui/material'
 import { NotificationChannelsSection, type NotificationChannelTypeOption } from '@sethbacon/terraform-suite-ui'
@@ -28,7 +26,6 @@ import type {
   NotificationChannelEvent,
   NotificationChannelInput,
   NotificationChannelType,
-  NotificationEvents,
   NotificationsConfigInput,
 } from '../../types'
 
@@ -40,47 +37,21 @@ const CHANNEL_EVENT_TYPES: NotificationChannelEvent[] = [
 ]
 
 interface FormState {
-  enabled: boolean
   host: string
   port: number
   username: string
   password: string
   from: string
   use_tls: boolean
-  recipients: string
-  events: NotificationEvents
-  api_key_expiry_warning_days: number
-  api_key_expiry_check_interval_hours: number
 }
-
-const defaultEvents: NotificationEvents = {
-  api_key_expiring: true,
-  module_published: true,
-  approval_pending: true,
-  cve_detected: true,
-  scanner_update_available: true,
-}
-
-const EVENT_TYPES: Array<keyof NotificationEvents> = [
-  'api_key_expiring',
-  'module_published',
-  'approval_pending',
-  'cve_detected',
-  'scanner_update_available',
-]
 
 const defaultFormState: FormState = {
-  enabled: false,
   host: '',
   port: 587,
   username: '',
   password: '',
   from: '',
   use_tls: true,
-  recipients: '',
-  events: defaultEvents,
-  api_key_expiry_warning_days: 7,
-  api_key_expiry_check_interval_hours: 24,
 }
 
 // ChannelsSection lists admin-configured notification channels (webhook,
@@ -119,17 +90,12 @@ const NotificationsPage: React.FC = () => {
   useEffect(() => {
     if (config) {
       setForm({
-        enabled: config.enabled,
         host: config.smtp.host,
         port: config.smtp.port,
         username: config.smtp.username,
         password: '',
         from: config.smtp.from,
         use_tls: config.smtp.use_tls,
-        recipients: (config.recipients ?? []).join(', '),
-        events: config.events,
-        api_key_expiry_warning_days: config.api_key_expiry_warning_days,
-        api_key_expiry_check_interval_hours: config.api_key_expiry_check_interval_hours,
       })
     }
   }, [config])
@@ -176,9 +142,10 @@ const NotificationsPage: React.FC = () => {
   })
 
   const handleSave = () => {
+    if (!config) return
     setError(null)
     saveMutation.mutate({
-      enabled: form.enabled,
+      enabled: config.enabled,
       smtp: {
         host: form.host,
         port: form.port,
@@ -187,18 +154,12 @@ const NotificationsPage: React.FC = () => {
         from: form.from,
         use_tls: form.use_tls,
       },
-      recipients: form.recipients
-        .split(',')
-        .map((r) => r.trim())
-        .filter(Boolean),
-      events: form.events,
-      api_key_expiry_warning_days: form.api_key_expiry_warning_days,
-      api_key_expiry_check_interval_hours: form.api_key_expiry_check_interval_hours,
+      recipients: config.recipients ?? [],
+      events: config.events,
+      api_key_expiry_warning_days: config.api_key_expiry_warning_days,
+      api_key_expiry_check_interval_hours: config.api_key_expiry_check_interval_hours,
     })
   }
-
-  const toggleEvent = (key: keyof NotificationEvents) =>
-    setForm((f) => ({ ...f, events: { ...f.events, [key]: !f.events[key] } }))
 
   const channelsQuery = useQuery({
     queryKey: queryKeys.notifications.channels(),
@@ -234,19 +195,11 @@ const NotificationsPage: React.FC = () => {
           )}
 
           <Paper sx={{ p: 3, mb: 3 }}>
-            <FormControlLabel
-              control={
-                <Switch
-                  checked={form.enabled}
-                  onChange={(e) => setForm((f) => ({ ...f, enabled: e.target.checked }))}
-                  disabled={!isAdmin}
-                />
-              }
-              label={t('admin.notifications.enabled')}
-            />
-
             <Typography variant="h6" sx={{ mt: 2 }} gutterBottom>
               {t('admin.notifications.smtpSection')}
+            </Typography>
+            <Typography variant="body2" sx={{ color: 'text.secondary', mb: 2 }}>
+              {t('admin.notifications.smtpSectionDescription')}
             </Typography>
             <Divider sx={{ mb: 2 }} />
             <Grid container spacing={2}>
@@ -315,35 +268,6 @@ const NotificationsPage: React.FC = () => {
               </Grid>
             </Grid>
 
-            <Typography variant="h6" sx={{ mt: 3 }} gutterBottom>
-              {t('admin.notifications.eventsSection')}
-            </Typography>
-            <Divider sx={{ mb: 2 }} />
-            <TextField
-              fullWidth
-              label={t('admin.notifications.recipients')}
-              helperText={t('admin.notifications.recipientsHelp')}
-              value={form.recipients}
-              onChange={(e) => setForm((f) => ({ ...f, recipients: e.target.value }))}
-              disabled={!isAdmin}
-              sx={{ mb: 2 }}
-            />
-            <FormGroup>
-              {EVENT_TYPES.map((key) => (
-                <FormControlLabel
-                  key={key}
-                  control={
-                    <Checkbox
-                      checked={form.events[key]}
-                      onChange={() => toggleEvent(key)}
-                      disabled={!isAdmin}
-                    />
-                  }
-                  label={t(`admin.notifications.event.${key}`)}
-                />
-              ))}
-            </FormGroup>
-
             <Box sx={{ mt: 3 }}>
               <Button
                 variant="contained"
@@ -353,13 +277,12 @@ const NotificationsPage: React.FC = () => {
                 {saveMutation.isPending ? <CircularProgress size={20} /> : t('admin.notifications.save')}
               </Button>
             </Box>
-          </Paper>
 
-          <Paper sx={{ p: 3 }}>
+            <Divider sx={{ my: 3 }} />
+
             <Typography variant="h6" gutterBottom>
               {t('admin.notifications.test')}
             </Typography>
-            <Divider sx={{ mb: 2 }} />
             <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', flexWrap: 'wrap' }}>
               <TextField
                 label={t('admin.notifications.testRecipients')}

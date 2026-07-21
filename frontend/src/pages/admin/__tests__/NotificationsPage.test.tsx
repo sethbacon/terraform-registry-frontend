@@ -137,7 +137,7 @@ describe('NotificationsPage', () => {
     })
   })
 
-  it('toggles the enabled and use_tls switches and edits SMTP fields', async () => {
+  it('toggles the use_tls switch and edits SMTP fields', async () => {
     const user = userEvent.setup()
     getNotificationsConfigMock.mockResolvedValue(fakeConfig)
     renderPage()
@@ -145,11 +145,6 @@ describe('NotificationsPage', () => {
     await waitFor(() => {
       expect(screen.getByDisplayValue('smtp.example.com')).toBeInTheDocument()
     })
-
-    const enabledSwitch = screen.getByRole('switch', { name: 'Enable notifications' })
-    expect(enabledSwitch).toBeChecked()
-    await user.click(enabledSwitch)
-    expect(enabledSwitch).not.toBeChecked()
 
     const useTlsSwitch = screen.getByRole('switch', { name: 'Use TLS' })
     expect(useTlsSwitch).toBeChecked()
@@ -165,6 +160,49 @@ describe('NotificationsPage', () => {
     await user.clear(portField)
     await user.type(portField, '2525')
     expect(screen.getByDisplayValue('2525')).toBeInTheDocument()
+  })
+
+  it('does not render the legacy Enable Notifications toggle or Notification Options section (config now lives per-channel or on the API Keys page)', async () => {
+    getNotificationsConfigMock.mockResolvedValue(fakeConfig)
+    renderPage()
+
+    await waitFor(() => {
+      expect(screen.getByDisplayValue('smtp.example.com')).toBeInTheDocument()
+    })
+
+    expect(screen.queryByRole('switch', { name: 'Enable notifications' })).not.toBeInTheDocument()
+    expect(screen.queryByText('Notification Options')).not.toBeInTheDocument()
+    expect(screen.queryByLabelText('Recipients')).not.toBeInTheDocument()
+    expect(screen.queryByText('API key expiring')).not.toBeInTheDocument()
+  })
+
+  it('preserves the existing enabled/recipients/events/api-key-expiry settings when saving SMTP changes (this page no longer edits them)', async () => {
+    const user = userEvent.setup()
+    getNotificationsConfigMock.mockResolvedValue({
+      ...fakeConfig,
+      enabled: true,
+      recipients: ['ops@example.com'],
+    })
+    saveNotificationsConfigMock.mockResolvedValue(fakeConfig)
+    renderPage()
+
+    await waitFor(() => {
+      expect(screen.getByDisplayValue('smtp.example.com')).toBeInTheDocument()
+    })
+
+    await user.click(screen.getByRole('button', { name: 'Save' }))
+
+    await waitFor(() => {
+      expect(saveNotificationsConfigMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          enabled: true,
+          recipients: ['ops@example.com'],
+          events: fakeConfig.events,
+          api_key_expiry_warning_days: fakeConfig.api_key_expiry_warning_days,
+          api_key_expiry_check_interval_hours: fakeConfig.api_key_expiry_check_interval_hours,
+        }),
+      )
+    })
   })
 
   it('saves with an empty password when the password field is left blank', async () => {
@@ -293,7 +331,7 @@ describe('NotificationsPage', () => {
 
       expect(screen.getByRole('button', { name: 'Save' })).toBeDisabled()
       expect(screen.getByRole('button', { name: 'Send Test Email' })).toBeDisabled()
-      expect(screen.getByRole('switch', { name: 'Enable notifications' })).toBeDisabled()
+      expect(screen.getByRole('switch', { name: 'Use TLS' })).toBeDisabled()
       expect(screen.getByLabelText('Host')).toBeDisabled()
     })
   })
