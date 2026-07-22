@@ -1,6 +1,13 @@
 <!-- markdownlint-disable MD013 MD024 MD041 -->
 # Changelog
 
+## [2.20.0](https://github.com/sethbacon/terraform-registry-frontend/compare/v2.19.4...v2.20.0) (2026-07-22)
+
+
+### Features
+
+* **modules:** add organization picker to module publish flow ([#591](https://github.com/sethbacon/terraform-registry-frontend/issues/591)) ([94b54d4](https://github.com/sethbacon/terraform-registry-frontend/commit/94b54d485b2cf96de394cc0201e7d0c806c98233))
+
 ## [2.19.4](https://github.com/sethbacon/terraform-registry-frontend/compare/v2.19.3...v2.19.4) (2026-07-21)
 
 
