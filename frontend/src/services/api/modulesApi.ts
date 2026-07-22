@@ -74,6 +74,7 @@ export async function createModuleRecord(data: {
   name: string
   system: string
   description?: string
+  organization_id?: string
 }): Promise<{ id: string; namespace: string; name: string; system: string }> {
   const response = await http.post('/api/v1/admin/modules/create', data)
   return response.data
@@ -92,11 +93,11 @@ export async function uploadModule(
     },
     onUploadProgress: options?.onUploadProgress
       ? (event) => {
-          if (event.total && event.total > 0) {
-            const percent = Math.round((event.loaded / event.total) * 100)
-            options.onUploadProgress?.(percent)
-          }
+        if (event.total && event.total > 0) {
+          const percent = Math.round((event.loaded / event.total) * 100)
+          options.onUploadProgress?.(percent)
         }
+      }
       : undefined,
   })
   return response.data

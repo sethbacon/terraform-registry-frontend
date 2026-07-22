@@ -1777,6 +1777,8 @@
       "formUploadTitle": "Télécharger un module Terraform",
       "formScmTitle": "Lier le module au référentiel SCM",
       "scmSubtitle": "Commencez par définir l'identité du module. Vous devrez ensuite choisir un référentiel et configurer les paramètres de publication.",
+      "labelOrganization": "Organisation",
+      "helpOrganization": "L'organisation qui possédera ce namespace. Requis lorsque vous appartenez à plusieurs organisations.",
       "labelNamespace": "Espace de noms",
       "helpNamespace": "L'identifiant de votre organisation",
       "labelModuleName": "Nom du module",

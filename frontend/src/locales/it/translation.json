@@ -1777,6 +1777,8 @@
       "formUploadTitle": "Carica il modulo Terraform",
       "formScmTitle": "Collegare il modulo al repository SCM",
       "scmSubtitle": "Per prima cosa, definisci l'identità del modulo. Successivamente, sceglierai un repository e configurerai le impostazioni di pubblicazione.",
+      "labelOrganization": "Organizzazione",
+      "helpOrganization": "L'organizzazione che possiederà questo namespace. Richiesto quando appartieni a più di un'organizzazione.",
       "labelNamespace": "Spazio dei nomi",
       "helpNamespace": "Il codice identificativo della tua organizzazione",
       "labelModuleName": "Nome del modulo",

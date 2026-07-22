@@ -1777,6 +1777,8 @@
       "formUploadTitle": "上传 Terraform 模块",
       "formScmTitle": "将模块链接到 SCM 存储库",
       "scmSubtitle": "首先，定义模块标识。然后，您需要选择一个仓库并配置发布设置。",
+      "labelOrganization": "组织",
+      "helpOrganization": "将拥有此命名空间的组织。当您属于多个组织时必填。",
       "labelNamespace": "命名空间",
       "helpNamespace": "您的组织标识符",
       "labelModuleName": "模块名称",

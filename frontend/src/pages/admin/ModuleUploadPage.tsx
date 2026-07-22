@@ -1,6 +1,7 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useLocation, useNavigate } from 'react-router-dom'
+import { useQuery } from '@tanstack/react-query'
 import {
   Typography,
   Box,
@@ -14,6 +15,11 @@ import {
   CardActionArea,
   CardContent,
   LinearProgress,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  FormHelperText,
 } from '@mui/material'
 import CloudUpload from '@mui/icons-material/CloudUpload'
 import SCMIcon from '@mui/icons-material/AccountTree'
@@ -27,7 +33,9 @@ import PageTitleIcon from '@mui/icons-material/ViewModule'
 import PublishFromSCMWizard from '../../components/PublishFromSCMWizard'
 import FileDropZone from '../../components/FileDropZone'
 import PolicyResultsPanel from '../../components/PolicyResultsPanel'
-import { PolicyResult } from '../../types'
+import { PolicyResult, UserMembership } from '../../types'
+import { useAuth } from '../../contexts/AuthContext'
+import { queryKeys } from '../../services/queryKeys'
 
 type ModuleMethod = 'choose' | 'upload' | 'scm'
 
@@ -35,6 +43,7 @@ const ModuleUploadPage: React.FC = () => {
   const { t } = useTranslation()
   const location = useLocation()
   const navigate = useNavigate()
+  const { user } = useAuth()
   const state = location.state as {
     moduleData?: { namespace: string; name: string; provider: string }
     method?: ModuleMethod
@@ -42,6 +51,24 @@ const ModuleUploadPage: React.FC = () => {
   const prefilledModule = state?.moduleData
 
   const [moduleMethod, setModuleMethod] = useState<ModuleMethod>(state?.method ?? 'choose')
+  const [selectedOrgId, setSelectedOrgId] = useState<string | undefined>(undefined)
+
+  // Memberships query
+  const { data: memberships = [] } = useQuery<UserMembership[]>({
+    queryKey: queryKeys.users.memberships(user?.id ?? ''),
+    queryFn: async () => {
+      const data = await api.getCurrentUserMemberships()
+      return data || []
+    },
+    enabled: !!user?.id,
+  })
+
+  // Set default org when memberships load
+  useEffect(() => {
+    if (memberships.length > 0 && !selectedOrgId) {
+      setSelectedOrgId(memberships[0].organization_id)
+    }
+  }, [memberships]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // SCM new-module metadata (before wizard)
   const [scmNamespace, setScmNamespace] = useState(prefilledModule?.namespace || '')
@@ -100,6 +127,7 @@ const ModuleUploadPage: React.FC = () => {
       formData.append('system', moduleProvider)
       formData.append('version', moduleVersion)
       if (moduleDescription) formData.append('description', moduleDescription)
+      if (selectedOrgId) formData.append('organization_id', selectedOrgId)
       formData.append('file', moduleFile)
 
       const result = await api.uploadModule(formData, {
@@ -147,6 +175,7 @@ const ModuleUploadPage: React.FC = () => {
         name: scmName,
         system: scmSystem,
         description: scmDescription || undefined,
+        organization_id: selectedOrgId,
       })
       setScmModuleId(module.id)
     } catch (err: unknown) {
@@ -259,6 +288,26 @@ const ModuleUploadPage: React.FC = () => {
             {t('admin.moduleUpload.scmSubtitle')}
           </Typography>
           <Stack spacing={3} sx={{ maxWidth: 500 }}>
+            {memberships.length > 1 && (
+              <FormControl fullWidth>
+                <InputLabel id="scm-org-label">
+                  {t('admin.moduleUpload.labelOrganization')}
+                </InputLabel>
+                <Select
+                  labelId="scm-org-label"
+                  value={selectedOrgId || ''}
+                  onChange={(e) => setSelectedOrgId(e.target.value)}
+                  label={t('admin.moduleUpload.labelOrganization')}
+                >
+                  {memberships.map((membership) => (
+                    <MenuItem key={membership.organization_id} value={membership.organization_id}>
+                      {membership.organization_name}
+                    </MenuItem>
+                  ))}
+                </Select>
+                <FormHelperText>{t('admin.moduleUpload.helpOrganization')}</FormHelperText>
+              </FormControl>
+            )}
             <TextField
               label={t('admin.moduleUpload.labelNamespace')}
               value={scmNamespace}
@@ -385,6 +434,26 @@ const ModuleUploadPage: React.FC = () => {
       </Box>
 
       <Stack spacing={3}>
+        {memberships.length > 1 && (
+          <FormControl fullWidth disabled={uploading}>
+            <InputLabel id="upload-org-label">
+              {t('admin.moduleUpload.labelOrganization')}
+            </InputLabel>
+            <Select
+              labelId="upload-org-label"
+              value={selectedOrgId || ''}
+              onChange={(e) => setSelectedOrgId(e.target.value)}
+              label={t('admin.moduleUpload.labelOrganization')}
+            >
+              {memberships.map((membership) => (
+                <MenuItem key={membership.organization_id} value={membership.organization_id}>
+                  {membership.organization_name}
+                </MenuItem>
+              ))}
+            </Select>
+            <FormHelperText>{t('admin.moduleUpload.helpOrganization')}</FormHelperText>
+          </FormControl>
+        )}
         <Stack
           direction={{ xs: 'column', md: 'row' }}
           spacing={2}

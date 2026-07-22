@@ -1777,6 +1777,8 @@
       "formUploadTitle": "Subir un módulo de Terraform",
       "formScmTitle": "Conectar el módulo al repositorio SCM",
       "scmSubtitle": "En primer lugar, define la identidad del módulo. A continuación, elige un repositorio y configura los ajustes de publicación.",
+      "labelOrganization": "Organización",
+      "helpOrganization": "La organización que será propietaria de este namespace. Requerido cuando perteneces a más de una organización.",
       "labelNamespace": "Espacio de nombres",
       "helpNamespace": "El identificador de su organización",
       "labelModuleName": "Nombre del módulo",
