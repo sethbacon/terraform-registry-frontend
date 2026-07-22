@@ -860,11 +860,13 @@ describe('ApiClient', () => {
         namespace: 'ns',
         name: 'mod',
         system: 'aws',
+        organization_id: 'org123',
       })
       expect(mockAxiosInstance.post).toHaveBeenCalledWith('/api/v1/admin/modules/create', {
         namespace: 'ns',
         name: 'mod',
         system: 'aws',
+        organization_id: 'org123',
       })
       expect(result.id).toBe('m1')
     })

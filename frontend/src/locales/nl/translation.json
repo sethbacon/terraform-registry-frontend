@@ -1777,6 +1777,8 @@
       "formUploadTitle": "Terraform-module uploaden",
       "formScmTitle": "Module koppelen aan SCM-repository",
       "scmSubtitle": "Bepaal eerst de module-identiteit. Vervolgens kies je een repository en stel je de publicatie-instellingen in.",
+      "labelOrganization": "Organisatie",
+      "helpOrganization": "De organisatie die eigenaar wordt van deze namespace. Verplicht wanneer u tot meer dan één organisatie behoort.",
       "labelNamespace": "Naamruimte",
       "helpNamespace": "Uw organisatie-ID",
       "labelModuleName": "Naam van de module",

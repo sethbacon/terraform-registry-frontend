@@ -1777,6 +1777,8 @@
       "formUploadTitle": "Terraform-Modul hochladen",
       "formScmTitle": "Modul mit dem SCM-Repository verknüpfen",
       "scmSubtitle": "Legen Sie zunächst die Modulidentität fest. Anschließend wählen Sie ein Repository aus und nehmen die Veröffentlichungseinstellungen vor.",
+      "labelOrganization": "Organisation",
+      "helpOrganization": "Die Organisation, die diesen Namespace besitzen wird. Erforderlich, wenn Sie mehreren Organisationen angehören.",
       "labelNamespace": "Namensraum",
       "helpNamespace": "Ihre Organisationskennung",
       "labelModuleName": "Modulname",

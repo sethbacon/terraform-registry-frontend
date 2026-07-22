@@ -1777,6 +1777,8 @@
       "formUploadTitle": "Terraformモジュールをアップロードする",
       "formScmTitle": "モジュールをSCMリポジトリにリンクする",
       "scmSubtitle": "まず、モジュールの識別子を定義します。次に、リポジトリを選択し、公開設定を行います。",
+      "labelOrganization": "組織",
+      "helpOrganization": "この名前空間を所有する組織。複数の組織に所属している場合は必須です。",
       "labelNamespace": "名前空間",
       "helpNamespace": "組織識別子",
       "labelModuleName": "モジュール名",

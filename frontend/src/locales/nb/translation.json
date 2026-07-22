@@ -1777,6 +1777,8 @@
       "formUploadTitle": "Last opp Terraform-modul",
       "formScmTitle": "Koble modulen til SCM-lageret",
       "scmSubtitle": "Først må du definere modulidentiteten. Deretter velger du et arkiv og konfigurerer publiseringsinnstillingene.",
+      "labelOrganization": "Organisasjon",
+      "helpOrganization": "Organisasjonen som vil eie dette navneområdet. Obligatorisk når du tilhører mer enn én organisasjon.",
       "labelNamespace": "Navneområde",
       "helpNamespace": "Organisasjonsidentifikatoren din",
       "labelModuleName": "Modulnavn",

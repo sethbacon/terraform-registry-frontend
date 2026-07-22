@@ -1779,6 +1779,8 @@
       "formUploadTitle": "Upload Terraform Module",
       "formScmTitle": "Link Module to SCM Repository",
       "scmSubtitle": "First, define the module identity. Then you'll choose a repository and configure publishing settings.",
+      "labelOrganization": "Organization",
+      "helpOrganization": "The organization that will own this namespace. Required when you belong to more than one organization.",
       "labelNamespace": "Namespace",
       "helpNamespace": "Your organization identifier",
       "labelModuleName": "Module Name",

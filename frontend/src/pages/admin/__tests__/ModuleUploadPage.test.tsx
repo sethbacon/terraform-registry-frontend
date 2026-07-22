@@ -17,6 +17,7 @@ vi.mock('../../../services/api', () => ({
   default: {
     uploadModule: vi.fn(),
     createModuleRecord: vi.fn(),
+    getCurrentUserMemberships: vi.fn(),
   },
 }))
 
@@ -24,18 +25,30 @@ vi.mock('../../../components/PublishFromSCMWizard', () => ({
   default: () => <div data-testid="scm-wizard">SCM Wizard</div>,
 }))
 
+vi.mock('../../../contexts/AuthContext', () => ({
+  useAuth: () => ({ user: { id: 'test-user-id', username: 'testuser' } }),
+}))
+
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import ModuleUploadPage from '../../admin/ModuleUploadPage'
 import apiDefault from '../../../services/api'
 const api = apiDefault as unknown as {
   uploadModule: ReturnType<typeof vi.fn>
   createModuleRecord: ReturnType<typeof vi.fn>
+  getCurrentUserMemberships: ReturnType<typeof vi.fn>
 }
+
+const queryClient = new QueryClient({
+  defaultOptions: { queries: { retry: false } },
+})
 
 function renderPage() {
   return render(
-    <MemoryRouter>
-      <ModuleUploadPage />
-    </MemoryRouter>,
+    <QueryClientProvider client={queryClient}>
+      <MemoryRouter>
+        <ModuleUploadPage />
+      </MemoryRouter>
+    </QueryClientProvider>,
   )
 }
 
@@ -47,6 +60,8 @@ async function openUploadForm(user: ReturnType<typeof userEvent.setup>) {
 describe('ModuleUploadPage', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    queryClient.clear()
+    api.getCurrentUserMemberships.mockResolvedValue([])
   })
 
   it('renders the page heading', () => {
@@ -121,6 +136,8 @@ describe('ModuleUploadPage', () => {
 describe('ModuleUploadPage — upload form (roadmap 2.5)', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    queryClient.clear()
+    api.getCurrentUserMemberships.mockResolvedValue([])
   })
 
   it('renders identity fields in namespace/name/provider order', async () => {
@@ -214,5 +231,113 @@ describe('ModuleUploadPage — upload form (roadmap 2.5)', () => {
     expect(byLabel(/^Provider/).value).toBe('aws')
     expect(byLabel(/Version/).value).toBe('1.0.0')
     expect(inputs.length).toBeGreaterThan(0)
+  })
+})
+
+describe('ModuleUploadPage — organization picker', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    queryClient.clear()
+  })
+
+  it('renders org picker when user has multiple memberships (SCM flow)', async () => {
+    api.getCurrentUserMemberships.mockResolvedValue([
+      { organization_id: 'org1', organization_name: 'Org One', created_at: '2024-01-01' },
+      { organization_id: 'org2', organization_name: 'Org Two', created_at: '2024-01-02' },
+    ])
+
+    const user = userEvent.setup()
+    renderPage()
+    await user.click(screen.getByText('Link from SCM Repository'))
+
+    await waitFor(() => {
+      expect(screen.getByLabelText(/Organization/i)).toBeInTheDocument()
+    })
+
+    // Default to first org - check displayed text
+    await waitFor(() => {
+      expect(screen.getByText('Org One')).toBeInTheDocument()
+    })
+
+    // Can select a different org
+    const orgSelect = screen.getByLabelText(/Organization/i)
+    await user.click(orgSelect)
+    const org2Option = await screen.findByRole('option', { name: 'Org Two' })
+    await user.click(org2Option)
+
+    await waitFor(() => {
+      expect(screen.getByText('Org Two')).toBeInTheDocument()
+    })
+  })
+
+  it('does not render org picker when user has single membership (SCM flow)', async () => {
+    api.getCurrentUserMemberships.mockResolvedValue([
+      { organization_id: 'org1', organization_name: 'Org One', created_at: '2024-01-01' },
+    ])
+
+    const user = userEvent.setup()
+    renderPage()
+    await user.click(screen.getByText('Link from SCM Repository'))
+
+    await waitFor(() => {
+      expect(screen.queryByLabelText(/Organization/i)).not.toBeInTheDocument()
+    })
+  })
+
+  it('includes organization_id in createModuleRecord when org is selected', async () => {
+    api.getCurrentUserMemberships.mockResolvedValue([
+      { organization_id: 'org1', organization_name: 'Org One', created_at: '2024-01-01' },
+      { organization_id: 'org2', organization_name: 'Org Two', created_at: '2024-01-02' },
+    ])
+    api.createModuleRecord.mockResolvedValue({
+      id: 'mod123',
+      namespace: 'ns',
+      name: 'vpc',
+      system: 'aws',
+    })
+
+    const user = userEvent.setup()
+    renderPage()
+    await user.click(screen.getByText('Link from SCM Repository'))
+
+    await waitFor(() => {
+      expect(screen.getByLabelText(/Organization/i)).toBeInTheDocument()
+    })
+
+    const byLabel = (t: RegExp) => screen.getByLabelText(t) as HTMLInputElement
+    await user.type(byLabel(/Namespace/), 'myns')
+    await user.type(byLabel(/Module Name/), 'vpc')
+    await user.type(byLabel(/^Provider/), 'aws')
+
+    const orgSelect = screen.getByLabelText(/Organization/i) as HTMLSelectElement
+    await user.click(orgSelect)
+    const org2Option = await screen.findByRole('option', { name: 'Org Two' })
+    await user.click(org2Option)
+
+    await user.click(screen.getByRole('button', { name: /Continue to Repository Selection/i }))
+
+    await waitFor(() => {
+      expect(api.createModuleRecord).toHaveBeenCalledWith({
+        namespace: 'myns',
+        name: 'vpc',
+        system: 'aws',
+        organization_id: 'org2',
+      })
+    })
+  })
+
+  it('renders org picker in upload flow when user has multiple memberships', async () => {
+    api.getCurrentUserMemberships.mockResolvedValue([
+      { organization_id: 'org1', organization_name: 'Org One', created_at: '2024-01-01' },
+      { organization_id: 'org2', organization_name: 'Org Two', created_at: '2024-01-02' },
+    ])
+
+    const user = userEvent.setup()
+    renderPage()
+    await user.click(screen.getByText('Upload from File'))
+
+    await waitFor(() => {
+      expect(screen.getByLabelText(/Organization/i)).toBeInTheDocument()
+    })
   })
 })
