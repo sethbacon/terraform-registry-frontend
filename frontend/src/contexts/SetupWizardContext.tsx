@@ -7,7 +7,7 @@ import React, {
   ReactNode,
 } from 'react'
 import api from '../services/api'
-import { getErrorMessage } from '../utils/errors'
+import { getErrorMessage, sanitizeServerErrorMessage } from '../utils/errors'
 import type {
   SetupStatus,
   OIDCConfigInput,
@@ -19,6 +19,21 @@ import type {
   ScanningTestResult,
   ScanningInstallResult,
 } from '../types'
+
+/**
+ * Bound and vet a backend-supplied test/install result string before it reaches
+ * any UI surface — the wizard's shared error banner (setError) AND the per-step
+ * inline Alerts (OIDCStep/StorageStep/ScanningStep render these fields directly).
+ * Connection-test failures are a prime place for internal detail (dial errors,
+ * host:port, filesystem paths) to leak, and these results arrive on a 2xx body so
+ * they bypass getErrorMessage's AxiosError-scoped sanitization. Sanitizing here at
+ * the trust boundary means every downstream consumer of the stored result is safe.
+ * Falls back to a curated generic message when the vetted text is unusable
+ * (CWE-209, audit #601).
+ */
+function safeResultMessage(raw: string | undefined, fallback: string): string {
+  return (raw ? sanitizeServerErrorMessage(raw) : null) ?? fallback
+}
 
 export interface SetupWizardContextValue {
   // status
@@ -284,8 +299,9 @@ export const SetupWizardProvider: React.FC<SetupWizardProviderProps> = ({
       setError(null)
       setOidcTestResult(null)
       const result = await api.testOIDCConfig(setupToken, oidcForm)
-      setOidcTestResult(result)
-      if (!result.success) setError(result.message)
+      const message = safeResultMessage(result.message, 'OIDC test failed')
+      setOidcTestResult({ ...result, message })
+      if (!result.success) setError(message)
     } catch (err: unknown) {
       setError(getErrorMessage(err, 'OIDC test failed'))
     } finally {
@@ -313,8 +329,9 @@ export const SetupWizardProvider: React.FC<SetupWizardProviderProps> = ({
       setError(null)
       setLdapTestResult(null)
       const result = await api.testLDAPConfig(setupToken, ldapForm)
-      setLdapTestResult(result)
-      if (!result.success) setError(result.message)
+      const message = safeResultMessage(result.message, 'LDAP test failed')
+      setLdapTestResult({ ...result, message })
+      if (!result.success) setError(message)
     } catch (err: unknown) {
       setError(getErrorMessage(err, 'LDAP test failed'))
     } finally {
@@ -356,9 +373,10 @@ export const SetupWizardProvider: React.FC<SetupWizardProviderProps> = ({
       setError(null)
       setStorageTestResult(null)
       const result = await api.testSetupStorageConfig(setupToken, storageForm)
-      setStorageTestResult(result)
+      const message = safeResultMessage(result.message, 'Storage test failed')
+      setStorageTestResult({ ...result, message })
       if (!result.success) {
-        setError(result.message)
+        setError(message)
       } else {
         await saveStorage()
       }
@@ -405,8 +423,9 @@ export const SetupWizardProvider: React.FC<SetupWizardProviderProps> = ({
       setError(null)
       setScanningTestResult(null)
       const result = await api.testScanningConfig(setupToken, scanningForm)
-      setScanningTestResult(result)
-      if (!result.success) setError(result.message)
+      const message = safeResultMessage(result.message, 'Scanning test failed')
+      setScanningTestResult({ ...result, message })
+      if (!result.success) setError(message)
     } catch (err: unknown) {
       setError(getErrorMessage(err, 'Scanning test failed'))
     } finally {
@@ -434,12 +453,17 @@ export const SetupWizardProvider: React.FC<SetupWizardProviderProps> = ({
       setError(null)
       setScanningInstallResult(null)
       const result = await api.installScanningTool(setupToken, { tool: scanningForm.tool, version })
-      setScanningInstallResult(result)
       if (result.success) {
+        setScanningInstallResult(result)
         setScanningForm({ ...scanningForm, binary_path: result.binary_path })
         setSuccess(`${result.tool} ${result.version} installed successfully`)
       } else {
-        setError(result.error || 'Scanner installation failed')
+        // Sanitize the backend-supplied error before it reaches setError OR the
+        // ScanningStep inline Alert that renders scanningInstallResult.error
+        // directly (CWE-209, audit #601).
+        const message = safeResultMessage(result.error, 'Scanner installation failed')
+        setScanningInstallResult({ ...result, error: message })
+        setError(message)
       }
     } catch (err: unknown) {
       setError(getErrorMessage(err, 'Scanner installation failed'))

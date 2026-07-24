@@ -2,6 +2,7 @@ import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router-dom'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { CanceledError } from 'axios'
 
 const mockNavigate = vi.fn()
 vi.mock('react-router-dom', async () => {
@@ -198,6 +199,83 @@ describe('ModuleUploadPage — upload form (roadmap 2.5)', () => {
     await user.type(byLabel(/Module Name/), 'BAD NAME')
     await user.type(byLabel(/^Provider/), 'aws')
     expect(screen.getByRole('button', { name: /Continue to Repository Selection/i })).toBeDisabled()
+  })
+
+  it('shows a Cancel button during upload that aborts without surfacing an error (#602)', async () => {
+    const user = userEvent.setup()
+    // Stalled upload: never resolves on its own, only rejects when aborted.
+    api.uploadModule.mockImplementationOnce(
+      (
+        _fd: FormData,
+        opts?: { onUploadProgress?: (p: number) => void; signal?: AbortSignal },
+      ) => {
+        opts?.onUploadProgress?.(15)
+        return new Promise((_resolve, reject) => {
+          opts?.signal?.addEventListener('abort', () => reject(new CanceledError('canceled')))
+        })
+      },
+    )
+
+    await openUploadForm(user)
+    const byLabel = (t: RegExp) => screen.getByLabelText(t) as HTMLInputElement
+    await user.type(byLabel(/Namespace/), 'myns')
+    await user.type(byLabel(/Module Name/), 'vpc')
+    await user.type(byLabel(/^Provider/), 'aws')
+    await user.type(byLabel(/Version/), '1.0.0')
+    const dropInput = screen.getByTestId('module-upload-dropzone-input') as HTMLInputElement
+    await user.upload(dropInput, new File(['x'], 'm.tar.gz'))
+
+    await user.click(screen.getByRole('button', { name: /Upload Module/i }))
+
+    // Cancel affordance appears while the upload is in flight.
+    const cancelBtn = await screen.findByRole('button', { name: /^Cancel$/i })
+    await user.click(cancelBtn)
+
+    // Cancelling resets to idle silently — no error alert, typed metadata kept.
+    await waitFor(() => {
+      expect(screen.queryByRole('button', { name: /^Cancel$/i })).not.toBeInTheDocument()
+    })
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument()
+    expect(byLabel(/Namespace/).value).toBe('myns')
+    expect(byLabel(/Version/).value).toBe('1.0.0')
+  })
+
+  it('aborts an in-flight upload when the component unmounts mid-upload (#602)', async () => {
+    const user = userEvent.setup()
+    let capturedSignal: AbortSignal | undefined
+    // Stalled upload: never resolves on its own, only rejects when aborted.
+    api.uploadModule.mockImplementationOnce(
+      (
+        _fd: FormData,
+        opts?: { onUploadProgress?: (p: number) => void; signal?: AbortSignal },
+      ) => {
+        capturedSignal = opts?.signal
+        opts?.onUploadProgress?.(10)
+        return new Promise((_resolve, reject) => {
+          opts?.signal?.addEventListener('abort', () => reject(new CanceledError('canceled')))
+        })
+      },
+    )
+
+    const { unmount } = renderPage()
+    await user.click(screen.getByText('Upload from File'))
+    const byLabel = (t: RegExp) => screen.getByLabelText(t) as HTMLInputElement
+    await user.type(byLabel(/Namespace/), 'myns')
+    await user.type(byLabel(/Module Name/), 'vpc')
+    await user.type(byLabel(/^Provider/), 'aws')
+    await user.type(byLabel(/Version/), '1.0.0')
+    const dropInput = screen.getByTestId('module-upload-dropzone-input') as HTMLInputElement
+    await user.upload(dropInput, new File(['x'], 'm.tar.gz'))
+
+    await user.click(screen.getByRole('button', { name: /Upload Module/i }))
+
+    // Signal is live while the upload is in flight...
+    await waitFor(() => expect(capturedSignal).toBeDefined())
+    expect(capturedSignal?.aborted).toBe(false)
+
+    // ...and unmounting (e.g. the user navigates away) aborts it.
+    unmount()
+    expect(capturedSignal?.aborted).toBe(true)
   })
 
   it('shows upload progress bar and preserves field state after upload failure', async () => {

@@ -50,7 +50,7 @@ import SyncIcon from '@mui/icons-material/Sync'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import HistoryIcon from '@mui/icons-material/History'
 import api from '../../services/api'
-import { getErrorMessage } from '../../utils/errors'
+import { getErrorMessage, sanitizeServerErrorMessage } from '../../utils/errors'
 import type {
   StorageConfigResponse,
   StorageConfigInput,
@@ -161,7 +161,10 @@ const StoragePage: React.FC = () => {
       if (result.success) {
         setSuccess(t('admin.storage.msgTestPassed'))
       } else {
-        setError(result.message || t('admin.storage.errTestFailed'))
+        // Never render the backend test-failure string verbatim: a storage
+        // connection test is a prime leak point for host:port / paths (CWE-209,
+        // #601). Sanitize, falling back to the generic message.
+        setError(sanitizeServerErrorMessage(result.message) ?? t('admin.storage.errTestFailed'))
       }
     },
     onError: (err) => setError(getErrorMessage(err, t('admin.storage.errConfigTest'))),

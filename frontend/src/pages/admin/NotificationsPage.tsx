@@ -21,7 +21,7 @@ import PageTitleIcon from '@mui/icons-material/Notifications'
 import api from '../../services/api'
 import { queryKeys } from '../../services/queryKeys'
 import { useAuth } from '../../contexts/AuthContext'
-import { getErrorMessage } from '../../utils/errors'
+import { getErrorMessage, sanitizeServerErrorMessage } from '../../utils/errors'
 import type {
   NotificationChannelEvent,
   NotificationChannelInput,
@@ -133,7 +133,10 @@ const NotificationsPage: React.FC = () => {
         setSuccess(data.message || t('admin.notifications.testSuccess'))
         setError(null)
       } else {
-        setError(data.message || t('admin.notifications.testError'))
+        // Never render the backend test-failure string verbatim: an SMTP send
+        // test can surface host:port / dial detail (CWE-209, #601). Sanitize,
+        // falling back to the generic message.
+        setError(sanitizeServerErrorMessage(data.message) ?? t('admin.notifications.testError'))
       }
     },
     onError: (err: unknown) => {

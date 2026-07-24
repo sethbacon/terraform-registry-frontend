@@ -6,8 +6,11 @@ import { clearAuthStorage } from '../../utils/authStorage'
 // In production, use the configured URL or default to current origin
 export const API_BASE_URL = import.meta.env.DEV ? '' : import.meta.env.VITE_API_URL || ''
 
-// Only use mock responses when explicitly enabled (e.g., when backend is not running)
-const USE_MOCK_DATA = import.meta.env.VITE_USE_MOCK_DATA === 'true'
+// Only use mock responses when explicitly enabled (e.g., when backend is not
+// running). Hard-gated to non-production builds: if this flag were ever left
+// true in a deployed build it would mask real 401/403/5xx errors as fake 200s,
+// swallowing auth failures and backend outages (CWE-636, audit #615).
+const USE_MOCK_DATA = import.meta.env.VITE_USE_MOCK_DATA === 'true' && !import.meta.env.PROD
 
 // Default request timeout. A hung backend would otherwise leave requests pending
 // indefinitely with no feedback to the user. File uploads (uploadModule,
@@ -51,6 +54,70 @@ function getMockResponse(url: string): { data: unknown; status: number } {
 }
 
 /**
+ * URL suffixes for the SCM-provider endpoints that proxy the *external* SCM API
+ * using the stored OAuth token. A 401 from one of these means the OAuth token
+ * expired or was revoked (show a reconnect prompt) — NOT that the user's app
+ * session died. Endpoints that operate on the local provider record or the OAuth
+ * linkage itself (list/get/update/delete, /oauth/*, /token, /verify) are
+ * deliberately excluded: a 401 there is a real session failure and must redirect
+ * to /login.
+ *
+ * This is a URL-shape heuristic. The robust fix is a structured backend signal
+ * (a dedicated error code) so new external-SCM endpoints need not be enumerated
+ * here — see audit issue #617 (backend change, out of tree). Until then, any new
+ * endpoint that calls the external SCM API on the user's behalf must be added to
+ * this list.
+ */
+const SCM_OAUTH_SUBRESOURCES = ['/repositories', '/tags', '/branches'] as const
+
+/**
+ * Classifies a 401 on an SCM-provider request as an OAuth-token failure (true,
+ * keep the session) vs a user-session failure (false, wipe + redirect), from the
+ * request URL shape.
+ */
+export function isSCMOAuthFailureUrl(url: string): boolean {
+  return (
+    url.includes('/scm-providers/') && SCM_OAUTH_SUBRESOURCES.some((suffix) => url.includes(suffix))
+  )
+}
+
+/**
+ * The CSRF double-submit only works when the SPA and API share an origin: the
+ * tfr_csrf cookie is read via document.cookie, which is same-origin only. If
+ * VITE_API_URL points at a different origin the cookie is unreadable and every
+ * mutating request goes out with no X-CSRF-Token header (the backend then
+ * rejects it — fail-closed, not a bypass). Returns a warning string for a
+ * cross-origin config, or null when same-origin (audit #631).
+ */
+export function checkCsrfOriginConfig(apiBaseUrl: string, appOrigin: string): string | null {
+  if (!apiBaseUrl) return null
+  let apiOrigin: string
+  try {
+    apiOrigin = new URL(apiBaseUrl, appOrigin).origin
+  } catch {
+    // Relative base (e.g. "" or "/api") — same-origin by construction.
+    return null
+  }
+  if (apiOrigin === appOrigin) return null
+  return (
+    `[api] VITE_API_URL (${apiOrigin}) is a different origin than the app (${appOrigin}). ` +
+    'The tfr_csrf cookie is not readable cross-origin, so CSRF-protected (mutating) requests ' +
+    'will be sent without X-CSRF-Token and rejected. Serve the API same-origin (reverse proxy) ' +
+    'for the double-submit CSRF defense to work.'
+  )
+}
+
+// Surface a cross-origin API misconfiguration loudly at startup instead of
+// letting every mutation silently fail without a CSRF header (audit #631).
+const csrfOriginWarning = checkCsrfOriginConfig(
+  API_BASE_URL,
+  typeof window !== 'undefined' ? window.location.origin : '',
+)
+if (csrfOriginWarning) {
+  console.error(csrfOriginWarning)
+}
+
+/**
  * The single shared Axios instance behind every domain API module. All
  * cross-cutting behavior — CSRF double-submit echo, 401 session handling,
  * breadcrumb timing — lives in the interceptors below so domain modules
@@ -90,14 +157,35 @@ http.interceptors.request.use(
   (error) => Promise.reject(error),
 )
 
+// Loop-prevention guard (audit #621): once the session-expiry redirect fires,
+// never fire it again for this page's lifetime — independent of whether the
+// tfr_csrf cookie deletion below actually took effect. Browser cookie deletion
+// silently no-ops when the cookie was set with a Domain attribute this code
+// doesn't mirror; without this guard that would keep hadSession=true forever and
+// reintroduce the /login <-> 401 redirect loop the cookie expiry is meant to
+// prevent. This module-scope flag only covers concurrent/same-tick 401s within a
+// single page instance — a real redirect is a full-page navigation that reloads
+// the module and resets it. The attribute-independent, navigation-surviving half
+// of the guard is the "already on /login" check at the redirect site below:
+// after the reload lands on /login, we refuse to redirect to /login again, so a
+// Domain-scoped cookie whose deletion no-ops still cannot loop.
+let hasRedirectedToLogin = false
+
+// The redirect target. Refusing to navigate here when we are already on this path
+// is what makes the loop guard survive a real page reload (see #621 above).
+const LOGIN_PATH = '/login'
+
 // Response interceptor for error handling
 http.interceptors.response.use(
   (response) => {
     return response
   },
   (error: AxiosError) => {
-    // Only return mock data when explicitly enabled (for offline development)
-    if (USE_MOCK_DATA) {
+    // Only return mock data when explicitly enabled AND the backend gave no
+    // response at all (offline/no-backend dev). Never let it pre-empt real error
+    // handling: a 401/403/5xx from a running backend must reach the session and
+    // error logic below, not be masked as a fake 200 (CWE-636, audit #615).
+    if (USE_MOCK_DATA && !error.response) {
       return getMockResponse(error.config?.url || '')
     }
 
@@ -107,9 +195,7 @@ http.interceptors.response.use(
       // so the calling component (e.g. RepositoryBrowser) can show the reconnect
       // prompt rather than wiping the user's session and redirecting to /login.
       const url = error.config?.url || ''
-      const isSCMOAuthFailure =
-        url.includes('/scm-providers/') &&
-        (url.includes('/repositories') || url.includes('/tags') || url.includes('/branches'))
+      const isSCMOAuthFailure = isSCMOAuthFailureUrl(url)
 
       if (!isSCMOAuthFailure) {
         // Only redirect when the user previously had an active cookie session.
@@ -130,8 +216,15 @@ http.interceptors.response.use(
         // Safe to clear from JS -- the cookie is non-HttpOnly by design and a dead
         // session's CSRF token has no value.
         document.cookie = 'tfr_csrf=; Max-Age=0; path=/'
-        if (hadSession) {
-          window.location.href = '/login'
+        // Two independent loop guards close the Domain-scoped-cookie case where the
+        // deletion above no-ops and hadSession stays true forever: (1) the
+        // module-scope flag stops concurrent 401s in this page instance; (2) the
+        // "already on /login" check survives a real page reload (which resets that
+        // flag) — redirecting to /login while already on /login is the loop itself.
+        const alreadyOnLoginPage = window.location.pathname === LOGIN_PATH
+        if (hadSession && !hasRedirectedToLogin && !alreadyOnLoginPage) {
+          hasRedirectedToLogin = true
+          window.location.href = LOGIN_PATH
         }
       }
     }

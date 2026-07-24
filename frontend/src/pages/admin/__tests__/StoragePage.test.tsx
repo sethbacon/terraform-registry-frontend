@@ -452,6 +452,23 @@ describe('StoragePage', () => {
     })
   })
 
+  it('does not surface a leaked internal detail from a failed per-config test (#601)', async () => {
+    mockExistingConfigs()
+    testStorageConfigMock.mockResolvedValue({
+      success: false,
+      message: 'dial tcp 10.0.5.23:5432: connect: connection refused',
+    })
+    const user = userEvent.setup()
+    renderWithProviders(<StoragePage />)
+    await waitFor(() => {
+      expect(screen.getByLabelText('Test Local File System')).toBeInTheDocument()
+    })
+    await user.click(screen.getByLabelText('Test Local File System'))
+    // The leaked internal host:port must not reach the UI; the generic fallback shows instead.
+    expect(await screen.findByText('Storage configuration test failed')).toBeInTheDocument()
+    expect(screen.queryByText(/10\.0\.5\.23/)).not.toBeInTheDocument()
+  })
+
   it('shows Migrate Data button when two or more configs exist', async () => {
     mockExistingConfigs([fakeLocalConfig, fakeS3Config])
     renderWithProviders(<StoragePage />)

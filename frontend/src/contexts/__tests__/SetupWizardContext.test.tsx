@@ -180,4 +180,139 @@ describe('SetupWizardContext (roadmap 1.3)', () => {
     expect(result.current.error).toBeTruthy()
     expect(result.current.scanningInstalling).toBe(false)
   })
+
+  // ─── #601 sibling: test/install result strings arrive on a 2xx body and skip
+  // getErrorMessage's AxiosError sanitization. They are surfaced BOTH via setError
+  // AND rendered directly by the step components (OIDCStep/StorageStep/ScanningStep),
+  // so the context sanitizes them at the trust boundary before storing. ────────────
+
+  it('testOIDC routes a leaked backend message away from both the banner and the stored result (#601)', async () => {
+    mockApi.testOIDCConfig.mockResolvedValue({
+      success: false,
+      message: 'dial tcp 10.0.5.23:5432: connect: connection refused',
+    })
+    const { result } = renderHook(() => useSetupWizard(), { wrapper })
+    await waitFor(() => expect(result.current.loading).toBe(false))
+    await act(async () => {
+      await result.current.testOIDC()
+    })
+    // Shared error banner is sanitized...
+    expect(result.current.error).not.toContain('10.0.5.23')
+    expect(result.current.error).toBe('OIDC test failed')
+    // ...and so is the result OIDCStep renders inline (oidcTestResult.message).
+    expect(result.current.oidcTestResult?.message).not.toContain('10.0.5.23')
+    expect(result.current.oidcTestResult?.message).toBe('OIDC test failed')
+  })
+
+  it('testOIDC preserves a short, clean backend failure message', async () => {
+    mockApi.testOIDCConfig.mockResolvedValue({ success: false, message: 'Invalid issuer URL' })
+    const { result } = renderHook(() => useSetupWizard(), { wrapper })
+    await waitFor(() => expect(result.current.loading).toBe(false))
+    await act(async () => {
+      await result.current.testOIDC()
+    })
+    expect(result.current.error).toBe('Invalid issuer URL')
+    expect(result.current.oidcTestResult?.message).toBe('Invalid issuer URL')
+  })
+
+  it('testScanning routes a leaked backend message through sanitization (#601)', async () => {
+    mockApi.testScanningConfig.mockResolvedValue({
+      success: false,
+      message: 'open /var/lib/registry/scanners/trivy: permission denied',
+    })
+    const { result } = renderHook(() => useSetupWizard(), { wrapper })
+    await waitFor(() => expect(result.current.loading).toBe(false))
+    await act(async () => {
+      await result.current.testScanning()
+    })
+    expect(result.current.error).not.toContain('/var/lib/registry')
+    expect(result.current.scanningTestResult?.message).not.toContain('/var/lib/registry')
+    expect(result.current.scanningTestResult?.message).toBe('Scanning test failed')
+  })
+
+  it('testLDAP routes a leaked backend message away from both the banner and the stored result (#601)', async () => {
+    mockApi.testLDAPConfig.mockResolvedValue({
+      success: false,
+      message: 'dial tcp 10.0.5.23:389: connect: connection refused',
+    })
+    const { result } = renderHook(() => useSetupWizard(), { wrapper })
+    await waitFor(() => expect(result.current.loading).toBe(false))
+    await act(async () => {
+      await result.current.testLDAP()
+    })
+    // Shared error banner is sanitized...
+    expect(result.current.error).not.toContain('10.0.5.23')
+    expect(result.current.error).toBe('LDAP test failed')
+    // ...and so is the result OIDCStep (auth step) renders inline (ldapTestResult.message).
+    expect(result.current.ldapTestResult?.message).not.toContain('10.0.5.23')
+    expect(result.current.ldapTestResult?.message).toBe('LDAP test failed')
+  })
+
+  it('testLDAP preserves a short, clean backend failure message', async () => {
+    mockApi.testLDAPConfig.mockResolvedValue({ success: false, message: 'Invalid bind credentials' })
+    const { result } = renderHook(() => useSetupWizard(), { wrapper })
+    await waitFor(() => expect(result.current.loading).toBe(false))
+    await act(async () => {
+      await result.current.testLDAP()
+    })
+    expect(result.current.error).toBe('Invalid bind credentials')
+    expect(result.current.ldapTestResult?.message).toBe('Invalid bind credentials')
+  })
+
+  it('testStorage routes a leaked backend message away from both the banner and the stored result (#601)', async () => {
+    mockApi.testSetupStorageConfig.mockResolvedValue({
+      success: false,
+      message: 'open /storage/local/uploads/tmp-9f3: permission denied',
+    })
+    const { result } = renderHook(() => useSetupWizard(), { wrapper })
+    await waitFor(() => expect(result.current.loading).toBe(false))
+    await act(async () => {
+      await result.current.testStorage()
+    })
+    // A failed test must NOT trigger a save of the (leaked) config.
+    expect(mockApi.saveSetupStorageConfig).not.toHaveBeenCalled()
+    // Shared banner is sanitized...
+    expect(result.current.error).not.toContain('/storage/local')
+    expect(result.current.error).toBe('Storage test failed')
+    // ...and so is the result StorageStep renders inline (storageTestResult.message).
+    expect(result.current.storageTestResult?.message).not.toContain('/storage/local')
+    expect(result.current.storageTestResult?.message).toBe('Storage test failed')
+  })
+
+  it('testStorage preserves a short, clean backend failure message', async () => {
+    mockApi.testSetupStorageConfig.mockResolvedValue({
+      success: false,
+      message: 'Bucket does not exist',
+    })
+    const { result } = renderHook(() => useSetupWizard(), { wrapper })
+    await waitFor(() => expect(result.current.loading).toBe(false))
+    await act(async () => {
+      await result.current.testStorage()
+    })
+    expect(result.current.error).toBe('Bucket does not exist')
+    expect(result.current.storageTestResult?.message).toBe('Bucket does not exist')
+  })
+
+  it('installScanner routes a leaked error away from both the banner and the stored result (#601)', async () => {
+    mockApi.installScanningTool.mockResolvedValue({
+      success: false,
+      tool: 'trivy',
+      version: '',
+      binary_path: '',
+      sha256: '',
+      source_url: '',
+      error: 'open /var/lib/registry/scanners/trivy.tmp: permission denied',
+    })
+    const { result } = renderHook(() => useSetupWizard(), { wrapper })
+    await waitFor(() => expect(result.current.loading).toBe(false))
+    await act(async () => {
+      await result.current.installScanner()
+    })
+    // ScanningStep renders scanningInstallResult.error directly, so the stored
+    // value must also be sanitized — not just the banner.
+    expect(result.current.error).not.toContain('/var/lib/registry')
+    expect(result.current.error).toBe('Scanner installation failed')
+    expect(result.current.scanningInstallResult?.error).not.toContain('/var/lib/registry')
+    expect(result.current.scanningInstallResult?.error).toBe('Scanner installation failed')
+  })
 })

@@ -2,7 +2,23 @@ import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { AxiosError, AxiosHeaders } from 'axios'
 import type { OIDCConfigResponse, Organization } from '../../../types'
+
+// Real AxiosError instances mirror what the shared http client actually rejects
+// with in production, so getErrorMessage's AxiosError-scoped sanitization runs
+// (a plain { response: … } object would skip it and hit the generic fallback).
+function axiosErrorWith(dataError: string, status = 500): AxiosError {
+  const error = new AxiosError(`Request failed with status code ${status}`)
+  error.response = {
+    status,
+    statusText: 'Error',
+    data: { error: dataError },
+    headers: {},
+    config: { headers: new AxiosHeaders() },
+  }
+  return error
+}
 
 const getAdminOIDCConfigMock = vi.fn()
 const updateOIDCGroupMappingMock = vi.fn()
@@ -235,9 +251,7 @@ describe('OIDCSettingsPage', () => {
 
   it('shows error alert when save mutation fails', async () => {
     getAdminOIDCConfigMock.mockResolvedValue(fakeConfig)
-    updateOIDCGroupMappingMock.mockRejectedValue({
-      response: { data: { error: 'Permission denied' } },
-    })
+    updateOIDCGroupMappingMock.mockRejectedValue(axiosErrorWith('Permission denied', 403))
     const user = userEvent.setup()
     renderWithProviders(<OIDCSettingsPage />)
     await waitFor(() => {
@@ -252,13 +266,44 @@ describe('OIDCSettingsPage', () => {
   })
 
   it('shows error when query fails to load config', async () => {
-    getAdminOIDCConfigMock.mockRejectedValue({
-      response: { data: { error: 'Unauthorized access' } },
-    })
+    getAdminOIDCConfigMock.mockRejectedValue(axiosErrorWith('Unauthorized access', 401))
     renderWithProviders(<OIDCSettingsPage />)
     await waitFor(() => {
       expect(screen.getByText('Unauthorized access')).toBeInTheDocument()
     })
+  })
+
+  // ─── #601: leaked backend internals must never render verbatim (CWE-209) ──────
+  // Before the fix both error paths read response.data.error and passed it
+  // straight to setError() → rendered raw in the <Alert>. These reproduce that
+  // bypass: they fail on the pre-fix code (the leaked token appears) and pass once
+  // the paths route through getErrorMessage()/sanitizeServerErrorMessage().
+
+  it('does not surface a leaked backend stack trace when config load fails (#601)', async () => {
+    const leaked = 'panic: runtime error: invalid memory address\n\tgoroutine 12 [running]'
+    getAdminOIDCConfigMock.mockRejectedValue(axiosErrorWith(leaked, 500))
+    renderWithProviders(<OIDCSettingsPage />)
+    // An error alert still appears (safe boilerplate), but not the raw internals.
+    await screen.findByRole('alert')
+    expect(screen.queryByText(/panic:/)).not.toBeInTheDocument()
+    expect(screen.queryByText(/goroutine/)).not.toBeInTheDocument()
+  })
+
+  it('does not surface a leaked backend SQL error when save fails (#601)', async () => {
+    getAdminOIDCConfigMock.mockResolvedValue(fakeConfig)
+    const leaked = 'pq: duplicate key value violates unique constraint "oidc_group_key"'
+    updateOIDCGroupMappingMock.mockRejectedValue(axiosErrorWith(leaked, 409))
+    const user = userEvent.setup()
+    renderWithProviders(<OIDCSettingsPage />)
+    await waitFor(() => {
+      expect(screen.getByText('Save Changes')).toBeInTheDocument()
+    })
+
+    await user.click(screen.getByText('Save Changes'))
+
+    await screen.findByRole('alert')
+    expect(screen.queryByText(/constraint/)).not.toBeInTheDocument()
+    expect(screen.queryByText(/pq:/)).not.toBeInTheDocument()
   })
 
   it('cancel button closes the add dialog without adding', async () => {

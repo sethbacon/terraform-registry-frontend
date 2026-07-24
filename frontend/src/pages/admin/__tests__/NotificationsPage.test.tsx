@@ -301,6 +301,26 @@ describe('NotificationsPage', () => {
     expect(await screen.findByText('SMTP rejected')).toBeInTheDocument()
   })
 
+  it('does not surface a leaked internal detail from a failed test result (#601)', async () => {
+    const user = userEvent.setup()
+    getNotificationsConfigMock.mockResolvedValue(fakeConfig)
+    sendTestNotificationMock.mockResolvedValue({
+      success: false,
+      message: 'dial tcp 10.0.5.23:587: connect: connection refused',
+    })
+    renderPage()
+
+    await waitFor(() => {
+      expect(screen.getByDisplayValue('smtp.example.com')).toBeInTheDocument()
+    })
+
+    await user.click(screen.getByRole('button', { name: 'Send Test Email' }))
+
+    // The leaked internal host:port must not reach the UI; the generic fallback shows instead.
+    expect(await screen.findByText('Failed to send test email')).toBeInTheDocument()
+    expect(screen.queryByText(/10\.0\.5\.23/)).not.toBeInTheDocument()
+  })
+
   it('shows an error alert when the test mutation throws', async () => {
     const user = userEvent.setup()
     getNotificationsConfigMock.mockResolvedValue(fakeConfig)
