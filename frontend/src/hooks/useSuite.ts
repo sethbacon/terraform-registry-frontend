@@ -1,28 +1,23 @@
 import { useQuery } from '@tanstack/react-query'
+import api from '../services/api'
+import type { SuiteSibling } from '../services/api'
 
-export interface SuiteSibling {
-  app: string
-  state: 'active' | 'degraded' | 'unreachable' | 'unknown'
-  publicUrl?: string
-  links?: Record<string, string>
-  // Identity provenance from the sibling's manifest. issuer identifies which app
-  // minted its tokens; sharedStore is true only when an operator has confirmed
-  // both apps use one identity store + IdP (single sign-on). Absent/false ⇒ the
-  // switcher warns that opening the sibling may require a separate sign-in.
-  issuer?: string
-  sharedStore?: boolean
-}
+export type { SuiteSibling }
 
 async function fetchUIConfig(): Promise<{ sibling: SuiteSibling | null }> {
   // Swallow any network/parse failure (endpoint absent pre-Phase-0, sibling
   // unreachable, or no backend in tests) and degrade to "no sibling". This keeps
   // the switcher inert instead of surfacing an unhandled rejection — notably,
-  // every test that renders <Layout> mounts useSuite, and an un-stubbed fetch
+  // every test that renders <Layout> mounts useSuite, and an un-stubbed request
   // would otherwise throw ECONNREFUSED.
+  //
+  // api.getUIConfig() (services/api/suiteApi.ts) routes through the shared http
+  // client (not a bare fetch()) so this call inherits API_BASE_URL resolution
+  // for the split-origin deployment mode, CSRF/401 handling, and
+  // scripts/contract-check.ts coverage like every other backend call in the
+  // app (#600).
   try {
-    const res = await fetch('/api/v1/ui/config', { credentials: 'include' })
-    if (!res.ok) return { sibling: null }
-    return await res.json()
+    return await api.getUIConfig()
   } catch {
     return { sibling: null }
   }

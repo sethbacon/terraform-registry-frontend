@@ -1,4 +1,4 @@
-import { http } from './http'
+import { http, encodeSegment } from './http'
 import type {
   Provider,
   ProviderVersion,
@@ -55,7 +55,7 @@ export async function getProviderVersions(
   type: string,
 ): Promise<ProviderVersionsResponse> {
   const response = await http.get<ProviderVersionsResponse>(
-    `/v1/providers/${namespace}/${type}/versions`,
+    `/v1/providers/${encodeSegment(namespace)}/${encodeSegment(type)}/versions`,
   )
   return response.data
 }
@@ -87,7 +87,7 @@ export async function uploadProvider(
 }
 
 export async function getProvider(namespace: string, type: string) {
-  const response = await http.get(`/api/v1/providers/${namespace}/${type}`)
+  const response = await http.get(`/api/v1/providers/${encodeSegment(namespace)}/${encodeSegment(type)}`)
   return response.data
 }
 
@@ -95,7 +95,7 @@ export async function deleteProvider(
   namespace: string,
   type: string,
 ): Promise<{ message: string }> {
-  const response = await http.delete<{ message: string }>(`/api/v1/providers/${namespace}/${type}`)
+  const response = await http.delete<{ message: string }>(`/api/v1/providers/${encodeSegment(namespace)}/${encodeSegment(type)}`)
   return response.data
 }
 
@@ -105,7 +105,7 @@ export async function deleteProviderVersion(
   version: string,
 ): Promise<{ message: string }> {
   const response = await http.delete<{ message: string }>(
-    `/api/v1/providers/${namespace}/${type}/versions/${version}`,
+    `/api/v1/providers/${encodeSegment(namespace)}/${encodeSegment(type)}/versions/${encodeSegment(version)}`,
   )
   return response.data
 }
@@ -117,7 +117,7 @@ export async function deprecateProviderVersion(
   message?: string,
 ): Promise<{ message: string }> {
   const response = await http.post<{ message: string }>(
-    `/api/v1/providers/${namespace}/${type}/versions/${version}/deprecate`,
+    `/api/v1/providers/${encodeSegment(namespace)}/${encodeSegment(type)}/versions/${encodeSegment(version)}/deprecate`,
     message ? { message } : {},
   )
   return response.data
@@ -129,7 +129,7 @@ export async function undeprecateProviderVersion(
   version: string,
 ): Promise<{ message: string }> {
   const response = await http.delete<{ message: string }>(
-    `/api/v1/providers/${namespace}/${type}/versions/${version}/deprecate`,
+    `/api/v1/providers/${encodeSegment(namespace)}/${encodeSegment(type)}/versions/${encodeSegment(version)}/deprecate`,
   )
   return response.data
 }
@@ -149,7 +149,7 @@ export async function getProviderDocs(
   if (limit !== undefined) params.limit = limit
   if (offset !== undefined) params.offset = offset
   const response = await http.get<ProviderDocsResponse>(
-    `/api/v1/providers/${namespace}/${type}/versions/${version}/docs`,
+    `/api/v1/providers/${encodeSegment(namespace)}/${encodeSegment(type)}/versions/${encodeSegment(version)}/docs`,
     { params },
   )
   return response.data
@@ -163,7 +163,7 @@ export async function getProviderDocContent(
   slug: string,
 ): Promise<ProviderDocContent> {
   const response = await http.get<ProviderDocContent>(
-    `/api/v1/providers/${namespace}/${type}/versions/${version}/docs/${category}/${slug}`,
+    `/api/v1/providers/${encodeSegment(namespace)}/${encodeSegment(type)}/versions/${encodeSegment(version)}/docs/${encodeSegment(category)}/${encodeSegment(slug)}`,
   )
   return response.data
 }

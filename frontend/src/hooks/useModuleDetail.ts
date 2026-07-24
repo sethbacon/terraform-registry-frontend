@@ -10,6 +10,7 @@ import { useSuite } from './useSuite'
 import { REGISTRY_HOST } from '../config'
 import { getErrorMessage, getErrorStatus } from '../utils/errors'
 import { queryKeys } from '../services/queryKeys'
+import { isSafeExternalUrl } from '../utils/externalUrl'
 
 // ---------------------------------------------------------------------------
 // Semver sort helper (shared by query & version selection)
@@ -644,7 +645,10 @@ export function useModuleDetail() {
     // Suite "Consumed by"
     moduleConsumers,
     suiteActive,
-    suiteSiblingUrl: suiteSibling?.publicUrl,
+    // Defense-in-depth: sibling.publicUrl comes from the backend /api/v1/ui/config;
+    // validate it at the app boundary before ConsumedByPanel hands it to its
+    // window.open() navigation sink (#559).
+    suiteSiblingUrl: isSafeExternalUrl(suiteSibling?.publicUrl) ? suiteSibling?.publicUrl : undefined,
     // Security scan
     moduleScan,
     scanLoading,

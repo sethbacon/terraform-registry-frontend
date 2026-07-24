@@ -27,7 +27,12 @@ vi.mock('../../contexts/AuthContext', () => ({
   useAuth: () => mockAuth,
 }))
 
+vi.mock('../../services/errorReporting', () => ({
+  captureError: vi.fn(),
+}))
+
 import DevUserSwitcher from '../DevUserSwitcher'
+import { captureError } from '../../services/errorReporting'
 
 describe('DevUserSwitcher', () => {
   beforeEach(() => {
@@ -134,5 +139,32 @@ describe('DevUserSwitcher', () => {
       expect(screen.getByText(/DEV/)).toBeInTheDocument()
     })
     expect(screen.getByText('Select user')).toBeInTheDocument()
+  })
+
+  // Regression guard (#623): a failed impersonation only logged via console.error
+  // before this fix -- it must also reach the app's telemetry pipeline.
+  it('reports a failed impersonation to telemetry', async () => {
+    const impersonateError = new Error('impersonation failed')
+    getDevStatusMock.mockResolvedValue({ dev_mode: true })
+    listUsersForImpersonationMock.mockResolvedValue({
+      users: [
+        { id: 'u1', email: 'admin@example.com', name: 'Admin', primary_role: 'admin' },
+        { id: 'u2', email: 'user@example.com', name: 'Regular User', primary_role: 'viewer' },
+      ],
+    })
+    impersonateUserMock.mockRejectedValue(impersonateError)
+
+    render(<DevUserSwitcher />)
+    await waitFor(() => expect(screen.getByText(/DEV/)).toBeInTheDocument())
+
+    fireEvent.mouseDown(screen.getByRole('combobox'))
+    const listbox = await screen.findByRole('listbox')
+    fireEvent.click(within(listbox).getByText('Regular User'))
+
+    await waitFor(() =>
+      expect(captureError).toHaveBeenCalledWith(impersonateError, {
+        context: 'Failed to impersonate user',
+      }),
+    )
   })
 })

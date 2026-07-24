@@ -43,7 +43,12 @@ vi.mock('../../components/ProviderDocContent', () => ({
   default: () => <div data-testid="provider-doc-content" />,
 }))
 
+vi.mock('../../services/errorReporting', () => ({
+  captureError: vi.fn(),
+}))
+
 import ProviderDetailPage from '../ProviderDetailPage'
+import { captureError } from '../../services/errorReporting'
 
 function renderPage(path = '/providers/hashicorp/aws') {
   return render(
@@ -112,6 +117,20 @@ describe('ProviderDetailPage', () => {
     await waitFor(() => {
       expect(screen.getByText(/failed to load provider details/i)).toBeInTheDocument()
     })
+  })
+
+  // Regression guard (#623): setError() here uses a plain hardcoded string, not
+  // getErrorMessage(), so a failed load only logged via console.error before this
+  // fix -- it must also reach the app's telemetry pipeline.
+  it('reports a failed provider details load to telemetry', async () => {
+    const loadError = new Error('Network error')
+    searchProvidersMock.mockRejectedValue(loadError)
+    renderPage()
+    await waitFor(() =>
+      expect(captureError).toHaveBeenCalledWith(loadError, {
+        context: 'Failed to load provider details',
+      }),
+    )
   })
 
   it('renders provider details after loading', async () => {

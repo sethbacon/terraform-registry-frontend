@@ -1504,6 +1504,7 @@
       "errUpdate": "Failed to update provider",
       "errDelete": "Failed to delete provider",
       "errOAuth": "Failed to initiate OAuth",
+      "errOAuthInvalidUrl": "The OAuth provider returned an invalid authorization URL",
       "errSaveToken": "Failed to save access token",
       "errDisconnect": "Failed to disconnect",
       "labelClientId": "Client ID",

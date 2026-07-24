@@ -20,6 +20,11 @@
       "method": "POST",
       "path": "/api/v1/dev/impersonate/{}",
       "reason": "Backend route is registered conditionally under DEV_MODE=true and is intentionally undocumented in production swagger. Permanent allowlist entry."
+    },
+    {
+      "method": "GET",
+      "path": "/api/v1/ui/config",
+      "reason": "Backend handler uiConfigHandler (terraform-registry-backend/backend/internal/api/suite.go) has no swag annotations and the route is absent from backend/docs/swagger.json -- unlike the sibling /api/v1/ui/theme route, which is documented. Tracked in #600; remove this entry once the backend adds @Router/@Summary annotations for uiConfigHandler and regenerates swagger.json."
     }
   ]
 }

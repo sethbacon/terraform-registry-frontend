@@ -1,7 +1,7 @@
 /**
  * Users domain API — user CRUD, search, GDPR export/erasure, and membership lookups.
  */
-import { http } from './http'
+import { http, encodeSegment } from './http'
 import type { PaginationMeta, User, UserMembership } from '../../types'
 
 /**
@@ -68,7 +68,7 @@ export async function searchUsers(
 }
 
 export async function getUser(id: string) {
-  const response = await http.get<{ user: Record<string, unknown> }>(`/api/v1/users/${id}`)
+  const response = await http.get<{ user: Record<string, unknown> }>(`/api/v1/users/${encodeSegment(id)}`)
   return transformUser(response.data.user)
 }
 
@@ -78,12 +78,12 @@ export async function createUser(data: { email: string; name: string }) {
 }
 
 export async function updateUser(id: string, data: { name?: string; email?: string }) {
-  const response = await http.put<{ user: Record<string, unknown> }>(`/api/v1/users/${id}`, data)
+  const response = await http.put<{ user: Record<string, unknown> }>(`/api/v1/users/${encodeSegment(id)}`, data)
   return transformUser(response.data.user)
 }
 
 export async function deleteUser(id: string): Promise<{ message: string }> {
-  const response = await http.delete<{ message: string }>(`/api/v1/users/${id}`)
+  const response = await http.delete<{ message: string }>(`/api/v1/users/${encodeSegment(id)}`)
   return response.data
 }
 
@@ -93,7 +93,7 @@ export async function deleteUser(id: string): Promise<{ message: string }> {
 // sets `Content-Disposition: attachment; filename=user-data-{id}.json`
 // and we want that filename hint to flow to the browser.
 export async function exportUserData(id: string): Promise<{ blob: Blob; filename: string }> {
-  const response = await http.get(`/api/v1/admin/users/${id}/export`, {
+  const response = await http.get(`/api/v1/admin/users/${encodeSegment(id)}/export`, {
     responseType: 'blob',
   })
   // Default to user-data-{id}.json; override if the server provided a Content-Disposition.
@@ -110,13 +110,13 @@ export async function exportUserData(id: string): Promise<{ blob: Blob; filename
 
 // GDPR Article 17 — anonymize user PII while preserving audit trail.
 export async function eraseUser(id: string): Promise<{ message: string; user_id: string }> {
-  const response = await http.post(`/api/v1/admin/users/${id}/erase`)
+  const response = await http.post(`/api/v1/admin/users/${encodeSegment(id)}/erase`)
   return response.data as { message: string; user_id: string }
 }
 
 export async function getUserMemberships(userId: string): Promise<UserMembership[]> {
   const response = await http.get<{ memberships?: UserMembership[] }>(
-    `/api/v1/users/${userId}/memberships`,
+    `/api/v1/users/${encodeSegment(userId)}/memberships`,
   )
   return response.data.memberships || []
 }

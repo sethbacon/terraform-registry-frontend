@@ -43,6 +43,18 @@ vi.mock('../../config', () => ({
   REGISTRY_HOST: 'registry.example.com',
 }))
 
+const mockUseSuite = vi.hoisted(() =>
+  vi.fn(
+    (): {
+      sibling: { app: string; state: string; publicUrl: string } | null
+      active: boolean
+    } => ({ sibling: null, active: false }),
+  ),
+)
+vi.mock('../useSuite', () => ({
+  useSuite: mockUseSuite,
+}))
+
 import { useModuleDetail } from '../useModuleDetail'
 import { useParams } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
@@ -89,6 +101,7 @@ describe('useModuleDetail', () => {
       allowedScopes: ['admin'],
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } as any)
+    mockUseSuite.mockReturnValue({ sibling: null, active: false })
     mockApi.getModule.mockResolvedValue(moduleData)
     mockApi.getModuleVersions.mockResolvedValue(versionsData)
     mockApi.getModuleSCMInfo.mockRejectedValue(new Error('404'))
@@ -592,5 +605,31 @@ describe('useModuleDetail', () => {
     await waitFor(() => expect(result.current.loading).toBe(false))
 
     expect(result.current.getTerraformExample()).toBe('')
+  })
+
+  // Regression guards (#559): suiteSiblingUrl comes from the backend
+  // /api/v1/ui/config and flows into ConsumedByPanel's window.open() navigation
+  // sink -- it must be validated at this app boundary before ConsumedByPanel
+  // ever sees it, instead of trusting the backend value verbatim.
+  it('passes through a safe suite sibling URL', async () => {
+    mockUseSuite.mockReturnValue({
+      sibling: { app: 'terraform-state-manager', state: 'active', publicUrl: 'https://tsm.example.com' },
+      active: true,
+    })
+    const { result } = renderHook(() => useModuleDetail(), { wrapper: createWrapper() })
+    await waitFor(() => expect(result.current.loading).toBe(false))
+
+    expect(result.current.suiteSiblingUrl).toBe('https://tsm.example.com')
+  })
+
+  it('drops an unsafe suite sibling URL instead of handing it to the navigation sink', async () => {
+    mockUseSuite.mockReturnValue({
+      sibling: { app: 'terraform-state-manager', state: 'active', publicUrl: '//evil.com' },
+      active: true,
+    })
+    const { result } = renderHook(() => useModuleDetail(), { wrapper: createWrapper() })
+    await waitFor(() => expect(result.current.loading).toBe(false))
+
+    expect(result.current.suiteSiblingUrl).toBeUndefined()
   })
 })

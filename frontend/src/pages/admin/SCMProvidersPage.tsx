@@ -41,6 +41,7 @@ import PageHeader from '../../components/PageHeader'
 import PageTitleIcon from '@mui/icons-material/GitHub'
 import api from '../../services/api'
 import { getErrorMessage } from '../../utils/errors'
+import { isSafeExternalUrl } from '../../utils/externalUrl'
 import { useAuth } from '../../contexts/AuthContext'
 import type {
   SCMProvider,
@@ -227,6 +228,13 @@ const SCMProvidersPage: React.FC = () => {
     } else {
       try {
         const response = await api.initiateSCMOAuth(provider.id)
+        // Defense-in-depth: authorization_url comes from the backend (ultimately the
+        // SCM provider's own OAuth config); validate it at the app boundary before
+        // this full-page redirect navigation sink, instead of trusting it verbatim (#559).
+        if (!isSafeExternalUrl(response.authorization_url)) {
+          setError(t('admin.scmProviders.errOAuthInvalidUrl'))
+          return
+        }
         window.location.href = response.authorization_url
       } catch (err: unknown) {
         setError(getErrorMessage(err, t('admin.scmProviders.errOAuth')))

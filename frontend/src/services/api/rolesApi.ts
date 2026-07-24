@@ -1,4 +1,4 @@
-import { http } from './http'
+import { http, encodeSegment } from './http'
 import type { RoleTemplate } from '../../types/rbac'
 
 // ============================================================================
@@ -11,7 +11,7 @@ export async function listRoleTemplates(): Promise<RoleTemplate[]> {
 }
 
 export async function getRoleTemplate(id: string): Promise<RoleTemplate> {
-  const response = await http.get<RoleTemplate>(`/api/v1/admin/role-templates/${id}`)
+  const response = await http.get<RoleTemplate>(`/api/v1/admin/role-templates/${encodeSegment(id)}`)
   return response.data
 }
 
@@ -34,11 +34,11 @@ export async function updateRoleTemplate(
     scopes?: string[]
   },
 ): Promise<RoleTemplate> {
-  const response = await http.put<RoleTemplate>(`/api/v1/admin/role-templates/${id}`, data)
+  const response = await http.put<RoleTemplate>(`/api/v1/admin/role-templates/${encodeSegment(id)}`, data)
   return response.data
 }
 
 export async function deleteRoleTemplate(id: string): Promise<{ message: string }> {
-  const response = await http.delete<{ message: string }>(`/api/v1/admin/role-templates/${id}`)
+  const response = await http.delete<{ message: string }>(`/api/v1/admin/role-templates/${encodeSegment(id)}`)
   return response.data
 }

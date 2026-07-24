@@ -1294,6 +1294,51 @@ describe('ApiClient', () => {
     })
   })
 
+  // ─── Path-segment encoding at call sites (#614, CWE-116) ───────────────────
+  // encodeSegment() itself is unit-tested in api/__tests__/http.test.ts. These
+  // guard the call sites: a future edit that dropped encodeSegment() from a
+  // domain function's URL-building would not be caught by benign alphanumeric
+  // ids elsewhere in this file, since those are encoding-invariant.
+  describe('path-segment encoding at call sites', () => {
+    it('getModule encodes a fragment character in a route param so the request is not truncated', async () => {
+      const client = await getApiClient()
+        ; (mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+          data: { id: 'm1' },
+        })
+      await client.getModule('ns', 'mod#evil', 'aws')
+      expect(mockAxiosInstance.get).toHaveBeenCalledWith('/api/v1/modules/ns/mod%23evil/aws')
+    })
+
+    it('deleteModuleVersion encodes a path separator in the version so the target resource cannot shift', async () => {
+      const client = await getApiClient()
+        ; (mockAxiosInstance.delete as ReturnType<typeof vi.fn>).mockResolvedValueOnce({ data: {} })
+      await client.deleteModuleVersion('ns', 'mod', 'aws', '../other')
+      expect(mockAxiosInstance.delete).toHaveBeenCalledWith(
+        '/api/v1/modules/ns/mod/aws/versions/..%2Fother',
+      )
+    })
+
+    it('getProvider encodes a query-string character in a route param so it cannot inject query params', async () => {
+      const client = await getApiClient()
+        ; (mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+          data: { id: 'p1' },
+        })
+      await client.getProvider('hashicorp', 'aws?admin=true')
+      expect(mockAxiosInstance.get).toHaveBeenCalledWith(
+        '/api/v1/providers/hashicorp/aws%3Fadmin%3Dtrue',
+      )
+    })
+
+    it('getSCMProvider encodes a fragment character in the id so the request is not truncated', async () => {
+      const client = await getApiClient()
+        ; (mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+          data: { id: 'scm-1' },
+        })
+      await client.getSCMProvider('scm-1#evil')
+      expect(mockAxiosInstance.get).toHaveBeenCalledWith('/api/v1/scm-providers/scm-1%23evil')
+    })
+  })
+
   // ─── Users ────────────────────────────────────────────────────────────────
   describe('user methods', () => {
     it('searchUsers', async () => {
@@ -2023,9 +2068,14 @@ describe('ApiClient', () => {
       const client = await getApiClient()
         ; (mockAxiosInstance.post as ReturnType<typeof vi.fn>).mockResolvedValueOnce({ data: {} })
       await client.triggerMirrorSync('mir-1', { namespace: 'hashicorp' })
-      expect(mockAxiosInstance.post).toHaveBeenCalledWith('/api/v1/admin/mirrors/mir-1/sync', {
-        namespace: 'hashicorp',
-      })
+      expect(mockAxiosInstance.post).toHaveBeenCalledWith(
+        '/api/v1/admin/mirrors/mir-1/sync',
+        { namespace: 'hashicorp' },
+        // Regression guard (#599): nginx grants this endpoint a 600s
+        // proxy_read_timeout/proxy_send_timeout because syncs can take several
+        // minutes -- the client must not abort at the shared 30s default.
+        { timeout: 600_000 },
+      )
     })
 
     it('getMirrorStatus', async () => {
@@ -2572,6 +2622,10 @@ describe('ApiClient', () => {
       expect(mockAxiosInstance.post).toHaveBeenCalledWith(
         '/api/v1/admin/terraform-mirrors/tc-1/sync',
         {},
+        // Regression guard (#599): this endpoint didn't even match nginx's
+        // long-timeout regex before the fix, so it needs the same client-side
+        // override as triggerMirrorSync once nginx.conf covers both paths.
+        { timeout: 600_000 },
       )
     })
 

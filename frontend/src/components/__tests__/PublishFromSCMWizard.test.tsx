@@ -5,6 +5,9 @@ import api from '../../services/api'
 import type { SCMProvider, SCMRepository, SCMTag } from '../../types/scm'
 
 vi.mock('../../services/api')
+vi.mock('../../services/errorReporting', () => ({
+  captureError: vi.fn(),
+}))
 vi.mock('../RepositoryBrowser', () => ({
   default: ({
     onRepositorySelect,
@@ -102,6 +105,7 @@ function renderWizard(
 }
 
 import PublishFromSCMWizard from '../PublishFromSCMWizard'
+import { captureError } from '../../services/errorReporting'
 
 describe('PublishFromSCMWizard', () => {
   // ── Step 0: Select Provider ──────────────────────────────────
@@ -132,6 +136,19 @@ describe('PublishFromSCMWizard', () => {
     renderWizard()
     await waitFor(() =>
       expect(screen.getByText('Failed to load SCM providers')).toBeInTheDocument(),
+    )
+  })
+
+  // Regression guard (#623): a failed provider load only logged via console.error
+  // before this fix -- it must also reach the app's telemetry pipeline.
+  it('reports a failed provider load to telemetry', async () => {
+    const loadError = new Error('net')
+    ;(api.listSCMProviders as Mock).mockRejectedValue(loadError)
+    renderWizard()
+    await waitFor(() =>
+      expect(captureError).toHaveBeenCalledWith(loadError, {
+        context: 'Error loading providers',
+      }),
     )
   })
 

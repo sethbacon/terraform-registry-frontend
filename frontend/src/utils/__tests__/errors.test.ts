@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { AxiosError, AxiosHeaders, CanceledError } from 'axios'
 import {
   getErrorMessage,
@@ -19,7 +19,48 @@ function axiosErrorWith(dataError: unknown, status = 500, message = 'Request fai
   return error
 }
 
+vi.mock('../../services/errorReporting', () => ({
+  captureError: vi.fn(),
+}))
+
+import { captureError } from '../../services/errorReporting'
+
 describe('getErrorMessage', () => {
+  beforeEach(() => {
+    vi.mocked(captureError).mockClear()
+  })
+
+  // Regression guard (#619): getErrorMessage is the one call every caught-API-error
+  // handler already goes through -- wiring telemetry reporting here, instead of at
+  // each of the ~90 call sites, is what gets handled failures into the same
+  // error-reporting pipeline as uncaught ones.
+  it('reports the caught error to telemetry, tagged with the fallback as context', () => {
+    const error = new Error('boom')
+    getErrorMessage(error, 'Failed to do the thing')
+    expect(captureError).toHaveBeenCalledWith(error, { context: 'Failed to do the thing' })
+  })
+
+  it('reports an AxiosError to telemetry as-is (not re-wrapped)', () => {
+    const error = new AxiosError('Network Error')
+    getErrorMessage(error, 'Failed to load')
+    expect(captureError).toHaveBeenCalledWith(error, { context: 'Failed to load' })
+  })
+
+  it('wraps a non-Error thrown value in an Error before reporting to telemetry', () => {
+    getErrorMessage('a string error', 'Failed fallback')
+    expect(captureError).toHaveBeenCalledWith(
+      expect.objectContaining({ message: 'a string error' }),
+      { context: 'Failed fallback' },
+    )
+  })
+
+  it('wraps a non-Error, non-string thrown value using the fallback as the message', () => {
+    getErrorMessage({ code: 123 }, 'Failed fallback')
+    expect(captureError).toHaveBeenCalledWith(expect.objectContaining({ message: 'Failed fallback' }), {
+      context: 'Failed fallback',
+    })
+  })
+
   it('extracts error message from AxiosError with response.data.error', () => {
     const error = new AxiosError('Request failed')
     error.response = {

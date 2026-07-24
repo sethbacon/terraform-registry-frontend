@@ -45,6 +45,7 @@ import { Organization, OrganizationMemberWithUser, User } from '../../types'
 import { RoleTemplate } from '../../types/rbac'
 import { useAuth } from '../../contexts/AuthContext'
 import { getErrorMessage } from '../../utils/errors'
+import { captureError } from '../../services/errorReporting'
 import { queryKeys } from '../../services/queryKeys'
 
 const OrganizationsPage: React.FC = () => {
@@ -194,6 +195,11 @@ const OrganizationsPage: React.FC = () => {
       setMembers(membersData)
     } catch (err) {
       console.error('Failed to load members:', err)
+      // No getErrorMessage() call here (list load just resets local state), so
+      // report explicitly to keep this failure visible in telemetry too (#623).
+      captureError(err instanceof Error ? err : new Error(String(err)), {
+        context: 'Failed to load members',
+      })
       setMembers([])
     } finally {
       setMembersLoading(false)
@@ -206,6 +212,9 @@ const OrganizationsPage: React.FC = () => {
       setAllUsers(response.users || [])
     } catch (err) {
       console.error('Failed to load users:', err)
+      captureError(err instanceof Error ? err : new Error(String(err)), {
+        context: 'Failed to load users',
+      })
       setAllUsers([])
     }
   }
@@ -216,6 +225,9 @@ const OrganizationsPage: React.FC = () => {
       setRoleTemplates(templates || [])
     } catch (err) {
       console.error('Failed to load role templates:', err)
+      captureError(err instanceof Error ? err : new Error(String(err)), {
+        context: 'Failed to load role templates',
+      })
       setRoleTemplates([])
     }
   }

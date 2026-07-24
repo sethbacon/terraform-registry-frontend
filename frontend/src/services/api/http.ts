@@ -26,6 +26,20 @@ export function getCookie(name: string): string {
   return match ? decodeURIComponent(match[1]) : ''
 }
 
+/**
+ * URL-encode a single path segment before interpolating it into a
+ * template-literal request URL. Axios does not encode manually-built path
+ * strings, so an unescaped identifier containing '#', '?', or '/' can
+ * truncate the request at a fragment (silently dropping later path
+ * segments), inject a bogus query string, or shift the path to a different
+ * resource than intended (CWE-116). Domain API modules should wrap every
+ * interpolated namespace/name/id/version/etc. segment with this before
+ * building a URL (#614).
+ */
+export function encodeSegment(value: string): string {
+  return encodeURIComponent(value)
+}
+
 function getMockResponse(url: string): { data: unknown; status: number } {
   // Mock responses for development when backend is not available
   let mockData: { data: unknown } = { data: [] }
