@@ -77,6 +77,7 @@ import {
 import { formatDate } from '../../utils'
 import { getErrorMessage } from '../../utils/errors'
 import { queryKeys } from '../../services/queryKeys'
+import { usePagination } from '../../hooks/usePagination'
 
 // ---------------------------------------------------------------------------
 // Version sub-row with expandable platform list
@@ -302,8 +303,12 @@ const MirrorsPage: React.FC = () => {
   const [historyMirrorName, setHistoryMirrorName] = useState('')
 
   // Client-side pagination
-  const [mirrorsPage, setMirrorsPage] = useState(0)
-  const [mirrorsRowsPerPage, setMirrorsRowsPerPage] = useState(10)
+  const {
+    page: mirrorsPage,
+    rowsPerPage: mirrorsRowsPerPage,
+    handleChangePage: handleMirrorsPageChange,
+    handleChangeRowsPerPage: handleMirrorsRowsPerPageChange,
+  } = usePagination(10)
 
   const [formData, setFormData] = useState<Partial<CreateMirrorConfigRequest>>({
     name: '',
@@ -865,12 +870,9 @@ const MirrorsPage: React.FC = () => {
               component="div"
               count={mirrors.length}
               page={mirrorsPage}
-              onPageChange={(_e, newPage) => setMirrorsPage(newPage)}
+              onPageChange={handleMirrorsPageChange}
               rowsPerPage={mirrorsRowsPerPage}
-              onRowsPerPageChange={(e) => {
-                setMirrorsRowsPerPage(parseInt(e.target.value, 10))
-                setMirrorsPage(0)
-              }}
+              onRowsPerPageChange={handleMirrorsRowsPerPageChange}
               rowsPerPageOptions={[10, 25, 50]}
               sx={{ mt: 2 }}
             />

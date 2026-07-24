@@ -282,6 +282,23 @@ A simple generic debounce hook used for search input:
 const debouncedQuery = useDebounce(searchQuery, 300);
 ```
 
+### `useDefaultOrgMembership` (`hooks/useDefaultOrgMembership.ts`)
+
+Loads the current user's organization memberships and, when given a
+`setDefaultOrgId` callback, defaults the caller's selected-organization state
+to the first membership once memberships load. Shared by admin pages that
+attach a newly-created resource to one of the user's organizations (module
+upload, SCM provider setup, API keys), replacing what was previously a
+near-identical query+effect pair copy-pasted into each page.
+
+### `usePagination` (`hooks/usePagination.ts`)
+
+Shared MUI `TablePagination` state (0-based page + rows-per-page) and its
+`onPageChange`/`onRowsPerPageChange` handlers, including resetting to page 0
+when rows-per-page changes. Used by the admin pages with paginated tables
+(audit logs, mirrors, security scanning, users) in place of each page
+reimplementing the same state and handlers.
+
 ## Error Handling
 
 ### ErrorBoundary (`components/ErrorBoundary.tsx`)

@@ -110,10 +110,6 @@ describe('queryKeys', () => {
     it('detail key includes id', () => {
       expect(queryKeys.users.detail('u-123')).toEqual(['users', 'detail', 'u-123'])
     })
-
-    it('memberships key includes userId', () => {
-      expect(queryKeys.users.memberships('u-123')).toEqual(['users', 'memberships', 'u-123'])
-    })
   })
 
   describe('organizations', () => {
@@ -151,10 +147,6 @@ describe('queryKeys', () => {
     it('list key works without organizationId', () => {
       expect(queryKeys.apiKeys.list()).toEqual(['apiKeys', 'list', undefined])
     })
-
-    it('memberships key includes userId', () => {
-      expect(queryKeys.apiKeys.memberships('u-1')).toEqual(['apiKeys', 'memberships', 'u-1'])
-    })
   })
 
   describe('scmProviders', () => {
@@ -171,14 +163,6 @@ describe('queryKeys', () => {
         'scmProviders',
         'tokenStatus',
         'scm-1',
-      ])
-    })
-
-    it('memberships key includes userId', () => {
-      expect(queryKeys.scmProviders.memberships('u-1')).toEqual([
-        'scmProviders',
-        'memberships',
-        'u-1',
       ])
     })
   })

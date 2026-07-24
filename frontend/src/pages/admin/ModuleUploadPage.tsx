@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useLocation, useNavigate } from 'react-router-dom'
-import { useQuery } from '@tanstack/react-query'
 import {
   Typography,
   Box,
@@ -33,9 +32,9 @@ import PageTitleIcon from '@mui/icons-material/ViewModule'
 import PublishFromSCMWizard from '../../components/PublishFromSCMWizard'
 import FileDropZone from '../../components/FileDropZone'
 import PolicyResultsPanel from '../../components/PolicyResultsPanel'
-import { PolicyResult, UserMembership } from '../../types'
-import { useAuth } from '../../contexts/AuthContext'
+import { PolicyResult } from '../../types'
 import { queryKeys } from '../../services/queryKeys'
+import { useDefaultOrgMembership } from '../../hooks/useDefaultOrgMembership'
 
 type ModuleMethod = 'choose' | 'upload' | 'scm'
 
@@ -43,7 +42,6 @@ const ModuleUploadPage: React.FC = () => {
   const { t } = useTranslation()
   const location = useLocation()
   const navigate = useNavigate()
-  const { user } = useAuth()
   const state = location.state as {
     moduleData?: { namespace: string; name: string; provider: string }
     method?: ModuleMethod
@@ -53,22 +51,11 @@ const ModuleUploadPage: React.FC = () => {
   const [moduleMethod, setModuleMethod] = useState<ModuleMethod>(state?.method ?? 'choose')
   const [selectedOrgId, setSelectedOrgId] = useState<string | undefined>(undefined)
 
-  // Memberships query
-  const { data: memberships = [] } = useQuery<UserMembership[]>({
-    queryKey: queryKeys.users.memberships(user?.id ?? ''),
-    queryFn: async () => {
-      const data = await api.getCurrentUserMemberships()
-      return data || []
-    },
-    enabled: !!user?.id,
-  })
-
-  // Set default org when memberships load
-  useEffect(() => {
-    if (memberships.length > 0 && !selectedOrgId) {
-      setSelectedOrgId(memberships[0].organization_id)
-    }
-  }, [memberships]) // eslint-disable-line react-hooks/exhaustive-deps
+  const { memberships } = useDefaultOrgMembership(
+    queryKeys.users._def,
+    selectedOrgId,
+    setSelectedOrgId,
+  )
 
   // SCM new-module metadata (before wizard)
   const [scmNamespace, setScmNamespace] = useState(prefilledModule?.namespace || '')

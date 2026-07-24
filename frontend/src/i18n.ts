@@ -53,6 +53,17 @@ i18n
       // values (or sanitize them explicitly) as part of that change.
       escapeValue: false,
     },
+    // Issue #635: without this handler, a key missing from both the active
+    // locale and the `en` fallback renders as the raw key path (e.g.
+    // "admin.mirrors.errLoad") verbatim in the UI. Log the miss for telemetry
+    // and fall back to a neutral placeholder instead. Call sites that pass
+    // their own defaultValue (t('key', 'Some fallback')) are unaffected —
+    // that explicit fallback is preserved as-is.
+    parseMissingKeyHandler: (key, defaultValue) => {
+      if (defaultValue !== undefined) return defaultValue
+      console.warn(`[i18n] Missing translation key: ${key}`)
+      return ''
+    },
   })
 
 export default i18n

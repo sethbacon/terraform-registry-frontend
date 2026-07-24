@@ -51,6 +51,7 @@ import { RoleTemplate } from '../../types/rbac'
 import { getErrorMessage } from '../../utils/errors'
 import { captureError } from '../../services/errorReporting'
 import { queryKeys } from '../../services/queryKeys'
+import { usePagination } from '../../hooks/usePagination'
 
 interface UserWithMemberships extends User {
   memberships?: UserMembership[]
@@ -65,8 +66,8 @@ const UsersPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null)
   const [info, setInfo] = useState<string | null>(null)
   const [searchQuery, setSearchQuery] = useState('')
-  const [page, setPage] = useState(0)
-  const [rowsPerPage, setRowsPerPage] = useState(10)
+  const { page, rowsPerPage, setPage, handleChangePage, handleChangeRowsPerPage } =
+    usePagination(10)
 
   // GDPR action state
   const [exportingUserId, setExportingUserId] = useState<string | null>(null)
@@ -404,15 +405,6 @@ const UsersPage: React.FC = () => {
     if (!userToDelete) return
     setError(null)
     deleteUserMutation.mutate(userToDelete.id)
-  }
-
-  const handleChangePage = (_event: unknown, newPage: number) => {
-    setPage(newPage)
-  }
-
-  const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setRowsPerPage(parseInt(event.target.value, 10))
-    setPage(0)
   }
 
   const getRoleTemplateColor = (

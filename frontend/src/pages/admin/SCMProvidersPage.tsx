@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import {
@@ -42,15 +42,14 @@ import PageTitleIcon from '@mui/icons-material/GitHub'
 import api from '../../services/api'
 import { getErrorMessage } from '../../utils/errors'
 import { isSafeExternalUrl } from '../../utils/externalUrl'
-import { useAuth } from '../../contexts/AuthContext'
 import type {
   SCMProvider,
   SCMProviderType,
   SCMAuthMode,
   CreateSCMProviderRequest,
 } from '../../types/scm'
-import type { UserMembership } from '../../types'
 import { queryKeys } from '../../services/queryKeys'
+import { useDefaultOrgMembership } from '../../hooks/useDefaultOrgMembership'
 
 interface TokenStatus {
   connected: boolean
@@ -62,7 +61,6 @@ interface TokenStatus {
 const SCMProvidersPage: React.FC = () => {
   const { t } = useTranslation()
   const queryClient = useQueryClient()
-  const { user } = useAuth()
   const [error, setError] = useState<string | null>(null)
   const [createDialogOpen, setCreateDialogOpen] = useState(false)
   const [editingProvider, setEditingProvider] = useState<SCMProvider | null>(null)
@@ -93,25 +91,11 @@ const SCMProvidersPage: React.FC = () => {
     {},
   )
 
-  // Memberships query
-  const { data: memberships = [] } = useQuery<UserMembership[]>({
-    queryKey: queryKeys.scmProviders.memberships(user?.id ?? ''),
-    queryFn: async () => {
-      const data = await api.getCurrentUserMemberships()
-      return data || []
-    },
-    enabled: !!user?.id,
-  })
-
-  // Set default org when memberships load
-  useEffect(() => {
-    if (memberships.length > 0 && !formData.organization_id) {
-      setFormData((prev) => ({
-        ...prev,
-        organization_id: memberships[0].organization_id,
-      }))
-    }
-  }, [memberships]) // eslint-disable-line react-hooks/exhaustive-deps
+  const { memberships } = useDefaultOrgMembership(
+    queryKeys.scmProviders._def,
+    formData.organization_id,
+    (organizationId) => setFormData((prev) => ({ ...prev, organization_id: organizationId })),
+  )
 
   // Providers query
   const {

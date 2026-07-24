@@ -56,6 +56,7 @@ import { AVAILABLE_SCOPES } from '../../types/rbac'
 import { getScopeInfo } from '../../utils'
 import { getErrorMessage } from '../../utils/errors'
 import { queryKeys } from '../../services/queryKeys'
+import { useDefaultOrgMembership } from '../../hooks/useDefaultOrgMembership'
 
 function getExpirationStatus(
   expiresAt?: string | null,
@@ -82,7 +83,7 @@ function toDatetimeLocalValue(isoString?: string | null): string {
 const APIKeysPage: React.FC = () => {
   const { t } = useTranslation()
   const queryClient = useQueryClient()
-  const { allowedScopes, roleTemplate, user } = useAuth()
+  const { allowedScopes, roleTemplate } = useAuth()
   const isAdmin = allowedScopes.includes('admin')
   const [error, setError] = useState<string | null>(null)
 
@@ -112,12 +113,9 @@ const APIKeysPage: React.FC = () => {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: queryKeys.notifications.config() }),
   })
 
-  // Memberships query
-  const { data: memberships = [], isLoading: membershipsLoading } = useQuery({
-    queryKey: queryKeys.apiKeys.memberships(user?.id ?? ''),
-    queryFn: () => api.getCurrentUserMemberships(),
-    enabled: !!user?.id,
-  })
+  const { memberships, isLoading: membershipsLoading } = useDefaultOrgMembership(
+    queryKeys.apiKeys._def,
+  )
 
   // API Keys query
   const {
