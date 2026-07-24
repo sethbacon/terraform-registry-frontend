@@ -102,6 +102,26 @@ describe('ApiClient', () => {
       await getApiClient()
       expect(capturedCreateConfig.timeout).toBe(30_000)
     })
+
+    it('sends credentials so the HttpOnly auth + tfr_csrf cookies ride along', async () => {
+      // withCredentials:true is load-bearing for the entire cookie-based
+      // auth/CSRF model — flipping it to false would silently break every
+      // authenticated request while leaving the hand-built interceptor tests green.
+      await getApiClient()
+      expect(capturedCreateConfig.withCredentials).toBe(true)
+    })
+
+    it('treats 2xx/3xx as success and 4xx/5xx as errors (validateStatus)', async () => {
+      await getApiClient()
+      const validateStatus = capturedCreateConfig.validateStatus as (status: number) => boolean
+      expect(typeof validateStatus).toBe('function')
+      expect(validateStatus(200)).toBe(true)
+      expect(validateStatus(302)).toBe(true)
+      expect(validateStatus(399)).toBe(true)
+      expect(validateStatus(400)).toBe(false)
+      expect(validateStatus(401)).toBe(false)
+      expect(validateStatus(500)).toBe(false)
+    })
   })
 
   // ─── Auth Interceptor ──────────────────────────────────────────────────
@@ -378,6 +398,146 @@ describe('ApiClient', () => {
       expect(window.location.href).toContain('/scm-page')
 
       document.cookie = 'tfr_csrf=; Max-Age=0; path=/'
+    })
+
+    it('never re-redirects to /login even if the CSRF cookie survives deletion, same page instance (loop guard #621)', async () => {
+      // Reproduces the latent redirect loop: if tfr_csrf were Domain-scoped, the
+      // path=/ deletion would silently no-op, hadSession would stay true, and
+      // every subsequent 401 would redirect again. The module-level guard breaks
+      // the loop within one page instance, independent of whether cookie deletion
+      // took effect. Start off /login so the first redirect actually fires.
+      window.history.pushState({}, '', '/app-page')
+      document.cookie = 'tfr_csrf=live; path=/'
+      await getApiClient()
+
+      const error = {
+        response: { status: 401 },
+        config: { url: '/api/v1/auth/me' },
+        isAxiosError: true,
+      } as AxiosError
+
+      const authRejectedHandler = capturedResRejectedHandlers[0]
+      await expect(authRejectedHandler(error)).rejects.toBe(error)
+      expect(window.location.href).toContain('/login')
+
+      // Simulate a cookie that deletion could not remove (Domain-scoped in prod).
+      document.cookie = 'tfr_csrf=live; path=/'
+      window.history.pushState({}, '', '/still-here')
+      await expect(authRejectedHandler(error)).rejects.toBe(error)
+      // The guard prevents a second redirect despite hadSession still being true.
+      expect(window.location.href).toContain('/still-here')
+
+      document.cookie = 'tfr_csrf=; Max-Age=0; path=/'
+    })
+
+    it('does not redirect on 401 while already on /login even after a full page reload reset the module guard (navigation-surviving guard #621)', async () => {
+      // The session-expiry redirect is a real full-page navigation to /login that
+      // reloads the JS and RESETS hasRedirectedToLogin — getApiClient() re-imports
+      // the module fresh below, reproducing that reset. If tfr_csrf were
+      // Domain-scoped, its deletion no-ops and hadSession stays true on the
+      // reloaded /login page, so the module flag alone cannot stop the loop. Only
+      // refusing to navigate to /login while already on /login can. We spy on
+      // location so pathname is pinned to /login and any href write is observable
+      // (a bare URL check can't tell "no redirect" from "redirect to the page we
+      // are already on").
+      const originalLocation = window.location
+      const hrefWrites: string[] = []
+      Object.defineProperty(window, 'location', {
+        configurable: true,
+        writable: true,
+        value: {
+          origin: originalLocation.origin,
+          pathname: '/login',
+          get href() {
+            return `${originalLocation.origin}/login`
+          },
+          set href(value: string) {
+            hrefWrites.push(value)
+          },
+        },
+      })
+      try {
+        document.cookie = 'tfr_csrf=live; path=/'
+        await getApiClient() // fresh module → hasRedirectedToLogin === false
+
+        const error = {
+          response: { status: 401 },
+          config: { url: '/api/v1/auth/me' },
+          isAxiosError: true,
+        } as AxiosError
+
+        const authRejectedHandler = capturedResRejectedHandlers[0]
+        await expect(authRejectedHandler(error)).rejects.toBe(error)
+        // No navigation attempted despite hadSession=true and a reset module flag.
+        expect(hrefWrites).toEqual([])
+      } finally {
+        Object.defineProperty(window, 'location', {
+          configurable: true,
+          writable: true,
+          value: originalLocation,
+        })
+        document.cookie = 'tfr_csrf=; Max-Age=0; path=/'
+      }
+    })
+  })
+
+  // ─── Mock-data safety (#615) ───────────────────────────────────────────────
+  // VITE_USE_MOCK_DATA must never mask a real error response as a fake 200. The
+  // mock short-circuit is scoped to the no-response (offline) case and is
+  // hard-disabled in production builds.
+  describe('response interceptor – mock data safety', () => {
+    afterEach(() => {
+      vi.unstubAllEnvs()
+      document.cookie = 'tfr_csrf=; Max-Age=0; path=/'
+    })
+
+    it('does not mask a real 401 response as mock data (mock only applies with no response)', async () => {
+      vi.stubEnv('VITE_USE_MOCK_DATA', 'true')
+      document.cookie = 'tfr_csrf=sess; path=/'
+      await getApiClient()
+
+      const error = {
+        response: { status: 401 },
+        config: { url: '/api/v1/modules/search' },
+        isAxiosError: true,
+      } as AxiosError
+
+      const authRejectedHandler = capturedResRejectedHandlers[0]
+      // Must reach the real 401 handler (reject + redirect), not resolve as mock.
+      await expect(authRejectedHandler(error)).rejects.toBe(error)
+      expect(window.location.href).toContain('/login')
+    })
+
+    it('still returns mock data when the backend is unreachable (no response) in dev', async () => {
+      vi.stubEnv('VITE_USE_MOCK_DATA', 'true')
+      await getApiClient()
+
+      const error = {
+        config: { url: '/api/v1/modules/search' },
+        isAxiosError: true,
+      } as AxiosError
+
+      const authRejectedHandler = capturedResRejectedHandlers[0]
+      const result = await authRejectedHandler(error)
+      expect(result).toEqual({
+        data: { modules: [], meta: { total: 0, limit: 10, offset: 0 } },
+        status: 200,
+      })
+    })
+
+    it('never returns mock data in a production build even with the flag set (#615)', async () => {
+      vi.stubEnv('VITE_USE_MOCK_DATA', 'true')
+      vi.stubEnv('PROD', true)
+      await getApiClient()
+
+      const error = {
+        config: { url: '/api/v1/modules/search' },
+        isAxiosError: true,
+      } as AxiosError
+
+      const authRejectedHandler = capturedResRejectedHandlers[0]
+      // Even the no-response case must not fabricate a 200 in production.
+      await expect(authRejectedHandler(error)).rejects.toBe(error)
     })
   })
 
@@ -889,6 +1049,19 @@ describe('ApiClient', () => {
       )
     })
 
+    it('uploadModule forwards an AbortSignal so a stalled upload can be cancelled (#602)', async () => {
+      const client = await getApiClient()
+      const fd = new FormData()
+      const controller = new AbortController()
+        ; (mockAxiosInstance.post as ReturnType<typeof vi.fn>).mockResolvedValueOnce({ data: {} })
+      await client.uploadModule(fd, { signal: controller.signal })
+      expect(mockAxiosInstance.post).toHaveBeenCalledWith(
+        '/api/v1/modules',
+        fd,
+        expect.objectContaining({ timeout: 0, signal: controller.signal }),
+      )
+    })
+
     it('getModule', async () => {
       const client = await getApiClient()
         ; (mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
@@ -1015,6 +1188,19 @@ describe('ApiClient', () => {
           // Large archives can legitimately exceed the default request timeout.
           timeout: 0,
         }),
+      )
+    })
+
+    it('uploadProvider forwards an AbortSignal so a stalled upload can be cancelled (#602)', async () => {
+      const client = await getApiClient()
+      const fd = new FormData()
+      const controller = new AbortController()
+        ; (mockAxiosInstance.post as ReturnType<typeof vi.fn>).mockResolvedValueOnce({ data: {} })
+      await client.uploadProvider(fd, { signal: controller.signal })
+      expect(mockAxiosInstance.post).toHaveBeenCalledWith(
+        '/api/v1/providers',
+        fd,
+        expect.objectContaining({ timeout: 0, signal: controller.signal }),
       )
     })
 
@@ -1316,6 +1502,32 @@ describe('ApiClient', () => {
         })
       const result = await client.createOrganization({ name: 'new', display_name: 'New' })
       expect(result.id).toBe('o2')
+    })
+
+    it('createOrganization sanitizes a leaked backend error before wrapping it (#601)', async () => {
+      // A 2xx/3xx-other-than-200/201 response resolves (validateStatus < 400) and
+      // reaches the error branch. The raw backend string must NOT be smuggled out
+      // through the plain-Error branch that bypasses getErrorMessage's sanitizer.
+      const client = await getApiClient()
+      const leaked = 'pq: duplicate key value violates unique constraint "orgs_name_key"'
+        ; (mockAxiosInstance.post as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+          status: 202,
+          data: { error: leaked },
+        })
+      await expect(
+        client.createOrganization({ name: 'dup', display_name: 'Dup' }),
+      ).rejects.toThrow('Failed to create organization')
+    })
+
+    it('createOrganization still surfaces a short, clean backend error', async () => {
+      const client = await getApiClient()
+        ; (mockAxiosInstance.post as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+          status: 202,
+          data: { error: 'Organization name already taken' },
+        })
+      await expect(
+        client.createOrganization({ name: 'dup', display_name: 'Dup' }),
+      ).rejects.toThrow('Organization name already taken')
     })
 
     it('updateOrganization', async () => {

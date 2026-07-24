@@ -47,6 +47,7 @@ import type {
   IdentityGroupMappings,
 } from '../../types'
 import { queryKeys } from '../../services/queryKeys'
+import { getErrorMessage } from '../../utils/errors'
 
 // Available roles that can be assigned to mapped groups — must match system role template names
 const AVAILABLE_ROLES = ['viewer', 'publisher', 'devops', 'user_manager', 'auditor', 'admin']
@@ -104,8 +105,10 @@ const OIDCSettingsPage: React.FC = () => {
   }, [config])
 
   if (queryError && !error) {
-    const e = queryError as { response?: { data?: { error?: string } } }
-    setError(e.response?.data?.error ?? t('admin.oidcSettings.errLoad'))
+    // Route through getErrorMessage so a leaked backend string is sanitized and
+    // bounded before it reaches the <Alert> below, exactly like every other admin
+    // page — never render response.data.error verbatim (CWE-209, #601).
+    setError(getErrorMessage(queryError, t('admin.oidcSettings.errLoad')))
   }
 
   const saveMutation = useMutation({
@@ -119,8 +122,8 @@ const OIDCSettingsPage: React.FC = () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.oidcConfig._def })
     },
     onError: (err: unknown) => {
-      const e = err as { response?: { data?: { error?: string } } }
-      setError(e.response?.data?.error ?? t('admin.oidcSettings.errSave'))
+      // Same sanitization choke point as the query-error path above (#601).
+      setError(getErrorMessage(err, t('admin.oidcSettings.errSave')))
     },
   })
 

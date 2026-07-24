@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
@@ -25,7 +25,7 @@ import CloudUpload from '@mui/icons-material/CloudUpload'
 import SCMIcon from '@mui/icons-material/AccountTree'
 import ArrowBack from '@mui/icons-material/ArrowBack'
 import api from '../../services/api'
-import { getErrorMessage } from '../../utils/errors'
+import { getErrorMessage, isCanceledError } from '../../utils/errors'
 import { isValidRegistrySegment, REGISTRY_SEGMENT_HELP } from '../../utils/registrySegment'
 import Page from '../../components/Page'
 import PageHeader from '../../components/PageHeader'
@@ -84,6 +84,18 @@ const ModuleUploadPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
   const [policyResult, setPolicyResult] = useState<PolicyResult | null>(null)
+  // Lets the user abort an in-flight upload (which uses timeout: 0) instead of
+  // being stuck watching a frozen progress bar with no affordance (audit #602).
+  const uploadAbortRef = useRef<AbortController | null>(null)
+
+  // Also abort if the user navigates away mid-upload: an unbounded (timeout: 0)
+  // request would otherwise outlive the unmounted component, keeping its
+  // onUploadProgress/resolve callbacks firing state updates into the void (#602).
+  useEffect(() => {
+    return () => {
+      uploadAbortRef.current?.abort()
+    }
+  }, [])
 
   // Module upload state
   const [moduleFile, setModuleFile] = useState<File | null>(null)
@@ -114,6 +126,9 @@ const ModuleUploadPage: React.FC = () => {
       }
     }
 
+    const controller = new AbortController()
+    uploadAbortRef.current = controller
+
     try {
       setUploading(true)
       setUploadPercent(0)
@@ -132,6 +147,7 @@ const ModuleUploadPage: React.FC = () => {
 
       const result = await api.uploadModule(formData, {
         onUploadProgress: (percent) => setUploadPercent(percent),
+        signal: controller.signal,
       })
 
       const pr: PolicyResult | undefined = result?.policy_result
@@ -146,10 +162,20 @@ const ModuleUploadPage: React.FC = () => {
         navigate(`/modules/${moduleNamespace}/${moduleName}/${moduleProvider}`)
       }
     } catch (err: unknown) {
-      setError(getErrorMessage(err, 'Failed to upload module. Please try again.'))
+      // A user-initiated cancel is not an error — reset to idle silently, keeping
+      // the typed metadata intact for a retry.
+      if (!isCanceledError(err)) {
+        setError(getErrorMessage(err, 'Failed to upload module. Please try again.'))
+      }
       setUploading(false)
       setUploadPercent(null)
+    } finally {
+      uploadAbortRef.current = null
     }
+  }
+
+  const handleCancelUpload = () => {
+    uploadAbortRef.current?.abort()
   }
 
   const handleScmProceed = async () => {
@@ -575,6 +601,11 @@ const ModuleUploadPage: React.FC = () => {
           >
             {uploading ? t('admin.moduleUpload.uploading') : t('admin.moduleUpload.uploadModule')}
           </Button>
+          {uploading && (
+            <Button variant="outlined" color="error" size="large" onClick={handleCancelUpload}>
+              {t('common.cancel')}
+            </Button>
+          )}
           {policyResult?.allowed && (
             <Button
               variant="outlined"

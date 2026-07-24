@@ -2,6 +2,7 @@
  * Organizations domain API — organization CRUD, search, and member management.
  */
 import { http } from './http'
+import { sanitizeServerErrorMessage } from '../../utils/errors'
 import type { Organization, OrganizationMemberWithUser } from '../../types'
 
 /** Wire shape of the list/search organizations endpoints (swagger: admin.ListOrganizationsResponse). */
@@ -63,9 +64,16 @@ export async function createOrganization(data: {
     '/api/v1/organizations',
     data,
   )
-  // Check if the response contains an error
+  // Check if the response contains an error. This branch is reachable only for a
+  // 2xx/3xx status other than 200/201 (4xx/5xx already reject via validateStatus).
+  // Sanitize the backend string before wrapping it: a plain Error skips
+  // getErrorMessage's AxiosError-scoped sanitization, so an unvetted message
+  // (stack trace, SQL, file path) would otherwise reach callers' UI verbatim via
+  // the generic Error branch (CWE-209, #601).
   if (response.status !== 200 && response.status !== 201) {
-    throw new Error(response.data?.error || 'Failed to create organization')
+    const raw = response.data?.error
+    const safe = raw ? sanitizeServerErrorMessage(raw) : null
+    throw new Error(safe ?? 'Failed to create organization')
   }
   if (!response.data.organization) {
     throw new Error('Invalid response from server: missing organization data')

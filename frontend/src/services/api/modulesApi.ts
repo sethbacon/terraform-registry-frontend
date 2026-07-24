@@ -82,12 +82,15 @@ export async function createModuleRecord(data: {
 
 export async function uploadModule(
   formData: FormData,
-  options?: { onUploadProgress?: (percent: number) => void },
+  options?: { onUploadProgress?: (percent: number) => void; signal?: AbortSignal },
 ) {
   const response = await http.post('/api/v1/modules', formData, {
     // Large archives on a slow connection can legitimately exceed the default
-    // request timeout; onUploadProgress gives the user feedback instead.
+    // request timeout; onUploadProgress gives the user feedback instead. The
+    // caller passes an AbortSignal so a stalled upload can be cancelled instead
+    // of hanging indefinitely with no affordance (audit #602).
     timeout: 0,
+    signal: options?.signal,
     headers: {
       'Content-Type': 'multipart/form-data',
     },

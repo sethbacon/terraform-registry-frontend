@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useRef, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate, useLocation } from 'react-router-dom'
 import {
@@ -24,7 +24,7 @@ import CloudUpload from '@mui/icons-material/CloudUpload'
 import CloudDownload from '@mui/icons-material/CloudDownload'
 import ArrowBack from '@mui/icons-material/ArrowBack'
 import api from '../../services/api'
-import { getErrorMessage } from '../../utils/errors'
+import { getErrorMessage, isCanceledError } from '../../utils/errors'
 import Page from '../../components/Page'
 import PageHeader from '../../components/PageHeader'
 import PageTitleIcon from '@mui/icons-material/Extension'
@@ -50,6 +50,18 @@ const ProviderUploadPage: React.FC = () => {
   const [uploadPercent, setUploadPercent] = useState<number | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
+  // Lets the user abort an in-flight upload (which uses timeout: 0) instead of
+  // being stuck watching a frozen progress bar with no affordance (audit #602).
+  const uploadAbortRef = useRef<AbortController | null>(null)
+
+  // Also abort if the user navigates away mid-upload: an unbounded (timeout: 0)
+  // request would otherwise outlive the unmounted component, keeping its
+  // onUploadProgress/resolve callbacks firing state updates into the void (#602).
+  useEffect(() => {
+    return () => {
+      uploadAbortRef.current?.abort()
+    }
+  }, [])
 
   // Provider upload state
   const [providerFile, setProviderFile] = useState<File | null>(null)
@@ -77,6 +89,9 @@ const ProviderUploadPage: React.FC = () => {
       return
     }
 
+    const controller = new AbortController()
+    uploadAbortRef.current = controller
+
     try {
       setUploading(true)
       setError(null)
@@ -93,14 +108,25 @@ const ProviderUploadPage: React.FC = () => {
       setUploadPercent(0)
       await api.uploadProvider(formData, {
         onUploadProgress: (percent) => setUploadPercent(percent),
+        signal: controller.signal,
       })
 
       navigate(`/providers/${providerNamespace}/${providerName}`)
     } catch (err: unknown) {
-      setError(getErrorMessage(err, 'Failed to upload provider. Please try again.'))
+      // A user-initiated cancel is not an error — reset to idle silently, keeping
+      // the typed metadata intact for a retry.
+      if (!isCanceledError(err)) {
+        setError(getErrorMessage(err, 'Failed to upload provider. Please try again.'))
+      }
       setUploading(false)
       setUploadPercent(null)
+    } finally {
+      uploadAbortRef.current = null
     }
+  }
+
+  const handleCancelUpload = () => {
+    uploadAbortRef.current?.abort()
   }
 
   const renderProviderMethodChooser = () => (
@@ -319,17 +345,24 @@ const ProviderUploadPage: React.FC = () => {
         {error && <Alert severity="error">{error}</Alert>}
         {success && <Alert severity="success">{success}</Alert>}
 
-        <Button
-          variant="contained"
-          onClick={handleProviderUpload}
-          disabled={uploading || !providerFile}
-          startIcon={uploading ? <CircularProgress size={20} /> : <CloudUpload />}
-          size="large"
-        >
-          {uploading
-            ? t('admin.providerUpload.uploading')
-            : t('admin.providerUpload.uploadProvider')}
-        </Button>
+        <Stack direction="row" spacing={2}>
+          <Button
+            variant="contained"
+            onClick={handleProviderUpload}
+            disabled={uploading || !providerFile}
+            startIcon={uploading ? <CircularProgress size={20} /> : <CloudUpload />}
+            size="large"
+          >
+            {uploading
+              ? t('admin.providerUpload.uploading')
+              : t('admin.providerUpload.uploadProvider')}
+          </Button>
+          {uploading && (
+            <Button variant="outlined" color="error" size="large" onClick={handleCancelUpload}>
+              {t('common.cancel')}
+            </Button>
+          )}
+        </Stack>
       </Stack>
     </Box>
   )

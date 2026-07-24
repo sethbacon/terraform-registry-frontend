@@ -2,6 +2,7 @@ import { render, screen, waitFor, fireEvent } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router-dom'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { CanceledError } from 'axios'
 
 const mockNavigate = vi.fn()
 vi.mock('react-router-dom', async () => {
@@ -154,6 +155,105 @@ describe('ProviderUploadPage', () => {
     )
     await user.click(screen.getByRole('button', { name: /^upload provider$/i }))
     await waitFor(() => expect(screen.getByText(/upload blew up/)).toBeInTheDocument())
+  })
+
+  it('shows a Cancel button during upload that aborts without surfacing an error (#602)', async () => {
+    const user = userEvent.setup()
+    // Stalled upload: never resolves on its own, only rejects when aborted.
+    uploadProviderMock.mockImplementationOnce(
+      (
+        _fd: FormData,
+        opts?: { onUploadProgress?: (p: number) => void; signal?: AbortSignal },
+      ) => {
+        opts?.onUploadProgress?.(20)
+        return new Promise((_resolve, reject) => {
+          opts?.signal?.addEventListener('abort', () => reject(new CanceledError('canceled')))
+        })
+      },
+    )
+    renderPage()
+    await user.click(screen.getByText('Manual Upload'))
+
+    await user.type(screen.getByLabelText(/Namespace/), 'myorg')
+    await user.type(screen.getByLabelText(/Provider Name/), 'widget')
+    await user.type(screen.getByLabelText(/Version/), '1.0.0')
+
+    const combos = screen.getAllByRole('combobox')
+    await user.click(combos[0])
+    await user.click(await screen.findByRole('option', { name: /^Linux$/i }))
+    await user.click(combos[1])
+    await user.click(await screen.findByRole('option', { name: /AMD64/i }))
+
+    const input = document.querySelector('input[type="file"]') as HTMLInputElement
+    const file = new File(['x'], 'terraform-provider-widget_1.0.0_linux_amd64.zip', {
+      type: 'application/zip',
+    })
+    fireEvent.change(input, { target: { files: [file] } })
+
+    await waitFor(() =>
+      expect(screen.getByRole('button', { name: /^upload provider$/i })).not.toBeDisabled(),
+    )
+    await user.click(screen.getByRole('button', { name: /^upload provider$/i }))
+
+    // Cancel affordance appears while the upload is in flight.
+    const cancelBtn = await screen.findByRole('button', { name: /^Cancel$/i })
+    await user.click(cancelBtn)
+
+    // Cancelling resets to idle silently — no error alert, no navigation.
+    await waitFor(() => {
+      expect(screen.queryByRole('button', { name: /^Cancel$/i })).not.toBeInTheDocument()
+    })
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument()
+    expect(mockNavigate).not.toHaveBeenCalled()
+  })
+
+  it('aborts an in-flight upload when the component unmounts mid-upload (#602)', async () => {
+    const user = userEvent.setup()
+    let capturedSignal: AbortSignal | undefined
+    // Stalled upload: never resolves on its own, only rejects when aborted.
+    uploadProviderMock.mockImplementationOnce(
+      (
+        _fd: FormData,
+        opts?: { onUploadProgress?: (p: number) => void; signal?: AbortSignal },
+      ) => {
+        capturedSignal = opts?.signal
+        opts?.onUploadProgress?.(20)
+        return new Promise((_resolve, reject) => {
+          opts?.signal?.addEventListener('abort', () => reject(new CanceledError('canceled')))
+        })
+      },
+    )
+    const { unmount } = renderPage()
+    await user.click(screen.getByText('Manual Upload'))
+
+    await user.type(screen.getByLabelText(/Namespace/), 'myorg')
+    await user.type(screen.getByLabelText(/Provider Name/), 'widget')
+    await user.type(screen.getByLabelText(/Version/), '1.0.0')
+
+    const combos = screen.getAllByRole('combobox')
+    await user.click(combos[0])
+    await user.click(await screen.findByRole('option', { name: /^Linux$/i }))
+    await user.click(combos[1])
+    await user.click(await screen.findByRole('option', { name: /AMD64/i }))
+
+    const input = document.querySelector('input[type="file"]') as HTMLInputElement
+    const file = new File(['x'], 'terraform-provider-widget_1.0.0_linux_amd64.zip', {
+      type: 'application/zip',
+    })
+    fireEvent.change(input, { target: { files: [file] } })
+
+    await waitFor(() =>
+      expect(screen.getByRole('button', { name: /^upload provider$/i })).not.toBeDisabled(),
+    )
+    await user.click(screen.getByRole('button', { name: /^upload provider$/i }))
+
+    // Signal is live while the upload is in flight...
+    await waitFor(() => expect(capturedSignal).toBeDefined())
+    expect(capturedSignal?.aborted).toBe(false)
+
+    // ...and unmounting (e.g. the user navigates away) aborts it.
+    unmount()
+    expect(capturedSignal?.aborted).toBe(true)
   })
 
   it('shows validation error when required fields are missing', async () => {
