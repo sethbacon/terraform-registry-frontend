@@ -46,7 +46,6 @@ export const queryKeys = {
     list: (params?: { page?: number; perPage?: number; search?: string }) =>
       [...queryKeys.users._def, 'list', params] as const,
     detail: (id: string) => [...queryKeys.users._def, 'detail', id] as const,
-    memberships: (userId: string) => [...queryKeys.users._def, 'memberships', userId] as const,
   },
   organizations: {
     _def: ['organizations'] as const,
@@ -58,7 +57,6 @@ export const queryKeys = {
   apiKeys: {
     _def: ['apiKeys'] as const,
     list: (organizationId?: string) => [...queryKeys.apiKeys._def, 'list', organizationId] as const,
-    memberships: (userId: string) => [...queryKeys.apiKeys._def, 'memberships', userId] as const,
   },
   scmProviders: {
     _def: ['scmProviders'] as const,
@@ -66,8 +64,6 @@ export const queryKeys = {
       [...queryKeys.scmProviders._def, 'list', organizationId] as const,
     tokenStatus: (providerId: string) =>
       [...queryKeys.scmProviders._def, 'tokenStatus', providerId] as const,
-    memberships: (userId: string) =>
-      [...queryKeys.scmProviders._def, 'memberships', userId] as const,
   },
   auditLogs: {
     _def: ['auditLogs'] as const,

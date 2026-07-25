@@ -36,6 +36,7 @@ import PageTitleIcon from '@mui/icons-material/History'
 import api from '../../services/api'
 import { AuditLog } from '../../types'
 import { queryKeys } from '../../services/queryKeys'
+import { usePagination } from '../../hooks/usePagination'
 
 const RESOURCE_TYPES = [
   { value: '', label: 'All Resource Types' },
@@ -64,8 +65,8 @@ const AuditLogPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null)
 
   // Pagination (MUI TablePagination uses 0-based page)
-  const [page, setPage] = useState(0)
-  const [rowsPerPage, setRowsPerPage] = useState(25)
+  const { page, rowsPerPage, setPage, handleChangePage, handleChangeRowsPerPage } =
+    usePagination(25)
 
   // Filters
   const [resourceType, setResourceType] = useState('')
@@ -371,12 +372,9 @@ const AuditLogPage: React.FC = () => {
               component="div"
               count={total}
               page={page}
-              onPageChange={(_e, newPage) => setPage(newPage)}
+              onPageChange={handleChangePage}
               rowsPerPage={rowsPerPage}
-              onRowsPerPageChange={(e) => {
-                setRowsPerPage(parseInt(e.target.value, 10))
-                setPage(0)
-              }}
+              onRowsPerPageChange={handleChangeRowsPerPage}
               rowsPerPageOptions={[10, 25, 50, 100]}
             />
           </>

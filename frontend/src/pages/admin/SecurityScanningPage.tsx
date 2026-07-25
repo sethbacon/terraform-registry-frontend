@@ -42,6 +42,7 @@ import api from '../../services/api'
 import { queryKeys } from '../../services/queryKeys'
 import { useAuth } from '../../contexts/AuthContext'
 import { getErrorMessage } from '../../utils/errors'
+import { usePagination } from '../../hooks/usePagination'
 import type {
   ModuleScan,
   RecentScanEntry,
@@ -150,8 +151,8 @@ const SecurityScanningPage: React.FC = () => {
   })
 
   const [statusFilter, setStatusFilter] = useState<string | undefined>(undefined)
-  const [page, setPage] = useState(0)
-  const [rowsPerPage, setRowsPerPage] = useState(20)
+  const { page, rowsPerPage, setPage, handleChangePage, handleChangeRowsPerPage } =
+    usePagination(20)
 
   const [scannerSuccess, setScannerSuccess] = useState<string | null>(null)
   const [scannerError, setScannerError] = useState<string | null>(null)
@@ -1052,12 +1053,9 @@ const SecurityScanningPage: React.FC = () => {
                   component="div"
                   count={stats.total_filtered}
                   page={page}
-                  onPageChange={(_, newPage) => setPage(newPage)}
+                  onPageChange={handleChangePage}
                   rowsPerPage={rowsPerPage}
-                  onRowsPerPageChange={(e) => {
-                    setRowsPerPage(parseInt(e.target.value, 10))
-                    setPage(0)
-                  }}
+                  onRowsPerPageChange={handleChangeRowsPerPage}
                   rowsPerPageOptions={[10, 20, 50, 100]}
                 />
               </>
