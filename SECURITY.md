@@ -57,13 +57,13 @@ We will credit reporters in the release notes unless anonymity is requested.
 ## Security Practices
 
 - All releases are signed with [cosign](https://github.com/sigstore/cosign) (keyless, Sigstore) and include SLSA build provenance attestations
-- Dependencies are monitored by Dependabot (npm — frontend + e2e — and GitHub Actions)
+- Dependencies are monitored by Dependabot, weekly (npm — frontend + e2e —, Docker, and GitHub Actions)
 - `npm audit --audit-level=high` runs in the Docker build and the scheduled security workflow
 - Markdown rendering is sanitised with `rehype-sanitize` (XSS mitigation)
 - `ApiDocumentation.tsx` renders the same-origin `/swagger.json` spec via `swagger-ui-react`, relying on that dependency's bundled DOMPurify-based sanitizer rather than app-side sanitization. This is a tracked residual-trust item, not an active vuln: the spec is server-controlled, and the mitigation is keeping `swagger-ui-react` patched (covered by the weekly `npm audit`/Dependabot workflow) plus ensuring the backend never reflects user-controlled strings into spec description/example fields
 - The frontend follows OWASP Top 10 mitigations applicable to SPAs (output encoding, strict CSP via nginx, no `dangerouslySetInnerHTML` outside the sanitised renderer)
 - HSTS (`Strict-Transport-Security`) is sent by `nginx.conf`, which terminates TLS directly. `nginx-ecs.conf.template` (ECS/Cloud Run/ACA) and any deployment that fronts the container with an external reverse proxy/ALB (see `deployments/docker-compose.prod.yml`) deliberately do **not** set it themselves -- HSTS only has effect on the hop that actually terminates TLS, so it must be configured at that edge/ALB, not on the origin container behind it
-- Authentication uses an HttpOnly session cookie set by the backend (no JWT persisted in `localStorage` outside a transitional migration path); mutating requests are protected by a double-submit CSRF token (the `tfr_csrf` cookie echoed in an `X-CSRF-Token` header)
+- Authentication uses an HttpOnly session cookie set by the backend (no JWT is ever persisted in `localStorage`); mutating requests are protected by a double-submit CSRF token (the `tfr_csrf` cookie echoed in an `X-CSRF-Token` header)
 
 ## Repository Hardening
 
@@ -106,7 +106,8 @@ matching `v*.*.*` with a "Restrict deletions" rule.
 - Dependabot vulnerability alerts: enabled
 - Dependabot automated security fixes: enabled
 - Dependabot version updates configured via `.github/dependabot.yml` for npm
-  (frontend + e2e) and GitHub Actions (biweekly)
+  (frontend + e2e), Docker (frontend), and GitHub Actions -- all weekly
+  (Mondays)
 
 ### Code Ownership
 
@@ -149,7 +150,10 @@ controls:
   methodology as this repo on 2026-07-10 (26 findings: 2 high, 16 medium,
   remainder low/info). All findings were remediated in
   [v0.5.3](https://github.com/sethbacon/terraform-suite-ui/releases/tag/v0.5.3)
-  (2026-07-11), which is the version pinned here. The package repo now
+  (2026-07-11). The pin has moved past v0.5.3 since then via the manual,
+  reviewed update process below -- see `frontend/package.json` for the
+  exact version currently pinned, rather than relying on a version number
+  in this doc that would go stale on the next bump. The package repo now
   carries its own `SECURITY.md` and a security-model section in its README.
 - **Upstream supply-chain gates** — the package's own CI runs typecheck,
   tests, build, and CodeQL; its publish workflow verifies the tarball

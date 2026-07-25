@@ -59,4 +59,4 @@ within 5 business days.
 
 - [axe DevTools](https://www.deque.com/axe/) — browser extension for manual audits
 - [@axe-core/react](https://github.com/dequelabs/axe-core-npm/tree/develop/packages/react) — runtime checks in development
-- [Lighthouse](https://developer.chrome.com/docs/lighthouse/) — CI accessibility scoring (target: ≥90)
+- [Lighthouse](https://developer.chrome.com/docs/lighthouse/) — not wired into CI; a suggested manual/local tool for spot-checking accessibility scores (target: ≥90) before a release
