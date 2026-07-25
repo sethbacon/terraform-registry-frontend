@@ -1502,6 +1502,7 @@
       "errUpdate": "Impossibile aggiornare il provider",
       "errDelete": "Impossibile eliminare il provider",
       "errOAuth": "Impossibile avviare OAuth",
+      "errOAuthInvalidUrl": "Il provider OAuth ha restituito un URL di autorizzazione non valido",
       "errSaveToken": "Impossibile salvare il token di accesso",
       "errDisconnect": "Impossibile disconnettersi",
       "labelClientId": "ID cliente",

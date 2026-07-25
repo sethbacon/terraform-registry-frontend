@@ -1502,6 +1502,7 @@
       "errUpdate": "Échec de la mise à jour du fournisseur",
       "errDelete": "Échec de la suppression du fournisseur",
       "errOAuth": "Échec de l'initialisation d'OAuth",
+      "errOAuthInvalidUrl": "Le fournisseur OAuth a renvoyé une URL d'autorisation non valide",
       "errSaveToken": "Échec de l'enregistrement du jeton d'accès",
       "errDisconnect": "Échec de la déconnexion",
       "labelClientId": "Identifiant client",

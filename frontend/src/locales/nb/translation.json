@@ -1502,6 +1502,7 @@
       "errUpdate": "Det gikk ikke å oppdatere leverandøren",
       "errDelete": "Det gikk ikke å slette leverandøren",
       "errOAuth": "Det gikk ikke å starte OAuth",
+      "errOAuthInvalidUrl": "OAuth-leverandøren returnerte en ugyldig autorisasjons-URL",
       "errSaveToken": "Det gikk ikke å lagre tilgangstokenet",
       "errDisconnect": "Det lyktes ikke å koble fra",
       "labelClientId": "Kunde-ID",

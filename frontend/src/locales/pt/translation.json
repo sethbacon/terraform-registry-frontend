@@ -1502,6 +1502,7 @@
       "errUpdate": "Não foi possível atualizar o fornecedor",
       "errDelete": "Não foi possível eliminar o fornecedor",
       "errOAuth": "Falha ao iniciar o OAuth",
+      "errOAuthInvalidUrl": "O fornecedor OAuth devolveu um URL de autorização inválido",
       "errSaveToken": "Não foi possível guardar o token de acesso",
       "errDisconnect": "Não foi possível desligar",
       "labelClientId": "ID do cliente",
