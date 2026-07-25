@@ -41,6 +41,7 @@ import Security from '@mui/icons-material/Security'
 import VpnKey from '@mui/icons-material/VpnKey'
 import api from '../../services/api'
 import { useAuth } from '../../contexts/AuthContext'
+import type { ScopeValue } from '../../types/rbac'
 import Page from '../../components/Page'
 import PageHeader from '../../components/PageHeader'
 import PageTitleIcon from '@mui/icons-material/Dashboard'
@@ -703,7 +704,7 @@ const DashboardPage: React.FC = () => {
     : false
 
   // ---- Zone 2: stat cards --------------------------------------------------
-  const statCards: (StatCardProps & { scope: string | null; gridMd: number })[] = !data
+  const statCards = (!data
     ? []
     : [
       // Row 1 — content cards (each md=6)
@@ -776,13 +777,14 @@ const DashboardPage: React.FC = () => {
           />
         ),
       },
-    ].filter((c) => c.scope === null || hasScope(c.scope))
+    ] satisfies (StatCardProps & { scope: ScopeValue | null; gridMd: number })[]
+  ).filter((c) => c.scope === null || hasScope(c.scope))
 
   // ---- Zone 3 left: recent syncs -------------------------------------------
   const recentSyncs = data ? data.recent_syncs.slice(0, 8) : []
 
   // ---- Zone 3 right: quick links -------------------------------------------
-  const quickLinks: (QuickLinkProps & { scope: string | null })[] = [
+  const quickLinks = ([
     {
       label: t('admin.dashboard.qlUploadModule'),
       icon: <CloudUpload fontSize="small" />,
@@ -839,7 +841,8 @@ const DashboardPage: React.FC = () => {
       color: '#78909C',
       scope: 'admin',
     },
-  ].filter((l) => l.scope === null || hasScope(l.scope))
+  ] satisfies (QuickLinkProps & { scope: ScopeValue | null })[]
+  ).filter((l) => l.scope === null || hasScope(l.scope))
 
   return (
     <Page maxWidth="lg" aria-busy={loading} aria-live="polite">

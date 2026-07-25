@@ -5,12 +5,13 @@ const getDevStatusMock = vi.fn()
 const listUsersForImpersonationMock = vi.fn()
 const impersonateUserMock = vi.fn()
 
-vi.mock('../../services/api', () => ({
-  default: {
-    getDevStatus: (...args: unknown[]) => getDevStatusMock(...args),
-    listUsersForImpersonation: (...args: unknown[]) => listUsersForImpersonationMock(...args),
-    impersonateUser: (...args: unknown[]) => impersonateUserMock(...args),
-  },
+// DevUserSwitcher imports devApi directly (not the shared `../../services/api`
+// barrel, which deliberately excludes it — see services/api/index.ts) so the
+// dev-only endpoints stay out of the production bundle (#608).
+vi.mock('../../services/api/devApi', () => ({
+  getDevStatus: (...args: unknown[]) => getDevStatusMock(...args),
+  listUsersForImpersonation: (...args: unknown[]) => listUsersForImpersonationMock(...args),
+  impersonateUser: (...args: unknown[]) => impersonateUserMock(...args),
 }))
 
 const mockAuth = {

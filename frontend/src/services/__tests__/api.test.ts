@@ -828,6 +828,16 @@ describe('ApiClient', () => {
       )
       expect([...composedFnNames].sort()).toEqual([...domainFnNames].sort())
     })
+
+    it('excludes devApi (dev-only endpoints stay out of the eager production bundle, #608)', async () => {
+      const mod = await import('../api')
+      const composed = mod.default as Record<string, unknown>
+      expect(composed.devLogin).toBeUndefined()
+      expect(composed.getDevStatus).toBeUndefined()
+      expect(composed.listUsersForImpersonation).toBeUndefined()
+      expect(composed.impersonateUser).toBeUndefined()
+      expect(mod.apiDomains).not.toHaveProperty('devApi')
+    })
   })
 
   // ─── CVE Advisories ───────────────────────────────────────────────────────
@@ -957,45 +967,10 @@ describe('ApiClient', () => {
       expect(result.allowed_scopes).toEqual([])
     })
 
-    it('devLogin calls POST /api/v1/dev/login (cookie is set server-side, token-less body)', async () => {
-      const client = await getApiClient()
-        ; (mockAxiosInstance.post as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
-          data: { user: { id: 'u1' }, expires_in: 3600 },
-        })
-      const result = await client.devLogin()
-      expect(mockAxiosInstance.post).toHaveBeenCalledWith('/api/v1/dev/login')
-      expect(result.expires_in).toBe(3600)
-    })
-
-    it('getDevStatus calls GET /api/v1/dev/status', async () => {
-      const client = await getApiClient()
-        ; (mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
-          data: { dev_mode: true },
-        })
-      const result = await client.getDevStatus()
-      expect(mockAxiosInstance.get).toHaveBeenCalledWith('/api/v1/dev/status')
-      expect(result.dev_mode).toBe(true)
-    })
-
-    it('listUsersForImpersonation calls GET /api/v1/dev/users', async () => {
-      const client = await getApiClient()
-        ; (mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
-          data: { users: [], dev_mode: true },
-        })
-      const result = await client.listUsersForImpersonation()
-      expect(mockAxiosInstance.get).toHaveBeenCalledWith('/api/v1/dev/users')
-      expect(result.dev_mode).toBe(true)
-    })
-
-    it('impersonateUser calls POST /api/v1/dev/impersonate/:id (cookie swap, token-less body)', async () => {
-      const client = await getApiClient()
-        ; (mockAxiosInstance.post as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
-          data: { user: { id: 'u1', email: 'a@b.com', name: 'A' }, message: 'ok' },
-        })
-      const result = await client.impersonateUser('u1')
-      expect(mockAxiosInstance.post).toHaveBeenCalledWith('/api/v1/dev/impersonate/u1')
-      expect(result.message).toBe('ok')
-    })
+    // devLogin/getDevStatus/listUsersForImpersonation/impersonateUser are covered
+    // in services/api/__tests__/devApi.test.ts, not here: devApi is deliberately
+    // excluded from this composed client so it can be dead-code-eliminated from
+    // the production bundle (#608) — see the "excludes devApi" test below.
   })
 
   // ─── Modules ──────────────────────────────────────────────────────────────

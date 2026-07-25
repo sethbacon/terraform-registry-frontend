@@ -457,6 +457,44 @@ describe('UsersPage', () => {
     expect(getUserMembershipsMock).not.toHaveBeenCalled()
   })
 
+  // ---- Mutation controls require users:write, not just users:read (#609) ----
+
+  describe('mutation control gating', () => {
+    it('hides Add/Edit/Delete for a users:read-only viewer', async () => {
+      useAuthMock.mockReturnValue({
+        allowedScopes: ['users:read'],
+        roleTemplate: { display_name: 'Auditor' },
+        user: { id: 'user-1' },
+      })
+      listUsersMock.mockResolvedValue(fakeUsersResponse)
+      getUserMembershipsMock.mockResolvedValue([])
+      renderPage()
+      await waitFor(() => screen.getByText('alice@example.com'))
+
+      // View access is unaffected — the viewer still sees the user directory.
+      expect(screen.getByText('bob@example.com')).toBeInTheDocument()
+      expect(screen.queryByRole('button', { name: /add user/i })).not.toBeInTheDocument()
+      expect(screen.queryByLabelText('Edit user')).not.toBeInTheDocument()
+      expect(screen.queryByLabelText('Delete user')).not.toBeInTheDocument()
+    })
+
+    it('shows Add/Edit/Delete once users:write is granted (non-admin)', async () => {
+      useAuthMock.mockReturnValue({
+        allowedScopes: ['users:read', 'users:write'],
+        roleTemplate: { display_name: 'User Manager' },
+        user: { id: 'user-1' },
+      })
+      listUsersMock.mockResolvedValue(fakeUsersResponse)
+      getUserMembershipsMock.mockResolvedValue([])
+      renderPage()
+      await waitFor(() => screen.getByText('alice@example.com'))
+
+      expect(screen.getByRole('button', { name: /add user/i })).toBeInTheDocument()
+      expect(screen.getAllByLabelText('Edit user').length).toBeGreaterThan(0)
+      expect(screen.getAllByLabelText('Delete user').length).toBeGreaterThan(0)
+    })
+  })
+
   // ---- GDPR actions (admin-scoped) ----
 
   describe('GDPR actions', () => {

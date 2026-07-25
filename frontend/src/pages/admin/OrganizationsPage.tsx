@@ -52,6 +52,12 @@ const OrganizationsPage: React.FC = () => {
   const { t } = useTranslation()
   const queryClient = useQueryClient()
   const { allowedScopes } = useAuth()
+  // The route itself is gated at organizations:read (view-only) so auditors/
+  // viewers can browse the org list (routeScopes.ts). Add/Edit/Delete mutate
+  // organizations though, so canManage additionally gates those controls (and
+  // the membership-management controls below) on organizations:write/admin —
+  // a read-only viewer would otherwise see actionable buttons that only fail
+  // once clicked, relying entirely on the server to say no (#609).
   const canManage =
     allowedScopes.includes('admin') || allowedScopes.includes('organizations:write')
   const [error, setError] = useState<string | null>(null)
@@ -291,9 +297,11 @@ const OrganizationsPage: React.FC = () => {
         title={t('admin.organizations.pageTitle')}
         description={t('admin.organizations.pageSubtitle')}
         actions={
-          <Button variant="contained" startIcon={<AddIcon />} onClick={() => handleOpenDialog()}>
-            {t('admin.organizations.addOrganization')}
-          </Button>
+          canManage ? (
+            <Button variant="contained" startIcon={<AddIcon />} onClick={() => handleOpenDialog()}>
+              {t('admin.organizations.addOrganization')}
+            </Button>
+          ) : undefined
         }
       />
       {error && !import.meta.env.DEV && (
@@ -316,14 +324,16 @@ const OrganizationsPage: React.FC = () => {
             >
               {t('admin.organizations.emptyState')}
             </Typography>
-            <Button
-              variant="outlined"
-              startIcon={<AddIcon />}
-              onClick={() => handleOpenDialog()}
-              sx={{ mt: 2 }}
-            >
-              {t('admin.organizations.createFirst')}
-            </Button>
+            {canManage && (
+              <Button
+                variant="outlined"
+                startIcon={<AddIcon />}
+                onClick={() => handleOpenDialog()}
+                sx={{ mt: 2 }}
+              >
+                {t('admin.organizations.createFirst')}
+              </Button>
+            )}
           </Box>
         ) : (
           <TableContainer>
@@ -380,26 +390,30 @@ const OrganizationsPage: React.FC = () => {
                     </TableCell>
                     <TableCell>{new Date(org.created_at).toLocaleDateString()}</TableCell>
                     <TableCell align="right">
-                      <Tooltip title={t('admin.organizations.tooltipEditOrg')}>
-                        <IconButton
-                          size="small"
-                          aria-label={t('admin.organizations.ariaEditOrg')}
-                          onClick={() => handleOpenDialog(org)}
-                          color="primary"
-                        >
-                          <EditIcon />
-                        </IconButton>
-                      </Tooltip>
-                      <Tooltip title={t('admin.organizations.tooltipDeleteOrg')}>
-                        <IconButton
-                          size="small"
-                          aria-label={t('admin.organizations.ariaDeleteOrg')}
-                          onClick={() => handleDeleteClick(org)}
-                          color="error"
-                        >
-                          <DeleteIcon />
-                        </IconButton>
-                      </Tooltip>
+                      {canManage && (
+                        <>
+                          <Tooltip title={t('admin.organizations.tooltipEditOrg')}>
+                            <IconButton
+                              size="small"
+                              aria-label={t('admin.organizations.ariaEditOrg')}
+                              onClick={() => handleOpenDialog(org)}
+                              color="primary"
+                            >
+                              <EditIcon />
+                            </IconButton>
+                          </Tooltip>
+                          <Tooltip title={t('admin.organizations.tooltipDeleteOrg')}>
+                            <IconButton
+                              size="small"
+                              aria-label={t('admin.organizations.ariaDeleteOrg')}
+                              onClick={() => handleDeleteClick(org)}
+                              color="error"
+                            >
+                              <DeleteIcon />
+                            </IconButton>
+                          </Tooltip>
+                        </>
+                      )}
                     </TableCell>
                   </TableRow>
                 ))}

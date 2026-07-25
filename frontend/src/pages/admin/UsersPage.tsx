@@ -63,6 +63,13 @@ const UsersPage: React.FC = () => {
   const queryClient = useQueryClient()
   const { allowedScopes } = useAuth()
   const isAdmin = allowedScopes.includes('admin')
+  // The route itself is gated at users:read (view-only) so auditors/viewers can
+  // browse the directory (routeScopes.ts). Add/Edit/Delete mutate OTHER users'
+  // accounts though, so — separately from that view gate — only show those
+  // controls to callers who actually hold the write scope the mutations need
+  // (#609): a users:read-only viewer would otherwise see actionable buttons
+  // that only fail once clicked, relying entirely on the server to say no.
+  const canManageUsers = isAdmin || allowedScopes.includes('users:write')
   const [error, setError] = useState<string | null>(null)
   const [info, setInfo] = useState<string | null>(null)
   const [searchQuery, setSearchQuery] = useState('')
@@ -439,9 +446,11 @@ const UsersPage: React.FC = () => {
         title={t('admin.users.pageTitle')}
         description={t('admin.users.pageSubtitle')}
         actions={
-          <Button variant="contained" startIcon={<AddIcon />} onClick={() => handleOpenDialog()}>
-            {t('admin.users.addUser')}
-          </Button>
+          canManageUsers ? (
+            <Button variant="contained" startIcon={<AddIcon />} onClick={() => handleOpenDialog()}>
+              {t('admin.users.addUser')}
+            </Button>
+          ) : undefined
         }
       />
       {error && (
@@ -559,16 +568,18 @@ const UsersPage: React.FC = () => {
                     </TableCell>
                     <TableCell>{new Date(user.created_at).toLocaleDateString()}</TableCell>
                     <TableCell align="right" sx={{ whiteSpace: 'nowrap' }}>
-                      <Tooltip title={t('admin.users.tooltipEdit')}>
-                        <IconButton
-                          size="small"
-                          aria-label={t('admin.users.ariaEdit')}
-                          onClick={() => handleOpenDialog(user)}
-                          color="primary"
-                        >
-                          <EditIcon />
-                        </IconButton>
-                      </Tooltip>
+                      {canManageUsers && (
+                        <Tooltip title={t('admin.users.tooltipEdit')}>
+                          <IconButton
+                            size="small"
+                            aria-label={t('admin.users.ariaEdit')}
+                            onClick={() => handleOpenDialog(user)}
+                            color="primary"
+                          >
+                            <EditIcon />
+                          </IconButton>
+                        </Tooltip>
+                      )}
                       {isAdmin && (
                         <>
                           <Tooltip title={t('admin.users.tooltipExport')}>
@@ -599,16 +610,18 @@ const UsersPage: React.FC = () => {
                           </Tooltip>
                         </>
                       )}
-                      <Tooltip title={t('admin.users.tooltipDelete')}>
-                        <IconButton
-                          size="small"
-                          aria-label={t('admin.users.ariaDelete')}
-                          onClick={() => handleDeleteClick(user)}
-                          color="error"
-                        >
-                          <DeleteIcon />
-                        </IconButton>
-                      </Tooltip>
+                      {canManageUsers && (
+                        <Tooltip title={t('admin.users.tooltipDelete')}>
+                          <IconButton
+                            size="small"
+                            aria-label={t('admin.users.ariaDelete')}
+                            onClick={() => handleDeleteClick(user)}
+                            color="error"
+                          >
+                            <DeleteIcon />
+                          </IconButton>
+                        </Tooltip>
+                      )}
                     </TableCell>
                   </TableRow>
                 ))

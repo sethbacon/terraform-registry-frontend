@@ -1,5 +1,5 @@
 import { render, act, waitFor } from '@testing-library/react'
-import { AuthProvider, useAuth } from '../AuthContext'
+import { AuthProvider, useAuth, toSyntheticMemberships } from '../AuthContext'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { AUTH_STORAGE_KEYS } from '../../utils/authStorage'
 
@@ -14,6 +14,10 @@ const mockApi = vi.hoisted(() => ({
 }))
 
 vi.mock('../../services/api', () => ({ default: mockApi }))
+// devLogin is dynamically imported from devApi directly (not the barrel above,
+// which deliberately excludes it) so the dev-only endpoint is dead-code-eliminated
+// from the production bundle (#608) — mock that import target too.
+vi.mock('../../services/api/devApi', () => ({ devLogin: () => mockApi.devLogin() }))
 
 const me = {
   user: { id: 'u1', email: 'a@b.c', name: 'Alice' },
@@ -136,5 +140,26 @@ describe('AuthProvider', () => {
     await act(() => latest.refreshSession())
     expect(latest.isAuthenticated).toBe(true)
     expect(mockApi.logout).not.toHaveBeenCalled()
+  })
+})
+
+describe('toSyntheticMemberships (#622)', () => {
+  it('returns an empty array when there is no role template', () => {
+    expect(toSyntheticMemberships(null)).toEqual([])
+  })
+
+  it('fills organization_id/organization_name with an obviously-fake sentinel, not blank strings', () => {
+    const [membership] = toSyntheticMemberships({
+      name: 'admin',
+      display_name: 'Administrator',
+      scopes: ['admin'],
+    })
+    expect(membership.role_template_name).toBe('admin')
+    expect(membership.role_template_scopes).toEqual(['admin'])
+    // Must not silently render blank — a future consumer should notice these
+    // are placeholders, not real organization data.
+    expect(membership.organization_id).not.toBe('')
+    expect(membership.organization_name).not.toBe('')
+    expect(membership.organization_id).toBe(membership.organization_name)
   })
 })

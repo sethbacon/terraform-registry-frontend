@@ -21,6 +21,12 @@ vi.mock('../../../services/api', () => ({
   },
 }))
 
+let mockAllowedScopes: string[] = ['admin']
+
+vi.mock('../../../contexts/AuthContext', () => ({
+  useAuth: () => ({ allowedScopes: mockAllowedScopes, user: { id: 'u1' } }),
+}))
+
 import VersionApprovalsPage from '../VersionApprovalsPage'
 
 function renderWithProviders(ui: React.ReactElement) {
@@ -67,6 +73,7 @@ const emptyResponse = { items: [], total: 0 }
 
 beforeEach(() => {
   vi.clearAllMocks()
+  mockAllowedScopes = ['admin']
   listVersionApprovalsMock.mockResolvedValue({
     items: [fakePendingProvider, fakePendingTerraform],
     total: 2,
@@ -322,5 +329,35 @@ describe('VersionApprovalsPage', () => {
     listVersionApprovalsMock.mockRejectedValue(new Error('boom'))
     renderWithProviders(<VersionApprovalsPage />)
     await waitFor(() => expect(screen.getByRole('alert')).toBeInTheDocument())
+  })
+
+  // ── canManage gates approve/reject controls (#609) ──────────────────────────
+
+  it('hides per-row and bulk Approve/Reject controls for the mirrors:read scope', async () => {
+    mockAllowedScopes = ['mirrors:read']
+    const user = userEvent.setup()
+    renderWithProviders(<VersionApprovalsPage />)
+    await waitFor(() => expect(screen.getByText('5.90.0')).toBeInTheDocument())
+
+    expect(screen.queryByRole('button', { name: 'Approve' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Reject' })).not.toBeInTheDocument()
+
+    // Selecting a row still doesn't reveal the bulk action bar for a
+    // read-only viewer.
+    await user.click(screen.getAllByRole('checkbox')[1])
+    expect(screen.queryByRole('button', { name: /Approve Selected/ })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /Reject Selected/ })).not.toBeInTheDocument()
+  })
+
+  it('shows per-row and bulk Approve/Reject controls for the canonical mirrors:manage scope', async () => {
+    mockAllowedScopes = ['mirrors:manage']
+    const user = userEvent.setup()
+    renderWithProviders(<VersionApprovalsPage />)
+    await waitFor(() => expect(screen.getAllByRole('button', { name: 'Approve' })).toHaveLength(2))
+    expect(screen.getAllByRole('button', { name: 'Reject' })).toHaveLength(2)
+
+    await user.click(screen.getAllByRole('checkbox')[1])
+    expect(screen.getByRole('button', { name: /Approve Selected/ })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /Reject Selected/ })).toBeInTheDocument()
   })
 })

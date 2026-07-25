@@ -1,3 +1,5 @@
+import type { ScopeValue } from './types/rbac'
+
 // Single source of truth for which scope (if any) each /admin/* route
 // requires. App.tsx (route guards, via LazyRoute) and navigation.tsx
 // (sidebar item filtering) both read from this map instead of each
@@ -6,8 +8,10 @@
 //
 // A value of `null` means the route requires an authenticated user but no
 // specific scope (matches NavItem['scope']'s "always visible to
-// authenticated users" convention).
-export const ADMIN_ROUTE_SCOPES: Record<string, string | null> = {
+// authenticated users" convention). Values are typed as the canonical
+// ScopeValue union (#633) so a typo'd/retired scope is a compile error
+// instead of silently drifting from types/rbac.ts's AVAILABLE_SCOPES.
+export const ADMIN_ROUTE_SCOPES: Record<string, ScopeValue | null> = {
   '/admin': null,
   '/admin/users': 'users:read',
   '/admin/organizations': 'organizations:read',

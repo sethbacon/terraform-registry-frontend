@@ -65,6 +65,7 @@ import Page from '../../components/Page'
 import PageHeader from '../../components/PageHeader'
 import PageTitleIcon from '@mui/icons-material/CloudDownload'
 import api from '../../services/api'
+import { useAuth } from '../../contexts/AuthContext'
 import {
   type MirrorConfiguration,
   type MirrorSyncHistory,
@@ -286,6 +287,14 @@ const ProviderRow: React.FC<{ provider: MirroredProvider }> = ({ provider }) => 
 const MirrorsPage: React.FC = () => {
   const { t } = useTranslation()
   const queryClient = useQueryClient()
+  const { allowedScopes } = useAuth()
+  // The route itself is gated at mirrors:read (view-only) so auditors/viewers
+  // can browse mirror configurations (routeScopes.ts). Add/Edit/Delete/
+  // Trigger-Sync mutate mirror config or kick off syncs against the upstream
+  // registry though, so canManage additionally gates those controls on
+  // mirrors:manage/admin — a mirrors:read-only viewer would otherwise see
+  // fully actionable controls that only fail once clicked (#609).
+  const canManage = allowedScopes.includes('admin') || allowedScopes.includes('mirrors:manage')
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
   const [createDialogOpen, setCreateDialogOpen] = useState(false)
@@ -350,12 +359,15 @@ const MirrorsPage: React.FC = () => {
     setError(getErrorMessage(queryError, t('admin.mirrors.errLoadMirrors')))
   }
 
-  // Auto-open the Add Mirror dialog when navigated here with ?action=add
+  // Auto-open the Add Mirror dialog when navigated here with ?action=add.
+  // Gated on canManage too, so a mirrors:read-only viewer can't reach the
+  // create form via a deep link that bypasses the (also gated) Add Mirror
+  // button (#609).
   useEffect(() => {
-    if (searchParams.get('action') === 'add') {
+    if (canManage && searchParams.get('action') === 'add') {
       setCreateDialogOpen(true)
     }
-  }, [searchParams])
+  }, [searchParams, canManage])
 
   const createMutation = useMutation({
     mutationFn: (data: CreateMirrorConfigRequest) => api.createMirror(data),
@@ -616,16 +628,18 @@ const MirrorsPage: React.FC = () => {
                 >
                   {t('admin.mirrors.refresh')}
                 </Button>
-                <Button
-                  variant="contained"
-                  startIcon={<AddIcon />}
-                  onClick={() => {
-                    resetForm()
-                    setCreateDialogOpen(true)
-                  }}
-                >
-                  {t('admin.mirrors.addMirror')}
-                </Button>
+                {canManage && (
+                  <Button
+                    variant="contained"
+                    startIcon={<AddIcon />}
+                    onClick={() => {
+                      resetForm()
+                      setCreateDialogOpen(true)
+                    }}
+                  >
+                    {t('admin.mirrors.addMirror')}
+                  </Button>
+                )}
               </Box>
             }
           />
@@ -809,43 +823,45 @@ const MirrorsPage: React.FC = () => {
                             </IconButton>
                           </Tooltip>
                         </Box>
-                        <Box>
-                          <Tooltip title={t('admin.mirrors.tooltipTriggerSync')}>
-                            <span>
+                        {canManage && (
+                          <Box>
+                            <Tooltip title={t('admin.mirrors.tooltipTriggerSync')}>
+                              <span>
+                                <IconButton
+                                  size="small"
+                                  aria-label={t('admin.mirrors.ariaSyncMirror')}
+                                  color="primary"
+                                  onClick={() => handleTriggerSync(mirror)}
+                                  disabled={mirror.last_sync_status === 'in_progress'}
+                                >
+                                  <SyncIcon fontSize="small" />
+                                </IconButton>
+                              </span>
+                            </Tooltip>
+                            <Tooltip title={t('admin.mirrors.tooltipEdit')}>
                               <IconButton
                                 size="small"
-                                aria-label={t('admin.mirrors.ariaSyncMirror')}
-                                color="primary"
-                                onClick={() => handleTriggerSync(mirror)}
-                                disabled={mirror.last_sync_status === 'in_progress'}
+                                aria-label={t('admin.mirrors.ariaEditMirror')}
+                                onClick={() => openEditDialog(mirror)}
                               >
-                                <SyncIcon fontSize="small" />
+                                <EditIcon fontSize="small" />
                               </IconButton>
-                            </span>
-                          </Tooltip>
-                          <Tooltip title={t('admin.mirrors.tooltipEdit')}>
-                            <IconButton
-                              size="small"
-                              aria-label={t('admin.mirrors.ariaEditMirror')}
-                              onClick={() => openEditDialog(mirror)}
-                            >
-                              <EditIcon fontSize="small" />
-                            </IconButton>
-                          </Tooltip>
-                          <Tooltip title={t('admin.mirrors.tooltipDelete')}>
-                            <IconButton
-                              size="small"
-                              aria-label={t('admin.mirrors.ariaDeleteMirror')}
-                              color="error"
-                              onClick={() => {
-                                setMirrorToDelete(mirror)
-                                setDeleteConfirmOpen(true)
-                              }}
-                            >
-                              <DeleteIcon fontSize="small" />
-                            </IconButton>
-                          </Tooltip>
-                        </Box>
+                            </Tooltip>
+                            <Tooltip title={t('admin.mirrors.tooltipDelete')}>
+                              <IconButton
+                                size="small"
+                                aria-label={t('admin.mirrors.ariaDeleteMirror')}
+                                color="error"
+                                onClick={() => {
+                                  setMirrorToDelete(mirror)
+                                  setDeleteConfirmOpen(true)
+                                }}
+                              >
+                                <DeleteIcon fontSize="small" />
+                              </IconButton>
+                            </Tooltip>
+                          </Box>
+                        )}
                       </CardActions>
                     </Card>
                   </Grid>

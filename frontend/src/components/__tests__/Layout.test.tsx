@@ -217,6 +217,17 @@ describe('Layout', () => {
     expect(screen.queryByTestId('dev-user-switcher')).not.toBeInTheDocument()
   })
 
+  it('does not render DevUserSwitcher outside dev builds, even when authenticated (#608)', async () => {
+    vi.stubEnv('DEV', false)
+    try {
+      renderLayout({ scopes: ['admin'] })
+      await screen.findByLabelText('Account') // wait for the authenticated shell to settle
+      expect(screen.queryByTestId('dev-user-switcher')).not.toBeInTheDocument()
+    } finally {
+      vi.unstubAllEnvs()
+    }
+  })
+
   it('renders a skip-to-content link', async () => {
     renderLayout()
     const skipLink = await screen.findByText('Skip to content')

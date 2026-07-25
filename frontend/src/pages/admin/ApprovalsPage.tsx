@@ -34,11 +34,20 @@ import api from '../../services/api'
 import { formatDate } from '../../utils'
 import { MirrorApprovalRequest } from '../../types/rbac'
 import { getErrorMessage } from '../../utils/errors'
+import { useAuth } from '../../contexts/AuthContext'
 import { queryKeys } from '../../services/queryKeys'
 
 const ApprovalsPage: React.FC = () => {
   const { t } = useTranslation()
   const queryClient = useQueryClient()
+  const { allowedScopes } = useAuth()
+  // The route itself is gated at mirrors:read (view-only) so auditors/viewers
+  // can browse approval requests (routeScopes.ts). Create-request and
+  // Approve/Reject mutate approval state though, so canManage additionally
+  // gates those controls on mirrors:manage/admin — a mirrors:read-only
+  // viewer would otherwise see fully actionable controls that only fail once
+  // clicked (#609).
+  const canManage = allowedScopes.includes('admin') || allowedScopes.includes('mirrors:manage')
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
 
@@ -224,13 +233,15 @@ const ApprovalsPage: React.FC = () => {
                 >
                   {t('admin.approvals.refresh')}
                 </Button>
-                <Button
-                  variant="contained"
-                  startIcon={<AddIcon />}
-                  onClick={() => setCreateDialogOpen(true)}
-                >
-                  {t('admin.approvals.createRequest')}
-                </Button>
+                {canManage && (
+                  <Button
+                    variant="contained"
+                    startIcon={<AddIcon />}
+                    onClick={() => setCreateDialogOpen(true)}
+                  >
+                    {t('admin.approvals.createRequest')}
+                  </Button>
+                )}
               </Box>
             }
           />
@@ -328,7 +339,7 @@ const ApprovalsPage: React.FC = () => {
                     )}
                   </CardContent>
 
-                  {approval.status === 'pending' && (
+                  {approval.status === 'pending' && canManage && (
                     <CardActions>
                       <Button
                         size="small"

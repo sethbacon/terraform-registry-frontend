@@ -63,6 +63,24 @@ describe('filterByScope', () => {
     expect(entry?.label).toBe('Hosted Binaries')
     expect(entry?.path).toBe('/terraform-binaries')
   })
+
+  // #633 — the Publish/Upload commands must reference the real modules:write /
+  // providers:write scopes (not the nonexistent modules:publish /
+  // providers:publish), or a non-admin holder of the real write scope never
+  // sees these commands (fails closed, but silently).
+  it('reveals Publish Module / Upload Provider to holders of the real write scopes', () => {
+    const withModulesWrite = filterByScope(defaultCommands, ['modules:write'])
+    expect(withModulesWrite.find((i) => i.path === '/admin/upload/module')).toBeDefined()
+
+    const withProvidersWrite = filterByScope(defaultCommands, ['providers:write'])
+    expect(withProvidersWrite.find((i) => i.path === '/admin/upload/provider')).toBeDefined()
+  })
+
+  it('hides Publish Module / Upload Provider without the write scopes', () => {
+    const result = filterByScope(defaultCommands, [])
+    expect(result.find((i) => i.path === '/admin/upload/module')).toBeUndefined()
+    expect(result.find((i) => i.path === '/admin/upload/provider')).toBeUndefined()
+  })
 })
 
 describe('CommandPalette', () => {

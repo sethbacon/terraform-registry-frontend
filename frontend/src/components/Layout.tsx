@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, lazy, Suspense } from 'react'
 import { useTranslation } from 'react-i18next'
 import { IconButton, ListItemIcon, Menu, MenuItem, Tooltip } from '@mui/material'
 import SearchIcon from '@mui/icons-material/Search'
@@ -14,7 +14,6 @@ import {
   componentShowcaseItem,
   adminNavGroups,
 } from '../navigation'
-import DevUserSwitcher from './DevUserSwitcher'
 import { SuiteSwitcher } from './SuiteSwitcher'
 import HelpPanel, { HELP_PANEL_WIDTH } from './HelpPanel'
 import AboutModal from './AboutModal'
@@ -39,6 +38,13 @@ const LANGUAGE_NATIVE_NAMES = {
 } as const
 
 const LANGUAGES = Object.entries(LANGUAGE_NATIVE_NAMES).map(([code, label]) => ({ code, label }))
+
+// Dev-only "switch to any user" impersonation UI (#608). Loaded via a dynamic
+// import (rather than a static one) so that, combined with the
+// import.meta.env.DEV guard below, bundlers dead-code-eliminate it and its
+// devApi impersonation calls out of the production bundle instead of merely
+// relying on the runtime dev_mode probe + server-side DEV_MODE gate.
+const DevUserSwitcher = lazy(() => import('./DevUserSwitcher'))
 
 /**
  * Application shell. A thin wrapper over the shared SuiteLayout that injects the
@@ -87,7 +93,11 @@ const Layout = () => {
         contentInsetRight={helpOpen ? HELP_PANEL_WIDTH : 0}
         appBarActions={
           <>
-            {isAuthenticated && <DevUserSwitcher />}
+            {isAuthenticated && import.meta.env.DEV && (
+              <Suspense fallback={null}>
+                <DevUserSwitcher />
+              </Suspense>
+            )}
             <Tooltip title={t('header.quickNav')}>
               <IconButton
                 color="inherit"

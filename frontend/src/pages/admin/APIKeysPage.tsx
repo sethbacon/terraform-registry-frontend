@@ -85,6 +85,15 @@ const APIKeysPage: React.FC = () => {
   const queryClient = useQueryClient()
   const { allowedScopes, roleTemplate } = useAuth()
   const isAdmin = allowedScopes.includes('admin')
+  // The route itself is gated at no scope at all (routeScopes.ts: null) so any
+  // authenticated user can reach this page. listAPIKeys returns keys across the
+  // caller's organization (each key carries its own user_id/user_name), so
+  // Create/Edit/Rotate/Delete act on OTHER users' keys too -- separately from
+  // page visibility, only show those controls to callers who hold the scope
+  // the mutating endpoints actually need (#609): an unscoped viewer would
+  // otherwise see fully actionable buttons that only fail once clicked,
+  // relying entirely on the server to say no.
+  const canManage = isAdmin || allowedScopes.includes('api_keys:manage')
   const [error, setError] = useState<string | null>(null)
 
   // API-key-expiry notification settings (admin-only). Shares the notifications
@@ -496,9 +505,11 @@ const APIKeysPage: React.FC = () => {
         title={t('admin.apiKeys.pageTitle')}
         description={t('admin.apiKeys.pageSubtitle')}
         actions={
-          <Button variant="contained" startIcon={<AddIcon />} onClick={handleOpenDialog}>
-            {t('admin.apiKeys.createApiKey')}
-          </Button>
+          canManage ? (
+            <Button variant="contained" startIcon={<AddIcon />} onClick={handleOpenDialog}>
+              {t('admin.apiKeys.createApiKey')}
+            </Button>
+          ) : undefined
         }
       />
       {error && (
@@ -536,11 +547,15 @@ const APIKeysPage: React.FC = () => {
             title={t('admin.apiKeys.emptyTitle')}
             description={t('admin.apiKeys.emptyDescription')}
             icon={<KeyIcon />}
-            primaryAction={{
-              label: t('admin.apiKeys.emptyAction'),
-              icon: <AddIcon />,
-              onClick: handleOpenDialog,
-            }}
+            primaryAction={
+              canManage
+                ? {
+                  label: t('admin.apiKeys.emptyAction'),
+                  icon: <AddIcon />,
+                  onClick: handleOpenDialog,
+                }
+                : undefined
+            }
             data-testid="apikeys-empty-state"
           />
         ) : (
@@ -607,34 +622,38 @@ const APIKeysPage: React.FC = () => {
                       </TableCell>
                       <TableCell align="right">
                         <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 0.5 }}>
-                          <Tooltip title={t('admin.apiKeys.tooltipEdit')}>
-                            <IconButton
-                              size="small"
-                              aria-label={t('admin.apiKeys.ariaEdit')}
-                              onClick={() => handleEditClick(apiKey)}
-                            >
-                              <EditIcon fontSize="small" />
-                            </IconButton>
-                          </Tooltip>
-                          <Tooltip title={t('admin.apiKeys.tooltipRotate')}>
-                            <IconButton
-                              size="small"
-                              aria-label={t('admin.apiKeys.ariaRotate')}
-                              onClick={() => handleRotateClick(apiKey)}
-                            >
-                              <AutorenewIcon fontSize="small" />
-                            </IconButton>
-                          </Tooltip>
-                          <Tooltip title={t('admin.apiKeys.tooltipDelete')}>
-                            <IconButton
-                              size="small"
-                              aria-label={t('admin.apiKeys.ariaDelete')}
-                              onClick={() => handleDeleteClick(apiKey)}
-                              color="error"
-                            >
-                              <DeleteIcon fontSize="small" />
-                            </IconButton>
-                          </Tooltip>
+                          {canManage && (
+                            <>
+                              <Tooltip title={t('admin.apiKeys.tooltipEdit')}>
+                                <IconButton
+                                  size="small"
+                                  aria-label={t('admin.apiKeys.ariaEdit')}
+                                  onClick={() => handleEditClick(apiKey)}
+                                >
+                                  <EditIcon fontSize="small" />
+                                </IconButton>
+                              </Tooltip>
+                              <Tooltip title={t('admin.apiKeys.tooltipRotate')}>
+                                <IconButton
+                                  size="small"
+                                  aria-label={t('admin.apiKeys.ariaRotate')}
+                                  onClick={() => handleRotateClick(apiKey)}
+                                >
+                                  <AutorenewIcon fontSize="small" />
+                                </IconButton>
+                              </Tooltip>
+                              <Tooltip title={t('admin.apiKeys.tooltipDelete')}>
+                                <IconButton
+                                  size="small"
+                                  aria-label={t('admin.apiKeys.ariaDelete')}
+                                  onClick={() => handleDeleteClick(apiKey)}
+                                  color="error"
+                                >
+                                  <DeleteIcon fontSize="small" />
+                                </IconButton>
+                              </Tooltip>
+                            </>
+                          )}
                         </Box>
                       </TableCell>
                     </TableRow>

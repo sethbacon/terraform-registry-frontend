@@ -30,10 +30,12 @@ vi.mock('../../../services/api', () => ({
   },
 }))
 
+let mockAllowedScopes: string[] = ['admin']
+
 vi.mock('../../../contexts/AuthContext', () => ({
   useAuth: () => ({
     isAuthenticated: true,
-    allowedScopes: ['admin'],
+    allowedScopes: mockAllowedScopes,
     user: { id: 'u1', email: 'admin@example.com', name: 'Admin', role_template_name: 'admin' },
   }),
 }))
@@ -85,8 +87,53 @@ const fakeMemberships = [
 describe('SCMProvidersPage', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    mockAllowedScopes = ['admin']
     getCurrentUserMembershipsMock.mockResolvedValue([])
     getSCMTokenStatusMock.mockResolvedValue({ connected: false })
+  })
+
+  // ── canManage gates credential-mutation controls (#609) ────────────────────
+
+  it('hides Add/Edit/Delete/Connect provider controls for the scm:read scope', async () => {
+    mockAllowedScopes = ['scm:read']
+    listSCMProvidersMock.mockResolvedValue(fakeProviders)
+    renderPage()
+    await waitFor(() => expect(screen.getByText('GitHub Enterprise')).toBeInTheDocument())
+
+    // View access is unaffected — the viewer still sees the provider list.
+    expect(screen.queryByRole('button', { name: /add.*provider/i })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /edit scm provider/i })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /delete scm provider/i })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /connect scm provider/i })).not.toBeInTheDocument()
+  })
+
+  it('hides Test connection for app-mode providers under the scm:read scope', async () => {
+    mockAllowedScopes = ['scm:read']
+    const appProvider = [
+      {
+        ...fakeProviders[0],
+        id: 'scm-app',
+        name: 'ADO App',
+        provider_type: 'azuredevops' as const,
+        auth_mode: 'entra_app' as const,
+      },
+    ]
+    listSCMProvidersMock.mockResolvedValue(appProvider)
+    renderPage()
+    await waitFor(() => expect(screen.getByText('ADO App')).toBeInTheDocument())
+    expect(screen.queryByRole('button', { name: /test connection/i })).not.toBeInTheDocument()
+  })
+
+  it('shows Add/Edit/Delete/Connect provider controls for the canonical scm:manage scope', async () => {
+    mockAllowedScopes = ['scm:manage']
+    listSCMProvidersMock.mockResolvedValue(fakeProviders)
+    renderPage()
+    await waitFor(() => expect(screen.getByText('GitHub Enterprise')).toBeInTheDocument())
+
+    expect(screen.getByRole('button', { name: /add.*provider/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /edit scm provider/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /delete scm provider/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /connect scm provider/i })).toBeInTheDocument()
   })
 
   it('shows loading spinner initially', () => {

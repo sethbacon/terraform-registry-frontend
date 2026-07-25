@@ -24,6 +24,12 @@ vi.mock('../../../services/api', () => ({
   },
 }))
 
+let mockAllowedScopes: string[] = ['admin']
+
+vi.mock('../../../contexts/AuthContext', () => ({
+  useAuth: () => ({ allowedScopes: mockAllowedScopes, user: { id: 'u1' } }),
+}))
+
 import MirrorsPage from '../MirrorsPage'
 
 function renderWithProviders(
@@ -95,6 +101,7 @@ const neverSyncedMirror = {
 describe('MirrorsPage', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    mockAllowedScopes = ['admin']
   })
 
   it('shows loading spinner while fetching', () => {
@@ -467,6 +474,45 @@ describe('MirrorsPage', () => {
     await waitFor(() => {
       expect(screen.getByText('Add Provider Mirror')).toBeInTheDocument()
     })
+  })
+
+  // ── canManage gates mirror CRUD/sync controls (#609) ───────────────────────
+
+  it('hides Add/Edit/Delete/Sync mirror controls for the mirrors:read scope', async () => {
+    mockAllowedScopes = ['mirrors:read']
+    listMirrorsMock.mockResolvedValue([baseMirror])
+    renderWithProviders(<MirrorsPage />)
+    await waitFor(() => expect(screen.getByText('Upstream Public')).toBeInTheDocument())
+
+    // View access is unaffected — the viewer still sees the mirror list.
+    expect(screen.queryByText('Add Mirror')).not.toBeInTheDocument()
+    expect(screen.queryByLabelText('Edit mirror')).not.toBeInTheDocument()
+    expect(screen.queryByLabelText('Delete mirror')).not.toBeInTheDocument()
+    expect(screen.queryByLabelText('Sync mirror')).not.toBeInTheDocument()
+  })
+
+  it('shows Add/Edit/Delete/Sync mirror controls for the canonical mirrors:manage scope', async () => {
+    mockAllowedScopes = ['mirrors:manage']
+    listMirrorsMock.mockResolvedValue([baseMirror])
+    renderWithProviders(<MirrorsPage />)
+    await waitFor(() => expect(screen.getByText('Upstream Public')).toBeInTheDocument())
+
+    expect(screen.getByText('Add Mirror')).toBeInTheDocument()
+    expect(screen.getByLabelText('Edit mirror')).toBeInTheDocument()
+    expect(screen.getByLabelText('Delete mirror')).toBeInTheDocument()
+    expect(screen.getByLabelText('Sync mirror')).toBeInTheDocument()
+  })
+
+  it('ignores the ?action=add deep link for the mirrors:read scope', async () => {
+    mockAllowedScopes = ['mirrors:read']
+    listMirrorsMock.mockResolvedValue([])
+    renderWithProviders(<MirrorsPage />, {
+      initialEntries: ['/admin/mirrors?action=add'],
+    })
+    await waitFor(() => {
+      expect(screen.getByText('Mirroring — Provider Config')).toBeInTheDocument()
+    })
+    expect(screen.queryByText('Add Provider Mirror')).not.toBeInTheDocument()
   })
 
   it('shows error alert when create mutation fails', async () => {

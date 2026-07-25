@@ -214,22 +214,6 @@ export interface PaginationMeta {
   total: number
 }
 
-export interface AuthContextType {
-  user: User | null
-  roleTemplate: RoleTemplateInfo | null // Primary role template (backward compat)
-  allowedScopes: string[] // Combined scopes across all org memberships
-  isAuthenticated: boolean
-  isLoading: boolean
-  sessionExpiresAt: Date | null
-  sessionExpiresSoon: boolean
-  login: (provider?: string) => void
-  devLogin: () => Promise<void>
-  ldapLogin: (username: string, password: string) => Promise<void>
-  logout: () => void
-  refreshSession: () => Promise<void>
-  hasScope: (scope: string) => boolean
-}
-
 // Storage Configuration Types
 export type StorageBackendType = 'local' | 'azure' | 's3' | 'gcs'
 

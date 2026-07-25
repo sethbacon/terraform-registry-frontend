@@ -14,6 +14,12 @@ vi.mock('../../../services/api', () => ({
   },
 }))
 
+let mockAllowedScopes: string[] = ['admin']
+
+vi.mock('../../../contexts/AuthContext', () => ({
+  useAuth: () => ({ allowedScopes: mockAllowedScopes, user: { id: 'u1' } }),
+}))
+
 import ApprovalsPage from '../ApprovalsPage'
 
 function renderWithProviders(ui: React.ReactElement) {
@@ -63,6 +69,7 @@ const fakeApprovals = [
 describe('ApprovalsPage', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    mockAllowedScopes = ['admin']
   })
 
   it('shows loading spinner while fetching', () => {
@@ -276,5 +283,31 @@ describe('ApprovalsPage', () => {
     listApprovalRequestsMock.mockResolvedValue(fakeApprovals)
     renderWithProviders(<ApprovalsPage />)
     await waitFor(() => expect(screen.getByText(/auto[\s-]*approved/i)).toBeInTheDocument())
+  })
+
+  // ── canManage gates create/approve/reject controls (#609) ──────────────────
+
+  it('hides Create Request and Approve/Reject controls for the mirrors:read scope', async () => {
+    mockAllowedScopes = ['mirrors:read']
+    listApprovalRequestsMock.mockResolvedValue(fakeApprovals)
+    renderWithProviders(<ApprovalsPage />)
+    await waitFor(() => expect(screen.getByText('hashicorp/aws')).toBeInTheDocument())
+
+    // View access is unaffected — the viewer still sees the approval cards.
+    expect(screen.getByText('datadog/datadog')).toBeInTheDocument()
+    expect(screen.queryByText('Create Request')).not.toBeInTheDocument()
+    expect(screen.queryByText('Approve')).not.toBeInTheDocument()
+    expect(screen.queryByText('Reject')).not.toBeInTheDocument()
+  })
+
+  it('shows Create Request and Approve/Reject controls for the canonical mirrors:manage scope', async () => {
+    mockAllowedScopes = ['mirrors:manage']
+    listApprovalRequestsMock.mockResolvedValue(fakeApprovals)
+    renderWithProviders(<ApprovalsPage />)
+    await waitFor(() => expect(screen.getByText('hashicorp/aws')).toBeInTheDocument())
+
+    expect(screen.getByText('Create Request')).toBeInTheDocument()
+    expect(screen.getByText('Approve')).toBeInTheDocument()
+    expect(screen.getByText('Reject')).toBeInTheDocument()
   })
 })

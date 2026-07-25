@@ -65,6 +65,7 @@ import SyncIcon from '@mui/icons-material/Sync'
 
 import api from '../../services/api'
 import { getErrorMessage } from '../../utils/errors'
+import { useAuth } from '../../contexts/AuthContext'
 import ReleasesGPGKeyStatus from '../../components/ReleasesGPGKeyStatus'
 import {
   type TerraformMirrorConfig,
@@ -113,7 +114,8 @@ const VersionRow: React.FC<{
   version: TerraformVersion
   configId: string
   onDelete: (v: TerraformVersion) => void
-}> = ({ version, configId, onDelete }) => {
+  canManage: boolean
+}> = ({ version, configId, onDelete, canManage }) => {
   const { t } = useTranslation()
   const [open, setOpen] = useState(false)
   const [platforms, setPlatforms] = useState<TerraformVersionPlatform[] | null>(null)
@@ -190,19 +192,21 @@ const VersionRow: React.FC<{
           {version.synced_at ? new Date(version.synced_at).toLocaleString() : '—'}
         </TableCell>
         <TableCell align="right">
-          <Tooltip title={t('admin.terraformMirror.tooltipDeleteVersion')}>
-            <span>
-              <IconButton
-                size="small"
-                aria-label={t('admin.terraformMirror.ariaDeleteVersion')}
-                color="error"
-                onClick={() => onDelete(version)}
-                disabled={version.sync_status === 'syncing'}
-              >
-                <DeleteIcon fontSize="small" />
-              </IconButton>
-            </span>
-          </Tooltip>
+          {canManage && (
+            <Tooltip title={t('admin.terraformMirror.tooltipDeleteVersion')}>
+              <span>
+                <IconButton
+                  size="small"
+                  aria-label={t('admin.terraformMirror.ariaDeleteVersion')}
+                  color="error"
+                  onClick={() => onDelete(version)}
+                  disabled={version.sync_status === 'syncing'}
+                >
+                  <DeleteIcon fontSize="small" />
+                </IconButton>
+              </span>
+            </Tooltip>
+          )}
         </TableCell>
       </TableRow>
       <TableRow>
@@ -291,7 +295,18 @@ const ConfigCard: React.FC<{
   onViewVersions: (c: TerraformMirrorConfig) => void
   onViewHistory: (c: TerraformMirrorConfig) => void
   syncing: boolean
-}> = ({ config, status, onEdit, onDelete, onSync, onViewVersions, onViewHistory, syncing }) => {
+  canManage: boolean
+}> = ({
+  config,
+  status,
+  onEdit,
+  onDelete,
+  onSync,
+  onViewVersions,
+  onViewHistory,
+  syncing,
+  canManage,
+}) => {
   const { t } = useTranslation()
   return (
     <Card variant="outlined">
@@ -413,39 +428,41 @@ const ConfigCard: React.FC<{
             </IconButton>
           </Tooltip>
         </Box>
-        <Box>
-          <Tooltip title={t('admin.terraformMirror.tooltipTriggerSync')}>
-            <span>
+        {canManage && (
+          <Box>
+            <Tooltip title={t('admin.terraformMirror.tooltipTriggerSync')}>
+              <span>
+                <IconButton
+                  size="small"
+                  aria-label={t('admin.terraformMirror.ariaSyncMirror')}
+                  onClick={() => onSync(config)}
+                  disabled={syncing || !config.enabled}
+                >
+                  <SyncIcon fontSize="small" />
+                </IconButton>
+              </span>
+            </Tooltip>
+            <Tooltip title={t('admin.terraformMirror.tooltipEditConfig')}>
               <IconButton
                 size="small"
-                aria-label={t('admin.terraformMirror.ariaSyncMirror')}
-                onClick={() => onSync(config)}
-                disabled={syncing || !config.enabled}
+                aria-label={t('admin.terraformMirror.ariaEditMirror')}
+                onClick={() => onEdit(config)}
               >
-                <SyncIcon fontSize="small" />
+                <EditIcon fontSize="small" />
               </IconButton>
-            </span>
-          </Tooltip>
-          <Tooltip title={t('admin.terraformMirror.tooltipEditConfig')}>
-            <IconButton
-              size="small"
-              aria-label={t('admin.terraformMirror.ariaEditMirror')}
-              onClick={() => onEdit(config)}
-            >
-              <EditIcon fontSize="small" />
-            </IconButton>
-          </Tooltip>
-          <Tooltip title={t('admin.terraformMirror.tooltipDeleteMirror')}>
-            <IconButton
-              size="small"
-              aria-label={t('admin.terraformMirror.ariaDeleteMirror')}
-              color="error"
-              onClick={() => onDelete(config)}
-            >
-              <DeleteIcon fontSize="small" />
-            </IconButton>
-          </Tooltip>
-        </Box>
+            </Tooltip>
+            <Tooltip title={t('admin.terraformMirror.tooltipDeleteMirror')}>
+              <IconButton
+                size="small"
+                aria-label={t('admin.terraformMirror.ariaDeleteMirror')}
+                color="error"
+                onClick={() => onDelete(config)}
+              >
+                <DeleteIcon fontSize="small" />
+              </IconButton>
+            </Tooltip>
+          </Box>
+        )}
       </CardActions>
     </Card>
   )
@@ -506,6 +523,14 @@ const emptyCreate = (): CreateTerraformMirrorConfigRequest => ({
 const TerraformMirrorPage: React.FC = () => {
   const { t } = useTranslation()
   const queryClient = useQueryClient()
+  const { allowedScopes } = useAuth()
+  // The route itself is gated at mirrors:read (view-only) so auditors/viewers
+  // can browse mirror configurations (routeScopes.ts). Add/Edit/Delete config
+  // and Delete-version, plus Trigger-Sync, mutate mirror state though, so
+  // canManage additionally gates those controls on mirrors:manage/admin — a
+  // mirrors:read-only viewer would otherwise see fully actionable controls
+  // that only fail once clicked (#609).
+  const canManage = allowedScopes.includes('admin') || allowedScopes.includes('mirrors:manage')
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
 
@@ -776,18 +801,20 @@ const TerraformMirrorPage: React.FC = () => {
                 >
                   {t('admin.terraformMirror.refresh')}
                 </Button>
-                <Button
-                  variant="contained"
-                  startIcon={<AddIcon />}
-                  onClick={() => {
-                    setCreateForm(emptyCreate())
-                    setCreateVersionFilter('')
-                    setCreatePlatformFilter([])
-                    setCreateOpen(true)
-                  }}
-                >
-                  {t('admin.terraformMirror.addMirror')}
-                </Button>
+                {canManage && (
+                  <Button
+                    variant="contained"
+                    startIcon={<AddIcon />}
+                    onClick={() => {
+                      setCreateForm(emptyCreate())
+                      setCreateVersionFilter('')
+                      setCreatePlatformFilter([])
+                      setCreateOpen(true)
+                    }}
+                  >
+                    {t('admin.terraformMirror.addMirror')}
+                  </Button>
+                )}
               </Box>
             }
           />
@@ -835,6 +862,7 @@ const TerraformMirrorPage: React.FC = () => {
                       onViewVersions={openVersions}
                       onViewHistory={openHistory}
                       syncing={syncingIds.has(cfg.id)}
+                      canManage={canManage}
                     />
                   </Grid>
                 )
@@ -1265,6 +1293,7 @@ const TerraformMirrorPage: React.FC = () => {
                             version={v}
                             configId={versionsConfig.id}
                             onDelete={setDeleteVersion}
+                            canManage={canManage}
                           />
                         ))}
                       </TableBody>

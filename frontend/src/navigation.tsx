@@ -22,11 +22,16 @@ import History from '@mui/icons-material/History'
 import Notifications from '@mui/icons-material/Notifications'
 import type { NavItem, NavGroup } from '@sethbacon/terraform-suite-ui'
 import { ADMIN_ROUTE_SCOPES } from './routeScopes'
+import type { ScopeValue } from './types/rbac'
 
 // Reads the scope for an admin nav item from the shared route-scope map
 // (routeScopes.ts) so App.tsx's route guards and this sidebar's item
-// filtering can't drift apart.
-function adminScope(path: string): string | null {
+// filtering can't drift apart. Returns the canonical ScopeValue union (#633)
+// rather than widening back to `string | null` -- NavItem.scope itself stays
+// `string | null` (defined by the out-of-tree @sethbacon/terraform-suite-ui
+// package), but this keeps ADMIN_ROUTE_SCOPES's compile-time protection
+// intact through this call site instead of discarding it here.
+function adminScope(path: string): ScopeValue | null {
   return ADMIN_ROUTE_SCOPES[path] ?? null
 }
 
