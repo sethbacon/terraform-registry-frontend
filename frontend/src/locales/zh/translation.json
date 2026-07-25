@@ -1502,6 +1502,7 @@
       "errUpdate": "更新提供程序失败",
       "errDelete": "无法删除提供商",
       "errOAuth": "无法启动 OAuth",
+      "errOAuthInvalidUrl": "OAuth 提供商返回了一个无效的授权 URL",
       "errSaveToken": "保存访问令牌失败",
       "errDisconnect": "断开连接失败",
       "labelClientId": "客户ID",

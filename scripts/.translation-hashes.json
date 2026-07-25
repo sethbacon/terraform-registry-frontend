@@ -1140,6 +1140,7 @@
   "admin.scmProviders.errUpdate": "4a108c9389540d263fa06ed658f541f6accef5794a6995f2f2dbe8b325019495",
   "admin.scmProviders.errDelete": "b19d63afaf2a30db5f0ab9369a3749e2e203f623541de960192af08bb1489d37",
   "admin.scmProviders.errOAuth": "988153bb44354eaaef8598097333556432c7e2fdd1b29c82ed34d7a283c4fbda",
+  "admin.scmProviders.errOAuthInvalidUrl": "7f25ab510e7ce6f1f08576ab4bd992c613dab028e116c9738d1469cc9035d202",
   "admin.scmProviders.errSaveToken": "ac539ad2da6de6b4a8621aad5667598f31ea927e656a7bf80c7fc62bff9f3db2",
   "admin.scmProviders.errDisconnect": "b7668a581f590fa3f213e7654edf698e8e3cc273fae1fc9b82be589abec4f462",
   "admin.scmProviders.labelClientId": "8726db013948f0703807f17d23ca6c9903dc27f5d70c5a453604bb465c50864a",

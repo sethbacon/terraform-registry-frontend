@@ -1502,6 +1502,7 @@
       "errUpdate": "プロバイダーの更新に失敗しました",
       "errDelete": "プロバイダーの削除に失敗しました",
       "errOAuth": "OAuthの開始に失敗しました",
+      "errOAuthInvalidUrl": "OAuthプロバイダーから無効な認証URLが返されました",
       "errSaveToken": "アクセストークンの保存に失敗しました",
       "errDisconnect": "切断に失敗しました",
       "labelClientId": "クライアントID",

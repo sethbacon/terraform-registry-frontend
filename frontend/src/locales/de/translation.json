@@ -1502,6 +1502,7 @@
       "errUpdate": "Die Aktualisierung des Anbieters ist fehlgeschlagen",
       "errDelete": "Das Löschen des Anbieters ist fehlgeschlagen",
       "errOAuth": "OAuth konnte nicht initiiert werden",
+      "errOAuthInvalidUrl": "Der OAuth-Anbieter hat eine ungültige Autorisierungs-URL zurückgegeben.",
       "errSaveToken": "Das Speichern des Zugriffstokens ist fehlgeschlagen",
       "errDisconnect": "Die Trennung ist fehlgeschlagen",
       "labelClientId": "Kunden-ID",

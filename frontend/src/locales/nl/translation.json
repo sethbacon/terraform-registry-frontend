@@ -1502,6 +1502,7 @@
       "errUpdate": "Het is niet gelukt om de provider bij te werken",
       "errDelete": "Het verwijderen van de provider is mislukt",
       "errOAuth": "Het starten van OAuth is mislukt",
+      "errOAuthInvalidUrl": "De OAuth-provider heeft een ongeldige autorisatie-URL teruggestuurd",
       "errSaveToken": "Het opslaan van het toegangstoken is mislukt",
       "errDisconnect": "De verbinding kon niet worden verbroken",
       "labelClientId": "Klant-ID",
