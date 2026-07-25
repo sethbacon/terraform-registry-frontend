@@ -1,4 +1,4 @@
-import { http } from './http'
+import { http, encodeSegment } from './http'
 
 // ============================================================================
 // Development-Only Endpoints (disabled in production)
@@ -40,6 +40,6 @@ export async function impersonateUser(userId: string): Promise<{
   }
   message: string
 }> {
-  const response = await http.post(`/api/v1/dev/impersonate/${userId}`)
+  const response = await http.post(`/api/v1/dev/impersonate/${encodeSegment(userId)}`)
   return response.data
 }

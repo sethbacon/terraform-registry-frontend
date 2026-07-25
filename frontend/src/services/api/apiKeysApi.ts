@@ -1,7 +1,7 @@
 /**
  * API Keys domain API — key listing, CRUD, and rotation.
  */
-import { http } from './http'
+import { http, encodeSegment } from './http'
 import type { APIKey, RotateAPIKeyResponse } from '../../types'
 
 /**
@@ -58,7 +58,7 @@ export async function createAPIKey(data: {
 }
 
 export async function getAPIKey(id: string) {
-  const response = await http.get(`/api/v1/apikeys/${id}`)
+  const response = await http.get(`/api/v1/apikeys/${encodeSegment(id)}`)
   return response.data
 }
 
@@ -66,12 +66,12 @@ export async function updateAPIKey(
   id: string,
   data: { name?: string; scopes?: string[]; expires_at?: string },
 ) {
-  const response = await http.put(`/api/v1/apikeys/${id}`, data)
+  const response = await http.put(`/api/v1/apikeys/${encodeSegment(id)}`, data)
   return response.data
 }
 
 export async function deleteAPIKey(id: string): Promise<{ message: string }> {
-  const response = await http.delete<{ message: string }>(`/api/v1/apikeys/${id}`)
+  const response = await http.delete<{ message: string }>(`/api/v1/apikeys/${encodeSegment(id)}`)
   return response.data
 }
 
@@ -79,7 +79,7 @@ export async function rotateAPIKey(
   id: string,
   gracePeriodHours: number = 0,
 ): Promise<RotateAPIKeyResponse> {
-  const response = await http.post<RotateAPIKeyResponse>(`/api/v1/apikeys/${id}/rotate`, {
+  const response = await http.post<RotateAPIKeyResponse>(`/api/v1/apikeys/${encodeSegment(id)}/rotate`, {
     grace_period_hours: gracePeriodHours,
   })
   return response.data

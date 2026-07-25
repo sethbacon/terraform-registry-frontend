@@ -1,4 +1,4 @@
-import { http } from './http'
+import { http, encodeSegment } from './http'
 import type {
   MigrationPlan,
   StorageConfigInput,
@@ -21,7 +21,7 @@ export async function listStorageConfigs(): Promise<StorageConfigResponse[]> {
 }
 
 export async function getStorageConfig(id: string): Promise<StorageConfigResponse> {
-  const response = await http.get(`/api/v1/storage/configs/${id}`)
+  const response = await http.get(`/api/v1/storage/configs/${encodeSegment(id)}`)
   return response.data
 }
 
@@ -36,18 +36,18 @@ export async function updateStorageConfig(
   id: string,
   data: StorageConfigInput,
 ): Promise<StorageConfigResponse> {
-  const response = await http.put(`/api/v1/storage/configs/${id}`, data)
+  const response = await http.put(`/api/v1/storage/configs/${encodeSegment(id)}`, data)
   return response.data
 }
 
 export async function deleteStorageConfig(id: string): Promise<void> {
-  await http.delete(`/api/v1/storage/configs/${id}`)
+  await http.delete(`/api/v1/storage/configs/${encodeSegment(id)}`)
 }
 
 export async function activateStorageConfig(
   id: string,
 ): Promise<{ message: string; config: StorageConfigResponse }> {
-  const response = await http.post(`/api/v1/storage/configs/${id}/activate`)
+  const response = await http.post(`/api/v1/storage/configs/${encodeSegment(id)}/activate`)
   return response.data
 }
 
@@ -85,12 +85,12 @@ export async function startStorageMigration(
 }
 
 export async function getStorageMigration(id: string): Promise<StorageMigration> {
-  const response = await http.get(`/api/v1/admin/storage/migrations/${id}`)
+  const response = await http.get(`/api/v1/admin/storage/migrations/${encodeSegment(id)}`)
   return response.data
 }
 
 export async function cancelStorageMigration(id: string): Promise<StorageMigration> {
-  const response = await http.post(`/api/v1/admin/storage/migrations/${id}/cancel`)
+  const response = await http.post(`/api/v1/admin/storage/migrations/${encodeSegment(id)}/cancel`)
   return response.data
 }
 

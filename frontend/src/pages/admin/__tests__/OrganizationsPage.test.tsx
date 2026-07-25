@@ -36,7 +36,12 @@ vi.mock('../../../contexts/AuthContext', () => ({
   useAuth: () => ({ allowedScopes: mockAllowedScopes, user: { id: 'u1' } }),
 }))
 
+vi.mock('../../../services/errorReporting', () => ({
+  captureError: vi.fn(),
+}))
+
 import OrganizationsPage from '../OrganizationsPage'
+import { captureError } from '../../../services/errorReporting'
 
 function createQueryClient() {
   return new QueryClient({
@@ -534,5 +539,21 @@ describe('OrganizationsPage', () => {
     )
     expect(updateOrganizationMock).not.toHaveBeenCalled()
     expect(createOrganizationMock).not.toHaveBeenCalled()
+  })
+
+  // Regression guard (#623): a failed members load only reset local state via
+  // console.error before this fix -- it must also reach the app's telemetry pipeline.
+  it('reports a failed members load to telemetry', async () => {
+    listOrganizationsMock.mockResolvedValue(fakeOrgs)
+    const loadError = new Error('members load failed')
+    listOrganizationMembersMock.mockRejectedValue(loadError)
+    listRoleTemplatesMock.mockResolvedValue([])
+    renderPage()
+    await waitFor(() => expect(screen.getByText('acme-corp')).toBeInTheDocument())
+    const membersBtns = screen.getAllByRole('button', { name: /view members/i })
+    await userEvent.click(membersBtns[0])
+    await waitFor(() =>
+      expect(captureError).toHaveBeenCalledWith(loadError, { context: 'Failed to load members' }),
+    )
   })
 })

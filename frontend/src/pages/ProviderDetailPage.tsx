@@ -42,6 +42,7 @@ import Add from '@mui/icons-material/Add'
 import GitHub from '@mui/icons-material/GitHub'
 import api from '../services/api'
 import { getErrorMessage } from '../utils/errors'
+import { captureError } from '../services/errorReporting'
 import { Provider, ProviderVersion, ProviderDocEntry } from '../types'
 import { useAuth } from '../contexts/AuthContext'
 import { REGISTRY_HOST } from '../config'
@@ -140,6 +141,11 @@ const ProviderDetailPage: React.FC = () => {
       }
     } catch (err) {
       console.error('Failed to load provider details:', err)
+      // setError() here uses a plain hardcoded string, not getErrorMessage(), so
+      // it doesn't get telemetry reporting for free -- report explicitly (#623).
+      captureError(err instanceof Error ? err : new Error(String(err)), {
+        context: 'Failed to load provider details',
+      })
       setError('Failed to load provider details. Please try again.')
     } finally {
       setLoading(false)

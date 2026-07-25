@@ -1,4 +1,4 @@
-import { http } from './http'
+import { http, encodeSegment } from './http'
 import type { AuditLog, AuditLogListResponse } from '../../types'
 
 // ============================================================================
@@ -22,7 +22,7 @@ export async function listAuditLogs(opts?: {
 }
 
 export async function getAuditLog(id: string): Promise<AuditLog> {
-  const response = await http.get<AuditLog>(`/api/v1/admin/audit-logs/${id}`)
+  const response = await http.get<AuditLog>(`/api/v1/admin/audit-logs/${encodeSegment(id)}`)
   return response.data
 }
 

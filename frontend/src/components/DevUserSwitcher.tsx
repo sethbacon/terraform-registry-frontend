@@ -14,6 +14,7 @@ import {
 import SyncAlt from '@mui/icons-material/SyncAlt'
 import { useAuth } from '../contexts/AuthContext'
 import apiClient from '../services/api'
+import { captureError } from '../services/errorReporting'
 
 interface DevUser {
   id: string
@@ -64,6 +65,12 @@ const DevUserSwitcher = () => {
       window.location.reload()
     } catch (error) {
       console.error('Failed to impersonate user:', error)
+      // This catch has no getErrorMessage() call to piggyback telemetry on, so
+      // report it directly -- otherwise a real impersonation failure is only
+      // visible in the console, never in the error-reporting pipeline (#623).
+      captureError(error instanceof Error ? error : new Error(String(error)), {
+        context: 'Failed to impersonate user',
+      })
     } finally {
       setSwitching(false)
     }

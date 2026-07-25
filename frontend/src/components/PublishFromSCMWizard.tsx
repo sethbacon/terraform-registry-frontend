@@ -25,6 +25,7 @@ import {
 } from '@mui/material'
 import api from '../services/api'
 import { getErrorMessage } from '../utils/errors'
+import { captureError } from '../services/errorReporting'
 import RepositoryBrowser from './RepositoryBrowser'
 import type { SCMProvider, SCMRepository, SCMTag } from '../types/scm'
 
@@ -78,6 +79,11 @@ const PublishFromSCMWizard: React.FC<PublishFromSCMWizardProps> = ({
     } catch (err: unknown) {
       setError(t('scmWizard.loadProvidersError'))
       console.error('Error loading providers:', err)
+      // setError() here uses a plain i18n string, not getErrorMessage(), so it
+      // doesn't get telemetry reporting for free -- report explicitly (#623).
+      captureError(err instanceof Error ? err : new Error(String(err)), {
+        context: 'Error loading providers',
+      })
     } finally {
       setLoading(false)
     }

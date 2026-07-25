@@ -1,4 +1,4 @@
-import { http } from './http'
+import { http, encodeSegment } from './http'
 import type {
   NotificationChannel,
   NotificationChannelInput,
@@ -51,15 +51,15 @@ export async function updateNotificationChannel(
   id: string,
   data: NotificationChannelInput,
 ): Promise<NotificationChannel> {
-  const response = await http.put(`/api/v1/admin/notifications/channels/${id}`, data)
+  const response = await http.put(`/api/v1/admin/notifications/channels/${encodeSegment(id)}`, data)
   return response.data
 }
 
 export async function deleteNotificationChannel(id: string): Promise<void> {
-  await http.delete(`/api/v1/admin/notifications/channels/${id}`)
+  await http.delete(`/api/v1/admin/notifications/channels/${encodeSegment(id)}`)
 }
 
 export async function testNotificationChannel(id: string): Promise<{ status: string }> {
-  const response = await http.post(`/api/v1/admin/notifications/channels/${id}/test`)
+  const response = await http.post(`/api/v1/admin/notifications/channels/${encodeSegment(id)}/test`)
   return response.data
 }

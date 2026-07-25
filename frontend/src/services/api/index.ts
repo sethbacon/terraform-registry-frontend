@@ -32,6 +32,7 @@ import * as scanningApi from './scanningApi'
 import * as scmApi from './scmApi'
 import * as setupApi from './setupApi'
 import * as storageApi from './storageApi'
+import * as suiteApi from './suiteApi'
 import * as terraformMirrorApi from './terraformMirrorApi'
 import * as themeApi from './themeApi'
 import * as usersApi from './usersApi'
@@ -57,6 +58,7 @@ export const apiDomains = {
   scmApi,
   setupApi,
   storageApi,
+  suiteApi,
   terraformMirrorApi,
   themeApi,
   usersApi,
@@ -82,6 +84,7 @@ const apiClient = {
   ...scmApi,
   ...setupApi,
   ...storageApi,
+  ...suiteApi,
   ...terraformMirrorApi,
   ...themeApi,
   ...usersApi,
@@ -90,5 +93,6 @@ const apiClient = {
 }
 
 export type { ModuleConsumer } from './modulesApi'
+export type { SuiteSibling } from './suiteApi'
 
 export default apiClient

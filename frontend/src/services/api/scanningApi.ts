@@ -1,4 +1,4 @@
-import { http } from './http'
+import { http, encodeSegment } from './http'
 import type {
   ModuleScan,
   ScannerAutoUpdateInput,
@@ -17,7 +17,7 @@ export async function getModuleScan(
   version: string,
 ): Promise<ModuleScan> {
   const response = await http.get(
-    `/api/v1/modules/${namespace}/${name}/${system}/versions/${version}/scan`,
+    `/api/v1/modules/${encodeSegment(namespace)}/${encodeSegment(name)}/${encodeSegment(system)}/versions/${encodeSegment(version)}/scan`,
   )
   return response.data
 }
@@ -37,7 +37,7 @@ export async function getScanningStats(params?: {
 }
 
 export async function getScanByID(scanID: string): Promise<ModuleScan> {
-  const response = await http.get(`/api/v1/admin/scanning/scans/${scanID}`)
+  const response = await http.get(`/api/v1/admin/scanning/scans/${encodeSegment(scanID)}`)
   return response.data
 }
 

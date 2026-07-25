@@ -1,5 +1,6 @@
 import axios, { AxiosError } from 'axios'
 import i18n from '../i18n'
+import { captureError } from '../services/errorReporting'
 
 /** Longest backend-supplied error string we are willing to render verbatim. */
 const MAX_SERVER_MESSAGE_LENGTH = 300
@@ -55,8 +56,16 @@ export function isCanceledError(err: unknown): boolean {
  * Extracts a human-readable error message from an unknown catch-block value.
  * Handles Axios errors (with nested response.data.error), native Errors, and
  * arbitrary thrown values.
+ *
+ * As a side effect, reports the caught error to the app's error-telemetry
+ * pipeline (captureError), tagged with the caller-supplied fallback message
+ * as context, so handled API/UI failures get the same production visibility
+ * as uncaught errors instead of only setting local component state (#619).
  */
 export function getErrorMessage(err: unknown, fallback = 'An unexpected error occurred'): string {
+  captureError(err instanceof Error ? err : new Error(typeof err === 'string' ? err : fallback), {
+    context: fallback,
+  })
   if (err instanceof AxiosError) {
     // A request that hit the client-side timeout has no response either, but is a
     // distinct, more actionable condition than "can't reach the server at all" --

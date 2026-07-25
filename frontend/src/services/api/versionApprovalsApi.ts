@@ -1,4 +1,4 @@
-import { http } from './http'
+import { http, encodeSegment } from './http'
 import type {
   VersionApprovalBulkResponse,
   VersionApprovalEvent,
@@ -29,11 +29,11 @@ export async function listVersionApprovals(params?: {
 }
 
 export async function approveVersion(id: string, data?: { notes?: string }): Promise<void> {
-  await http.put(`/api/v1/admin/version-approvals/${id}/approve`, data ?? {})
+  await http.put(`/api/v1/admin/version-approvals/${encodeSegment(id)}/approve`, data ?? {})
 }
 
 export async function rejectVersion(id: string, data?: { notes?: string }): Promise<void> {
-  await http.put(`/api/v1/admin/version-approvals/${id}/reject`, data ?? {})
+  await http.put(`/api/v1/admin/version-approvals/${encodeSegment(id)}/reject`, data ?? {})
 }
 
 export async function bulkApproveVersions(
@@ -60,7 +60,7 @@ export async function bulkRejectVersions(
 
 export async function getVersionApprovalEvents(id: string): Promise<VersionApprovalEvent[]> {
   const response = await http.get<VersionApprovalEvent[]>(
-    `/api/v1/admin/version-approvals/${id}/events`,
+    `/api/v1/admin/version-approvals/${encodeSegment(id)}/events`,
   )
   return Array.isArray(response.data) ? response.data : []
 }

@@ -1,4 +1,4 @@
-import { render, screen, waitFor, fireEvent } from '@testing-library/react'
+import { render, screen, waitFor, fireEvent, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { MemoryRouter } from 'react-router-dom'
@@ -49,7 +49,12 @@ vi.mock('../../../contexts/AuthContext', () => ({
   useAuth: () => useAuthMock(),
 }))
 
+vi.mock('../../../services/errorReporting', () => ({
+  captureError: vi.fn(),
+}))
+
 import UsersPage from '../../admin/UsersPage'
+import { captureError } from '../../../services/errorReporting'
 
 // ---- Helpers ----
 
@@ -348,6 +353,72 @@ describe('UsersPage', () => {
     fireEvent.change(nameInputs[0], { target: { value: 'X' } })
     await userEvent.click(screen.getByRole('button', { name: /^create$/i }))
     await waitFor(() => expect(screen.getByText(/boom/)).toBeInTheDocument())
+  })
+
+  // Regression guards (#623): these catch blocks only logged via console.error
+  // before this fix -- they must also reach the app's telemetry pipeline.
+  it('reports a failed organizations load to telemetry', async () => {
+    listUsersMock.mockResolvedValue(fakeUsersResponse)
+    getUserMembershipsMock.mockResolvedValue([])
+    const loadError = new Error('organizations load failed')
+    listOrganizationsMock.mockRejectedValue(loadError)
+    listRoleTemplatesMock.mockResolvedValue(fakeRoleTemplates)
+    renderPage()
+    await waitFor(() => expect(screen.getByText('Alice Smith')).toBeInTheDocument())
+    await userEvent.click(screen.getByRole('button', { name: /add user/i }))
+    await waitFor(() =>
+      expect(captureError).toHaveBeenCalledWith(loadError, {
+        context: 'Failed to load organizations',
+      }),
+    )
+  })
+
+  it('reports a failed role templates load to telemetry', async () => {
+    listUsersMock.mockResolvedValue(fakeUsersResponse)
+    getUserMembershipsMock.mockResolvedValue([])
+    listOrganizationsMock.mockResolvedValue(fakeOrganizations)
+    const loadError = new Error('role templates load failed')
+    listRoleTemplatesMock.mockRejectedValue(loadError)
+    renderPage()
+    await waitFor(() => expect(screen.getByText('Alice Smith')).toBeInTheDocument())
+    await userEvent.click(screen.getByRole('button', { name: /add user/i }))
+    await waitFor(() =>
+      expect(captureError).toHaveBeenCalledWith(loadError, {
+        context: 'Failed to load role templates',
+      }),
+    )
+  })
+
+  it('reports a failed "add user to organization" to telemetry', async () => {
+    listUsersMock.mockResolvedValue(fakeUsersResponse)
+    getUserMembershipsMock.mockResolvedValue([])
+    listOrganizationsMock.mockResolvedValue(fakeOrganizations)
+    listRoleTemplatesMock.mockResolvedValue(fakeRoleTemplates)
+    createUserMock.mockResolvedValue({ id: 'u-new', email: 'c@example.com', name: 'Carol' })
+    const addMemberError = new Error('add member failed')
+    addOrganizationMemberMock.mockRejectedValue(addMemberError)
+    renderPage()
+    await waitFor(() => expect(screen.getByText('Alice Smith')).toBeInTheDocument())
+    await userEvent.click(screen.getByRole('button', { name: /add user/i }))
+    await waitFor(() => expect(screen.getByRole('dialog')).toBeInTheDocument())
+    const dialog = screen.getByRole('dialog')
+    const emailInput = dialog.querySelector('input[type="email"]') as HTMLInputElement
+    const nameInputs = dialog.querySelectorAll('input[type="text"]')
+    fireEvent.change(emailInput, { target: { value: 'c@example.com' } })
+    fireEvent.change(nameInputs[0], { target: { value: 'Carol' } })
+
+    // Select an organization so the create mutation also calls addOrganizationMember.
+    const orgCombobox = within(dialog).getAllByRole('combobox')[0]
+    fireEvent.mouseDown(orgCombobox)
+    const listbox = await screen.findByRole('listbox')
+    fireEvent.click(within(listbox).getByText('Acme'))
+
+    await userEvent.click(screen.getByRole('button', { name: /^create$/i }))
+    await waitFor(() =>
+      expect(captureError).toHaveBeenCalledWith(addMemberError, {
+        context: 'Failed to add user to organization',
+      }),
+    )
   })
 
   it('changes rows per page in pagination', async () => {

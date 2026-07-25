@@ -215,6 +215,28 @@ describe('SCMProvidersPage', () => {
     await waitFor(() => expect(initiateSCMOAuthMock).toHaveBeenCalledWith('scm-1'))
   })
 
+  // Regression guard (#559): authorization_url comes from the backend; it must be
+  // validated at the app boundary before this full-page redirect navigation sink,
+  // instead of trusting it verbatim (unvalidated redirect).
+  it('refuses to redirect when the OAuth authorization URL is unsafe', async () => {
+    listSCMProvidersMock.mockResolvedValue(fakeProviders)
+    initiateSCMOAuthMock.mockResolvedValue({ authorization_url: '//evil.com/steal-session' })
+    const originalLocation = window.location
+    Object.defineProperty(window, 'location', {
+      value: { ...originalLocation, href: '' },
+      writable: true,
+      configurable: true,
+    })
+    renderPage()
+    await waitFor(() => expect(screen.getByText('GitHub Enterprise')).toBeInTheDocument())
+    await userEvent.click(screen.getByRole('button', { name: /connect scm provider/i }))
+    await waitFor(() => expect(initiateSCMOAuthMock).toHaveBeenCalledWith('scm-1'))
+    expect(window.location.href).toBe('')
+    expect(
+      screen.getByText('The OAuth provider returned an invalid authorization URL'),
+    ).toBeInTheDocument()
+  })
+
   it('opens PAT dialog for Bitbucket Data Center provider', async () => {
     const bbProvider = [
       { ...fakeProviders[0], provider_type: 'bitbucket_dc' as const, name: 'BB DC' },

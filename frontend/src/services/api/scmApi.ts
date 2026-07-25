@@ -1,4 +1,4 @@
-import { http } from './http'
+import { http, encodeSegment } from './http'
 import type {
   ModuleSCMLink,
   SCMBranch,
@@ -34,7 +34,7 @@ export async function createSCMProvider(data: {
 }
 
 export async function getSCMProvider(id: string): Promise<SCMProvider> {
-  const response = await http.get(`/api/v1/scm-providers/${id}`)
+  const response = await http.get(`/api/v1/scm-providers/${encodeSegment(id)}`)
   return response.data
 }
 
@@ -54,12 +54,12 @@ export async function updateSCMProvider(
     app_private_key?: string
   },
 ): Promise<SCMProvider> {
-  const response = await http.put(`/api/v1/scm-providers/${id}`, data)
+  const response = await http.put(`/api/v1/scm-providers/${encodeSegment(id)}`, data)
   return response.data
 }
 
 export async function deleteSCMProvider(id: string): Promise<{ message: string }> {
-  const response = await http.delete(`/api/v1/scm-providers/${id}`)
+  const response = await http.delete(`/api/v1/scm-providers/${encodeSegment(id)}`)
   return response.data
 }
 
@@ -67,20 +67,20 @@ export async function deleteSCMProvider(id: string): Promise<{ message: string }
 export async function verifySCMProvider(
   providerId: string,
 ): Promise<{ ok: boolean; expires_at?: string | null }> {
-  const response = await http.post(`/api/v1/scm-providers/${providerId}/verify`)
+  const response = await http.post(`/api/v1/scm-providers/${encodeSegment(providerId)}/verify`)
   return response.data
 }
 
 // SCM OAuth
 export async function initiateSCMOAuth(providerId: string) {
-  const response = await http.get(`/api/v1/scm-providers/${providerId}/oauth/authorize`)
+  const response = await http.get(`/api/v1/scm-providers/${encodeSegment(providerId)}/oauth/authorize`)
   return response.data
 }
 
 export async function refreshSCMToken(
   providerId: string,
 ): Promise<{ message: string; expires_at?: string }> {
-  const response = await http.post(`/api/v1/scm-providers/${providerId}/oauth/refresh`)
+  const response = await http.post(`/api/v1/scm-providers/${encodeSegment(providerId)}/oauth/refresh`)
   return response.data
 }
 
@@ -90,7 +90,7 @@ export async function getSCMTokenStatus(providerId: string): Promise<{
   expires_at?: string | null
   token_type?: string
 }> {
-  const response = await http.get(`/api/v1/scm-providers/${providerId}/oauth/token`)
+  const response = await http.get(`/api/v1/scm-providers/${encodeSegment(providerId)}/oauth/token`)
   return response.data
 }
 
@@ -99,7 +99,7 @@ export async function listSCMRepositories(
   search?: string,
 ): Promise<{ repositories: SCMRepository[] | null }> {
   const params = search ? { search } : {}
-  const response = await http.get(`/api/v1/scm-providers/${providerId}/repositories`, {
+  const response = await http.get(`/api/v1/scm-providers/${encodeSegment(providerId)}/repositories`, {
     params,
   })
   return response.data
@@ -111,7 +111,7 @@ export async function listSCMRepositoryTags(
   repo: string,
 ): Promise<{ tags: SCMTag[] | null }> {
   const response = await http.get<{ tags: SCMTag[] | null }>(
-    `/api/v1/scm-providers/${providerId}/repositories/${owner}/${repo}/tags`,
+    `/api/v1/scm-providers/${encodeSegment(providerId)}/repositories/${encodeSegment(owner)}/${encodeSegment(repo)}/tags`,
   )
   return response.data
 }
@@ -122,13 +122,13 @@ export async function listSCMRepositoryBranches(
   repo: string,
 ): Promise<{ branches: SCMBranch[] | null }> {
   const response = await http.get<{ branches: SCMBranch[] | null }>(
-    `/api/v1/scm-providers/${providerId}/repositories/${owner}/${repo}/branches`,
+    `/api/v1/scm-providers/${encodeSegment(providerId)}/repositories/${encodeSegment(owner)}/${encodeSegment(repo)}/branches`,
   )
   return response.data
 }
 
 export async function revokeSCMToken(providerId: string): Promise<{ message: string }> {
-  const response = await http.delete(`/api/v1/scm-providers/${providerId}/oauth/token`)
+  const response = await http.delete(`/api/v1/scm-providers/${encodeSegment(providerId)}/oauth/token`)
   return response.data
 }
 
@@ -136,7 +136,7 @@ export async function saveSCMToken(
   providerId: string,
   accessToken: string,
 ): Promise<{ message: string }> {
-  const response = await http.post(`/api/v1/scm-providers/${providerId}/token`, {
+  const response = await http.post(`/api/v1/scm-providers/${encodeSegment(providerId)}/token`, {
     access_token: accessToken,
   })
   return response.data
@@ -161,12 +161,12 @@ export async function linkModuleToSCM(
   webhook_registered: boolean
   note: string
 }> {
-  const response = await http.post(`/api/v1/admin/modules/${moduleId}/scm`, data)
+  const response = await http.post(`/api/v1/admin/modules/${encodeSegment(moduleId)}/scm`, data)
   return response.data
 }
 
 export async function getModuleSCMInfo(moduleId: string): Promise<ModuleSCMLink> {
-  const response = await http.get<ModuleSCMLink>(`/api/v1/admin/modules/${moduleId}/scm`)
+  const response = await http.get<ModuleSCMLink>(`/api/v1/admin/modules/${encodeSegment(moduleId)}/scm`)
   return response.data
 }
 
@@ -179,12 +179,12 @@ export async function updateModuleSCMLink(
     tag_pattern?: string
   },
 ): Promise<{ message: string }> {
-  const response = await http.put(`/api/v1/admin/modules/${moduleId}/scm`, data)
+  const response = await http.put(`/api/v1/admin/modules/${encodeSegment(moduleId)}/scm`, data)
   return response.data
 }
 
 export async function unlinkModuleFromSCM(moduleId: string): Promise<{ message: string }> {
-  const response = await http.delete(`/api/v1/admin/modules/${moduleId}/scm`)
+  const response = await http.delete(`/api/v1/admin/modules/${encodeSegment(moduleId)}/scm`)
   return response.data
 }
 
@@ -192,13 +192,13 @@ export async function triggerManualSync(
   moduleId: string,
   data?: { tag_name?: string; commit_sha?: string },
 ): Promise<{ message: string }> {
-  const response = await http.post(`/api/v1/admin/modules/${moduleId}/scm/sync`, data || {})
+  const response = await http.post(`/api/v1/admin/modules/${encodeSegment(moduleId)}/scm/sync`, data || {})
   return response.data
 }
 
 export async function getWebhookEvents(moduleId: string): Promise<SCMWebhookEvent[]> {
   const response = await http.get<{ events?: SCMWebhookEvent[] }>(
-    `/api/v1/admin/modules/${moduleId}/scm/events`,
+    `/api/v1/admin/modules/${encodeSegment(moduleId)}/scm/events`,
   )
   // Backend wraps the list as { events: [...] }; callers expect a bare array.
   return response.data?.events ?? []

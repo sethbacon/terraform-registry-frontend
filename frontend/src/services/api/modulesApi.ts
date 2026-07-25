@@ -1,4 +1,4 @@
-import { http } from './http'
+import { http, encodeSegment } from './http'
 import type { Module, ModuleVersion, ModuleDoc } from '../../types'
 
 /**
@@ -64,7 +64,7 @@ export async function getModuleVersions(
   system: string,
 ): Promise<ModuleVersionsResponse> {
   const response = await http.get<ModuleVersionsResponse>(
-    `/v1/modules/${namespace}/${name}/${system}/versions`,
+    `/v1/modules/${encodeSegment(namespace)}/${encodeSegment(name)}/${encodeSegment(system)}/versions`,
   )
   return response.data
 }
@@ -107,7 +107,7 @@ export async function uploadModule(
 }
 
 export async function getModule(namespace: string, name: string, system: string): Promise<Module> {
-  const response = await http.get<Module>(`/api/v1/modules/${namespace}/${name}/${system}`)
+  const response = await http.get<Module>(`/api/v1/modules/${encodeSegment(namespace)}/${encodeSegment(name)}/${encodeSegment(system)}`)
   return response.data
 }
 
@@ -117,7 +117,7 @@ export async function deleteModule(
   system: string,
 ): Promise<{ message: string }> {
   const response = await http.delete<{ message: string }>(
-    `/api/v1/modules/${namespace}/${name}/${system}`,
+    `/api/v1/modules/${encodeSegment(namespace)}/${encodeSegment(name)}/${encodeSegment(system)}`,
   )
   return response.data
 }
@@ -129,7 +129,7 @@ export async function deleteModuleVersion(
   version: string,
 ): Promise<{ message: string }> {
   const response = await http.delete<{ message: string }>(
-    `/api/v1/modules/${namespace}/${name}/${system}/versions/${version}`,
+    `/api/v1/modules/${encodeSegment(namespace)}/${encodeSegment(name)}/${encodeSegment(system)}/versions/${encodeSegment(version)}`,
   )
   return response.data
 }
@@ -141,7 +141,7 @@ export async function reanalyzeModuleVersion(
   version: string,
 ): Promise<{ message: string; docs?: string; scan?: string }> {
   const response = await http.post<{ message: string; docs?: string; scan?: string }>(
-    `/api/v1/modules/${namespace}/${name}/${system}/versions/${version}/reanalyze`,
+    `/api/v1/modules/${encodeSegment(namespace)}/${encodeSegment(name)}/${encodeSegment(system)}/versions/${encodeSegment(version)}/reanalyze`,
   )
   return response.data
 }
@@ -158,7 +158,7 @@ export async function deprecateModuleVersion(
   if (message) body.message = message
   if (replacementSource) body.replacement_source = replacementSource
   const response = await http.post<{ message: string }>(
-    `/api/v1/modules/${namespace}/${name}/${system}/versions/${version}/deprecate`,
+    `/api/v1/modules/${encodeSegment(namespace)}/${encodeSegment(name)}/${encodeSegment(system)}/versions/${encodeSegment(version)}/deprecate`,
     body,
   )
   return response.data
@@ -171,7 +171,7 @@ export async function undeprecateModuleVersion(
   version: string,
 ): Promise<{ message: string }> {
   const response = await http.delete<{ message: string }>(
-    `/api/v1/modules/${namespace}/${name}/${system}/versions/${version}/deprecate`,
+    `/api/v1/modules/${encodeSegment(namespace)}/${encodeSegment(name)}/${encodeSegment(system)}/versions/${encodeSegment(version)}/deprecate`,
   )
   return response.data
 }
@@ -183,7 +183,7 @@ export async function deprecateModule(
   data: { message: string; successor_module_id?: string },
 ): Promise<{ message: string }> {
   const response = await http.post<{ message: string }>(
-    `/api/v1/modules/${namespace}/${name}/${system}/deprecate`,
+    `/api/v1/modules/${encodeSegment(namespace)}/${encodeSegment(name)}/${encodeSegment(system)}/deprecate`,
     data,
   )
   return response.data
@@ -195,7 +195,7 @@ export async function undeprecateModule(
   system: string,
 ): Promise<{ message: string }> {
   const response = await http.delete<{ message: string }>(
-    `/api/v1/modules/${namespace}/${name}/${system}/deprecate`,
+    `/api/v1/modules/${encodeSegment(namespace)}/${encodeSegment(name)}/${encodeSegment(system)}/deprecate`,
   )
   return response.data
 }
@@ -209,7 +209,7 @@ export async function getModuleConsumers(
   // token is configured, else returns an empty list. Backend wraps the list
   // as { consumers: [...] }; callers expect a bare array.
   const response = await http.get<{ consumers?: ModuleConsumer[] }>(
-    `/api/v1/suite/modules/${namespace}/${name}/${system}/consumers`,
+    `/api/v1/suite/modules/${encodeSegment(namespace)}/${encodeSegment(name)}/${encodeSegment(system)}/consumers`,
   )
   return response.data?.consumers ?? []
 }
@@ -218,7 +218,7 @@ export async function updateModule(
   id: string,
   data: { description?: string; source?: string; namespace?: string },
 ): Promise<Module> {
-  const response = await http.put<Module>(`/api/v1/admin/modules/${id}`, data)
+  const response = await http.put<Module>(`/api/v1/admin/modules/${encodeSegment(id)}`, data)
   return response.data
 }
 
@@ -229,7 +229,7 @@ export async function getModuleDocs(
   version: string,
 ): Promise<ModuleDoc> {
   const response = await http.get<ModuleDoc>(
-    `/api/v1/modules/${namespace}/${name}/${system}/versions/${version}/docs`,
+    `/api/v1/modules/${encodeSegment(namespace)}/${encodeSegment(name)}/${encodeSegment(system)}/versions/${encodeSegment(version)}/docs`,
   )
   return response.data
 }

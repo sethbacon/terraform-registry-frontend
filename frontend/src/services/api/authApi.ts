@@ -1,4 +1,4 @@
-import { http, API_BASE_URL } from './http'
+import { http, API_BASE_URL, encodeSegment } from './http'
 import type { User, RoleTemplateInfo } from '../../types'
 
 // Authentication
@@ -15,7 +15,7 @@ export async function getAuthProviders(): Promise<{
 }
 
 export async function login(provider: string) {
-  window.location.href = `${API_BASE_URL}/api/v1/auth/login?provider=${provider}`
+  window.location.href = `${API_BASE_URL}/api/v1/auth/login?provider=${encodeSegment(provider)}`
 }
 
 /**

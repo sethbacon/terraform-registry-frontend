@@ -1,7 +1,7 @@
 /**
  * Organizations domain API — organization CRUD, search, and member management.
  */
-import { http } from './http'
+import { http, encodeSegment } from './http'
 import { sanitizeServerErrorMessage } from '../../utils/errors'
 import type { Organization, OrganizationMemberWithUser } from '../../types'
 
@@ -51,7 +51,7 @@ export async function searchOrganizations(
 
 export async function getOrganization(id: string): Promise<Organization> {
   const response = await http.get<{ organization: Record<string, unknown> }>(
-    `/api/v1/organizations/${id}`,
+    `/api/v1/organizations/${encodeSegment(id)}`,
   )
   return transformOrganization(response.data.organization)
 }
@@ -91,14 +91,14 @@ export async function updateOrganization(
   },
 ): Promise<Organization> {
   const response = await http.put<{ organization: Record<string, unknown> }>(
-    `/api/v1/organizations/${id}`,
+    `/api/v1/organizations/${encodeSegment(id)}`,
     data,
   )
   return transformOrganization(response.data.organization)
 }
 
 export async function deleteOrganization(id: string): Promise<{ message: string }> {
-  const response = await http.delete<{ message: string }>(`/api/v1/organizations/${id}`)
+  const response = await http.delete<{ message: string }>(`/api/v1/organizations/${encodeSegment(id)}`)
   return response.data
 }
 
@@ -106,7 +106,7 @@ export async function addOrganizationMember(
   orgId: string,
   data: { user_id: string; role_template_id?: string },
 ) {
-  const response = await http.post(`/api/v1/organizations/${orgId}/members`, data)
+  const response = await http.post(`/api/v1/organizations/${encodeSegment(orgId)}/members`, data)
   return response.data
 }
 
@@ -115,7 +115,7 @@ export async function updateOrganizationMember(
   userId: string,
   data: { role_template_id?: string },
 ) {
-  const response = await http.put(`/api/v1/organizations/${orgId}/members/${userId}`, data)
+  const response = await http.put(`/api/v1/organizations/${encodeSegment(orgId)}/members/${encodeSegment(userId)}`, data)
   return response.data
 }
 
@@ -124,7 +124,7 @@ export async function removeOrganizationMember(
   userId: string,
 ): Promise<{ message: string }> {
   const response = await http.delete<{ message: string }>(
-    `/api/v1/organizations/${orgId}/members/${userId}`,
+    `/api/v1/organizations/${encodeSegment(orgId)}/members/${encodeSegment(userId)}`,
   )
   return response.data
 }
@@ -133,7 +133,7 @@ export async function listOrganizationMembers(
   orgId: string,
 ): Promise<OrganizationMemberWithUser[]> {
   const response = await http.get<{ members?: OrganizationMemberWithUser[] }>(
-    `/api/v1/organizations/${orgId}/members`,
+    `/api/v1/organizations/${encodeSegment(orgId)}/members`,
   )
   return response.data.members || []
 }
