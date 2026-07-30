@@ -121,9 +121,9 @@ App
 
 **State management**: React Query (`@tanstack/react-query`) for all server state; React Context for app-level concerns (auth, theme, help panel); local `useState` for UI-only state.
 
-**Data fetching**: API calls go through `services/api.ts` (Axios). Query cache keys are defined in `services/queryKeys.ts` using a factory pattern. Mutations invalidate related queries via `queryClient.invalidateQueries()`.
+**Data fetching**: API calls go through `services/api/` (a composed barrel over per-domain modules sharing one Axios instance in `services/api/http.ts`). Query cache keys are defined in `services/queryKeys.ts` using a factory pattern. Mutations invalidate related queries via `queryClient.invalidateQueries()`.
 
-**Authentication**: Sessions are cookie-only. The backend sets an HttpOnly auth cookie; the Axios client sends it on every request via `withCredentials: true`, and `AuthContext` detects the session by calling `/api/v1/auth/me`. Mutating requests are protected by a CSRF double-submit: the non-HttpOnly `tfr_csrf` cookie is echoed in an `X-CSRF-Token` header. A 401 clears local session state and redirects to `/login`. (A legacy `localStorage` Bearer token is still honoured as a backward-compatible migration fallback and will be removed once all sessions use cookies.)
+**Authentication**: Sessions are cookie-only. The backend sets an HttpOnly auth cookie; the Axios client sends it on every request via `withCredentials: true`, and `AuthContext` detects the session by calling `/api/v1/auth/me`. Mutating requests are protected by a CSRF double-submit: the non-HttpOnly `tfr_csrf` cookie is echoed in an `X-CSRF-Token` header. A 401 clears local session state and redirects to `/login`. (The migration off of `localStorage` Bearer tokens is complete; `authStorage.ts` retains the pre-migration key list solely to purge leftover values from sessions predating the cookie-only auth model.)
 
 **Security posture (CSP nonce)**: When served through nginx, a per-request CSP nonce is derived from `$request_id` and injected into `index.html` (the `__CSP_NONCE__` placeholder), so the `Content-Security-Policy` `style-src` can use `'nonce-…'` instead of `'unsafe-inline'`. The Emotion cache reads the same nonce so MUI styles are allowed. See [`frontend/nginx.conf`](frontend/nginx.conf).
 

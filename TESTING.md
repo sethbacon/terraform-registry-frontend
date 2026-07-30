@@ -59,7 +59,7 @@ Setup file: `frontend/src/setupTests.ts`
 
 ### Mocking the API client with `vi.mock`
 
-The API client (`services/api.ts`) is a class-based singleton. Tests mock it at the module level using `vi.mock` and `vi.hoisted`:
+The API client (`services/api/`) is a composed barrel object over per-domain modules that share one Axios instance (`services/api/http.ts`). Tests mock it at the module level using `vi.mock` and `vi.hoisted`:
 
 ```ts
 // vi.hoisted runs BEFORE imports, so mock variables are available in vi.mock
@@ -82,7 +82,7 @@ This pattern is used consistently across:
 
 ### Mocking Axios for interceptor tests
 
-The API test file uses a more advanced pattern that captures the interceptor callbacks registered during `ApiClient` construction. This allows testing auth header injection and 401 handling directly:
+The API test file uses a more advanced pattern that captures the interceptor callbacks registered when `services/api/http.ts` creates its Axios instance. This allows testing CSRF header injection and 401 handling directly:
 
 ```ts
 vi.mock('axios', () => {
@@ -98,7 +98,7 @@ vi.mock('axios', () => {
 });
 ```
 
-Each test calls `getApiClient()` which resets modules (`vi.resetModules()`) and re-imports `api.ts` to get a fresh instance with fresh interceptors.
+Each test calls `getApiClient()` which resets modules (`vi.resetModules()`) and re-imports `services/api` to get a fresh instance with fresh interceptors.
 
 ### Testing hooks with `renderHook`
 
@@ -265,10 +265,12 @@ e2e/tests/
   oidc-settings.spec.ts        # OIDC configuration page
   policies.spec.ts             # Mirror policies
   providers.spec.ts            # Provider browsing
+  security.spec.ts             # Security-abuse scenarios (#489)
   setup-wizard.spec.ts         # First-run setup wizard
   terraform-binaries.spec.ts   # Terraform binary mirror browsing
   terraform-mirror-admin.spec.ts # Terraform mirror admin
   upload.spec.ts               # Module/provider upload
+  version-approvals.spec.ts    # Version approval flows
   visual-regression.spec.ts    # Pixel-diff snapshots (excluded from CI gate; run on demand)
 ```
 

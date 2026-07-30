@@ -99,7 +99,7 @@ The following are stored in the browser's `localStorage`, not as cookies:
 
 | Key                           | Purpose                                                             | Duration |
 | ------------------------------ | --------------------------------------------------------------------- | -------- |
-| `auth_token`                   | **Sensitive.** Legacy session JWT, used only during the transitional migration away from `localStorage`-based auth (see `SECURITY.md`); new sessions use the HttpOnly cookie above instead. Cleared on logout or session expiry. | Session  |
+| `auth_token`                   | **Sensitive.** Nothing writes this key anymore -- sessions are cookie-only (see `SECURITY.md`). Kept only so a one-time cleanup can purge a stale JWT left behind by a session from before the cookie-only migration. Cleared on logout or session expiry. | Session  |
 | `user`                         | Cached profile info (id, email, name) for the signed-in user. Cleared on logout or session expiry. | Session  |
 | `role_template`                | Cached role template for the signed-in user. Cleared on logout or session expiry. | Session  |
 | `allowed_scopes`                | Cached authorization scopes for the signed-in user. Cleared on logout or session expiry. | Session  |

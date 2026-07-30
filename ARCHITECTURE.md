@@ -132,19 +132,19 @@ The catch-all route (`*`) redirects to `/`.
   queryKeys.ts  (cache key factory)
      |
      v
-  api.ts  (Axios client)
+  services/api  (Axios client)
      |
      v
   Backend API  (/api/v1/...)
 ```
 
-### API Client (`services/api.ts`)
+### API Client (`services/api/`)
 
-A singleton `ApiClient` class wrapping an Axios instance. Key features:
+A composed barrel object (`services/api/index.ts`) that spreads every per-domain module (`modulesApi.ts`, `usersApi.ts`, etc.) into one flat `apiClient`, all sharing the single configured Axios instance in `services/api/http.ts`. The old 1900-line `ApiClient` god object (issue #474) was split into these per-domain modules; existing `import apiClient from '../services/api'` call sites keep working unchanged. Key features (implemented in `http.ts`):
 
 - **Base URL**: Empty in dev (Vite proxy handles `/api/*`), configurable via `VITE_API_URL` in production.
 - **Cookie credentials**: The Axios instance is created with `withCredentials: true`, so the HttpOnly auth cookie and the `tfr_csrf` cookie are sent on every request.
-- **Request interceptor (CSRF)**: On mutating requests (`POST`/`PUT`/`PATCH`/`DELETE`), reads the non-HttpOnly `tfr_csrf` cookie and echoes it in an `X-CSRF-Token` header (double-submit pattern). As a backward-compatible migration fallback, if a legacy `auth_token` is still present in `localStorage` it is attached as `Authorization: Bearer <token>`; this path is slated for removal once all sessions use cookies.
+- **Request interceptor (CSRF)**: On mutating requests (`POST`/`PUT`/`PATCH`/`DELETE`), reads the non-HttpOnly `tfr_csrf` cookie and echoes it in an `X-CSRF-Token` header (double-submit pattern). Auth is cookie-only -- no request ever attaches an `Authorization: Bearer` header sourced from `localStorage` (`authStorage.ts` keeps the legacy key list only to purge leftover values from pre-cookie-migration sessions).
 - **Response interceptor (401)**: On 401, clears auth and redirects to `/login` -- except for SCM OAuth endpoints (`/scm-providers/*/repositories`, `/tags`, `/branches`) where 401 means the SCM token expired, not the user session.
 - **Breadcrumb interceptor**: Records every API call (method, URL, status, duration) for error reporting context.
 - **Setup requests**: The `setupRequest(token)` method creates one-off requests with `Authorization: SetupToken <token>` for the first-run setup wizard.
@@ -215,7 +215,7 @@ sequenceDiagram
     IdP-->>U: 302 Redirect to /auth/callback?code=...
     U->>FE: /auth/callback (CallbackPage)
     Note over FE,BE: Backend set an HttpOnly auth cookie (+ tfr_csrf cookie) on the callback redirect
-    FE->>FE: CallbackPage navigates to the return URL<br/>(legacy: a ?token= query param, if present, is stored in localStorage)
+    FE->>FE: CallbackPage navigates to the return URL<br/>(no token ever transits the URL -- the session lives in the HttpOnly cookie)
     FE->>BE: GET /api/v1/auth/me (HttpOnly cookie sent via withCredentials)
     BE-->>FE: { user, role_template, allowed_scopes }
     FE->>FE: Cache user + scopes in state & localStorage
@@ -234,7 +234,7 @@ sequenceDiagram
 ### Key details
 
 - **AuthContext** (`contexts/AuthContext.tsx`) provides: `user`, `roleTemplate`, `allowedScopes`, `isAuthenticated`, `isLoading`, `login`, `logout`, `refreshToken`, `setToken`.
-- **Session detection**: The session lives in an HttpOnly cookie. On mount, AuthContext calls `/api/v1/auth/me` (cookie sent via `withCredentials`) to detect and validate the session. If a cached user is in `localStorage` it restores UI state immediately (optimistic) and revalidates against `/auth/me` in the background. A legacy `auth_token` in `localStorage` is still honoured as a migration fallback.
+- **Session detection**: The session lives in an HttpOnly cookie. On mount, AuthContext calls `/api/v1/auth/me` (cookie sent via `withCredentials`) to detect and validate the session. If a cached user is in `localStorage` it restores UI state immediately (optimistic) and revalidates against `/auth/me` in the background.
 - **Logout**: Clears local session state and the cached localStorage keys (`auth_token`, `user`, `role_template`, `allowed_scopes`, `authorized`) and redirects to the backend's logout endpoint, which clears the HttpOnly auth cookie and terminates the IdP session.
 - **Dev mode login**: When the backend runs with `DEV_MODE=true`, the login page shows a "Dev Login (Admin)" button that authenticates directly without an IdP redirect.
 - **Token refresh**: `refreshToken()` calls `api.refreshToken()` and updates the stored token. On failure, it calls `logout()`.

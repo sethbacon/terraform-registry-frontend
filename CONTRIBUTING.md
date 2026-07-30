@@ -122,7 +122,7 @@ TypeScript strict mode is enforced. `any` types require explicit justification i
 
 ### Conventions
 
-- **All API calls** go through `services/api.ts` (Axios instance with auth interceptors). Never call `fetch` directly.
+- **All API calls** go through `services/api/` (composed barrel over per-domain modules sharing the Axios instance + auth interceptors in `services/api/http.ts`). Never call `fetch` directly.
 - **Global state** uses React Context (`AuthContext`, `ThemeContext`). Redux is not used.
 - **Protected routes** use `components/ProtectedRoute.tsx`.
 - **MUI `TextField` inputs** for non-obvious fields must include a `helperText` prop explaining what value is expected and why.
@@ -255,7 +255,7 @@ frontend/src/
 - **TypeScript strict mode** is enforced. Avoid `any` types; if unavoidable, add a comment explaining why.
 - **ESLint** runs with zero warnings (`npm run lint`). No `// eslint-disable` without a comment justifying it.
 - **No unused variables or imports**. ESLint catches these.
-- **All API calls** go through `services/api.ts`. Never use `fetch` or create separate Axios instances.
+- **All API calls** go through `services/api/`. Never use `fetch` or create separate Axios instances.
 - **MUI TextField inputs** for non-obvious fields must include a `helperText` prop.
 - **Imports**: prefer named imports. Group imports: React/external libraries first, then internal modules.
 
