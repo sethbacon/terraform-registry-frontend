@@ -105,4 +105,15 @@ describe('ErrorBoundary', () => {
     expect(screen.getByText('Custom fallback UI')).toBeInTheDocument()
     expect(screen.queryByText('Something went wrong')).not.toBeInTheDocument()
   })
+
+  it('does not render the raw error message in production builds (#618)', () => {
+    vi.stubEnv('DEV', false)
+
+    render(<ThrowController initialThrow={true} />)
+
+    expect(screen.getByText('Something went wrong')).toBeInTheDocument()
+    expect(screen.queryByText('Test error from child')).not.toBeInTheDocument()
+
+    vi.unstubAllEnvs()
+  })
 })

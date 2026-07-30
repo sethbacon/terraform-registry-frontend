@@ -182,6 +182,16 @@ describe('getErrorMessage', () => {
     expect(getErrorMessage(error)).toBe('File not found')
   })
 
+  it('does not leak the raw native Error message in production builds (#618-class)', () => {
+    vi.stubEnv('DEV', false)
+
+    const error = new Error('Cannot read properties of undefined (reading "foo")')
+    expect(getErrorMessage(error)).toBe('An unexpected error occurred')
+    expect(getErrorMessage(error, 'Custom fallback')).toBe('Custom fallback')
+
+    vi.unstubAllEnvs()
+  })
+
   it('returns string error directly', () => {
     expect(getErrorMessage('Connection timeout')).toBe('Connection timeout')
   })

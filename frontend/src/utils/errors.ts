@@ -85,7 +85,11 @@ export function getErrorMessage(err: unknown, fallback = 'An unexpected error oc
     }
     return err.message || fallback
   }
-  if (err instanceof Error) return err.message
+  // A native (non-Axios) Error is typically a client-side bug (TypeError,
+  // ReferenceError, etc.) whose message can leak implementation details
+  // (variable/property names). Only show it to developers, same DEV gate as
+  // ErrorBoundary.tsx (#618).
+  if (err instanceof Error) return import.meta.env.DEV ? err.message : fallback
   if (typeof err === 'string') return err
   return fallback
 }

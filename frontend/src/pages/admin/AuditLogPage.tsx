@@ -37,6 +37,7 @@ import api from '../../services/api'
 import { AuditLog } from '../../types'
 import { queryKeys } from '../../services/queryKeys'
 import { usePagination } from '../../hooks/usePagination'
+import { getErrorMessage } from '../../utils/errors'
 
 const RESOURCE_TYPES = [
   { value: '', label: 'All Resource Types' },
@@ -110,7 +111,10 @@ const AuditLogPage: React.FC = () => {
   const total = data?.pagination?.total ?? 0
 
   if (queryError && !error) {
-    setError(queryError instanceof Error ? queryError.message : 'Failed to load audit logs')
+    // Raw error messages can leak implementation details -- route through the
+    // shared getErrorMessage helper, which DEV-gates native Error messages
+    // the same way ErrorBoundary.tsx does (#618-class).
+    setError(getErrorMessage(queryError, t('admin.auditLog.errLoad')))
   }
 
   // Debounce text filter changes

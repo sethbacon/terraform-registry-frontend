@@ -22,6 +22,16 @@ window.addEventListener('unhandledrejection', (event) => {
   captureError(error, { type: 'unhandledrejection' })
 })
 
+// @axe-core/react stays a devDependency deliberately -- it's genuinely dev-only
+// tooling. Guarding the import with import.meta.env.DEV lets `vite build` in
+// production mode dead-code-eliminate this whole branch (verified: `vite build`
+// succeeds even with @axe-core/react absent from node_modules), so unlike a
+// Sentry-style runtime-conditional import this one is safe under a hypothetical
+// `npm ci --omit=dev` before the Docker image's `vite build` step (see #610).
+// It is NOT safe for `tsc` (the "build" npm script's type-check step, and any
+// standalone typecheck/lint job): tsc still needs to resolve the module's type
+// declarations regardless of runtime reachability, so devDependencies must stay
+// installed for any job that runs `tsc`.
 if (import.meta.env.DEV) {
   import('@axe-core/react').then((axe) => {
     axe.default(React, ReactDOM, 1000)

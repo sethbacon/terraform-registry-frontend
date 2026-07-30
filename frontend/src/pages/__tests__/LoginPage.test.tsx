@@ -181,4 +181,46 @@ describe('LoginPage', () => {
       expect(screen.getByText('Invalid credentials')).toBeInTheDocument()
     })
   })
+
+  it('shows only the generic message when LDAP login fails outside development builds (#618-class)', async () => {
+    vi.stubEnv('DEV', false)
+    mockLdapLogin.mockRejectedValue(new Error('Invalid credentials'))
+    mockProviders([{ type: 'ldap', name: 'LDAP' }])
+    renderLoginPage()
+    const usernameInput = await screen.findByRole('textbox', { name: /username/i })
+    const passwordInput = screen.getByLabelText(/password/i)
+    const signInBtn = screen.getByRole('button', { name: 'Sign In' })
+    await act(async () => {
+      await userEvent.type(usernameInput, 'testuser')
+      await userEvent.type(passwordInput, 'wrongpass')
+      await userEvent.click(signInBtn)
+    })
+    await waitFor(() => {
+      expect(screen.getByText('LDAP login failed. Check your credentials.')).toBeInTheDocument()
+    })
+    expect(screen.queryByText('Invalid credentials')).not.toBeInTheDocument()
+
+    vi.unstubAllEnvs()
+  })
+
+  it('shows only the generic message when dev login fails outside development builds (#618-class)', async () => {
+    // isDev (button visibility) is driven by MODE, independent of the DEV
+    // flag that gates the raw message -- a `vite build --mode development`
+    // hardened/staging build is the scenario where these two disagree.
+    vi.stubEnv('MODE', 'development')
+    vi.stubEnv('DEV', false)
+    mockDevLogin.mockRejectedValue(new Error('ECONNREFUSED 127.0.0.1:8080'))
+    mockProviders([])
+    renderLoginPage()
+    const devLoginBtn = await screen.findByRole('button', { name: 'Dev Login (Admin)' })
+    await act(async () => {
+      await userEvent.click(devLoginBtn)
+    })
+    await waitFor(() => {
+      expect(screen.getByText('Dev login failed. Check server logs.')).toBeInTheDocument()
+    })
+    expect(screen.queryByText('ECONNREFUSED 127.0.0.1:8080')).not.toBeInTheDocument()
+
+    vi.unstubAllEnvs()
+  })
 })

@@ -1999,7 +1999,8 @@
       "emptyTitle": "No audit entries match the current filters",
       "emptySubtitle": "Audit log entries appear when users make changes. Adjust the filters above or publish a module to see one.",
       "detailTitle": "Audit Log Detail",
-      "close": "Close"
+      "close": "Close",
+      "errLoad": "Failed to load audit logs"
     },
     "notifications": {
       "pageTitle": "Notifications",

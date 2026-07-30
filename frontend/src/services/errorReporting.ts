@@ -231,6 +231,17 @@ function enqueueError(error: Error, context?: Record<string, unknown>): void {
   if (errorBuffer.length >= MAX_BATCH_SIZE) {
     flush()
   }
+  // flush() is a no-op while no DSN is configured (see its own `!dsn` guard),
+  // so without this cap every captured error would accumulate for the lifetime
+  // of the page for users who never consented to telemetry -- and captureError
+  // is wired into every API error path, so that is a real leak, not a
+  // theoretical one. Entries are kept (rather than dropped at the door) so
+  // errors captured before init() resolves the DSN still ship once it does;
+  // capping evicts the oldest first, the same bounded-ring-buffer approach
+  // performanceReporting.ts uses.
+  if (errorBuffer.length > MAX_BATCH_SIZE) {
+    errorBuffer.splice(0, errorBuffer.length - MAX_BATCH_SIZE)
+  }
 }
 
 /**

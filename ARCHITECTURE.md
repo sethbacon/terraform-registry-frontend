@@ -311,9 +311,47 @@ Enhanced error reporter with:
 
 - **Batching**: Queues errors and flushes every 5 seconds or when 10 errors accumulate.
 - **Retry**: Exponential backoff (up to 3 retries) on send failure.
-- **Breadcrumbs**: Records the last 20 events (navigation, API calls, console errors) for debugging context.
+- **Breadcrumbs**: Records the last 20 events (navigation — via `NavigationBreadcrumbTracker`/`useNavigationBreadcrumbs` on every route change, API calls, console errors) for debugging context.
 - **Session tracking**: Random `sessionId` generated per page load, included with all reports.
-- **Error reporting**: If `VITE_ERROR_REPORTING_DSN` is set (e.g. a Sentry DSN or custom HTTP endpoint), batched error reports are POSTed to that URL. Otherwise errors are logged to the console only.
+- **Configuration** (three mutually exclusive outcomes, checked in order):
+  1. `VITE_SENTRY_DSN` set — the Sentry SDK (`@sentry/react`) is lazy-loaded and initialized (preferred for production); `beforeSend`/`beforeBreadcrumb` hooks strip session tokens from URLs before they leave the browser.
+  2. `VITE_ERROR_REPORTING_DSN` set (and no Sentry DSN) — the built-in batched custom reporter POSTs to that URL.
+  3. Neither set — errors are logged to the console only.
+
+### Performance Reporting (`services/performanceReporting.ts`)
+
+Reports Core Web Vitals (CLS, FCP, LCP, INP, TTFB) and route-level navigation
+timing — `reportNavigation()`, called from the same `NavigationBreadcrumbTracker`/
+`useNavigationBreadcrumbs` hook that records navigation breadcrumbs above, so
+every SPA route change reports both. Batches and flushes to `VITE_PERFORMANCE_DSN`
+(falling back to `VITE_ERROR_REPORTING_DSN`) every 10 seconds or 25 entries,
+via `sendBeacon` where available. In development, metrics are also logged to
+the console. `reportNavigation()` is called unconditionally on every route
+change regardless of consent, so it only buffers an entry once the service is
+active (a DSN has been resolved by `init()`); dev-mode console logging stays
+unconditional since it never leaves the browser. This prevents pre-consent
+navigation history from being buffered and then flushed once the user later
+opts in. Same DSN/`connect-src` constraints as error reporting apply (see
+below).
+
+### Telemetry Consent Gating (`components/TelemetryGate.tsx`)
+
+Both error and performance reporting are opt-in: `TelemetryGate` starts/stops
+each service in lockstep with the user's live consent preferences
+(`useConsent()`), calling `init()` when a preference turns on and `destroy()`
+on withdrawal or unmount — no page reload required. See PRIVACY.md section 3.3
+for the consent lifecycle and legal basis.
+
+### CSP and Telemetry Endpoints
+
+The shipped Content-Security-Policy's `connect-src 'self'` (`nginx.conf`,
+`nginx-ecs.conf.template`) means a DSN pointing at a genuinely cross-origin
+endpoint (e.g. a Sentry SaaS `*.ingest.sentry.io` DSN) will have its
+`fetch`/`sendBeacon` calls blocked by the browser — both send paths swallow
+that failure silently by design, so telemetry would appear configured but
+never actually leave the browser. Route third-party DSNs through this app's
+own reverse proxy (same pattern as `nginx-ecs.conf.template`'s `BACKEND_URL`),
+or add the destination origin to `connect-src` in both nginx configs.
 
 ### API Error Utilities (`utils/errors.ts`)
 

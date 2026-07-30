@@ -326,4 +326,15 @@ describe('AuditLogPage', () => {
       expect(screen.getByText('kaboom')).toBeInTheDocument()
     })
   })
+
+  it('shows only the generic message when the query fails outside development builds (#618-class)', async () => {
+    vi.stubEnv('DEV', false)
+    listAuditLogsMock.mockRejectedValue(new Error('relation "audit_logs" does not exist'))
+    renderPage()
+    await waitFor(() => {
+      expect(screen.getByText('Failed to load audit logs')).toBeInTheDocument()
+    })
+    expect(screen.queryByText('relation "audit_logs" does not exist')).not.toBeInTheDocument()
+    vi.unstubAllEnvs()
+  })
 })

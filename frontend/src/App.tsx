@@ -16,6 +16,7 @@ import ErrorBoundary from './components/ErrorBoundary'
 import { queryClient } from './queryClient'
 import LazyRoute from './components/LazyRoute'
 import RouteFocusManager from './components/RouteFocusManager'
+import NavigationBreadcrumbTracker from './components/NavigationBreadcrumbTracker'
 import { ADMIN_ROUTE_SCOPES } from './routeScopes'
 // Critical-path pages loaded eagerly (small, always needed on first visit)
 import HomePage from './pages/HomePage'
@@ -64,6 +65,7 @@ function App() {
               <QueryClientProvider client={queryClient}>
                 <Router>
                   <RouteFocusManager />
+                  <NavigationBreadcrumbTracker />
                   <ErrorBoundary>
                     <Routes>
                       {/* Public routes */}
