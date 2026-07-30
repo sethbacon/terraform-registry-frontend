@@ -31,6 +31,7 @@
     "@mui/icons-material": "^9.2.0",
     "@mui/material": "^9.2.0",
     "@mui/material-pigment-css": "^9.2.0",
+    "@sentry/react": "^10.68.0",
     "@sethbacon/terraform-suite-ui": "0.7.0",
     "@tanstack/react-query": "^5.101.4",
     "@tanstack/react-query-devtools": "^5.101.4",
@@ -53,7 +54,6 @@
   },
   "devDependencies": {
     "@axe-core/react": "^4.12.1",
-    "@sentry/react": "^10.68.0",
     "@testing-library/dom": "^10.0.0",
     "@testing-library/jest-dom": "^7.0.0",
     "@testing-library/react": "^16.3.2",

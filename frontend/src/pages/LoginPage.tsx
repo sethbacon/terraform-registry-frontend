@@ -87,7 +87,10 @@ const LoginPage: React.FC = () => {
       await devLogin()
       navigate('/')
     } catch (err) {
-      const message = err instanceof Error ? err.message : t('auth.devLoginFailed')
+      // Raw error messages can leak implementation details -- only show them
+      // to developers, same DEV gate as ErrorBoundary.tsx (#618).
+      const message =
+        import.meta.env.DEV && err instanceof Error ? err.message : t('auth.devLoginFailed')
       setLoginError(message)
     }
   }
@@ -106,7 +109,10 @@ const LoginPage: React.FC = () => {
       await ldapLogin(ldapUsername, ldapPassword)
       navigate('/')
     } catch (err) {
-      const message = err instanceof Error ? err.message : t('auth.ldapLoginFailed')
+      // Raw error messages can leak implementation details -- only show them
+      // to developers, same DEV gate as ErrorBoundary.tsx (#618).
+      const message =
+        import.meta.env.DEV && err instanceof Error ? err.message : t('auth.ldapLoginFailed')
       setLoginError(message)
     } finally {
       setLdapLoading(false)

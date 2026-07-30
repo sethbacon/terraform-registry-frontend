@@ -302,4 +302,36 @@ describe('errorReporting', () => {
       expect(globalThis.fetch).toHaveBeenCalled()
     })
   })
+
+  describe('buffer bounding without a DSN', () => {
+    it('caps the error buffer when no DSN is configured', async () => {
+      // No DSN => flush() is a no-op, so nothing drains the buffer. Without a
+      // cap this grows for the lifetime of the page (captureError is wired
+      // into every API error path), so assert the retained entries are
+      // bounded: capture well past MAX_BATCH_SIZE with reporting inactive,
+      // then activate a DSN and flush, and inspect what was retained.
+      vi.stubEnv('VITE_ERROR_REPORTING_DSN', '')
+      vi.resetModules()
+      const mod = await import('../errorReporting')
+
+      for (let i = 0; i < 25; i++) {
+        mod.captureError(new Error(`overflow ${i}`))
+      }
+
+      // Activate reporting, then drain.
+      vi.stubEnv('VITE_ERROR_REPORTING_DSN', 'https://errors.example.com/report')
+      mod.init()
+      mod.flush()
+
+      expect(globalThis.fetch).toHaveBeenCalled()
+      const call = (globalThis.fetch as unknown as ReturnType<typeof vi.fn>).mock.calls[0]
+      const body = JSON.parse((call[1] as RequestInit).body as string)
+      // MAX_BATCH_SIZE is 10; pre-fix this would be all 25.
+      expect(body.entries.length).toBeLessThanOrEqual(10)
+      // Oldest are evicted first, so the newest error must survive.
+      expect(JSON.stringify(body.entries)).toContain('overflow 24')
+
+      mod.destroy()
+    })
+  })
 })

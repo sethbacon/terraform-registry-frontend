@@ -85,10 +85,14 @@ Frontend configuration is provided via Vite environment variables. All variables
 | `VITE_API_URL`             | (proxied by Vite in dev) | Backend API **origin** for production builds, e.g. `https://registry.example.com`. Must not include a path: every API call already hardcodes its own `/api/v1/...` prefix, so a path here (e.g. `.../api/v1`) would double it. |
 | `VITE_PROXY_TARGET`        | `http://localhost:8080`  | Backend URL the Vite dev server proxies `/api/*` to. Override for TLS or non-local backend during development.                                                       |
 | `VITE_USE_MOCK_DATA`       | `false`                  | When `true`, the API client returns static mock data instead of calling the backend (offline development).                                                           |
-| `VITE_ERROR_REPORTING_DSN` | _(unset)_                | URL for batched browser error reports (Sentry-compatible DSN or any HTTP endpoint). When unset, errors log to console only.                                          |
+| `VITE_ERROR_REPORTING_DSN` | _(unset)_                | URL for batched browser error reports (Sentry-compatible DSN or any HTTP endpoint). When unset, errors log to console only. Compiled into the public bundle -- see note below. |
+| `VITE_SENTRY_DSN`          | _(unset)_                | Sentry DSN for error reporting via the Sentry SDK (preferred over `VITE_ERROR_REPORTING_DSN` when both are set). Compiled into the public bundle -- see note below.  |
+| `VITE_PERFORMANCE_DSN`     | _(unset)_                | DSN for performance/Web Vitals reporting (`services/performanceReporting.ts`). Falls back to `VITE_ERROR_REPORTING_DSN` when unset. Compiled into the public bundle -- see note below. |
 
 In development the Vite proxy handles `/api/*` routing, so no env var is needed locally.
 For Docker / production builds served through nginx, the bundled nginx config already proxies `/api/*` to the backend, so `VITE_API_URL` is normally left unset. Only set it if the frontend is genuinely served from a different origin than the backend -- and note the shipped Content-Security-Policy's `connect-src 'self'` will block that origin's requests unless you also route both through the same reverse proxy (see `nginx-ecs.conf.template`'s `BACKEND_URL` pattern) instead of calling the other origin directly from the browser. This value is compiled into the public JS bundle, so it must stay public-facing -- never an internal-only hostname.
+
+Like `VITE_API_URL`, the three DSN variables above are compiled into the public JS bundle and ship in cleartext to every visitor. Never embed an auth token or API key in one of these URLs (e.g. as a query-string parameter) for a custom collector -- Sentry's own DSN scheme is write-only-by-design, but a bespoke endpoint that authenticates via an embedded credential would leak it to anyone viewing the bundle. See [`frontend/.env.example`](frontend/.env.example) for the full annotated guidance, which is authoritative for these vars.
 
 ## Tech Stack
 

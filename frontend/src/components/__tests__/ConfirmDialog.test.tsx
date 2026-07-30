@@ -129,6 +129,24 @@ describe('ConfirmDialog', () => {
     expect(onClose).not.toHaveBeenCalled()
   })
 
+  it('shows only the generic message when onConfirm fails outside development builds (#618-class)', async () => {
+    vi.stubEnv('DEV', false)
+    const user = userEvent.setup()
+    const onConfirm = vi.fn().mockRejectedValue(new Error('server blew up'))
+    const onClose = vi.fn()
+    render(<ConfirmDialog open onClose={onClose} onConfirm={onConfirm} title="T" />)
+    await user.click(screen.getByRole('button', { name: 'Confirm' }))
+    await waitFor(() => {
+      expect(screen.getByTestId('confirm-dialog-error')).toHaveTextContent(
+        'An unexpected error occurred.',
+      )
+    })
+    expect(screen.queryByText('server blew up')).not.toBeInTheDocument()
+    expect(onClose).not.toHaveBeenCalled()
+
+    vi.unstubAllEnvs()
+  })
+
   it('onClose is called when cancel is clicked', async () => {
     const user = userEvent.setup()
     const onClose = vi.fn()

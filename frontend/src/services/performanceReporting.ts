@@ -74,6 +74,16 @@ function enqueue(entry: PerfEntry): void {
   if (buffer.length >= MAX_BATCH_SIZE) {
     flush()
   }
+  // flush() above clears the buffer synchronously once a DSN is configured,
+  // so this is only a safety net for reentrancy/burst edge cases in the Web
+  // Vitals path (handleMetric below) -- cap at the batch size, evicting the
+  // oldest entries first, the same bounded-ring-buffer approach
+  // errorReporting.ts uses for breadcrumbs. reportNavigation() below never
+  // reaches this function at all until the service is active (see its own
+  // consent/active-service gate), so it cannot contribute unbounded growth.
+  if (buffer.length > MAX_BATCH_SIZE) {
+    buffer.splice(0, buffer.length - MAX_BATCH_SIZE)
+  }
 }
 
 function handleMetric(metric: Metric): void {
@@ -141,10 +151,27 @@ export function init(): void {
 /**
  * Report a route-level navigation timing.
  *
+ * `useNavigationBreadcrumbs.ts` calls this unconditionally on every SPA route
+ * change, regardless of the user's telemetry consent -- unlike the Web Vitals
+ * metrics above, which can't fire at all until `init()` has registered their
+ * callbacks. Without an equivalent guard here, this would be the one
+ * telemetry entry point that keeps recording (and, once a DSN is later
+ * configured via consent, retroactively flushing) navigation history for
+ * users who never consented. So: only enqueue once the service is active
+ * (a DSN has been resolved by `init()`) -- the same active/consent check
+ * `flush()` itself uses. Dev-mode console logging stays unconditional (it
+ * never leaves the browser) so local debugging still works before consent.
+ *
  * @param routeName  The destination route (e.g. "/admin/users").
  * @param durationMs Time taken for the navigation in milliseconds.
  */
 export function reportNavigation(routeName: string, durationMs: number): void {
+  if (import.meta.env.DEV) {
+    console.log(`[Perf] Navigation → ${routeName}: ${durationMs.toFixed(1)}ms`)
+  }
+
+  if (!dsn) return
+
   const entry: PerfEntry = {
     type: 'navigation',
     name: routeName,
@@ -152,10 +179,6 @@ export function reportNavigation(routeName: string, durationMs: number): void {
     timestamp: new Date().toISOString(),
     url: sanitizeUrl(window.location.href),
     sessionId,
-  }
-
-  if (import.meta.env.DEV) {
-    console.log(`[Perf] Navigation → ${routeName}: ${durationMs.toFixed(1)}ms`)
   }
 
   enqueue(entry)

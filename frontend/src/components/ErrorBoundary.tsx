@@ -49,7 +49,7 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
             <Typography variant="body2" sx={{ mb: 2 }}>
               {i18n.t('errorBoundary.description')}
             </Typography>
-            {this.state.error && (
+            {import.meta.env.DEV && this.state.error && (
               <Box
                 component="pre"
                 sx={{

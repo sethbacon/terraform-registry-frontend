@@ -41,16 +41,66 @@ describe('performanceReporting', () => {
   })
 
   describe('reportNavigation', () => {
-    it('enqueues a navigation entry', () => {
-      // reportNavigation pushes to buffer even without dsn
+    it('logs to the console in dev mode even before the service is active', () => {
+      // Dev-mode logging never leaves the browser, so it stays unconditional
+      // even pre-consent/pre-init -- only buffering (see below) is gated.
       reportNavigation('/admin/users', 150.5)
-      // We can verify the log in dev mode
       expect(console.log).toHaveBeenCalledWith(expect.stringContaining('[Perf] Navigation'))
     })
 
     it('logs the route name and duration in dev mode', () => {
       reportNavigation('/modules', 42.3)
       expect(console.log).toHaveBeenCalledWith(expect.stringContaining('/modules'))
+    })
+
+    it('does not enqueue navigation entries before the service is active (no consent yet)', () => {
+      // useNavigationBreadcrumbs.ts calls reportNavigation unconditionally on
+      // every SPA route change, regardless of consent. Without a guard, these
+      // pre-consent navigations would sit in the buffer and then leak out on
+      // the very first flush once the user later grants consent and init()
+      // configures a DSN -- reporting on browsing history recorded before the
+      // user ever agreed to it.
+      for (let i = 0; i < 100; i++) {
+        reportNavigation(`/route-${i}`, i)
+      }
+
+      // Consent granted afterwards: init() resolves a DSN.
+      vi.stubEnv('VITE_PERFORMANCE_DSN', 'https://perf.example.com/report')
+      init()
+
+      vi.spyOn(navigator, 'sendBeacon').mockReturnValue(false)
+      const fetchSpy = vi.spyOn(globalThis, 'fetch').mockResolvedValue(new Response())
+      flush()
+
+      // None of the pre-consent navigations should ever have been buffered,
+      // so there is nothing to flush.
+      expect(fetchSpy).not.toHaveBeenCalled()
+
+      vi.unstubAllEnvs()
+    })
+
+    it('bounds buffer growth once active, even under a heavy navigation burst', () => {
+      vi.stubEnv('VITE_PERFORMANCE_DSN', 'https://perf.example.com/report')
+      init()
+
+      const sendBeaconSpy = vi.spyOn(navigator, 'sendBeacon').mockReturnValue(true)
+
+      // With the service already active, each batch of MAX_BATCH_SIZE (25)
+      // entries triggers an eager flush, so the buffer should never be
+      // allowed to grow past that regardless of how many navigations fire
+      // in a row.
+      for (let i = 0; i < 100; i++) {
+        reportNavigation(`/route-${i}`, i)
+      }
+
+      // 100 entries at a 25-entry batch size flush in exactly 4 batches.
+      expect(sendBeaconSpy).toHaveBeenCalledTimes(4)
+      const lastCall = sendBeaconSpy.mock.calls[sendBeaconSpy.mock.calls.length - 1]
+      const lastBody = JSON.parse(lastCall[1] as string)
+      expect(lastBody.entries.length).toBe(25)
+      expect(lastBody.entries.at(-1).name).toBe('/route-99')
+
+      vi.unstubAllEnvs()
     })
   })
 
