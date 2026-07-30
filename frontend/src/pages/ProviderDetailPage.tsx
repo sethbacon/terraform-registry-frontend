@@ -1,29 +1,13 @@
-import React, { useState, useEffect, useCallback } from 'react'
+import React from 'react'
 import { useTranslation } from 'react-i18next'
-import { useParams, useNavigate, useSearchParams } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import {
   Typography,
   Box,
   Paper,
-  Breadcrumbs,
-  Link,
-  Chip,
-  Divider,
   CircularProgress,
   Alert,
   Button,
-  Stack,
-  IconButton,
-  Tooltip,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Select,
-  MenuItem,
-  FormControl,
   Dialog,
   DialogTitle,
   DialogContent,
@@ -34,360 +18,86 @@ import {
   Tab,
 } from '@mui/material'
 import ArrowBack from '@mui/icons-material/ArrowBack'
-import ContentCopy from '@mui/icons-material/ContentCopy'
-import Delete from '@mui/icons-material/Delete'
-import Warning from '@mui/icons-material/Warning'
-import Restore from '@mui/icons-material/Restore'
-import Add from '@mui/icons-material/Add'
-import GitHub from '@mui/icons-material/GitHub'
-import api from '../services/api'
-import { getErrorMessage } from '../utils/errors'
-import { captureError } from '../services/errorReporting'
-import { Provider, ProviderVersion, ProviderDocEntry } from '../types'
-import { useAuth } from '../contexts/AuthContext'
-import { REGISTRY_HOST } from '../config'
 import Page from '../components/Page'
 import ProviderDocsSidebar from '../components/ProviderDocsSidebar'
 import ProviderDocContent from '../components/ProviderDocContent'
+import ProviderDetailHeader from '../components/ProviderDetailHeader'
+import ProviderUsageExample from '../components/ProviderUsageExample'
+import ProviderPlatformsTable from '../components/ProviderPlatformsTable'
+import ProviderInfoPanel from '../components/ProviderInfoPanel'
+import ProviderVersionDetailsPanel from '../components/ProviderVersionDetailsPanel'
+import { useProviderDetail } from '../hooks/useProviderDetail'
 
 const ProviderDetailPage: React.FC = () => {
   const { t } = useTranslation()
-  const { namespace, type } = useParams<{
-    namespace: string
-    type: string
-  }>()
   const navigate = useNavigate()
-  const [searchParams, setSearchParams] = useSearchParams()
-  const { isAuthenticated, allowedScopes } = useAuth()
-  const canManage =
-    isAuthenticated &&
-    (allowedScopes.includes('admin') || allowedScopes.includes('providers:write'))
+  const {
+    namespace,
+    type,
+    name,
+    canManage,
+    provider,
+    versions,
+    selectedVersion,
+    setSelectedVersion,
+    loading,
+    error,
+    copiedSource,
+    copiedChecksum,
+    deleteProviderDialogOpen,
+    setDeleteProviderDialogOpen,
+    deleting,
+    deleteVersionDialogOpen,
+    setDeleteVersionDialogOpen,
+    versionToDelete,
+    openDeleteVersionDialog,
+    deprecateDialogOpen,
+    setDeprecateDialogOpen,
+    deprecationMessage,
+    setDeprecationMessage,
+    deprecating,
+    activeTab,
+    hasDocs,
+    docs,
+    docsLoading,
+    selectedDocCategory,
+    selectedDocSlug,
+    handleTabChange,
+    handleDocSelect,
+    githubUrl,
+    changelogUrl,
+    getTerraformExample,
+    handleCopySource,
+    handleCopyChecksum,
+    handleDeleteProvider,
+    handleDeleteVersion,
+    handleDeprecateVersion,
+    handleUndeprecateVersion,
+    handlePublishNewVersion,
+  } = useProviderDetail()
 
-  const activeTab = searchParams.get('tab') === 'docs' ? 1 : 0
-  const docParam = searchParams.get('doc')
-  const docParts = docParam ? docParam.split('/') : []
-  const selectedDocCategory = docParts[0] ?? null
-  const selectedDocSlug = docParts[1] ?? null
-
-  // Use 'type' as the name for display
-  const name = type
-
-  const [provider, setProvider] = useState<Provider | null>(null)
-  const [versions, setVersions] = useState<ProviderVersion[]>([])
-  const [selectedVersion, setSelectedVersion] = useState<ProviderVersion | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-  const [copiedSource, setCopiedSource] = useState(false)
-  const [copiedChecksum, setCopiedChecksum] = useState<string | null>(null)
-  const [deleteProviderDialogOpen, setDeleteProviderDialogOpen] = useState(false)
-  const [deleteVersionDialogOpen, setDeleteVersionDialogOpen] = useState(false)
-  const [versionToDelete, setVersionToDelete] = useState<string | null>(null)
-  const [deleting, setDeleting] = useState(false)
-  const [deprecateDialogOpen, setDeprecateDialogOpen] = useState(false)
-  const [deprecationMessage, setDeprecationMessage] = useState('')
-  const [deprecating, setDeprecating] = useState(false)
-
-  const [docs, setDocs] = useState<ProviderDocEntry[]>([])
-  const [docsLoading, setDocsLoading] = useState(false)
-
-  const loadProviderDetails = useCallback(async () => {
-    if (!namespace || !type) return
-
-    try {
-      setLoading(true)
-      setError(null)
-
-      // Use searchProviders with namespace filter and then find by type
-      const [providerData, versionsData] = await Promise.all([
-        api.searchProviders({ query: type, limit: 100 }), // Search with type as query
-        api.getProviderVersions(namespace, type),
-      ])
-
-      // Filter results to find exact match for namespace/type
-      const matchingProvider = providerData.providers.find(
-        (p: Provider) => p.namespace === namespace && p.type === type,
-      )
-
-      if (!matchingProvider) {
-        setError('Provider not found')
-        return
-      }
-
-      setProvider(matchingProvider)
-
-      // Backend returns { versions: [...] } directly — sort by semver descending
-      const rawVersions: ProviderVersion[] = versionsData.versions || []
-      const sortedVersions = [...rawVersions].sort((a, b) => {
-        const parseParts = (v: string): [number, number, number] => {
-          const clean = v.replace(/^v/, '').split('-')[0]
-          const [maj = 0, min = 0, pat = 0] = clean.split('.').map(Number)
-          return [maj, min, pat]
-        }
-        const [aMaj, aMin, aPat] = parseParts(a.version)
-        const [bMaj, bMin, bPat] = parseParts(b.version)
-        if (bMaj !== aMaj) return bMaj - aMaj
-        if (bMin !== aMin) return bMin - aMin
-        if (bPat !== aPat) return bPat - aPat
-        // Same numeric version: stable releases (no pre-release suffix) sort before pre-releases
-        const aStable = !a.version.replace(/^v/, '').includes('-')
-        const bStable = !b.version.replace(/^v/, '').includes('-')
-        if (aStable !== bStable) return aStable ? -1 : 1
-        return 0
-      })
-      setVersions(sortedVersions)
-
-      if (sortedVersions.length > 0) {
-        setSelectedVersion(sortedVersions[0])
-      }
-    } catch (err) {
-      console.error('Failed to load provider details:', err)
-      // setError() here uses a plain hardcoded string, not getErrorMessage(), so
-      // it doesn't get telemetry reporting for free -- report explicitly (#623).
-      captureError(err instanceof Error ? err : new Error(String(err)), {
-        context: 'Failed to load provider details',
-      })
-      setError('Failed to load provider details. Please try again.')
-    } finally {
-      setLoading(false)
-    }
-  }, [namespace, type])
-
-  useEffect(() => {
-    loadProviderDetails()
-  }, [loadProviderDetails])
-
-  // Fetch doc index for mirrored providers when version is selected
-  useEffect(() => {
-    if (!provider?.source || !selectedVersion || !namespace || !type) return
-    let cancelled = false
-    const fetchAllDocs = async () => {
-      const PAGE_SIZE = 1000
-      let allDocs: ProviderDocEntry[] = []
-      let offset = 0
-      let total = Infinity
-
-      while (offset < total) {
-        const data = await api.getProviderDocs(
-          namespace,
-          type,
-          selectedVersion.version,
-          undefined,
-          'hcl',
-          PAGE_SIZE,
-          offset,
-        )
-        allDocs = allDocs.concat(data.docs)
-        total = data.total
-        offset += data.docs.length
-        if (data.docs.length === 0) break
-      }
-      return allDocs
-    }
-
-    setDocsLoading(true)
-    fetchAllDocs()
-      .then((allDocs) => {
-        if (!cancelled) setDocs(allDocs)
-      })
-      .catch(() => {
-        /* non-fatal */
-      })
-      .finally(() => {
-        if (!cancelled) setDocsLoading(false)
-      })
-    return () => {
-      cancelled = true
-    }
-  }, [provider?.source, selectedVersion, namespace, type])
-
-  // Auto-select first doc when Documentation tab is opened with no selection
-  useEffect(() => {
-    if (activeTab !== 1 || docParam || docs.length === 0) return
-    const overview = docs.find((d) => d.category === 'overview')
-    const first = overview ?? docs[0]
-    setSearchParams(
-      (prev) => {
-        const next = new URLSearchParams(prev)
-        next.set('doc', `${first.category}/${first.slug}`)
-        return next
-      },
-      { replace: true },
-    )
-  }, [activeTab, docParam, docs, setSearchParams])
-
-  const handleCopySource = () => {
-    if (!provider || !selectedVersion) return
-
-    const source = `${namespace}/${name}`
-    navigator.clipboard.writeText(source)
-    setCopiedSource(true)
-    setTimeout(() => setCopiedSource(false), 2000)
-  }
-
-  const handleCopyChecksum = (checksum: string) => {
-    navigator.clipboard.writeText(checksum)
-    setCopiedChecksum(checksum)
-    setTimeout(() => setCopiedChecksum(null), 2000)
-  }
-
-  const handleDeleteProvider = async () => {
-    if (!namespace || !type) return
-
-    try {
-      setDeleting(true)
-      await api.deleteProvider(namespace, type)
-      navigate('/providers')
-    } catch (err: unknown) {
-      console.error('Failed to delete provider:', err)
-      setError(getErrorMessage(err, 'Failed to delete provider. Please try again.'))
-    } finally {
-      setDeleting(false)
-      setDeleteProviderDialogOpen(false)
-    }
-  }
-
-  const handleDeleteVersion = async () => {
-    if (!namespace || !type || !versionToDelete) return
-
-    try {
-      setDeleting(true)
-      await api.deleteProviderVersion(namespace, type, versionToDelete)
-      // Reload the provider details
-      await loadProviderDetails()
-      setVersionToDelete(null)
-    } catch (err: unknown) {
-      console.error('Failed to delete version:', err)
-      setError(getErrorMessage(err, 'Failed to delete version. Please try again.'))
-    } finally {
-      setDeleting(false)
-      setDeleteVersionDialogOpen(false)
-    }
-  }
-
-  const openDeleteVersionDialog = (version: string) => {
-    setVersionToDelete(version)
-    setDeleteVersionDialogOpen(true)
-  }
-
-  const handleDeprecateVersion = async () => {
-    if (!namespace || !type || !selectedVersion) return
-
-    try {
-      setDeprecating(true)
-      await api.deprecateProviderVersion(
-        namespace,
-        type,
-        selectedVersion.version,
-        deprecationMessage || undefined,
-      )
-      // Reload the provider details
-      await loadProviderDetails()
-      setDeprecationMessage('')
-    } catch (err: unknown) {
-      console.error('Failed to deprecate version:', err)
-      setError(getErrorMessage(err, 'Failed to deprecate version. Please try again.'))
-    } finally {
-      setDeprecating(false)
-      setDeprecateDialogOpen(false)
-    }
-  }
-
-  const handlePublishNewVersion = () => {
-    navigate('/admin/upload/provider', {
-      state: {
-        providerData: { namespace, type },
-        method: 'upload' as const,
-      },
-    })
-  }
-
-  const handleUndeprecateVersion = async () => {
-    if (!namespace || !type || !selectedVersion) return
-
-    try {
-      setDeprecating(true)
-      await api.undeprecateProviderVersion(namespace, type, selectedVersion.version)
-      // Reload the provider details
-      await loadProviderDetails()
-    } catch (err: unknown) {
-      console.error('Failed to remove deprecation:', err)
-      setError(getErrorMessage(err, 'Failed to remove deprecation. Please try again.'))
-    } finally {
-      setDeprecating(false)
-    }
-  }
-
-  const handleTabChange = (_: React.SyntheticEvent, newValue: number) => {
-    setSearchParams(
-      (prev) => {
-        const next = new URLSearchParams(prev)
-        if (newValue === 1) {
-          next.set('tab', 'docs')
-        } else {
-          next.delete('tab')
-          next.delete('doc')
-        }
-        return next
-      },
-      { replace: true },
-    )
-  }
-
-  const handleDocSelect = (category: string, slug: string) => {
-    setSearchParams(
-      (prev) => {
-        const next = new URLSearchParams(prev)
-        next.set('tab', 'docs')
-        next.set('doc', `${category}/${slug}`)
-        return next
-      },
-      { replace: true },
-    )
-  }
-
-  const getTerraformExample = () => {
-    if (!provider || !selectedVersion) return ''
-
-    const v = selectedVersion.version
-    const majorMinor = v.split('.').slice(0, 2).join('.')
-
-    // Mirrored providers use the upstream source (e.g. hashicorp/aws) because
-    // Terraform resolves the mirror transparently via CLI network mirror config.
-    if (provider.source) {
-      return `terraform {
-  required_version = ">= 1.0.0"
-
-  required_providers {
-    ${name} = {
-      source  = "${namespace}/${name}"
-      version = ">=${majorMinor}"
-    }
-  }
-}`
-    }
-
-    return `terraform {
-  required_providers {
-    ${name} = {
-      source  = "${REGISTRY_HOST}/${namespace}/${name}"
-      version = "${selectedVersion.version}"
-    }
-  }
-}
-
-provider "${name}" {
-  # Configure provider settings here
-}`
-  }
-
-  const hasDocs = provider?.source && selectedVersion
-
-  // Derive GitHub repo URL from namespace/type convention for mirrored providers
-  const githubUrl = provider?.source
-    ? `https://github.com/${namespace}/terraform-provider-${type}`
-    : null
-  const changelogUrl =
-    githubUrl && selectedVersion ? `${githubUrl}/releases/tag/v${selectedVersion.version}` : null
+  // Sidebar cards are identical on the Overview and Documentation tabs.
+  const sidebarCards = provider && (
+    <>
+      <ProviderInfoPanel
+        provider={provider}
+        namespace={namespace}
+        name={name}
+        versions={versions}
+        selectedVersion={selectedVersion}
+        githubUrl={githubUrl}
+        changelogUrl={changelogUrl}
+      />
+      <ProviderVersionDetailsPanel
+        selectedVersion={selectedVersion}
+        canManage={canManage}
+        deprecating={deprecating}
+        onUndeprecate={handleUndeprecateVersion}
+        onOpenDeprecateDialog={() => setDeprecateDialogOpen(true)}
+        onOpenDeleteVersionDialog={openDeleteVersionDialog}
+      />
+    </>
+  )
 
   return (
     <Box aria-busy={loading} aria-live="polite">
@@ -404,145 +114,18 @@ provider "${name}" {
         </Page>
       ) : (
         <Page maxWidth="xl">
-          {/* Breadcrumbs */}
-          <Breadcrumbs sx={{ mb: 3 }}>
-            <Link
-              component="button"
-              variant="body1"
-              onClick={() => navigate('/providers')}
-              sx={{ cursor: 'pointer' }}
-            >
-              Providers
-            </Link>
-            <Typography
-              sx={{
-                color: 'text.primary',
-              }}
-            >
-              {namespace}
-            </Typography>
-            <Typography
-              sx={{
-                color: 'text.primary',
-              }}
-            >
-              {name}
-            </Typography>
-            {selectedVersion && (
-              <Typography
-                sx={{
-                  color: 'text.primary',
-                }}
-              >
-                v{selectedVersion.version}
-              </Typography>
-            )}
-          </Breadcrumbs>
-
-          {/* Header */}
-          <Box sx={{ mb: 3 }}>
-            <Stack
-              direction="row"
-              spacing={2}
-              sx={{
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                mb: 2,
-              }}
-            >
-              <Stack
-                direction="row"
-                spacing={2}
-                sx={{
-                  alignItems: 'center',
-                }}
-              >
-                <IconButton
-                  aria-label={t('providers.detail.ariaBack')}
-                  onClick={() => navigate('/providers')}
-                >
-                  <ArrowBack />
-                </IconButton>
-                <Typography variant="h4" component="h1">
-                  {name}
-                </Typography>
-              </Stack>
-              {canManage && !provider.source && (
-                <Button variant="contained" startIcon={<Add />} onClick={handlePublishNewVersion}>
-                  {t('providers.detail.publishNewVersion')}
-                </Button>
-              )}
-            </Stack>
-            <Typography
-              variant="body1"
-              gutterBottom
-              sx={{
-                color: 'text.secondary',
-              }}
-            >
-              {provider.description || 'No description available'}
-            </Typography>
-            <Stack
-              direction="row"
-              spacing={1}
-              sx={{
-                alignItems: 'center',
-                mt: 2,
-              }}
-            >
-              <Chip label={namespace} />
-              {provider.source && (
-                <Chip
-                  label={t('providers.networkMirroredBadge')}
-                  color="info"
-                  size="small"
-                  variant="outlined"
-                />
-              )}
-              <FormControl size="small" sx={{ minWidth: 220 }}>
-                <Select
-                  value={selectedVersion?.version || ''}
-                  onChange={(e) => {
-                    const version = versions.find((v) => v.version === e.target.value)
-                    if (version) setSelectedVersion(version)
-                  }}
-                  displayEmpty
-                >
-                  {versions.map((v) => (
-                    <MenuItem
-                      key={v.id}
-                      value={v.version}
-                      sx={{ color: v.deprecated ? 'text.disabled' : 'inherit' }}
-                    >
-                      v{v.version}
-                      {versions.find((ver) => !ver.deprecated)?.id === v.id ? ' (latest)' : ''}
-                      {v.deprecated ? ' [DEPRECATED]' : ''}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-              {selectedVersion?.deprecated && (
-                <Chip
-                  label={t('providers.detail.chipDeprecated')}
-                  color="warning"
-                  size="small"
-                  icon={<Warning />}
-                />
-              )}
-              <Chip label={`${provider.download_count ?? 0} downloads`} />
-              {canManage && (
-                <Button
-                  variant="outlined"
-                  color="error"
-                  size="small"
-                  startIcon={<Delete />}
-                  onClick={() => setDeleteProviderDialogOpen(true)}
-                >
-                  {t('providers.detail.deleteProvider')}
-                </Button>
-              )}
-            </Stack>
-          </Box>
+          <ProviderDetailHeader
+            provider={provider}
+            namespace={namespace}
+            name={name}
+            versions={versions}
+            selectedVersion={selectedVersion}
+            canManage={canManage}
+            onBack={() => navigate('/providers')}
+            onSelectVersion={setSelectedVersion}
+            onPublishNewVersion={handlePublishNewVersion}
+            onOpenDeleteProviderDialog={() => setDeleteProviderDialogOpen(true)}
+          />
 
           {/* Tabs */}
           {hasDocs && (
@@ -559,252 +142,21 @@ provider "${name}" {
             <Box sx={{ display: 'flex', gap: 3, flexDirection: { xs: 'column', md: 'row' } }}>
               {/* Main Content */}
               <Box sx={{ flex: 1 }}>
-                {/* Usage Example */}
-                <Paper sx={{ p: 3, mb: 3 }}>
-                  <Stack
-                    direction="row"
-                    sx={{
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
-                      mb: 2,
-                    }}
-                  >
-                    <Typography variant="h6">{t('providers.detail.usageExample')}</Typography>
-                    <Tooltip title={copiedSource ? 'Copied!' : t('providers.detail.copySourceUrl')}>
-                      <IconButton
-                        aria-label={t('providers.detail.copySourceUrl')}
-                        onClick={handleCopySource}
-                        size="small"
-                      >
-                        <ContentCopy />
-                      </IconButton>
-                    </Tooltip>
-                  </Stack>
-                  <Box
-                    component="pre"
-                    sx={{
-                      p: 2,
-                      backgroundColor: (theme) =>
-                        theme.palette.mode === 'dark' ? '#2d2d2d' : '#f5f5f5',
-                      color: (theme) => (theme.palette.mode === 'dark' ? '#e6e6e6' : '#1e1e1e'),
-                      borderRadius: 1,
-                      overflow: 'auto',
-                      fontSize: '0.875rem',
-                    }}
-                  >
-                    <code>{getTerraformExample()}</code>
-                  </Box>
-                </Paper>
+                <ProviderUsageExample
+                  example={getTerraformExample()}
+                  copied={copiedSource}
+                  onCopySource={handleCopySource}
+                />
 
-                {/* Platforms Table */}
-                {selectedVersion &&
-                  selectedVersion.platforms &&
-                  selectedVersion.platforms.length > 0 && (
-                    <Paper sx={{ p: 3 }}>
-                      <Typography variant="h6" gutterBottom>
-                        Available Platforms
-                      </Typography>
-                      <Divider sx={{ mb: 2 }} />
-                      <TableContainer>
-                        <Table size="small">
-                          <TableHead>
-                            <TableRow>
-                              <TableCell>OS</TableCell>
-                              <TableCell>{t('providers.detail.thArchitecture')}</TableCell>
-                              <TableCell>{t('providers.detail.thSha256Sum')}</TableCell>
-                              <TableCell width="50px"></TableCell>
-                            </TableRow>
-                          </TableHead>
-                          <TableBody>
-                            {selectedVersion.platforms.map((platform) => (
-                              <TableRow key={platform.id}>
-                                <TableCell>{platform.os}</TableCell>
-                                <TableCell>{platform.arch}</TableCell>
-                                <TableCell
-                                  sx={{
-                                    fontFamily: 'monospace',
-                                    fontSize: '0.75rem',
-                                    wordBreak: 'break-all',
-                                  }}
-                                >
-                                  {platform.shasum || 'N/A'}
-                                </TableCell>
-                                <TableCell>
-                                  {platform.shasum && (
-                                    <Tooltip
-                                      title={
-                                        copiedChecksum === platform.shasum
-                                          ? 'Copied!'
-                                          : t('providers.detail.tooltipCopyChecksum')
-                                      }
-                                    >
-                                      <IconButton
-                                        size="small"
-                                        aria-label={t('providers.detail.ariaCopyChecksum')}
-                                        onClick={() => handleCopyChecksum(platform.shasum)}
-                                      >
-                                        <ContentCopy fontSize="small" />
-                                      </IconButton>
-                                    </Tooltip>
-                                  )}
-                                </TableCell>
-                              </TableRow>
-                            ))}
-                          </TableBody>
-                        </Table>
-                      </TableContainer>
-                    </Paper>
-                  )}
+                <ProviderPlatformsTable
+                  platforms={selectedVersion?.platforms ?? []}
+                  copiedChecksum={copiedChecksum}
+                  onCopyChecksum={handleCopyChecksum}
+                />
               </Box>
 
               {/* Sidebar - Provider Information and Version Details */}
-              <Box sx={{ width: { xs: '100%', md: 320 }, flexShrink: 0 }}>
-                {/* Provider Information */}
-                <Paper sx={{ p: 3, mb: 3 }}>
-                  <Typography variant="h6" gutterBottom>
-                    {t('providers.detail.sidebarProviderInfo')}
-                  </Typography>
-                  <Divider sx={{ mb: 2 }} />
-                  <Box sx={{ '& > *': { mb: 1 } }}>
-                    <Typography variant="body2">
-                      <strong>Namespace:</strong> {namespace}
-                    </Typography>
-                    <Typography variant="body2">
-                      <strong>Name:</strong> {name}
-                    </Typography>
-                    <Typography variant="body2">
-                      <strong>{t('providers.detail.labelLatestVersion')}</strong>{' '}
-                      {versions.length > 0
-                        ? (versions.find((v) => !v.deprecated) ?? versions[0]).version
-                        : 'N/A'}
-                    </Typography>
-                    <Typography variant="body2">
-                      <strong>{t('providers.detail.labelTotalDownloads')}</strong>{' '}
-                      {provider.download_count ?? 0}
-                    </Typography>
-                    {githubUrl && (
-                      <Box sx={{ mt: 1 }}>
-                        <Button
-                          variant="outlined"
-                          size="small"
-                          startIcon={<GitHub fontSize="small" />}
-                          href={githubUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          fullWidth
-                        >
-                          GitHub Repository
-                        </Button>
-                      </Box>
-                    )}
-                    {changelogUrl && (
-                      <Box sx={{ mt: 1 }}>
-                        <Button
-                          variant="outlined"
-                          size="small"
-                          href={changelogUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          fullWidth
-                        >
-                          Changelog v{selectedVersion?.version}
-                        </Button>
-                      </Box>
-                    )}
-                    {provider.created_by_name && (
-                      <Typography variant="body2" sx={{ mt: 1 }}>
-                        <strong>{t('providers.detail.labelCreatedBy')}</strong>{' '}
-                        {provider.created_by_name}
-                      </Typography>
-                    )}
-                  </Box>
-                </Paper>
-
-                {/* Selected Version Details */}
-                {selectedVersion && (
-                  <Paper sx={{ p: 3 }}>
-                    <Typography variant="h6" gutterBottom>
-                      Version {selectedVersion.version} Details
-                    </Typography>
-                    <Divider sx={{ mb: 2 }} />
-                    <Typography variant="body2" sx={{ mb: 2 }}>
-                      <strong>Published:</strong>{' '}
-                      {new Date(selectedVersion.published_at).toISOString().split('T')[0]}
-                    </Typography>
-                    <Typography variant="body2" sx={{ mb: 2 }}>
-                      <strong>Downloads:</strong> {selectedVersion.download_count ?? 0}
-                    </Typography>
-                    {selectedVersion.published_by_name && (
-                      <Typography variant="body2" sx={{ mb: 2 }}>
-                        <strong>{t('providers.detail.labelPublishedBy')}</strong>{' '}
-                        {selectedVersion.published_by_name}
-                      </Typography>
-                    )}
-
-                    {/* Deprecation Status */}
-                    {selectedVersion.deprecated && (
-                      <Alert severity="warning" sx={{ mb: 2 }}>
-                        <Typography variant="body2">
-                          <strong>{t('providers.detail.chipDeprecated')}</strong>
-                          {selectedVersion.deprecated_at && (
-                            <>
-                              {' '}
-                              on{' '}
-                              {new Date(selectedVersion.deprecated_at).toISOString().split('T')[0]}
-                            </>
-                          )}
-                        </Typography>
-                        {selectedVersion.deprecation_message && (
-                          <Typography variant="body2" sx={{ mt: 1 }}>
-                            {selectedVersion.deprecation_message}
-                          </Typography>
-                        )}
-                      </Alert>
-                    )}
-
-                    {canManage && (
-                      <Stack spacing={1}>
-                        {selectedVersion.deprecated ? (
-                          <Button
-                            variant="outlined"
-                            color="success"
-                            size="small"
-                            startIcon={<Restore />}
-                            onClick={handleUndeprecateVersion}
-                            disabled={deprecating}
-                            fullWidth
-                          >
-                            {deprecating
-                              ? t('providers.detail.removing')
-                              : t('providers.detail.removeDeprecation')}
-                          </Button>
-                        ) : (
-                          <Button
-                            variant="outlined"
-                            color="warning"
-                            size="small"
-                            startIcon={<Warning />}
-                            onClick={() => setDeprecateDialogOpen(true)}
-                            fullWidth
-                          >
-                            {t('providers.detail.deprecateVersion')}
-                          </Button>
-                        )}
-                        <Button
-                          variant="outlined"
-                          color="error"
-                          size="small"
-                          startIcon={<Delete />}
-                          onClick={() => openDeleteVersionDialog(selectedVersion.version)}
-                          fullWidth
-                        >
-                          {t('providers.detail.deleteThisVersion')}
-                        </Button>
-                      </Stack>
-                    )}
-                  </Paper>
-                )}
-              </Box>
+              <Box sx={{ width: { xs: '100%', md: 320 }, flexShrink: 0 }}>{sidebarCards}</Box>
             </Box>
           )}
 
@@ -835,10 +187,14 @@ provider "${name}" {
                   />
                 </Box>
                 <Box sx={{ flex: 1, overflowY: 'auto' }}>
-                  {selectedDocCategory && selectedDocSlug && selectedVersion ? (
+                  {selectedDocCategory &&
+                  selectedDocSlug &&
+                  selectedVersion &&
+                  namespace &&
+                  type ? (
                     <ProviderDocContent
-                      namespace={namespace!}
-                      type={type!}
+                      namespace={namespace}
+                      type={type}
                       version={selectedVersion.version}
                       category={selectedDocCategory}
                       slug={selectedDocSlug}
@@ -858,148 +214,7 @@ provider "${name}" {
               </Paper>
 
               {/* Info cards — same as overview tab */}
-              <Box sx={{ width: 320, flexShrink: 0 }}>
-                <Paper sx={{ p: 3, mb: 3 }}>
-                  <Typography variant="h6" gutterBottom>
-                    {t('providers.detail.sidebarProviderInfo')}
-                  </Typography>
-                  <Divider sx={{ mb: 2 }} />
-                  <Box sx={{ '& > *': { mb: 1 } }}>
-                    <Typography variant="body2">
-                      <strong>Namespace:</strong> {namespace}
-                    </Typography>
-                    <Typography variant="body2">
-                      <strong>Name:</strong> {name}
-                    </Typography>
-                    <Typography variant="body2">
-                      <strong>{t('providers.detail.labelLatestVersion')}</strong>{' '}
-                      {versions.length > 0
-                        ? (versions.find((v) => !v.deprecated) ?? versions[0]).version
-                        : 'N/A'}
-                    </Typography>
-                    <Typography variant="body2">
-                      <strong>{t('providers.detail.labelTotalDownloads')}</strong>{' '}
-                      {provider.download_count ?? 0}
-                    </Typography>
-                    {githubUrl && (
-                      <Box sx={{ mt: 1 }}>
-                        <Button
-                          variant="outlined"
-                          size="small"
-                          startIcon={<GitHub fontSize="small" />}
-                          href={githubUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          fullWidth
-                        >
-                          GitHub Repository
-                        </Button>
-                      </Box>
-                    )}
-                    {changelogUrl && (
-                      <Box sx={{ mt: 1 }}>
-                        <Button
-                          variant="outlined"
-                          size="small"
-                          href={changelogUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          fullWidth
-                        >
-                          Changelog v{selectedVersion?.version}
-                        </Button>
-                      </Box>
-                    )}
-                    {provider.created_by_name && (
-                      <Typography variant="body2" sx={{ mt: 1 }}>
-                        <strong>{t('providers.detail.labelCreatedBy')}</strong>{' '}
-                        {provider.created_by_name}
-                      </Typography>
-                    )}
-                  </Box>
-                </Paper>
-
-                {selectedVersion && (
-                  <Paper sx={{ p: 3 }}>
-                    <Typography variant="h6" gutterBottom>
-                      Version {selectedVersion.version} Details
-                    </Typography>
-                    <Divider sx={{ mb: 2 }} />
-                    <Typography variant="body2" sx={{ mb: 1 }}>
-                      <strong>Published:</strong>{' '}
-                      {new Date(selectedVersion.published_at).toISOString().split('T')[0]}
-                    </Typography>
-                    <Typography variant="body2" sx={{ mb: 1 }}>
-                      <strong>Downloads:</strong> {selectedVersion.download_count ?? 0}
-                    </Typography>
-                    {selectedVersion.published_by_name && (
-                      <Typography variant="body2" sx={{ mb: 2 }}>
-                        <strong>{t('providers.detail.labelPublishedBy')}</strong>{' '}
-                        {selectedVersion.published_by_name}
-                      </Typography>
-                    )}
-                    {selectedVersion.deprecated && (
-                      <Alert severity="warning" sx={{ mb: 2 }}>
-                        <Typography variant="body2">
-                          <strong>{t('providers.detail.chipDeprecated')}</strong>
-                          {selectedVersion.deprecated_at && (
-                            <>
-                              {' '}
-                              on{' '}
-                              {new Date(selectedVersion.deprecated_at).toISOString().split('T')[0]}
-                            </>
-                          )}
-                        </Typography>
-                        {selectedVersion.deprecation_message && (
-                          <Typography variant="body2" sx={{ mt: 1 }}>
-                            {selectedVersion.deprecation_message}
-                          </Typography>
-                        )}
-                      </Alert>
-                    )}
-                    {canManage && (
-                      <Stack spacing={1}>
-                        {selectedVersion.deprecated ? (
-                          <Button
-                            variant="outlined"
-                            color="success"
-                            size="small"
-                            startIcon={<Restore />}
-                            onClick={handleUndeprecateVersion}
-                            disabled={deprecating}
-                            fullWidth
-                          >
-                            {deprecating
-                              ? t('providers.detail.removing')
-                              : t('providers.detail.removeDeprecation')}
-                          </Button>
-                        ) : (
-                          <Button
-                            variant="outlined"
-                            color="warning"
-                            size="small"
-                            startIcon={<Warning />}
-                            onClick={() => setDeprecateDialogOpen(true)}
-                            fullWidth
-                          >
-                            {t('providers.detail.deprecateVersion')}
-                          </Button>
-                        )}
-                        <Button
-                          variant="outlined"
-                          color="error"
-                          size="small"
-                          startIcon={<Delete />}
-                          onClick={() => openDeleteVersionDialog(selectedVersion.version)}
-                          fullWidth
-                        >
-                          {t('providers.detail.deleteThisVersion')}
-                        </Button>
-                      </Stack>
-                    )}
-                  </Paper>
-                )}
-              </Box>
+              <Box sx={{ width: 320, flexShrink: 0 }}>{sidebarCards}</Box>
             </Box>
           )}
 

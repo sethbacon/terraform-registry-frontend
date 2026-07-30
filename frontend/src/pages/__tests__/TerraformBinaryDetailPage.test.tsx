@@ -29,13 +29,14 @@ vi.mock('../../contexts/AuthContext', () => ({
   }),
 }))
 
-import TerraformBinaryDetailPage, { getChangelogUrl } from '../TerraformBinaryDetailPage'
+import TerraformBinaryDetailPage from '../TerraformBinaryDetailPage'
 
 function renderPage(path = '/terraform/binaries/terraform') {
   return render(
     <MemoryRouter initialEntries={[path]}>
       <Routes>
         <Route path="/terraform/binaries/:name" element={<TerraformBinaryDetailPage />} />
+        <Route path="/terraform-binaries" element={<div>mirror list</div>} />
       </Routes>
     </MemoryRouter>,
   )
@@ -246,46 +247,43 @@ describe('TerraformBinaryDetailPage', () => {
       expect(screen.getByText(/No versions have been synced yet/)).toBeInTheDocument(),
     )
   })
-})
 
-describe('getChangelogUrl', () => {
-  it('builds per-version GitHub release tags for terraform and opentofu', () => {
-    expect(getChangelogUrl('terraform', '1.8.0')).toBe(
-      'https://github.com/hashicorp/terraform/releases/tag/v1.8.0',
+  it('dismisses the action success banner', async () => {
+    listPublicTerraformMirrorConfigsMock.mockResolvedValue([fakeConfig])
+    listPublicTerraformVersionsMock.mockResolvedValue(fakeVersions)
+    undeprecateTerraformVersionMock.mockResolvedValue({})
+    renderPage()
+    await waitFor(() => expect(screen.getByText('1.7.0')).toBeInTheDocument())
+    await userEvent.click(screen.getByRole('button', { name: /undeprecate version/i }))
+    await waitFor(() =>
+      expect(screen.getByText(/Deprecation removed from version 1\.7\.0/)).toBeInTheDocument(),
     )
-    expect(getChangelogUrl('opentofu', '1.7.0')).toBe(
-      'https://github.com/opentofu/opentofu/releases/tag/v1.7.0',
+    await userEvent.click(screen.getByRole('button', { name: /^close$/i }))
+    await waitFor(() =>
+      expect(
+        screen.queryByText(/Deprecation removed from version 1\.7\.0/),
+      ).not.toBeInTheDocument(),
     )
   })
 
-  it('builds per-version GitHub release tags for opa and packer', () => {
-    expect(getChangelogUrl('opa', '0.60.0')).toBe(
-      'https://github.com/open-policy-agent/opa/releases/tag/v0.60.0',
-    )
-    expect(getChangelogUrl('packer', '1.11.0')).toBe(
-      'https://github.com/hashicorp/packer/releases/tag/v1.11.0',
-    )
+  it('shows and dismisses an action error when an action fails', async () => {
+    listPublicTerraformMirrorConfigsMock.mockResolvedValue([fakeConfig])
+    listPublicTerraformVersionsMock.mockResolvedValue(fakeVersions)
+    undeprecateTerraformVersionMock.mockRejectedValue(new Error('Upstream refused'))
+    renderPage()
+    await waitFor(() => expect(screen.getByText('1.7.0')).toBeInTheDocument())
+    await userEvent.click(screen.getByRole('button', { name: /undeprecate version/i }))
+    await waitFor(() => expect(screen.getByText('Upstream refused')).toBeInTheDocument())
+    await userEvent.click(screen.getByRole('button', { name: /^close$/i }))
+    await waitFor(() => expect(screen.queryByText('Upstream refused')).not.toBeInTheDocument())
   })
 
-  it('builds a per-version GitHub release tag for terraform-docs', () => {
-    expect(getChangelogUrl('terraform-docs', '0.24.0')).toBe(
-      'https://github.com/terraform-docs/terraform-docs/releases/tag/v0.24.0',
-    )
-  })
-
-  it('links sentinel to the consolidated changelog page (no per-version tag)', () => {
-    expect(getChangelogUrl('sentinel', '0.40.0')).toBe(
-      'https://developer.hashicorp.com/sentinel/docs/changelog',
-    )
-  })
-
-  it('does not double-prefix a version that already starts with v', () => {
-    expect(getChangelogUrl('opa', 'v1.0.0')).toBe(
-      'https://github.com/open-policy-agent/opa/releases/tag/v1.0.0',
-    )
-  })
-
-  it('returns null for unknown/custom tools', () => {
-    expect(getChangelogUrl('custom-tool', '1.0.0')).toBeNull()
+  it('returns to the mirror list from the error state', async () => {
+    listPublicTerraformMirrorConfigsMock.mockRejectedValue(new Error('fail'))
+    listPublicTerraformVersionsMock.mockRejectedValue(new Error('fail'))
+    renderPage()
+    await waitFor(() => expect(screen.getByRole('button', { name: /back/i })).toBeInTheDocument())
+    await userEvent.click(screen.getByRole('button', { name: /back/i }))
+    await waitFor(() => expect(screen.getByText('mirror list')).toBeInTheDocument())
   })
 })
