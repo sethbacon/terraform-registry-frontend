@@ -1997,7 +1997,8 @@
       "emptyTitle": "Não existem registos de auditoria que correspondam aos filtros atuais",
       "emptySubtitle": "As entradas do registo de auditoria aparecem quando os utilizadores efetuam alterações. Ajuste os filtros acima ou publique um módulo para ver uma.",
       "detailTitle": "Detalhes do registo de auditoria",
-      "close": "Fechar"
+      "close": "Fechar",
+      "errLoad": "Não foi possível carregar os registos de auditoria"
     },
     "notifications": {
       "pageTitle": "Notificações",

@@ -1997,7 +1997,8 @@
       "emptyTitle": "Aucune entrée d'audit ne correspond aux filtres actuels",
       "emptySubtitle": "Des entrées de journal d'audit s'affichent lorsque les utilisateurs effectuent des modifications. Modifiez les filtres ci-dessus ou publiez un module pour en voir une.",
       "detailTitle": "Détails du journal d'audit",
-      "close": "Fermer"
+      "close": "Fermer",
+      "errLoad": "Échec du chargement des journaux d'audit"
     },
     "notifications": {
       "pageTitle": "Notifications",

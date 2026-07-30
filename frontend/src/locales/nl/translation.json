@@ -1997,7 +1997,8 @@
       "emptyTitle": "Er zijn geen auditvermeldingen die aan de huidige filters voldoen",
       "emptySubtitle": "Er verschijnen logboekvermeldingen wanneer gebruikers wijzigingen aanbrengen. Pas de bovenstaande filters aan of publiceer een module om er een te bekijken.",
       "detailTitle": "Details van het auditlogboek",
-      "close": "Sluiten"
+      "close": "Sluiten",
+      "errLoad": "Het laden van de auditlogboeken is mislukt"
     },
     "notifications": {
       "pageTitle": "Meldingen",
