@@ -274,6 +274,27 @@ The most complex hook in the codebase. It composes multiple React Query queries 
 
 It also manages UI state (selected version, tab, dialogs) and provides `useMutation` wrappers for delete, deprecate, and SCM operations. Route params (`namespace`, `name`, `system`) come from `useParams()`.
 
+### `useProviderDetail` (`hooks/useProviderDetail.ts`)
+
+The provider-side counterpart to `useModuleDetail`. It owns everything `ProviderDetailPage` needs so the page itself stays presentational:
+
+- Loads the provider and its versions (`api.searchProviders` + `api.getProviderVersions`), sorted newest-first with stable releases ahead of pre-releases.
+- Walks the paginated doc index (`api.getProviderDocs`) for network-mirrored providers only.
+- Owns the `?tab=docs` / `?doc=<category>/<slug>` query state via `useSearchParams`, plus dialog and copy-feedback UI state.
+- Exposes delete / deprecate / undeprecate handlers and the derived `getTerraformExample()`, `githubUrl` and `changelogUrl` values.
+
+Unlike `useModuleDetail` it does not use React Query yet -- it keeps the page's original `useState` + `useEffect` fetching.
+
+### `useTerraformBinaryDetail` (`hooks/useTerraformBinaryDetail.ts`)
+
+The mirrored-binary counterpart to the two hooks above, backing `TerraformBinaryDetailPage`:
+
+- Loads the mirror summary and its versions from the two **public** endpoints (`api.listPublicTerraformMirrorConfigs` + `api.listPublicTerraformVersions`), sorted latest-first then numerically descending.
+- Keeps the `config_id` (UUID) taken from the first version row -- admin actions need it, and the public config summary does not carry it.
+- Owns the deprecate/undeprecate/delete dialog state plus the action error/success banners, and derives `canManage` from the `admin` / `mirrors:manage` scopes.
+
+Like `useProviderDetail` it uses plain `useState` + `useEffect` rather than React Query.
+
 ### `useDebounce` (`hooks/useDebounce.ts`)
 
 A simple generic debounce hook used for search input:
@@ -398,6 +419,15 @@ The following local files are thin wrappers or re-exports around it:
 | `SecurityScanPanel`      | Displays security scan results for a module version                            |
 | `VersionDetailsPanel`    | Shows version metadata, inputs/outputs, dependencies                           |
 | `WebhookEventsPanel`     | Collapsible panel showing SCM webhook events                                   |
+| `ProviderDetailHeader`   | Breadcrumbs, title, version selector and manage actions for a provider        |
+| `ProviderUsageExample`   | `required_providers` snippet with copy-source action                          |
+| `ProviderPlatformsTable` | OS/arch build matrix with copyable SHA256 sums                                |
+| `ProviderInfoPanel`      | Provider sidebar card (namespace, latest version, repo/changelog links)       |
+| `ProviderVersionDetailsPanel` | Provider version sidebar card with deprecation status and actions        |
+| `TerraformBinaryDetailHeader` | Breadcrumbs, title, tool chip and mirror-URL hint for a binary mirror     |
+| `TerraformBinaryVersionsTable` | Synced-version table for a binary mirror (or its empty state)           |
+| `TerraformBinaryVersionRow` | One version row with expandable platform detail; exports `getChangelogUrl` |
+| `TerraformBinaryPlatformRows` | Lazily loaded OS/arch rows with SHA256 / GPG verification state          |
 | `RepositoryBrowser`      | SCM repository picker with branch/tag selection                                |
 | `StorageMigrationWizard` | Multi-step dialog for storage backend migration                                |
 | `ProviderIcon`           | Renders provider brand icons from simple-icons                                 |
