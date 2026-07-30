@@ -1997,7 +1997,8 @@
       "emptyTitle": "Ingen revisjonsoppføringer samsvarer med de gjeldende filtrene",
       "emptySubtitle": "Det vises oppføringer i revisjonsloggen når brukere foretar endringer. Juster filtrene ovenfor eller publiser en modul for å se en slik oppføring.",
       "detailTitle": "Detaljer i revisjonsloggen",
-      "close": "Lukk"
+      "close": "Lukk",
+      "errLoad": "Det lyktes ikke å laste inn revisjonsloggene"
     },
     "notifications": {
       "pageTitle": "Varsler",

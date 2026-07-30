@@ -1997,7 +1997,8 @@
       "emptyTitle": "没有审计条目符合当前筛选条件",
       "emptySubtitle": "当用户进行更改时，系统会生成审计日志条目。请调整上方的筛选条件或发布一个模块，即可查看相关条目。",
       "detailTitle": "审计日志详情",
-      "close": "关闭"
+      "close": "关闭",
+      "errLoad": "无法加载审计日志"
     },
     "notifications": {
       "pageTitle": "通知",

@@ -1997,7 +1997,8 @@
       "emptyTitle": "Nessuna voce di revisione corrisponde ai filtri attuali",
       "emptySubtitle": "Le voci del registro di controllo vengono visualizzate quando gli utenti apportano modifiche. Modifica i filtri qui sopra o pubblica un modulo per visualizzarne una.",
       "detailTitle": "Dettagli del registro di controllo",
-      "close": "Chiudi"
+      "close": "Chiudi",
+      "errLoad": "Impossibile caricare i registri di audit"
     },
     "notifications": {
       "pageTitle": "Notifiche",
