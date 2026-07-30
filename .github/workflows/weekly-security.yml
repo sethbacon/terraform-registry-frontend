@@ -21,7 +21,10 @@ jobs:
   ci:
     name: CI
     uses: ./.github/workflows/ci.yml
-    secrets: inherit
+    # No `secrets:` needed here (#613): ci.yml's only secret-consuming step
+    # (GIST_TOKEN for the coverage badge) is gated to `push`/`workflow_dispatch`
+    # events, neither of which is true on this workflow_call path, so nothing
+    # in ci.yml actually reads an inherited secret when invoked from here.
     permissions:
       contents: read
       packages: read
@@ -30,19 +33,37 @@ jobs:
   npm-audit:
     name: Dependency Audit
     runs-on: ubuntu-latest
+    # Same sibling defect as pr-checks.yml's npm-audit job (#598): without
+    # an explicit grant, this job only has the workflow-level `contents:
+    # read`, and setup-frontend's default `npm ci` needs packages:read to
+    # authenticate to npm.pkg.github.com for @sethbacon/terraform-suite-ui.
+    permissions:
+      contents: read
+      packages: read
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v6
       - uses: ./.github/actions/setup-frontend
         with:
           install-e2e-deps: "true"
 
+      # Same triage the per-PR gate uses (frontend/scripts/audit-gate.mjs):
+      # blocks only on advisories that reach production AND have a non-breaking
+      # fix. Everything else — dev-only packages, advisories with no published
+      # fix or only a breaking one, and documented accepted risks — is reported
+      # as a warning and in the job summary. Keeping this identical to
+      # pr-checks.yml matters: if the weekly run failed on findings the PR gate
+      # deliberately tolerates, it would sit permanently red and get ignored.
       - name: Audit frontend dependencies
-        working-directory: frontend
-        run: npm audit --audit-level=high
+        run: |
+          (cd frontend && npm audit --json > "$RUNNER_TEMP/frontend-audit.json") || true
+          node frontend/scripts/audit-gate.mjs "$RUNNER_TEMP/frontend-audit.json" \
+            --exceptions frontend/scripts/npm-audit-exceptions.json
 
       - name: Audit e2e dependencies
-        working-directory: e2e
-        run: npm audit --audit-level=high
+        run: |
+          (cd e2e && npm audit --json > "$RUNNER_TEMP/e2e-audit.json") || true
+          node frontend/scripts/audit-gate.mjs "$RUNNER_TEMP/e2e-audit.json" \
+            --exceptions frontend/scripts/npm-audit-exceptions.json
 
   # ── OSV Scan ──────────────────────────────────────────
   osv-scan:
