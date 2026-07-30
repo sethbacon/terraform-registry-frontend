@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
 // @ts-expect-error -- plain ESM script, no type declarations by design
-import { triage, render, loadExceptions } from '../audit-gate.mjs'
+import { triage, triageOsv, triageReport, render, loadExceptions } from '../audit-gate.mjs'
 
 type Fix = boolean | { name: string; version: string; isSemVerMajor: boolean }
 
@@ -108,5 +108,92 @@ describe('audit-gate triage', () => {
     const { byAdvisory, byPackage } = loadExceptions('does-not-exist.json')
     expect(byAdvisory.size).toBe(0)
     expect(byPackage.size).toBe(0)
+  })
+})
+
+describe('audit-gate OSV mode', () => {
+  const osvReport = (name: string, installed: string, fixed: string | null, id = 'GHSA-test-1111') => ({
+    results: [
+      {
+        source: { path: 'frontend/package-lock.json' },
+        packages: [
+          {
+            package: { name, version: installed, ecosystem: 'npm' },
+            vulnerabilities: [
+              {
+                id,
+                summary: 'Example advisory',
+                database_specific: { severity: 'HIGH' },
+                affected: [
+                  {
+                    package: { name },
+                    ranges: [
+                      {
+                        type: 'SEMVER',
+                        events: fixed ? [{ introduced: '0' }, { fixed }] : [{ introduced: '0' }],
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      },
+    ],
+  })
+
+  const NONE = { byAdvisory: new Map(), byPackage: new Map() }
+
+  it('blocks a same-major (non-breaking) fix', () => {
+    const { blocking } = triageOsv(osvReport('brace-expansion', '5.0.7', '5.0.8'), NONE)
+    expect(blocking).toHaveLength(1)
+    expect(blocking[0].fix.version).toBe('5.0.8')
+  })
+
+  it('does not block when the only fix crosses a major — the react-router case', () => {
+    // OSV reports a fixed version (8.3.0) for react-router 7.18.1, so a naive
+    // "a fix exists" rule would block forever on a breaking upgrade that also
+    // breaks the suite-ui pin. npm audit calls the same advisory breaking.
+    const { blocking, advisory } = triageOsv(osvReport('react-router', '7.18.1', '8.3.0'), NONE)
+    expect(blocking).toHaveLength(0)
+    expect(advisory[0].why).toBe('only a semver-major (breaking) fix is available')
+  })
+
+  it('does not block when OSV publishes no fixed version', () => {
+    const { blocking, advisory } = triageOsv(osvReport('lib', '1.0.0', null), NONE)
+    expect(blocking).toHaveLength(0)
+    expect(advisory[0].why).toBe('no fixed version published')
+  })
+
+  it('honours the shared exceptions file by advisory id', () => {
+    const exceptions = {
+      byAdvisory: new Map([['GHSA-qwww-vcr4-c8h2', { reason: 'RSC mode unused', review_by: '2026-10-30' }]]),
+      byPackage: new Map(),
+    }
+    const { blocking, accepted } = triageOsv(
+      osvReport('react-router', '7.18.1', '7.19.0', 'GHSA-qwww-vcr4-c8h2'),
+      exceptions,
+    )
+    expect(blocking).toHaveLength(0)
+    expect(accepted[0].reason).toBe('RSC mode unused')
+  })
+
+  it('ignores advisories below the high threshold', () => {
+    const r = osvReport('lib', '1.0.0', '1.0.1')
+    r.results[0].packages[0].vulnerabilities[0].database_specific.severity = 'MODERATE'
+    const { blocking, advisory, accepted } = triageOsv(r, NONE)
+    expect([blocking, advisory, accepted].every((l) => l.length === 0)).toBe(true)
+  })
+
+  it('auto-detects report format so callers need not declare the scanner', () => {
+    const osv = triageReport(osvReport('brace-expansion', '5.0.7', '5.0.8'), NONE)
+    expect(osv.blocking).toHaveLength(1)
+
+    const npm = triageReport(
+      { vulnerabilities: { lib: { severity: 'high', dev: false, fixAvailable: false, via: [{ title: 't', url: 'u/GHSA-x' }] } } },
+      NONE,
+    )
+    expect(npm.advisory).toHaveLength(1)
   })
 })
