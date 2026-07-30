@@ -21,10 +21,17 @@ jobs:
   ci:
     name: CI
     uses: ./.github/workflows/ci.yml
-    # No `secrets:` needed here (#613): ci.yml's only secret-consuming step
-    # (GIST_TOKEN for the coverage badge) is gated to `push`/`workflow_dispatch`
-    # events, neither of which is true on this workflow_call path, so nothing
-    # in ci.yml actually reads an inherited secret when invoked from here.
+    # No `secrets:` passed here (#613): ci.yml's only secret-consuming step is
+    # the GIST_TOKEN coverage badge, which this workflow has no reason to
+    # update.
+    #
+    # NOTE: the original justification for this was wrong. It claimed the
+    # badge step's `push`/`workflow_dispatch` event gate could never be true on
+    # a workflow_call path — but a reusable workflow sees the CALLER's
+    # `github.event_name`, so it IS true here (tag push for release.yml, manual
+    # dispatch for weekly-security.yml) and the step failed with
+    # "Missing auth secret". ci.yml now also requires the token to be non-empty,
+    # so omitting secrets skips the step instead of failing the job.
     permissions:
       contents: read
       packages: read
