@@ -21,8 +21,18 @@ name: Dependabot Auto-Merge
 #   - Routine version bumps (no open alert): auto-merge patch-only,
 #     direct-production only -- unchanged from the original, more conservative
 #     default that isn't specifically security-motivated.
+#
+# Trigger: GitHub always runs `pull_request`-triggered workflows for
+# Dependabot PRs with a read-only GITHUB_TOKEN and no secrets, regardless of
+# the `permissions:`/secrets declared below -- so this job could never
+# actually complete a merge (#597). `pull_request_target` runs in the
+# context of the base repository instead, so it gets the real token and
+# secrets. That's normally risky for PR automation because it can check out
+# and execute untrusted PR code with elevated privileges, but this workflow
+# never checks out the PR head (no `actions/checkout` step at all), so there
+# is no untrusted code execution here.
 on:
-  pull_request:
+  pull_request_target:
 
 permissions:
   contents: write
@@ -49,8 +59,19 @@ jobs:
           alert-lookup: true
 
       - name: Auto-merge security-driven patch/minor updates
+        # package-ecosystem == 'npm_and_yarn' excludes github-actions (and
+        # docker) bumps (#612): action deps have no dev/prod split, so a
+        # workflow-file version bump would otherwise likely qualify as
+        # direct:production and ride this same unreviewed path, granting a
+        # compromised action full repo secrets on every subsequent run.
+        # Always require human review for those regardless of semver level.
+        # 'npm_and_yarn' is fetch-metadata's runtime package-manager
+        # identifier for the npm ecosystem (matches the dependabot/npm_and_yarn/
+        # branch prefix) -- distinct from the 'npm' package-ecosystem key
+        # used in .github/dependabot.yml.
         if: >-
           steps.metadata.outputs.alert-state == 'OPEN' &&
+          steps.metadata.outputs.package-ecosystem == 'npm_and_yarn' &&
           steps.metadata.outputs.dependency-type == 'direct:production' &&
           steps.metadata.outputs.update-type != 'version-update:semver-major'
         run: gh pr merge --auto --squash "$PR_URL"
@@ -59,8 +80,10 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Auto-merge routine patch-level updates
+        # See package-ecosystem note above (#612).
         if: >-
           steps.metadata.outputs.alert-state != 'OPEN' &&
+          steps.metadata.outputs.package-ecosystem == 'npm_and_yarn' &&
           steps.metadata.outputs.update-type == 'version-update:semver-patch' &&
           steps.metadata.outputs.dependency-type == 'direct:production'
         run: gh pr merge --auto --squash "$PR_URL"

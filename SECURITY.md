@@ -58,7 +58,7 @@ We will credit reporters in the release notes unless anonymity is requested.
 
 - All releases are signed with [cosign](https://github.com/sigstore/cosign) (keyless, Sigstore) and include SLSA build provenance attestations
 - Dependencies are monitored by Dependabot, weekly (npm — frontend + e2e —, Docker, and GitHub Actions)
-- `npm audit --audit-level=high` runs in the Docker build and the scheduled security workflow
+- `npm audit --audit-level=high` runs in the Docker build, on every pull request, and in the scheduled security workflow
 - Markdown rendering is sanitised with `rehype-sanitize` (XSS mitigation)
 - `ApiDocumentation.tsx` renders the same-origin `/swagger.json` spec via `swagger-ui-react`, relying on that dependency's bundled DOMPurify-based sanitizer rather than app-side sanitization. This is a tracked residual-trust item, not an active vuln: the spec is server-controlled, and the mitigation is keeping `swagger-ui-react` patched (covered by the weekly `npm audit`/Dependabot workflow) plus ensuring the backend never reflects user-controlled strings into spec description/example fields
 - The frontend follows OWASP Top 10 mitigations applicable to SPAs (output encoding, strict CSP via nginx, no `dangerouslySetInnerHTML` outside the sanitised renderer)
@@ -72,7 +72,9 @@ the release pipeline and supply chain:
 
 ### Branch Protection (`main`)
 
-- Required status checks (strict — branch must be up-to-date): `Lint`, `Typecheck`, `Unit Tests (1/4)`..`(4/4)`, `Unit Test Coverage`, `Contract Check`, `Build`, `Conventional PR Title`
+- Required status checks (strict — branch must be up-to-date): `Lint`, `Typecheck`, `Unit Tests (1/4)`..`(4/4)`, `Unit Test Coverage`, `Contract Check`, `Build`, `Conventional PR Title`, `E2E (security subset)`
+  - `E2E (security subset)` (the XSS/CSRF/open-redirect abuse suite in `e2e/tests/security.spec.ts`) was added on every PR so a regression in that control is caught before merge instead of only in the release-gated full E2E run (#604). The branch protection rule on GitHub must be updated by a repo admin to add this context to the required list above.
+  - `Dependency Audit` (`npm audit --audit-level=high`, frontend + e2e) also now runs on every PR (#598), closing the weekly-only blind spot for anything not yet GHSA-listed. It is deliberately **not** on the required-checks list yet: as of this writing `frontend`'s resolved dependency tree has pre-existing high-severity advisories (`brace-expansion` via the eslint toolchain, GHSA-mh99-v99m-4gvg; `react-router` via the direct `react-router-dom` dependency, GHSA-qwww-vcr4-c8h2) with no non-breaking fix available, so the check fails today independent of any PR's own content. Promote it to required once those advisories are cleared through the normal Dependabot update flow -- adding it as required before then would block every PR regardless of content.
 - Required pull request reviews: 1 approving review, dismiss stale reviews, require code-owner review
 - Required conversation resolution: yes
 - Force pushes: blocked; branch deletion: blocked
@@ -118,7 +120,7 @@ matching `v*.*.*` with a "Restrict deletions" rule.
 
 - All GitHub Actions pinned to full commit SHAs
 - Secret scanning + push protection: enabled
-- `npm audit --audit-level=high` in Dockerfile and the scheduled security workflow
+- `npm audit --audit-level=high` in Dockerfile, on every pull request, and in the scheduled security workflow
 - `rehype-sanitize` for Markdown rendering (XSS mitigation)
 - Scheduled weekly security workflow with auto-issue on failure
 - **SLSA provenance attestation** on Docker images via `actions/attest-build-provenance`

@@ -201,7 +201,8 @@ The CI pipeline is defined in `.github/workflows/ci.yml` and runs on pushes to `
 | **unit-test-coverage** | Merges the shard reports and enforces coverage thresholds                                   |
 | **build**              | Production build, uploads `dist/` artifact                                                  |
 | **contract-check**     | Runs `npm run contract:check` against the backend OpenAPI via `docker-compose.contract-check.yml` |
-| **e2e-gated**          | Playwright against the Docker Compose test stack (main branch, manual dispatch, or release) |
+| **e2e-security**       | Playwright `security.spec.ts` (XSS/CSRF/open-redirect abuse suite) only, single browser -- runs on every PR |
+| **e2e-gated**          | Full Playwright suite against the Docker Compose test stack (main branch, manual dispatch, or release) |
 
 Additional workflows: `release-please.yml` (automated versioning + release PR), `release.yml` (tag-triggered image build + GHCR push), `weekly-security.yml` (weekly security checks), `translate.yml` (DeepL/Google Translate sync of new i18n strings), `dependabot-automerge.yml`, `pr-checks.yml`, `wiki-sync.yml`.
 

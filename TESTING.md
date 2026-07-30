@@ -338,6 +338,7 @@ test('page loads', async ({ loggedInPage: page }) => {
 Tests run automatically in `.github/workflows/ci.yml`:
 
 - **unit-test** job: runs `npm run test:coverage`, uploads the coverage report as an artifact.
-- **e2e-gated** job: starts the Docker Compose test stack, runs Playwright, uploads the report. This job runs on pushes to `main`, `workflow_dispatch`, and `workflow_call` (from release).
+- **e2e-security** job: starts the Docker Compose test stack, runs `tests/security.spec.ts` only (single browser), uploads the report. This job runs on every `pull_request`.
+- **e2e-gated** job: starts the Docker Compose test stack, runs the full Playwright suite, uploads the report. This job runs on pushes to `main`, `workflow_dispatch`, and `workflow_call` (from release).
 
 Coverage reports and Playwright HTML reports are available as downloadable artifacts on each workflow run.
