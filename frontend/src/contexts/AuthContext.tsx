@@ -14,6 +14,36 @@ import {
 import api from '../services/api'
 import { clearAuthStorage } from '../utils/authStorage'
 import { queryClient } from '../queryClient'
+import type { RoleTemplateInfo } from '../types'
+
+// Membership.organization_id/organization_name are required, non-optional
+// strings in the shared package's contract, so the synthetic membership below
+// can't simply omit them. This obviously-fake sentinel (rather than '') is
+// used for both fields so that if a future suite-ui feature (an org switcher,
+// breadcrumbs, etc.) ever renders them, it fails visibly instead of silently
+// showing a blank organization (#622).
+const NO_ORGANIZATION_SENTINEL = '(no organization — registry has a single role_template)'
+
+/**
+ * Builds the synthetic single-membership array the shared package's
+ * MeResponse contract expects, from this app's single role_template (the
+ * registry backend has no real multi-org membership concept). Exported for
+ * unit testing.
+ */
+export function toSyntheticMemberships(
+  roleTemplate: RoleTemplateInfo | null,
+): MeResponse['memberships'] {
+  return roleTemplate
+    ? [
+      {
+        organization_id: NO_ORGANIZATION_SENTINEL,
+        organization_name: NO_ORGANIZATION_SENTINEL,
+        role_template_name: roleTemplate.name,
+        role_template_scopes: roleTemplate.scopes,
+      },
+    ]
+    : []
+}
 
 // On sign-out, also drop the react-query cache so prior-user admin/query data does not
 // linger in memory until a full page reload (a retention gap on shared/kiosk machines).
@@ -29,23 +59,20 @@ const authApi: AuthApi = {
       user: r.user,
       allowed_scopes: r.allowed_scopes,
       session_expires_at: r.session_expires_at ?? undefined,
-      memberships: r.role_template
-        ? [
-          {
-            organization_id: '',
-            organization_name: '',
-            role_template_name: r.role_template.name,
-            role_template_scopes: r.role_template.scopes,
-          },
-        ]
-        : [],
+      memberships: toSyntheticMemberships(r.role_template),
     }
   },
   login: (provider) => api.login(provider),
   // Registry dev/LDAP logins set the HttpOnly auth cookie (plus tfr_csrf) via
   // Set-Cookie on the response — no token in the body, nothing to persist. The
   // suite AuthProvider resolves the session via the subsequent /auth/me probe.
-  devLogin: () => api.devLogin(),
+  //
+  // devLogin is dynamically imported (rather than going through the eager `api`
+  // barrel, which deliberately excludes devApi) so this dev-only endpoint stays
+  // out of the production bundle even though AuthContext itself is always
+  // eagerly loaded (#608). LoginPage only calls this from its own
+  // import.meta.env-gated "Dev Login" button.
+  devLogin: () => import('../services/api/devApi').then((devApi) => devApi.devLogin()),
   ldapLogin: (username, password) => api.ldapLogin(username, password),
   logout: () => api.logout(),
   refreshToken: async () => {

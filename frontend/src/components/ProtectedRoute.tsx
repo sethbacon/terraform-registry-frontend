@@ -1,10 +1,11 @@
 import { Navigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import { CircularProgress, Box, Container, Typography, Alert, Button } from '@mui/material'
+import type { ScopeValue } from '../types/rbac'
 
 interface ProtectedRouteProps {
   children: React.ReactNode
-  requiredScope?: string // Optional scope required to access this route
+  requiredScope?: ScopeValue // Optional scope required to access this route
 }
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, requiredScope }) => {

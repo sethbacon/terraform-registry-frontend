@@ -42,6 +42,7 @@ import PageTitleIcon from '@mui/icons-material/GitHub'
 import api from '../../services/api'
 import { getErrorMessage } from '../../utils/errors'
 import { isSafeExternalUrl } from '../../utils/externalUrl'
+import { useAuth } from '../../contexts/AuthContext'
 import type {
   SCMProvider,
   SCMProviderType,
@@ -61,6 +62,15 @@ interface TokenStatus {
 const SCMProvidersPage: React.FC = () => {
   const { t } = useTranslation()
   const queryClient = useQueryClient()
+  const { allowedScopes } = useAuth()
+  // The route itself is gated at scm:read (view-only) so auditors/viewers can
+  // browse configured providers (routeScopes.ts). Add/Edit/Delete/Connect/
+  // Disconnect/Verify/Save-PAT all mutate or exercise live credentials
+  // (OAuth client secrets, GitHub App private keys, webhook secrets, PATs)
+  // though, so canManage additionally gates those controls on scm:manage/
+  // admin — a scm:read-only viewer would otherwise see fully actionable
+  // credential controls that only fail once clicked (#609).
+  const canManage = allowedScopes.includes('admin') || allowedScopes.includes('scm:manage')
   const [error, setError] = useState<string | null>(null)
   const [createDialogOpen, setCreateDialogOpen] = useState(false)
   const [editingProvider, setEditingProvider] = useState<SCMProvider | null>(null)
@@ -413,16 +423,18 @@ const SCMProvidersPage: React.FC = () => {
                 >
                   {t('admin.scmProviders.refresh')}
                 </Button>
-                <Button
-                  variant="contained"
-                  startIcon={<AddIcon />}
-                  onClick={() => {
-                    resetForm()
-                    setCreateDialogOpen(true)
-                  }}
-                >
-                  {t('admin.scmProviders.addProvider')}
-                </Button>
+                {canManage && (
+                  <Button
+                    variant="contained"
+                    startIcon={<AddIcon />}
+                    onClick={() => {
+                      resetForm()
+                      setCreateDialogOpen(true)
+                    }}
+                  >
+                    {t('admin.scmProviders.addProvider')}
+                  </Button>
+                )}
               </Box>
             }
           />
@@ -663,7 +675,7 @@ const SCMProvidersPage: React.FC = () => {
                   </CardContent>
 
                   <CardActions>
-                    {!isAppModeProvider(provider) && (
+                    {!isAppModeProvider(provider) && canManage && (
                       <>
                         <Tooltip
                           title={
@@ -710,7 +722,7 @@ const SCMProvidersPage: React.FC = () => {
                         )}
                       </>
                     )}
-                    {isAppModeProvider(provider) && (
+                    {isAppModeProvider(provider) && canManage && (
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mr: 'auto' }}>
                         <Button
                           size="small"
@@ -731,28 +743,32 @@ const SCMProvidersPage: React.FC = () => {
                         )}
                       </Box>
                     )}
-                    <Tooltip title={t('admin.scmProviders.tooltipEdit')}>
-                      <IconButton
-                        size="small"
-                        aria-label={t('admin.scmProviders.ariaEdit')}
-                        onClick={() => openEditDialog(provider)}
-                      >
-                        <EditIcon />
-                      </IconButton>
-                    </Tooltip>
-                    <Tooltip title={t('admin.scmProviders.tooltipDelete')}>
-                      <IconButton
-                        size="small"
-                        aria-label={t('admin.scmProviders.ariaDelete')}
-                        color="error"
-                        onClick={() => {
-                          setProviderToDelete(provider)
-                          setDeleteConfirmOpen(true)
-                        }}
-                      >
-                        <DeleteIcon />
-                      </IconButton>
-                    </Tooltip>
+                    {canManage && (
+                      <>
+                        <Tooltip title={t('admin.scmProviders.tooltipEdit')}>
+                          <IconButton
+                            size="small"
+                            aria-label={t('admin.scmProviders.ariaEdit')}
+                            onClick={() => openEditDialog(provider)}
+                          >
+                            <EditIcon />
+                          </IconButton>
+                        </Tooltip>
+                        <Tooltip title={t('admin.scmProviders.tooltipDelete')}>
+                          <IconButton
+                            size="small"
+                            aria-label={t('admin.scmProviders.ariaDelete')}
+                            color="error"
+                            onClick={() => {
+                              setProviderToDelete(provider)
+                              setDeleteConfirmOpen(true)
+                            }}
+                          >
+                            <DeleteIcon />
+                          </IconButton>
+                        </Tooltip>
+                      </>
+                    )}
                   </CardActions>
                 </Card>
               </Grid>

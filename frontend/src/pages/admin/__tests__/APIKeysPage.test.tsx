@@ -27,12 +27,15 @@ vi.mock('../../../services/api', () => ({
   },
 }))
 
+// Default to admin scope so existing tests pass; individual tests can override.
+const useAuthMock = vi.fn(() => ({
+  allowedScopes: ['admin'],
+  roleTemplate: { display_name: 'Administrator' },
+  user: { id: 'user-1' },
+}))
+
 vi.mock('../../../contexts/AuthContext', () => ({
-  useAuth: () => ({
-    allowedScopes: ['admin'],
-    roleTemplate: { display_name: 'Administrator' },
-    user: { id: 'user-1' },
-  }),
+  useAuth: () => useAuthMock(),
 }))
 
 import APIKeysPage from '../APIKeysPage'
@@ -426,5 +429,58 @@ describe('APIKeysPage', () => {
     // "Never" appears both for expiration and last used; check multiple
     const neverTexts = screen.getAllByText('Never')
     expect(neverTexts.length).toBeGreaterThanOrEqual(2)
+  })
+
+  // ---- Mutation controls require api_keys:manage/admin, not just an
+  // authenticated session (#609 -- route is gated at null scope) ----
+
+  describe('mutation control gating', () => {
+    it('hides Create/Edit/Rotate/Delete for a caller with no manage scope', async () => {
+      useAuthMock.mockReturnValue({
+        allowedScopes: ['modules:read'],
+        roleTemplate: { display_name: 'Viewer' },
+        user: { id: 'user-1' },
+      })
+      listAPIKeysMock.mockResolvedValue(fakeKeys)
+      renderPage()
+      await waitFor(() => screen.getByText('CI Pipeline Key'))
+
+      // View access is unaffected -- the viewer still sees the key list.
+      expect(screen.getByText('Expired Key')).toBeInTheDocument()
+      expect(screen.queryByRole('button', { name: /Create API Key/i })).not.toBeInTheDocument()
+      expect(screen.queryByLabelText('Edit API key')).not.toBeInTheDocument()
+      expect(screen.queryByLabelText('Rotate API key')).not.toBeInTheDocument()
+      expect(screen.queryByLabelText('Delete API key')).not.toBeInTheDocument()
+    })
+
+    it('hides the empty-state Create action for a caller with no manage scope', async () => {
+      useAuthMock.mockReturnValue({
+        allowedScopes: ['modules:read'],
+        roleTemplate: { display_name: 'Viewer' },
+        user: { id: 'user-1' },
+      })
+      listAPIKeysMock.mockResolvedValue([])
+      renderPage()
+      await waitFor(() => {
+        expect(screen.getByText('No API keys yet')).toBeInTheDocument()
+      })
+      expect(screen.queryByTestId('apikeys-empty-state-primary')).not.toBeInTheDocument()
+    })
+
+    it('shows Create/Edit/Rotate/Delete once api_keys:manage is granted (non-admin)', async () => {
+      useAuthMock.mockReturnValue({
+        allowedScopes: ['modules:read', 'api_keys:manage'],
+        roleTemplate: { display_name: 'API Key Manager' },
+        user: { id: 'user-1' },
+      })
+      listAPIKeysMock.mockResolvedValue(fakeKeys)
+      renderPage()
+      await waitFor(() => screen.getByText('CI Pipeline Key'))
+
+      expect(screen.getByRole('button', { name: /Create API Key/i })).toBeInTheDocument()
+      expect(screen.getAllByLabelText('Edit API key').length).toBeGreaterThan(0)
+      expect(screen.getAllByLabelText('Rotate API key').length).toBeGreaterThan(0)
+      expect(screen.getAllByLabelText('Delete API key').length).toBeGreaterThan(0)
+    })
   })
 })

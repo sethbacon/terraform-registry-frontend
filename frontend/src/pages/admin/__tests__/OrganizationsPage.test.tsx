@@ -518,6 +518,32 @@ describe('OrganizationsPage', () => {
     expect(screen.queryByRole('button', { name: /remove member/i })).not.toBeInTheDocument()
   })
 
+  // ── canManage also gates org CRUD itself, not just membership (#609) ──────
+
+  it('hides Add/Edit/Delete organization controls for the organizations:read scope', async () => {
+    mockAllowedScopes = ['organizations:read']
+    listOrganizationsMock.mockResolvedValue(fakeOrgs)
+    renderPage()
+    await waitFor(() => expect(screen.getByText('acme-corp')).toBeInTheDocument())
+
+    // View access is unaffected — the viewer still sees the org directory.
+    expect(screen.getByText('globex')).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /add organization/i })).not.toBeInTheDocument()
+    expect(screen.queryByLabelText('Edit organization')).not.toBeInTheDocument()
+    expect(screen.queryByLabelText('Delete organization')).not.toBeInTheDocument()
+  })
+
+  it('shows Add/Edit/Delete organization controls for the canonical organizations:write scope', async () => {
+    mockAllowedScopes = ['organizations:write']
+    listOrganizationsMock.mockResolvedValue(fakeOrgs)
+    renderPage()
+    await waitFor(() => expect(screen.getByText('acme-corp')).toBeInTheDocument())
+
+    expect(screen.getByRole('button', { name: /add organization/i })).toBeInTheDocument()
+    expect(screen.getAllByLabelText('Edit organization').length).toBeGreaterThan(0)
+    expect(screen.getAllByLabelText('Delete organization').length).toBeGreaterThan(0)
+  })
+
   it('blocks save and shows field error when name format is invalid', async () => {
     listOrganizationsMock.mockResolvedValue(fakeOrgs)
     renderPage()

@@ -20,7 +20,6 @@ import * as advisoriesApi from './advisoriesApi'
 import * as apiKeysApi from './apiKeysApi'
 import * as auditApi from './auditApi'
 import * as authApi from './authApi'
-import * as devApi from './devApi'
 import * as identityApi from './identityApi'
 import * as mirrorsApi from './mirrorsApi'
 import * as modulesApi from './modulesApi'
@@ -39,6 +38,15 @@ import * as usersApi from './usersApi'
 import * as versionApi from './versionApi'
 import * as versionApprovalsApi from './versionApprovalsApi'
 
+// devApi (dev/status, dev/login, dev/users, dev/impersonate/:id) is deliberately
+// NOT part of this barrel. Every other domain module here is spread into the
+// eagerly-imported `apiClient` object below, which pulls its code into the main
+// bundle regardless of any import.meta.env.DEV guard at the *call site* --
+// spreading devApi in too would defeat DevUserSwitcher's lazy import and undo
+// the dead-code elimination it exists for (#608). Import
+// '../services/api/devApi' directly (statically only from code that is itself
+// dev-only/lazy-loaded, or via a dynamic import()) instead.
+
 /** Domain modules composed into the flat client, exported for the parity test. */
 export const apiDomains = {
   adminStatsApi,
@@ -46,7 +54,6 @@ export const apiDomains = {
   apiKeysApi,
   auditApi,
   authApi,
-  devApi,
   identityApi,
   mirrorsApi,
   modulesApi,
@@ -72,7 +79,6 @@ const apiClient = {
   ...apiKeysApi,
   ...auditApi,
   ...authApi,
-  ...devApi,
   ...identityApi,
   ...mirrorsApi,
   ...modulesApi,

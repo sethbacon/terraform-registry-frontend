@@ -2,6 +2,7 @@ import { Suspense } from 'react'
 import type { ComponentType } from 'react'
 import ErrorBoundary from './ErrorBoundary'
 import ProtectedRoute from './ProtectedRoute'
+import type { ScopeValue } from '../types/rbac'
 
 const loader = <div>Loading...</div>
 
@@ -12,7 +13,7 @@ interface LazyRouteProps {
    * requires an authenticated user but no specific scope. Pass a scope
    * string for a route gated on that scope (via ProtectedRoute).
    */
-  requiredScope?: string | null
+  requiredScope?: ScopeValue | null
 }
 
 /**

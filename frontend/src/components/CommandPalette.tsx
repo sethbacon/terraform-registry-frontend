@@ -6,12 +6,13 @@ import { Box, Dialog, Typography, useTheme } from '@mui/material'
 import { useAuth } from '../contexts/AuthContext'
 import api from '../services/api'
 import type { Module, Provider } from '../types'
+import type { ScopeValue } from '../types/rbac'
 
 export interface CommandPaletteNavItem {
   label: string
   path: string
   /** If set, the entry is hidden unless the user has the scope (or 'admin'). */
-  scope?: string | null
+  scope?: ScopeValue | null
   group: 'Navigation' | 'Admin'
   keywords?: string[]
 }
@@ -55,14 +56,14 @@ export const defaultCommands: CommandPaletteNavItem[] = [
   {
     label: 'Publish Module',
     path: '/admin/upload/module',
-    scope: 'modules:publish',
+    scope: 'modules:write',
     group: 'Admin',
     keywords: ['upload'],
   },
   {
     label: 'Upload Provider',
     path: '/admin/upload/provider',
-    scope: 'providers:publish',
+    scope: 'providers:write',
     group: 'Admin',
     keywords: ['publish'],
   },

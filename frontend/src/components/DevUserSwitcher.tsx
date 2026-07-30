@@ -13,8 +13,12 @@ import {
 } from '@mui/material'
 import SyncAlt from '@mui/icons-material/SyncAlt'
 import { useAuth } from '../contexts/AuthContext'
-import apiClient from '../services/api'
 import { captureError } from '../services/errorReporting'
+// Imported directly from the domain module rather than the shared `../services/api`
+// barrel: the barrel is spread into every eagerly-loaded page's `apiClient`, so
+// pulling devApi through it would drag dev/impersonate endpoints back into the
+// production bundle despite this component's own lazy import in Layout.tsx (#608).
+import * as devApi from '../services/api/devApi'
 
 interface DevUser {
   id: string
@@ -35,11 +39,11 @@ const DevUserSwitcher = () => {
   useEffect(() => {
     const checkDevMode = async () => {
       try {
-        const status = await apiClient.getDevStatus()
+        const status = await devApi.getDevStatus()
         setDevMode(status.dev_mode)
         if (status.dev_mode) {
           // Load users for impersonation
-          const usersData = await apiClient.listUsersForImpersonation()
+          const usersData = await devApi.listUsersForImpersonation()
           setUsers(usersData.users || [])
         }
       } catch {
@@ -59,7 +63,7 @@ const DevUserSwitcher = () => {
 
     setSwitching(true)
     try {
-      await apiClient.impersonateUser(targetUserId)
+      await devApi.impersonateUser(targetUserId)
       // The backend swapped the HttpOnly auth cookie to the impersonated user;
       // reload the page so the auth context picks up the new session via /auth/me.
       window.location.reload()

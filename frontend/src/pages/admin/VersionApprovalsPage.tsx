@@ -41,6 +41,7 @@ import api from '../../services/api'
 import { queryKeys } from '../../services/queryKeys'
 import { getErrorMessage } from '../../utils/errors'
 import { formatDate } from '../../utils'
+import { useAuth } from '../../contexts/AuthContext'
 import type {
   VersionApproval,
   VersionApprovalStatus,
@@ -145,12 +146,14 @@ function VersionRow({
   onToggleSelect,
   onApprove,
   onReject,
+  canManage,
 }: {
   item: VersionApproval
   selected: boolean
   onToggleSelect: () => void
   onApprove: (item: VersionApproval) => void
   onReject: (item: VersionApproval) => void
+  canManage: boolean
 }) {
   const { t } = useTranslation()
   const [open, setOpen] = useState(false)
@@ -211,7 +214,7 @@ function VersionRow({
         <TableCell>
           <Box sx={{ display: 'flex', gap: 0.5, alignItems: 'center' }}>
             <ApprovalStatusChip status={item.approval_status} />
-            {item.approval_status === 'pending_approval' && (
+            {item.approval_status === 'pending_approval' && canManage && (
               <>
                 <Button
                   size="small"
@@ -252,6 +255,14 @@ const STATUS_TABS: Array<{ label: string; value: VersionApprovalStatus | '' }> =
 const VersionApprovalsPage: React.FC = () => {
   const { t } = useTranslation()
   const queryClient = useQueryClient()
+  const { allowedScopes } = useAuth()
+  // The route itself is gated at mirrors:read (view-only) so auditors/viewers
+  // can browse pending versions (routeScopes.ts). Approve/Reject and the bulk
+  // equivalents mutate approval state though, so canManage additionally
+  // gates those controls on mirrors:manage/admin — a mirrors:read-only
+  // viewer would otherwise see fully actionable controls that only fail once
+  // clicked (#609).
+  const canManage = allowedScopes.includes('admin') || allowedScopes.includes('mirrors:manage')
 
   const [statusTab, setStatusTab] = useState<VersionApprovalStatus | ''>('pending_approval')
   const [typeFilter, setTypeFilter] = useState<'provider' | 'terraform' | 'scanner' | ''>('')
@@ -451,7 +462,7 @@ const VersionApprovalsPage: React.FC = () => {
         </ToggleButtonGroup>
       </Box>
 
-      {selected.size > 0 && (
+      {selected.size > 0 && canManage && (
         <Box sx={{ display: 'flex', gap: 1, mb: 1 }}>
           <Button
             variant="contained"
@@ -518,6 +529,7 @@ const VersionApprovalsPage: React.FC = () => {
                     onToggleSelect={() => toggleOne(item.id)}
                     onApprove={(i) => openActionDialog('approve', i)}
                     onReject={(i) => openActionDialog('reject', i)}
+                    canManage={canManage}
                   />
                 ))
               )}

@@ -30,6 +30,12 @@ vi.mock('../../../services/api', () => ({
   },
 }))
 
+let mockAllowedScopes: string[] = ['admin']
+
+vi.mock('../../../contexts/AuthContext', () => ({
+  useAuth: () => ({ allowedScopes: mockAllowedScopes, user: { id: 'u1' } }),
+}))
+
 import TerraformMirrorPage from '../../admin/TerraformMirrorPage'
 
 function createQueryClient() {
@@ -67,6 +73,7 @@ const fakeConfigs = [
 describe('TerraformMirrorPage', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    mockAllowedScopes = ['admin']
     getTerraformMirrorStatusMock.mockResolvedValue({
       status: 'idle',
       version_count: 3,
@@ -686,5 +693,64 @@ describe('TerraformMirrorPage', () => {
     await userEvent.click(screen.getByRole('button', { name: /view details/i }))
     await waitFor(() => expect(screen.getByText('1.5.0')).toBeInTheDocument())
     expect(screen.getByText('Pending Approval')).toBeInTheDocument()
+  })
+
+  // ── canManage gates mirror-config CRUD/sync + delete-version (#609) ────────
+
+  it('hides Add/Edit/Delete/Sync mirror and Delete version controls for the mirrors:read scope', async () => {
+    mockAllowedScopes = ['mirrors:read']
+    listTerraformMirrorConfigsMock.mockResolvedValue({ configs: fakeConfigs })
+    listVersionsMock.mockResolvedValue({
+      versions: [
+        {
+          id: 'v1',
+          version: '1.5.0',
+          sync_status: 'synced',
+          is_latest: true,
+          is_deprecated: false,
+          synced_at: '2025-06-01T00:00:00Z',
+        },
+      ],
+    })
+    renderPage()
+    await waitFor(() => expect(screen.getAllByText('terraform').length).toBeGreaterThan(0))
+
+    // View access is unaffected — the viewer still sees the config card.
+    expect(screen.queryByRole('button', { name: /add mirror/i })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /edit mirror/i })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /delete mirror/i })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /^sync mirror$/i })).not.toBeInTheDocument()
+
+    await userEvent.click(screen.getByRole('button', { name: /view details/i }))
+    await waitFor(() => expect(screen.getByText('1.5.0')).toBeInTheDocument())
+    expect(screen.queryByRole('button', { name: /delete version/i })).not.toBeInTheDocument()
+  })
+
+  it('shows Add/Edit/Delete/Sync mirror and Delete version controls for the canonical mirrors:manage scope', async () => {
+    mockAllowedScopes = ['mirrors:manage']
+    listTerraformMirrorConfigsMock.mockResolvedValue({ configs: fakeConfigs })
+    listVersionsMock.mockResolvedValue({
+      versions: [
+        {
+          id: 'v1',
+          version: '1.5.0',
+          sync_status: 'synced',
+          is_latest: true,
+          is_deprecated: false,
+          synced_at: '2025-06-01T00:00:00Z',
+        },
+      ],
+    })
+    renderPage()
+    await waitFor(() => expect(screen.getAllByText('terraform').length).toBeGreaterThan(0))
+
+    expect(screen.getByRole('button', { name: /add mirror/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /edit mirror/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /delete mirror/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /^sync mirror$/i })).toBeInTheDocument()
+
+    await userEvent.click(screen.getByRole('button', { name: /view details/i }))
+    await waitFor(() => expect(screen.getByText('1.5.0')).toBeInTheDocument())
+    expect(screen.getByRole('button', { name: /delete version/i })).toBeInTheDocument()
   })
 })
