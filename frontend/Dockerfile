@@ -26,9 +26,11 @@ RUN --mount=type=secret,id=node_auth_token \
 # build time would undermine the lockfile integrity npm ci above just established.
 # A vulnerability fix belongs in a PR (Dependabot or manual `npm audit fix` + review)
 # where the lockfile change is reviewed before it ships, not auto-applied in the image.
+COPY scripts/audit-gate.mjs scripts/npm-audit-exceptions.json ./scripts/
 RUN --mount=type=secret,id=node_auth_token \
     export NODE_AUTH_TOKEN="$(cat /run/secrets/node_auth_token)" && \
-    npm audit --audit-level=high --omit=dev
+    { npm audit --omit=dev --json > /tmp/audit.json || true; } && \
+    node scripts/audit-gate.mjs /tmp/audit.json --exceptions scripts/npm-audit-exceptions.json
 
 # Copy source code
 COPY . .

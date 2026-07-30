@@ -46,13 +46,24 @@ jobs:
         with:
           install-e2e-deps: "true"
 
+      # Same triage the per-PR gate uses (frontend/scripts/audit-gate.mjs):
+      # blocks only on advisories that reach production AND have a non-breaking
+      # fix. Everything else — dev-only packages, advisories with no published
+      # fix or only a breaking one, and documented accepted risks — is reported
+      # as a warning and in the job summary. Keeping this identical to
+      # pr-checks.yml matters: if the weekly run failed on findings the PR gate
+      # deliberately tolerates, it would sit permanently red and get ignored.
       - name: Audit frontend dependencies
-        working-directory: frontend
-        run: npm audit --audit-level=high
+        run: |
+          (cd frontend && npm audit --json > "$RUNNER_TEMP/frontend-audit.json") || true
+          node frontend/scripts/audit-gate.mjs "$RUNNER_TEMP/frontend-audit.json" \
+            --exceptions frontend/scripts/npm-audit-exceptions.json
 
       - name: Audit e2e dependencies
-        working-directory: e2e
-        run: npm audit --audit-level=high
+        run: |
+          (cd e2e && npm audit --json > "$RUNNER_TEMP/e2e-audit.json") || true
+          node frontend/scripts/audit-gate.mjs "$RUNNER_TEMP/e2e-audit.json" \
+            --exceptions frontend/scripts/npm-audit-exceptions.json
 
   # ── OSV Scan ──────────────────────────────────────────
   osv-scan:
