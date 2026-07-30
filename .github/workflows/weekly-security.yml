@@ -76,11 +76,31 @@ jobs:
 
       - name: Run OSV Scanner
         # v2.3.8
+        id: osv
         uses: google/osv-scanner-action/osv-scanner-action@9a498708959aeaef5ef730655706c5a1df1edbc2
+        continue-on-error: true
         with:
+          # JSON so the triage step below can classify findings; it prints a
+          # readable summary in place of the table.
           scan-args: |-
+            --format=json
+            --output=osv-results.json
             --lockfile=frontend/package-lock.json
             --lockfile=e2e/package-lock.json
+
+      # Triaged through the same gate the npm-audit jobs use, against the same
+      # exceptions file, so the two scanners cannot reach opposite conclusions
+      # about one advisory. Blocking is reserved for advisories that have a
+      # non-breaking fix; ones with no published fix, ones fixable only by a
+      # semver-major, and documented accepted risks are reported as warnings.
+      #
+      # Without this the weekly run failed indefinitely on GHSA-qwww-vcr4-c8h2
+      # (react-router): OSV lists a fix of 8.3.0, but that is a breaking major
+      # that also breaks the @sethbacon/terraform-suite-ui pin, so the job was
+      # red every week with no action anyone could take (issue #643).
+      - name: Triage OSV findings
+        run: node frontend/scripts/audit-gate.mjs osv-results.json \
+          --exceptions frontend/scripts/npm-audit-exceptions.json
 
   # ── CodeQL ────────────────────────────────────────────
   # Scans the application source (javascript-typescript), the repo's GitHub
