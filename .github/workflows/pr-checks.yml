@@ -57,3 +57,54 @@ jobs:
         with:
           fail-on-severity: high
           comment-summary-in-pr: always
+
+  # ── Dependency Audit (npm audit) ───────────────────────
+  # dependency-review-action above only sees the PR's own manifest diff
+  # against the GitHub Advisory Database. Without this job, a full audit of
+  # the resolved dependency tree only ran on weekly-security.yml's Monday
+  # cron, leaving up to a 6-day blind spot for anything not yet GHSA-listed.
+  # Same command already used in the Docker build and the weekly workflow.
+  #
+  # NOT a required branch-protection check yet -- frontend/ currently carries
+  # pre-existing high-severity advisories (brace-expansion via the eslint
+  # toolchain, react-router via the direct react-router-dom dependency) with
+  # no non-breaking fix available, so this job fails today regardless of PR
+  # content. See SECURITY.md's Branch Protection section. Promote to
+  # required once those clear via the normal Dependabot update flow.
+  npm-audit:
+    name: Dependency Audit
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      # setup-frontend's default `npm ci` in frontend/ authenticates to
+      # npm.pkg.github.com (frontend/.npmrc) with github.token to resolve
+      # @sethbacon/terraform-suite-ui. A job-level `permissions:` block
+      # zeroes out unlisted scopes, so packages:read must be explicit here
+      # (#598) -- matches ci.yml's workflow-level grant for the same reason.
+      packages: read
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v6
+      - uses: ./.github/actions/setup-frontend
+        with:
+          install-e2e-deps: "true"
+
+      # Triaged rather than raw: `npm audit` exits non-zero for ANY high
+      # advisory, including ones this PR cannot act on (dev-only packages that
+      # never ship, advisories whose only published fix is a breaking major, and
+      # documented accepted risks). Gating merges on those pins the check red
+      # regardless of what changed, and a permanently-red required check is one
+      # everybody learns to ignore. Blocking is reserved for advisories that
+      # reach production AND have a non-breaking fix; everything else is a
+      # warning + job summary. Accepted risks live in
+      # scripts/npm-audit-exceptions.json with a rationale and a review date.
+      - name: Audit frontend dependencies
+        run: |
+          (cd frontend && npm audit --json > "$RUNNER_TEMP/frontend-audit.json") || true
+          node frontend/scripts/audit-gate.mjs "$RUNNER_TEMP/frontend-audit.json" \
+            --exceptions frontend/scripts/npm-audit-exceptions.json
+
+      - name: Audit e2e dependencies
+        run: |
+          (cd e2e && npm audit --json > "$RUNNER_TEMP/e2e-audit.json") || true
+          node frontend/scripts/audit-gate.mjs "$RUNNER_TEMP/e2e-audit.json" \
+            --exceptions frontend/scripts/npm-audit-exceptions.json

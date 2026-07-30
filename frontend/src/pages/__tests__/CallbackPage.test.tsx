@@ -1,5 +1,6 @@
-import { render, screen, waitFor } from '@testing-library/react'
-import { MemoryRouter } from 'react-router-dom'
+import React from 'react'
+import { render, screen, waitFor, act } from '@testing-library/react'
+import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 
 // Must import after mock setup
@@ -77,6 +78,31 @@ describe('CallbackPage', () => {
     })
   })
 
+  it('navigates to /login 3 seconds after an error is shown', () => {
+    // Fake timers to deterministically fire the redirect setTimeout without a
+    // real 3s wait. handleCallback's error branch has no `await` before
+    // scheduling the timeout, so it has already run synchronously by the time
+    // render() (which wraps effects in act()) returns -- no waitFor needed.
+    vi.useFakeTimers()
+    try {
+      render(
+        <MemoryRouter initialEntries={['/auth/callback?error=access_denied']}>
+          <Routes>
+            <Route path="/auth/callback" element={<CallbackPage />} />
+            <Route path="/login" element={<div>Login Page</div>} />
+          </Routes>
+        </MemoryRouter>,
+      )
+      expect(screen.getByText('Authentication Error')).toBeInTheDocument()
+      act(() => {
+        vi.advanceTimersByTime(3000)
+      })
+      expect(screen.getByText('Login Page')).toBeInTheDocument()
+    } finally {
+      vi.useRealTimers()
+    }
+  })
+
   describe('open-redirect guard (returnUrl)', () => {
     it('redirects to a legitimate same-origin returnUrl path', async () => {
       sessionStorage.setItem('returnUrl', '/admin/users')
@@ -115,6 +141,23 @@ describe('CallbackPage', () => {
         expect(window.location.replace).toHaveBeenCalled()
       })
       expect(sessionStorage.getItem('returnUrl')).toBeNull()
+    })
+  })
+
+  it('guards against a duplicate callback exchange on React StrictMode double-invoke', async () => {
+    // StrictMode intentionally mounts, cleans up, and remounts effects once in
+    // dev to surface effects that aren't idempotent. exchangedRef must make the
+    // second invocation a no-op, otherwise a double-mount would double-run the
+    // whole callback handler (redundant navigation / OIDC-exchange side effects).
+    render(
+      <React.StrictMode>
+        <MemoryRouter initialEntries={['/auth/callback']}>
+          <CallbackPage />
+        </MemoryRouter>
+      </React.StrictMode>,
+    )
+    await waitFor(() => {
+      expect(window.location.replace).toHaveBeenCalledTimes(1)
     })
   })
 })

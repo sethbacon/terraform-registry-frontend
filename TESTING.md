@@ -200,7 +200,7 @@ are organised by domain under `frontend/src/`:
 | Directory                         | Coverage focus                                                                                                                                                                                                             |
 | --------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `services/__tests__/`             | API client interceptors (auth header, 401 handling, SCM OAuth exception), error/performance reporting, query-key stability                                                                                                 |
-| `hooks/__tests__/`                | `useModuleDetail`, `useDebounce`, `useHotkey`, `useRouteFocus` — React Query state, debouncing, focus management                                                                                                           |
+| `hooks/__tests__/`                | `useModuleDetail`, `useProviderDetail`, `useTerraformBinaryDetail`, `useDebounce`, `useHotkey`, `useRouteFocus` — React Query state, debouncing, focus management                                                           |
 | `contexts/__tests__/`             | `AuthContext`, `ThemeContext`, `HelpContext`, `SetupWizardContext`, `ConsentContext`, `AnnouncerContext`                                                                                                                   |
 | `components/__tests__/`           | ~35 component specs covering layout, dialogs, panels (security/scan/SCM/policy), wizards, registry cards, markdown, focus mgr                                                                                              |
 | `components/skeletons/__tests__/` | Loading skeleton variants                                                                                                                                                                                                  |
@@ -338,6 +338,7 @@ test('page loads', async ({ loggedInPage: page }) => {
 Tests run automatically in `.github/workflows/ci.yml`:
 
 - **unit-test** job: runs `npm run test:coverage`, uploads the coverage report as an artifact.
-- **e2e-gated** job: starts the Docker Compose test stack, runs Playwright, uploads the report. This job runs on pushes to `main`, `workflow_dispatch`, and `workflow_call` (from release).
+- **e2e-security** job: starts the Docker Compose test stack, runs `tests/security.spec.ts` only (single browser), uploads the report. This job runs on every `pull_request`.
+- **e2e-gated** job: starts the Docker Compose test stack, runs the full Playwright suite, uploads the report. This job runs on pushes to `main`, `workflow_dispatch`, and `workflow_call` (from release).
 
 Coverage reports and Playwright HTML reports are available as downloadable artifacts on each workflow run.

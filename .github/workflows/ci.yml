@@ -336,3 +336,104 @@ jobs:
         if: always()
         run: >-
           docker compose -f deployments/docker-compose.test.yml down --volumes
+
+  # ── E2E security subset (PR-gated) ───────────────────────
+  # security.spec.ts (the XSS/CSRF/open-redirect abuse suite) previously only
+  # ran via e2e-gated above, whose `if:` skips normal pull_request events --
+  # so a regression in one of those controls could only ever be caught AFTER
+  # it merged to main (#604). Run just this spec, on a single browser, on
+  # every PR so the highest-value security coverage actually gates merge;
+  # the full multi-browser suite stays release-gated in e2e-gated to keep
+  # routine PR CI fast.
+  e2e-security:
+    name: E2E (security subset)
+    runs-on: ubuntu-latest
+    needs: [lint, typecheck, unit-test-coverage, build, contract-check]
+    if: github.event_name == 'pull_request'
+
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v6
+      - uses: ./.github/actions/setup-frontend
+        with:
+          install-deps: "false"
+          install-e2e-deps: "true"
+          install-playwright: "true"
+          playwright-browsers: "chromium"
+
+      - name: Log in to GHCR
+        uses: docker/login-action@af1e73f918a031802d376d3c8bbc3fe56130a9b0 # v4.4.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Pull test images (retry transient Docker Hub timeouts)
+        # See e2e-gated's identical step above for the rationale.
+        run: |
+          compose="docker compose -f deployments/docker-compose.test.yml"
+          for attempt in 1 2 3 4 5; do
+            if $compose pull --ignore-buildable; then
+              exit 0
+            fi
+            echo "::warning::Image pull failed (attempt ${attempt}/5); retrying in 15s..."
+            sleep 15
+          done
+          echo "::error::Image pull failed after 5 attempts"
+          exit 1
+
+      - name: Start test compose
+        # Images are pre-pulled above; this builds the frontend and starts everything.
+        env:
+          # GitHub Packages read token so the frontend image build can install the
+          # private @sethbacon/* dep (consumed via the compose build secret).
+          NODE_AUTH_TOKEN: ${{ github.token }}
+        run: >-
+          docker compose -f deployments/docker-compose.test.yml up -d
+
+      - name: Wait for frontend
+        run: |
+          echo "Waiting for frontend on port 3000..."
+          echo "(backend/postgres readiness via Docker healthchecks)"
+          frontend_up=0
+          for i in {1..60}; do
+            code=$(curl -sk https://localhost:3000/ \
+              -o /dev/null -w "%{http_code}" 2>/dev/null || true)
+            if echo "$code" | grep -qE "^[23]"; then
+              echo "Frontend ready (HTTP $code)"
+              frontend_up=1
+              break
+            fi
+            sleep 3
+          done
+          if [ "$frontend_up" -eq 0 ]; then
+            echo "ERROR: frontend never became ready"
+            exit 1
+          fi
+
+      - name: Run Playwright security tests
+        working-directory: e2e
+        run: >-
+          npx playwright test tests/security.spec.ts --project=chromium
+          --workers=2 --max-failures=1 --retries=1 --reporter=list
+
+      - name: Upload Playwright artifacts
+        # v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: playwright-report-security
+          path: e2e/playwright-report
+
+      - name: Dump container logs
+        if: failure()
+        run: |
+          for svc in backend seed-db frontend postgres; do
+            echo "===== $svc ====="
+            docker compose \
+              -f deployments/docker-compose.test.yml \
+              logs "$svc" || true
+          done
+
+      - name: Tear down test compose
+        if: always()
+        run: >-
+          docker compose -f deployments/docker-compose.test.yml down --volumes
