@@ -40,7 +40,7 @@ const ALLOWLIST_PATH = path.join(SCRIPT_DIR, 'contract-check.allowlist.json')
 type CallSite = { method: string; rawPath: string; normalized: string; file: string; line: number }
 
 /** Replace every `{...}` segment with `{}` so different param names match. */
-function normalize(p: string): string {
+export function normalize(p: string): string {
   return p.replace(/\{[^}/]+\}/g, '{}')
 }
 
@@ -64,7 +64,7 @@ function normalizeSwaggerPath(p: string): string {
  * Returns the path with `${expr}` segments rendered as `{var}` placeholders,
  * or null if the path is not a string/template-literal we can statically resolve.
  */
-function extractPath(arg: ts.Expression): string | null {
+export function extractPath(arg: ts.Expression): string | null {
   if (ts.isStringLiteral(arg) || ts.isNoSubstitutionTemplateLiteral(arg)) {
     return arg.text
   }
@@ -303,11 +303,23 @@ async function main() {
   process.exitCode = 1
 }
 
-// Set the exit code and let the process drain naturally. Calling process.exit()
-// while the global fetch (undici) socket is still closing aborts the process on
-// Windows with "Assertion failed: !(handle->flags & UV_HANDLE_CLOSING)", which
-// would fail the check even on success.
-main().catch((err) => {
-  console.error('contract-check failed:', err)
-  process.exitCode = 2
-})
+// Only run main() when this file is executed directly (`tsx contract-check.ts`),
+// not when it's imported -- e.g. by contract-check.test.ts, which imports
+// normalize()/extractPath() for unit testing and must not trigger a live
+// swagger fetch or mutate process.exitCode as a side effect of import.
+const isMain = (() => {
+  const entry = process.argv[1]
+  if (!entry) return false
+  return path.resolve(entry) === fileURLToPath(import.meta.url)
+})()
+
+if (isMain) {
+  // Set the exit code and let the process drain naturally. Calling process.exit()
+  // while the global fetch (undici) socket is still closing aborts the process on
+  // Windows with "Assertion failed: !(handle->flags & UV_HANDLE_CLOSING)", which
+  // would fail the check even on success.
+  main().catch((err) => {
+    console.error('contract-check failed:', err)
+    process.exitCode = 2
+  })
+}

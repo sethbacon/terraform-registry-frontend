@@ -8,6 +8,11 @@ function renderWithTheme(ui: React.ReactElement) {
   return render(<ThemeProvider theme={theme}>{ui}</ThemeProvider>)
 }
 
+function renderWithDarkTheme(ui: React.ReactElement) {
+  const theme = createTheme({ palette: { mode: 'dark' } })
+  return render(<ThemeProvider theme={theme}>{ui}</ThemeProvider>)
+}
+
 describe('MarkdownRenderer', () => {
   it('renders basic markdown text as HTML', () => {
     renderWithTheme(<MarkdownRenderer>{'Hello **world**'}</MarkdownRenderer>)
@@ -163,5 +168,29 @@ describe('MarkdownRenderer', () => {
     )
     const h6s = container.querySelectorAll('h6')
     expect(h6s.length).toBe(1)
+  })
+
+  it('renders code, code blocks, and tables under a dark theme', () => {
+    // The sx callback's `theme.palette.mode === 'dark'` branches (code/pre
+    // background+text, table cell borders and header background) are only
+    // ever exercised under a dark theme -- every other test in this file uses
+    // the light theme.
+    const markdown = [
+      'Use `terraform init` to start',
+      '',
+      '```hcl',
+      'resource "aws_instance" "example" {}',
+      '```',
+      '',
+      '| Name | Version |',
+      '| --- | --- |',
+      '| aws | 5.0 |',
+    ].join('\n')
+
+    const { container } = renderWithDarkTheme(<MarkdownRenderer>{markdown}</MarkdownRenderer>)
+
+    expect(screen.getByText('terraform init').tagName).toBe('CODE')
+    expect(screen.getByText(/resource "aws_instance"/)).toBeInTheDocument()
+    expect(container.querySelector('table')).not.toBeNull()
   })
 })

@@ -32,6 +32,9 @@ describe('isSafeExternalUrl', () => {
     '   ',
     null,
     undefined,
+    // No scheme and no leading /#. -- the URL constructor throws (invalid,
+    // no base to resolve against) and the catch branch must reject it too.
+    'not a url at all',
   ])('rejects %s', (value) => {
     expect(isSafeExternalUrl(value as string | null | undefined)).toBe(false)
   })
