@@ -1,5 +1,5 @@
-import { describe, expect, it } from 'vitest'
-import { isSafeExternalUrl } from '../externalUrl'
+import { afterEach, describe, expect, it, vi } from 'vitest'
+import { allowedExternalOrigins, isSafeExternalUrl } from '../externalUrl'
 
 describe('isSafeExternalUrl', () => {
   it.each([
@@ -42,5 +42,75 @@ describe('isSafeExternalUrl', () => {
   it('does not throw and returns false for truthy non-string inputs', () => {
     expect(isSafeExternalUrl(123 as unknown as string)).toBe(false)
     expect(isSafeExternalUrl({} as unknown as string)).toBe(false)
+  })
+})
+
+describe('isSafeExternalUrl origin allowlist (#559)', () => {
+  afterEach(() => {
+    vi.unstubAllEnvs()
+  })
+
+  it('is inert when VITE_ALLOWED_EXTERNAL_ORIGINS is unset — behaviour unchanged', () => {
+    vi.stubEnv('VITE_ALLOWED_EXTERNAL_ORIGINS', '')
+    expect(isSafeExternalUrl('https://anything.example.com')).toBe(true)
+  })
+
+  it('rejects an origin that is not listed once an allowlist is configured', () => {
+    vi.stubEnv('VITE_ALLOWED_EXTERNAL_ORIGINS', 'https://tsm.example.com')
+    // The core of #559: a compromised backend handing us an attacker host.
+    expect(isSafeExternalUrl('https://evil.example.com')).toBe(false)
+  })
+
+  it('accepts a listed origin', () => {
+    vi.stubEnv('VITE_ALLOWED_EXTERNAL_ORIGINS', 'https://tsm.example.com')
+    expect(isSafeExternalUrl('https://tsm.example.com/modules/x')).toBe(true)
+  })
+
+  it('accepts multiple listed origins and ignores surrounding whitespace', () => {
+    vi.stubEnv('VITE_ALLOWED_EXTERNAL_ORIGINS', ' https://tsm.example.com , https://cdn.example.com ')
+    expect(isSafeExternalUrl('https://cdn.example.com/logo.png')).toBe(true)
+    expect(isSafeExternalUrl('https://tsm.example.com')).toBe(true)
+  })
+
+  it('always accepts the app\'s own origin without listing it', () => {
+    vi.stubEnv('VITE_ALLOWED_EXTERNAL_ORIGINS', 'https://tsm.example.com')
+    expect(isSafeExternalUrl(`${window.location.origin}/admin`)).toBe(true)
+  })
+
+  it('matches on full origin, so a different port or scheme is rejected', () => {
+    vi.stubEnv('VITE_ALLOWED_EXTERNAL_ORIGINS', 'https://tsm.example.com')
+    expect(isSafeExternalUrl('https://tsm.example.com:8443')).toBe(false)
+    expect(isSafeExternalUrl('http://tsm.example.com')).toBe(false)
+  })
+
+  it('does not let a lookalike host through on a prefix match', () => {
+    vi.stubEnv('VITE_ALLOWED_EXTERNAL_ORIGINS', 'https://tsm.example.com')
+    expect(isSafeExternalUrl('https://tsm.example.com.evil.test')).toBe(false)
+    expect(isSafeExternalUrl('https://evil.test/?x=https://tsm.example.com')).toBe(false)
+  })
+
+  it('still accepts relative paths and anchors when an allowlist is configured', () => {
+    vi.stubEnv('VITE_ALLOWED_EXTERNAL_ORIGINS', 'https://tsm.example.com')
+    expect(isSafeExternalUrl('/admin/modules')).toBe(true)
+    expect(isSafeExternalUrl('#section')).toBe(true)
+  })
+
+  it('still rejects dangerous schemes regardless of the allowlist', () => {
+    vi.stubEnv('VITE_ALLOWED_EXTERNAL_ORIGINS', 'https://tsm.example.com')
+    expect(isSafeExternalUrl('javascript:alert(1)')).toBe(false)
+    expect(isSafeExternalUrl('//evil.example.com')).toBe(false)
+  })
+
+  it('drops a malformed allowlist entry instead of widening the allowlist', () => {
+    // A typo must not degrade to "allow everything".
+    vi.stubEnv('VITE_ALLOWED_EXTERNAL_ORIGINS', 'not a url,https://tsm.example.com')
+    expect(allowedExternalOrigins()).toEqual(['https://tsm.example.com'])
+    expect(isSafeExternalUrl('https://evil.example.com')).toBe(false)
+  })
+
+  it('normalises a configured entry that carries a path', () => {
+    vi.stubEnv('VITE_ALLOWED_EXTERNAL_ORIGINS', 'https://tsm.example.com/some/path')
+    expect(allowedExternalOrigins()).toEqual(['https://tsm.example.com'])
+    expect(isSafeExternalUrl('https://tsm.example.com/other')).toBe(true)
   })
 })

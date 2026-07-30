@@ -127,6 +127,43 @@ matching `v*.*.*` with a "Restrict deletions" rule.
 - **SBOM (SPDX) generation and attestation** on Docker images via Syft (`anchore/sbom-action`) and `actions/attest-sbom`
 - **Cosign keyless signing** on Docker images via Sigstore (verify with `cosign verify`)
 
+### Backend-supplied URLs and the external-origin allowlist
+
+Several URLs reaching this app come from the backend rather than from user input:
+the suite-sibling switcher link and the Consumed-by panel link (`GET /api/v1/ui/config`),
+the whitelabel logo/hero/favicon URLs (`GET /api/v1/ui/theme`), and the SCM OAuth
+authorization redirect. They are validated at the app boundary by
+`isSafeExternalUrl` (`frontend/src/utils/externalUrl.ts`) before reaching any
+navigation or resource sink.
+
+That validator always rejects dangerous URI schemes (`javascript:`, `data:`,
+`vbscript:`, `file:`, …), protocol-relative URLs, and control-character smuggling.
+
+**Origin allowlist.** Set `VITE_ALLOWED_EXTERNAL_ORIGINS` (comma-separated) to the
+origins this deployment should be willing to link or redirect to; the app's own
+origin is always permitted. Matching is on full origin — scheme, host and port.
+It is build-time configuration on purpose: the risk being mitigated is a
+**compromised or misconfigured backend** returning an attacker-controlled URL, so
+an allowlist the backend could influence would mitigate nothing.
+
+**Accepted risks** (issue #559):
+
+1. **`http:` is accepted alongside `https:`.** Requiring HTTPS would break three
+   supported cases, two of them silently: a locally-running suite sibling (the
+   backend's development default is `base_url: http://localhost:8080`, so the
+   switcher and Consumed-by links would simply disappear), whitelabel assets
+   served over plain HTTP (they degrade to defaults with no indication why), and
+   OAuth against a self-hosted SCM on an internal network — Bitbucket Data
+   Center, self-hosted GitLab and Azure DevOps Server are supported targets and
+   are not always TLS-fronted internally. The origin allowlist, not the scheme
+   check, is the control that constrains *where* the app will navigate.
+2. **The allowlist is inert when unset.** The default preserves prior behaviour —
+   any `http(s)` origin is accepted — so that upgrading does not silently break
+   deployments whose sibling and asset origins are not yet declared. Any
+   deployment where those origins are known should set the variable; until it is
+   set, a backend able to return an arbitrary URL can point these sinks at an
+   arbitrary host.
+
 ### Shared private package: `@sethbacon/terraform-suite-ui`
 
 This app depends on the private, out-of-tree package
