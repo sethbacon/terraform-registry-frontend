@@ -7,10 +7,13 @@ import type { AxiosInstance, InternalAxiosRequestConfig, AxiosResponse, AxiosErr
 // ---------------------------------------------------------------------------
 
 type ReqFulfilled = (config: InternalAxiosRequestConfig) => InternalAxiosRequestConfig
+type ReqRejected = (error: unknown) => unknown
 type ResFulfilled = (response: AxiosResponse) => AxiosResponse
 type ResRejected = (error: AxiosError) => unknown
 
 let capturedReqFulfilled: ReqFulfilled
+let capturedReqRejected: ReqRejected
+let capturedResFulfilledHandlers: ResFulfilled[]
 let capturedResRejectedHandlers: ResRejected[]
 let mockAxiosInstance: AxiosInstance
 let capturedCreateConfig: Record<string, unknown>
@@ -52,6 +55,7 @@ function getApiClient() {
   vi.resetModules()
   // Re-apply the mock since resetModules clears it
   vi.doMock('axios', () => {
+    const resFulfilledHandlers: ResFulfilled[] = []
     const resRejectedHandlers: ResRejected[] = []
     const mockInstance = {
       get: vi.fn(),
@@ -60,12 +64,15 @@ function getApiClient() {
       delete: vi.fn(),
       interceptors: {
         request: {
-          use: vi.fn((fulfilled: ReqFulfilled) => {
+          use: vi.fn((fulfilled: ReqFulfilled, rejected: ReqRejected) => {
             capturedReqFulfilled = fulfilled
+            capturedReqRejected = rejected
           }),
         },
         response: {
-          use: vi.fn((_fulfilled: ResFulfilled, rejected: ResRejected) => {
+          use: vi.fn((fulfilled: ResFulfilled, rejected: ResRejected) => {
+            resFulfilledHandlers.push(fulfilled)
+            capturedResFulfilledHandlers = resFulfilledHandlers
             resRejectedHandlers.push(rejected)
             capturedResRejectedHandlers = resRejectedHandlers
           }),
@@ -117,10 +124,23 @@ describe('ApiClient', () => {
       expect(typeof validateStatus).toBe('function')
       expect(validateStatus(200)).toBe(true)
       expect(validateStatus(302)).toBe(true)
+      expect(validateStatus(304)).toBe(true)
       expect(validateStatus(399)).toBe(true)
+      expect(validateStatus(199)).toBe(false)
       expect(validateStatus(400)).toBe(false)
       expect(validateStatus(401)).toBe(false)
       expect(validateStatus(500)).toBe(false)
+    })
+  })
+
+  // ─── Request interceptor – config-build error passthrough ─────────────
+
+  describe('request interceptor – error passthrough', () => {
+    it('re-rejects a request-config-build error unchanged', async () => {
+      await getApiClient()
+
+      const error = new Error('config build failed')
+      await expect(capturedReqRejected(error)).rejects.toBe(error)
     })
   })
 
@@ -538,6 +558,124 @@ describe('ApiClient', () => {
       const authRejectedHandler = capturedResRejectedHandlers[0]
       // Even the no-response case must not fabricate a 200 in production.
       await expect(authRejectedHandler(error)).rejects.toBe(error)
+    })
+  })
+
+  // ─── Mock data mode (VITE_USE_MOCK_DATA) ───────────────────────────────
+  // Offline-development escape hatch: when explicitly enabled, the response
+  // error interceptor short-circuits and returns canned data instead of
+  // propagating the error, keyed off substrings in the failed request's URL.
+
+  describe('response interceptor – mock data mode', () => {
+    afterEach(() => {
+      vi.unstubAllEnvs()
+    })
+
+    it('does not return mock data when mock mode is disabled (default)', async () => {
+      await getApiClient()
+
+      const error = {
+        response: { status: 500 },
+        config: { url: '/api/v1/modules' },
+        isAxiosError: true,
+      } as AxiosError
+
+      const authRejectedHandler = capturedResRejectedHandlers[0]
+      await expect(authRejectedHandler(error)).rejects.toBe(error)
+    })
+
+    it.each([
+      ['/api/v1/modules/search', { modules: [], meta: { total: 0, limit: 10, offset: 0 } }],
+      ['/api/v1/modules/ns/mod/aws/versions', { versions: [] }],
+      ['/api/v1/providers/search', { providers: [], meta: { total: 0, limit: 10, offset: 0 } }],
+      // Contains both '/providers' and '/scm-providers' so the providers branch's
+      // scm-providers exclusion is false, falling through to the scm-providers branch.
+      ['/api/v1/scm-providers/providers-fake', []],
+      ['/api/v1/users', { users: [], meta: { total: 0, limit: 10, offset: 0 } }],
+      ['/api/v1/organizations', []],
+      ['/api/v1/apikeys', []],
+      ['/api/v1/unmatched-resource', []],
+    ])('returns mock data for %s when mock mode is enabled', async (url, expectedData) => {
+      vi.stubEnv('VITE_USE_MOCK_DATA', 'true')
+      await getApiClient()
+
+      const error = {
+        config: { url },
+        isAxiosError: true,
+      } as AxiosError
+
+      const authRejectedHandler = capturedResRejectedHandlers[0]
+      const result = await authRejectedHandler(error)
+      expect(result).toEqual({ data: expectedData, status: 200 })
+    })
+
+    it('falls back to an empty url when the error has no config in mock mode', async () => {
+      vi.stubEnv('VITE_USE_MOCK_DATA', 'true')
+      await getApiClient()
+
+      const error = { isAxiosError: true } as AxiosError
+      const authRejectedHandler = capturedResRejectedHandlers[0]
+      const result = await authRejectedHandler(error)
+      expect(result).toEqual({ data: [], status: 200 })
+    })
+  })
+
+  // ─── Response interceptors – success passthrough & breadcrumb timing ───
+  // http.ts registers two response interceptors: the auth/401 handler (index 0)
+  // and the breadcrumb-timing handler (index 1). Both were previously only
+  // exercised through their rejected callbacks; the fulfilled (success) path
+  // of each was never invoked by any test.
+
+  describe('response interceptor – auth handler success passthrough', () => {
+    it('returns the response unchanged', async () => {
+      await getApiClient()
+
+      const response = { status: 200, config: {} } as AxiosResponse
+      const result = capturedResFulfilledHandlers[0](response)
+      expect(result).toBe(response)
+    })
+  })
+
+  describe('response interceptor – breadcrumb timing', () => {
+    it('records a breadcrumb with duration on success and returns the response unchanged', async () => {
+      await getApiClient()
+
+      const response = {
+        status: 200,
+        config: { method: 'get', url: '/api/v1/modules', _startTime: Date.now() - 42 },
+      } as unknown as AxiosResponse
+      const result = capturedResFulfilledHandlers[1](response)
+      expect(result).toBe(response)
+    })
+
+    it('records a breadcrumb without a duration when _startTime was never stamped', async () => {
+      await getApiClient()
+
+      const response = { status: 200, config: {} } as AxiosResponse
+      const result = capturedResFulfilledHandlers[1](response)
+      expect(result).toBe(response)
+    })
+
+    it('records a breadcrumb on error and re-rejects with the same error', async () => {
+      await getApiClient()
+
+      const error = {
+        response: { status: 500 },
+        config: { method: 'post', url: '/api/v1/modules', _startTime: Date.now() - 10 },
+        isAxiosError: true,
+      } as unknown as AxiosError
+
+      const breadcrumbHandler = capturedResRejectedHandlers[1]
+      await expect(breadcrumbHandler(error)).rejects.toBe(error)
+    })
+
+    it('falls back to GET and an empty url/status when the error has no config', async () => {
+      await getApiClient()
+
+      const error = { isAxiosError: true } as AxiosError
+
+      const breadcrumbHandler = capturedResRejectedHandlers[1]
+      await expect(breadcrumbHandler(error)).rejects.toBe(error)
     })
   })
 

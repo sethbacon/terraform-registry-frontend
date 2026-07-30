@@ -2,6 +2,17 @@ import { defineConfig } from 'vitest/config'
 import react from '@vitejs/plugin-react'
 import { resolve } from 'path'
 
+// CI runs the suite as 4 parallel shards (`--shard=N/4`), each executing only
+// ~25% of the tests. A file's own tests can land in a different shard than the
+// file itself, so a single shard's coverage for that file is legitimately 0%
+// even though the merged report (which is what CI actually enforces
+// thresholds against, see .github/workflows/ci.yml's unit-test-coverage job)
+// is well above floor. CI zeroes the four top-level threshold keys per shard
+// via `--coverage.thresholds.*` CLI flags, but that dot-path override can't
+// reach the nested per-file glob keys below, so we gate them here instead
+// (#626).
+const isSharded = process.argv.some((arg) => arg === '--shard' || arg.startsWith('--shard='))
+
 export default defineConfig({
   plugins: [react()],
   define: {
@@ -38,6 +49,37 @@ export default defineConfig({
         branches: 70,
         functions: 70,
         lines: 80,
+        // Higher per-file floor for the app's security-critical boundary
+        // files (#626) — the repo-wide average can stay green while one of
+        // these regresses. Omitted on sharded CI runs; see isSharded above.
+        ...(isSharded
+          ? {}
+          : {
+              'src/services/api/http.ts': {
+                statements: 95,
+                branches: 90,
+                functions: 95,
+                lines: 95,
+              },
+              'src/pages/CallbackPage.tsx': {
+                statements: 95,
+                branches: 90,
+                functions: 95,
+                lines: 95,
+              },
+              'src/components/MarkdownRenderer.tsx': {
+                statements: 95,
+                branches: 90,
+                functions: 95,
+                lines: 95,
+              },
+              'src/utils/externalUrl.ts': {
+                statements: 95,
+                branches: 90,
+                functions: 95,
+                lines: 95,
+              },
+            }),
       },
     },
   },
