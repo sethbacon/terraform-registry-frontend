@@ -62,9 +62,9 @@ describe('enforceSwaggerA11yStyles', () => {
     enforceSwaggerA11yStyles(false)
 
     const btn = document.querySelector<HTMLElement>('.btn.authorize')!
-    expect(btn.style.borderColor).toBe('#00875a')
-    expect(btn.querySelector<HTMLElement>('span')!.style.color).toBe('#00875a')
-    expect(btn.querySelector<SVGElement>('svg')!.style.fill).toBe('#00875a')
+    expect(btn.style.borderColor).toBe('#007a52')
+    expect(btn.querySelector<HTMLElement>('span')!.style.color).toBe('#007a52')
+    expect(btn.querySelector<SVGElement>('svg')!.style.fill).toBe('#007a52')
   })
 
   it('replaces the nested anchor inside opblock-summary-control with a span (nested-interactive a11y fix)', () => {
