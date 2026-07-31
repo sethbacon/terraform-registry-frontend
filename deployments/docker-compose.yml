@@ -75,8 +75,12 @@ services:
       TFR_TELEMETRY_METRICS_ENABLED: "true"
       TFR_TELEMETRY_METRICS_PROMETHEUS_PORT: 9090
 
-      # Security — development values only, not for production use
-      ENCRYPTION_KEY: "01234567890123456789012345678901"
+      # Security — development values only, not for production use.
+      # ENCRYPTION_KEY must look CSPRNG-generated (openssl rand -hex 16): the
+      # backend's low-entropy guard (backend issue #560) refuses to start on
+      # sequential/trivial keys. Changing this key orphans SCM credentials
+      # already encrypted in an existing local postgres volume.
+      ENCRYPTION_KEY: "590b7570037dc019c17189e76ce9b73e"
       TFR_JWT_SECRET: "development-jwt-secret-change-in-production-01234567890"
 
       # DEV_MODE enables the /api/v1/dev/login shortcut used by local dev and E2E tests.
