@@ -14,9 +14,10 @@
 //      today's class names, so at minimum confirms this module's own logic
 //      is unchanged.
 //   2. Manually load /api-docs in both light and dark mode and confirm:
-//      method badges keep white-on-colour text, version stamps/URL/info
-//      links/authorize button keep readable contrast, and the page still
-//      matches the app's Inter font + palette (no default Swagger blue).
+//      method badges keep white-on-colour text, endpoint path text/version
+//      stamps/URL/info links/authorize button keep readable contrast, and the
+//      page still matches the app's Inter font + palette (no default Swagger
+//      blue).
 // ---------------------------------------------------------------------------
 
 const METHOD_COLORS: Record<string, string> = {
@@ -291,6 +292,8 @@ const DARK_EXTRA = `
     border-bottom: 1px solid #333;
   }
   .swagger-ui .opblock-summary-description { color: #aaa !important; }
+  .swagger-ui .opblock-summary-path,
+  .swagger-ui .opblock-summary-path .nostyle { color: #e0e0e0 !important; }
 
   .swagger-ui label,
   .swagger-ui .parameter__name,
