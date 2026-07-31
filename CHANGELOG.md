@@ -1,6 +1,13 @@
 <!-- markdownlint-disable MD013 MD024 MD041 -->
 # Changelog
 
+## [2.20.2](https://github.com/sethbacon/terraform-registry-frontend/compare/v2.20.1...v2.20.2) (2026-07-31)
+
+
+### Bug Fixes
+
+* log out via CSRF-protected POST instead of a GET navigation ([#664](https://github.com/sethbacon/terraform-registry-frontend/issues/664)) ([9f84ae4](https://github.com/sethbacon/terraform-registry-frontend/commit/9f84ae4d4a311d3a4ff4a67b0a80f75ba65ee570))
+
 ## [2.20.1](https://github.com/sethbacon/terraform-registry-frontend/compare/v2.20.0...v2.20.1) (2026-07-31)
 
 
