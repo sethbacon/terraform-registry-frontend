@@ -277,8 +277,13 @@ test.describe('Real file upload (#605)', () => {
 
     await page.getByLabel('Namespace').fill('e2e-fixtures');
     await page.getByLabel('Module Name').fill(moduleName);
-    await page.getByLabel('Provider').fill('aws');
-    await page.getByLabel('Version').fill('1.0.0');
+    // Role-scoped: getByLabel substring-matches the sidebar nav tooltips'
+    // aria-labels too ("Configure SCM providers...", "...pending mirrored
+    // versions", etc.), which is a strict-mode violation. Restricting to the
+    // textbox role excludes those spans while keeping substring matching
+    // (required-field labels render as "Provider *").
+    await page.getByRole('textbox', { name: 'Provider' }).fill('aws');
+    await page.getByRole('textbox', { name: 'Version' }).fill('1.0.0');
 
     await page.getByTestId('module-upload-dropzone-input').setInputFiles(VALID_MODULE_ARCHIVE);
 
@@ -321,7 +326,9 @@ test.describe('Real file upload (#605)', () => {
 
     await page.getByLabel('Namespace').fill('e2e-fixtures');
     await page.getByLabel('Provider Name').fill(providerName);
-    await page.getByLabel('Version').fill('1.0.0');
+    // Role-scoped for the same nav-tooltip aria-label collision as the module
+    // upload test above ("...pending mirrored versions" contains "version").
+    await page.getByRole('textbox', { name: 'Version' }).fill('1.0.0');
 
     // The OS/Architecture Selects don't wire an aria-labelledby to their
     // InputLabel, so getByLabel() can't find them -- scope by the FormControl
