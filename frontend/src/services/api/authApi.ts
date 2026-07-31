@@ -28,14 +28,32 @@ export async function ldapLogin(username: string, password: string): Promise<voi
 }
 
 /**
- * Redirects the browser to the backend /api/v1/auth/logout endpoint, which in turn
- * redirects to the OIDC provider's end_session_endpoint (if configured) so that the
- * IdP SSO session is terminated. This prevents silent re-authentication after logout.
- * The backend uses client_id (not id_token_hint) so nothing sensitive needs to be
- * stored client-side.
+ * Ends the session via a CSRF-protected POST, then navigates to wherever the
+ * backend says the browser should land — the OIDC provider's
+ * end_session_endpoint when one is configured, so the IdP SSO session is
+ * terminated and cannot silently re-authenticate the user. The backend uses
+ * client_id (not id_token_hint) so nothing sensitive is stored client-side.
+ *
+ * This is a POST and not a full-page GET navigation on purpose: a GET logout is
+ * triggerable by a cross-site link (the auth cookie rides a top-level
+ * navigation), which makes forced logout a CSRF. The POST goes through the
+ * double-submit check that http's request interceptor satisfies.
+ *
+ * The backend answers 200 with the destination rather than a 302 because an XHR
+ * cannot usefully follow a cross-origin redirect to the IdP — so the navigation
+ * happens here instead.
  */
-export function logout() {
-  window.location.href = `${API_BASE_URL}/api/v1/auth/logout`
+export async function logout(): Promise<void> {
+  let destination = '/'
+  try {
+    const response = await http.post<{ redirect_url?: string }>('/api/v1/auth/logout')
+    if (response.data?.redirect_url) destination = response.data.redirect_url
+  } catch {
+    // Session already gone (this backend answers 403 for a cookie-less
+    // mutation), a stale CSRF cookie, or a network blip. Local session state is
+    // cleared regardless, so leave the app anyway.
+  }
+  window.location.href = destination
 }
 
 export async function refreshToken(): Promise<{ expires_in: number }> {
