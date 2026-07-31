@@ -65,8 +65,9 @@ export function enforceSwaggerA11yStyles(dark: boolean): void {
       el.style.setProperty('color', linkColor, 'important')
     })
 
-  // Authorize button
-  const authColor = dark ? '#2ea77a' : '#00875a'
+  // Authorize button — light green must clear 4.5:1 on the #fafafa
+  // scheme-container background (#00875a was only 4.36:1)
+  const authColor = dark ? '#2ea77a' : '#007a52'
   document.querySelectorAll<HTMLElement>('.swagger-ui .btn.authorize').forEach((btn) => {
     btn.style.setProperty('border-color', authColor, 'important')
     btn.style.setProperty('color', authColor, 'important')
@@ -215,9 +216,9 @@ const BASE_CSS = `
 
   /* ---------- authorize button contrast fix ---------- */
   .swagger-ui .btn.authorize,
-  .swagger-ui .auth-wrapper .btn.authorize { border-color: #00875a !important; color: #00875a !important; }
-  .swagger-ui .btn.authorize span { color: #00875a !important; }
-  .swagger-ui .btn.authorize svg { fill: #00875a !important; }
+  .swagger-ui .auth-wrapper .btn.authorize { border-color: #007a52 !important; color: #007a52 !important; }
+  .swagger-ui .btn.authorize span { color: #007a52 !important; }
+  .swagger-ui .btn.authorize svg { fill: #007a52 !important; }
 
   /* ---------- response code pills ---------- */
   .swagger-ui .response-col_status { font-weight: 600; }
