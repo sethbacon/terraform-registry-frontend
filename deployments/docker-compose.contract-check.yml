@@ -32,9 +32,11 @@ services:
       - TFR_DATABASE_SSL_MODE=disable
       - TFR_SERVER_HOST=0.0.0.0
       - TFR_SERVER_PORT=8080
-      # Test-only secrets; never used in production.
+      # Test-only secrets; never used in production. The encryption key must
+      # look CSPRNG-generated — the backend refuses to boot on low-entropy
+      # keys (its issue #560), so an all-zeros placeholder fails startup.
       - TFR_JWT_SECRET=test-jwt-secret-for-contract-check-only
-      - ENCRYPTION_KEY=00000000000000000000000000000000
+      - ENCRYPTION_KEY=b8aa8087d97d609b15d2f818dd9ddb9e
     ports:
       - "8080:8080"
     depends_on:

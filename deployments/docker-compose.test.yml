@@ -39,8 +39,11 @@ services:
       - TFR_SERVER_PORT=8080
       # JWT secret required by backend — fixed value for test environment only
       - TFR_JWT_SECRET=test-jwt-secret-for-e2e-only-not-for-production
-      # ENCRYPTION_KEY required for SCM integration — fixed 32-byte value for test only
-      - ENCRYPTION_KEY=00000000000000000000000000000000
+      # ENCRYPTION_KEY required for SCM integration — fixed value for test only.
+      # Must look CSPRNG-generated: the backend refuses to start on
+      # low-entropy keys (its issue #560), so an all-zeros placeholder fails
+      # boot. Public in this repo by design — this stack never holds real data.
+      - ENCRYPTION_KEY=b8aa8087d97d609b15d2f818dd9ddb9e
       # Disable rate limiting so the E2E suite (40+ tests each making API calls) does not
       # trigger 429 responses mid-run.
       - TFR_SECURITY_RATE_LIMITING_ENABLED=false
