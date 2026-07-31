@@ -21,7 +21,6 @@ import {
   Select,
   MenuItem,
   Collapse,
-  IconButton,
 } from '@mui/material'
 import type { SelectChangeEvent } from '@mui/material'
 import SearchIcon from '@mui/icons-material/Search'
@@ -470,9 +469,15 @@ const ModulesPage: React.FC = () => {
                     userSelect: 'none',
                   }}
                 >
-                  <IconButton size="small" tabIndex={-1} aria-hidden="true">
+                  {/* Decorative chevron: must not be a real <button> — a focusable
+                      element nested inside this role="button" header is an axe
+                      "nested-interactive" violation (negative tabindex + aria-hidden
+                      do not stop assistive tech from focusing it). A plain span
+                      keeps the IconButton's small-size footprint without the
+                      interactive semantics. */}
+                  <Box component="span" aria-hidden="true" sx={{ display: 'inline-flex', p: '5px' }}>
                     {isCollapsed ? <ExpandMore /> : <ExpandLess />}
-                  </IconButton>
+                  </Box>
                   <ProviderIcon provider={provider} size={28} />
                   <Typography variant="h6" sx={{ fontWeight: 600 }}>
                     {providerDisplayName(provider)}
