@@ -1,6 +1,37 @@
 <!-- markdownlint-disable MD013 MD024 MD041 -->
 # Changelog
 
+## [2.20.1](https://github.com/sethbacon/terraform-registry-frontend/compare/v2.20.0...v2.20.1) (2026-07-31)
+
+
+### Bug Fixes
+
+* **a11y:** darken swagger authorize green to meet WCAG AA contrast ([#659](https://github.com/sethbacon/terraform-registry-frontend/issues/659)) ([7516d8b](https://github.com/sethbacon/terraform-registry-frontend/commit/7516d8bbf3cba9935405ce6aef0d04e4436cc66e))
+* **a11y:** lighten swagger dark-mode path text to meet WCAG AA contrast ([#662](https://github.com/sethbacon/terraform-registry-frontend/issues/662)) ([4583dd5](https://github.com/sethbacon/terraform-registry-frontend/commit/4583dd51432725a23624319933b41f128b23db99))
+* **a11y:** remove nested interactive control from modules group header ([#658](https://github.com/sethbacon/terraform-registry-frontend/issues/658)) ([a3d988a](https://github.com/sethbacon/terraform-registry-frontend/commit/a3d988a84e5279d277b712ad96ab8f685eed4e40))
+* **ci:** skip coverage badge when GIST_TOKEN is absent in called workflows ([#656](https://github.com/sethbacon/terraform-registry-frontend/issues/656)) ([0ee22af](https://github.com/sethbacon/terraform-registry-frontend/commit/0ee22af432dcf0b2955f4cef57a33739cc01bd30))
+* **deployments:** replace low-entropy test encryption keys rejected by backend ([#660](https://github.com/sethbacon/terraform-registry-frontend/issues/660)) ([bdc611c](https://github.com/sethbacon/terraform-registry-frontend/commit/bdc611cdf0d2e0d47c8a4486aa038649f1237e41))
+* error-reporting infra: Sentry dep, ErrorBoundary, CSP, docs ([#610](https://github.com/sethbacon/terraform-registry-frontend/issues/610), [#611](https://github.com/sethbacon/terraform-registry-frontend/issues/611), [#618](https://github.com/sethbacon/terraform-registry-frontend/issues/618), [#620](https://github.com/sethbacon/terraform-registry-frontend/issues/620), [#630](https://github.com/sethbacon/terraform-registry-frontend/issues/630), [#634](https://github.com/sethbacon/terraform-registry-frontend/issues/634)) ([#651](https://github.com/sethbacon/terraform-registry-frontend/issues/651)) ([693b21c](https://github.com/sethbacon/terraform-registry-frontend/commit/693b21c59a5b07b5c0ebc004c96bf792b155b3e2))
+* i18n missing-key fallback, shared admin-page hook, swagger trust note ([#624](https://github.com/sethbacon/terraform-registry-frontend/issues/624), [#632](https://github.com/sethbacon/terraform-registry-frontend/issues/632), [#635](https://github.com/sethbacon/terraform-registry-frontend/issues/635)) ([#640](https://github.com/sethbacon/terraform-registry-frontend/issues/640)) ([03f232f](https://github.com/sethbacon/terraform-registry-frontend/commit/03f232f7ac3bb58238af96c3b3fd1870138947e4))
+
+
+### Documentation
+
+* correct stale security/testing/accessibility doc claims ([#607](https://github.com/sethbacon/terraform-registry-frontend/issues/607), [#625](https://github.com/sethbacon/terraform-registry-frontend/issues/625), [#627](https://github.com/sethbacon/terraform-registry-frontend/issues/627), [#628](https://github.com/sethbacon/terraform-registry-frontend/issues/628), [#629](https://github.com/sethbacon/terraform-registry-frontend/issues/629), part of [#472](https://github.com/sethbacon/terraform-registry-frontend/issues/472)) ([#648](https://github.com/sethbacon/terraform-registry-frontend/issues/648)) ([e9468e3](https://github.com/sethbacon/terraform-registry-frontend/commit/e9468e30b2ecda1d98df4296aa91a8d32bef3266))
+
+
+### Refactor
+
+* decompose ModuleDetailPage/useModuleDetail god hook ([#102](https://github.com/sethbacon/terraform-registry-frontend/issues/102)) ([#653](https://github.com/sethbacon/terraform-registry-frontend/issues/653)) ([b7e0ef3](https://github.com/sethbacon/terraform-registry-frontend/commit/b7e0ef39ac87caa685d59883bf4a20768e878886))
+
+
+### Security
+
+* add external-origin allowlist for backend-supplied URLs ([#559](https://github.com/sethbacon/terraform-registry-frontend/issues/559)) ([#655](https://github.com/sethbacon/terraform-registry-frontend/issues/655)) ([bfbeeb5](https://github.com/sethbacon/terraform-registry-frontend/commit/bfbeeb55e7580d2175f938c1dd0ef6992b0aa4eb))
+* harden shared HTTP client: errors, timeouts, CSRF, retry, mock-fallback ([#601](https://github.com/sethbacon/terraform-registry-frontend/issues/601), [#602](https://github.com/sethbacon/terraform-registry-frontend/issues/602), [#606](https://github.com/sethbacon/terraform-registry-frontend/issues/606), [#615](https://github.com/sethbacon/terraform-registry-frontend/issues/615), [#616](https://github.com/sethbacon/terraform-registry-frontend/issues/616), [#617](https://github.com/sethbacon/terraform-registry-frontend/issues/617), [#621](https://github.com/sethbacon/terraform-registry-frontend/issues/621), [#631](https://github.com/sethbacon/terraform-registry-frontend/issues/631)) ([#638](https://github.com/sethbacon/terraform-registry-frontend/issues/638)) ([8fe1ca0](https://github.com/sethbacon/terraform-registry-frontend/commit/8fe1ca099ce3f7863490e30548914d2187b5ee8d))
+* scope/gating consistency, dev-login bundle stripping, dead auth types ([#608](https://github.com/sethbacon/terraform-registry-frontend/issues/608), [#609](https://github.com/sethbacon/terraform-registry-frontend/issues/609), [#622](https://github.com/sethbacon/terraform-registry-frontend/issues/622), [#633](https://github.com/sethbacon/terraform-registry-frontend/issues/633), [#636](https://github.com/sethbacon/terraform-registry-frontend/issues/636)) ([#647](https://github.com/sethbacon/terraform-registry-frontend/issues/647)) ([d4fc089](https://github.com/sethbacon/terraform-registry-frontend/commit/d4fc089adddbd2adde79bd59dd75aa7e0f13301a))
+* URL encoding/validation and telemetry wiring in the API layer ([#599](https://github.com/sethbacon/terraform-registry-frontend/issues/599), [#600](https://github.com/sethbacon/terraform-registry-frontend/issues/600), [#614](https://github.com/sethbacon/terraform-registry-frontend/issues/614), [#619](https://github.com/sethbacon/terraform-registry-frontend/issues/619), [#623](https://github.com/sethbacon/terraform-registry-frontend/issues/623), part of [#559](https://github.com/sethbacon/terraform-registry-frontend/issues/559)) ([#639](https://github.com/sethbacon/terraform-registry-frontend/issues/639)) ([f18a99c](https://github.com/sethbacon/terraform-registry-frontend/commit/f18a99c8a1afa1e010429aece7e07f37ddcb9d15))
+
 ## [2.20.0](https://github.com/sethbacon/terraform-registry-frontend/compare/v2.19.4...v2.20.0) (2026-07-22)
 
 
