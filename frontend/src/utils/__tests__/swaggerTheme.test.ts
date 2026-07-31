@@ -104,4 +104,10 @@ describe('getSwaggerThemeCss', () => {
     expect(css).toContain('.swagger-ui .scheme-container select { color-scheme: dark;')
     expect(css).not.toContain('.swagger-ui .scheme-container { background: #fafafa !important;')
   })
+
+  it('lightens the opblock summary path text in dark mode (color-contrast fix)', () => {
+    const darkRule = '.swagger-ui .opblock-summary-path .nostyle { color: #e0e0e0 !important; }'
+    expect(getSwaggerThemeCss(true)).toContain(darkRule)
+    expect(getSwaggerThemeCss(false)).not.toContain(darkRule)
+  })
 })
