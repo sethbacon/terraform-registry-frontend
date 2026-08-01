@@ -14,6 +14,7 @@ const listVersionsMock = vi.fn()
 const listVersionPlatformsMock = vi.fn()
 const deleteVersionMock = vi.fn()
 const getHistoryMock = vi.fn()
+const getReleasesGPGKeysMock = vi.fn()
 
 vi.mock('../../../services/api', () => ({
   default: {
@@ -27,6 +28,11 @@ vi.mock('../../../services/api', () => ({
     listTerraformVersionPlatforms: (...args: unknown[]) => listVersionPlatformsMock(...args),
     deleteTerraformVersion: (...args: unknown[]) => deleteVersionMock(...args),
     getTerraformMirrorHistory: (...args: unknown[]) => getHistoryMock(...args),
+    // The page renders <ReleasesGPGKeyStatus />, which calls this. Leaving it out
+    // makes the call a TypeError, so that panel renders its own "Failed to load
+    // GPG key status." alert in every test here — a second element matching any
+    // loose /error|failed/ assertion.
+    getReleasesGPGKeys: (...args: unknown[]) => getReleasesGPGKeysMock(...args),
   },
 }))
 
@@ -84,6 +90,7 @@ describe('TerraformMirrorPage', () => {
     listVersionsMock.mockResolvedValue({ versions: [] })
     listVersionPlatformsMock.mockResolvedValue({ platforms: [] })
     getHistoryMock.mockResolvedValue({ history: [] })
+    getReleasesGPGKeysMock.mockResolvedValue({ keys: [] })
   })
 
   it('shows loading spinner initially', () => {
@@ -119,9 +126,11 @@ describe('TerraformMirrorPage', () => {
   it('shows error state on API failure', async () => {
     listTerraformMirrorConfigsMock.mockRejectedValue(new Error('Server error'))
     renderPage()
-    await waitFor(() => {
-      expect(screen.getByText(/error|failed|server error/i)).toBeInTheDocument()
-    })
+    // Assert the page's own alert text exactly. A loose /error|failed/ regex also
+    // matches any other alert on the page, and getByText throws on multiple
+    // matches — so the assertion only held in the window before the second alert
+    // rendered, which a loaded parallel worker can miss.
+    expect(await screen.findByText('Server error')).toBeInTheDocument()
   })
 
   it('renders page heading', async () => {
