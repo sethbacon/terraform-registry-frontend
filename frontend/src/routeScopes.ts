@@ -32,4 +32,5 @@ export const ADMIN_ROUTE_SCOPES: Record<string, ScopeValue | null> = {
   '/admin/audit-logs': 'audit:read',
   '/admin/security-scanning': 'admin',
   '/admin/notifications': 'admin',
+  '/admin/branding': 'admin',
 }

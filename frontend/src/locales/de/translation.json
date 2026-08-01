@@ -48,6 +48,8 @@
       "securityScanningTooltip": "Konfiguration und Status der Sicherheitsüberprüfung anzeigen",
       "notifications": "Benachrichtigungen",
       "notificationsTooltip": "E-Mail-Benachrichtigungen und SMTP konfigurieren",
+      "branding": "Markenbildung",
+      "brandingTooltip": "Produktname, Farben und Logo als White-Label-Version bereitstellen",
       "auditLogs": "Prüfprotokolle",
       "auditLogsTooltip": "System-Auditprotokolle anzeigen",
       "componentsDev": "Komponenten",
@@ -912,6 +914,23 @@
     }
   },
   "admin": {
+    "branding": {
+      "pageTitle": "Markenbildung",
+      "pageSubtitle": "Passen Sie die App an Ihre Organisation an: Produktname, Farbpalette sowie Logo, Favicon und Bilder für den Login-Hero.",
+      "loadError": "Das Laden des aktuellen Brandings ist fehlgeschlagen.",
+      "saveError": "Das Speichern des Brandings ist fehlgeschlagen",
+      "productName": "Produktname",
+      "productNameHelp": "Bis zu 100 Zeichen.",
+      "primaryColor": "Grundfarbe",
+      "secondaryColorLight": "Sekundärfarbe (Hellmodus)",
+      "secondaryColorDark": "Sekundärfarbe (Dunkelmodus)",
+      "logoUrl": "Logo-URL",
+      "faviconUrl": "Favicon-URL",
+      "loginHeroUrl": "URL des Hero-Bildes für die Anmeldung",
+      "resetDefaults": "Auf Standardwerte zurücksetzen",
+      "savedReloadHint": "Branding wurde gespeichert. Lade die Seite neu, um die Änderungen anzuzeigen.",
+      "reloadNow": "Jetzt neu laden"
+    },
     "storage": {
       "stepSelectBackend": "Backend auswählen",
       "stepConfigureSettings": "Einstellungen konfigurieren",
@@ -2511,6 +2530,8 @@
       "productNameHelp": "Wird im Browsertitel, in der Seitenleiste und auf der Anmeldeseite angezeigt",
       "primaryColor": "Grundfarbe",
       "primaryColorHelp": "Hex-Farbcode für Schaltflächen, Links und Akzentelemente",
+      "secondaryColorLight": "Sekundärfarbe (Hellmodus)",
+      "secondaryColorDark": "Sekundärfarbe (Dunkelmodus)",
       "logoUrl": "Logo-URL",
       "logoUrlHelp": "Wird in der Kopfzeile der Seitenleiste und auf der Anmeldeseite angezeigt (PNG oder SVG, empfohlene Höhe 40 px)",
       "heroUrl": "URL des Hero-Bildes auf der Anmeldeseite",

@@ -48,6 +48,8 @@
       "securityScanningTooltip": "Vis konfigurasjon og status for sikkerhetsskanning",
       "notifications": "Varsler",
       "notificationsTooltip": "Konfigurer e-postvarsler og SMTP",
+      "branding": "Merkevarebygging",
+      "brandingTooltip": "Tilpass produktnavnet, fargene og logoen",
       "auditLogs": "Revisjonslogger",
       "auditLogsTooltip": "Vis systemrevisjonslogger",
       "componentsDev": "Komponenter",
@@ -912,6 +914,23 @@
     }
   },
   "admin": {
+    "branding": {
+      "pageTitle": "Merkevarebygging",
+      "pageSubtitle": "Tilpass appen til din organisasjon: produktnavn, fargepalett, logo, favikon og bilder til påloggingssiden.",
+      "loadError": "Det gikk ikke å laste inn den gjeldende merkevareprofilen.",
+      "saveError": "Det gikk ikke å lagre merkevaren",
+      "productName": "Produktnavn",
+      "productNameHelp": "Opptil 100 tegn.",
+      "primaryColor": "Primærfarge",
+      "secondaryColorLight": "Sekundærfarge (lysmodus)",
+      "secondaryColorDark": "Sekundærfarge (mørk modus)",
+      "logoUrl": "Logo-URL",
+      "faviconUrl": "Favicon-URL",
+      "loginHeroUrl": "URL til hovedbilde for innlogging",
+      "resetDefaults": "Tilbakestill til standardinnstillinger",
+      "savedReloadHint": "Merkeinnstillingene er lagret. Last inn siden på nytt for å se endringene.",
+      "reloadNow": "Last inn på nytt nå"
+    },
     "storage": {
       "stepSelectBackend": "Velg backend",
       "stepConfigureSettings": "Konfigurer innstillinger",
@@ -2511,6 +2530,8 @@
       "productNameHelp": "Vises i nettlesertittelen, sidefeltet og på innloggingssiden",
       "primaryColor": "Primærfarge",
       "primaryColorHelp": "Hex-fargekode for knapper, lenker og aksentelementer",
+      "secondaryColorLight": "Sekundærfarge (lysmodus)",
+      "secondaryColorDark": "Sekundærfarge (mørk modus)",
       "logoUrl": "Logo-URL",
       "logoUrlHelp": "Vises i overskriften på sidepanelet og på påloggingssiden (PNG eller SVG, anbefalt høyde 40 piksler)",
       "heroUrl": "URL til hovedbildet på innloggingssiden",

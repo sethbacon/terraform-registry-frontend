@@ -48,6 +48,8 @@
       "securityScanningTooltip": "Ver la configuración y el estado del análisis de seguridad",
       "notifications": "Notificaciones",
       "notificationsTooltip": "Configurar las notificaciones por correo electrónico y el SMTP",
+      "branding": "Imagen de marca",
+      "brandingTooltip": "Personalizar el nombre del producto, los colores y el logotipo con la marca del cliente",
       "auditLogs": "Registros de auditoría",
       "auditLogsTooltip": "Ver los registros de auditoría del sistema",
       "componentsDev": "Componentes",
@@ -912,6 +914,23 @@
     }
   },
   "admin": {
+    "branding": {
+      "pageTitle": "Imagen de marca",
+      "pageSubtitle": "Personaliza la aplicación con la imagen de marca de tu organización: nombre del producto, paleta de colores, logotipo, favicon e imágenes de inicio de sesión.",
+      "loadError": "No se ha podido cargar la imagen de marca actual.",
+      "saveError": "No se ha podido guardar la imagen de marca",
+      "productName": "Nombre del producto",
+      "productNameHelp": "Hasta 100 caracteres.",
+      "primaryColor": "Color primario",
+      "secondaryColorLight": "Color secundario (modo claro)",
+      "secondaryColorDark": "Color secundario (modo oscuro)",
+      "logoUrl": "URL del logotipo",
+      "faviconUrl": "URL del favicon",
+      "loginHeroUrl": "URL de la imagen principal de inicio de sesión",
+      "resetDefaults": "Restablecer los valores predeterminados",
+      "savedReloadHint": "Se ha guardado la imagen de marca. Actualiza la página para ver los cambios.",
+      "reloadNow": "Actualizar ahora"
+    },
     "storage": {
       "stepSelectBackend": "Seleccionar backend",
       "stepConfigureSettings": "Configurar ajustes",
@@ -2511,6 +2530,8 @@
       "productNameHelp": "Se muestra en el título del navegador, en la barra lateral y en la página de inicio de sesión",
       "primaryColor": "Color primario",
       "primaryColorHelp": "Código de color hexadecimal para botones, enlaces y elementos decorativos",
+      "secondaryColorLight": "Color secundario (modo claro)",
+      "secondaryColorDark": "Color secundario (modo oscuro)",
       "logoUrl": "URL del logotipo",
       "logoUrlHelp": "Se muestra en el encabezado de la barra lateral y en la página de inicio de sesión (PNG o SVG; altura recomendada: 40 píxeles)",
       "heroUrl": "URL de la imagen principal de la página de inicio de sesión",

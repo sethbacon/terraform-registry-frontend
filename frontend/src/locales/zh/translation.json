@@ -48,6 +48,8 @@
       "securityScanningTooltip": "查看安全扫描配置和状态",
       "notifications": "通知",
       "notificationsTooltip": "配置电子邮件通知和 SMTP",
+      "branding": "品牌建设",
+      "brandingTooltip": "将产品名称、颜色和徽标进行白标处理",
       "auditLogs": "审计日志",
       "auditLogsTooltip": "查看系统审计日志",
       "componentsDev": "组件",
@@ -912,6 +914,23 @@
     }
   },
   "admin": {
+    "branding": {
+      "pageTitle": "品牌建设",
+      "pageSubtitle": "为您的组织对该应用进行白标定制：产品名称、配色方案、徽标、网站图标以及登录页头图。",
+      "loadError": "无法加载当前的品牌样式。",
+      "saveError": "无法保存品牌标识",
+      "productName": "产品名称",
+      "productNameHelp": "最多100个字符。",
+      "primaryColor": "原色",
+      "secondaryColorLight": "次要颜色（浅色模式）",
+      "secondaryColorDark": "辅助颜色（深色模式）",
+      "logoUrl": "徽标网址",
+      "faviconUrl": "网站图标网址",
+      "loginHeroUrl": "登录主图网址",
+      "resetDefaults": "恢复默认设置",
+      "savedReloadHint": "品牌设置已保存。请刷新页面以查看更改效果。",
+      "reloadNow": "立即刷新"
+    },
     "storage": {
       "stepSelectBackend": "选择后端",
       "stepConfigureSettings": "配置设置",
@@ -2511,6 +2530,8 @@
       "productNameHelp": "显示在浏览器标题栏、侧边栏和登录页面中",
       "primaryColor": "原色",
       "primaryColorHelp": "按钮、链接和强调元素的十六进制颜色代码",
+      "secondaryColorLight": "次要颜色（浅色模式）",
+      "secondaryColorDark": "辅助颜色（深色模式）",
       "logoUrl": "徽标网址",
       "logoUrlHelp": "显示在侧边栏标题栏和登录页面上（PNG 或 SVG 格式，建议高度为 40 像素）",
       "heroUrl": "登录页面主图网址",

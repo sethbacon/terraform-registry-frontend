@@ -48,6 +48,8 @@
       "securityScanningTooltip": "De configuratie en status van beveiligingsscans bekijken",
       "notifications": "Meldingen",
       "notificationsTooltip": "E-mailmeldingen en SMTP configureren",
+      "branding": "Merkopbouw",
+      "brandingTooltip": "Pas de productnaam, kleuren en het logo aan volgens de whitelabel-richtlijnen",
       "auditLogs": "Controledagboeken",
       "auditLogsTooltip": "Systeemlogboeken bekijken",
       "componentsDev": "Onderdelen",
@@ -912,6 +914,23 @@
     }
   },
   "admin": {
+    "branding": {
+      "pageTitle": "Merkopbouw",
+      "pageSubtitle": "Pas de app aan voor uw organisatie: productnaam, kleurenpalet, logo, favicon en afbeeldingen voor de inlogpagina.",
+      "loadError": "Het laden van de huidige huisstijl is mislukt.",
+      "saveError": "Het opslaan van de huisstijl is mislukt",
+      "productName": "Productnaam",
+      "productNameHelp": "Maximaal 100 tekens.",
+      "primaryColor": "Primaire kleur",
+      "secondaryColorLight": "Secundaire kleur (lichtmodus)",
+      "secondaryColorDark": "Secundaire kleur (donkere modus)",
+      "logoUrl": "URL van het logo",
+      "faviconUrl": "URL van het favicon",
+      "loginHeroUrl": "URL van de hero-afbeelding bij het inloggen",
+      "resetDefaults": "Terugzetten naar standaardinstellingen",
+      "savedReloadHint": "Het merk is opgeslagen. Laad de pagina opnieuw om de wijzigingen te zien.",
+      "reloadNow": "Nu opnieuw laden"
+    },
     "storage": {
       "stepSelectBackend": "Backend selecteren",
       "stepConfigureSettings": "Instellingen configureren",
@@ -2511,6 +2530,8 @@
       "productNameHelp": "Weergegeven in de titelbalk van de browser, de zijbalk en de inlogpagina",
       "primaryColor": "Primaire kleur",
       "primaryColorHelp": "Hex-kleurcode voor knoppen, links en accentelementen",
+      "secondaryColorLight": "Secundaire kleur (lichtmodus)",
+      "secondaryColorDark": "Secundaire kleur (donkere modus)",
       "logoUrl": "URL van het logo",
       "logoUrlHelp": "Wordt weergegeven in de koptekst van de zijbalk en op de inlogpagina (PNG of SVG, aanbevolen hoogte 40px)",
       "heroUrl": "URL van de hero-afbeelding op de inlogpagina",

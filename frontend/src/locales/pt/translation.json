@@ -48,6 +48,8 @@
       "securityScanningTooltip": "Ver a configuração e o estado da verificação de segurança",
       "notifications": "Notificações",
       "notificationsTooltip": "Configurar notificações por e-mail e SMTP",
+      "branding": "Imagem de marca",
+      "brandingTooltip": "Personalizar o nome do produto, as cores e o logótipo com a marca do cliente",
       "auditLogs": "Registos de auditoria",
       "auditLogsTooltip": "Ver registos de auditoria do sistema",
       "componentsDev": "Componentes",
@@ -912,6 +914,23 @@
     }
   },
   "admin": {
+    "branding": {
+      "pageTitle": "Imagem de marca",
+      "pageSubtitle": "Personalize a aplicação com a marca da sua organização: nome do produto, paleta de cores, logótipo, favicon e imagens de destaque na página de início de sessão.",
+      "loadError": "Não foi possível carregar a identidade visual atual.",
+      "saveError": "Não foi possível guardar a identidade visual",
+      "productName": "Nome do produto",
+      "productNameHelp": "Até 100 caracteres.",
+      "primaryColor": "Cor primária",
+      "secondaryColorLight": "Cor secundária (modo claro)",
+      "secondaryColorDark": "Cor secundária (modo escuro)",
+      "logoUrl": "URL do logótipo",
+      "faviconUrl": "URL do favicon",
+      "loginHeroUrl": "URL da imagem principal da página de início de sessão",
+      "resetDefaults": "Restaurar as predefinições",
+      "savedReloadHint": "A identidade visual foi guardada. Atualize a página para ver as alterações aplicadas.",
+      "reloadNow": "Atualizar agora"
+    },
     "storage": {
       "stepSelectBackend": "Selecionar backend",
       "stepConfigureSettings": "Configurar definições",
@@ -2511,6 +2530,8 @@
       "productNameHelp": "Exibido no título do navegador, na barra lateral e na página de início de sessão",
       "primaryColor": "Cor primária",
       "primaryColorHelp": "Código de cor hexadecimal para botões, links e elementos de destaque",
+      "secondaryColorLight": "Cor secundária (modo claro)",
+      "secondaryColorDark": "Cor secundária (modo escuro)",
       "logoUrl": "URL do logótipo",
       "logoUrlHelp": "Exibido no cabeçalho da barra lateral e na página de início de sessão (PNG ou SVG, altura recomendada: 40 px)",
       "heroUrl": "URL da imagem principal da página de início de sessão",
