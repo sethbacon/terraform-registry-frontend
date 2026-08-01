@@ -51,6 +51,7 @@ const MTLSPage = lazy(() => import('./pages/admin/MTLSPage'))
 const AuditLogPage = lazy(() => import('./pages/admin/AuditLogPage'))
 const SecurityScanningPage = lazy(() => import('./pages/admin/SecurityScanningPage'))
 const NotificationsPage = lazy(() => import('./pages/admin/NotificationsPage'))
+const BrandingPage = lazy(() => import('./pages/admin/BrandingPage'))
 const ComponentShowcase = lazy(() => import('./pages/dev/ComponentShowcase'))
 const SettingsPage = lazy(() => import('./pages/SettingsPage'))
 
@@ -289,6 +290,15 @@ function App() {
                             <LazyRoute
                               Component={NotificationsPage}
                               requiredScope={ADMIN_ROUTE_SCOPES['/admin/notifications']}
+                            />
+                          }
+                        />
+                        <Route
+                          path="/admin/branding"
+                          element={
+                            <LazyRoute
+                              Component={BrandingPage}
+                              requiredScope={ADMIN_ROUTE_SCOPES['/admin/branding']}
                             />
                           }
                         />

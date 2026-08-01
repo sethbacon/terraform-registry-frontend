@@ -48,6 +48,8 @@
       "securityScanningTooltip": "セキュリティスキャンの設定とステータスを確認する",
       "notifications": "通知",
       "notificationsTooltip": "メール通知とSMTPの設定",
+      "branding": "ブランディング",
+      "brandingTooltip": "製品名、カラー、ロゴをホワイトラベル化する",
       "auditLogs": "監査ログ",
       "auditLogsTooltip": "システム監査ログを表示する",
       "componentsDev": "構成要素",
@@ -912,6 +914,23 @@
     }
   },
   "admin": {
+    "branding": {
+      "pageTitle": "ブランディング",
+      "pageSubtitle": "組織に合わせてアプリをホワイトラベル化しましょう：製品名、カラーパレット、ロゴ、ファビコン、ログイン画面のヘッダー画像などをカスタマイズできます。",
+      "loadError": "現在のブランディングを読み込めませんでした。",
+      "saveError": "ブランディングの保存に失敗しました",
+      "productName": "製品名",
+      "productNameHelp": "最大100文字。",
+      "primaryColor": "原色",
+      "secondaryColorLight": "セカンダリーカラー（ライトモード）",
+      "secondaryColorDark": "セカンダリカラー（ダークモード）",
+      "logoUrl": "ロゴのURL",
+      "faviconUrl": "ファビコンのURL",
+      "loginHeroUrl": "ログイン用ヒーロー画像のURL",
+      "resetDefaults": "デフォルト設定に戻す",
+      "savedReloadHint": "ブランディングが保存されました。変更を反映させるには、ページを再読み込みしてください。",
+      "reloadNow": "今すぐ再読み込み"
+    },
     "storage": {
       "stepSelectBackend": "バックエンドを選択",
       "stepConfigureSettings": "設定を行う",
@@ -2511,6 +2530,8 @@
       "productNameHelp": "ブラウザのタイトルバー、サイドバー、およびログインページに表示されます",
       "primaryColor": "原色",
       "primaryColorHelp": "ボタン、リンク、およびアクセント要素の16進数カラーコード",
+      "secondaryColorLight": "セカンダリーカラー（ライトモード）",
+      "secondaryColorDark": "セカンダリカラー（ダークモード）",
       "logoUrl": "ロゴのURL",
       "logoUrlHelp": "サイドバーのヘッダーおよびログインページに表示されます（PNGまたはSVG、推奨高さ40px）",
       "heroUrl": "ログインページのヘッダー画像のURL",

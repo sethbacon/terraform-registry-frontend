@@ -48,6 +48,8 @@
       "securityScanningTooltip": "Visualizza la configurazione e lo stato della scansione di sicurezza",
       "notifications": "Notifiche",
       "notificationsTooltip": "Configurare le notifiche via e-mail e SMTP",
+      "branding": "Branding",
+      "brandingTooltip": "Personalizza il nome del prodotto, i colori e il logo con il marchio del cliente",
       "auditLogs": "Registri di controllo",
       "auditLogsTooltip": "Visualizza i registri di controllo del sistema",
       "componentsDev": "Componenti",
@@ -912,6 +914,23 @@
     }
   },
   "admin": {
+    "branding": {
+      "pageTitle": "Branding",
+      "pageSubtitle": "Personalizza l'app con il marchio della tua organizzazione: nome del prodotto, palette di colori, logo, favicon e immagini di login-hero.",
+      "loadError": "Impossibile caricare il branding corrente.",
+      "saveError": "Impossibile salvare il branding",
+      "productName": "Nome del prodotto",
+      "productNameHelp": "Fino a 100 caratteri.",
+      "primaryColor": "Colore primario",
+      "secondaryColorLight": "Colore secondario (modalità chiara)",
+      "secondaryColorDark": "Colore secondario (modalità scura)",
+      "logoUrl": "URL del logo",
+      "faviconUrl": "URL della favicon",
+      "loginHeroUrl": "URL dell'immagine principale della pagina di accesso",
+      "resetDefaults": "Ripristina impostazioni predefinite",
+      "savedReloadHint": "Il branding è stato salvato. Aggiorna la pagina per vedere le modifiche applicate.",
+      "reloadNow": "Aggiorna ora"
+    },
     "storage": {
       "stepSelectBackend": "Seleziona il backend",
       "stepConfigureSettings": "Configura le impostazioni",
@@ -2511,6 +2530,8 @@
       "productNameHelp": "Visualizzato nella barra del titolo del browser, nella barra laterale e nella pagina di accesso",
       "primaryColor": "Colore primario",
       "primaryColorHelp": "Codice esadecimale dei colori per pulsanti, link ed elementi di risalto",
+      "secondaryColorLight": "Colore secondario (modalità chiara)",
+      "secondaryColorDark": "Colore secondario (modalità scura)",
       "logoUrl": "URL del logo",
       "logoUrlHelp": "Visualizzato nell'intestazione della barra laterale e nella pagina di accesso (formato PNG o SVG, altezza consigliata 40 px)",
       "heroUrl": "URL dell'immagine principale della pagina di accesso",

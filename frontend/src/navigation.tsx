@@ -118,6 +118,7 @@ export const adminNavGroups: NavGroup[] = [
       { path: '/admin/storage', labelKey: 'nav.admin.storage', tooltipKey: 'nav.admin.storageTooltip', icon: <Storage />, scope: adminScope('/admin/storage') },
       { path: '/admin/security-scanning', labelKey: 'nav.admin.securityScanning', tooltipKey: 'nav.admin.securityScanningTooltip', icon: <Security />, scope: adminScope('/admin/security-scanning') },
       { path: '/admin/notifications', labelKey: 'nav.admin.notifications', tooltipKey: 'nav.admin.notificationsTooltip', icon: <Notifications />, scope: adminScope('/admin/notifications') },
+      { path: '/admin/branding', labelKey: 'nav.admin.branding', tooltipKey: 'nav.admin.brandingTooltip', icon: <Palette />, scope: adminScope('/admin/branding') },
       { path: '/admin/audit-logs', labelKey: 'nav.admin.auditLogs', tooltipKey: 'nav.admin.auditLogsTooltip', icon: <History />, scope: adminScope('/admin/audit-logs') },
     ],
   },

@@ -48,6 +48,8 @@
       "securityScanningTooltip": "Afficher la configuration et l'état de l'analyse de sécurité",
       "notifications": "Notifications",
       "notificationsTooltip": "Configurer les notifications par e-mail et le protocole SMTP",
+      "branding": "Image de marque",
+      "brandingTooltip": "Personnaliser le nom du produit, les couleurs et le logo",
       "auditLogs": "Journaux d'audit",
       "auditLogsTooltip": "Afficher les journaux d'audit du système",
       "componentsDev": "Composants",
@@ -912,6 +914,23 @@
     }
   },
   "admin": {
+    "branding": {
+      "pageTitle": "Image de marque",
+      "pageSubtitle": "Personnalisez l'application aux couleurs de votre organisation : nom du produit, palette de couleurs, logo, favicon et images de la page d'accueil.",
+      "loadError": "Impossible de charger l'identité visuelle actuelle.",
+      "saveError": "Échec de l'enregistrement de l'identité visuelle",
+      "productName": "Nom du produit",
+      "productNameHelp": "100 caractères maximum.",
+      "primaryColor": "Couleur primaire",
+      "secondaryColorLight": "Couleur secondaire (mode clair)",
+      "secondaryColorDark": "Couleur secondaire (mode sombre)",
+      "logoUrl": "URL du logo",
+      "faviconUrl": "URL de la favicon",
+      "loginHeroUrl": "URL de l'image principale de la page de connexion",
+      "resetDefaults": "Rétablir les paramètres par défaut",
+      "savedReloadHint": "L'identité visuelle a été enregistrée. Actualisez la page pour voir les modifications.",
+      "reloadNow": "Recharger maintenant"
+    },
     "storage": {
       "stepSelectBackend": "Sélectionner le backend",
       "stepConfigureSettings": "Configurer les paramètres",
@@ -2511,6 +2530,8 @@
       "productNameHelp": "Affiché dans la barre de titre du navigateur, dans la barre latérale et sur la page de connexion",
       "primaryColor": "Couleur primaire",
       "primaryColorHelp": "Code couleur hexadécimal pour les boutons, les liens et les éléments de mise en valeur",
+      "secondaryColorLight": "Couleur secondaire (mode clair)",
+      "secondaryColorDark": "Couleur secondaire (mode sombre)",
       "logoUrl": "URL du logo",
       "logoUrlHelp": "Affiché dans l'en-tête de la barre latérale et sur la page de connexion (format PNG ou SVG, hauteur recommandée : 40 px)",
       "heroUrl": "URL de l'image principale de la page de connexion",
