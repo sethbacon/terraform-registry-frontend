@@ -25,11 +25,6 @@
       "method": "GET",
       "path": "/api/v1/ui/config",
       "reason": "Backend handler uiConfigHandler (terraform-registry-backend/backend/internal/api/suite.go) has no swag annotations and the route is absent from backend/docs/swagger.json -- unlike the sibling /api/v1/ui/theme route, which is documented. Tracked in #600; remove this entry once the backend adds @Router/@Summary annotations for uiConfigHandler and regenerates swagger.json."
-    },
-    {
-      "method": "POST",
-      "path": "/api/v1/auth/logout",
-      "reason": "TEMPORARY -- release-ordering only, not a missing route. Logout moved from a forgeable GET navigation to a CSRF-protected POST (terraform-registry-backend#729, merged to main). The contract check runs against the PINNED RELEASED backend image in deployments/docker-compose.contract-check.yml (currently 3.2.0), and no release yet contains the POST route -- the latest, 3.5.1, predates it. The backend still serves GET as well, so deploying this frontend against any current backend works. REMOVE THIS ENTRY and bump BACKEND_IMAGE to the first release containing POST /api/v1/auth/logout; that same release is the prerequisite for terraform-registry-backend#731, which deletes the GET route."
     }
   ]
 }
