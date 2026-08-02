@@ -208,7 +208,29 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Pull contract-check images (retry transient Docker Hub timeouts)
+        # postgres:16-alpine comes from Docker Hub, whose unauthenticated rate
+        # limit on shared GitHub runners intermittently times out the pull. This
+        # job gates e2e-gated (`needs: contract-check`), so one unretried pull
+        # failure here skips the release gate entirely without ever comparing a
+        # contract — see run 30734033297, where the stack never started. Retry so
+        # the subsequent `compose up` finds the images cached. e2e-gated has had
+        # the same guard since it started blocking releases; unlike that stack,
+        # nothing here is buildable, so no --ignore-buildable is needed.
+        run: |
+          compose="docker compose -f deployments/docker-compose.contract-check.yml"
+          for attempt in 1 2 3 4 5; do
+            if $compose pull; then
+              exit 0
+            fi
+            echo "::warning::Image pull failed (attempt ${attempt}/5); retrying in 15s..."
+            sleep 15
+          done
+          echo "::error::Image pull failed after 5 attempts"
+          exit 1
+
       - name: Start contract-check stack
+        # Images are pre-pulled above.
         run: >-
           docker compose -f deployments/docker-compose.contract-check.yml up -d
 
