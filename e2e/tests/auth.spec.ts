@@ -7,7 +7,7 @@ import { test, expect } from '@playwright/test';
  *  - Login page renders correctly
  *  - Dev login flow redirects to main app
  *  - Invalid/missing auth on a protected route redirects to login
- *  - Logout returns user to login page
+ *  - Logout returns user to home page
  */
 
 test.describe('Login page', () => {
@@ -68,21 +68,41 @@ test.describe('Logout', () => {
     await devLoginBtn.click();
     await page.waitForURL((url) => !url.pathname.endsWith('/login'), { timeout: 10_000 });
 
+    // Seed the key the security assertion at the end of this test guards. Nothing
+    // else in this flow writes it, so without seeding that assertion reads null
+    // whether or not logout clears anything, and can never fail.
+    await page.evaluate(() =>
+      localStorage.setItem('authorized', JSON.stringify({ apiKey: { value: 'e2e-canary' } }))
+    );
+
     // Open account menu (top-right AppBar button, aria-label "Account")
     await page.getByRole('button', { name: 'Account' }).click();
+
+    // Since #664, logout is a CSRF-protected POST: authApi.logout() awaits the
+    // response and only THEN assigns window.location.href, and the suite AppBar
+    // fires it without awaiting. With no OIDC configured the backend answers
+    // {"redirect_url": TFR_SERVER_PUBLIC_URL + "/"} -- i.e. the SPA's own home
+    // page, which is already the current URL because dev login navigates to '/'.
+    //
+    // So waitForURL(pathname === '/') would match the *pre-logout* document and
+    // resolve before the navigation had even started, leaving everything after it
+    // racing the reload: on webkit the localStorage read below lost that race in
+    // every main run since #664, failing with "Execution context was destroyed,
+    // most likely because of a navigation".
+    //
+    // Wait for the document the logout navigation actually loads instead. The
+    // listener must be armed before the click. 30 s covers the backend round-trip
+    // plus a full SPA page load on slow CI runners.
+    const loggedOut = page.waitForEvent('load', { timeout: 30_000 });
 
     // Click the logout menu item. Labelled "Sign out" since #438 moved this menu into
     // the shared @sethbacon/terraform-suite-ui AppBar, whose SuiteLayout renders
     // t('auth.signOut', { defaultValue: 'Sign out' }) -- a key this app doesn't
     // override, so the literal default is what's actually on screen.
     await page.getByRole('menuitem', { name: 'Sign out' }).click();
+    await loggedOut;
 
-    // Logout redirects to the backend /auth/logout endpoint which terminates any
-    // OIDC SSO session and then redirects back to the frontend home page ('/').
-    // In dev mode (no OIDC) the backend falls back directly to the home page.
-    // 30 s — covers the backend redirect latency + full SPA page load on slow CI runners.
-    await page.waitForURL((url) => url.pathname === '/', { timeout: 30_000 });
-    expect(page.url()).not.toContain('/login');
+    expect(new URL(page.url()).pathname).toBe('/');
 
     // Security check: swagger-ui-react persists Authorize dialog entries under
     // the key "authorized" in localStorage.  AuthContext.logout() must clear it

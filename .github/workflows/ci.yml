@@ -329,6 +329,10 @@ jobs:
           --reporter=list --grep-invert="Visual regression"
 
       - name: Upload Playwright artifacts
+        # always() — without it this step inherits the default success()
+        # condition, so the traces/videos/screenshots are uploaded only when the
+        # suite passes and are missing from exactly the runs that need them.
+        if: always()
         # v7
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
@@ -430,6 +434,8 @@ jobs:
           --workers=2 --max-failures=1 --retries=1 --reporter=list
 
       - name: Upload Playwright artifacts
+        # always() — see the identical step in e2e-gated above for the rationale.
+        if: always()
         # v7
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
