@@ -1,13 +1,16 @@
+import { isSafeUrl } from '@sethbacon/terraform-suite-ui'
+
 /**
  * App-boundary validator for URLs sourced from the backend / whitelabel config (the
  * suite-switcher sibling URL and the whitelabel theme logo/hero/favicon URLs) before they are
  * handed to shared `@sethbacon/terraform-suite-ui` components.
  *
- * Defense-in-depth: the app currently trusts the backend config verbatim. This validator parses
- * with the URL constructor and rejects embedded control characters, so a value the browser would
- * silently normalize into a protocol-relative off-origin URL (e.g. "/\t/evil.com" -> "//evil.com")
- * is never passed through to a navigation/resource sink. Allows same-origin-relative paths/hashes
- * and absolute http(s) URLs only.
+ * Delegates the base allowlist/normalisation check (control characters, protocol-relative and
+ * backslash variants, the relative-path/anchor fast-path, and the URL-constructor parse) to the
+ * shared `isSafeUrl`, then layers this app's own scheme narrowing and origin allowlist on top.
+ * Composing this way means a future fix to isSafeUrl (it has already been tuned once, for the
+ * embedded-tab/newline WHATWG-normalisation bypass) reaches this app automatically instead of
+ * silently drifting.
  */
 /**
  * Origins this app will follow to, beyond its own. Read from
@@ -42,22 +45,19 @@ export function allowedExternalOrigins(): string[] {
 }
 
 export function isSafeExternalUrl(value: string | null | undefined): value is string {
-  if (!value || typeof value !== 'string') return false
-  const trimmed = value.trim()
-  if (trimmed === '') return false
+  if (!isSafeUrl(value)) return false
 
-  // Reject embedded ASCII control characters (C0 range + DEL). The WHATWG URL parser strips
-  // tab/newline/CR (U+0009/U+000A/U+000D) before parsing, which can turn a "relative-looking"
-  // value into a protocol-relative off-origin URL at the sink.
-  if (/[\u0000-\u001F\u007F]/.test(trimmed)) return false
+  let url: URL
+  try {
+    // isSafeUrl already accepted this value; only an absolute URL parses here without a base.
+    url = new URL(value.trim())
+  } catch {
+    // Doesn't parse without a base -- isSafeUrl accepted it via the relative-path/anchor
+    // fast-path, which carries no scheme/origin to narrow.
+    return true
+  }
 
-  // Protocol-relative ("//evil.com") and backslash variants.
-  if (/^[/\\]{2}/.test(trimmed) || /^\/\\/.test(trimmed)) return false
-
-  // Same-origin-relative path or same-page anchor — never carries a scheme, safe.
-  if (/^[/#.]/.test(trimmed)) return true
-
-  // Absolute URL: allow only http(s).
+  // isSafeUrl allows http/https/mailto/tel; narrow to http(s) only.
   //
   // `http:` is accepted alongside `https:` as a documented, deliberate
   // acceptance (issue #559) rather than an oversight. Requiring https here would
@@ -70,20 +70,15 @@ export function isSafeExternalUrl(value: string | null | undefined): value is st
   // and are not always fronted by TLS internally. The origin allowlist below is
   // the control that actually constrains *where* we will navigate; the scheme
   // check only screens out dangerous URI schemes. See SECURITY.md.
-  try {
-    const url = new URL(trimmed)
-    if (url.protocol !== 'https:' && url.protocol !== 'http:') return false
+  if (url.protocol !== 'https:' && url.protocol !== 'http:') return false
 
-    // When an allowlist is configured, an absolute URL must match this app's
-    // own origin or one of the listed origins. Unconfigured, this check is
-    // inert and behaviour is unchanged — see SECURITY.md for why that is the
-    // default and what residual risk it leaves.
-    const allowed = allowedExternalOrigins()
-    if (allowed.length === 0) return true
+  // When an allowlist is configured, an absolute URL must match this app's
+  // own origin or one of the listed origins. Unconfigured, this check is
+  // inert and behaviour is unchanged — see SECURITY.md for why that is the
+  // default and what residual risk it leaves.
+  const allowed = allowedExternalOrigins()
+  if (allowed.length === 0) return true
 
-    const selfOrigin = typeof window !== 'undefined' ? window.location?.origin : undefined
-    return url.origin === selfOrigin || allowed.includes(url.origin)
-  } catch {
-    return false
-  }
+  const selfOrigin = typeof window !== 'undefined' ? window.location?.origin : undefined
+  return url.origin === selfOrigin || allowed.includes(url.origin)
 }
