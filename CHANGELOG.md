@@ -1,6 +1,13 @@
 <!-- markdownlint-disable MD013 MD024 MD041 -->
 # Changelog
 
+## [2.21.0](https://github.com/sethbacon/terraform-registry-frontend/compare/v2.20.2...v2.21.0) (2026-08-03)
+
+
+### Features
+
+* **admin:** add a persistent branding page ([#700](https://github.com/sethbacon/terraform-registry-frontend/issues/700)) ([d18aefc](https://github.com/sethbacon/terraform-registry-frontend/commit/d18aefc93e115c60aad2e924b000e1784ec52c17))
+
 ## [2.20.2](https://github.com/sethbacon/terraform-registry-frontend/compare/v2.20.1...v2.20.2) (2026-07-31)
 
 
