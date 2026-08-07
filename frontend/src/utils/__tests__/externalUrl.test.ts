@@ -1,5 +1,12 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
+import { isSafeUrl } from '@sethbacon/terraform-suite-ui'
 import { allowedExternalOrigins, isSafeExternalUrl } from '../externalUrl'
+
+vi.mock('@sethbacon/terraform-suite-ui', async () => {
+  const actual =
+    await vi.importActual<typeof import('@sethbacon/terraform-suite-ui')>('@sethbacon/terraform-suite-ui')
+  return { ...actual, isSafeUrl: vi.fn(actual.isSafeUrl) }
+})
 
 describe('isSafeExternalUrl', () => {
   it.each([
@@ -112,5 +119,40 @@ describe('isSafeExternalUrl origin allowlist (#559)', () => {
     vi.stubEnv('VITE_ALLOWED_EXTERNAL_ORIGINS', 'https://tsm.example.com/some/path')
     expect(allowedExternalOrigins()).toEqual(['https://tsm.example.com'])
     expect(isSafeExternalUrl('https://tsm.example.com/other')).toBe(true)
+  })
+})
+
+// Regression coverage for #102: isSafeExternalUrl must compose the shared isSafeUrl rather than
+// re-deriving its own copy of the control-character/protocol-relative/relative-path checks. Each
+// test here would fail if a future edit un-does that composition.
+describe('isSafeExternalUrl delegates to the shared isSafeUrl (#102)', () => {
+  afterEach(() => {
+    vi.unstubAllEnvs()
+    vi.mocked(isSafeUrl).mockClear()
+  })
+
+  it('calls the shared isSafeUrl with the raw value', () => {
+    isSafeExternalUrl('  https://tsm.example.com  ')
+    expect(vi.mocked(isSafeUrl)).toHaveBeenCalledWith('  https://tsm.example.com  ')
+  })
+
+  it('rejects whatever the shared isSafeUrl rejects, even an otherwise-allowlisted URL', () => {
+    vi.stubEnv('VITE_ALLOWED_EXTERNAL_ORIGINS', 'https://tsm.example.com')
+    vi.mocked(isSafeUrl).mockReturnValueOnce(false)
+    expect(isSafeExternalUrl('https://tsm.example.com')).toBe(false)
+  })
+
+  it('still narrows to http(s) after isSafeUrl accepts a mailto: URL', () => {
+    // Proves the app doesn't just forward isSafeUrl's answer wholesale -- it composes its own
+    // scheme narrowing on top, since isSafeUrl itself allows mailto:/tel:.
+    vi.mocked(isSafeUrl).mockReturnValueOnce(true)
+    expect(isSafeExternalUrl('mailto:a@b.com')).toBe(false)
+  })
+
+  it('still applies the origin allowlist after isSafeUrl accepts', () => {
+    // Proves the allowlist layer isn't bypassed by isSafeUrl's own answer either.
+    vi.stubEnv('VITE_ALLOWED_EXTERNAL_ORIGINS', 'https://tsm.example.com')
+    vi.mocked(isSafeUrl).mockReturnValueOnce(true)
+    expect(isSafeExternalUrl('https://evil.example.com')).toBe(false)
   })
 })
