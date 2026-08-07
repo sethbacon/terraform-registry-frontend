@@ -37,6 +37,24 @@ runs:
         cache: "npm"
         cache-dependency-path: frontend/package-lock.json
 
+    # The @sethbacon scope on the PUBLIC npm registry is owned by an unrelated account, so a
+    # missing scope mapping here would silently resolve @sethbacon/* from npmjs.org instead of
+    # GitHub Packages and land third-party code in the bundle. frontend/.npmrc supplies the
+    # mapping; this asserts it is actually in effect rather than trusting it is.
+    - name: Assert the @sethbacon scope resolves to GitHub Packages
+      if: inputs.install-deps == 'true'
+      working-directory: frontend
+      shell: bash
+      run: |
+        set -euo pipefail
+        actual=$(npm config get @sethbacon:registry)
+        expected="https://npm.pkg.github.com"
+        if [ "${actual%/}" != "$expected" ]; then
+          echo "::error::@sethbacon:registry resolves to '${actual}', expected '${expected}'. Refusing to install - @sethbacon on the public registry is not ours."
+          exit 1
+        fi
+        echo "@sethbacon:registry -> ${actual}"
+
     - name: Install frontend dependencies
       if: inputs.install-deps == 'true'
       working-directory: frontend
@@ -44,6 +62,25 @@ runs:
       env:
         NODE_AUTH_TOKEN: ${{ github.token }}
       run: npm ci
+
+    # The library publishes a SLSA provenance attestation bound to the packed tarball. Without
+    # this, the attestation is an audit trail nobody reads; here it gates the build. Verified
+    # locally before adding: a genuine tarball passes, and one with a single appended byte fails
+    # with HTTP 404 for its altered digest.
+    - name: Verify @sethbacon/terraform-suite-ui provenance
+      if: inputs.install-deps == 'true'
+      working-directory: frontend
+      shell: bash
+      env:
+        NODE_AUTH_TOKEN: ${{ github.token }}
+        GH_TOKEN: ${{ github.token }}
+      run: |
+        set -euo pipefail
+        version=$(node -p "require('./package.json').dependencies['@sethbacon/terraform-suite-ui']")
+        tmp=$(mktemp -d)
+        tarball=$(cd "$tmp" && npm pack "@sethbacon/terraform-suite-ui@${version}" --silent | tail -n1)
+        gh attestation verify "${tmp}/${tarball}" --repo sethbacon/terraform-suite-ui
+        rm -rf "$tmp"
 
     - name: Install e2e dependencies
       if: inputs.install-e2e-deps == 'true'
