@@ -78,7 +78,13 @@ runs:
         set -euo pipefail
         version=$(node -p "require('./package.json').dependencies['@sethbacon/terraform-suite-ui']")
         tmp=$(mktemp -d)
-        tarball=$(cd "$tmp" && npm pack "@sethbacon/terraform-suite-ui@${version}" --silent | tail -n1)
+        # Pack FROM frontend/, writing to $tmp -- never `cd "$tmp"` first. npm reads
+        # .npmrc from the cwd upward, so packing inside a temp directory drops the
+        # @sethbacon -> npm.pkg.github.com mapping the step above just asserted and
+        # resolves the tarball from the PUBLIC registry, where the scope is not ours.
+        # That is the very substitution this step exists to detect, performed by the
+        # step itself.
+        tarball=$(basename "$(npm pack "@sethbacon/terraform-suite-ui@${version}" --silent --pack-destination "$tmp" | tail -n1)")
         gh attestation verify "${tmp}/${tarball}" --repo sethbacon/terraform-suite-ui
         rm -rf "$tmp"
 
