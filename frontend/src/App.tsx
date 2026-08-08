@@ -82,31 +82,31 @@ function App() {
                         <Route path="/modules" element={<ModulesPage />} />
                         <Route
                           path="/modules/:namespace/:name/:system"
-                          element={<LazyRoute Component={ModuleDetailPage} />}
+                          element={<LazyRoute Component={ModuleDetailPage} isPublic />}
                         />
 
                         {/* Providers */}
                         <Route path="/providers" element={<ProvidersPage />} />
                         <Route
                           path="/providers/:namespace/:type"
-                          element={<LazyRoute Component={ProviderDetailPage} />}
+                          element={<LazyRoute Component={ProviderDetailPage} isPublic />}
                         />
 
                         {/* Terraform Binaries */}
                         <Route path="/terraform-binaries" element={<TerraformBinariesPage />} />
                         <Route
                           path="/terraform-binaries/:name"
-                          element={<LazyRoute Component={TerraformBinaryDetailPage} />}
+                          element={<LazyRoute Component={TerraformBinaryDetailPage} isPublic />}
                         />
 
                         {/* API Documentation */}
                         <Route
                           path="/api-docs"
-                          element={<LazyRoute Component={ApiDocumentation} />}
+                          element={<LazyRoute Component={ApiDocumentation} isPublic />}
                         />
 
                         {/* Settings & Privacy */}
-                        <Route path="/settings" element={<LazyRoute Component={SettingsPage} />} />
+                        <Route path="/settings" element={<LazyRoute Component={SettingsPage} isPublic />} />
 
                         {/* Admin routes (protected with scope requirements from routeScopes.ts) */}
                         <Route
@@ -307,7 +307,7 @@ function App() {
                         {import.meta.env.DEV && (
                           <Route
                             path="/dev/components"
-                            element={<LazyRoute Component={ComponentShowcase} />}
+                            element={<LazyRoute Component={ComponentShowcase} isPublic />}
                           />
                         )}
 
