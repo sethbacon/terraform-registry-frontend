@@ -1,6 +1,14 @@
 <!-- markdownlint-disable MD013 MD024 MD041 -->
 # Changelog
 
+## [2.21.1](https://github.com/sethbacon/terraform-registry-frontend/compare/v2.21.0...v2.21.1) (2026-08-08)
+
+
+### Bug Fixes
+
+* **deps:** pin nanoid past GHSA-2v37-7h3g-55p8 ([#714](https://github.com/sethbacon/terraform-registry-frontend/issues/714)) ([627ecf2](https://github.com/sethbacon/terraform-registry-frontend/commit/627ecf27df0cef180232feb54ff6de7a5a26af23))
+* **utils:** compose isSafeExternalUrl on top of the shared isSafeUrl guard ([#709](https://github.com/sethbacon/terraform-registry-frontend/issues/709)) ([fc641fd](https://github.com/sethbacon/terraform-registry-frontend/commit/fc641fd4d06424e4dc8fd1a9943e897eb977392c))
+
 ## [2.21.0](https://github.com/sethbacon/terraform-registry-frontend/compare/v2.20.2...v2.21.0) (2026-08-03)
 
 
