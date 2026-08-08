@@ -14,6 +14,14 @@ concurrency:
   cancel-in-progress: true
 
 permissions:
+  # A permissions block REPLACES the default set rather than adding to it, so an
+  # omitted scope is 'none'. Without contents:read every job here ran
+  # actions/checkout with no read access to this repository -- which worked only
+  # because the repository is public and a public clone needs no credential. The
+  # declared set now matches the access the workflow actually exercises.
+  contents: read
+  # npm ci in frontend/ resolves @sethbacon/terraform-suite-ui from
+  # npm.pkg.github.com.
   packages: read
 
 jobs:
