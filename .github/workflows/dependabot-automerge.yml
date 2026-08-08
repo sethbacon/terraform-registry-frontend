@@ -48,7 +48,12 @@ jobs:
         id: app-token
         uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
         with:
-          app-id: ${{ secrets.DEPENDABOT_APP_ID }}
+          # `client-id` + `vars.`, matching release-please.yml and every other
+          # app-token step in the suite. This step alone said
+          # `app-id: ${{ secrets.DEPENDABOT_APP_ID }}`, and the ID is a repository
+          # VARIABLE, not a secret -- so the expression resolved to empty and the
+          # step failed every run with "must be set to a non-empty string".
+          client-id: ${{ vars.DEPENDABOT_APP_ID }}
           private-key: ${{ secrets.DEPENDABOT_APP_PRIVATE_KEY }}
 
       - name: Fetch Dependabot metadata
