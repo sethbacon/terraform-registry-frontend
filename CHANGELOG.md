@@ -1,6 +1,19 @@
 <!-- markdownlint-disable MD013 MD024 MD041 -->
 # Changelog
 
+## [2.21.2](https://github.com/sethbacon/terraform-registry-frontend/compare/v2.21.1...v2.21.2) (2026-08-08)
+
+
+### Bug Fixes
+
+* **auth:** a route can no longer become public by losing a map key ([#717](https://github.com/sethbacon/terraform-registry-frontend/issues/717)) ([f84dda1](https://github.com/sethbacon/terraform-registry-frontend/commit/f84dda14aca2b52528c4f7ae3c596d9eae109431))
+* **build:** stop the compiled vite config from shadowing its source ([#716](https://github.com/sethbacon/terraform-registry-frontend/issues/716)) ([1920265](https://github.com/sethbacon/terraform-registry-frontend/commit/192026598211a0417e4498e3f275142ae9db0d3a))
+
+
+### Documentation
+
+* correct three claims the code does not support ([#720](https://github.com/sethbacon/terraform-registry-frontend/issues/720)) ([b6f3bf0](https://github.com/sethbacon/terraform-registry-frontend/commit/b6f3bf0f223fbf69da31df888d25eb4ac6cf74bc))
+
 ## [2.21.1](https://github.com/sethbacon/terraform-registry-frontend/compare/v2.21.0...v2.21.1) (2026-08-08)
 
 
