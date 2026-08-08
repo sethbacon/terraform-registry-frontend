@@ -103,7 +103,7 @@ The following are stored in the browser's `localStorage`, not as cookies:
 | `user`                         | Cached profile info (id, email, name) for the signed-in user. Cleared on logout or session expiry. | Session  |
 | `role_template`                | Cached role template for the signed-in user. Cleared on logout or session expiry. | Session  |
 | `allowed_scopes`                | Cached authorization scopes for the signed-in user. Cleared on logout or session expiry. | Session  |
-| `authorized`                   | Swagger UI's own "Authorize" dialog state (`/api-docs`), persisted by the third-party `swagger-ui-react` component when a user authorizes a request there. May contain an API key if one was entered. Cleared on logout or session expiry. | Session  |
+| `authorized`                   | Swagger UI's own "Authorize" dialog state (`/api-docs`). **Nothing writes this key.** The `swagger-ui-react` component only persists it when `persistAuthorization` is enabled, which this app deliberately does not enable (asserted by a test). Kept here only so a one-time cleanup can purge a stale value left by a build from before that was settled. Cleared on logout or session expiry. | Session  |
 | `terraform-registry-theme`   | UI theme (light/dark) | Persistent |
 | `terraform-registry-consent` | Consent preferences   | Persistent |
 
