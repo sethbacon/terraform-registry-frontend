@@ -4,7 +4,21 @@
     "skipLibCheck": true,
     "module": "ESNext",
     "moduleResolution": "bundler",
-    "allowSyntheticDefaultImports": true
+    "allowSyntheticDefaultImports": true,
+    // This project is REFERENCED by tsconfig.json, so it may not disable emit
+    // -- the referencing project consumes its declarations. The fix is to send
+    // the output somewhere Vite will not find it rather than to suppress it.
+    //
+    // Without an outDir, "composite" emits vite.config.js and vite.config.d.ts
+    // NEXT TO the source, and Vite resolves vite.config.js BEFORE
+    // vite.config.ts -- so the compiled artefact, not the file anyone edits,
+    // configured every build.
+    "outDir": "./node_modules/.tmp/tsconfig.node",
+    "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.node/tsconfig.node.tsbuildinfo"
   },
-  "include": ["vite.config.ts"]
+  // package.json is listed because vite.config.ts imports it (for the version
+  // stamped into __APP_VERSION__). Once outDir is set, TypeScript requires
+  // every input -- including a resolveJsonModule import -- to be in the file
+  // list, and errors TS6307 otherwise.
+  "include": ["vite.config.ts", "package.json"]
 }
