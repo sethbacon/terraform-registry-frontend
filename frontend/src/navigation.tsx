@@ -21,7 +21,7 @@ import Security from '@mui/icons-material/Security'
 import History from '@mui/icons-material/History'
 import Notifications from '@mui/icons-material/Notifications'
 import type { NavItem, NavGroup } from '@sethbacon/terraform-suite-ui'
-import { ADMIN_ROUTE_SCOPES } from './routeScopes'
+import { adminRouteScopeForPath } from './routeScopes'
 import type { ScopeValue } from './types/rbac'
 
 // Reads the scope for an admin nav item from the shared route-scope map
@@ -32,7 +32,7 @@ import type { ScopeValue } from './types/rbac'
 // package), but this keeps ADMIN_ROUTE_SCOPES's compile-time protection
 // intact through this call site instead of discarding it here.
 function adminScope(path: string): ScopeValue | null {
-  return ADMIN_ROUTE_SCOPES[path] ?? null
+  return adminRouteScopeForPath(path)
 }
 
 // Home — shown standalone at the top of the drawer.
