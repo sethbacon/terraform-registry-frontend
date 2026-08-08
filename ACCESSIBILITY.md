@@ -16,7 +16,7 @@ components.
 
 | Area                      | Approach                                                                                                                                    |
 | ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Automated testing**     | `@axe-core/react` runs in development; Playwright + `@axe-core/playwright` enforces zero critical/serious violations across all pages in CI |
+| **Automated testing**     | `@axe-core/react` runs in development. In CI, Playwright + `@axe-core/playwright` **enforce** zero critical/serious violations on the four core public pages (Home, Login, Modules, Providers); the other 20 audited routes — every `/admin/*` page, plus Terraform Binaries and API Documentation — are scanned and their violations logged as warnings, but do **not** fail the build. See [Enforcement tiers](#enforcement-tiers). |
 | **Linting**               | `eslint-plugin-jsx-a11y` enforces accessible JSX patterns at **error** level in CI                                                          |
 | **Keyboard navigation**   | All interactive elements are reachable via keyboard; the command palette (`Ctrl+K` / `⌘K`) provides keyboard-first navigation               |
 | **Skip link**             | A "Skip to main content" link is the first focusable element on every page                                                                  |
@@ -25,8 +25,31 @@ components.
 | **Screen reader support** | ARIA landmarks, roles, and labels are applied; route changes are announced via a live region                                                |
 | **Reduced motion**        | All MUI transitions are disabled when `prefers-reduced-motion: reduce` is active                                                            |
 
+## Enforcement tiers
+
+Automated accessibility coverage is **tiered**, not uniform. `e2e/tests/accessibility.spec.ts`
+is the source of truth; this table describes what it actually does.
+
+| Tier | Routes | On a critical/serious violation |
+| --- | --- | --- |
+| **Enforced** | Home, Login, Modules, Providers (4) | the build **fails** |
+| **Audited** | Terraform Binaries, API Documentation (2) | logged as a warning |
+| **Audited** | every `/admin/*` page (18) | logged as a warning |
+
+The audited tiers call `warnA11yViolations()`, which only `console.warn`s and
+never asserts, so they cannot fail CI. Roughly 20 of the ~24 scanned routes are
+therefore warn-only.
+
+This is a deliberate staging position, not a claim of full coverage: violations
+on admin pages are visible in CI output and tracked for incremental remediation,
+and routes graduate to the enforced tier as they are cleared. Anyone assessing
+WCAG 2.1 AA conformance evidence should read the enforced list as the guaranteed
+surface and treat the rest as audited-but-unblocking.
+
 ## Known Limitations
 
+- Automated enforcement covers only the four core public pages; see
+  [Enforcement tiers](#enforcement-tiers).
 - Some third-party components (Swagger UI, cmdk command palette) have partial
   ARIA coverage — we apply workarounds where possible.
 - Chart/graph visualizations on the admin dashboard do not yet include
