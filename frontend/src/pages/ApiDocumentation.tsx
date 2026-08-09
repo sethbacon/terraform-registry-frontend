@@ -19,16 +19,16 @@ const TagsSorterPlugin = (): any => ({
       wrapSelectors: {
         taggedOperations:
           (origSelector: any) =>
-            (...args: any[]) => {
-              const taggedOps = origSelector(...args)
-              if (taggedOps && typeof taggedOps.sortBy === 'function') {
-                return taggedOps.sortBy(
-                  (_val: any, key: string) => key,
-                  (a: string, b: string) => a.localeCompare(b),
-                )
-              }
-              return taggedOps
-            },
+          (...args: any[]) => {
+            const taggedOps = origSelector(...args)
+            if (taggedOps && typeof taggedOps.sortBy === 'function') {
+              return taggedOps.sortBy(
+                (_val: any, key: string) => key,
+                (a: string, b: string) => a.localeCompare(b),
+              )
+            }
+            return taggedOps
+          },
       },
     },
   },
@@ -70,6 +70,24 @@ function buildNavTags(spec: OpenAPISpec): NavTag[] {
 
 const NAV_WIDTH = 200
 
+/**
+ * isSameOriginRequest reports whether a Swagger UI request target resolves to
+ * the app's own origin.
+ *
+ * Exported for testing: the interceptor that uses it is created inside the
+ * component via useCallback, so the rule itself is only reachable through a
+ * rendered SwaggerUI mock. Testing the decision directly keeps the rule covered
+ * even if that mock's shape changes.
+ */
+export function isSameOriginRequest(url: unknown): boolean {
+  if (typeof url !== 'string' || url === '') return false
+  try {
+    return new URL(url, window.location.origin).origin === window.location.origin
+  } catch {
+    return false
+  }
+}
+
 const ApiDocumentation: React.FC = () => {
   const { t } = useTranslation()
   const theme = useTheme()
@@ -100,10 +118,29 @@ const ApiDocumentation: React.FC = () => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any -- swagger-ui-react's Request type lacks headers
   const requestInterceptor = useCallback((req: any) => {
     const method = String(req.method || 'GET').toUpperCase()
-    if (method === 'POST' || method === 'PUT' || method === 'PATCH' || method === 'DELETE') {
-      const csrfToken = getCookie('tfr_csrf')
-      if (csrfToken) req.headers['X-CSRF-Token'] = csrfToken
+    if (method !== 'POST' && method !== 'PUT' && method !== 'PATCH' && method !== 'DELETE') {
+      return req
     }
+    // Same-origin only (issue #697).
+    //
+    // Swagger UI derives request targets from the fetched OpenAPI document's
+    // `servers`/`host` fields, which come from the backend-generated spec — so a
+    // spec declaring (or misconfigured into declaring) a non-same-origin server
+    // would ship the user's tfr_csrf value to that host as a request header.
+    // The axios interceptor this mirrors is bounded by a same-origin baseURL and
+    // is accompanied by checkCsrfOriginConfig; this sink had no such bound.
+    //
+    // Fails CLOSED on an unparseable or absent URL: without the header the
+    // request is rejected by the CSRF middleware, which is a visible failure,
+    // whereas attaching it anyway would be a silent disclosure. A double-submit
+    // token is low-value on its own — the custom header needs a CORS preflight
+    // the server would have to allow — but it is the user's, and there is no
+    // reason for it to leave the origin that issued it.
+    if (!isSameOriginRequest(req.url)) {
+      return req
+    }
+    const csrfToken = getCookie('tfr_csrf')
+    if (csrfToken) req.headers['X-CSRF-Token'] = csrfToken
     return req
   }, [])
 
@@ -204,7 +241,11 @@ const ApiDocumentation: React.FC = () => {
   return (
     <Box sx={{ overflow: 'hidden' }}>
       {/* Page title */}
-      <PageHeader icon={<PageTitleIcon />} title={t('apiDocumentation.title')} description={t('apiDocumentation.subtitle')} />
+      <PageHeader
+        icon={<PageTitleIcon />}
+        title={t('apiDocumentation.title')}
+        description={t('apiDocumentation.subtitle')}
+      />
       {/* Layout: sticky left nav + Swagger UI content */}
       <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 0 }}>
         {/* ---- Left navigation panel ---- */}

@@ -8,7 +8,11 @@ import { ThemeProvider, createTheme } from '@mui/material/styles'
 interface SwaggerProps {
   url: string
   onComplete?: (system: unknown) => void
-  requestInterceptor?: (req: { method?: string; headers: Record<string, string> }) => unknown
+  requestInterceptor?: (req: {
+    method?: string
+    url?: string
+    headers: Record<string, string>
+  }) => unknown
   plugins?: Array<() => unknown>
 }
 
@@ -250,7 +254,7 @@ describe('ApiDocumentation', () => {
   it('requestInterceptor does not attach Authorization even when a stray legacy token exists in localStorage', () => {
     localStorage.setItem('auth_token', 'stale-legacy-jwt')
     renderWithTheme()
-    const req = { method: 'GET', headers: {} as Record<string, string> }
+    const req = { method: 'GET', url: '/api/v1/modules', headers: {} as Record<string, string> }
     const result = capturedProps?.requestInterceptor?.(req)
     expect(result).toBe(req)
     expect(req.headers['Authorization']).toBeUndefined()
@@ -262,7 +266,10 @@ describe('ApiDocumentation', () => {
       document.cookie = 'tfr_csrf=swagger-csrf-token; path=/'
       try {
         renderWithTheme()
-        const req = { method, headers: {} as Record<string, string> }
+        // A url is supplied because the interceptor is same-origin bound
+        // (#697); Swagger UI always sets one, so a request without it is not a
+        // shape production produces.
+        const req = { method, url: '/api/v1/modules', headers: {} as Record<string, string> }
         capturedProps?.requestInterceptor?.(req)
         expect(req.headers['X-CSRF-Token']).toBe('swagger-csrf-token')
         expect(req.headers['Authorization']).toBeUndefined()
@@ -271,6 +278,47 @@ describe('ApiDocumentation', () => {
       }
     },
   )
+
+  // Issue #697: the token must not leave the origin that issued it.
+  //
+  // Swagger UI derives request targets from the fetched OpenAPI document's
+  // servers/host fields, which come from the backend-generated spec. A spec
+  // declaring a non-same-origin server would otherwise ship the user's tfr_csrf
+  // to that host as a request header.
+  it.each([
+    ['absolute cross-origin', 'https://evil.example.com/api/v1/modules'],
+    ['protocol-relative cross-origin', '//evil.example.com/api/v1/modules'],
+    ['different port on the same host', 'http://localhost:9999/api/v1/modules'],
+  ])('requestInterceptor withholds tfr_csrf for a %s target', (_label, url) => {
+    document.cookie = 'tfr_csrf=swagger-csrf-token; path=/'
+    try {
+      renderWithTheme()
+      const req = { method: 'POST', url, headers: {} as Record<string, string> }
+      capturedProps?.requestInterceptor?.(req)
+      expect(req.headers['X-CSRF-Token']).toBeUndefined()
+    } finally {
+      document.cookie = 'tfr_csrf=; Max-Age=0; path=/'
+    }
+  })
+
+  // Fails closed: without the header the request is rejected by the CSRF
+  // middleware, which is visible. Attaching it anyway would be a silent
+  // disclosure.
+  it.each([
+    ['missing', undefined],
+    ['empty', ''],
+    ['unparseable', 'http://['],
+  ])('requestInterceptor withholds tfr_csrf when the url is %s', (_label, url) => {
+    document.cookie = 'tfr_csrf=swagger-csrf-token; path=/'
+    try {
+      renderWithTheme()
+      const req = { method: 'POST', url, headers: {} as Record<string, string> }
+      capturedProps?.requestInterceptor?.(req)
+      expect(req.headers['X-CSRF-Token']).toBeUndefined()
+    } finally {
+      document.cookie = 'tfr_csrf=; Max-Age=0; path=/'
+    }
+  })
 
   it('requestInterceptor omits X-CSRF-Token on GET even when the cookie is present', () => {
     document.cookie = 'tfr_csrf=swagger-csrf-token; path=/'
