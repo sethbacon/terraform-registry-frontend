@@ -18,3 +18,21 @@ rules:
       - release-please.yml
       - dependabot-automerge.yml
 
+  dangerous-triggers:
+    ignore:
+      # `pull_request_target` is REQUIRED here, not incidental. Dependabot PRs run
+      # with a read-only token and no access to secrets under `pull_request`, so
+      # the alert-lookup token and the auto-merge write simply cannot happen on
+      # that trigger. The standard mitigations are both in place: the job is
+      # gated on `github.actor == 'dependabot[bot]'`, and it never checks out or
+      # executes the PR's code -- it reads metadata and calls `gh pr merge`.
+      - dependabot-automerge.yml
+
+  superfluous-actions:
+    ignore:
+      # softprops/action-gh-release where `gh release create` would do. True, but
+      # this is the live release-publishing step: it is SHA-pinned, it works, and
+      # swapping it for hand-rolled gh CLI on the release path buys a marginal
+      # supply-chain reduction against a real chance of breaking publishing.
+      # Worth revisiting deliberately, not as part of a lint sweep.
+      - release.yml
