@@ -104,7 +104,7 @@ jobs:
       attestations: write # required for SLSA provenance attestation
 
     outputs:
-      digest: ${{ steps.build.outputs.digest }}
+      digest: ${{ steps.push.outputs.digest }}
 
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -132,13 +132,23 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@bb05f3f5519dd87d3ba754cc423b652a5edd6d2c # v4.2.0
 
-      - name: Build and push image
+      # Built into the LOCAL daemon, not pushed (issue #670). The scan below is
+      # the gate: publishing first meant a fixable HIGH/CRITICAL failed the job
+      # with the image already live under its version tags AND `latest`, pullable
+      # and indistinguishable at the registry from a verified release except by
+      # checking whether an attestation happens to exist. Nothing deleted it.
+      #
+      # Single-platform, so `load: true` is available; a multi-platform build
+      # could not be loaded and would need the staging-tag-then-promote shape
+      # instead.
+      - name: Build image (local only — not published)
         id: build
         uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7.3.0
         with:
           context: frontend/
           file: frontend/Dockerfile
-          push: true
+          push: false
+          load: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
@@ -148,13 +158,12 @@ jobs:
           secrets: |
             node_auth_token=${{ secrets.GITHUB_TOKEN }}
 
-      - name: Trivy image scan (published digest)
-        # Scan the real pushed digest for OS-package and dependency CVEs
-        # before it's attested/signed.
+      - name: Trivy image scan (BEFORE publishing)
+        # Scans the local image. A failure here now means nothing was published.
         uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
         with:
           scan-type: image
-          image-ref: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}@${{ steps.build.outputs.digest }}
+          image-ref: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.meta.outputs.version }}
           severity: HIGH,CRITICAL
           # Only fail on vulnerabilities that have a fix available; un-actionable
           # (no-fix-yet) CVEs shouldn't block a release.
@@ -162,17 +171,48 @@ jobs:
           exit-code: 1
           format: table
 
+      # Pushes the image the scan just approved, byte for byte.
+      #
+      # `docker push` of the loaded image rather than a second build-push-action
+      # run with push: true. A rebuild would almost certainly be a cache hit and
+      # produce the same bytes, but "almost certainly" is a time-of-check /
+      # time-of-use gap: it would scan one image and publish another. Pushing the
+      # loaded image cannot diverge.
+      - name: Push image (scan passed)
+        id: push
+        env:
+          TAGS: ${{ steps.meta.outputs.tags }}
+          PRIMARY: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ steps.meta.outputs.version }}
+        run: |
+          set -euo pipefail
+          while IFS= read -r tag; do
+            [ -n "$tag" ] || continue
+            echo "pushing $tag"
+            docker push "$tag"
+          done <<< "$TAGS"
+
+          # The registry digest, read back from the pushed image. Every
+          # downstream step (attestation, SBOM, signing) pins this digest, so it
+          # must be the published one and not a locally-computed id.
+          digest=$(docker inspect --format='{{index .RepoDigests 0}}' "$PRIMARY" | cut -d@ -f2)
+          if [ -z "$digest" ]; then
+            echo "::error::could not resolve the pushed digest; refusing to attest or sign an unidentified image"
+            exit 1
+          fi
+          echo "digest=$digest" >> "$GITHUB_OUTPUT"
+          echo "published digest: $digest"
+
       - name: Attest build provenance (SLSA)
         uses: actions/attest-build-provenance@0f67c3f4856b2e3261c31976d6725780e5e4c373 # v4.1.1
         with:
           subject-name: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
-          subject-digest: ${{ steps.build.outputs.digest }}
+          subject-digest: ${{ steps.push.outputs.digest }}
           push-to-registry: true
 
       - name: Generate SBOM (Syft)
         uses: anchore/sbom-action@e22c389904149dbc22b58101806040fa8d37a610 # v0.24.0
         with:
-          image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}@${{ steps.build.outputs.digest }}
+          image: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}@${{ steps.push.outputs.digest }}
           format: spdx-json
           output-file: sbom.spdx.json
           # The "Protect release tags" ruleset makes the tag's GitHub Release
@@ -187,7 +227,7 @@ jobs:
         uses: actions/attest-sbom@c604332985a26aa8cf1bdc465b92731239ec6b9e # v4.1.0
         with:
           subject-name: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
-          subject-digest: ${{ steps.build.outputs.digest }}
+          subject-digest: ${{ steps.push.outputs.digest }}
           sbom-path: sbom.spdx.json
           push-to-registry: true
 
@@ -197,7 +237,7 @@ jobs:
       - name: Sign image with cosign (keyless)
         run: cosign sign --yes "${{ env.REGISTRY }}/${IMAGE_NAME}@${STEPS_BUILD_OUTPUTS_DIGEST}"
         env:
-          STEPS_BUILD_OUTPUTS_DIGEST: ${{ steps.build.outputs.digest }}
+          STEPS_BUILD_OUTPUTS_DIGEST: ${{ steps.push.outputs.digest }}
 
   # ── Create GitHub Release ────────────────────────────────────────────────
   release:
