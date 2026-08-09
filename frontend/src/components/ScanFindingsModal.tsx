@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import { csvCell } from '../utils/csv'
 import { useTranslation } from 'react-i18next'
 import {
   Dialog,
@@ -29,18 +30,11 @@ import { parseScanFindings } from '../utils/scanParsers'
 import ScanDiagnostics from './ScanDiagnostics'
 
 /** Escape a single CSV field value (RFC 4180). */
-function csvEscape(value: string): string {
-  if (value.includes('"') || value.includes(',') || value.includes('\n')) {
-    return `"${value.replace(/"/g, '""')}"`
-  }
-  return value
-}
-
 /** Convert an array of FindingRow records to a CSV string. */
 function findingsToCsv(findings: FindingRow[]): string {
   const header = ['Severity', 'Rule ID', 'Title', 'Resource', 'File', 'Resolution']
   const rows = findings.map((f) =>
-    [f.severity, f.ruleId, f.title, f.resource, f.file, f.resolution].map(csvEscape).join(','),
+    [f.severity, f.ruleId, f.title, f.resource, f.file, f.resolution].map(csvCell).join(','),
   )
   return [header.join(','), ...rows].join('\r\n')
 }

@@ -1,4 +1,5 @@
 import { http, encodeSegment } from './http'
+import { csvCell } from '../../utils/csv'
 import type { AuditLog, AuditLogListResponse } from '../../types'
 
 // ============================================================================
@@ -50,7 +51,7 @@ export function exportAuditLogsCSV(logs: AuditLog[]): void {
       l.organization_id ?? '',
       l.ip_address ?? '',
     ]
-      .map((v) => `"${String(v).replace(/"/g, '""')}"`)
+      .map(csvCell)
       .join(','),
   )
   const csv = [header.join(','), ...rows].join('\n')
