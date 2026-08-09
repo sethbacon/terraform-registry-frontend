@@ -112,7 +112,12 @@ describe('LoginPage', () => {
     expect(screen.getByText(/single sign-on for authentication/)).toBeInTheDocument()
   })
 
-  it('does not render dev login button in test mode', () => {
+  it('does not render dev login button when the backend is not in dev mode', () => {
+    // Renamed with #667: this used to pass because MODE was "test", and it now
+    // passes because the mocked backend reports dev_mode: false (the default in
+    // beforeEach). Same assertion, different reason -- and a test whose name
+    // states the old reason is one that goes on passing after the thing it
+    // described stops existing.
     mockProviders([{ type: 'oidc', name: 'OpenID Connect' }])
     renderLoginPage()
     expect(screen.queryByText('Dev Login (Admin)')).not.toBeInTheDocument()
@@ -214,10 +219,15 @@ describe('LoginPage', () => {
   })
 
   it('shows only the generic message when dev login fails outside development builds (#618-class)', async () => {
-    // isDev (button visibility) is driven by MODE, independent of the DEV
-    // flag that gates the raw message -- a `vite build --mode development`
-    // hardened/staging build is the scenario where these two disagree.
-    vi.stubEnv('MODE', 'development')
+    // Button visibility now comes from the BACKEND's dev status, not from MODE
+    // (#667) — so this test has to say the backend is in dev mode for the button
+    // to exist at all. What it is actually asserting is unchanged and is about
+    // the OTHER flag: `DEV` still gates whether the raw error text is surfaced,
+    // and a build where the two disagree must show only the generic message.
+    //
+    // The previous comment here said visibility was "driven by MODE". That was
+    // true when it was written and is not any more.
+    mockGetDevStatus.mockResolvedValue({ dev_mode: true })
     vi.stubEnv('DEV', false)
     mockDevLogin.mockRejectedValue(new Error('ECONNREFUSED 127.0.0.1:8080'))
     mockProviders([])
