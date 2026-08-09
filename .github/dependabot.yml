@@ -38,6 +38,8 @@ updates:
       # Revisit once both ship TS7-compatible releases.
       - dependency-name: "typescript"
         update-types: [ "version-update:semver-major" ]
+    cooldown:
+      default-days: 7
 
   # ---------------------------------------------------------------------------
   # npm (e2e/)
@@ -61,6 +63,8 @@ updates:
       npm-e2e-dependencies:
         patterns:
           - "*"
+    cooldown:
+      default-days: 7
 
   # ---------------------------------------------------------------------------
   # Docker (frontend/)
@@ -79,6 +83,8 @@ updates:
       - docker
     commit-message:
       prefix: "chore(deps)"
+    cooldown:
+      default-days: 7
 
   # ---------------------------------------------------------------------------
   # GitHub Actions
@@ -101,3 +107,5 @@ updates:
       github-actions-dependencies:
         patterns:
           - "*"
+    cooldown:
+      default-days: 7

@@ -31,6 +31,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
       - uses: ./.github/actions/setup-frontend
 
       - name: Lint
@@ -43,6 +45,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
       - uses: ./.github/actions/setup-frontend
 
       - name: Typecheck
@@ -63,6 +67,8 @@ jobs:
         shard: [1, 2, 3, 4]
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
       - uses: ./.github/actions/setup-frontend
 
       - name: Run tests (shard ${{ matrix.shard }}/${{ strategy.job-total }})
@@ -71,11 +77,13 @@ jobs:
           npx vitest run --coverage
           --reporter=blob
           --outputFile.blob=.vitest-reports/blob-${{ matrix.shard }}.json
-          --shard=${{ matrix.shard }}/${{ strategy.job-total }}
+          --shard=${{ matrix.shard }}/${STRATEGY_JOB_TOTAL}
           --coverage.thresholds.statements=0
           --coverage.thresholds.branches=0
           --coverage.thresholds.functions=0
           --coverage.thresholds.lines=0
+        env:
+          STRATEGY_JOB_TOTAL: ${{ strategy.job-total }}
 
       - name: List blob reports (debug)
         if: always()
@@ -99,6 +107,8 @@ jobs:
     needs: unit-test
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
       - uses: ./.github/actions/setup-frontend
 
       - name: Download blob reports
@@ -184,6 +194,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
       - uses: ./.github/actions/setup-frontend
 
       - name: Build
@@ -207,6 +219,8 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
       - uses: ./.github/actions/setup-frontend
 
       - name: Log in to GHCR
@@ -284,6 +298,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
       - uses: ./.github/actions/setup-frontend
         with:
           install-deps: "false"
@@ -400,6 +416,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
       - uses: ./.github/actions/setup-frontend
         with:
           install-deps: "false"
