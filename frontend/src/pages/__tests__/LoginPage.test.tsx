@@ -23,6 +23,15 @@ vi.mock('../../services/api', () => ({
   },
 }))
 
+// #667: the Dev Login button is gated on the BACKEND's dev status, not on
+// import.meta.env.MODE. A build-time gate meant `--build-arg VITE_MODE=development`
+// opened an unauthenticated login path in an image otherwise indistinguishable
+// from production. Mocked here so the tests below can drive both answers.
+const mockGetDevStatus = vi.fn()
+vi.mock('../../services/api/devApi', () => ({
+  getDevStatus: (...args: unknown[]) => mockGetDevStatus(...args),
+}))
+
 vi.mock('../../contexts/ThemeContext', () => ({
   useThemeMode: () => ({
     mode: 'light',
@@ -49,6 +58,7 @@ function renderLoginPage() {
 }
 
 beforeEach(() => {
+  mockGetDevStatus.mockResolvedValue({ dev_mode: false })
   vi.clearAllMocks()
 })
 
@@ -222,5 +232,33 @@ describe('LoginPage', () => {
     expect(screen.queryByText('ECONNREFUSED 127.0.0.1:8080')).not.toBeInTheDocument()
 
     vi.unstubAllEnvs()
+  })
+})
+
+describe('Dev Login gate (#667)', () => {
+  it('does not render Dev Login when the backend reports dev_mode false', async () => {
+    mockProviders([])
+    mockGetDevStatus.mockResolvedValue({ dev_mode: false })
+    renderLoginPage()
+    await waitFor(() => expect(mockGetDevStatus).toHaveBeenCalled())
+    expect(screen.queryByRole('button', { name: /dev login/i })).not.toBeInTheDocument()
+  })
+
+  it('renders Dev Login when the backend reports dev_mode true', async () => {
+    mockProviders([])
+    mockGetDevStatus.mockResolvedValue({ dev_mode: true })
+    renderLoginPage()
+    expect(await screen.findByRole('button', { name: /dev login/i })).toBeInTheDocument()
+  })
+
+  it('FAILS CLOSED when the dev-status call rejects', async () => {
+    // Production does not serve /api/v1/dev/status at all, so the request
+    // rejecting is the ordinary production path -- not an edge case. If this
+    // ever renders the button, a network blip becomes an auth-bypass affordance.
+    mockProviders([])
+    mockGetDevStatus.mockRejectedValue(new Error('404'))
+    renderLoginPage()
+    await waitFor(() => expect(mockGetDevStatus).toHaveBeenCalled())
+    expect(screen.queryByRole('button', { name: /dev login/i })).not.toBeInTheDocument()
   })
 })

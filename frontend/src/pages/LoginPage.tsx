@@ -18,6 +18,7 @@ import { useAuth } from '../contexts/AuthContext'
 import { useThemeMode } from '../contexts/ThemeContext'
 import { useNavigate } from 'react-router-dom'
 import api from '../services/api'
+import * as devApi from '../services/api/devApi'
 
 interface AuthProvider {
   type: string
@@ -54,7 +55,32 @@ const LoginPage: React.FC = () => {
   const { productName } = useThemeMode()
   const navigate = useNavigate()
   const [loginError, setLoginError] = React.useState<string | null>(null)
-  const isDev = import.meta.env.MODE === 'development'
+  // Gated on the BACKEND's dev status, not on import.meta.env.MODE (#667).
+  //
+  // MODE is baked in at build time by `vite build --mode`, so a single
+  // `--build-arg VITE_MODE=development` used to open this button in an image
+  // that is otherwise indistinguishable from a production one. The backend is
+  // the only thing that actually knows whether POST /api/v1/dev/login will
+  // work, so it decides whether the button exists.
+  //
+  // Fails CLOSED: the endpoint is absent in production, the request rejects,
+  // and the catch leaves this false. Same pattern DevUserSwitcher already uses.
+  const [isDev, setIsDev] = React.useState(false)
+
+  React.useEffect(() => {
+    let cancelled = false
+    devApi
+      .getDevStatus()
+      .then((status) => {
+        if (!cancelled) setIsDev(Boolean(status.dev_mode))
+      })
+      .catch(() => {
+        if (!cancelled) setIsDev(false)
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [])
   const [providers, setProviders] = React.useState<AuthProvider[]>([])
   const [loading, setLoading] = React.useState(true)
 
