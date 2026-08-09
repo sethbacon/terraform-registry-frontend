@@ -98,4 +98,12 @@ runs:
       if: inputs.install-playwright == 'true'
       working-directory: e2e
       shell: bash
-      run: npx playwright install --with-deps ${{ inputs.playwright-browsers }}
+      # The input goes through env rather than straight into the command line.
+      # Interpolated directly, a caller-supplied value is concatenated into the
+      # shell before bash ever sees it, so anything with a `;` or backtick runs
+      # as a command. Every caller today passes a fixed string, which makes this
+      # latent rather than live -- but the fix costs nothing and the property
+      # should hold regardless of who calls it next.
+      env:
+        PLAYWRIGHT_BROWSERS: ${{ inputs.playwright-browsers }}
+      run: npx playwright install --with-deps ${PLAYWRIGHT_BROWSERS}
