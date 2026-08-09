@@ -87,6 +87,20 @@ describe.each(CONFIGS)('%s — add_header inheritance (#668)', (name, conf) => {
     ).toEqual([])
   })
 
+  it('declares the CSP directives that do NOT fall back to default-src', () => {
+    // CSP3 §6.1: only the FETCH directives fall back to default-src. base-uri
+    // and form-action do not, so `default-src 'self'` does not cover them and
+    // their absence is silent (#669).
+    //
+    // Without base-uri, an injected <base href="https://attacker/"> re-roots
+    // every relative script and asset off-origin, straight through
+    // `script-src 'self'`. Without form-action, an injected form posts
+    // credentials anywhere without tripping `connect-src 'self'`.
+    for (const directive of ["base-uri 'self'", "form-action 'self'"]) {
+      expect(conf, `${name} CSP is missing ${directive}`).toContain(directive)
+    }
+  })
+
   it('keeps the location CSP byte-identical to the server-level one', () => {
     // Two CSPs that drift are worse than one: the weaker one wins on whichever
     // path uses it, and nothing says which path that is.
