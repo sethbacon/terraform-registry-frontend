@@ -76,6 +76,7 @@ jobs:
         run: >-
           npx vitest run --coverage
           --reporter=blob
+          --reporter=default
           --outputFile.blob=.vitest-reports/blob-${{ matrix.shard }}.json
           --shard=${{ matrix.shard }}/${STRATEGY_JOB_TOTAL}
           --coverage.thresholds.statements=0
@@ -91,6 +92,11 @@ jobs:
         run: ls -la .vitest-reports/ || echo "no .vitest-reports/ directory"
 
       - name: Upload blob report
+        # always(): a shard that FAILED is the one whose report is worth reading.
+        # Without this the upload is skipped exactly when it matters, and the
+        # blob reporter writes nothing to stdout -- so a red shard left no
+        # failure detail anywhere at all.
+        if: always()
         # v7
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
         with:
