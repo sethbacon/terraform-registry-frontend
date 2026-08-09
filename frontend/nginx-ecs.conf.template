@@ -41,12 +41,23 @@ server {
     add_header X-Frame-Options "DENY" always;
     add_header X-Content-Type-Options "nosniff" always;
     add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+    # Strict-Transport-Security was absent from THIS template only. nginx.conf
+    # (compose/E2E) has always sent it; the template that actually ships whenever
+    # BACKEND_URL is set never has, and nothing claimed that was deliberate.
+    # Found by nginxHeaderInheritance.test.ts asserting the SERVER level, not by
+    # reading the file -- the two configs had drifted on exactly the header whose
+    # absence is invisible in a browser.
+    #
+    # Harmless where TLS terminates at an ALB or CloudFront in front of this
+    # container: a browser ignores HSTS delivered over plain HTTP, so this is
+    # correct when nginx serves TLS and inert when it does not.
+    add_header Strict-Transport-Security "max-age=63072000; includeSubDomains" always;
     # connect-src 'self' also constrains VITE_SENTRY_DSN / VITE_ERROR_REPORTING_DSN /
     # VITE_PERFORMANCE_DSN (services/errorReporting.ts, performanceReporting.ts): a
     # genuinely cross-origin DSN (e.g. a Sentry SaaS *.ingest.sentry.io endpoint) will
     # have its fetch/sendBeacon calls silently blocked by the browser. Route such DSNs
     # through this reverse proxy instead, or add their origin here (see ARCHITECTURE.md).
-    add_header Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self' 'nonce-$csp_nonce'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self'; frame-ancestors 'none';" always;
+    add_header Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self' 'nonce-$csp_nonce'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self';" always;
     add_header Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=()" always;
 
     # Inject CSP nonce into index.html. once off = replace EVERY __CSP_NONCE__
@@ -107,6 +118,25 @@ server {
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
+        # nginx add_header is REPLACE-BY-LEVEL, not additive: "these directives are
+        # inherited from the previous configuration level if and only if there are
+        # no add_header directives defined on the current level". The
+        # Content-Type line below is one, so without re-declaring them here this
+        # location serves with NONE of the six server-level security headers.
+        #
+        # This is the one same-origin path carrying content the operator does not
+        # author -- /terraform/ is the network-mirror protocol, proxying provider
+        # metadata from third-party upstream registries -- so it is the worst
+        # place in the config to lose nosniff and the CSP.
+        #
+        # Duplication here is deliberate and guarded: nginxHeaderInheritance.test.ts
+        # fails if any location that defines add_header omits one of these.
+        add_header X-Frame-Options "DENY" always;
+        add_header X-Content-Type-Options "nosniff" always;
+        add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+        add_header Strict-Transport-Security "max-age=63072000; includeSubDomains" always;
+        add_header Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=()" always;
+        add_header Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self' 'nonce-$csp_nonce'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self';" always;
         add_header Content-Type "application/json" always;
     }
 
