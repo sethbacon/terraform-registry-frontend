@@ -41,6 +41,17 @@ server {
     add_header X-Frame-Options "DENY" always;
     add_header X-Content-Type-Options "nosniff" always;
     add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+    # Strict-Transport-Security was absent from THIS template only. nginx.conf
+    # (compose/E2E) has always sent it; the template that actually ships whenever
+    # BACKEND_URL is set never has, and nothing claimed that was deliberate.
+    # Found by nginxHeaderInheritance.test.ts asserting the SERVER level, not by
+    # reading the file -- the two configs had drifted on exactly the header whose
+    # absence is invisible in a browser.
+    #
+    # Harmless where TLS terminates at an ALB or CloudFront in front of this
+    # container: a browser ignores HSTS delivered over plain HTTP, so this is
+    # correct when nginx serves TLS and inert when it does not.
+    add_header Strict-Transport-Security "max-age=63072000; includeSubDomains" always;
     # connect-src 'self' also constrains VITE_SENTRY_DSN / VITE_ERROR_REPORTING_DSN /
     # VITE_PERFORMANCE_DSN (services/errorReporting.ts, performanceReporting.ts): a
     # genuinely cross-origin DSN (e.g. a Sentry SaaS *.ingest.sentry.io endpoint) will

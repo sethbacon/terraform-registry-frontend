@@ -34,9 +34,18 @@ const REQUIRED = [
   'Permissions-Policy',
 ] as const
 
-/** Extract `location <match> { ... }` blocks, brace-balanced. */
-function locationBlocks(conf: string): { match: string; body: string }[] {
-  const out: { match: string; body: string }[] = []
+/**
+ * Extract `location <match> { ... }` blocks, brace-balanced, keeping the index
+ * range of each body.
+ *
+ * The ranges matter: the server level is computed by removing these spans by
+ * INDEX, not by `String.replace(body, '')`. Replace-by-content takes the first
+ * textual match, which is not necessarily the block it came from — two blocks
+ * with identical bodies, or a body that also occurs verbatim earlier, silently
+ * strip the wrong region and take real server-level directives with them.
+ */
+function locationBlocks(conf: string): { match: string; body: string; start: number; end: number }[] {
+  const out: { match: string; body: string; start: number; end: number }[] = []
   const re = /location\s+([^{]+)\{/g
   let m: RegExpExecArray | null
   while ((m = re.exec(conf)) !== null) {
@@ -47,9 +56,24 @@ function locationBlocks(conf: string): { match: string; body: string }[] {
       else if (conf[i] === '}') depth--
       i++
     }
-    out.push({ match: m[1].trim(), body: conf.slice(re.lastIndex, i - 1) })
+    out.push({ match: m[1].trim(), body: conf.slice(re.lastIndex, i - 1), start: m.index, end: i })
+    // Skip past this block so a NESTED location is not also reported as a
+    // top-level one, which would strip the same span twice.
+    re.lastIndex = i
   }
   return out
+}
+
+/** The config with every location block removed, by index. */
+function serverLevelOnly(conf: string): string {
+  const blocks = locationBlocks(conf)
+  let out = ''
+  let cursor = 0
+  for (const b of blocks) {
+    out += conf.slice(cursor, b.start)
+    cursor = b.end
+  }
+  return out + conf.slice(cursor)
 }
 
 const CONFIGS: [string, string][] = [
@@ -65,9 +89,7 @@ describe.each(CONFIGS)('%s — add_header inheritance (#668)', (name, conf) => {
   })
 
   it('declares every security header at the server level', () => {
-    // Strip location bodies so we are looking at the server level only.
-    let serverLevel = conf
-    for (const { body } of locationBlocks(conf)) serverLevel = serverLevel.replace(body, '')
+    const serverLevel = serverLevelOnly(conf)
     for (const h of REQUIRED) {
       expect(serverLevel, `${name} lost server-level ${h}`).toContain(`add_header ${h}`)
     }
