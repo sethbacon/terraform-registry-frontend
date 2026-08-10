@@ -114,6 +114,53 @@ describe('errorReporting', () => {
       window.history.pushState({}, '', originalLocation)
     })
 
+    // ─── #698: context is sanitized once, at the point it enters ────────────
+    //
+    // Three exits carry the context out, and the Sentry hooks in init() cover
+    // none of them: this console.error (Sentry's console integration records the
+    // arguments verbatim, a shape beforeBreadcrumb's url/from/to loop never
+    // inspects), Sentry's `extra` (beforeSend only rewrites request.url), and
+    // the custom reporter's stored entry.
+    it('strips a session token from the context passed to console.error', async () => {
+      vi.stubEnv('VITE_ERROR_REPORTING_DSN', '')
+      vi.stubEnv('VITE_SENTRY_DSN', '')
+
+      const { captureError: freshCapture } = await import('../errorReporting')
+      freshCapture(new Error('boom'), {
+        returnTo: 'https://app.example.com/auth/callback?token=super-secret-jwt',
+      })
+
+      const logged = (console.error as ReturnType<typeof vi.fn>).mock.calls.find(
+        (c) => c[0] === '[ErrorReporting]',
+      )
+      expect(logged, 'captureError logged nothing').toBeDefined()
+      expect(JSON.stringify(logged?.[2])).not.toContain('super-secret-jwt')
+      // The rest of the URL survives, or the diagnostic is worthless.
+      expect(JSON.stringify(logged?.[2])).toContain('/auth/callback')
+    })
+
+    it('strips a session token from the context stored by the custom reporter', async () => {
+      vi.stubEnv('VITE_ERROR_REPORTING_DSN', 'https://errors.example.com/report')
+      vi.stubEnv('VITE_SENTRY_DSN', '')
+
+      const {
+        init: freshInit,
+        captureError: freshCapture,
+        flush: freshFlush,
+      } = await import('../errorReporting')
+      freshInit()
+      freshCapture(new Error('boom'), {
+        returnTo: '/auth/callback?token=super-secret-jwt',
+        component: 'OrganizationsPage',
+      })
+      freshFlush()
+
+      const body = JSON.parse((globalThis.fetch as ReturnType<typeof vi.fn>).mock.calls[0][1].body)
+      expect(JSON.stringify(body.entries[0].context)).not.toContain('super-secret-jwt')
+      // Non-URL values must pass through untouched, or ordinary context is mangled.
+      expect(body.entries[0].context.component).toBe('OrganizationsPage')
+    })
+
     it('does not call fetch when no DSN is configured', () => {
       const error = new Error('No DSN error')
       captureError(error)
@@ -174,6 +221,34 @@ describe('errorReporting', () => {
       }) as { data: { from: string; to: string } }
       expect(navBreadcrumb.data.from).toBe('/auth/callback')
       expect(navBreadcrumb.data.to).toBe('/')
+    })
+
+    // #698's third exit. beforeSend only rewrites event.request.url, so a
+    // sensitive value in the context reaches Sentry through `extra` untouched
+    // by any hook above -- it has to be sanitized before it is handed over.
+    it('strips a session token from the context handed to Sentry as extra', async () => {
+      const initMock = vi.fn()
+      const captureExceptionMock = vi.fn()
+      vi.doMock('@sentry/react', () => ({
+        init: initMock,
+        captureException: captureExceptionMock,
+      }))
+      vi.stubEnv('VITE_SENTRY_DSN', 'https://sentry.example.com/dsn')
+
+      const { init: freshInit, captureError: freshCapture } = await import('../errorReporting')
+      freshInit()
+      await vi.waitFor(() => expect(initMock).toHaveBeenCalled())
+
+      freshCapture(new Error('boom'), {
+        returnTo: 'https://app.example.com/auth/callback?token=super-secret-jwt',
+        component: 'UsersPage',
+      })
+      await vi.waitFor(() => expect(captureExceptionMock).toHaveBeenCalled())
+
+      const extra = captureExceptionMock.mock.calls[0][1].extra as Record<string, unknown>
+      expect(JSON.stringify(extra)).not.toContain('super-secret-jwt')
+      expect(String(extra.returnTo)).toContain('/auth/callback')
+      expect(extra.component).toBe('UsersPage')
     })
   })
 
