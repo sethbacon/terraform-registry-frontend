@@ -1,6 +1,7 @@
 import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios'
 import { addApiBreadcrumb } from '../errorReporting'
 import { clearAuthStorage } from '../../utils/authStorage'
+import { captureReturnUrl } from '../../utils/returnUrl'
 
 // In dev mode, use empty baseURL to use relative paths (goes through Vite proxy)
 // In production, use the configured URL or default to current origin
@@ -293,6 +294,11 @@ http.interceptors.response.use(
         const alreadyOnLoginPage = window.location.pathname === LOGIN_PATH
         if (hadSession && !hasRedirectedToLogin && !alreadyOnLoginPage) {
           hasRedirectedToLogin = true
+          // Capture INSIDE the redirect branch, not on every 401 (#695). A 401
+          // that does not navigate is an SCM-OAuth failure, an anonymous probe,
+          // or a suppressed loop-guard case -- recording a destination for any of
+          // those would leave a stale entry that hijacks the next real login.
+          captureReturnUrl()
           window.location.href = LOGIN_PATH
         }
       }

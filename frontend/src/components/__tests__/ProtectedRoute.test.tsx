@@ -54,6 +54,61 @@ describe('ProtectedRoute', () => {
     expect(screen.queryByText('Protected Content')).not.toBeInTheDocument()
   })
 
+  // #695 wiring. captureReturnUrl() being correct is worth nothing if this
+  // component never calls it — which is the same failure the issue described
+  // from the other side: a well-tested read of a key nothing ever wrote.
+  it('captures the current location before redirecting to /login', () => {
+    sessionStorage.clear()
+    // captureReturnUrl reads window.location, not the router's. Under
+    // BrowserRouter in the app those agree; MemoryRouter never touches
+    // window.location, so the test has to set it explicitly.
+    window.history.pushState({}, '', '/providers/hashicorp/aws')
+
+    mockUseAuth.mockReturnValue({
+      isAuthenticated: false,
+      isLoading: false,
+      allowedScopes: [],
+    })
+
+    renderWithRouter(
+      <ProtectedRoute>
+        <div>Protected Content</div>
+      </ProtectedRoute>,
+    )
+
+    expect(screen.getByText('Login Page')).toBeInTheDocument()
+    expect(sessionStorage.getItem('returnUrl')).toBe('/providers/hashicorp/aws')
+
+    sessionStorage.clear()
+    window.history.pushState({}, '', '/')
+  })
+
+  it('captures nothing when the user is authenticated', () => {
+    // The control. Without it, calling captureReturnUrl unconditionally at the
+    // top of the component would satisfy the test above while leaving a stale
+    // destination behind on every authenticated render.
+    sessionStorage.clear()
+    window.history.pushState({}, '', '/providers/hashicorp/aws')
+
+    mockUseAuth.mockReturnValue({
+      isAuthenticated: true,
+      isLoading: false,
+      allowedScopes: ['admin'],
+    })
+
+    renderWithRouter(
+      <ProtectedRoute>
+        <div>Protected Content</div>
+      </ProtectedRoute>,
+    )
+
+    expect(screen.getByText('Protected Content')).toBeInTheDocument()
+    expect(sessionStorage.getItem('returnUrl')).toBeNull()
+
+    sessionStorage.clear()
+    window.history.pushState({}, '', '/')
+  })
+
   it('shows Access Denied when required scope is missing', () => {
     mockUseAuth.mockReturnValue({
       isAuthenticated: true,

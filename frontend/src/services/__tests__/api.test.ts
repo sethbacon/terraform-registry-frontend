@@ -463,6 +463,48 @@ describe('ApiClient', () => {
       document.cookie = 'tfr_csrf=; Max-Age=0'
     })
 
+    // #695 wiring. captureReturnUrl() being correct is worth nothing if the
+    // interceptor never calls it -- which is precisely the state this issue
+    // described from the other direction: a validated read of a key nothing wrote.
+    it('captures the current page as the return URL before redirecting to /login', async () => {
+      sessionStorage.clear()
+      window.history.pushState({}, '', '/modules/hashicorp/consul/aws?tab=inputs')
+      document.cookie = 'tfr_csrf=some-csrf-token'
+      await getApiClient()
+
+      const error = {
+        response: { status: 401 },
+        config: { url: '/api/v1/modules/search' },
+        isAxiosError: true,
+      } as AxiosError
+
+      await expect(capturedResRejectedHandlers[0](error)).rejects.toBe(error)
+      expect(sessionStorage.getItem('returnUrl')).toBe('/modules/hashicorp/consul/aws?tab=inputs')
+
+      document.cookie = 'tfr_csrf=; Max-Age=0'
+      sessionStorage.clear()
+    })
+
+    // The other half: a 401 that does NOT navigate must leave no destination
+    // behind, or a stale entry hijacks the next genuine login.
+    it('does not capture a return URL on a 401 that does not redirect', async () => {
+      sessionStorage.clear()
+      window.history.pushState({}, '', '/public-page')
+      // No tfr_csrf cookie -> anonymous visitor -> no redirect.
+      await getApiClient()
+
+      const error = {
+        response: { status: 401 },
+        config: { url: '/api/v1/auth/me' },
+        isAxiosError: true,
+      } as AxiosError
+
+      await expect(capturedResRejectedHandlers[0](error)).rejects.toBe(error)
+      expect(sessionStorage.getItem('returnUrl')).toBeNull()
+
+      sessionStorage.clear()
+    })
+
     it('expires the tfr_csrf cookie on 401 so the redirect is one-shot (no reload loop)', async () => {
       // /login renders inside AuthProvider, which probes /auth/me on mount. If the
       // cookie survived the first 401, the probe's own 401 would re-trigger the
