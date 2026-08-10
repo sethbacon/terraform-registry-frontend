@@ -24,6 +24,13 @@
 # `set $csp_nonce $request_id` re-runs after that redirect and yields a SECOND,
 # different id, so the header nonce and the <meta>/emotion nonce disagree and the
 # browser blocks every injected style. See frontend/nginx.conf for the same fix.
+#
+# THIS NONCE IS STYLE-SCOPED. Do not reuse it for script-src (#696). It is
+# published to the DOM via <meta name="csp-nonce"> so Emotion can consume it, so
+# any script that can read the document can read the nonce and authorise itself;
+# and it derives from $request_id, nginx's request identifier, not a CSPRNG
+# (CWE-330). script-src stays 'self', which is stronger than a nonce built this
+# way. Full reasoning in frontend/nginx.conf.
 map $request_id $csp_nonce {
     default $request_id;
 }
