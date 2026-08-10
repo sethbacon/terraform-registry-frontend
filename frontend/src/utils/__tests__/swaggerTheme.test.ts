@@ -67,15 +67,46 @@ describe('enforceSwaggerA11yStyles', () => {
     expect(btn.querySelector<SVGElement>('svg')!.style.fill).toBe('#007a52')
   })
 
-  it('replaces the nested anchor inside opblock-summary-control with a span (nested-interactive a11y fix)', () => {
+  // #683 — this used to assert the <a> was REPLACED by a <span>. That
+  // replacement removed a node swagger-ui's React tree still referenced, and
+  // React's later removeChild against a parent no longer containing it threw
+  // NotFoundError, taking the whole /api-docs route to the ErrorBoundary.
+  //
+  // The nested-interactive violation is now cleared by dropping href instead:
+  // an <a> without href has no implicit link role and is not focusable. The
+  // assertions therefore invert -- the element must SURVIVE, in place, with its
+  // identity intact.
+  it('clears the nested-interactive violation without replacing the anchor node', () => {
     renderFixture()
+    const control = document.querySelector('.opblock-summary-control')!
+    const before = control.querySelector('a')!
+
     enforceSwaggerA11yStyles(false)
 
-    const control = document.querySelector('.opblock-summary-control')!
-    expect(control.querySelector('a')).toBeNull()
-    const span = control.querySelector('span.opblock-summary-path')!
-    expect(span.textContent).toBe('/things')
-    expect(span.getAttribute('data-foo')).toBe('bar')
+    const after = control.querySelector('a')
+    // Same node object, still attached: anything else is the crash this fixes.
+    expect(after).toBe(before)
+    expect(after!.isConnected).toBe(true)
+    // The violation itself is gone.
+    expect(after!.hasAttribute('href')).toBe(false)
+    // And nothing else about the element was discarded -- the old replacement
+    // dropped every non-data attribute and rebuilt the class list by hand.
+    expect(after!.textContent).toBe('/things')
+    expect(after!.className).toBe('opblock-summary-path')
+    expect(after!.getAttribute('data-foo')).toBe('bar')
+  })
+
+  it('is idempotent, because the MutationObserver re-runs it constantly', () => {
+    renderFixture()
+    const before = document.querySelector('.opblock-summary-control a')!
+
+    enforceSwaggerA11yStyles(false)
+    enforceSwaggerA11yStyles(false)
+    enforceSwaggerA11yStyles(false)
+
+    const after = document.querySelector('.opblock-summary-control a')
+    expect(after).toBe(before)
+    expect(after!.hasAttribute('href')).toBe(false)
   })
 
   it('is a no-op when no matching elements exist', () => {

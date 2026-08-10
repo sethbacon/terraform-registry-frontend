@@ -78,17 +78,34 @@ export function enforceSwaggerA11yStyles(dark: boolean): void {
     if (svg) svg.style.setProperty('fill', authColor, 'important')
   })
 
-  // Nested-interactive fix: replace <a> inside summary buttons with <span>
+  // Nested-interactive fix: swagger-ui renders an <a> inside the summary
+  // button, which is a nested-interactive a11y violation.
+  //
+  // This used to replace the <a> with a <span>, and that removed a node
+  // swagger-ui's own React tree still held a reference to. When React later
+  // unmounted or re-rendered the subtree -- collapsing an operation, switching
+  // tags, toggling deep-link state -- it called removeChild/insertBefore
+  // against a parent that no longer contained the node, throwing
+  // "NotFoundError: Failed to execute 'removeChild' on 'Node'". That propagates
+  // to the ErrorBoundary LazyRoute wraps around this page, so the entire
+  // /api-docs route dropped to the error fallback (#683).
+  //
+  // Dropping href is sufficient: an <a> with no href has no implicit link role
+  // and is not focusable, so the nested-interactive rule is satisfied. The node
+  // stays exactly where React put it and every reconciler reference stays
+  // valid.
+  //
+  // It is also strictly less destructive than the replacement it supersedes,
+  // which discarded the anchor's identity, class list and all non-data
+  // attributes. And it removes the feedback loop: the MutationObserver in
+  // ApiDocumentation.tsx watches { childList, subtree } and not attributes, so
+  // swapping nodes re-triggered it on every pass while an attribute removal
+  // does not. Re-running is a no-op once href is gone, which matters because
+  // the observer fires constantly during normal interaction.
   document
-    .querySelectorAll<HTMLAnchorElement>('.swagger-ui .opblock-summary-control a')
+    .querySelectorAll<HTMLAnchorElement>('.swagger-ui .opblock-summary-control a[href]')
     .forEach((a) => {
-      const span = document.createElement('span')
-      span.className = a.className
-      span.textContent = a.textContent
-      Array.from(a.attributes).forEach((attr) => {
-        if (attr.name.startsWith('data-')) span.setAttribute(attr.name, attr.value)
-      })
-      a.replaceWith(span)
+      a.removeAttribute('href')
     })
 }
 
