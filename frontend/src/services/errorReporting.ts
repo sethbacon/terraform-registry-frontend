@@ -190,26 +190,62 @@ export function init(): void {
 }
 
 /**
+ * Sanitize a captureError context once, at the point the data enters, so every
+ * exit below is covered by construction (#698).
+ *
+ * There are three of them, and the Sentry hooks in init() cover none:
+ *
+ *   1. `console.error` here. Sentry's default console integration records the
+ *      arguments verbatim as a breadcrumb, and that breadcrumb's shape is an
+ *      arguments array -- not the url/from/to keys beforeBreadcrumb inspects.
+ *   2. `Sentry.captureException(..., { extra })`. beforeSend only rewrites
+ *      `event.request.url`; it never touches `event.extra`.
+ *   3. The custom reporter, which stores the context on the queued entry.
+ *
+ * Sanitizing the breadcrumb instead would not have worked: sanitizeUrl returns
+ * non-URL strings unchanged, so a URL embedded in a serialized arguments array
+ * is not something it can find. Sanitizing at the source is both simpler and
+ * the only version that holds.
+ *
+ * Deliberately SHALLOW -- top-level string values only. Every call site
+ * reviewed passes flat objects of short static strings, and recursive
+ * traversal of arbitrary context would be speculative. A URL nested inside an
+ * object value is therefore still passed through; that is a known limit, not
+ * an oversight.
+ */
+function sanitizeContext(context?: Record<string, unknown>): Record<string, unknown> | undefined {
+  if (!context) return context
+
+  const sanitized: Record<string, unknown> = {}
+  for (const [key, value] of Object.entries(context)) {
+    sanitized[key] = typeof value === 'string' ? sanitizeUrl(value) : value
+  }
+  return sanitized
+}
+
+/**
  * Capture an error with optional context. The error is batched and will be
  * sent to the configured DSN (or Sentry) on the next flush cycle.
  */
 export function captureError(error: Error, context?: Record<string, unknown>): void {
-  console.error('[ErrorReporting]', error.message, context)
+  const safeContext = sanitizeContext(context)
+
+  console.error('[ErrorReporting]', error.message, safeContext)
 
   // Delegate to Sentry when available
   if (useSentry) {
     import('@sentry/react')
       .then((Sentry) => {
-        Sentry.captureException(error, { extra: context })
+        Sentry.captureException(error, { extra: safeContext })
       })
       .catch(() => {
         // Sentry not available — queue for custom reporter
-        enqueueError(error, context)
+        enqueueError(error, safeContext)
       })
     return
   }
 
-  enqueueError(error, context)
+  enqueueError(error, safeContext)
 }
 
 function enqueueError(error: Error, context?: Record<string, unknown>): void {
