@@ -116,27 +116,28 @@ deployments, see the backend's
 ### Images in module and provider documentation
 
 Module and provider READMEs are authored by whoever publishes them, and they may
-reference images hosted anywhere — build-status badges are the common case. Those
-images are fetched by **your browser, directly from the host the publisher chose**.
-They are not proxied through this registry.
+reference images — build-status badges are the common case. Those images are fetched
+by **your browser**, not proxied through this registry, so the host serving them
+observes your IP address, your browser's `User-Agent`, and the time you viewed the
+page. It does **not** learn which module page you were on: the `Referrer-Policy` is
+`strict-origin-when-cross-origin`, so only this registry's origin is sent.
 
-That fetch discloses to the third-party host:
+**Remote images may only be loaded from a fixed allowlist of hosts** (currently the
+shields.io and badgen.net badge services, and GitHub/GitLab content hosts). The
+browser blocks anything else outright.
 
-- your IP address,
-- your browser's `User-Agent`,
-- the time you viewed the page, and
-- this registry's origin (the `Referrer-Policy` is `strict-origin-when-cross-origin`,
-  so the specific module page you were viewing is **not** sent).
+The allowlist exists to stop module publishers tracking you. It contains only hosts
+whose access logs the publisher **cannot read** — a badge still renders, but the log
+entry belongs to shields.io or GitHub, not to whoever wrote the README. Were an
+arbitrary host permitted, any publisher could embed a one-pixel image on their own
+domain and record every viewer's IP and browsing time, with no attack required.
 
-The disclosure is to the image's host, not to us, and it happens whether or not the
-image is a genuine badge — an embedded image is a working analytics pixel for anyone
-who can publish to this registry. Publishers are therefore able to learn that
-*somebody at your organisation* viewed their module, and how often.
+Two consequences worth knowing:
 
-Operators who need to eliminate this can restrict the frontend's
-`Content-Security-Policy` to `img-src 'self' data:` in `frontend/nginx.conf`. This
-blocks **all** remote images in documentation, including legitimate badges, so it is
-a deliberate trade of documentation fidelity for viewer privacy rather than a default.
+- The disclosure that remains is to those allowlisted services, not to us and not to
+  the module publisher.
+- A README referencing an image hosted anywhere else will show a broken image. That
+  is the policy working as intended, not a fault in the document.
 
 ## 9. Security
 

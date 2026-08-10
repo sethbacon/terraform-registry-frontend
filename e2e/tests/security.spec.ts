@@ -265,7 +265,12 @@ test.describe('Response headers: the nginx security headers reach the browser', 
   const CSP_DIRECTIVES = [
     "default-src 'self'",
     "script-src 'self'",
-    "img-src 'self' data: https:",
+    // An ALLOWLIST, not a wildcard (#680). Asserted in full rather than as a prefix so
+    // that widening it back to `https:` -- or quietly appending a publisher-controlled
+    // origin -- fails here rather than shipping.
+    "img-src 'self' data: https://img.shields.io https://badgen.net " +
+      'https://raw.githubusercontent.com https://avatars.githubusercontent.com ' +
+      'https://github.com https://gitlab.com',
     "font-src 'self' data:",
     "connect-src 'self'",
     "frame-ancestors 'none'",
