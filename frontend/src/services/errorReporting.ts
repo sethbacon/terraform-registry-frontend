@@ -119,6 +119,19 @@ export function flush(): void {
   })
 }
 
+/**
+ * Messages currently buffered, oldest first. **Test seam only.**
+ *
+ * The buffer used to be observable by activating a DSN and flushing, which is
+ * exactly the transmission #689 removed. The MAX_BATCH_SIZE memory bound still
+ * matters for users who never consent -- captureError is wired into every API
+ * error path, so an uncapped buffer would grow for the lifetime of the page --
+ * and without this it could not be asserted at all.
+ */
+export function bufferedErrorMessages(): string[] {
+  return errorBuffer.map((entry) => entry.message)
+}
+
 // ---------------------------------------------------------------------------
 // Public API
 // ---------------------------------------------------------------------------
@@ -265,10 +278,12 @@ function enqueueError(error: Error, context?: Record<string, unknown>): void {
   // so without this cap every captured error would accumulate for the lifetime
   // of the page for users who never consented to telemetry -- and captureError
   // is wired into every API error path, so that is a real leak, not a
-  // theoretical one. Entries are kept (rather than dropped at the door) so
-  // errors captured before init() resolves the DSN still ship once it does;
-  // capping evicts the oldest first, the same bounded-ring-buffer approach
-  // performanceReporting.ts uses.
+  // theoretical one. Capping evicts the oldest first, the same bounded
+  // ring-buffer approach performanceReporting.ts uses.
+  //
+  // This cap is now purely a memory bound. Anything buffered while reporting is
+  // inactive is discarded by init() rather than transmitted (#689), so the cap
+  // no longer decides what gets sent -- only how much is held in the meantime.
   if (errorBuffer.length > MAX_BATCH_SIZE) {
     errorBuffer.splice(0, errorBuffer.length - MAX_BATCH_SIZE)
   }

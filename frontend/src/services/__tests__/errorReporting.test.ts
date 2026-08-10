@@ -308,8 +308,13 @@ describe('errorReporting', () => {
       // No DSN => flush() is a no-op, so nothing drains the buffer. Without a
       // cap this grows for the lifetime of the page (captureError is wired
       // into every API error path), so assert the retained entries are
-      // bounded: capture well past MAX_BATCH_SIZE with reporting inactive,
-      // then activate a DSN and flush, and inspect what was retained.
+      // bounded.
+      //
+      // This used to observe the buffer by activating a DSN and flushing --
+      // which is precisely the pre-consent transmission #689 removed, so that
+      // route no longer exists. The memory bound it was checking is still real
+      // and still matters for users who never consent, so it is now read
+      // directly via the bufferedErrorMessages test seam.
       vi.stubEnv('VITE_ERROR_REPORTING_DSN', '')
       vi.resetModules()
       const mod = await import('../errorReporting')
@@ -318,18 +323,36 @@ describe('errorReporting', () => {
         mod.captureError(new Error(`overflow ${i}`))
       }
 
-      // Activate reporting, then drain.
+      const buffered = mod.bufferedErrorMessages()
+      // MAX_BATCH_SIZE is 10; unbounded this would be all 25.
+      expect(buffered.length).toBeLessThanOrEqual(10)
+      // Oldest are evicted first, so the newest error must survive.
+      expect(buffered).toContain('overflow 24')
+      // ...and the oldest must not, or nothing was actually evicted.
+      expect(buffered).not.toContain('overflow 0')
+
+      mod.destroy()
+    })
+
+    it('discards the bounded buffer on opt-in rather than transmitting it', async () => {
+      // The other half of the behaviour the old version of this test asserted:
+      // those retained entries were captured with reporting inactive, so
+      // granting consent must drop them, not ship them (#689).
+      vi.stubEnv('VITE_ERROR_REPORTING_DSN', '')
+      vi.resetModules()
+      const mod = await import('../errorReporting')
+
+      for (let i = 0; i < 25; i++) {
+        mod.captureError(new Error(`overflow ${i}`))
+      }
+      expect(mod.bufferedErrorMessages().length).toBeGreaterThan(0)
+
       vi.stubEnv('VITE_ERROR_REPORTING_DSN', 'https://errors.example.com/report')
       mod.init()
-      mod.flush()
 
-      expect(globalThis.fetch).toHaveBeenCalled()
-      const call = (globalThis.fetch as unknown as ReturnType<typeof vi.fn>).mock.calls[0]
-      const body = JSON.parse((call[1] as RequestInit).body as string)
-      // MAX_BATCH_SIZE is 10; pre-fix this would be all 25.
-      expect(body.entries.length).toBeLessThanOrEqual(10)
-      // Oldest are evicted first, so the newest error must survive.
-      expect(JSON.stringify(body.entries)).toContain('overflow 24')
+      expect(mod.bufferedErrorMessages()).toEqual([])
+      mod.flush()
+      expect(globalThis.fetch).not.toHaveBeenCalled()
 
       mod.destroy()
     })
