@@ -1,5 +1,6 @@
 import { Navigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
+import { captureReturnUrl } from '../utils/returnUrl'
 import { CircularProgress, Box, Container, Typography, Alert, Button } from '@mui/material'
 import type { ScopeValue } from '../types/rbac'
 
@@ -33,6 +34,15 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, requiredScope
   }
 
   if (!isAuthenticated) {
+    // Record the destination before bouncing to /login, so the OIDC callback can
+    // return the user here instead of dropping them on '/' (#695).
+    //
+    // Written during render rather than from an effect on purpose: <Navigate>
+    // performs its navigation from an effect of its own, and child effects run
+    // before the parent's, so an effect here would fire too late to be read. The
+    // write is idempotent and self-contained, so StrictMode's double render is
+    // harmless, and captureReturnUrl never throws.
+    captureReturnUrl()
     return <Navigate to="/login" replace />
   }
 

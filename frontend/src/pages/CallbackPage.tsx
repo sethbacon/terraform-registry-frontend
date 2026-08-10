@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { Container, Box, CircularProgress, Typography, Alert } from '@mui/material'
+import { RETURN_URL_KEY } from '../utils/returnUrl'
 
 const CallbackPage: React.FC = () => {
   const navigate = useNavigate()
@@ -26,8 +27,12 @@ const CallbackPage: React.FC = () => {
       // callback redirect (no token ever transits the URL). AuthContext will
       // detect the session via /auth/me on mount. Navigate to the return URL;
       // AuthContext handles the rest.
-      const raw = sessionStorage.getItem('returnUrl') || '/'
-      sessionStorage.removeItem('returnUrl')
+      // RETURN_URL_KEY rather than a literal: this read and the writes in
+      // ProtectedRoute / the 401 interceptor are two halves of one feature, and
+      // they were disconnected for exactly as long as the key was duplicated
+      // as a string in only one of them (#695).
+      const raw = sessionStorage.getItem(RETURN_URL_KEY) || '/'
+      sessionStorage.removeItem(RETURN_URL_KEY)
       // Reject absolute and protocol-relative URLs to prevent open redirect.
       // Use URL parsing to catch backslash normalisation bypasses (/\\ → //).
       let safeReturnUrl = '/'
