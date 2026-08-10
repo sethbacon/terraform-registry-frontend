@@ -113,6 +113,31 @@ Data residency depends on where this instance is deployed. For multi-region
 deployments, see the backend's
 [data residency guide](https://github.com/sethbacon/terraform-registry-backend/blob/main/docs/data-residency.md).
 
+### Images in module and provider documentation
+
+Module and provider READMEs are authored by whoever publishes them, and they may
+reference images hosted anywhere — build-status badges are the common case. Those
+images are fetched by **your browser, directly from the host the publisher chose**.
+They are not proxied through this registry.
+
+That fetch discloses to the third-party host:
+
+- your IP address,
+- your browser's `User-Agent`,
+- the time you viewed the page, and
+- this registry's origin (the `Referrer-Policy` is `strict-origin-when-cross-origin`,
+  so the specific module page you were viewing is **not** sent).
+
+The disclosure is to the image's host, not to us, and it happens whether or not the
+image is a genuine badge — an embedded image is a working analytics pixel for anyone
+who can publish to this registry. Publishers are therefore able to learn that
+*somebody at your organisation* viewed their module, and how often.
+
+Operators who need to eliminate this can restrict the frontend's
+`Content-Security-Policy` to `img-src 'self' data:` in `frontend/nginx.conf`. This
+blocks **all** remote images in documentation, including legitimate badges, so it is
+a deliberate trade of documentation fidelity for viewer privacy rather than a default.
+
 ## 9. Security
 
 We implement technical and organizational measures including:

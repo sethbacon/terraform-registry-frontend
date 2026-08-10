@@ -57,6 +57,14 @@ server {
     # genuinely cross-origin DSN (e.g. a Sentry SaaS *.ingest.sentry.io endpoint) will
     # have its fetch/sendBeacon calls silently blocked by the browser. Route such DSNs
     # through this reverse proxy instead, or add their origin here (see ARCHITECTURE.md).
+    #
+    # img-src permits any https host because module/provider READMEs are publisher-authored
+    # and routinely carry build-status badges. The cost is that an embedded image is a
+    # working analytics pixel: the publisher's host learns the viewer's IP, User-Agent and
+    # timestamp (not the module path -- Referrer-Policy is strict-origin-when-cross-origin).
+    # Documented for end users in PRIVACY.md section 8. Operators who would rather lose
+    # badges than leak that can narrow this to `img-src 'self' data:`, which blocks ALL
+    # remote documentation images.
     add_header Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self' 'nonce-$csp_nonce'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self';" always;
     add_header Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=()" always;
 
