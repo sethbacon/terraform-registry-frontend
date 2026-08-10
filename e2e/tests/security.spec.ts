@@ -233,3 +233,117 @@ test.describe('Open redirect: OIDC callback returnUrl cannot escape the origin',
     expect(landed.searchParams.get('q')).toBe('safe');
   });
 });
+
+// ---------------------------------------------------------------------------
+// 4. Response headers — the security headers nginx declares actually ship
+// ---------------------------------------------------------------------------
+// Issue #691. nginxHeaderInheritance.test.ts already parses the config files
+// statically, but a static parse cannot see whether nginx *serves* what the file
+// declares. This asserts the delivered response, which is the only thing a
+// browser acts on.
+//
+// The compose stack these tests run against serves frontend/nginx.conf (see
+// frontend/Dockerfile: it is COPYd to conf.d/default.conf and is the default
+// whenever BACKEND_URL is unset). nginx-ecs.conf.template is NOT exercised here
+// -- it is selected by the entrypoint only when BACKEND_URL is set, so it has no
+// running instance to interrogate and remains covered by the static test alone.
+test.describe('Response headers: the nginx security headers reach the browser', () => {
+  // Exact values, not mere presence: `X-Frame-Options: ALLOWALL` and a
+  // `max-age=0` HSTS are both "present" while defending nothing.
+  const EXPECTED: Record<string, string> = {
+    'x-frame-options': 'DENY',
+    'x-content-type-options': 'nosniff',
+    'referrer-policy': 'strict-origin-when-cross-origin',
+    'strict-transport-security': 'max-age=63072000; includeSubDomains',
+    'permissions-policy': 'camera=(), microphone=(), geolocation=(), payment=()',
+  };
+
+  // Asserted as substrings rather than one whole-string compare so the
+  // per-request nonce in style-src does not have to be reconstructed here, and
+  // so a failure names the directive that went missing instead of diffing a
+  // 300-character line.
+  const CSP_DIRECTIVES = [
+    "default-src 'self'",
+    "script-src 'self'",
+    "img-src 'self' data: https:",
+    "font-src 'self' data:",
+    "connect-src 'self'",
+    "frame-ancestors 'none'",
+    "base-uri 'self'",
+    "form-action 'self'",
+  ];
+
+  // Two paths, deliberately at the two different nginx levels.
+  //
+  // /terraform/ is the one that matters most. nginx's add_header is
+  // REPLACE-BY-LEVEL, not additive: a location that declares any add_header of
+  // its own inherits none from the server block. /terraform/ declares
+  // `add_header Content-Type`, so it drops all six unless they are re-declared
+  // there -- and it is the one same-origin path serving content the operator did
+  // not author (provider metadata proxied from third-party registries).
+  //
+  // Verified against real nginx before this test was written: deleting the six
+  // re-declarations from the /terraform/ block takes that path from six security
+  // headers to ZERO while / still reports six. A test that only checked / would
+  // have stayed green through exactly that regression.
+  const PATHS: [string, string][] = [
+    ['/', 'the SPA document (server level)'],
+    ['/terraform/example.com/hashicorp/aws/index.json', 'the network-mirror proxy (location level)'],
+  ];
+
+  for (const [path, what] of PATHS) {
+    test(`sends every security header on ${what}`, async ({ request }) => {
+      // No status assertion: these are declared `always`, so they must ship on
+      // error responses too. Pinning a status here would make the test depend on
+      // upstream seed data rather than on the header policy.
+      const res = await request.get(path);
+      const headers = res.headers();
+
+      for (const [name, value] of Object.entries(EXPECTED)) {
+        expect(headers[name], `${name} missing or wrong on ${path} (status ${res.status()})`).toBe(
+          value,
+        );
+      }
+
+      const csp = headers['content-security-policy'];
+      expect(csp, `Content-Security-Policy missing on ${path}`).toBeTruthy();
+      for (const directive of CSP_DIRECTIVES) {
+        expect(csp, `CSP on ${path} lost "${directive}"`).toContain(directive);
+      }
+    });
+  }
+
+  // The nonce the header authorises must be the nonce the document carries.
+  //
+  // If they diverge, the browser blocks every style Emotion/MUI injects and the
+  // app renders unstyled -- a real, user-visible break that no unit test sees.
+  // Both values are read from a SINGLE response on purpose: the nonce derives
+  // from $request_id, so two separate requests legitimately carry different
+  // nonces and comparing across them would be flaky by construction.
+  //
+  // Verified to catch the sub_filter rewrite being dropped (the document then
+  // keeps the literal __CSP_NONCE__ placeholder while the header carries a real
+  // nonce). It does NOT distinguish the `map` form from a plain
+  // `set $csp_nonce $request_id` -- checked directly against nginx, both agree
+  // on current nginx -- so this guards nonce delivery, not that particular
+  // config idiom.
+  test('CSP style-src nonce matches the nonce in the served document', async ({ request }) => {
+    const res = await request.get('/');
+    const csp = res.headers()['content-security-policy'] ?? '';
+    const body = await res.text();
+
+    const headerNonce = /style-src[^;]*'nonce-([^']+)'/.exec(csp)?.[1];
+    expect(headerNonce, `no style-src nonce in CSP: ${csp}`).toBeTruthy();
+
+    const metaNonce = /<meta[^>]+name="csp-nonce"[^>]+content="([^"]*)"/.exec(body)?.[1];
+    expect(metaNonce, 'no <meta name="csp-nonce"> in the served document').toBeTruthy();
+
+    // Called out separately: an unsubstituted placeholder is the specific
+    // symptom of the sub_filter rewrite failing, and reads far better in CI than
+    // "expected 'abc123' to be '__CSP_NONCE__'".
+    expect(metaNonce, 'the __CSP_NONCE__ placeholder was never substituted by nginx').not.toBe(
+      '__CSP_NONCE__',
+    );
+    expect(metaNonce).toBe(headerNonce);
+  });
+});
