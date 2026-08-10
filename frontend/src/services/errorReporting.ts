@@ -125,8 +125,38 @@ export function flush(): void {
 
 /**
  * Initialise error reporting. Call once at app startup.
+ *
+ * Only TelemetryGate calls this, and only once the user has opted in, so
+ * reaching this function IS the consent transition. Anything already buffered
+ * was therefore captured while telemetry was switched off, and is discarded
+ * rather than shipped (#689).
+ *
+ * captureError() is called unconditionally across the app -- by getErrorMessage()
+ * on every handled error, by the unhandledrejection listener, and by
+ * ErrorBoundary -- so without this the first flush after opt-in would transmit
+ * up to MAX_BATCH_SIZE entries, plus their breadcrumb trail of visited URLs,
+ * that were collected before consent existed. PRIVACY.md section 3.3 states
+ * telemetry is opt-in only; shipping data captured before the opt-in does not
+ * honour that, whoever pressed the button afterwards.
+ *
+ * Breadcrumbs are dropped for the same reason: they are user-activity data and
+ * they ride along with the next error report.
+ *
+ * The cost is bounded and deliberate. On a page load where consent was already
+ * stored, errors captured between module load and TelemetryGate's effect are
+ * lost rather than sent. Distinguishing those from genuinely pre-consent
+ * entries would mean reading the consent record here, duplicating a storage
+ * contract owned by @sethbacon/terraform-suite-ui -- not worth a cross-repo
+ * coupling to recover a few milliseconds of startup errors, and the safe
+ * direction to err in is dropping.
+ *
+ * destroy() already clears the same state, so withdrawal was handled; only the
+ * grant transition leaked.
  */
 export function init(): void {
+  errorBuffer.length = 0
+  breadcrumbs.length = 0
+
   sessionId = generateSessionId()
 
   const sentryDsn = import.meta.env.VITE_SENTRY_DSN

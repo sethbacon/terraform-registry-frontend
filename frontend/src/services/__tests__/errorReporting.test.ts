@@ -334,4 +334,76 @@ describe('errorReporting', () => {
       mod.destroy()
     })
   })
+
+  // ─── #689: nothing captured before opt-in may be transmitted after it ──────
+  //
+  // TelemetryGate is the only caller of init(), and it calls it only once the
+  // user has opted in — so reaching init() IS the consent transition. captureError
+  // runs unconditionally app-wide, so before this fix the first flush after opt-in
+  // shipped everything buffered while telemetry was switched off.
+  //
+  // Every test here stubs a real DSN. Without that, flush() early-returns on
+  // `!dsn` and "fetch was not called" would be true no matter what the buffer
+  // held — the assertion would pass against completely unfixed code.
+  describe('pre-consent buffering (#689)', () => {
+    const DSN = 'https://errors.example.com/report'
+
+    it('discards errors captured before init() instead of shipping them', async () => {
+      vi.stubEnv('VITE_ERROR_REPORTING_DSN', DSN)
+      vi.stubEnv('VITE_SENTRY_DSN', '')
+
+      const mod = await import('../errorReporting')
+      // Captured while telemetry is off — the user has not opted in yet.
+      mod.captureError(new Error('pre-consent secret'))
+      mod.captureError(new Error('another pre-consent one'))
+
+      // The user now opts in.
+      mod.init()
+      mod.flush()
+
+      expect(globalThis.fetch).not.toHaveBeenCalled()
+      mod.destroy()
+    })
+
+    it('still reports errors captured after init()', async () => {
+      // The control. Without it, deleting the whole reporting path would satisfy
+      // the test above, and this suite would be certifying a broken module.
+      vi.stubEnv('VITE_ERROR_REPORTING_DSN', DSN)
+      vi.stubEnv('VITE_SENTRY_DSN', '')
+
+      const mod = await import('../errorReporting')
+      mod.captureError(new Error('pre-consent secret'))
+      mod.init()
+      mod.captureError(new Error('post-consent error'))
+      mod.flush()
+
+      expect(globalThis.fetch).toHaveBeenCalledTimes(1)
+      const body = JSON.parse((globalThis.fetch as ReturnType<typeof vi.fn>).mock.calls[0][1].body)
+      expect(body.entries).toHaveLength(1)
+      expect(JSON.stringify(body.entries)).toContain('post-consent error')
+      // And the pre-consent one did not ride along in the same batch.
+      expect(JSON.stringify(body.entries)).not.toContain('pre-consent secret')
+      mod.destroy()
+    })
+
+    it('does not attach breadcrumbs collected before init() to a later error', async () => {
+      // Breadcrumbs are user-activity data (visited URLs, API calls) and they ride
+      // along inside the next error report, so clearing the error buffer alone
+      // would still transmit pre-consent history.
+      vi.stubEnv('VITE_ERROR_REPORTING_DSN', DSN)
+      vi.stubEnv('VITE_SENTRY_DSN', '')
+
+      const mod = await import('../errorReporting')
+      mod.addNavigationBreadcrumb('/secret-page', '/another-secret-page')
+
+      mod.init()
+      mod.captureError(new Error('post-consent error'))
+      mod.flush()
+
+      const body = JSON.parse((globalThis.fetch as ReturnType<typeof vi.fn>).mock.calls[0][1].body)
+      expect(body.entries[0].breadcrumbs).toHaveLength(0)
+      expect(JSON.stringify(body.entries)).not.toContain('secret-page')
+      mod.destroy()
+    })
+  })
 })
