@@ -30,6 +30,36 @@ describe('MarkdownRenderer', () => {
     expect(screen.getByText('Heading 2')).toBeInTheDocument()
   })
 
+  // Issue #681. react-markdown runs with passNode: true, so it hands each custom
+  // component the underlying hast node. The heading overrides used to spread it
+  // straight onto the DOM element, producing `<h2 node="[object Object]">` on
+  // every heading of every README. React 19 stopped warning about unknown props,
+  // so nothing surfaced it.
+  //
+  // Verified against react-markdown 10 that this fails without the fix: with the
+  // node prop spread, `# Hello *world*` renders
+  // `<h2 node="[object Object]">Hello <em>world</em></h2>`.
+  //
+  // Asserted across all six levels because the overrides are six separate
+  // closures -- fixing h1 and missing h4 is exactly the kind of partial fix a
+  // single-heading test would certify as done.
+  it('does not leak react-markdown internals onto heading elements', () => {
+    const { container } = renderWithTheme(
+      <MarkdownRenderer>
+        {'# One\n## Two\n### Three\n#### Four\n##### Five\n###### Six'}
+      </MarkdownRenderer>,
+    )
+
+    const headings = container.querySelectorAll('h1, h2, h3, h4, h5, h6')
+    expect(headings).toHaveLength(6)
+    for (const heading of headings) {
+      expect(
+        heading.getAttribute('node'),
+        `<${heading.tagName.toLowerCase()}> carries a node attribute: ${heading.outerHTML}`,
+      ).toBeNull()
+    }
+  })
+
   it('renders inline code', () => {
     renderWithTheme(<MarkdownRenderer>{'Use `terraform init` to start'}</MarkdownRenderer>)
 

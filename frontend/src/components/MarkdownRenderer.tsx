@@ -14,14 +14,23 @@ interface MarkdownRendererProps {
  * Custom heading components that shift markdown headings down by one level
  * (h1 -> h2, h2 -> h3, h3 -> h4) so the page <h1> remains the top-level
  * heading and markdown content maintains proper heading hierarchy.
+ *
+ * `node` is destructured out and discarded on purpose. react-markdown runs with
+ * `passNode: true`, so it hands each custom component the underlying hast node;
+ * spreading it onto a real DOM element renders
+ * `<h2 node="[object Object]">` on every heading in every README. React 19 no
+ * longer warns about unknown props, so it ships silently. Verified against
+ * react-markdown 10 -- `# Hello *world*` produces
+ * `<h2 node="[object Object]">Hello <em>world</em></h2>` with the spread and a
+ * clean `<h2>` without it.
  */
 const markdownComponents: Partial<Components> = {
-  h1: ({ children, ...props }) => <h2 {...props}>{children}</h2>,
-  h2: ({ children, ...props }) => <h3 {...props}>{children}</h3>,
-  h3: ({ children, ...props }) => <h4 {...props}>{children}</h4>,
-  h4: ({ children, ...props }) => <h5 {...props}>{children}</h5>,
-  h5: ({ children, ...props }) => <h6 {...props}>{children}</h6>,
-  h6: ({ children, ...props }) => <h6 {...props}>{children}</h6>,
+  h1: ({ children, node: _node, ...props }) => <h2 {...props}>{children}</h2>,
+  h2: ({ children, node: _node, ...props }) => <h3 {...props}>{children}</h3>,
+  h3: ({ children, node: _node, ...props }) => <h4 {...props}>{children}</h4>,
+  h4: ({ children, node: _node, ...props }) => <h5 {...props}>{children}</h5>,
+  h5: ({ children, node: _node, ...props }) => <h6 {...props}>{children}</h6>,
+  h6: ({ children, node: _node, ...props }) => <h6 {...props}>{children}</h6>,
 }
 
 const MarkdownRenderer: React.FC<MarkdownRendererProps> = ({ children }) => {
