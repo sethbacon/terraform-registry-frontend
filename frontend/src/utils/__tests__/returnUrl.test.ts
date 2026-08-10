@@ -56,12 +56,39 @@ describe('captureReturnUrl', () => {
   // this feature exists to improve -- the #679 failure shape exactly.
   it('never throws when sessionStorage is unavailable', () => {
     at('/modules')
-    const setItem = vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
-      throw new DOMException('QuotaExceededError')
+
+    // The whole sessionStorage accessor is replaced rather than spying on
+    // Storage.prototype.setItem: jsdom exposes setItem as an OWN property of the
+    // storage instance, so a prototype spy is never reached. The real setItem
+    // then runs, nothing throws, and the test passes while proving nothing --
+    // which is exactly how this first went green locally and failed in CI.
+    let attempted = false
+    const original = Object.getOwnPropertyDescriptor(window, 'sessionStorage')
+    Object.defineProperty(window, 'sessionStorage', {
+      configurable: true,
+      get: () => ({
+        getItem: () => null,
+        removeItem: () => {},
+        clear: () => {},
+        setItem: () => {
+          attempted = true
+          throw new Error('QuotaExceededError')
+        },
+      }),
     })
 
-    expect(() => captureReturnUrl()).not.toThrow()
-    expect(setItem).toHaveBeenCalled()
+    try {
+      expect(() => captureReturnUrl()).not.toThrow()
+      // Proves the throwing path was entered. Without it the assertion above
+      // also passes when captureReturnUrl returns early and never writes.
+      expect(attempted, 'captureReturnUrl never attempted a write').toBe(true)
+    } finally {
+      if (original) {
+        Object.defineProperty(window, 'sessionStorage', original)
+      } else {
+        delete (window as unknown as { sessionStorage?: unknown }).sessionStorage
+      }
+    }
   })
 
   it('overwrites a stale entry rather than keeping the older destination', () => {
