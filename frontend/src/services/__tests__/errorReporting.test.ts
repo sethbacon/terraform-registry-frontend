@@ -308,8 +308,13 @@ describe('errorReporting', () => {
       // No DSN => flush() is a no-op, so nothing drains the buffer. Without a
       // cap this grows for the lifetime of the page (captureError is wired
       // into every API error path), so assert the retained entries are
-      // bounded: capture well past MAX_BATCH_SIZE with reporting inactive,
-      // then activate a DSN and flush, and inspect what was retained.
+      // bounded.
+      //
+      // This used to observe the buffer by activating a DSN and flushing --
+      // which is precisely the pre-consent transmission #689 removed, so that
+      // route no longer exists. The memory bound it was checking is still real
+      // and still matters for users who never consent, so it is now read
+      // directly via the bufferedErrorMessages test seam.
       vi.stubEnv('VITE_ERROR_REPORTING_DSN', '')
       vi.resetModules()
       const mod = await import('../errorReporting')
@@ -318,19 +323,109 @@ describe('errorReporting', () => {
         mod.captureError(new Error(`overflow ${i}`))
       }
 
-      // Activate reporting, then drain.
+      const buffered = mod.bufferedErrorMessages()
+      // MAX_BATCH_SIZE is 10; unbounded this would be all 25.
+      expect(buffered.length).toBeLessThanOrEqual(10)
+      // Oldest are evicted first, so the newest error must survive.
+      expect(buffered).toContain('overflow 24')
+      // ...and the oldest must not, or nothing was actually evicted.
+      expect(buffered).not.toContain('overflow 0')
+
+      mod.destroy()
+    })
+
+    it('discards the bounded buffer on opt-in rather than transmitting it', async () => {
+      // The other half of the behaviour the old version of this test asserted:
+      // those retained entries were captured with reporting inactive, so
+      // granting consent must drop them, not ship them (#689).
+      vi.stubEnv('VITE_ERROR_REPORTING_DSN', '')
+      vi.resetModules()
+      const mod = await import('../errorReporting')
+
+      for (let i = 0; i < 25; i++) {
+        mod.captureError(new Error(`overflow ${i}`))
+      }
+      expect(mod.bufferedErrorMessages().length).toBeGreaterThan(0)
+
       vi.stubEnv('VITE_ERROR_REPORTING_DSN', 'https://errors.example.com/report')
+      mod.init()
+
+      expect(mod.bufferedErrorMessages()).toEqual([])
+      mod.flush()
+      expect(globalThis.fetch).not.toHaveBeenCalled()
+
+      mod.destroy()
+    })
+  })
+
+  // ─── #689: nothing captured before opt-in may be transmitted after it ──────
+  //
+  // TelemetryGate is the only caller of init(), and it calls it only once the
+  // user has opted in — so reaching init() IS the consent transition. captureError
+  // runs unconditionally app-wide, so before this fix the first flush after opt-in
+  // shipped everything buffered while telemetry was switched off.
+  //
+  // Every test here stubs a real DSN. Without that, flush() early-returns on
+  // `!dsn` and "fetch was not called" would be true no matter what the buffer
+  // held — the assertion would pass against completely unfixed code.
+  describe('pre-consent buffering (#689)', () => {
+    const DSN = 'https://errors.example.com/report'
+
+    it('discards errors captured before init() instead of shipping them', async () => {
+      vi.stubEnv('VITE_ERROR_REPORTING_DSN', DSN)
+      vi.stubEnv('VITE_SENTRY_DSN', '')
+
+      const mod = await import('../errorReporting')
+      // Captured while telemetry is off — the user has not opted in yet.
+      mod.captureError(new Error('pre-consent secret'))
+      mod.captureError(new Error('another pre-consent one'))
+
+      // The user now opts in.
       mod.init()
       mod.flush()
 
-      expect(globalThis.fetch).toHaveBeenCalled()
-      const call = (globalThis.fetch as unknown as ReturnType<typeof vi.fn>).mock.calls[0]
-      const body = JSON.parse((call[1] as RequestInit).body as string)
-      // MAX_BATCH_SIZE is 10; pre-fix this would be all 25.
-      expect(body.entries.length).toBeLessThanOrEqual(10)
-      // Oldest are evicted first, so the newest error must survive.
-      expect(JSON.stringify(body.entries)).toContain('overflow 24')
+      expect(globalThis.fetch).not.toHaveBeenCalled()
+      mod.destroy()
+    })
 
+    it('still reports errors captured after init()', async () => {
+      // The control. Without it, deleting the whole reporting path would satisfy
+      // the test above, and this suite would be certifying a broken module.
+      vi.stubEnv('VITE_ERROR_REPORTING_DSN', DSN)
+      vi.stubEnv('VITE_SENTRY_DSN', '')
+
+      const mod = await import('../errorReporting')
+      mod.captureError(new Error('pre-consent secret'))
+      mod.init()
+      mod.captureError(new Error('post-consent error'))
+      mod.flush()
+
+      expect(globalThis.fetch).toHaveBeenCalledTimes(1)
+      const body = JSON.parse((globalThis.fetch as ReturnType<typeof vi.fn>).mock.calls[0][1].body)
+      expect(body.entries).toHaveLength(1)
+      expect(JSON.stringify(body.entries)).toContain('post-consent error')
+      // And the pre-consent one did not ride along in the same batch.
+      expect(JSON.stringify(body.entries)).not.toContain('pre-consent secret')
+      mod.destroy()
+    })
+
+    it('does not attach breadcrumbs collected before init() to a later error', async () => {
+      // Breadcrumbs are user-activity data (visited URLs, API calls) and they ride
+      // along inside the next error report, so clearing the error buffer alone
+      // would still transmit pre-consent history.
+      vi.stubEnv('VITE_ERROR_REPORTING_DSN', DSN)
+      vi.stubEnv('VITE_SENTRY_DSN', '')
+
+      const mod = await import('../errorReporting')
+      mod.addNavigationBreadcrumb('/secret-page', '/another-secret-page')
+
+      mod.init()
+      mod.captureError(new Error('post-consent error'))
+      mod.flush()
+
+      const body = JSON.parse((globalThis.fetch as ReturnType<typeof vi.fn>).mock.calls[0][1].body)
+      expect(body.entries[0].breadcrumbs).toHaveLength(0)
+      expect(JSON.stringify(body.entries)).not.toContain('secret-page')
       mod.destroy()
     })
   })

@@ -119,14 +119,57 @@ export function flush(): void {
   })
 }
 
+/**
+ * Messages currently buffered, oldest first. **Test seam only.**
+ *
+ * The buffer used to be observable by activating a DSN and flushing, which is
+ * exactly the transmission #689 removed. The MAX_BATCH_SIZE memory bound still
+ * matters for users who never consent -- captureError is wired into every API
+ * error path, so an uncapped buffer would grow for the lifetime of the page --
+ * and without this it could not be asserted at all.
+ */
+export function bufferedErrorMessages(): string[] {
+  return errorBuffer.map((entry) => entry.message)
+}
+
 // ---------------------------------------------------------------------------
 // Public API
 // ---------------------------------------------------------------------------
 
 /**
  * Initialise error reporting. Call once at app startup.
+ *
+ * Only TelemetryGate calls this, and only once the user has opted in, so
+ * reaching this function IS the consent transition. Anything already buffered
+ * was therefore captured while telemetry was switched off, and is discarded
+ * rather than shipped (#689).
+ *
+ * captureError() is called unconditionally across the app -- by getErrorMessage()
+ * on every handled error, by the unhandledrejection listener, and by
+ * ErrorBoundary -- so without this the first flush after opt-in would transmit
+ * up to MAX_BATCH_SIZE entries, plus their breadcrumb trail of visited URLs,
+ * that were collected before consent existed. PRIVACY.md section 3.3 states
+ * telemetry is opt-in only; shipping data captured before the opt-in does not
+ * honour that, whoever pressed the button afterwards.
+ *
+ * Breadcrumbs are dropped for the same reason: they are user-activity data and
+ * they ride along with the next error report.
+ *
+ * The cost is bounded and deliberate. On a page load where consent was already
+ * stored, errors captured between module load and TelemetryGate's effect are
+ * lost rather than sent. Distinguishing those from genuinely pre-consent
+ * entries would mean reading the consent record here, duplicating a storage
+ * contract owned by @sethbacon/terraform-suite-ui -- not worth a cross-repo
+ * coupling to recover a few milliseconds of startup errors, and the safe
+ * direction to err in is dropping.
+ *
+ * destroy() already clears the same state, so withdrawal was handled; only the
+ * grant transition leaked.
  */
 export function init(): void {
+  errorBuffer.length = 0
+  breadcrumbs.length = 0
+
   sessionId = generateSessionId()
 
   const sentryDsn = import.meta.env.VITE_SENTRY_DSN
@@ -235,10 +278,12 @@ function enqueueError(error: Error, context?: Record<string, unknown>): void {
   // so without this cap every captured error would accumulate for the lifetime
   // of the page for users who never consented to telemetry -- and captureError
   // is wired into every API error path, so that is a real leak, not a
-  // theoretical one. Entries are kept (rather than dropped at the door) so
-  // errors captured before init() resolves the DSN still ship once it does;
-  // capping evicts the oldest first, the same bounded-ring-buffer approach
-  // performanceReporting.ts uses.
+  // theoretical one. Capping evicts the oldest first, the same bounded
+  // ring-buffer approach performanceReporting.ts uses.
+  //
+  // This cap is now purely a memory bound. Anything buffered while reporting is
+  // inactive is discarded by init() rather than transmitted (#689), so the cap
+  // no longer decides what gets sent -- only how much is held in the meantime.
   if (errorBuffer.length > MAX_BATCH_SIZE) {
     errorBuffer.splice(0, errorBuffer.length - MAX_BATCH_SIZE)
   }
