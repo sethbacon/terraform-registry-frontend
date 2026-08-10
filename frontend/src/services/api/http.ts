@@ -18,12 +18,67 @@ const USE_MOCK_DATA = import.meta.env.VITE_USE_MOCK_DATA === 'true' && !import.m
 // connection can legitimately take longer than this.
 const DEFAULT_REQUEST_TIMEOUT_MS = 30_000
 
-/** Read a cookie value by name. Returns empty string if not found. */
+// One-shot, because getCookie runs on EVERY mutating request: a per-call log
+// would bury the first (and only useful) occurrence under thousands of repeats.
+let hasWarnedDuplicateCookie = false
+
+/** Reset the duplicate-cookie warning latch. Test seam only. */
+export function resetDuplicateCookieWarning(): void {
+  hasWarnedDuplicateCookie = false
+}
+
+/**
+ * Read a cookie value by name. Returns empty string if not found.
+ *
+ * Both hazards handled here are #679, and both matter because the two callers
+ * (the axios request interceptor below, and the Swagger one in
+ * ApiDocumentation.tsx) run on the request path:
+ *
+ * 1. `decodeURIComponent` throws `URIError` on a stray '%' that is not a valid
+ *    escape -- `tfr_csrf=ab%zz` is enough. Thrown from inside an interceptor
+ *    that rejects every mutating request with an opaque URIError rather than a
+ *    network error. The RAW value is returned on a decode failure rather than
+ *    '': the backend reads those same undecoded bytes from the Cookie header,
+ *    so echoing them back is what actually matches, whereas '' drops the
+ *    X-CSRF-Token header entirely and guarantees rejection.
+ *
+ * 2. `document.cookie` exposes no attributes, so a host-only cookie and a
+ *    Domain-scoped one set by a sibling suite app on a shared parent domain are
+ *    indistinguishable from here. First match is still what is returned --
+ *    there is genuinely no information available to choose better -- but the
+ *    collision is logged, because otherwise the symptom is every mutation
+ *    failing server-side with nothing client-side to explain why.
+ *
+ *    The durable fix for (2) is a `__Host-` prefixed CSRF cookie, whose prefix
+ *    makes a Domain-scoped duplicate impossible to set. That requires the
+ *    backend to change the cookie it issues, so it is not done here.
+ */
 export function getCookie(name: string): string {
-  const match = document.cookie.match(
-    new RegExp('(?:^|; )' + name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '=([^;]*)'),
+  const pattern = new RegExp(
+    '(?:^|; )' + name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '=([^;]*)',
+    'g',
   )
-  return match ? decodeURIComponent(match[1]) : ''
+  const matches = Array.from(document.cookie.matchAll(pattern))
+  if (matches.length === 0) return ''
+
+  if (matches.length > 1 && !hasWarnedDuplicateCookie) {
+    hasWarnedDuplicateCookie = true
+    console.error(
+      `[auth] ${matches.length} cookies named "${name}" are visible to this page. ` +
+        'document.cookie hides their Domain/Path, so the wrong one may be echoed while the ' +
+        'server reads another -- which presents as every mutating request failing CSRF ' +
+        'validation. A sibling app on a shared parent domain is the usual cause.',
+    )
+  }
+
+  const raw = matches[0][1]
+  try {
+    return decodeURIComponent(raw)
+  } catch {
+    // Malformed percent-encoding. Returning raw keeps the request survivable;
+    // see (1) above for why '' would be strictly worse.
+    return raw
+  }
 }
 
 /**

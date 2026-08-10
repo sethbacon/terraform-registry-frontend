@@ -298,6 +298,104 @@ describe('ApiClient', () => {
       const result = capturedReqFulfilled(config)
       expect(result.headers['X-CSRF-Token']).toBe('token/with+special=chars')
     })
+
+    // ─── #679: getCookie must not be able to break the request path ────────
+
+    it('does not throw in the interceptor when tfr_csrf is malformed', async () => {
+      // decodeURIComponent('ab%zz') throws URIError -- '%zz' is not a valid
+      // escape. getCookie runs INSIDE the request interceptor, so an uncaught
+      // throw rejects every mutating request with an opaque URIError instead of
+      // a network error, which is a silent write outage that looks like nothing.
+      //
+      // The getter is stubbed rather than the value assigned through
+      // document.cookie: what matters is that a malformed value REACHES
+      // getCookie, and routing it through jsdom's cookie jar would make this
+      // test depend on tough-cookie's validation rules instead of on the
+      // behaviour under test.
+      Object.defineProperty(document, 'cookie', {
+        configurable: true,
+        get: () => 'tfr_csrf=ab%zz',
+      })
+      await getApiClient()
+
+      const config = {
+        method: 'post',
+        headers: {} as Record<string, string>,
+      } as InternalAxiosRequestConfig
+
+      try {
+        expect(() => capturedReqFulfilled(config)).not.toThrow()
+
+        // And the raw bytes are what get echoed. The backend reads the same
+        // undecoded value from the Cookie header, so this is the value that
+        // actually matches; returning '' would drop the X-CSRF-Token header
+        // entirely and turn a survivable request into a guaranteed rejection.
+        expect(capturedReqFulfilled(config).headers['X-CSRF-Token']).toBe('ab%zz')
+      } finally {
+        delete (document as unknown as { cookie?: unknown }).cookie
+      }
+    })
+
+    it('warns once, not per request, when two tfr_csrf cookies are visible', async () => {
+      const { getCookie, resetDuplicateCookieWarning } = await import('../api/http')
+      resetDuplicateCookieWarning()
+
+      // jsdom's cookie jar keys on name+path+domain, so the setter cannot
+      // produce a genuine shadowing pair. The browser can: a host-only cookie
+      // plus a Domain-scoped one set by a sibling suite app on a shared parent
+      // domain. document.cookie renders them indistinguishably, which is the
+      // whole problem -- so stub the getter to emit what a browser would.
+      Object.defineProperty(document, 'cookie', {
+        configurable: true,
+        get: () => 'tfr_csrf=host-only; other=x; tfr_csrf=domain-scoped',
+      })
+      const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {})
+
+      try {
+        // First match wins. There is no attribute information available to
+        // choose better; the point is that the ambiguity is reported, not that
+        // it is resolved.
+        expect(getCookie('tfr_csrf')).toBe('host-only')
+        expect(getCookie('tfr_csrf')).toBe('host-only')
+        expect(getCookie('tfr_csrf')).toBe('host-only')
+
+        const warnings = consoleError.mock.calls
+          .map((c) => String(c[0] ?? ''))
+          .filter((m) => m.includes('cookies named'))
+        // Exactly one across three reads: this runs on every mutating request,
+        // and a per-call log would bury the first occurrence under thousands.
+        expect(warnings).toHaveLength(1)
+        expect(warnings[0]).toContain('tfr_csrf')
+      } finally {
+        delete (document as unknown as { cookie?: unknown }).cookie
+        resetDuplicateCookieWarning()
+      }
+    })
+
+    it('does not warn when only one tfr_csrf cookie is present', async () => {
+      // The control half. Without it the warning could fire on every ordinary
+      // single-cookie request and the test above would still pass.
+      const { getCookie, resetDuplicateCookieWarning } = await import('../api/http')
+      resetDuplicateCookieWarning()
+
+      Object.defineProperty(document, 'cookie', {
+        configurable: true,
+        get: () => 'other=x; tfr_csrf=only-one; another=y',
+      })
+      const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {})
+
+      try {
+        expect(getCookie('tfr_csrf')).toBe('only-one')
+        expect(
+          consoleError.mock.calls
+            .map((c) => String(c[0] ?? ''))
+            .filter((m) => m.includes('cookies named')),
+        ).toHaveLength(0)
+      } finally {
+        delete (document as unknown as { cookie?: unknown }).cookie
+        resetDuplicateCookieWarning()
+      }
+    })
   })
 
   // ─── 401 Interceptor ──────────────────────────────────────────────────
