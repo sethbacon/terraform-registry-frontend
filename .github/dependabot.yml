@@ -1,11 +1,25 @@
 version: 2
 
+# Dependabot resolves the frontend dependency tree, which includes the private
+# @sethbacon/* package hosted on GitHub Packages. The repository Dependabot
+# secret SUITE_READ_TOKEN (a token with read:packages) lets the npm updater
+# resolve it; the private package itself is excluded from automated version
+# updates below (it is released and pinned in lockstep with the suite, out of
+# band).
+registries:
+  npm-github-packages:
+    type: npm-registry
+    url: https://npm.pkg.github.com
+    token: ${{secrets.SUITE_READ_TOKEN}}
+
 updates:
   # ---------------------------------------------------------------------------
   # npm (frontend/)
   # ---------------------------------------------------------------------------
   - package-ecosystem: npm
     directory: /frontend
+    registries:
+      - npm-github-packages
     schedule:
       interval: weekly
       day: monday
@@ -23,21 +37,24 @@ updates:
         patterns:
           - "*"
     ignore:
+      # Private, released and version-pinned in lockstep with the suite; not
+      # auto-bumped here (resolved via the registry above only).
+      - dependency-name: "@sethbacon/*"
       # Major React/MUI bumps require manual migration work.
       - dependency-name: "react"
-        update-types: [ "version-update:semver-major" ]
+        update-types: ["version-update:semver-major"]
       - dependency-name: "react-dom"
-        update-types: [ "version-update:semver-major" ]
+        update-types: ["version-update:semver-major"]
       - dependency-name: "@mui/material"
-        update-types: [ "version-update:semver-major" ]
+        update-types: ["version-update:semver-major"]
       - dependency-name: "@mui/icons-material"
-        update-types: [ "version-update:semver-major" ]
+        update-types: ["version-update:semver-major"]
       # Major TypeScript bumps break the toolchain before app code: tsup's
       # bundled rollup-plugin-dts and @typescript-eslint/typescript-estree
       # both crash against TS7's changed internals (2026-07-13 incident).
       # Revisit once both ship TS7-compatible releases.
       - dependency-name: "typescript"
-        update-types: [ "version-update:semver-major" ]
+        update-types: ["version-update:semver-major"]
     cooldown:
       default-days: 7
 
