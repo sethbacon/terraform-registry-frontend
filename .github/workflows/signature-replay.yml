@@ -162,7 +162,11 @@ jobs:
       # rather than cosmetic: an app token is minted per INSTALLATION, and this
       # file also runs from a repo in another org, where the default -- the
       # running repo's owner -- would mint a token that cannot see this repo at
-      # all. `repositories:` narrows it to the single repo it is spent on.
+      # all. `repositories:` narrows the token to the single repo it is spent on,
+      # and `permission-contents: read` narrows what it may do there -- without
+      # that, the token inherits every permission the app installation holds
+      # (zizmor's `github-app-token` audit), so a read-only intention silently
+      # becomes write-capable the day the app is widened.
       - uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
         id: suite-read
         with:
@@ -170,6 +174,7 @@ jobs:
           private-key: "${{ secrets.SUITE_READ_APP_KEY }}"
           owner: sethbacon
           repositories: security-orchestration
+          permission-contents: read
 
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
