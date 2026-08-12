@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { queryKeys } from '../../services/queryKeys'
 import PageHeader from '../../components/PageHeader'
 import StatusAlerts from '../../components/StatusAlerts'
@@ -45,6 +45,7 @@ import MirrorConfigCard from './terraformMirror/MirrorConfigCard'
 import MirrorVersionRow from './terraformMirror/MirrorVersionRow'
 import CreateMirrorDialog, { useCreateMirrorFlow } from './terraformMirror/CreateMirrorDialog'
 import EditMirrorDialog, { useEditMirrorFlow } from './terraformMirror/EditMirrorDialog'
+import DeleteMirrorDialog, { useDeleteMirrorFlow } from './terraformMirror/DeleteMirrorDialog'
 
 // ---------------------------------------------------------------------------
 // Main page
@@ -66,8 +67,7 @@ const TerraformMirrorPage: React.FC = () => {
   const create = useCreateMirrorFlow(status)
 
   const edit = useEditMirrorFlow(status)
-  // ---- delete dialog ----
-  const [deleteConfig, setDeleteConfig] = useState<TerraformMirrorConfig | null>(null)
+  const deleteMirror = useDeleteMirrorFlow(status)
 
   // ---- versions dialog ----
   const [versionsConfig, setVersionsConfig] = useState<TerraformMirrorConfig | null>(null)
@@ -117,29 +117,6 @@ const TerraformMirrorPage: React.FC = () => {
       }
     })
   }, [configs])
-
-  // ---------------------------------------------------------------------------
-  // Delete
-  // ---------------------------------------------------------------------------
-  const deleteMutation = useMutation({
-    mutationFn: async () => {
-      if (!deleteConfig) throw new Error('No config to delete')
-      await api.deleteTerraformMirrorConfig(deleteConfig.id)
-    },
-    onSuccess: () => {
-      status.setSuccess(t('admin.terraformMirror.msgDeleted', { name: deleteConfig?.name }))
-      setDeleteConfig(null)
-      queryClient.invalidateQueries({ queryKey: queryKeys.terraformMirrors._def })
-    },
-    onError: (err: unknown) => {
-      status.setError(getErrorMessage(err, t('admin.terraformMirror.errDelete')))
-    },
-  })
-
-  const handleDelete = () => {
-    if (!deleteConfig) return
-    deleteMutation.mutate()
-  }
 
   // ---------------------------------------------------------------------------
   // Sync
@@ -289,7 +266,7 @@ const TerraformMirrorPage: React.FC = () => {
                       config={cfg}
                       status={status}
                       onEdit={edit.openDialog}
-                      onDelete={setDeleteConfig}
+                      onDelete={deleteMirror.openDialog}
                       onSync={handleSync}
                       onViewVersions={openVersions}
                       onViewHistory={openHistory}
@@ -306,31 +283,7 @@ const TerraformMirrorPage: React.FC = () => {
 
           <EditMirrorDialog flow={edit} />
 
-          {/* ==================================================================
-          Delete Config Dialog
-      ================================================================== */}
-          <Dialog open={!!deleteConfig} onClose={() => setDeleteConfig(null)}>
-            <DialogTitle>{t('admin.terraformMirror.deleteConfigTitle')}</DialogTitle>
-            <DialogContent>
-              <Typography>
-                {t('admin.terraformMirror.deleteConfigTextBefore')}
-                <strong>{deleteConfig?.name}</strong>
-                {t('admin.terraformMirror.deleteConfigTextAfter')}
-              </Typography>
-            </DialogContent>
-            <DialogActions>
-              <Button onClick={() => setDeleteConfig(null)}>
-                {t('admin.terraformMirror.cancel')}
-              </Button>
-              <Button color="error" onClick={handleDelete} disabled={deleteMutation.isPending}>
-                {deleteMutation.isPending ? (
-                  <CircularProgress size={18} />
-                ) : (
-                  t('admin.terraformMirror.delete')
-                )}
-              </Button>
-            </DialogActions>
-          </Dialog>
+          <DeleteMirrorDialog flow={deleteMirror} />
 
           {/* ==================================================================
           Versions Dialog
