@@ -1,25 +1,15 @@
 version: 2
 
-# Dependabot resolves the frontend dependency tree, which includes the private
-# @sethbacon/* package hosted on GitHub Packages. The repository Dependabot
-# secret SUITE_READ_TOKEN (a token with read:packages) lets the npm updater
-# resolve it; the private package itself is excluded from automated version
-# updates below (it is released and pinned in lockstep with the suite, out of
-# band).
-registries:
-  npm-github-packages:
-    type: npm-registry
-    url: https://npm.pkg.github.com
-    token: ${{secrets.SUITE_READ_TOKEN}}
-
+# The shared suite UI package is public on npmjs, so the frontend tree needs no
+# registry credentials. The package itself is still excluded from automated
+# version updates below: it is released and pinned in lockstep with the suite,
+# out of band.
 updates:
   # ---------------------------------------------------------------------------
   # npm (frontend/)
   # ---------------------------------------------------------------------------
   - package-ecosystem: npm
     directory: /frontend
-    registries:
-      - npm-github-packages
     schedule:
       interval: weekly
       day: monday
@@ -39,7 +29,7 @@ updates:
     ignore:
       # Private, released and version-pinned in lockstep with the suite; not
       # auto-bumped here (resolved via the registry above only).
-      - dependency-name: "@sethbacon/*"
+      - dependency-name: "@4cloudguru/*"
       # Major React/MUI bumps require manual migration work.
       - dependency-name: "react"
         update-types: ["version-update:semver-major"]
