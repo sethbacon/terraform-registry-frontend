@@ -291,44 +291,38 @@ test.describe('Response headers: the nginx security headers reach the browser', 
   // re-declarations from the /terraform/ block takes that path from six security
   // headers to ZERO while / still reports six. A test that only checked / would
   // have stayed green through exactly that regression.
-  const PATHS: [string, string, boolean][] = [
-    ['/', 'the SPA document (server level)', false],
+  // The second entry is the proxied one. That distinction used to select a weaker
+  // assertion; since #743 both are asserted identically, so it survives only as
+  // the reason these two paths in particular are covered.
+  const PATHS: [string, string][] = [
+    ['/', 'the SPA document (server level)'],
     [
       '/terraform/example.com/hashicorp/aws/index.json',
       'the network-mirror proxy (location level)',
-      true,
     ],
   ];
 
-  // On PROXIED paths both nginx and the backend emit these: the Go service runs
-  // its own SecurityHeaders middleware, and nginx adds the same names on top, so
-  // the delivered header carries BOTH. Two shapes are observed in CI:
+  // Every path now asserts EXACT equality, including the proxied one.
   //
-  //   x-frame-options:  "DENY, DENY"                                (agreeing)
+  // It did not used to. Both nginx and the backend emit these headers, so a
+  // proxied response carried BOTH sets and the browser saw, on the wire:
+  //
+  //   x-frame-options:  "DENY, DENY"                                    (agreeing)
   //   referrer-policy:  "no-referrer, strict-origin-when-cross-origin"  (conflicting)
   //
-  // The second is a real defect -- the backend's APISecurityHeadersConfig sends
-  // the stricter `no-referrer` for API responses and nginx appends the looser
-  // value, and Referrer-Policy resolution takes the LAST value the agent
-  // understands, so nginx silently overrides the backend's stricter intent. It
-  // is reported separately. Gating #691 behind that fix would be wrong, so the
-  // proxied path asserts the strongest thing it can while the duplication
-  // stands: that OUR value is present as a whole comma-separated element.
+  // The second was a real defect: the backend deliberately sends the stricter
+  // `no-referrer` for API responses, and Referrer-Policy resolution takes the
+  // LAST value understood, so nginx's looser value silently won. While that
+  // stood, this test could only assert that OUR value appeared as one
+  // comma-separated element -- weaker, but the strongest thing available without
+  // gating an unrelated fix on it.
   //
-  // Membership is matched with an anchored `(^|, )value(, |$)` rather than by
-  // splitting on ',' -- Permissions-Policy's own value contains commas
-  // ("camera=(), microphone=()..."), so a naive split would shred it. It is also
-  // why plain substring matching is not used: "DENY" must not be satisfied by
-  // "DENYX".
-  //
-  // The non-proxied path keeps EXACT equality: nothing else emits there, so
-  // there is no reason to accept less.
-  const hasValueAsElement = (received: string, expected: string): boolean => {
-    const lit = expected.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    return new RegExp(`(^|, )${lit}(, |$)`).test(received);
-  };
+  // #743 made nginx the single authority on proxied paths via proxy_hide_header,
+  // so the tolerance is no longer needed and is removed rather than left behind.
+  // Leaving it would mean this test keeps passing if the duplication ever returns
+  // -- which is exactly the regression it should now catch.
 
-  for (const [path, what, proxied] of PATHS) {
+  for (const [path, what] of PATHS) {
     test(`sends every security header on ${what}`, async ({ request }) => {
       // No status assertion: these are declared `always`, so they must ship on
       // error responses too. Pinning a status here would make the test depend on
@@ -339,14 +333,10 @@ test.describe('Response headers: the nginx security headers reach the browser', 
       for (const [name, value] of Object.entries(EXPECTED)) {
         const received = headers[name] ?? '';
         const where = `${name} on ${path} (status ${res.status()}, raw: ${JSON.stringify(headers[name])})`;
-        if (proxied) {
-          // Still catches the regression this test exists for: strip the
-          // re-declarations from the /terraform/ block and the header is absent
-          // entirely, so nothing is present as an element.
-          expect(hasValueAsElement(received, value), `${where} does not carry our value`).toBe(true);
-        } else {
-          expect(received, `${where} missing or wrong`).toBe(value);
-        }
+        // Exact, not membership: a duplicated header now FAILS here, which is the
+        // point. It also still catches the original regression -- strip the
+        // re-declarations from the /terraform/ block and the header is absent.
+        expect(received, `${where} missing, wrong, or duplicated`).toBe(value);
       }
 
       const csp = headers['content-security-policy'];

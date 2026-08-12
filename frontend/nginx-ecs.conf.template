@@ -41,6 +41,28 @@ server {
     root /usr/share/nginx/html;
     index index.html;
 
+    # Drop the backend's own copies of the six security headers before adding ours
+    # below (#743). The backend runs SecurityHeadersMiddleware on every response, so
+    # without this a proxied path returns BOTH sets and the browser sees e.g.
+    # `x-frame-options: DENY, DENY` and
+    # `referrer-policy: no-referrer, strict-origin-when-cross-origin` — where the
+    # backend's deliberately stricter API value is overridden by nginx's looser one,
+    # because Referrer-Policy resolution takes the last value understood.
+    #
+    # This template matters MORE than nginx.conf here, not less: on ECS the ALB
+    # routes /api/* straight to the backend target group, so the backend's own
+    # headers are the only ones on those requests and must stay. This hides them only
+    # on requests that actually pass through nginx, where nginx is the outer hop.
+    #
+    # Declared once at server level; proxy_hide_header inherits into every location
+    # that does not declare its own, and none below do.
+    proxy_hide_header X-Frame-Options;
+    proxy_hide_header X-Content-Type-Options;
+    proxy_hide_header Referrer-Policy;
+    proxy_hide_header Strict-Transport-Security;
+    proxy_hide_header Content-Security-Policy;
+    proxy_hide_header Permissions-Policy;
+
     # ${BACKEND_URL} is https on Cloud Run / ACA — send SNI on proxied TLS.
     proxy_ssl_server_name on;
 
