@@ -78,12 +78,6 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      # setup-frontend's default `npm ci` in frontend/ authenticates to
-      # npm.pkg.github.com (frontend/.npmrc) with github.token to resolve
-      # @4cloudguru/cloud-suite-ui. A job-level `permissions:` block
-      # zeroes out unlisted scopes, so packages:read must be explicit here
-      # (#598) -- matches ci.yml's workflow-level grant for the same reason.
-      packages: read
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -112,7 +106,6 @@ jobs:
           (cd e2e && npm audit --json > "$RUNNER_TEMP/e2e-audit.json") || true
           node frontend/scripts/audit-gate.mjs "$RUNNER_TEMP/e2e-audit.json" \
             --exceptions frontend/scripts/npm-audit-exceptions.json
-
 
   # ── Breaking-change declarations survive the squash ────
   # This repository squash-merges with

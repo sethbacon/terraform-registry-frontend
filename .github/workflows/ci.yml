@@ -20,8 +20,7 @@ permissions:
   # because the repository is public and a public clone needs no credential. The
   # declared set now matches the access the workflow actually exercises.
   contents: read
-  # npm ci in frontend/ resolves @4cloudguru/cloud-suite-ui from
-  # npm.pkg.github.com.
+  # The contract-check jobs pull the backend image from ghcr.io.
   packages: read
 
 jobs:
