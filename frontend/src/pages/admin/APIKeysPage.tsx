@@ -42,12 +42,14 @@ import { ApiKeyExpirySettingsCard, type ApiKeyExpirySettingsInput } from '@4clou
 import EmptyState from '../../components/EmptyState'
 import Page from '../../components/Page'
 import PageHeader from '../../components/PageHeader'
+import StatusAlerts from '../../components/StatusAlerts'
 import PageTitleIcon from '@mui/icons-material/Key'
 import CopyIcon from '@mui/icons-material/ContentCopy'
 import InfoIcon from '@mui/icons-material/Info'
 import EditIcon from '@mui/icons-material/Edit'
 import AutorenewIcon from '@mui/icons-material/Autorenew'
 import api from '../../services/api'
+import { useStatusMessage } from '../../hooks/useStatusMessage'
 import { APIKey } from '../../types'
 import type { NotificationsConfigInput } from '../../types'
 import { REGISTRY_HOST } from '../../config'
@@ -94,7 +96,7 @@ const APIKeysPage: React.FC = () => {
   // otherwise see fully actionable buttons that only fail once clicked,
   // relying entirely on the server to say no.
   const canManage = isAdmin || allowedScopes.includes('api_keys:manage')
-  const [error, setError] = useState<string | null>(null)
+  const status = useStatusMessage()
 
   // API-key-expiry notification settings (admin-only). Shares the notifications
   // config query/endpoint with admin/NotificationsPage -- saving here reads the
@@ -140,8 +142,8 @@ const APIKeysPage: React.FC = () => {
   })
 
   useEffect(() => {
-    if (queryError && !error) {
-      setError(t('admin.apiKeys.errLoad'))
+    if (queryError && !status.error) {
+      status.setError(t('admin.apiKeys.errLoad'))
     }
   }, [queryError]) // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -204,7 +206,7 @@ const APIKeysPage: React.FC = () => {
       scopes: defaultScopes,
       expires_at: '',
     })
-    setError(null)
+    status.setError(null)
     setOpenDialog(true)
   }
 
@@ -214,11 +216,11 @@ const APIKeysPage: React.FC = () => {
 
   const handleCreateAPIKey = async () => {
     try {
-      setError(null)
+      status.setError(null)
       const orgId =
         formData.organization_id || (memberships.length > 0 ? memberships[0].organization_id : '')
       if (!orgId) {
-        setError(t('admin.apiKeys.errNoOrg'))
+        status.setError(t('admin.apiKeys.errNoOrg'))
         return
       }
       const response = await api.createAPIKey({
@@ -232,7 +234,7 @@ const APIKeysPage: React.FC = () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.apiKeys._def })
     } catch (err: unknown) {
       console.error('Failed to create API key:', err)
-      setError(getErrorMessage(err, t('admin.apiKeys.errCreate')))
+      status.setError(getErrorMessage(err, t('admin.apiKeys.errCreate')))
     }
   }
 
@@ -245,7 +247,7 @@ const APIKeysPage: React.FC = () => {
       scopes: key.scopes || [],
       expires_at: toDatetimeLocalValue(key.expires_at),
     })
-    setError(null)
+    status.setError(null)
     setEditDialogOpen(true)
   }
 
@@ -261,7 +263,7 @@ const APIKeysPage: React.FC = () => {
   const handleEditSave = async () => {
     if (!keyToEdit) return
     try {
-      setError(null)
+      status.setError(null)
       await api.updateAPIKey(keyToEdit.id, {
         name: editFormData.name,
         scopes: editFormData.scopes,
@@ -274,7 +276,7 @@ const APIKeysPage: React.FC = () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.apiKeys._def })
     } catch (err: unknown) {
       console.error('Failed to update API key:', err)
-      setError(getErrorMessage(err, t('admin.apiKeys.errUpdate')))
+      status.setError(getErrorMessage(err, t('admin.apiKeys.errUpdate')))
     }
   }
 
@@ -286,14 +288,14 @@ const APIKeysPage: React.FC = () => {
     setGracePeriodHours(24)
     setRotatedKeyValue(null)
     setRotateResult(null)
-    setError(null)
+    status.setError(null)
     setRotateDialogOpen(true)
   }
 
   const handleRotateConfirm = async () => {
     if (!keyToRotate) return
     try {
-      setError(null)
+      status.setError(null)
       const hours = rotateMode === 'immediate' ? 0 : gracePeriodHours
       const response = await api.rotateAPIKey(keyToRotate.id, hours)
       const newKey = response.new_key
@@ -305,7 +307,7 @@ const APIKeysPage: React.FC = () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.apiKeys._def })
     } catch (err: unknown) {
       console.error('Failed to rotate API key:', err)
-      setError(getErrorMessage(err, t('admin.apiKeys.errRotate')))
+      status.setError(getErrorMessage(err, t('admin.apiKeys.errRotate')))
     }
   }
 
@@ -326,14 +328,14 @@ const APIKeysPage: React.FC = () => {
   const handleDeleteConfirm = async () => {
     if (!keyToDelete) return
     try {
-      setError(null)
+      status.setError(null)
       await api.deleteAPIKey(keyToDelete.id)
       setDeleteDialogOpen(false)
       setKeyToDelete(null)
       queryClient.invalidateQueries({ queryKey: queryKeys.apiKeys._def })
     } catch (err: unknown) {
       console.error('Failed to delete API key:', err)
-      setError(getErrorMessage(err, t('admin.apiKeys.errDelete')))
+      status.setError(getErrorMessage(err, t('admin.apiKeys.errDelete')))
     }
   }
 
@@ -512,11 +514,7 @@ const APIKeysPage: React.FC = () => {
           ) : undefined
         }
       />
-      {error && (
-        <Alert severity="error" sx={{ mb: 3 }} onClose={() => setError(null)}>
-          {error}
-        </Alert>
-      )}
+      <StatusAlerts status={status} mb={3} />
       {!membershipsLoading && memberships.length === 0 && (
         <Alert severity="warning" sx={{ mb: 3 }}>
           {t('admin.apiKeys.warnNoOrg')}

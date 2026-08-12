@@ -21,7 +21,6 @@ import {
   TextField,
   Tooltip,
   Typography,
-  Alert,
   Tabs,
   Tab,
   ToggleButton,
@@ -36,8 +35,10 @@ import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown'
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp'
 import Page from '../../components/Page'
 import PageHeader from '../../components/PageHeader'
+import StatusAlerts from '../../components/StatusAlerts'
 import PageTitleIcon from '@mui/icons-material/HourglassEmpty'
 import api from '../../services/api'
+import { useStatusMessage } from '../../hooks/useStatusMessage'
 import { queryKeys } from '../../services/queryKeys'
 import { getErrorMessage } from '../../utils/errors'
 import { formatDate } from '../../utils'
@@ -267,8 +268,7 @@ const VersionApprovalsPage: React.FC = () => {
   const [statusTab, setStatusTab] = useState<VersionApprovalStatus | ''>('pending_approval')
   const [typeFilter, setTypeFilter] = useState<'provider' | 'terraform' | 'scanner' | ''>('')
   const [selected, setSelected] = useState<Set<string>>(new Set())
-  const [error, setError] = useState<string | null>(null)
-  const [success, setSuccess] = useState<string | null>(null)
+  const status = useStatusMessage()
 
   // Single approve/reject dialog
   const [actionDialog, setActionDialog] = useState<{
@@ -301,8 +301,8 @@ const VersionApprovalsPage: React.FC = () => {
 
   const items: VersionApproval[] = data?.items ?? []
 
-  if (queryError && !error) {
-    setError(getErrorMessage(queryError, t('admin.versionApprovals.errLoad')))
+  if (queryError && !status.error) {
+    status.setError(getErrorMessage(queryError, t('admin.versionApprovals.errLoad')))
   }
 
   const invalidate = () => {
@@ -314,14 +314,13 @@ const VersionApprovalsPage: React.FC = () => {
     mutationFn: ({ id, notes }: { id: string; notes?: string }) =>
       api.approveVersion(id, notes ? { notes } : undefined),
     onSuccess: () => {
-      setSuccess(t('admin.versionApprovals.approveSuccess'))
-      setError(null)
+      status.showSuccess(t('admin.versionApprovals.approveSuccess'))
       setActionDialog((d) => ({ ...d, open: false }))
       invalidate()
     },
     onError: (err: unknown) => {
       setActionDialog((d) => ({ ...d, open: false }))
-      setError(getErrorMessage(err, t('admin.versionApprovals.errApprove')))
+      status.setError(getErrorMessage(err, t('admin.versionApprovals.errApprove')))
     },
   })
 
@@ -329,14 +328,13 @@ const VersionApprovalsPage: React.FC = () => {
     mutationFn: ({ id, notes }: { id: string; notes?: string }) =>
       api.rejectVersion(id, notes ? { notes } : undefined),
     onSuccess: () => {
-      setSuccess(t('admin.versionApprovals.rejectSuccess'))
-      setError(null)
+      status.showSuccess(t('admin.versionApprovals.rejectSuccess'))
       setActionDialog((d) => ({ ...d, open: false }))
       invalidate()
     },
     onError: (err: unknown) => {
       setActionDialog((d) => ({ ...d, open: false }))
-      setError(getErrorMessage(err, t('admin.versionApprovals.errReject')))
+      status.setError(getErrorMessage(err, t('admin.versionApprovals.errReject')))
     },
   })
 
@@ -344,26 +342,28 @@ const VersionApprovalsPage: React.FC = () => {
     mutationFn: ({ ids, notes }: { ids: string[]; notes?: string }) =>
       api.bulkApproveVersions(ids, notes),
     onSuccess: (res) => {
-      setSuccess(t('admin.versionApprovals.bulkApproveSuccess', { count: res.approved ?? 0 }))
-      setError(null)
+      status.showSuccess(
+        t('admin.versionApprovals.bulkApproveSuccess', { count: res.approved ?? 0 }),
+      )
       setBulkDialog((d) => ({ ...d, open: false }))
       invalidate()
     },
     onError: (err: unknown) =>
-      setError(getErrorMessage(err, t('admin.versionApprovals.errBulkApprove'))),
+      status.setError(getErrorMessage(err, t('admin.versionApprovals.errBulkApprove'))),
   })
 
   const bulkRejectMutation = useMutation({
     mutationFn: ({ ids, notes }: { ids: string[]; notes?: string }) =>
       api.bulkRejectVersions(ids, notes),
     onSuccess: (res) => {
-      setSuccess(t('admin.versionApprovals.bulkRejectSuccess', { count: res.rejected ?? 0 }))
-      setError(null)
+      status.showSuccess(
+        t('admin.versionApprovals.bulkRejectSuccess', { count: res.rejected ?? 0 }),
+      )
       setBulkDialog((d) => ({ ...d, open: false }))
       invalidate()
     },
     onError: (err: unknown) =>
-      setError(getErrorMessage(err, t('admin.versionApprovals.errBulkReject'))),
+      status.setError(getErrorMessage(err, t('admin.versionApprovals.errBulkReject'))),
   })
 
   const allSelected = items.length > 0 && selected.size === items.length
@@ -421,16 +421,7 @@ const VersionApprovalsPage: React.FC = () => {
         description={t('admin.versionApprovals.pageSubtitle')}
       />
 
-      {error && (
-        <Alert severity="error" sx={{ mb: 2 }} onClose={() => setError(null)}>
-          {error}
-        </Alert>
-      )}
-      {success && (
-        <Alert severity="success" sx={{ mb: 2 }} onClose={() => setSuccess(null)}>
-          {success}
-        </Alert>
-      )}
+      <StatusAlerts status={status} mb={2} />
 
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
         <Tabs
