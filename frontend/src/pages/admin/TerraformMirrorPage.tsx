@@ -10,12 +10,8 @@ import {
   Alert,
   Box,
   Button,
-  Card,
-  CardActions,
-  CardContent,
   Chip,
   CircularProgress,
-  Collapse,
   Container,
   Dialog,
   DialogActions,
@@ -23,7 +19,6 @@ import {
   DialogTitle,
   FormControlLabel,
   Grid,
-  IconButton,
   MenuItem,
   Paper,
   Switch,
@@ -34,35 +29,10 @@ import {
   TableHead,
   TableRow,
   TextField,
-  Tooltip,
   Typography,
 } from '@mui/material'
-
-/** Known Terraform binary platform combinations (os/arch). */
-const KNOWN_PLATFORMS = [
-  'linux/amd64',
-  'linux/arm64',
-  'linux/386',
-  'linux/arm',
-  'darwin/amd64',
-  'darwin/arm64',
-  'windows/amd64',
-  'windows/386',
-  'windows/arm64',
-  'freebsd/amd64',
-  'freebsd/386',
-  'freebsd/arm',
-] as const
 import AddIcon from '@mui/icons-material/Add'
-import CheckCircleIcon from '@mui/icons-material/CheckCircle'
-import DeleteIcon from '@mui/icons-material/Delete'
-import EditIcon from '@mui/icons-material/Edit'
-import ErrorIcon from '@mui/icons-material/Error'
-import ExpandLessIcon from '@mui/icons-material/ExpandLess'
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
-import HistoryIcon from '@mui/icons-material/History'
 import RefreshIcon from '@mui/icons-material/Refresh'
-import SyncIcon from '@mui/icons-material/Sync'
 
 import api from '../../services/api'
 import { useStatusMessage } from '../../hooks/useStatusMessage'
@@ -73,450 +43,20 @@ import {
   type TerraformMirrorConfig,
   type TerraformMirrorStatusResponse,
   type TerraformVersion,
-  type TerraformVersionPlatform,
   type TerraformSyncHistory,
   type CreateTerraformMirrorConfigRequest,
   type UpdateTerraformMirrorConfigRequest,
-  syncStatusColor,
   parsePlatformFilter,
 } from '../../types/terraform_mirror'
-
-// ---------------------------------------------------------------------------
-// Helper chip components
-// ---------------------------------------------------------------------------
-
-const SyncStatusChip: React.FC<{ status: string; size?: 'small' | 'medium' }> = ({
-  status,
-  size = 'small',
-}) => (
-  <Chip
-    label={status}
-    color={syncStatusColor(status)}
-    size={size}
-    icon={
-      status === 'synced' || status === 'success' ? (
-        <CheckCircleIcon />
-      ) : status === 'failed' ? (
-        <ErrorIcon />
-      ) : undefined
-    }
-  />
-)
-
-const ToolChip: React.FC<{ tool: string }> = ({ tool }) => {
-  const color = tool === 'terraform' ? 'primary' : tool === 'opentofu' ? 'secondary' : 'default'
-  return <Chip label={tool} size="small" color={color} variant="outlined" />
-}
-
-// ---------------------------------------------------------------------------
-// Version row with expandable platform list
-// ---------------------------------------------------------------------------
-
-const VersionRow: React.FC<{
-  version: TerraformVersion
-  configId: string
-  onDelete: (v: TerraformVersion) => void
-  canManage: boolean
-}> = ({ version, configId, onDelete, canManage }) => {
-  const { t } = useTranslation()
-  const [open, setOpen] = useState(false)
-  const [platforms, setPlatforms] = useState<TerraformVersionPlatform[] | null>(null)
-  const [loadingPlatforms, setLoadingPlatforms] = useState(false)
-
-  const handleExpand = async () => {
-    if (!open && platforms === null) {
-      setLoadingPlatforms(true)
-      try {
-        const data = await api.listTerraformVersionPlatforms(configId, version.version)
-        setPlatforms(data)
-      } catch {
-        setPlatforms([])
-      } finally {
-        setLoadingPlatforms(false)
-      }
-    }
-    setOpen((prev) => !prev)
-  }
-
-  return (
-    <>
-      <TableRow hover sx={{ '& > *': { borderBottom: 'unset' } }}>
-        <TableCell>
-          <IconButton
-            size="small"
-            aria-label={t('admin.terraformMirror.ariaToggleVersionDetails')}
-            onClick={handleExpand}
-          >
-            {open ? <ExpandLessIcon /> : <ExpandMoreIcon />}
-          </IconButton>
-        </TableCell>
-        <TableCell>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <Typography
-              variant="body2"
-              sx={{
-                fontFamily: 'monospace',
-              }}
-            >
-              {version.version}
-            </Typography>
-            {version.is_latest && (
-              <Chip label={t('admin.terraformMirror.chipLatest')} color="primary" size="small" />
-            )}
-            {version.is_deprecated && (
-              <Chip
-                label={t('admin.terraformMirror.chipDeprecated')}
-                color="warning"
-                size="small"
-              />
-            )}
-          </Box>
-        </TableCell>
-        <TableCell>
-          <SyncStatusChip status={version.sync_status} />
-        </TableCell>
-        <TableCell>
-          {version.approval_status && (
-            <Chip
-              label={t(`admin.versionApprovals.status.${version.approval_status}`)}
-              size="small"
-              color={
-                version.approval_status === 'approved'
-                  ? 'success'
-                  : version.approval_status === 'rejected'
-                    ? 'error'
-                    : 'warning'
-              }
-            />
-          )}
-        </TableCell>
-        <TableCell>
-          {version.synced_at ? new Date(version.synced_at).toLocaleString() : '—'}
-        </TableCell>
-        <TableCell align="right">
-          {canManage && (
-            <Tooltip title={t('admin.terraformMirror.tooltipDeleteVersion')}>
-              <span>
-                <IconButton
-                  size="small"
-                  aria-label={t('admin.terraformMirror.ariaDeleteVersion')}
-                  color="error"
-                  onClick={() => onDelete(version)}
-                  disabled={version.sync_status === 'syncing'}
-                >
-                  <DeleteIcon fontSize="small" />
-                </IconButton>
-              </span>
-            </Tooltip>
-          )}
-        </TableCell>
-      </TableRow>
-      <TableRow>
-        <TableCell colSpan={6} sx={{ pb: 0, pt: 0 }}>
-          <Collapse in={open} unmountOnExit>
-            <Box sx={{ m: 1, mb: 2 }}>
-              {loadingPlatforms ? (
-                <CircularProgress size={20} />
-              ) : platforms && platforms.length > 0 ? (
-                <Table size="small">
-                  <TableHead>
-                    <TableRow>
-                      <TableCell>OS</TableCell>
-                      <TableCell>{t('admin.terraformMirror.thArch')}</TableCell>
-                      <TableCell>{t('admin.terraformMirror.thFilename')}</TableCell>
-                      <TableCell>{t('admin.terraformMirror.thStatus')}</TableCell>
-                      <TableCell>SHA256</TableCell>
-                      <TableCell>GPG</TableCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {platforms.map((p) => (
-                      <TableRow key={p.id}>
-                        <TableCell>{p.os}</TableCell>
-                        <TableCell>{p.arch}</TableCell>
-                        <TableCell>
-                          <Typography
-                            variant="caption"
-                            sx={{
-                              fontFamily: 'monospace',
-                              wordBreak: 'break-all',
-                            }}
-                          >
-                            {p.filename}
-                          </Typography>
-                        </TableCell>
-                        <TableCell>
-                          <SyncStatusChip status={p.sync_status} />
-                        </TableCell>
-                        <TableCell>
-                          {p.sha256_verified ? (
-                            <CheckCircleIcon color="success" fontSize="small" />
-                          ) : (
-                            <ErrorIcon color="disabled" fontSize="small" />
-                          )}
-                        </TableCell>
-                        <TableCell>
-                          {p.gpg_verified ? (
-                            <CheckCircleIcon color="success" fontSize="small" />
-                          ) : (
-                            <ErrorIcon color="disabled" fontSize="small" />
-                          )}
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              ) : (
-                <Typography
-                  variant="body2"
-                  sx={{
-                    color: 'text.secondary',
-                  }}
-                >
-                  {t('admin.terraformMirror.noPlatformsSynced')}
-                </Typography>
-              )}
-            </Box>
-          </Collapse>
-        </TableCell>
-      </TableRow>
-    </>
-  )
-}
-
-// ---------------------------------------------------------------------------
-// Config card
-// ---------------------------------------------------------------------------
-
-const ConfigCard: React.FC<{
-  config: TerraformMirrorConfig
-  status?: TerraformMirrorStatusResponse
-  onEdit: (c: TerraformMirrorConfig) => void
-  onDelete: (c: TerraformMirrorConfig) => void
-  onSync: (c: TerraformMirrorConfig) => void
-  onViewVersions: (c: TerraformMirrorConfig) => void
-  onViewHistory: (c: TerraformMirrorConfig) => void
-  syncing: boolean
-  canManage: boolean
-}> = ({
-  config,
-  status,
-  onEdit,
-  onDelete,
-  onSync,
-  onViewVersions,
-  onViewHistory,
-  syncing,
-  canManage,
-}) => {
-  const { t } = useTranslation()
-  return (
-    <Card variant="outlined">
-      <CardContent>
-        <Box
-          sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1 }}
-        >
-          <Typography variant="h6" sx={{ wordBreak: 'break-word' }}>
-            {config.name}
-          </Typography>
-          <Box sx={{ display: 'flex', gap: 0.5, ml: 1, flexShrink: 0 }}>
-            <ToolChip tool={config.tool} />
-            <Chip
-              label={
-                config.enabled
-                  ? t('admin.terraformMirror.chipEnabled')
-                  : t('admin.terraformMirror.chipDisabled')
-              }
-              color={config.enabled ? 'success' : 'default'}
-              size="small"
-            />
-          </Box>
-        </Box>
-
-        {config.description && (
-          <Typography
-            variant="body2"
-            sx={{
-              color: 'text.secondary',
-              mb: 1,
-            }}
-          >
-            {config.description}
-          </Typography>
-        )}
-
-        <Typography
-          variant="body2"
-          noWrap
-          sx={{
-            color: 'text.secondary',
-          }}
-        >
-          {config.upstream_url}
-        </Typography>
-
-        {status && (
-          <Box
-            sx={{
-              display: 'flex',
-              gap: 1,
-              flexWrap: 'wrap',
-              mt: 1,
-            }}
-          >
-            <Chip
-              size="small"
-              label={t('admin.terraformMirror.chipVersionCount', { count: status.version_count })}
-              variant="outlined"
-            />
-            <Chip
-              size="small"
-              label={t('admin.terraformMirror.chipPlatformCount', { count: status.platform_count })}
-              variant="outlined"
-            />
-            {status.pending_count > 0 && (
-              <Chip
-                size="small"
-                label={t('admin.terraformMirror.chipPendingCount', { count: status.pending_count })}
-                variant="outlined"
-                color="warning"
-              />
-            )}
-          </Box>
-        )}
-
-        <Box sx={{ mt: 1.5 }}>
-          {config.last_sync_status ? (
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-              <SyncStatusChip status={config.last_sync_status} />
-              {config.last_sync_at && (
-                <Typography
-                  variant="caption"
-                  sx={{
-                    color: 'text.secondary',
-                  }}
-                >
-                  {new Date(config.last_sync_at).toLocaleString()}
-                </Typography>
-              )}
-            </Box>
-          ) : (
-            <Typography
-              variant="caption"
-              sx={{
-                color: 'text.secondary',
-              }}
-            >
-              {t('admin.terraformMirror.neverSynced')}
-            </Typography>
-          )}
-        </Box>
-      </CardContent>
-
-      <CardActions sx={{ justifyContent: 'space-between', flexWrap: 'wrap', gap: 0.5 }}>
-        <Box>
-          <Tooltip title={t('admin.terraformMirror.tooltipViewDetails')}>
-            <Button size="small" onClick={() => onViewVersions(config)}>
-              {t('admin.terraformMirror.viewDetails')}
-            </Button>
-          </Tooltip>
-          <Tooltip title={t('admin.terraformMirror.tooltipViewHistory')}>
-            <IconButton
-              size="small"
-              aria-label={t('admin.terraformMirror.ariaViewHistory')}
-              onClick={() => onViewHistory(config)}
-            >
-              <HistoryIcon fontSize="small" />
-            </IconButton>
-          </Tooltip>
-        </Box>
-        {canManage && (
-          <Box>
-            <Tooltip title={t('admin.terraformMirror.tooltipTriggerSync')}>
-              <span>
-                <IconButton
-                  size="small"
-                  aria-label={t('admin.terraformMirror.ariaSyncMirror')}
-                  onClick={() => onSync(config)}
-                  disabled={syncing || !config.enabled}
-                >
-                  <SyncIcon fontSize="small" />
-                </IconButton>
-              </span>
-            </Tooltip>
-            <Tooltip title={t('admin.terraformMirror.tooltipEditConfig')}>
-              <IconButton
-                size="small"
-                aria-label={t('admin.terraformMirror.ariaEditMirror')}
-                onClick={() => onEdit(config)}
-              >
-                <EditIcon fontSize="small" />
-              </IconButton>
-            </Tooltip>
-            <Tooltip title={t('admin.terraformMirror.tooltipDeleteMirror')}>
-              <IconButton
-                size="small"
-                aria-label={t('admin.terraformMirror.ariaDeleteMirror')}
-                color="error"
-                onClick={() => onDelete(config)}
-              >
-                <DeleteIcon fontSize="small" />
-              </IconButton>
-            </Tooltip>
-          </Box>
-        )}
-      </CardActions>
-    </Card>
-  )
-}
-
-// ---------------------------------------------------------------------------
-// Tool defaults
-// ---------------------------------------------------------------------------
-
-const TOOL_DEFAULT_URLS: Record<string, string> = {
-  terraform: 'https://releases.hashicorp.com',
-  opentofu: 'https://github.com/opentofu/opentofu',
-  packer: 'https://releases.hashicorp.com',
-  sentinel: 'https://releases.hashicorp.com',
-  opa: 'https://github.com/open-policy-agent/opa',
-  'terraform-docs': 'https://github.com/terraform-docs/terraform-docs',
-}
-
-/** Returns the canonical upstream URL for a known tool, or '' for custom. */
-function toolDefaultUrl(tool: string): string {
-  return TOOL_DEFAULT_URLS[tool] ?? ''
-}
-
-/**
- * SUPPORTED_TOOLS is the single source of truth for the selectable upstream
- * tools in both the create and edit dialogs, so a new tool is added in exactly
- * one place. "custom" is rendered separately because its label is translated.
- */
-const SUPPORTED_TOOLS: readonly { value: string; label: string }[] = [
-  { value: 'terraform', label: 'Terraform (HashiCorp)' },
-  { value: 'opentofu', label: 'OpenTofu' },
-  { value: 'packer', label: 'Packer (HashiCorp)' },
-  { value: 'sentinel', label: 'Sentinel (HashiCorp)' },
-  { value: 'opa', label: 'OPA (Open Policy Agent)' },
-  { value: 'terraform-docs', label: 'terraform-docs' },
-]
-
-// ---------------------------------------------------------------------------
-// Empty config form helpers
-// ---------------------------------------------------------------------------
-
-const emptyCreate = (): CreateTerraformMirrorConfigRequest => ({
-  name: '',
-  description: '',
-  tool: 'terraform',
-  upstream_url: toolDefaultUrl('terraform'),
-  gpg_verify: true,
-  stable_only: true,
-  enabled: true,
-  sync_interval_hours: 24,
-  requires_approval: true,
-})
+import { SyncStatusChip, ToolChip } from './terraformMirror/StatusChips'
+import MirrorConfigCard from './terraformMirror/MirrorConfigCard'
+import MirrorVersionRow from './terraformMirror/MirrorVersionRow'
+import {
+  KNOWN_PLATFORMS,
+  SUPPORTED_TOOLS,
+  emptyCreate,
+  toolDefaultUrl,
+} from './terraformMirror/constants'
 
 // ---------------------------------------------------------------------------
 // Main page
@@ -847,7 +387,7 @@ const TerraformMirrorPage: React.FC = () => {
                 const status = statusMap[cfg.id]
                 return (
                   <Grid size={{ xs: 12, md: 6 }} key={cfg.id}>
-                    <ConfigCard
+                    <MirrorConfigCard
                       config={cfg}
                       status={status}
                       onEdit={openEdit}
@@ -1282,7 +822,7 @@ const TerraformMirrorPage: React.FC = () => {
                       </TableHead>
                       <TableBody>
                         {versions.map((v) => (
-                          <VersionRow
+                          <MirrorVersionRow
                             key={v.id}
                             version={v}
                             configId={versionsConfig.id}
