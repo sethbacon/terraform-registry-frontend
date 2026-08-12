@@ -27,7 +27,7 @@
  * One gate and one exceptions file for both scanners is deliberate: they
  * disagree about the same advisory otherwise. OSV lists react-router's fix as
  * 8.3.0 — technically "a fix exists", but a semver-major that also breaks the
- * @sethbacon/terraform-suite-ui pin — so a naive fixed-version-exists rule
+ * @4cloudguru/cloud-suite-ui pin — so a naive fixed-version-exists rule
  * would block forever on it while npm audit correctly reports it as breaking.
  *
  * Usage:

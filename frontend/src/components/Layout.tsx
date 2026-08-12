@@ -4,7 +4,7 @@ import { IconButton, ListItemIcon, Menu, MenuItem, Tooltip } from '@mui/material
 import SearchIcon from '@mui/icons-material/Search'
 import HelpOutline from '@mui/icons-material/HelpOutlined'
 import InfoOutlined from '@mui/icons-material/InfoOutlined'
-import { SuiteLayout } from '@sethbacon/terraform-suite-ui'
+import { SuiteLayout } from '@4cloudguru/cloud-suite-ui'
 import { useAuth } from '../contexts/AuthContext'
 import { useHelp } from '../contexts/HelpContext'
 import { useHotkey } from '../hooks/useHotkey'

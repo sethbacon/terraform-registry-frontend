@@ -383,10 +383,10 @@ or add the destination origin to `connect-src` in both nginx configs.
 
 Critical-path pages (HomePage, LoginPage, ModulesPage, ProvidersPage, etc.) are loaded eagerly. Non-critical pages (detail pages, admin pages, API docs) are loaded lazily via `React.lazy()` with `<Suspense fallback={<div>Loading...</div>}>`.
 
-## Shared Suite Package (`@sethbacon/terraform-suite-ui`)
+## Shared Suite Package (`@4cloudguru/cloud-suite-ui`)
 
 Cross-cutting concerns shared with the other Terraform Suite apps live in the
-private package [`@sethbacon/terraform-suite-ui`](https://github.com/sethbacon/terraform-suite-ui),
+private package [`@4cloudguru/cloud-suite-ui`](https://github.com/sethbacon/terraform-suite-ui),
 published to the GitHub Packages npm registry and pinned to an **exact**
 version in `package.json` (see the "Shared private package" section of
 `SECURITY.md` for the audit/provenance/update policy — the package carries the

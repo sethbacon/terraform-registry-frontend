@@ -117,7 +117,7 @@ jobs:
             # repos, keeping it is exactly what would leave this still failing.
             #
             # NOTE: this repo ALSO consumes the moved project as the npm package
-            # @sethbacon/terraform-suite-ui. That dependency is untouched here —
+            # @4cloudguru/cloud-suite-ui. That dependency is untouched here —
             # whether it still resolves under the old scope is a separate call.
             repository: 4cloudguru/cloud-suite-ui,
             path: suite/terraform-suite-ui,

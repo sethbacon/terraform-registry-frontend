@@ -10,7 +10,7 @@ import {
   SESSION_WARNING_LEAD_MS,
   type AuthApi,
   type MeResponse,
-} from '@sethbacon/terraform-suite-ui'
+} from '@4cloudguru/cloud-suite-ui'
 import api from '../services/api'
 import { clearAuthStorage } from '../utils/authStorage'
 import { queryClient } from '../queryClient'

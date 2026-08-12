@@ -2,7 +2,7 @@ import { render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router-dom'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { SuiteThemeProvider, AuthProvider, type AuthApi } from '@sethbacon/terraform-suite-ui'
+import { SuiteThemeProvider, AuthProvider, type AuthApi } from '@4cloudguru/cloud-suite-ui'
 
 // ── Mocks ──────────────────────────────────────────────────────────────────
 // Help context stays app-level (SuiteLayout does not use it); mock it so the

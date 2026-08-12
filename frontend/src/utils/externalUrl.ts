@@ -1,9 +1,9 @@
-import { isSafeUrl } from '@sethbacon/terraform-suite-ui'
+import { isSafeUrl } from '@4cloudguru/cloud-suite-ui'
 
 /**
  * App-boundary validator for URLs sourced from the backend / whitelabel config (the
  * suite-switcher sibling URL and the whitelabel theme logo/hero/favicon URLs) before they are
- * handed to shared `@sethbacon/terraform-suite-ui` components.
+ * handed to shared `@4cloudguru/cloud-suite-ui` components.
  *
  * Delegates the base allowlist/normalisation check (control characters, protocol-relative and
  * backslash variants, the relative-path/anchor fast-path, and the URL-constructor parse) to the

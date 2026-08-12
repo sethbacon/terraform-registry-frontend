@@ -159,7 +159,7 @@ export function bufferedErrorMessages(): string[] {
  * stored, errors captured between module load and TelemetryGate's effect are
  * lost rather than sent. Distinguishing those from genuinely pre-consent
  * entries would mean reading the consent record here, duplicating a storage
- * contract owned by @sethbacon/terraform-suite-ui -- not worth a cross-repo
+ * contract owned by @4cloudguru/cloud-suite-ui -- not worth a cross-repo
  * coupling to recover a few milliseconds of startup errors, and the safe
  * direction to err in is dropping.
  *

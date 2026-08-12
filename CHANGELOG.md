@@ -166,7 +166,7 @@
 * add a request timeout and offline detection to the API layer ([#511](https://github.com/sethbacon/terraform-registry-frontend/issues/511)) ([8fa156a](https://github.com/sethbacon/terraform-registry-frontend/commit/8fa156a100f7b885d73ed0c1a61185d83513af52)), closes [#473](https://github.com/sethbacon/terraform-registry-frontend/issues/473)
 * **admin:** render matched policy name and make org IdP binding visible and clearable ([#541](https://github.com/sethbacon/terraform-registry-frontend/issues/541)) ([548f98c](https://github.com/sethbacon/terraform-registry-frontend/commit/548f98cb4d651ee83319e488b139d303a3b09e71))
 * **auth:** remove the legacy localStorage JWT path — cookie-only sessions ([#543](https://github.com/sethbacon/terraform-registry-frontend/issues/543)) ([3fedcc3](https://github.com/sethbacon/terraform-registry-frontend/commit/3fedcc342b20da4946769f7c50d10d157f1e444d))
-* disclose and exact-pin the @sethbacon/terraform-suite-ui auth package ([#532](https://github.com/sethbacon/terraform-registry-frontend/issues/532)) ([5af0364](https://github.com/sethbacon/terraform-registry-frontend/commit/5af036411c46e84c85b7b9460d93684d5fb0f83f))
+* disclose and exact-pin the @4cloudguru/cloud-suite-ui auth package ([#532](https://github.com/sethbacon/terraform-registry-frontend/issues/532)) ([5af0364](https://github.com/sethbacon/terraform-registry-frontend/commit/5af036411c46e84c85b7b9460d93684d5fb0f83f))
 * don't let a stray legacy JWT clobber an explicit Authorization header ([#502](https://github.com/sethbacon/terraform-registry-frontend/issues/502)) ([d64e924](https://github.com/sethbacon/terraform-registry-frontend/commit/d64e9245d0a499e25d41d3a8d3c98d88695f1469)), closes [#486](https://github.com/sethbacon/terraform-registry-frontend/issues/486)
 * don't prefix "Error undefined:" on RepositoryBrowser network failures ([#500](https://github.com/sethbacon/terraform-registry-frontend/issues/500)) ([1577c21](https://github.com/sethbacon/terraform-registry-frontend/commit/1577c21a6fd0707f583d614939240980b40aef5d)), closes [#497](https://github.com/sethbacon/terraform-registry-frontend/issues/497)
 * lint-ban dangerouslySetInnerHTML to lock in the JSX-escaping posture ([#531](https://github.com/sethbacon/terraform-registry-frontend/issues/531)) ([0c520e9](https://github.com/sethbacon/terraform-registry-frontend/commit/0c520e904c5876fb8634438f5c078cce9fe03f68)), closes [#478](https://github.com/sethbacon/terraform-registry-frontend/issues/478)
@@ -247,15 +247,15 @@
 ### Refactor
 
 * consume suite-ui consent, theme & identity ([#442](https://github.com/sethbacon/terraform-registry-frontend/issues/442)) ([c445c1e](https://github.com/sethbacon/terraform-registry-frontend/commit/c445c1ef1c4b7db5f197750f05add075c2c2f89e))
-* **shell:** consume SuiteLayout from @sethbacon/terraform-suite-ui ([#447](https://github.com/sethbacon/terraform-registry-frontend/issues/447)) ([68a1b40](https://github.com/sethbacon/terraform-registry-frontend/commit/68a1b4056e8c69ab4da29ae56c3bb2677269acfc))
-* **shell:** consume SuiteSwitcher from @sethbacon/terraform-suite-ui ([#446](https://github.com/sethbacon/terraform-registry-frontend/issues/446)) ([c8e7c56](https://github.com/sethbacon/terraform-registry-frontend/commit/c8e7c56e49b70573aab0c964995c29f11d81059e))
+* **shell:** consume SuiteLayout from @4cloudguru/cloud-suite-ui ([#447](https://github.com/sethbacon/terraform-registry-frontend/issues/447)) ([68a1b40](https://github.com/sethbacon/terraform-registry-frontend/commit/68a1b4056e8c69ab4da29ae56c3bb2677269acfc))
+* **shell:** consume SuiteSwitcher from @4cloudguru/cloud-suite-ui ([#446](https://github.com/sethbacon/terraform-registry-frontend/issues/446)) ([c8e7c56](https://github.com/sethbacon/terraform-registry-frontend/commit/c8e7c56e49b70573aab0c964995c29f11d81059e))
 
 ## [2.12.0](https://github.com/sethbacon/terraform-registry-frontend/compare/v2.11.1...v2.12.0) (2026-06-28)
 
 
 ### Features
 
-* UX alignment + consume @sethbacon/terraform-suite-ui ([#438](https://github.com/sethbacon/terraform-registry-frontend/issues/438)) ([a8c739f](https://github.com/sethbacon/terraform-registry-frontend/commit/a8c739f769f31299bdeea32e184b8578bb76795b))
+* UX alignment + consume @4cloudguru/cloud-suite-ui ([#438](https://github.com/sethbacon/terraform-registry-frontend/issues/438)) ([a8c739f](https://github.com/sethbacon/terraform-registry-frontend/commit/a8c739f769f31299bdeea32e184b8578bb76795b))
 
 ## [2.11.1](https://github.com/sethbacon/terraform-registry-frontend/compare/v2.11.0...v2.11.1) (2026-06-27)
 

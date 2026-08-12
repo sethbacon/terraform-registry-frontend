@@ -77,7 +77,7 @@ describe('AuthProvider', () => {
   })
 
   it('ends an already-expired session immediately rather than warning about it', async () => {
-    // @sethbacon/terraform-suite-ui 0.8.1 changed this to fail closed: a session
+    // @4cloudguru/cloud-suite-ui 0.8.1 changed this to fail closed: a session
     // already past its expiry when /me resolves is ENDED, not flagged with
     // sessionExpiresSoon. Warning about a session the client already knows is dead
     // leaves the UI rendered against it until the user acts on the warning, so the

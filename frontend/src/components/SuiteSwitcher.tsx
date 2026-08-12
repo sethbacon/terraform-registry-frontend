@@ -1,5 +1,5 @@
 import { useSuite } from '../hooks/useSuite'
-import { SuiteSwitcher as SuiteSwitcherBase } from '@sethbacon/terraform-suite-ui'
+import { SuiteSwitcher as SuiteSwitcherBase } from '@4cloudguru/cloud-suite-ui'
 import { isSafeExternalUrl } from '../utils/externalUrl'
 
 const LABELS: Record<string, string> = {

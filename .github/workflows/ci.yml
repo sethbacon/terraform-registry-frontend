@@ -20,7 +20,7 @@ permissions:
   # because the repository is public and a public clone needs no credential. The
   # declared set now matches the access the workflow actually exercises.
   contents: read
-  # npm ci in frontend/ resolves @sethbacon/terraform-suite-ui from
+  # npm ci in frontend/ resolves @4cloudguru/cloud-suite-ui from
   # npm.pkg.github.com.
   packages: read
 
@@ -342,10 +342,6 @@ jobs:
 
       - name: Start test compose
         # Images are pre-pulled above; this builds the frontend and starts everything.
-        env:
-          # GitHub Packages read token so the frontend image build can install the
-          # private @sethbacon/* dep (consumed via the compose build secret).
-          NODE_AUTH_TOKEN: ${{ github.token }}
         run: >-
           docker compose -f deployments/docker-compose.test.yml up -d
 
@@ -454,10 +450,6 @@ jobs:
 
       - name: Start test compose
         # Images are pre-pulled above; this builds the frontend and starts everything.
-        env:
-          # GitHub Packages read token so the frontend image build can install the
-          # private @sethbacon/* dep (consumed via the compose build secret).
-          NODE_AUTH_TOKEN: ${{ github.token }}
         run: >-
           docker compose -f deployments/docker-compose.test.yml up -d
 

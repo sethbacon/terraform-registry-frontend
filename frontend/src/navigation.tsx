@@ -20,7 +20,7 @@ import Storage from '@mui/icons-material/Storage'
 import Security from '@mui/icons-material/Security'
 import History from '@mui/icons-material/History'
 import Notifications from '@mui/icons-material/Notifications'
-import type { NavItem, NavGroup } from '@sethbacon/terraform-suite-ui'
+import type { NavItem, NavGroup } from '@4cloudguru/cloud-suite-ui'
 import { adminRouteScopeForPath } from './routeScopes'
 import type { ScopeValue } from './types/rbac'
 
@@ -28,7 +28,7 @@ import type { ScopeValue } from './types/rbac'
 // (routeScopes.ts) so App.tsx's route guards and this sidebar's item
 // filtering can't drift apart. Returns the canonical ScopeValue union (#633)
 // rather than widening back to `string | null` -- NavItem.scope itself stays
-// `string | null` (defined by the out-of-tree @sethbacon/terraform-suite-ui
+// `string | null` (defined by the out-of-tree @4cloudguru/cloud-suite-ui
 // package), but this keeps ADMIN_ROUTE_SCOPES's compile-time protection
 // intact through this call site instead of discarding it here.
 function adminScope(path: string): ScopeValue | null {

@@ -14,7 +14,7 @@ import {
   FormControlLabel,
   Button,
 } from '@mui/material'
-import { NotificationChannelsSection, type NotificationChannelTypeOption } from '@sethbacon/terraform-suite-ui'
+import { NotificationChannelsSection, type NotificationChannelTypeOption } from '@4cloudguru/cloud-suite-ui'
 import Page from '../../components/Page'
 import PageHeader from '../../components/PageHeader'
 import PageTitleIcon from '@mui/icons-material/Notifications'
@@ -59,7 +59,7 @@ const defaultFormState: FormState = {
 // module_published, approval_pending, cve_detected, and
 // scanner_update_available events — additional delivery destinations
 // alongside the shared SMTP recipients list above. Rendered via the shared
-// @sethbacon/terraform-suite-ui NotificationChannelsSection component.
+// @4cloudguru/cloud-suite-ui NotificationChannelsSection component.
 const CHANNEL_TYPE_OPTIONS: NotificationChannelTypeOption[] = [
   { value: 'webhook', label: 'Webhook' },
   { value: 'slack', label: 'Slack' },
