@@ -401,6 +401,19 @@ describe('ApiClient', () => {
   // ─── 401 Interceptor ──────────────────────────────────────────────────
 
   describe('response interceptor – 401 handling', () => {
+    // The teardown of a live-looking session is now gated on a /auth/me
+    // confirmation (#677), so it lands a few microtasks after the interceptor
+    // has already rejected. A macrotask turn drains that chain.
+    const flushProbe = () => new Promise((resolve) => setTimeout(resolve, 0))
+
+    /** Make the /auth/me confirmation probe answer with `status` (or a network error). */
+    const answerProbe = (response?: { status: number }) =>
+      (mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockImplementation(() =>
+        response && response.status < 400
+          ? Promise.resolve({ status: response.status, data: { user: { id: '1' } } })
+          : Promise.reject({ response, isAxiosError: true }),
+      )
+
     it('does not treat stray legacy localStorage keys as a session (clears them, no redirect)', async () => {
       // Pre-migration sessions left auth_token/user in localStorage. Those keys
       // are no longer a session signal — only the tfr_csrf cookie is. A 401
@@ -448,6 +461,9 @@ describe('ApiClient', () => {
       // HttpOnly auth cookie + the readable tfr_csrf double-submit cookie.
       document.cookie = 'tfr_csrf=some-csrf-token'
       await getApiClient()
+      // /modules/search is not the session check, so the session is confirmed
+      // dead against /auth/me before the teardown runs (#677).
+      answerProbe({ status: 401 })
 
       const error = {
         response: { status: 401 },
@@ -457,6 +473,7 @@ describe('ApiClient', () => {
 
       const authRejectedHandler = capturedResRejectedHandlers[0]
       await expect(authRejectedHandler(error)).rejects.toBe(error)
+      await flushProbe()
       expect(window.location.href).toContain('/login')
 
       // Clean up so this cookie doesn't leak into later tests.
@@ -471,6 +488,7 @@ describe('ApiClient', () => {
       window.history.pushState({}, '', '/modules/hashicorp/consul/aws?tab=inputs')
       document.cookie = 'tfr_csrf=some-csrf-token'
       await getApiClient()
+      answerProbe({ status: 401 })
 
       const error = {
         response: { status: 401 },
@@ -479,6 +497,7 @@ describe('ApiClient', () => {
       } as AxiosError
 
       await expect(capturedResRejectedHandlers[0](error)).rejects.toBe(error)
+      await flushProbe()
       expect(sessionStorage.getItem('returnUrl')).toBe('/modules/hashicorp/consul/aws?tab=inputs')
 
       document.cookie = 'tfr_csrf=; Max-Age=0'
@@ -639,6 +658,226 @@ describe('ApiClient', () => {
         document.cookie = 'tfr_csrf=; Max-Age=0; path=/'
       }
     })
+
+    // ─── A 401 is not automatically session death (#677) ──────────────────
+    // tfr_csrf is the client half of the double-submit pair. Deleting it while
+    // the HttpOnly auth cookie is still valid — which JS can neither read nor
+    // clear — leaves the session alive but every subsequent mutation shipping
+    // no X-CSRF-Token, i.e. a silent, fail-closed write outage until reload.
+    // So the teardown is confirmed against /auth/me first.
+    describe('401s that are not session failures', () => {
+      const liveSessionCookie = 'tfr_csrf=live-session-csrf'
+
+      afterEach(() => {
+        document.cookie = 'tfr_csrf=; Max-Age=0; path=/'
+        localStorage.clear()
+      })
+
+      it.each([
+        [
+          'module SCM sync — backend 401s "not connected to this SCM provider"',
+          '/api/v1/admin/modules/m1/scm/sync',
+        ],
+        ['an authorization failure the backend returns as 401 not 403', '/api/v1/admin/users'],
+        [
+          'an external-SCM endpoint no URL heuristic knows about',
+          '/api/v1/scm-providers/1/pull-requests',
+        ],
+      ])(
+        'keeps the tfr_csrf half of the double-submit pair when /auth/me proves the session is alive: %s',
+        async (_label, url) => {
+          document.cookie = `${liveSessionCookie}; path=/`
+          localStorage.setItem('user', '{"id":"1"}')
+          window.history.pushState({}, '', '/admin/modules')
+          await getApiClient()
+          answerProbe({ status: 200 })
+
+          const error = {
+            response: { status: 401 },
+            config: { url, method: 'post' },
+            isAxiosError: true,
+          } as AxiosError
+
+          await expect(capturedResRejectedHandlers[0](error)).rejects.toBe(error)
+          await flushProbe()
+
+          expect(mockAxiosInstance.get).toHaveBeenCalledWith(
+            '/api/v1/auth/me',
+            expect.objectContaining({ _sessionProbe: true }),
+          )
+          // The pair survives, so the next POST still carries X-CSRF-Token.
+          expect(document.cookie).toContain(liveSessionCookie)
+          expect(localStorage.getItem('user')).toBe('{"id":"1"}')
+          expect(window.location.href).toContain('/admin/modules')
+        },
+      )
+
+      it('tears the session down once /auth/me confirms it really is gone', async () => {
+        document.cookie = `${liveSessionCookie}; path=/`
+        window.history.pushState({}, '', '/admin/modules')
+        await getApiClient()
+        answerProbe({ status: 401 })
+
+        const error = {
+          response: { status: 401 },
+          config: { url: '/api/v1/admin/users' },
+          isAxiosError: true,
+        } as AxiosError
+
+        await expect(capturedResRejectedHandlers[0](error)).rejects.toBe(error)
+        await flushProbe()
+
+        expect(document.cookie).not.toContain('live-session-csrf')
+        expect(window.location.href).toContain('/login')
+      })
+
+      it.each([
+        ['a 5xx from the auth service', { status: 503 }],
+        ['no response at all (network blip)', undefined],
+      ])(
+        'leaves the session intact when the confirmation cannot answer: %s',
+        async (_label, probeResponse) => {
+          document.cookie = `${liveSessionCookie}; path=/`
+          window.history.pushState({}, '', '/admin/modules')
+          await getApiClient()
+          answerProbe(probeResponse)
+
+          const error = {
+            response: { status: 401 },
+            config: { url: '/api/v1/admin/users' },
+            isAxiosError: true,
+          } as AxiosError
+
+          await expect(capturedResRejectedHandlers[0](error)).rejects.toBe(error)
+          await flushProbe()
+
+          expect(document.cookie).toContain(liveSessionCookie)
+          expect(window.location.href).toContain('/admin/modules')
+        },
+      )
+
+      it.each([
+        ['Setup Wizard SetupToken', '/api/v1/setup/admin', 'SetupToken setup-abc123'],
+        ['an explicit Bearer token', '/api/v1/modules', 'Bearer some-jwt'],
+      ])(
+        'never touches the cookie session for a request carrying its own credential (%s)',
+        async (_label, url, authorization) => {
+          document.cookie = `${liveSessionCookie}; path=/`
+          window.history.pushState({}, '', '/setup')
+          await getApiClient()
+          answerProbe({ status: 401 })
+
+          const error = {
+            response: { status: 401 },
+            config: { url, headers: { Authorization: authorization } },
+            isAxiosError: true,
+          } as AxiosError
+
+          await expect(capturedResRejectedHandlers[0](error)).rejects.toBe(error)
+          await flushProbe()
+
+          // A 401 on someone else's credential is not evidence about this one:
+          // no probe, no teardown, no redirect.
+          expect(mockAxiosInstance.get).not.toHaveBeenCalled()
+          expect(document.cookie).toContain(liveSessionCookie)
+          expect(window.location.href).toContain('/setup')
+        },
+      )
+
+      it('confirms once for a burst of concurrent 401s', async () => {
+        // A page that fans out six requests must not fan out six probes.
+        document.cookie = `${liveSessionCookie}; path=/`
+        window.history.pushState({}, '', '/admin/modules')
+        await getApiClient()
+        answerProbe({ status: 200 })
+
+        const error = {
+          response: { status: 401 },
+          config: { url: '/api/v1/admin/users' },
+          isAxiosError: true,
+        } as AxiosError
+
+        await Promise.all(
+          Array.from({ length: 6 }, () =>
+            expect(capturedResRejectedHandlers[0](error)).rejects.toBe(error),
+          ),
+        )
+        await flushProbe()
+
+        expect(mockAxiosInstance.get).toHaveBeenCalledTimes(1)
+
+        // The latch releases, so a later 401 is confirmed again rather than
+        // being trusted from a stale answer.
+        await expect(capturedResRejectedHandlers[0](error)).rejects.toBe(error)
+        await flushProbe()
+        expect(mockAxiosInstance.get).toHaveBeenCalledTimes(2)
+      })
+
+      it('does not re-enter the 401 handler for the confirmation probe itself', async () => {
+        // Without the marker the probe's own 401 would look like a fresh
+        // session-death event and recurse into another probe.
+        document.cookie = `${liveSessionCookie}; path=/`
+        window.history.pushState({}, '', '/admin/modules')
+        await getApiClient()
+        answerProbe({ status: 401 })
+
+        const probeError = {
+          response: { status: 401 },
+          config: { url: '/api/v1/auth/me', _sessionProbe: true },
+          isAxiosError: true,
+        } as unknown as AxiosError
+
+        await expect(capturedResRejectedHandlers[0](probeError)).rejects.toBe(probeError)
+        await flushProbe()
+
+        expect(mockAxiosInstance.get).not.toHaveBeenCalled()
+        expect(document.cookie).toContain(liveSessionCookie)
+        expect(window.location.href).toContain('/admin/modules')
+      })
+
+      it('needs no confirmation when /auth/me is the request that 401d', async () => {
+        // /auth/me IS the session check — asking it again would only re-ask the
+        // question it just answered.
+        document.cookie = `${liveSessionCookie}; path=/`
+        window.history.pushState({}, '', '/admin/modules')
+        await getApiClient()
+        answerProbe({ status: 200 })
+
+        const error = {
+          response: { status: 401 },
+          config: { url: '/api/v1/auth/me' },
+          isAxiosError: true,
+        } as AxiosError
+
+        await expect(capturedResRejectedHandlers[0](error)).rejects.toBe(error)
+
+        expect(mockAxiosInstance.get).not.toHaveBeenCalled()
+        expect(document.cookie).not.toContain('live-session-csrf')
+        expect(window.location.href).toContain('/login')
+      })
+
+      it('does not probe for an anonymous visitor with no session signal', async () => {
+        // No tfr_csrf means there is nothing to protect and nothing to redirect;
+        // the legacy localStorage sweep still runs.
+        localStorage.setItem('auth_token', 'stale-legacy-jwt')
+        window.history.pushState({}, '', '/public-page')
+        await getApiClient()
+        answerProbe({ status: 401 })
+
+        const error = {
+          response: { status: 401 },
+          config: { url: '/api/v1/admin/users' },
+          isAxiosError: true,
+        } as AxiosError
+
+        await expect(capturedResRejectedHandlers[0](error)).rejects.toBe(error)
+        await flushProbe()
+
+        expect(mockAxiosInstance.get).not.toHaveBeenCalled()
+        expect(localStorage.getItem('auth_token')).toBeNull()
+        expect(window.location.href).toContain('/public-page')
+      })
+    })
   })
 
   // ─── Mock-data safety (#615) ───────────────────────────────────────────────
@@ -655,6 +894,11 @@ describe('ApiClient', () => {
       vi.stubEnv('VITE_USE_MOCK_DATA', 'true')
       document.cookie = 'tfr_csrf=sess; path=/'
       await getApiClient()
+      // The /auth/me confirmation (#677) answers 401 too — the session is dead.
+      ;(mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockRejectedValue({
+        response: { status: 401 },
+        isAxiosError: true,
+      })
 
       const error = {
         response: { status: 401 },
@@ -665,6 +909,7 @@ describe('ApiClient', () => {
       const authRejectedHandler = capturedResRejectedHandlers[0]
       // Must reach the real 401 handler (reject + redirect), not resolve as mock.
       await expect(authRejectedHandler(error)).rejects.toBe(error)
+      await new Promise((resolve) => setTimeout(resolve, 0))
       expect(window.location.href).toContain('/login')
     })
 

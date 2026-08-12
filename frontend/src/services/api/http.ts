@@ -1,4 +1,4 @@
-import axios, { AxiosError, InternalAxiosRequestConfig } from 'axios'
+import axios, { AxiosError, AxiosRequestConfig, InternalAxiosRequestConfig } from 'axios'
 import { addApiBreadcrumb } from '../errorReporting'
 import { clearAuthStorage } from '../../utils/authStorage'
 import { captureReturnUrl } from '../../utils/returnUrl'
@@ -129,26 +129,93 @@ function getMockResponse(url: string): { data: unknown; status: number } {
  * expired or was revoked (show a reconnect prompt) — NOT that the user's app
  * session died. Endpoints that operate on the local provider record or the OAuth
  * linkage itself (list/get/update/delete, /oauth/*, /token, /verify) are
- * deliberately excluded: a 401 there is a real session failure and must redirect
- * to /login.
+ * deliberately excluded: a 401 there may be a real session failure.
  *
- * This is a URL-shape heuristic. The robust fix is a structured backend signal
- * (a dedicated error code) so new external-SCM endpoints need not be enumerated
- * here — see audit issue #617 (backend change, out of tree). Until then, any new
- * endpoint that calls the external SCM API on the user's behalf must be added to
- * this list.
+ * This is a URL-shape heuristic, and it is no longer load-bearing: an
+ * external-SCM endpoint missing from this list is merely `unconfirmed` (see
+ * classifySession401 below), so it costs a /auth/me round-trip instead of
+ * destroying a live session's CSRF cookie (#677). Listing one here just skips
+ * that round-trip. A structured backend error code would remove the heuristic
+ * entirely — see audit issue #617 (backend change, out of tree).
  */
 const SCM_OAUTH_SUBRESOURCES = ['/repositories', '/tags', '/branches'] as const
 
 /**
  * Classifies a 401 on an SCM-provider request as an OAuth-token failure (true,
- * keep the session) vs a user-session failure (false, wipe + redirect), from the
- * request URL shape.
+ * definitely keep the session) from the request URL shape.
  */
 export function isSCMOAuthFailureUrl(url: string): boolean {
   return (
     url.includes('/scm-providers/') && SCM_OAUTH_SUBRESOURCES.some((suffix) => url.includes(suffix))
   )
+}
+
+/**
+ * GET /api/v1/auth/me is the one endpoint whose entire job is to answer "is this
+ * browser's cookie session still alive?", and it is authenticated by nothing but
+ * that session. A 401 from it is therefore the authoritative session-death
+ * signal, and a 2xx is proof the session is alive.
+ */
+const SESSION_PROBE_URL = '/api/v1/auth/me'
+
+/**
+ * Marks the confirmation request issued by confirmSessionDead() so the 401
+ * handler ignores it: the probe asks the handler's own question, and letting its
+ * 401 back in would both recurse and look like a fresh session-death event.
+ */
+type SessionProbeConfig = { _sessionProbe?: boolean }
+
+/** Is this request itself the authoritative session check? */
+function isSessionProbeUrl(url: string): boolean {
+  return url.split('?')[0].endsWith(SESSION_PROBE_URL)
+}
+
+/**
+ * True when the request carried its own Authorization credential. Axios
+ * normalizes headers into an AxiosHeaders instance whose values are only
+ * reachable through .get(), but callers (and tests) hand in plain objects too,
+ * so both shapes are read.
+ */
+function hasExplicitAuthorization(headers: unknown): boolean {
+  if (!headers || typeof headers !== 'object') return false
+  const bag = headers as {
+    Authorization?: unknown
+    authorization?: unknown
+    get?: (name: string) => unknown
+  }
+  const viaGetter = typeof bag.get === 'function' ? bag.get('Authorization') : undefined
+  return !!(bag.Authorization ?? bag.authorization ?? viaGetter)
+}
+
+/**
+ * How a 401 relates to *this browser's cookie session* (#677). Only a request
+ * that the session cookie authenticated can report that session's death:
+ *
+ * - `other-credential` — the request authenticated with something else: an
+ *   explicit Authorization header (the Setup Wizard's SetupToken, or a Bearer
+ *   token) or an SCM-provider call the backend proxies with the stored OAuth
+ *   token. The 401 is about *that* credential and is evidence of nothing here.
+ * - `session-dead` — the request IS the session check, so its 401 is the answer.
+ * - `unconfirmed` — a cookie-authenticated request that could equally have 401d
+ *   for an authorization failure returned as 401 rather than 403, a handler-level
+ *   "not connected to this SCM provider", or a transient auth blip. The session
+ *   may well be alive, so nothing may be torn down until /auth/me says otherwise.
+ *
+ * Note the direction of the residual risk: an endpoint nobody anticipated lands
+ * in `unconfirmed`, which costs one extra GET and never destroys a live session
+ * — the opposite of a URL-shape allowlist, where the unanticipated endpoint is
+ * the one that breaks.
+ */
+export type Session401Verdict = 'other-credential' | 'session-dead' | 'unconfirmed'
+
+export function classifySession401(
+  config: { url?: string; headers?: unknown } | undefined,
+): Session401Verdict {
+  const url = config?.url || ''
+  if (isSCMOAuthFailureUrl(url) || hasExplicitAuthorization(config?.headers)) {
+    return 'other-credential'
+  }
+  return isSessionProbeUrl(url) ? 'session-dead' : 'unconfirmed'
 }
 
 /**
@@ -231,9 +298,9 @@ http.interceptors.request.use(
 // never fire it again for this page's lifetime — independent of whether the
 // tfr_csrf cookie deletion below actually took effect. Browser cookie deletion
 // silently no-ops when the cookie was set with a Domain attribute this code
-// doesn't mirror; without this guard that would keep hadSession=true forever and
-// reintroduce the /login <-> 401 redirect loop the cookie expiry is meant to
-// prevent. This module-scope flag only covers concurrent/same-tick 401s within a
+// doesn't mirror; without this guard the cookie would read as a live session
+// forever and reintroduce the /login <-> 401 redirect loop the cookie expiry is
+// meant to prevent. This module-scope flag only covers concurrent/same-tick 401s within a
 // single page instance — a real redirect is a full-page navigation that reloads
 // the module and resets it. The attribute-independent, navigation-surviving half
 // of the guard is the "already on /login" check at the redirect site below:
@@ -244,6 +311,74 @@ let hasRedirectedToLogin = false
 // The redirect target. Refusing to navigate here when we are already on this path
 // is what makes the loop guard survive a real page reload (see #621 above).
 const LOGIN_PATH = '/login'
+
+/**
+ * Consume the session: drop the client-side remnants and send the user to
+ * /login. Only called once the session is known to be dead, because the CSRF
+ * cookie expiry below is destructive in a way JS cannot undo — the HttpOnly auth
+ * cookie is not clearable from here, so a session that outlives its tfr_csrf
+ * half keeps authenticating while every mutation fails the double-submit check
+ * (#677).
+ */
+function endSession(): void {
+  clearAuthStorage()
+  // Expire the CSRF cookie so the session signal is ONE-SHOT, exactly like
+  // the localStorage keys clearAuthStorage() just removed. Without this, a
+  // session invalidated server-side (revocation, secret rotation, clock
+  // skew) redirects in a loop: /login mounts AuthProvider, which probes
+  // /auth/me, 401s, and re-triggers this handler with the cookie still set.
+  // Safe to clear from JS -- the cookie is non-HttpOnly by design and a dead
+  // session's CSRF token has no value.
+  document.cookie = 'tfr_csrf=; Max-Age=0; path=/'
+  // Two independent loop guards close the Domain-scoped-cookie case where the
+  // deletion above no-ops and the cookie session signal stays true forever: (1)
+  // the module-scope flag stops concurrent 401s in this page instance; (2) the
+  // "already on /login" check survives a real page reload (which resets that
+  // flag) — redirecting to /login while already on /login is the loop itself.
+  const alreadyOnLoginPage = window.location.pathname === LOGIN_PATH
+  if (!hasRedirectedToLogin && !alreadyOnLoginPage) {
+    hasRedirectedToLogin = true
+    // Capture INSIDE the redirect branch, not on every 401 (#695). A 401
+    // that does not navigate is an SCM-OAuth failure, an anonymous probe,
+    // or a suppressed loop-guard case -- recording a destination for any of
+    // those would leave a stale entry that hijacks the next real login.
+    captureReturnUrl()
+    window.location.href = LOGIN_PATH
+  }
+}
+
+// One confirmation at a time: a page that fans out six requests answers six
+// 401s in the same tick, and six identical /auth/me probes would answer one
+// question. Cleared when the probe settles rather than cached — a session can
+// die at any moment, so the next 401 deserves a fresh answer.
+let sessionProbeInFlight = false
+
+/**
+ * Ask /auth/me whether the session is actually dead, and only then tear it down.
+ * A probe that cannot answer (5xx, network failure, rate limit) deliberately
+ * leaves everything in place: a live session keeping a usable CSRF pair is
+ * recoverable, a live session that lost it is a silent write outage.
+ */
+function confirmSessionDead(): void {
+  if (sessionProbeInFlight) return
+  sessionProbeInFlight = true
+  http
+    // Path spelled out rather than passed as SESSION_PROBE_URL because
+    // scripts/contract-check.ts only resolves literal path arguments — inlining
+    // keeps this call under the frontend/backend route contract check.
+    .get('/api/v1/auth/me', { _sessionProbe: true } as AxiosRequestConfig & SessionProbeConfig)
+    .then(
+      () => {
+        // 2xx: the session is alive, so that 401 meant something else entirely.
+      },
+      (probeError: AxiosError) => {
+        if (probeError?.response?.status === 401) endSession()
+      },
+    )
+    .finally(() => {
+      sessionProbeInFlight = false
+    })
+}
 
 // Response interceptor for error handling
 http.interceptors.response.use(
@@ -259,47 +394,30 @@ http.interceptors.response.use(
       return getMockResponse(error.config?.url || '')
     }
 
-    if (error.response?.status === 401) {
-      // SCM provider endpoints return 401 when the SCM OAuth token has expired or
-      // been revoked — this is not a user session failure. Let the error propagate
-      // so the calling component (e.g. RepositoryBrowser) can show the reconnect
-      // prompt rather than wiping the user's session and redirecting to /login.
-      const url = error.config?.url || ''
-      const isSCMOAuthFailure = isSCMOAuthFailureUrl(url)
-
-      if (!isSCMOAuthFailure) {
-        // Only redirect when the user previously had an active cookie session.
-        // Fresh anonymous visitors receive 401 on probing endpoints like
-        // /auth/me — this is expected and should NOT trigger a redirect so
-        // public pages remain accessible. The "tfr_csrf" cookie is set only
-        // when the backend issues or refreshes the auth cookie (see
-        // middleware/csrf.go) and cleared on logout, so its presence is a
-        // reliable session signal even though the HttpOnly auth cookie itself
-        // isn't readable from JS.
-        const hadSession = !!getCookie('tfr_csrf')
-        clearAuthStorage()
-        // Expire the CSRF cookie so the session signal is ONE-SHOT, exactly like
-        // the localStorage keys clearAuthStorage() just removed. Without this, a
-        // session invalidated server-side (revocation, secret rotation, clock
-        // skew) redirects in a loop: /login mounts AuthProvider, which probes
-        // /auth/me, 401s, and re-triggers this handler with the cookie still set.
-        // Safe to clear from JS -- the cookie is non-HttpOnly by design and a dead
-        // session's CSRF token has no value.
-        document.cookie = 'tfr_csrf=; Max-Age=0; path=/'
-        // Two independent loop guards close the Domain-scoped-cookie case where the
-        // deletion above no-ops and hadSession stays true forever: (1) the
-        // module-scope flag stops concurrent 401s in this page instance; (2) the
-        // "already on /login" check survives a real page reload (which resets that
-        // flag) — redirecting to /login while already on /login is the loop itself.
-        const alreadyOnLoginPage = window.location.pathname === LOGIN_PATH
-        if (hadSession && !hasRedirectedToLogin && !alreadyOnLoginPage) {
-          hasRedirectedToLogin = true
-          // Capture INSIDE the redirect branch, not on every 401 (#695). A 401
-          // that does not navigate is an SCM-OAuth failure, an anonymous probe,
-          // or a suppressed loop-guard case -- recording a destination for any of
-          // those would leave a stale entry that hijacks the next real login.
-          captureReturnUrl()
-          window.location.href = LOGIN_PATH
+    const config = error.config as (InternalAxiosRequestConfig & SessionProbeConfig) | undefined
+    // The confirmation probe's own 401 is handled by confirmSessionDead(), which
+    // asked the question; re-entering here would recurse.
+    if (error.response?.status === 401 && !config?._sessionProbe) {
+      // Not every 401 means the session died: an SCM-provider call proxied with
+      // the stored OAuth token 401s when THAT token expired (the calling
+      // component, e.g. RepositoryBrowser, shows a reconnect prompt), and a
+      // request carrying its own Authorization credential 401s about that
+      // credential. Neither is evidence about the cookie session (#677).
+      const verdict = classifySession401(config)
+      if (verdict !== 'other-credential') {
+        // The "tfr_csrf" cookie is set only when the backend issues or refreshes
+        // the auth cookie (see middleware/csrf.go) and cleared on logout, so its
+        // presence is a reliable session signal even though the HttpOnly auth
+        // cookie itself isn't readable from JS. Without it there is no session to
+        // end and no reason to probe: fresh anonymous visitors receive 401 on
+        // endpoints like /auth/me, which must leave public pages accessible. The
+        // pre-cookie-migration localStorage keys are still swept.
+        if (!getCookie('tfr_csrf')) {
+          clearAuthStorage()
+        } else if (verdict === 'session-dead') {
+          endSession()
+        } else {
+          confirmSessionDead()
         }
       }
     }
