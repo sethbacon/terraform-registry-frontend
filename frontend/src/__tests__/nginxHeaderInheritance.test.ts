@@ -35,6 +35,51 @@ const REQUIRED = [
 ] as const
 
 /**
+ * Blank out `#` comments, replacing each with spaces of the SAME length so
+ * every byte offset below stays valid.
+ *
+ * Without this the parser reads comment text as config, and both failure modes
+ * make this guard report green while the invariant is broken:
+ *
+ *   1. The block regex is /location\s+([^{]+)\{/ and `[^{]+` spans NEWLINES.
+ *      So the bare word "location" in a server-level comment opens a match that
+ *      runs to the next `{` — the first real location block — and
+ *      serverLevelOnly() then deletes that whole span BY INDEX, taking the
+ *      server-level add_header directives out with it. The assertions then run
+ *      against a config the parser has edited the headers out of. Latent until
+ *      the first server-level comment said "location": every earlier such
+ *      comment sat INSIDE a location block, which the parser skips.
+ *
+ *   2. A commented-out `# add_header X-Frame-Options ...` would satisfy the
+ *      re-declaration check for a header nginx never sends.
+ *
+ * `#` inside a quoted value is literal to nginx, so quotes are tracked rather
+ * than scanning for a bare `#`.
+ */
+function maskComments(conf: string): string {
+  let out = ''
+  let quote: string | null = null
+  for (let i = 0; i < conf.length; i++) {
+    const c = conf[i]
+    if (quote) {
+      out += c
+      if (c === quote) quote = null
+    } else if (c === '"' || c === "'") {
+      quote = c
+      out += c
+    } else if (c === '#') {
+      let j = i
+      while (j < conf.length && conf[j] !== '\n') j++
+      out += ' '.repeat(j - i)
+      i = j - 1
+    } else {
+      out += c
+    }
+  }
+  return out
+}
+
+/**
  * Extract `location <match> { ... }` blocks, brace-balanced, keeping the index
  * range of each body.
  *
@@ -44,7 +89,10 @@ const REQUIRED = [
  * with identical bodies, or a body that also occurs verbatim earlier, silently
  * strip the wrong region and take real server-level directives with them.
  */
-function locationBlocks(conf: string): { match: string; body: string; start: number; end: number }[] {
+function locationBlocks(rawConf: string): { match: string; body: string; start: number; end: number }[] {
+  // Parse the MASKED text throughout: offsets are identical, so the ranges stay
+  // valid against the raw config, and no directive is read out of a comment.
+  const conf = maskComments(rawConf)
   const out: { match: string; body: string; start: number; end: number }[] = []
   const re = /location\s+([^{]+)\{/g
   let m: RegExpExecArray | null
@@ -64,9 +112,10 @@ function locationBlocks(conf: string): { match: string; body: string; start: num
   return out
 }
 
-/** The config with every location block removed, by index. */
-function serverLevelOnly(conf: string): string {
-  const blocks = locationBlocks(conf)
+/** The config with every location block removed, by index. Comments masked. */
+function serverLevelOnly(rawConf: string): string {
+  const conf = maskComments(rawConf)
+  const blocks = locationBlocks(rawConf)
   let out = ''
   let cursor = 0
   for (const b of blocks) {
@@ -75,6 +124,38 @@ function serverLevelOnly(conf: string): string {
   }
   return out + conf.slice(cursor)
 }
+
+describe('config parser', () => {
+  // These two cases are why maskComments() exists. Both fail OPEN — the parser
+  // silently mis-reads the config and every assertion above still passes — so
+  // they are asserted directly rather than trusted to surface via the real
+  // files. Case 1 is a live regression: it is exactly what the #743
+  // proxy_hide_header comment did to nginx.conf.
+  it('does not read a location block out of a comment', () => {
+    const conf = [
+      'server {',
+      '    # proxy_hide_header inherits into every location below.',
+      '    add_header X-Frame-Options "DENY" always;',
+      '',
+      '    location / {',
+      '        try_files $uri /index.html;',
+      '    }',
+      '}',
+    ].join('\n')
+
+    expect(locationBlocks(conf).map((b) => b.match)).toEqual(['/'])
+    expect(serverLevelOnly(conf)).toContain('add_header X-Frame-Options')
+  })
+
+  it('does not count a commented-out add_header as declared', () => {
+    const conf = ['server {', '    location /x/ {', '        # add_header X-Frame-Options "DENY";', '    }', '}'].join(
+      '\n',
+    )
+
+    expect(locationBlocks(conf)[0].body).not.toContain('add_header')
+    expect(serverLevelOnly(conf)).not.toContain('add_header')
+  })
+})
 
 const CONFIGS: [string, string][] = [
   ['nginx.conf', nginxConf],
