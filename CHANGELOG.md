@@ -1,6 +1,56 @@
 <!-- markdownlint-disable MD013 MD024 MD041 -->
 # Changelog
 
+## [2.22.0](https://github.com/sethbacon/terraform-registry-frontend/compare/v2.21.2...v2.22.0) (2026-08-12)
+
+
+### Features
+
+* adopt @4cloudguru/cloud-suite-ui from npmjs ([#756](https://github.com/sethbacon/terraform-registry-frontend/issues/756)) ([9b77b74](https://github.com/sethbacon/terraform-registry-frontend/commit/9b77b74734d4980cc87df7d7527a0f1a2a7ccbf9))
+
+
+### Bug Fixes
+
+* **api-docs:** stop replacing DOM nodes swagger-ui's React tree still owns ([#741](https://github.com/sethbacon/terraform-registry-frontend/issues/741)) ([eb16900](https://github.com/sethbacon/terraform-registry-frontend/commit/eb169008d40fc1b9cf932a93fe74884e0c4e9d48)), closes [#683](https://github.com/sethbacon/terraform-registry-frontend/issues/683)
+* **api:** confirm a 401 ended the session before clearing tfr_csrf ([#767](https://github.com/sethbacon/terraform-registry-frontend/issues/767)) ([7775b59](https://github.com/sethbacon/terraform-registry-frontend/commit/7775b59a6b5964ea8b73f36d4d43961c00460358)), closes [#677](https://github.com/sethbacon/terraform-registry-frontend/issues/677)
+* **auth:** gate Dev Login on the backend, not on the build mode ([#728](https://github.com/sethbacon/terraform-registry-frontend/issues/728)) ([de69843](https://github.com/sethbacon/terraform-registry-frontend/commit/de69843ed437a3106979b1a3e2543234293c511f))
+* **auth:** write the returnUrl that post-login restore has always read ([#745](https://github.com/sethbacon/terraform-registry-frontend/issues/745)) ([565da7c](https://github.com/sethbacon/terraform-registry-frontend/commit/565da7cf61fe5e930931ce2bb6ee91aaa1b1a4e1))
+* **ci:** check out the two ADO extension repos the replay gate requires ([#731](https://github.com/sethbacon/terraform-registry-frontend/issues/731)) ([47b67fc](https://github.com/sethbacon/terraform-registry-frontend/commit/47b67fc13274595e8b70015b4f9a63880f3730fc))
+* **ci:** Dependabot auto-merge read the App ID from the wrong place ([#721](https://github.com/sethbacon/terraform-registry-frontend/issues/721)) ([1c25247](https://github.com/sethbacon/terraform-registry-frontend/commit/1c252477d6cebedb7923a3566248ddfbabc275a7))
+* **ci:** drop the dead GitHub Packages registry from dependabot ([#758](https://github.com/sethbacon/terraform-registry-frontend/issues/758)) ([e4c2d28](https://github.com/sethbacon/terraform-registry-frontend/commit/e4c2d28992c1ba7a0c90a0c7e3a8a29f102723c7))
+* **ci:** give dependabot GitHub Packages auth for the private dep ([#750](https://github.com/sethbacon/terraform-registry-frontend/issues/750)) ([5fafe19](https://github.com/sethbacon/terraform-registry-frontend/commit/5fafe1959771b4ef95cda880a279f6eba1deab83))
+* **ci:** pin the suite-ui attestation signer repo during the bridge ([#755](https://github.com/sethbacon/terraform-registry-frontend/issues/755)) ([d04f6b4](https://github.com/sethbacon/terraform-registry-frontend/commit/d04f6b4fbe12d885a0a642f8ee14d93664307e77))
+* **ci:** point the suite-ui checkout at its new owner ([#753](https://github.com/sethbacon/terraform-registry-frontend/issues/753)) ([df3abe9](https://github.com/sethbacon/terraform-registry-frontend/commit/df3abe9739c9a1913f6e1b56e8374f14b26630a3))
+* **ci:** repair the empty `with:` blocks that broke five workflows at startup ([#726](https://github.com/sethbacon/terraform-registry-frontend/issues/726)) ([a9ce4d2](https://github.com/sethbacon/terraform-registry-frontend/commit/a9ce4d217ee552e7710f63eb24a50e712b58c0e5))
+* **ci:** retire the stale react-router exception and dead packages:read ([#760](https://github.com/sethbacon/terraform-registry-frontend/issues/760)) ([45291f6](https://github.com/sethbacon/terraform-registry-frontend/commit/45291f6c09fd100e339068fba8da81b1706abca5))
+* **ci:** spend the replay credential on the one private checkout only ([#770](https://github.com/sethbacon/terraform-registry-frontend/issues/770)) ([9bec02e](https://github.com/sethbacon/terraform-registry-frontend/commit/9bec02e7fce8d0cf0958d825da9726b9716b4820))
+* **ci:** verify library provenance by owner while its repo move settles ([#754](https://github.com/sethbacon/terraform-registry-frontend/issues/754)) ([57aa840](https://github.com/sethbacon/terraform-registry-frontend/commit/57aa840a6487362f8e76ce7f9b7888b1916e25a5))
+* **csp:** replace the img-src wildcard with a publisher-blind allowlist ([#744](https://github.com/sethbacon/terraform-registry-frontend/issues/744)) ([9b3b1ff](https://github.com/sethbacon/terraform-registry-frontend/commit/9b3b1ff33b6d77f0dd781dde11d3995f70d59799)), closes [#680](https://github.com/sethbacon/terraform-registry-frontend/issues/680)
+* **csrf:** stop getCookie from throwing on the request path ([#737](https://github.com/sethbacon/terraform-registry-frontend/issues/737)) ([010009c](https://github.com/sethbacon/terraform-registry-frontend/commit/010009c214261ae02858cc52e2339dada54deb5e)), closes [#679](https://github.com/sethbacon/terraform-registry-frontend/issues/679)
+* **docs-page:** bound the Swagger CSRF echo to same-origin requests ([#734](https://github.com/sethbacon/terraform-registry-frontend/issues/734)) ([438ac29](https://github.com/sethbacon/terraform-registry-frontend/commit/438ac291b16aacd5e31744ede8b4b24a3c6a0855)), closes [#697](https://github.com/sethbacon/terraform-registry-frontend/issues/697)
+* **export:** neutralise spreadsheet formulas in the CSV exports ([#729](https://github.com/sethbacon/terraform-registry-frontend/issues/729)) ([0759fc7](https://github.com/sethbacon/terraform-registry-frontend/commit/0759fc7e42d55358f687a03213a4254984c80527))
+* **hooks:** order module and provider versions with one shared comparator ([#761](https://github.com/sethbacon/terraform-registry-frontend/issues/761)) ([5e4d1a5](https://github.com/sethbacon/terraform-registry-frontend/commit/5e4d1a55359ca87f325c0f44e00c9e636034bae4)), closes [#673](https://github.com/sethbacon/terraform-registry-frontend/issues/673)
+* **markdown:** stop spreading react-markdown's node prop onto heading elements ([#739](https://github.com/sethbacon/terraform-registry-frontend/issues/739)) ([1767833](https://github.com/sethbacon/terraform-registry-frontend/commit/1767833261092cb423214712577e76d7e6d0addc)), closes [#681](https://github.com/sethbacon/terraform-registry-frontend/issues/681)
+* **nginx:** /terraform/ served with none of the security headers ([#727](https://github.com/sethbacon/terraform-registry-frontend/issues/727)) ([9ade9ae](https://github.com/sethbacon/terraform-registry-frontend/commit/9ade9ae6da8b94850c60f2ad1bd72f2d925fd955))
+* **nginx:** make nginx the single emitter of security headers on proxied paths ([#759](https://github.com/sethbacon/terraform-registry-frontend/issues/759)) ([4bc9a81](https://github.com/sethbacon/terraform-registry-frontend/commit/4bc9a816cad5a93c511ffd78f2b23524ffe7e9f4))
+* **release:** scan the image before publishing it, not after ([#732](https://github.com/sethbacon/terraform-registry-frontend/issues/732)) ([68e2807](https://github.com/sethbacon/terraform-registry-frontend/commit/68e28076fcccd4a91c42a57fc127e02110d6e8aa)), closes [#670](https://github.com/sethbacon/terraform-registry-frontend/issues/670)
+* **telemetry:** discard error telemetry captured before the user opted in ([#738](https://github.com/sethbacon/terraform-registry-frontend/issues/738)) ([5e92112](https://github.com/sethbacon/terraform-registry-frontend/commit/5e92112dd8bad5b1d18c10a281d38b81422f7395))
+* **telemetry:** sanitize the captureError context at the point it enters ([#740](https://github.com/sethbacon/terraform-registry-frontend/issues/740)) ([fdd757f](https://github.com/sethbacon/terraform-registry-frontend/commit/fdd757fc6a75202ac0bbce26df9a4304b9349058))
+* **upload:** cap provider archives at the backend's 500MB, not the module 100MB ([#764](https://github.com/sethbacon/terraform-registry-frontend/issues/764)) ([5091e74](https://github.com/sethbacon/terraform-registry-frontend/commit/5091e743bce5d34211db22826adf8291149b46b0))
+
+
+### Documentation
+
+* **csp:** record that the nonce is style-scoped and must not reach script-src ([#742](https://github.com/sethbacon/terraform-registry-frontend/issues/742)) ([932d966](https://github.com/sethbacon/terraform-registry-frontend/commit/932d966ba2f5338204712b6b585fe40055f015e8)), closes [#696](https://github.com/sethbacon/terraform-registry-frontend/issues/696)
+* disclose that README images are fetched directly from publisher hosts ([#735](https://github.com/sethbacon/terraform-registry-frontend/issues/735)) ([f16b1dc](https://github.com/sethbacon/terraform-registry-frontend/commit/f16b1dcf40ea97dd3e92f2c733e2202d71f27060)), closes [#680](https://github.com/sethbacon/terraform-registry-frontend/issues/680)
+
+
+### Refactor
+
+* **admin:** extract the duplicated error/success banner into a shared hook ([#763](https://github.com/sethbacon/terraform-registry-frontend/issues/763)) ([da67055](https://github.com/sethbacon/terraform-registry-frontend/commit/da67055e5f0c6b079789ecb220e8fa72afe3f119)), closes [#690](https://github.com/sethbacon/terraform-registry-frontend/issues/690)
+* **hooks:** port useProviderDetail to React Query ([#674](https://github.com/sethbacon/terraform-registry-frontend/issues/674)) ([#768](https://github.com/sethbacon/terraform-registry-frontend/issues/768)) ([312f81f](https://github.com/sethbacon/terraform-registry-frontend/commit/312f81f77b2f0c40b383fd49792136758aeaabf8))
+* **terraform-mirror:** split TerraformMirrorPage into its five dialog flows ([#769](https://github.com/sethbacon/terraform-registry-frontend/issues/769)) ([9c0f1ff](https://github.com/sethbacon/terraform-registry-frontend/commit/9c0f1ff4ad1b35636fc16d2abea997a251d97486)), closes [#675](https://github.com/sethbacon/terraform-registry-frontend/issues/675)
+
 ## [2.21.2](https://github.com/sethbacon/terraform-registry-frontend/compare/v2.21.1...v2.21.2) (2026-08-08)
 
 
