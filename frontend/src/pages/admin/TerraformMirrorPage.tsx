@@ -5,27 +5,7 @@ import { queryKeys } from '../../services/queryKeys'
 import PageHeader from '../../components/PageHeader'
 import StatusAlerts from '../../components/StatusAlerts'
 import PageTitleIcon from '@mui/icons-material/GetApp'
-import {
-  Alert,
-  Box,
-  Button,
-  Chip,
-  CircularProgress,
-  Container,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Grid,
-  Paper,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Typography,
-} from '@mui/material'
+import { Alert, Box, Button, CircularProgress, Container, Grid, Typography } from '@mui/material'
 import AddIcon from '@mui/icons-material/Add'
 import RefreshIcon from '@mui/icons-material/Refresh'
 
@@ -37,15 +17,17 @@ import ReleasesGPGKeyStatus from '../../components/ReleasesGPGKeyStatus'
 import {
   type TerraformMirrorConfig,
   type TerraformMirrorStatusResponse,
-  type TerraformVersion,
-  type TerraformSyncHistory,
 } from '../../types/terraform_mirror'
-import { SyncStatusChip, ToolChip } from './terraformMirror/StatusChips'
 import MirrorConfigCard from './terraformMirror/MirrorConfigCard'
-import MirrorVersionRow from './terraformMirror/MirrorVersionRow'
 import CreateMirrorDialog, { useCreateMirrorFlow } from './terraformMirror/CreateMirrorDialog'
 import EditMirrorDialog, { useEditMirrorFlow } from './terraformMirror/EditMirrorDialog'
 import DeleteMirrorDialog, { useDeleteMirrorFlow } from './terraformMirror/DeleteMirrorDialog'
+import {
+  DeleteVersionDialog,
+  MirrorVersionsDialog,
+  useMirrorVersionsFlow,
+} from './terraformMirror/MirrorVersionsDialog'
+import MirrorHistoryDialog, { useMirrorHistoryFlow } from './terraformMirror/MirrorHistoryDialog'
 
 // ---------------------------------------------------------------------------
 // Main page
@@ -64,25 +46,19 @@ const TerraformMirrorPage: React.FC = () => {
   const canManage = allowedScopes.includes('admin') || allowedScopes.includes('mirrors:manage')
   const status = useStatusMessage()
 
+  // The five dialog flows. Each hook owns its own dialog's state and requests;
+  // the page only holds the flow object so a card's button can open it and the
+  // matching dialog can render against it. The versions flow also owns the
+  // delete-version confirmation nested inside it, because confirming a delete
+  // reloads the version list behind it.
   const create = useCreateMirrorFlow(status)
-
   const edit = useEditMirrorFlow(status)
   const deleteMirror = useDeleteMirrorFlow(status)
-
-  // ---- versions dialog ----
-  const [versionsConfig, setVersionsConfig] = useState<TerraformMirrorConfig | null>(null)
-  const [versions, setVersions] = useState<TerraformVersion[]>([])
-  const [versionsLoading, setVersionsLoading] = useState(false)
-  const [deleteVersion, setDeleteVersion] = useState<TerraformVersion | null>(null)
-  const [deletingVersion, setDeletingVersion] = useState(false)
+  const versions = useMirrorVersionsFlow(status)
+  const history = useMirrorHistoryFlow()
 
   // ---- status overlay (per-card) ----
   const [statusMap, setStatusMap] = useState<Record<string, TerraformMirrorStatusResponse>>({})
-
-  // ---- history dialog ----
-  const [historyConfig, setHistoryConfig] = useState<TerraformMirrorConfig | null>(null)
-  const [history, setHistory] = useState<TerraformSyncHistory[]>([])
-  const [historyLoading, setHistoryLoading] = useState(false)
 
   // ---- sync in-progress ----
   const [syncingIds, setSyncingIds] = useState<Set<string>>(new Set())
@@ -134,64 +110,6 @@ const TerraformMirrorPage: React.FC = () => {
         next.delete(config.id)
         return next
       })
-    }
-  }
-
-  // ---------------------------------------------------------------------------
-  // Versions dialog
-  // ---------------------------------------------------------------------------
-  const openVersions = async (config: TerraformMirrorConfig) => {
-    setVersionsConfig(config)
-    setVersionsLoading(true)
-    setVersions([])
-    try {
-      const data = await api.listTerraformVersions(config.id, { synced: false })
-      const rows = data.versions ?? []
-      // Sort: latest first, then by version descending
-      const sorted = [...rows].sort((a, b) => {
-        if (a.is_latest !== b.is_latest) return a.is_latest ? -1 : 1
-        return b.version.localeCompare(a.version, undefined, { numeric: true })
-      })
-      setVersions(sorted)
-    } catch {
-      setVersions([])
-    } finally {
-      setVersionsLoading(false)
-    }
-  }
-
-  const handleDeleteVersion = async () => {
-    if (!deleteVersion || !versionsConfig) return
-    setDeletingVersion(true)
-    try {
-      await api.deleteTerraformVersion(versionsConfig.id, deleteVersion.version)
-      status.setSuccess(
-        t('admin.terraformMirror.versionDeleted', { version: deleteVersion.version }),
-      )
-      setDeleteVersion(null)
-      openVersions(versionsConfig)
-    } catch (err: unknown) {
-      status.setError(getErrorMessage(err, t('admin.terraformMirror.errDeleteVersion')))
-      setDeleteVersion(null)
-    } finally {
-      setDeletingVersion(false)
-    }
-  }
-
-  // ---------------------------------------------------------------------------
-  // History dialog
-  // ---------------------------------------------------------------------------
-  const openHistory = async (config: TerraformMirrorConfig) => {
-    setHistoryConfig(config)
-    setHistoryLoading(true)
-    setHistory([])
-    try {
-      const data = await api.getTerraformMirrorHistory(config.id, 20)
-      setHistory(data.history ?? [])
-    } catch {
-      setHistory([])
-    } finally {
-      setHistoryLoading(false)
     }
   }
 
@@ -268,8 +186,8 @@ const TerraformMirrorPage: React.FC = () => {
                       onEdit={edit.openDialog}
                       onDelete={deleteMirror.openDialog}
                       onSync={handleSync}
-                      onViewVersions={openVersions}
-                      onViewHistory={openHistory}
+                      onViewVersions={versions.openDialog}
+                      onViewHistory={history.openDialog}
                       syncing={syncingIds.has(cfg.id)}
                       canManage={canManage}
                     />
@@ -285,152 +203,11 @@ const TerraformMirrorPage: React.FC = () => {
 
           <DeleteMirrorDialog flow={deleteMirror} />
 
-          {/* ==================================================================
-          Versions Dialog
-      ================================================================== */}
-          {versionsConfig && (
-            <Dialog open onClose={() => setVersionsConfig(null)} maxWidth="lg" fullWidth>
-              <DialogTitle>
-                {t('admin.terraformMirror.versionsTitle', { name: versionsConfig.name })}
-                <Box component="span" sx={{ ml: 1 }}>
-                  <ToolChip tool={versionsConfig.tool} />
-                </Box>
-              </DialogTitle>
-              <DialogContent>
-                {versionsLoading ? (
-                  <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
-                    <CircularProgress />
-                  </Box>
-                ) : versions.length === 0 ? (
-                  <Alert severity="info">{t('admin.terraformMirror.noVersionsSynced')}</Alert>
-                ) : (
-                  <TableContainer component={Paper} variant="outlined">
-                    <Table size="small">
-                      <TableHead>
-                        <TableRow>
-                          <TableCell width={48} />
-                          <TableCell>{t('admin.terraformMirror.thVersion')}</TableCell>
-                          <TableCell>{t('admin.terraformMirror.thStatus')}</TableCell>
-                          <TableCell>{t('admin.terraformMirror.thApproval')}</TableCell>
-                          <TableCell>{t('admin.terraformMirror.thSyncedAt')}</TableCell>
-                          <TableCell align="right">
-                            {t('admin.terraformMirror.thActions')}
-                          </TableCell>
-                        </TableRow>
-                      </TableHead>
-                      <TableBody>
-                        {versions.map((v) => (
-                          <MirrorVersionRow
-                            key={v.id}
-                            version={v}
-                            configId={versionsConfig.id}
-                            onDelete={setDeleteVersion}
-                            canManage={canManage}
-                          />
-                        ))}
-                      </TableBody>
-                    </Table>
-                  </TableContainer>
-                )}
-              </DialogContent>
-              <DialogActions>
-                <Button onClick={() => setVersionsConfig(null)}>
-                  {t('admin.terraformMirror.close')}
-                </Button>
-              </DialogActions>
-            </Dialog>
-          )}
+          <MirrorVersionsDialog flow={versions} canManage={canManage} />
 
-          {/* ---- Delete Version Confirmation ---- */}
-          <Dialog open={!!deleteVersion} onClose={() => setDeleteVersion(null)}>
-            <DialogTitle>{t('admin.terraformMirror.deleteVersionTitle')}</DialogTitle>
-            <DialogContent>
-              <Typography>
-                {t('admin.terraformMirror.deleteVersionTextBefore')}
-                <strong>{deleteVersion?.version}</strong>
-                {t('admin.terraformMirror.deleteVersionTextAfter')}
-              </Typography>
-            </DialogContent>
-            <DialogActions>
-              <Button onClick={() => setDeleteVersion(null)}>
-                {t('admin.terraformMirror.cancel')}
-              </Button>
-              <Button color="error" onClick={handleDeleteVersion} disabled={deletingVersion}>
-                {deletingVersion ? (
-                  <CircularProgress size={18} />
-                ) : (
-                  t('admin.terraformMirror.delete')
-                )}
-              </Button>
-            </DialogActions>
-          </Dialog>
+          <DeleteVersionDialog flow={versions} />
 
-          {/* ==================================================================
-          History Dialog
-      ================================================================== */}
-          <Dialog
-            open={!!historyConfig}
-            onClose={() => setHistoryConfig(null)}
-            maxWidth="lg"
-            fullWidth
-          >
-            <DialogTitle>
-              {t('admin.terraformMirror.historyTitle', { name: historyConfig?.name })}
-            </DialogTitle>
-            <DialogContent>
-              {historyLoading ? (
-                <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
-                  <CircularProgress />
-                </Box>
-              ) : history.length === 0 ? (
-                <Alert severity="info">{t('admin.terraformMirror.noHistory')}</Alert>
-              ) : (
-                <TableContainer component={Paper} variant="outlined">
-                  <Table size="small">
-                    <TableHead>
-                      <TableRow>
-                        <TableCell>{t('admin.terraformMirror.thStarted')}</TableCell>
-                        <TableCell>{t('admin.terraformMirror.thCompleted')}</TableCell>
-                        <TableCell>{t('admin.terraformMirror.thTriggeredBy')}</TableCell>
-                        <TableCell>{t('admin.terraformMirror.thStatus')}</TableCell>
-                        <TableCell>{t('admin.terraformMirror.thVersions')}</TableCell>
-                        <TableCell>{t('admin.terraformMirror.thPlatforms')}</TableCell>
-                        <TableCell>{t('admin.terraformMirror.thFailures')}</TableCell>
-                      </TableRow>
-                    </TableHead>
-                    <TableBody>
-                      {history.map((h) => (
-                        <TableRow key={h.id} hover>
-                          <TableCell>{new Date(h.started_at).toLocaleString()}</TableCell>
-                          <TableCell>
-                            {h.completed_at ? new Date(h.completed_at).toLocaleString() : '—'}
-                          </TableCell>
-                          <TableCell>{h.triggered_by}</TableCell>
-                          <TableCell>
-                            <SyncStatusChip status={h.status} />
-                          </TableCell>
-                          <TableCell>{h.versions_synced}</TableCell>
-                          <TableCell>{h.platforms_synced}</TableCell>
-                          <TableCell>
-                            {h.versions_failed > 0 ? (
-                              <Chip label={h.versions_failed} color="error" size="small" />
-                            ) : (
-                              '0'
-                            )}
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </TableContainer>
-              )}
-            </DialogContent>
-            <DialogActions>
-              <Button onClick={() => setHistoryConfig(null)}>
-                {t('admin.terraformMirror.close')}
-              </Button>
-            </DialogActions>
-          </Dialog>
+          <MirrorHistoryDialog flow={history} />
         </Container>
       )}
     </Box>

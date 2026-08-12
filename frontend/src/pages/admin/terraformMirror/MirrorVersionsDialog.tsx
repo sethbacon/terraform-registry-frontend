@@ -86,7 +86,9 @@ export function useMirrorVersionsFlow(status: StatusMessage): MirrorVersionsFlow
     setDeleting(true)
     try {
       await api.deleteTerraformVersion(config.id, pendingDelete.version)
-      status.setSuccess(t('admin.terraformMirror.versionDeleted', { version: pendingDelete.version }))
+      status.setSuccess(
+        t('admin.terraformMirror.versionDeleted', { version: pendingDelete.version }),
+      )
       setPendingDelete(null)
       openDialog(config)
     } catch (err: unknown) {
