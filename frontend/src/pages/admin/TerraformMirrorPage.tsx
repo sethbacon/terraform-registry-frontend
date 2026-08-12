@@ -44,19 +44,14 @@ import {
   type TerraformMirrorStatusResponse,
   type TerraformVersion,
   type TerraformSyncHistory,
-  type CreateTerraformMirrorConfigRequest,
   type UpdateTerraformMirrorConfigRequest,
   parsePlatformFilter,
 } from '../../types/terraform_mirror'
 import { SyncStatusChip, ToolChip } from './terraformMirror/StatusChips'
 import MirrorConfigCard from './terraformMirror/MirrorConfigCard'
 import MirrorVersionRow from './terraformMirror/MirrorVersionRow'
-import {
-  KNOWN_PLATFORMS,
-  SUPPORTED_TOOLS,
-  emptyCreate,
-  toolDefaultUrl,
-} from './terraformMirror/constants'
+import CreateMirrorDialog, { useCreateMirrorFlow } from './terraformMirror/CreateMirrorDialog'
+import { KNOWN_PLATFORMS, SUPPORTED_TOOLS, toolDefaultUrl } from './terraformMirror/constants'
 
 // ---------------------------------------------------------------------------
 // Main page
@@ -75,11 +70,7 @@ const TerraformMirrorPage: React.FC = () => {
   const canManage = allowedScopes.includes('admin') || allowedScopes.includes('mirrors:manage')
   const status = useStatusMessage()
 
-  // ---- create dialog ----
-  const [createOpen, setCreateOpen] = useState(false)
-  const [createForm, setCreateForm] = useState<CreateTerraformMirrorConfigRequest>(emptyCreate())
-  const [createVersionFilter, setCreateVersionFilter] = useState('')
-  const [createPlatformFilter, setCreatePlatformFilter] = useState<string[]>([])
+  const create = useCreateMirrorFlow(status)
 
   // ---- edit dialog ----
   const [editConfig, setEditConfig] = useState<TerraformMirrorConfig | null>(null)
@@ -138,34 +129,6 @@ const TerraformMirrorPage: React.FC = () => {
       }
     })
   }, [configs])
-
-  // ---------------------------------------------------------------------------
-  // Create
-  // ---------------------------------------------------------------------------
-  const createMutation = useMutation({
-    mutationFn: async () => {
-      await api.createTerraformMirrorConfig({
-        ...createForm,
-        platform_filter: createPlatformFilter.length > 0 ? createPlatformFilter : undefined,
-        version_filter: createVersionFilter.trim() || undefined,
-      })
-    },
-    onSuccess: () => {
-      status.setSuccess(t('admin.terraformMirror.msgCreated', { name: createForm.name }))
-      setCreateOpen(false)
-      setCreateForm(emptyCreate())
-      setCreateVersionFilter('')
-      setCreatePlatformFilter([])
-      queryClient.invalidateQueries({ queryKey: queryKeys.terraformMirrors._def })
-    },
-    onError: (err: unknown) => {
-      status.setError(getErrorMessage(err, t('admin.terraformMirror.errCreate')))
-    },
-  })
-
-  const handleCreate = () => {
-    createMutation.mutate()
-  }
 
   // ---------------------------------------------------------------------------
   // Edit
@@ -345,16 +308,7 @@ const TerraformMirrorPage: React.FC = () => {
                   {t('admin.terraformMirror.refresh')}
                 </Button>
                 {canManage && (
-                  <Button
-                    variant="contained"
-                    startIcon={<AddIcon />}
-                    onClick={() => {
-                      setCreateForm(emptyCreate())
-                      setCreateVersionFilter('')
-                      setCreatePlatformFilter([])
-                      setCreateOpen(true)
-                    }}
-                  >
+                  <Button variant="contained" startIcon={<AddIcon />} onClick={create.openDialog}>
                     {t('admin.terraformMirror.addMirror')}
                   </Button>
                 )}
@@ -404,186 +358,7 @@ const TerraformMirrorPage: React.FC = () => {
             </Grid>
           )}
 
-          {/* ==================================================================
-          Create Dialog
-      ================================================================== */}
-          <Dialog open={createOpen} onClose={() => setCreateOpen(false)} maxWidth="sm" fullWidth>
-            <DialogTitle>{t('admin.terraformMirror.dialogTitleCreate')}</DialogTitle>
-            <DialogContent>
-              <Box sx={{ pt: 1, display: 'flex', flexDirection: 'column', gap: 2 }}>
-                <TextField
-                  label={t('admin.terraformMirror.labelName')}
-                  value={createForm.name}
-                  onChange={(e) => setCreateForm((prev) => ({ ...prev, name: e.target.value }))}
-                  helperText={t('admin.terraformMirror.helpName')}
-                  required
-                  fullWidth
-                />
-                <TextField
-                  label={t('admin.terraformMirror.labelDescription')}
-                  value={createForm.description ?? ''}
-                  onChange={(e) =>
-                    setCreateForm((prev) => ({ ...prev, description: e.target.value }))
-                  }
-                  fullWidth
-                />
-                <TextField
-                  select
-                  label={t('admin.terraformMirror.labelTool')}
-                  value={createForm.tool}
-                  onChange={(e) => {
-                    const newTool = e.target.value
-                    setCreateForm((prev) => {
-                      // Auto-update upstream URL only if it still matches the previous tool's default
-                      const prevDefault = toolDefaultUrl(prev.tool)
-                      const shouldUpdate =
-                        prev.upstream_url === prevDefault || prev.upstream_url === ''
-                      return {
-                        ...prev,
-                        tool: newTool,
-                        upstream_url: shouldUpdate ? toolDefaultUrl(newTool) : prev.upstream_url,
-                      }
-                    })
-                  }}
-                  fullWidth
-                >
-                  {SUPPORTED_TOOLS.map((toolOption) => (
-                    <MenuItem key={toolOption.value} value={toolOption.value}>
-                      {toolOption.label}
-                    </MenuItem>
-                  ))}
-                  <MenuItem value="custom">{t('admin.terraformMirror.menuCustom')}</MenuItem>
-                </TextField>
-                <TextField
-                  label={t('admin.terraformMirror.labelUpstreamUrl')}
-                  value={createForm.upstream_url}
-                  onChange={(e) =>
-                    setCreateForm((prev) => ({ ...prev, upstream_url: e.target.value }))
-                  }
-                  helperText={
-                    createForm.tool === 'opentofu'
-                      ? t('admin.terraformMirror.helpUrlOpentofu')
-                      : createForm.tool === 'terraform'
-                        ? t('admin.terraformMirror.helpUrlTerraform')
-                        : t('admin.terraformMirror.helpUrlCustom')
-                  }
-                  required
-                  fullWidth
-                />
-                <TextField
-                  label={t('admin.terraformMirror.labelSyncInterval')}
-                  type="number"
-                  value={createForm.sync_interval_hours ?? 24}
-                  onChange={(e) =>
-                    setCreateForm((prev) => ({
-                      ...prev,
-                      sync_interval_hours: parseInt(e.target.value, 10),
-                    }))
-                  }
-                  fullWidth
-                  slotProps={{
-                    htmlInput: { min: 1 },
-                  }}
-                />
-                <Box sx={{ display: 'flex', gap: 2 }}>
-                  <FormControlLabel
-                    control={
-                      <Switch
-                        checked={createForm.enabled ?? true}
-                        onChange={(e) =>
-                          setCreateForm((prev) => ({ ...prev, enabled: e.target.checked }))
-                        }
-                      />
-                    }
-                    label={t('admin.terraformMirror.labelEnabled')}
-                  />
-                  <FormControlLabel
-                    control={
-                      <Switch
-                        checked={createForm.gpg_verify ?? true}
-                        onChange={(e) =>
-                          setCreateForm((prev) => ({ ...prev, gpg_verify: e.target.checked }))
-                        }
-                      />
-                    }
-                    label={t('admin.terraformMirror.labelGpgVerify')}
-                  />
-                  <FormControlLabel
-                    control={
-                      <Switch
-                        checked={createForm.stable_only ?? false}
-                        onChange={(e) =>
-                          setCreateForm((prev) => ({ ...prev, stable_only: e.target.checked }))
-                        }
-                      />
-                    }
-                    label={t('admin.terraformMirror.labelStableOnly')}
-                  />
-                  <FormControlLabel
-                    control={
-                      <Switch
-                        checked={createForm.requires_approval ?? false}
-                        onChange={(e) =>
-                          setCreateForm((prev) => ({
-                            ...prev,
-                            requires_approval: e.target.checked,
-                          }))
-                        }
-                      />
-                    }
-                    label={t('admin.terraformMirror.labelRequiresApproval')}
-                  />
-                </Box>
-                <TextField
-                  label={t('admin.terraformMirror.labelVersionFilter')}
-                  value={createVersionFilter}
-                  onChange={(e) => setCreateVersionFilter(e.target.value)}
-                  helperText={t('admin.terraformMirror.helpVersionFilter')}
-                  fullWidth
-                />
-                <Autocomplete
-                  multiple
-                  options={KNOWN_PLATFORMS}
-                  value={createPlatformFilter}
-                  onChange={(_event, newValue) => setCreatePlatformFilter(newValue)}
-                  renderInput={(params) => (
-                    <TextField
-                      {...params}
-                      label={t('admin.terraformMirror.labelPlatformFilter')}
-                      placeholder={
-                        createPlatformFilter.length === 0
-                          ? t('admin.terraformMirror.placeholderAllPlatforms')
-                          : ''
-                      }
-                      helperText={t('admin.terraformMirror.helpPlatformFilter')}
-                      fullWidth
-                    />
-                  )}
-                  renderValue={(value, getItemProps) =>
-                    value.map((option, index) => (
-                      <Chip label={option} size="small" {...getItemProps({ index })} key={option} />
-                    ))
-                  }
-                />
-              </Box>
-            </DialogContent>
-            <DialogActions>
-              <Button onClick={() => setCreateOpen(false)}>
-                {t('admin.terraformMirror.cancel')}
-              </Button>
-              <Button
-                onClick={handleCreate}
-                variant="contained"
-                disabled={createMutation.isPending || !createForm.name || !createForm.upstream_url}
-              >
-                {createMutation.isPending ? (
-                  <CircularProgress size={18} />
-                ) : (
-                  t('admin.terraformMirror.create')
-                )}
-              </Button>
-            </DialogActions>
-          </Dialog>
+          <CreateMirrorDialog flow={create} />
 
           {/* ==================================================================
           Edit Dialog
