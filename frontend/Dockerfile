@@ -13,12 +13,10 @@ WORKDIR /app
 # Copy package files
 COPY package.json package-lock.json .npmrc ./
 
-# NODE_AUTH_TOKEN (a GitHub Packages read token) is injected as a BuildKit secret so npm
-# can install the private @sethbacon/* dependency without baking the token into a layer.
-# npm ci installs exactly what package-lock.json specifies (matches the CI pattern in
-# .github/actions/setup-frontend, which already requires the lockfile to be in sync).
-RUN --mount=type=secret,id=node_auth_token \
-    NODE_AUTH_TOKEN="$(cat /run/secrets/node_auth_token)" npm ci --no-audit --no-fund
+# .npmrc carries legacy-peer-deps=true; the suite UI dependency is public on npmjs and
+# needs no auth. npm ci installs exactly what package-lock.json specifies (matches the CI
+# pattern in .github/actions/setup-frontend, which already requires the lockfile in sync).
+RUN npm ci --no-audit --no-fund
 
 # Gate on production-dependency vulnerabilities only. Dev-only packages (e.g. eslint
 # tooling) are excluded: they are not present in the final nginx image. Deliberately no
@@ -27,9 +25,7 @@ RUN --mount=type=secret,id=node_auth_token \
 # A vulnerability fix belongs in a PR (Dependabot or manual `npm audit fix` + review)
 # where the lockfile change is reviewed before it ships, not auto-applied in the image.
 COPY scripts/audit-gate.mjs scripts/npm-audit-exceptions.json ./scripts/
-RUN --mount=type=secret,id=node_auth_token \
-    export NODE_AUTH_TOKEN="$(cat /run/secrets/node_auth_token)" && \
-    { npm audit --omit=dev --json > /tmp/audit.json || true; } && \
+RUN { npm audit --omit=dev --json > /tmp/audit.json || true; } && \
     node scripts/audit-gate.mjs /tmp/audit.json --exceptions scripts/npm-audit-exceptions.json
 
 # Copy source code

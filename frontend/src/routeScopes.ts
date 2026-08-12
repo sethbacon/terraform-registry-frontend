@@ -51,7 +51,7 @@ export type AdminRoutePath = keyof typeof ADMIN_ROUTE_SCOPES
 /**
  * Scope lookup for consumers that hold a plain `string` and cannot narrow it --
  * today, the sidebar, whose NavItem paths come from the out-of-tree
- * @sethbacon/terraform-suite-ui package.
+ * @4cloudguru/cloud-suite-ui package.
  *
  * It defaults to `null` (authenticated users only), NOT to "public". That
  * asymmetry is deliberate: an unrecognised path should hide a nav item behind

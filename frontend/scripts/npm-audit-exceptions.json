@@ -10,7 +10,7 @@
     {
       "advisories": ["GHSA-qwww-vcr4-c8h2"],
       "packages": ["react-router", "react-router-dom"],
-      "reason": "RSC-mode CSRF bypass. This app never enters the affected code path: it is a Vite SPA that mounts BrowserRouter in src/App.tsx for client-side routing only, and uses none of react-router's server/RSC APIs (no createStaticHandler, StaticRouterProvider, react-router/server import, or unstable_* server entrypoint anywhere in src/ — verified by grep). The advisory covers >=7.12.0 <8.3.0, so every 7.x release including the latest is affected; npm's only suggested remedy is a semver-major downgrade to 7.11.0, which would also break the @sethbacon/terraform-suite-ui pin that itself depends on 7.18.1. Revisit when react-router 8.3.0+ is available and suite-ui supports it.",
+      "reason": "RSC-mode CSRF bypass. This app never enters the affected code path: it is a Vite SPA that mounts BrowserRouter in src/App.tsx for client-side routing only, and uses none of react-router's server/RSC APIs (no createStaticHandler, StaticRouterProvider, react-router/server import, or unstable_* server entrypoint anywhere in src/ — verified by grep). The advisory covers >=7.12.0 <8.3.0, so every 7.x release including the latest is affected; npm's only suggested remedy is a semver-major downgrade to 7.11.0, which would also break the @4cloudguru/cloud-suite-ui pin that itself depends on 7.18.1. Revisit when react-router 8.3.0+ is available and suite-ui supports it.",
       "review_by": "2026-10-30"
     }
   ]

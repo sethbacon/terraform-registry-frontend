@@ -37,82 +37,28 @@ runs:
         cache: "npm"
         cache-dependency-path: frontend/package-lock.json
 
-    # The @sethbacon scope on the PUBLIC npm registry is owned by an unrelated account, so a
-    # missing scope mapping here would silently resolve @sethbacon/* from npmjs.org instead of
-    # GitHub Packages and land third-party code in the bundle. frontend/.npmrc supplies the
-    # mapping; this asserts it is actually in effect rather than trusting it is.
-    - name: Assert the @sethbacon scope resolves to GitHub Packages
-      if: inputs.install-deps == 'true'
-      working-directory: frontend
-      shell: bash
-      run: |
-        set -euo pipefail
-        actual=$(npm config get @sethbacon:registry)
-        expected="https://npm.pkg.github.com"
-        if [ "${actual%/}" != "$expected" ]; then
-          echo "::error::@sethbacon:registry resolves to '${actual}', expected '${expected}'. Refusing to install - @sethbacon on the public registry is not ours."
-          exit 1
-        fi
-        echo "@sethbacon:registry -> ${actual}"
-
     - name: Install frontend dependencies
       if: inputs.install-deps == 'true'
       working-directory: frontend
       shell: bash
-      env:
-        NODE_AUTH_TOKEN: ${{ github.token }}
       run: npm ci
 
     # The library publishes a SLSA provenance attestation bound to the packed tarball. Without
     # this, the attestation is an audit trail nobody reads; here it gates the build. Verified
     # locally before adding: a genuine tarball passes, and one with a single appended byte fails
     # with HTTP 404 for its altered digest.
-    - name: Verify @sethbacon/terraform-suite-ui provenance
+    - name: Verify @4cloudguru/cloud-suite-ui provenance
       if: inputs.install-deps == 'true'
       working-directory: frontend
       shell: bash
       env:
-        NODE_AUTH_TOKEN: ${{ github.token }}
         GH_TOKEN: ${{ github.token }}
       run: |
         set -euo pipefail
-        version=$(node -p "require('./package.json').dependencies['@sethbacon/terraform-suite-ui']")
+        version=$(node -p "require('./package.json').dependencies['@4cloudguru/cloud-suite-ui']")
         tmp=$(mktemp -d)
-        # Pack FROM frontend/, writing to $tmp -- never `cd "$tmp"` first. npm reads
-        # .npmrc from the cwd upward, so packing inside a temp directory drops the
-        # @sethbacon -> npm.pkg.github.com mapping the step above just asserted and
-        # resolves the tarball from the PUBLIC registry, where the scope is not ours.
-        # That is the very substitution this step exists to detect, performed by the
-        # step itself.
-        tarball=$(basename "$(npm pack "@sethbacon/terraform-suite-ui@${version}" --silent --pack-destination "$tmp" | tail -n1)")
-        # --owner, not --repo, and this is a KNOWN WEAKENING. Read before changing.
-        #
-        # The library's repo was moved to 4cloudguru/cloud-suite-ui (2026-08-11).
-        # Its attestations did NOT move: they are still indexed under
-        # users/sethbacon (repository_id 1283090189), and the SLSA predicate still
-        # names github.com/sethbacon/terraform-suite-ui as the source. So BOTH
-        # repo-scoped forms now fail --
-        #   --repo sethbacon/terraform-suite-ui   the name redirects to the new
-        #                                          repo, which has no attestations
-        #   --repo 4cloudguru/cloud-suite-ui      no attestations, and the predicate
-        #                                          names the old repo anyway
-        # -- and the failure is a 404 on the digest lookup, which is
-        # indistinguishable from the tampering this step exists to catch.
-        #
-        # --owner still verifies the signature, the digest binding and that the
-        # artifact was built by a repo owned by sethbacon. On its own it would not
-        # pin WHICH repo, so --signer-repo restores that: the predicate records the
-        # signing repo immutably as the pre-move slug, and matching it explicitly
-        # keeps the same repository-level guarantee --repo used to give.
-        #
-        # This is a bridge, not a destination. Retire it by publishing the library
-        # from its new home (which mints attestations under 4cloudguru) and then
-        # switching both flags to the new identity:
-        #   gh attestation verify "${tmp}/${tarball}" --repo 4cloudguru/cloud-suite-ui
-        # The attestations for 0.8.1 will never migrate -- they are immutable
-        # records of a build that happened under the old name -- so this stays
-        # until the dependency moves to a version published from the new repo.
-        gh attestation verify "${tmp}/${tarball}" --owner sethbacon --signer-repo sethbacon/terraform-suite-ui
+        tarball=$(basename "$(npm pack "@4cloudguru/cloud-suite-ui@${version}" --silent --pack-destination "$tmp" | tail -n1)")
+        gh attestation verify "${tmp}/${tarball}" --repo 4cloudguru/cloud-suite-ui
         rm -rf "$tmp"
 
     - name: Install e2e dependencies

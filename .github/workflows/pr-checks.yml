@@ -80,7 +80,7 @@ jobs:
       contents: read
       # setup-frontend's default `npm ci` in frontend/ authenticates to
       # npm.pkg.github.com (frontend/.npmrc) with github.token to resolve
-      # @sethbacon/terraform-suite-ui. A job-level `permissions:` block
+      # @4cloudguru/cloud-suite-ui. A job-level `permissions:` block
       # zeroes out unlisted scopes, so packages:read must be explicit here
       # (#598) -- matches ci.yml's workflow-level grant for the same reason.
       packages: read

@@ -153,10 +153,6 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
-          # GitHub Packages read token so the Docker build can npm-install the private
-          # @sethbacon/* dependency (consumed via --mount=type=secret in the Dockerfile).
-          secrets: |
-            node_auth_token=${{ secrets.GITHUB_TOKEN }}
 
       - name: Trivy image scan (BEFORE publishing)
         # Scans the local image. A failure here now means nothing was published.

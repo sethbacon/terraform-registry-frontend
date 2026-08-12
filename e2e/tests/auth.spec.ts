@@ -96,7 +96,7 @@ test.describe('Logout', () => {
     const loggedOut = page.waitForEvent('load', { timeout: 30_000 });
 
     // Click the logout menu item. Labelled "Sign out" since #438 moved this menu into
-    // the shared @sethbacon/terraform-suite-ui AppBar, whose SuiteLayout renders
+    // the shared @4cloudguru/cloud-suite-ui AppBar, whose SuiteLayout renders
     // t('auth.signOut', { defaultValue: 'Sign out' }) -- a key this app doesn't
     // override, so the literal default is what's actually on screen.
     await page.getByRole('menuitem', { name: 'Sign out' }).click();

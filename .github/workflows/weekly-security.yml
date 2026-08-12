@@ -43,7 +43,7 @@ jobs:
     # Same sibling defect as pr-checks.yml's npm-audit job (#598): without
     # an explicit grant, this job only has the workflow-level `contents:
     # read`, and setup-frontend's default `npm ci` needs packages:read to
-    # authenticate to npm.pkg.github.com for @sethbacon/terraform-suite-ui.
+    # authenticate to npm.pkg.github.com for @4cloudguru/cloud-suite-ui.
     permissions:
       contents: read
       packages: read
@@ -107,7 +107,7 @@ jobs:
       #
       # Without this the weekly run failed indefinitely on GHSA-qwww-vcr4-c8h2
       # (react-router): OSV lists a fix of 8.3.0, but that is a breaking major
-      # that also breaks the @sethbacon/terraform-suite-ui pin, so the job was
+      # that also breaks the @4cloudguru/cloud-suite-ui pin, so the job was
       # red every week with no action anyone could take (issue #643).
       - name: Triage OSV findings
         run: node frontend/scripts/audit-gate.mjs osv-results.json \
