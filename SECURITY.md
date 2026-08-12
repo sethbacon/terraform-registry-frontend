@@ -164,11 +164,11 @@ an allowlist the backend could influence would mitigate nothing.
    set, a backend able to return an arbitrary URL can point these sinks at an
    arbitrary host.
 
-### Shared private package: `@4cloudguru/cloud-suite-ui`
+### Shared package: `@4cloudguru/cloud-suite-ui`
 
-This app depends on the private, out-of-tree package
-[`@4cloudguru/cloud-suite-ui`](https://github.com/sethbacon/terraform-suite-ui)
-(GitHub Packages npm registry), which carries **load-bearing security code**
+This app depends on the out-of-tree package
+[`@4cloudguru/cloud-suite-ui`](https://github.com/4cloudguru/cloud-suite-ui)
+(public, npmjs), which carries **load-bearing security code**
 shared across the Terraform Suite apps: the authentication/session provider
 (`SuiteAuthProvider` — session lifecycle, expiry warnings, scope checks),
 the GDPR consent provider, the theme provider, and the app shell/navigation.
@@ -188,7 +188,7 @@ controls:
 - **Audited** — the package received the same blind security audit
   methodology as this repo on 2026-07-10 (26 findings: 2 high, 16 medium,
   remainder low/info). All findings were remediated in
-  [v0.5.3](https://github.com/sethbacon/terraform-suite-ui/releases/tag/v0.5.3)
+  [v0.5.3](https://github.com/4cloudguru/cloud-suite-ui/releases/tag/v0.5.3)
   (2026-07-11). The pin has moved past v0.5.3 since then via the manual,
   reviewed update process below -- see `frontend/package.json` for the
   exact version currently pinned, rather than relying on a version number
@@ -199,9 +199,10 @@ controls:
   contains only `dist/` + docs before publishing and attaches a build
   provenance attestation (`actions/attest-build-provenance`) to each
   release.
-- **Manual, reviewed updates** — Dependabot does not have credentials for
-  the private registry, so this dependency is deliberately outside
-  Dependabot's reach. Version bumps are manual PRs that must update the
-  exact pin and lockfile together and review the upstream
-  [CHANGELOG](https://github.com/sethbacon/terraform-suite-ui/blob/main/CHANGELOG.md)
+- **Manual, reviewed updates** — this dependency is deliberately held
+  outside Dependabot's reach by an explicit `@4cloudguru/*` `ignore` rule in
+  `.github/dependabot.yml`: it is released and version-pinned in lockstep with
+  the rest of the suite, out of band. Version bumps are manual PRs that must
+  update the exact pin and lockfile together and review the upstream
+  [CHANGELOG](https://github.com/4cloudguru/cloud-suite-ui/blob/main/CHANGELOG.md)
   for auth/consent-relevant changes.
