@@ -100,18 +100,19 @@ runs:
         # indistinguishable from the tampering this step exists to catch.
         #
         # --owner still verifies the signature, the digest binding and that the
-        # artifact was built by a repo owned by sethbacon. What it no longer pins
-        # is WHICH repo. That is weaker, and it is deliberate rather than
-        # accidental.
+        # artifact was built by a repo owned by sethbacon. On its own it would not
+        # pin WHICH repo, so --signer-repo restores that: the predicate records the
+        # signing repo immutably as the pre-move slug, and matching it explicitly
+        # keeps the same repository-level guarantee --repo used to give.
         #
         # This is a bridge, not a destination. Retire it by publishing the library
         # from its new home (which mints attestations under 4cloudguru) and then
-        # restoring the strict form:
+        # switching both flags to the new identity:
         #   gh attestation verify "${tmp}/${tarball}" --repo 4cloudguru/cloud-suite-ui
         # The attestations for 0.8.1 will never migrate -- they are immutable
         # records of a build that happened under the old name -- so this stays
         # until the dependency moves to a version published from the new repo.
-        gh attestation verify "${tmp}/${tarball}" --owner sethbacon
+        gh attestation verify "${tmp}/${tarball}" --owner sethbacon --signer-repo sethbacon/terraform-suite-ui
         rm -rf "$tmp"
 
     - name: Install e2e dependencies
