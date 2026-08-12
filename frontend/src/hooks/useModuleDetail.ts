@@ -11,22 +11,7 @@ import { REGISTRY_HOST } from '../config'
 import { getErrorMessage, getErrorStatus } from '../utils/errors'
 import { queryKeys } from '../services/queryKeys'
 import { isSafeExternalUrl } from '../utils/externalUrl'
-
-// ---------------------------------------------------------------------------
-// Semver sort helper (shared by query & version selection)
-// ---------------------------------------------------------------------------
-function sortVersionsDesc(raw: ModuleVersion[]): ModuleVersion[] {
-  return [...raw].sort((a, b) => {
-    const parseParts = (v: string): [number, number, number] => {
-      const clean = v.replace(/^v/, '').split('-')[0]
-      const [maj = 0, min = 0, pat = 0] = clean.split('.').map(Number)
-      return [maj, min, pat]
-    }
-    const [aMaj, aMin, aPat] = parseParts(a.version)
-    const [bMaj, bMin, bPat] = parseParts(b.version)
-    return bMaj !== aMaj ? bMaj - aMaj : bMin !== aMin ? bMin - aMin : bPat - aPat
-  })
-}
+import { sortByVersionDesc } from '../utils/semver'
 
 const POLL_DELAYS = [2000, 5000, 12000] as const
 
@@ -105,7 +90,7 @@ export function useModuleDetail() {
       const moduleVersions = Array.isArray(mod?.versions) ? mod.versions : []
       const rawVersions: ModuleVersion[] =
         protocolVersions.length > 0 ? protocolVersions : moduleVersions
-      const mergedVersions = sortVersionsDesc(rawVersions)
+      const mergedVersions = sortByVersionDesc(rawVersions)
 
       return { module: mod, versions: mergedVersions }
     },
