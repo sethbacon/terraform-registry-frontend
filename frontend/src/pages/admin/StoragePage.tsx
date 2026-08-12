@@ -50,6 +50,7 @@ import SyncIcon from '@mui/icons-material/Sync'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import HistoryIcon from '@mui/icons-material/History'
 import api from '../../services/api'
+import { useStatusMessage } from '../../hooks/useStatusMessage'
 import { getErrorMessage, sanitizeServerErrorMessage } from '../../utils/errors'
 import type {
   StorageConfigResponse,
@@ -60,14 +61,14 @@ import type {
 import { queryKeys } from '../../services/queryKeys'
 import Page from '../../components/Page'
 import PageHeader from '../../components/PageHeader'
+import StatusAlerts from '../../components/StatusAlerts'
 import PageTitleIcon from '@mui/icons-material/Storage'
 import StorageMigrationWizard from '../../components/StorageMigrationWizard'
 
 const StoragePage: React.FC = () => {
   const { t } = useTranslation()
   const queryClient = useQueryClient()
-  const [error, setError] = useState<string | null>(null)
-  const [success, setSuccess] = useState<string | null>(null)
+  const status = useStatusMessage()
   const [saving, setSaving] = useState(false)
   const [testing, setTesting] = useState(false)
   const [migrationWizardOpen, setMigrationWizardOpen] = useState(false)
@@ -118,19 +119,19 @@ const StoragePage: React.FC = () => {
   const activateMutation = useMutation({
     mutationFn: (id: string) => api.activateStorageConfig(id),
     onSuccess: (data) => {
-      setSuccess(data.message || t('admin.storage.msgActivated'))
+      status.setSuccess(data.message || t('admin.storage.msgActivated'))
       queryClient.invalidateQueries({ queryKey: queryKeys.storageConfigs._def })
     },
-    onError: (err) => setError(getErrorMessage(err, t('admin.storage.errActivate'))),
+    onError: (err) => status.setError(getErrorMessage(err, t('admin.storage.errActivate'))),
   })
 
   const deleteMutation = useMutation({
     mutationFn: (id: string) => api.deleteStorageConfig(id),
     onSuccess: () => {
-      setSuccess(t('admin.storage.msgDeleted'))
+      status.setSuccess(t('admin.storage.msgDeleted'))
       queryClient.invalidateQueries({ queryKey: queryKeys.storageConfigs._def })
     },
-    onError: (err) => setError(getErrorMessage(err, t('admin.storage.errDelete'))),
+    onError: (err) => status.setError(getErrorMessage(err, t('admin.storage.errDelete'))),
   })
 
   const testMutation = useMutation({
@@ -159,19 +160,21 @@ const StoragePage: React.FC = () => {
     },
     onSuccess: (result) => {
       if (result.success) {
-        setSuccess(t('admin.storage.msgTestPassed'))
+        status.setSuccess(t('admin.storage.msgTestPassed'))
       } else {
         // Never render the backend test-failure string verbatim: a storage
         // connection test is a prime leak point for host:port / paths (CWE-209,
         // #601). Sanitize, falling back to the generic message.
-        setError(sanitizeServerErrorMessage(result.message) ?? t('admin.storage.errTestFailed'))
+        status.setError(
+          sanitizeServerErrorMessage(result.message) ?? t('admin.storage.errTestFailed'),
+        )
       }
     },
-    onError: (err) => setError(getErrorMessage(err, t('admin.storage.errConfigTest'))),
+    onError: (err) => status.setError(getErrorMessage(err, t('admin.storage.errConfigTest'))),
   })
 
-  if (queryError && !error) {
-    setError(getErrorMessage(queryError, t('admin.storage.errLoad')))
+  if (queryError && !status.error) {
+    status.setError(getErrorMessage(queryError, t('admin.storage.errLoad')))
   }
 
   const handleBackendChange = (type: StorageBackendType) => {
@@ -204,13 +207,13 @@ const StoragePage: React.FC = () => {
   const handleTestConfig = async () => {
     try {
       setTesting(true)
-      setError(null)
+      status.setError(null)
       const result = await api.testStorageConfig(formData)
       if (result.success) {
-        setSuccess(t('admin.storage.msgValid'))
+        status.setSuccess(t('admin.storage.msgValid'))
       }
     } catch (err: unknown) {
-      setError(getErrorMessage(err, t('admin.storage.errConfigTest')))
+      status.setError(getErrorMessage(err, t('admin.storage.errConfigTest')))
     } finally {
       setTesting(false)
     }
@@ -219,14 +222,14 @@ const StoragePage: React.FC = () => {
   const handleSaveConfig = async () => {
     try {
       setSaving(true)
-      setError(null)
+      status.setError(null)
       await api.createStorageConfig(formData)
-      setSuccess(t('admin.storage.msgSaved'))
+      status.setSuccess(t('admin.storage.msgSaved'))
       queryClient.invalidateQueries({ queryKey: queryKeys.storageConfigs._def })
       setActiveStep(0)
       setShowAddWizard(false)
     } catch (err: unknown) {
-      setError(getErrorMessage(err, t('admin.storage.errSave')))
+      status.setError(getErrorMessage(err, t('admin.storage.errSave')))
     } finally {
       setSaving(false)
     }
@@ -680,17 +683,7 @@ const StoragePage: React.FC = () => {
         ))}
       </Stepper>
 
-      {error && (
-        <Alert severity="error" sx={{ mb: 2 }} onClose={() => setError(null)}>
-          {error}
-        </Alert>
-      )}
-
-      {success && (
-        <Alert severity="success" sx={{ mb: 2 }} onClose={() => setSuccess(null)}>
-          {success}
-        </Alert>
-      )}
+      <StatusAlerts status={status} mb={2} />
 
       <Paper sx={{ p: 3, mb: 3 }}>
         {activeStep === 0 && renderBackendSelection()}
@@ -779,17 +772,7 @@ const StoragePage: React.FC = () => {
         }
       />
 
-      {error && (
-        <Alert severity="error" sx={{ mb: 2 }} onClose={() => setError(null)}>
-          {error}
-        </Alert>
-      )}
-
-      {success && (
-        <Alert severity="success" sx={{ mb: 2 }} onClose={() => setSuccess(null)}>
-          {success}
-        </Alert>
-      )}
+      <StatusAlerts status={status} mb={2} />
 
       <Alert severity="info" sx={{ mb: 3 }}>
         <Box

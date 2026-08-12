@@ -35,8 +35,10 @@ import BlockIcon from '@mui/icons-material/Block'
 import PlayArrowIcon from '@mui/icons-material/PlayArrow'
 import Page from '../../components/Page'
 import PageHeader from '../../components/PageHeader'
+import StatusAlerts from '../../components/StatusAlerts'
 import PageTitleIcon from '@mui/icons-material/Policy'
 import api from '../../services/api'
+import { useStatusMessage } from '../../hooks/useStatusMessage'
 import { MirrorPolicy, PolicyEvaluationResult } from '../../types/rbac'
 import { getErrorMessage } from '../../utils/errors'
 import { queryKeys } from '../../services/queryKeys'
@@ -68,8 +70,7 @@ const defaultFormData: PolicyFormData = {
 const MirrorPoliciesPage: React.FC = () => {
   const { t } = useTranslation()
   const queryClient = useQueryClient()
-  const [error, setError] = useState<string | null>(null)
-  const [success, setSuccess] = useState<string | null>(null)
+  const status = useStatusMessage()
 
   // Create / Edit dialog
   const [formDialogOpen, setFormDialogOpen] = useState(false)
@@ -99,8 +100,8 @@ const MirrorPoliciesPage: React.FC = () => {
     },
   })
 
-  if (queryError && !error) {
-    setError(getErrorMessage(queryError, t('admin.mirrorPolicies.errLoad')))
+  if (queryError && !status.error) {
+    status.setError(getErrorMessage(queryError, t('admin.mirrorPolicies.errLoad')))
   }
 
   const saveMutation = useMutation({
@@ -111,17 +112,16 @@ const MirrorPoliciesPage: React.FC = () => {
       return api.createMirrorPolicy(payload)
     },
     onSuccess: () => {
-      setSuccess(
+      status.showSuccess(
         editingPolicy ? t('admin.mirrorPolicies.msgUpdated') : t('admin.mirrorPolicies.msgCreated'),
       )
-      setError(null)
       setFormDialogOpen(false)
       setEditingPolicy(null)
       setFormData(defaultFormData)
       queryClient.invalidateQueries({ queryKey: queryKeys.policies._def })
     },
     onError: (err: unknown) => {
-      setError(getErrorMessage(err, t('admin.mirrorPolicies.errSave')))
+      status.setError(getErrorMessage(err, t('admin.mirrorPolicies.errSave')))
     },
   })
 
@@ -130,19 +130,18 @@ const MirrorPoliciesPage: React.FC = () => {
     onSuccess: () => {
       setDeleteDialogOpen(false)
       setPolicyToDelete(null)
-      setSuccess(t('admin.mirrorPolicies.msgDeleted'))
-      setError(null)
+      status.showSuccess(t('admin.mirrorPolicies.msgDeleted'))
       queryClient.invalidateQueries({ queryKey: queryKeys.policies._def })
     },
     onError: (err: unknown) => {
-      setError(getErrorMessage(err, t('admin.mirrorPolicies.errDelete')))
+      status.setError(getErrorMessage(err, t('admin.mirrorPolicies.errDelete')))
     },
   })
 
   const saving = saveMutation.isPending
 
   const handleSave = () => {
-    setError(null)
+    status.setError(null)
     saveMutation.mutate({
       name: formData.name,
       description: formData.description || undefined,
@@ -158,7 +157,7 @@ const MirrorPoliciesPage: React.FC = () => {
 
   const handleDelete = () => {
     if (!policyToDelete) return
-    setError(null)
+    status.setError(null)
     deleteMutation.mutate(policyToDelete.id)
   }
 
@@ -173,7 +172,7 @@ const MirrorPoliciesPage: React.FC = () => {
       })
       setEvaluateResult(result)
     } catch (err: unknown) {
-      setError(getErrorMessage(err, t('admin.mirrorPolicies.errEvaluate')))
+      status.setError(getErrorMessage(err, t('admin.mirrorPolicies.errEvaluate')))
     } finally {
       setEvaluating(false)
     }
@@ -272,17 +271,7 @@ const MirrorPoliciesPage: React.FC = () => {
             }
           />
 
-          {error && (
-            <Alert severity="error" sx={{ mb: 2 }} onClose={() => setError(null)}>
-              {error}
-            </Alert>
-          )}
-
-          {success && (
-            <Alert severity="success" sx={{ mb: 2 }} onClose={() => setSuccess(null)}>
-              {success}
-            </Alert>
-          )}
+          <StatusAlerts status={status} mb={2} />
 
           <Grid container spacing={3}>
             {policies.map((policy) => (

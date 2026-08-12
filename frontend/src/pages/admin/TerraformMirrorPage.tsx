@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { queryKeys } from '../../services/queryKeys'
 import PageHeader from '../../components/PageHeader'
+import StatusAlerts from '../../components/StatusAlerts'
 import PageTitleIcon from '@mui/icons-material/GetApp'
 import {
   Autocomplete,
@@ -64,6 +65,7 @@ import RefreshIcon from '@mui/icons-material/Refresh'
 import SyncIcon from '@mui/icons-material/Sync'
 
 import api from '../../services/api'
+import { useStatusMessage } from '../../hooks/useStatusMessage'
 import { getErrorMessage } from '../../utils/errors'
 import { useAuth } from '../../contexts/AuthContext'
 import ReleasesGPGKeyStatus from '../../components/ReleasesGPGKeyStatus'
@@ -531,8 +533,7 @@ const TerraformMirrorPage: React.FC = () => {
   // mirrors:read-only viewer would otherwise see fully actionable controls
   // that only fail once clicked (#609).
   const canManage = allowedScopes.includes('admin') || allowedScopes.includes('mirrors:manage')
-  const [error, setError] = useState<string | null>(null)
-  const [success, setSuccess] = useState<string | null>(null)
+  const status = useStatusMessage()
 
   // ---- create dialog ----
   const [createOpen, setCreateOpen] = useState(false)
@@ -582,8 +583,8 @@ const TerraformMirrorPage: React.FC = () => {
     },
   })
 
-  if (queryError && !error) {
-    setError(getErrorMessage(queryError, t('admin.terraformMirror.errLoad')))
+  if (queryError && !status.error) {
+    status.setError(getErrorMessage(queryError, t('admin.terraformMirror.errLoad')))
   }
 
   // Lazy-load status for each card when configs change
@@ -610,7 +611,7 @@ const TerraformMirrorPage: React.FC = () => {
       })
     },
     onSuccess: () => {
-      setSuccess(t('admin.terraformMirror.msgCreated', { name: createForm.name }))
+      status.setSuccess(t('admin.terraformMirror.msgCreated', { name: createForm.name }))
       setCreateOpen(false)
       setCreateForm(emptyCreate())
       setCreateVersionFilter('')
@@ -618,7 +619,7 @@ const TerraformMirrorPage: React.FC = () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.terraformMirrors._def })
     },
     onError: (err: unknown) => {
-      setError(getErrorMessage(err, t('admin.terraformMirror.errCreate')))
+      status.setError(getErrorMessage(err, t('admin.terraformMirror.errCreate')))
     },
   })
 
@@ -656,12 +657,12 @@ const TerraformMirrorPage: React.FC = () => {
       })
     },
     onSuccess: () => {
-      setSuccess(t('admin.terraformMirror.msgUpdated', { name: editConfig?.name }))
+      status.setSuccess(t('admin.terraformMirror.msgUpdated', { name: editConfig?.name }))
       setEditConfig(null)
       queryClient.invalidateQueries({ queryKey: queryKeys.terraformMirrors._def })
     },
     onError: (err: unknown) => {
-      setError(getErrorMessage(err, t('admin.terraformMirror.errUpdate')))
+      status.setError(getErrorMessage(err, t('admin.terraformMirror.errUpdate')))
     },
   })
 
@@ -679,12 +680,12 @@ const TerraformMirrorPage: React.FC = () => {
       await api.deleteTerraformMirrorConfig(deleteConfig.id)
     },
     onSuccess: () => {
-      setSuccess(t('admin.terraformMirror.msgDeleted', { name: deleteConfig?.name }))
+      status.setSuccess(t('admin.terraformMirror.msgDeleted', { name: deleteConfig?.name }))
       setDeleteConfig(null)
       queryClient.invalidateQueries({ queryKey: queryKeys.terraformMirrors._def })
     },
     onError: (err: unknown) => {
-      setError(getErrorMessage(err, t('admin.terraformMirror.errDelete')))
+      status.setError(getErrorMessage(err, t('admin.terraformMirror.errDelete')))
     },
   })
 
@@ -700,9 +701,9 @@ const TerraformMirrorPage: React.FC = () => {
     setSyncingIds((prev) => new Set([...prev, config.id]))
     try {
       await api.triggerTerraformMirrorSync(config.id)
-      setSuccess(t('admin.terraformMirror.syncTriggered', { name: config.name }))
+      status.setSuccess(t('admin.terraformMirror.syncTriggered', { name: config.name }))
     } catch (err: unknown) {
-      setError(getErrorMessage(err, t('admin.terraformMirror.errTriggerSync')))
+      status.setError(getErrorMessage(err, t('admin.terraformMirror.errTriggerSync')))
     } finally {
       setSyncingIds((prev) => {
         const next = new Set(prev)
@@ -740,11 +741,13 @@ const TerraformMirrorPage: React.FC = () => {
     setDeletingVersion(true)
     try {
       await api.deleteTerraformVersion(versionsConfig.id, deleteVersion.version)
-      setSuccess(t('admin.terraformMirror.versionDeleted', { version: deleteVersion.version }))
+      status.setSuccess(
+        t('admin.terraformMirror.versionDeleted', { version: deleteVersion.version }),
+      )
       setDeleteVersion(null)
       openVersions(versionsConfig)
     } catch (err: unknown) {
-      setError(getErrorMessage(err, t('admin.terraformMirror.errDeleteVersion')))
+      status.setError(getErrorMessage(err, t('admin.terraformMirror.errDeleteVersion')))
       setDeleteVersion(null)
     } finally {
       setDeletingVersion(false)
@@ -830,16 +833,7 @@ const TerraformMirrorPage: React.FC = () => {
             </Typography>
           </Alert>
 
-          {error && (
-            <Alert severity="error" onClose={() => setError(null)} sx={{ mb: 2 }}>
-              {error}
-            </Alert>
-          )}
-          {success && (
-            <Alert severity="success" onClose={() => setSuccess(null)} sx={{ mb: 2 }}>
-              {success}
-            </Alert>
-          )}
+          <StatusAlerts status={status} mb={2} />
 
           {/* Release signing key status panel */}
           <ReleasesGPGKeyStatus />

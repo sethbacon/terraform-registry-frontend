@@ -21,7 +21,6 @@ import {
   FormControl,
   InputLabel,
   FormHelperText,
-  Alert,
   CircularProgress,
   Tooltip,
   Divider,
@@ -38,8 +37,10 @@ import CheckCircleIcon from '@mui/icons-material/CheckCircle'
 import LinkOffIcon from '@mui/icons-material/LinkOff'
 import Page from '../../components/Page'
 import PageHeader from '../../components/PageHeader'
+import StatusAlerts from '../../components/StatusAlerts'
 import PageTitleIcon from '@mui/icons-material/GitHub'
 import api from '../../services/api'
+import { useStatusMessage } from '../../hooks/useStatusMessage'
 import { getErrorMessage } from '../../utils/errors'
 import { isSafeExternalUrl } from '../../utils/externalUrl'
 import { useAuth } from '../../contexts/AuthContext'
@@ -71,7 +72,7 @@ const SCMProvidersPage: React.FC = () => {
   // admin — a scm:read-only viewer would otherwise see fully actionable
   // credential controls that only fail once clicked (#609).
   const canManage = allowedScopes.includes('admin') || allowedScopes.includes('scm:manage')
-  const [error, setError] = useState<string | null>(null)
+  const status = useStatusMessage()
   const [createDialogOpen, setCreateDialogOpen] = useState(false)
   const [editingProvider, setEditingProvider] = useState<SCMProvider | null>(null)
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false)
@@ -141,8 +142,8 @@ const SCMProvidersPage: React.FC = () => {
     enabled: providers.length > 0,
   })
 
-  if (queryError && !error) {
-    setError(getErrorMessage(queryError, t('admin.scmProviders.errLoad')))
+  if (queryError && !status.error) {
+    status.setError(getErrorMessage(queryError, t('admin.scmProviders.errLoad')))
   }
 
   const createMutation = useMutation({
@@ -150,11 +151,11 @@ const SCMProvidersPage: React.FC = () => {
     onSuccess: () => {
       setCreateDialogOpen(false)
       resetForm()
-      setError(null)
+      status.setError(null)
       queryClient.invalidateQueries({ queryKey: queryKeys.scmProviders._def })
     },
     onError: (err: unknown) => {
-      setError(getErrorMessage(err, t('admin.scmProviders.errCreate')))
+      status.setError(getErrorMessage(err, t('admin.scmProviders.errCreate')))
     },
   })
 
@@ -177,11 +178,11 @@ const SCMProvidersPage: React.FC = () => {
     onSuccess: () => {
       setEditingProvider(null)
       resetForm()
-      setError(null)
+      status.setError(null)
       queryClient.invalidateQueries({ queryKey: queryKeys.scmProviders._def })
     },
     onError: (err: unknown) => {
-      setError(getErrorMessage(err, t('admin.scmProviders.errUpdate')))
+      status.setError(getErrorMessage(err, t('admin.scmProviders.errUpdate')))
     },
   })
 
@@ -190,27 +191,27 @@ const SCMProvidersPage: React.FC = () => {
     onSuccess: () => {
       setDeleteConfirmOpen(false)
       setProviderToDelete(null)
-      setError(null)
+      status.setError(null)
       queryClient.invalidateQueries({ queryKey: queryKeys.scmProviders._def })
     },
     onError: (err: unknown) => {
-      setError(getErrorMessage(err, t('admin.scmProviders.errDelete')))
+      status.setError(getErrorMessage(err, t('admin.scmProviders.errDelete')))
     },
   })
 
   const handleCreate = () => {
-    setError(null)
+    status.setError(null)
     createMutation.mutate()
   }
 
   const handleUpdate = () => {
-    setError(null)
+    status.setError(null)
     updateMutation.mutate()
   }
 
   const handleDelete = () => {
     if (!providerToDelete) return
-    setError(null)
+    status.setError(null)
     deleteMutation.mutate(providerToDelete.id)
   }
 
@@ -226,12 +227,12 @@ const SCMProvidersPage: React.FC = () => {
         // SCM provider's own OAuth config); validate it at the app boundary before
         // this full-page redirect navigation sink, instead of trusting it verbatim (#559).
         if (!isSafeExternalUrl(response.authorization_url)) {
-          setError(t('admin.scmProviders.errOAuthInvalidUrl'))
+          status.setError(t('admin.scmProviders.errOAuthInvalidUrl'))
           return
         }
         window.location.href = response.authorization_url
       } catch (err: unknown) {
-        setError(getErrorMessage(err, t('admin.scmProviders.errOAuth')))
+        status.setError(getErrorMessage(err, t('admin.scmProviders.errOAuth')))
       }
     }
   }
@@ -239,13 +240,13 @@ const SCMProvidersPage: React.FC = () => {
   const handleSavePAT = async () => {
     if (!patProvider || !patValue) return
     try {
-      setError(null)
+      status.setError(null)
       await api.saveSCMToken(patProvider.id, patValue)
       setPatDialogOpen(false)
       setPatValue('')
       setPatProvider(null)
     } catch (err: unknown) {
-      setError(getErrorMessage(err, t('admin.scmProviders.errSaveToken')))
+      status.setError(getErrorMessage(err, t('admin.scmProviders.errSaveToken')))
     }
   }
 
@@ -439,11 +440,7 @@ const SCMProvidersPage: React.FC = () => {
             }
           />
 
-          {error && (
-            <Alert severity="error" sx={{ mb: 2 }} onClose={() => setError(null)}>
-              {error}
-            </Alert>
-          )}
+          <StatusAlerts status={status} mb={2} />
 
           <Grid container spacing={3}>
             {providers.map((provider) => (
@@ -710,7 +707,7 @@ const SCMProvidersPage: React.FC = () => {
                                     queryKey: queryKeys.scmProviders._def,
                                   })
                                 } catch (err: unknown) {
-                                  setError(
+                                  status.setError(
                                     getErrorMessage(err, t('admin.scmProviders.errDisconnect')),
                                   )
                                 }

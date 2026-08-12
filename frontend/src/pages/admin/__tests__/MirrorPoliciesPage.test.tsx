@@ -212,6 +212,23 @@ describe('MirrorPoliciesPage', () => {
     await waitFor(() => expect(deleteMirrorPolicyMock).toHaveBeenCalledWith('pol-1'))
   })
 
+  // Covers the page -> useStatusMessage -> StatusAlerts chain for the success
+  // banner; the "shows error state when API fails" case above covers the error
+  // banner. Between them the shared wiring is exercised end to end.
+  it('shows the success banner after a policy is deleted', async () => {
+    listMirrorPoliciesMock.mockResolvedValue(fakePolicies)
+    deleteMirrorPolicyMock.mockResolvedValue({})
+    renderPage()
+    await waitFor(() => expect(screen.getByText('Allow HashiCorp')).toBeInTheDocument())
+    await userEvent.click(screen.getAllByRole('button', { name: /delete policy/i })[0])
+    await waitFor(() => expect(screen.getByText('Confirm Delete')).toBeInTheDocument())
+    const confirmBtns = screen.getAllByRole('button', { name: /^delete$/i })
+    await userEvent.click(confirmBtns[confirmBtns.length - 1])
+    await waitFor(() => {
+      expect(screen.getByText('Policy deleted successfully')).toBeInTheDocument()
+    })
+  })
+
   it('cancels create dialog', async () => {
     listMirrorPoliciesMock.mockResolvedValue([])
     renderPage()

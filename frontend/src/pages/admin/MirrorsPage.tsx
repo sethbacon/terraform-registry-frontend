@@ -63,8 +63,10 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import ScheduleIcon from '@mui/icons-material/Schedule'
 import Page from '../../components/Page'
 import PageHeader from '../../components/PageHeader'
+import StatusAlerts from '../../components/StatusAlerts'
 import PageTitleIcon from '@mui/icons-material/CloudDownload'
 import api from '../../services/api'
+import { useStatusMessage } from '../../hooks/useStatusMessage'
 import { useAuth } from '../../contexts/AuthContext'
 import {
   type MirrorConfiguration,
@@ -295,8 +297,7 @@ const MirrorsPage: React.FC = () => {
   // mirrors:manage/admin — a mirrors:read-only viewer would otherwise see
   // fully actionable controls that only fail once clicked (#609).
   const canManage = allowedScopes.includes('admin') || allowedScopes.includes('mirrors:manage')
-  const [error, setError] = useState<string | null>(null)
-  const [success, setSuccess] = useState<string | null>(null)
+  const status = useStatusMessage()
   const [createDialogOpen, setCreateDialogOpen] = useState(false)
   const [editingMirror, setEditingMirror] = useState<MirrorConfiguration | null>(null)
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false)
@@ -355,8 +356,8 @@ const MirrorsPage: React.FC = () => {
     },
   })
 
-  if (queryError && !error) {
-    setError(getErrorMessage(queryError, t('admin.mirrors.errLoadMirrors')))
+  if (queryError && !status.error) {
+    status.setError(getErrorMessage(queryError, t('admin.mirrors.errLoadMirrors')))
   }
 
   // Auto-open the Add Mirror dialog when navigated here with ?action=add.
@@ -374,12 +375,11 @@ const MirrorsPage: React.FC = () => {
     onSuccess: () => {
       setCreateDialogOpen(false)
       resetForm()
-      setSuccess(t('admin.mirrors.msgCreated'))
-      setError(null)
+      status.showSuccess(t('admin.mirrors.msgCreated'))
       queryClient.invalidateQueries({ queryKey: queryKeys.mirrors._def })
     },
     onError: (err: unknown) => {
-      setError(getErrorMessage(err, t('admin.mirrors.errCreate')))
+      status.setError(getErrorMessage(err, t('admin.mirrors.errCreate')))
     },
   })
 
@@ -389,12 +389,11 @@ const MirrorsPage: React.FC = () => {
     onSuccess: () => {
       setEditingMirror(null)
       resetForm()
-      setSuccess(t('admin.mirrors.msgUpdated'))
-      setError(null)
+      status.showSuccess(t('admin.mirrors.msgUpdated'))
       queryClient.invalidateQueries({ queryKey: queryKeys.mirrors._def })
     },
     onError: (err: unknown) => {
-      setError(getErrorMessage(err, t('admin.mirrors.errUpdate')))
+      status.setError(getErrorMessage(err, t('admin.mirrors.errUpdate')))
     },
   })
 
@@ -403,12 +402,11 @@ const MirrorsPage: React.FC = () => {
     onSuccess: () => {
       setDeleteConfirmOpen(false)
       setMirrorToDelete(null)
-      setSuccess(t('admin.mirrors.msgDeleted'))
-      setError(null)
+      status.showSuccess(t('admin.mirrors.msgDeleted'))
       queryClient.invalidateQueries({ queryKey: queryKeys.mirrors._def })
     },
     onError: (err: unknown) => {
-      setError(getErrorMessage(err, t('admin.mirrors.errDelete')))
+      status.setError(getErrorMessage(err, t('admin.mirrors.errDelete')))
     },
   })
 
@@ -430,7 +428,7 @@ const MirrorsPage: React.FC = () => {
   }
 
   const handleCreate = () => {
-    setError(null)
+    status.setError(null)
     const data = {
       ...formData,
       namespace_filter: namespaceFilterInput
@@ -450,7 +448,7 @@ const MirrorsPage: React.FC = () => {
 
   const handleUpdate = () => {
     if (!editingMirror) return
-    setError(null)
+    status.setError(null)
     const data = {
       name: formData.name,
       description: formData.description,
@@ -477,18 +475,18 @@ const MirrorsPage: React.FC = () => {
 
   const handleDelete = () => {
     if (!mirrorToDelete) return
-    setError(null)
+    status.setError(null)
     deleteMutation.mutate(mirrorToDelete.id)
   }
 
   const handleTriggerSync = async (mirror: MirrorConfiguration) => {
     try {
-      setError(null)
+      status.setError(null)
       await api.triggerMirrorSync(mirror.id)
-      setSuccess(t('admin.mirrors.syncTriggered', { name: mirror.name }))
+      status.setSuccess(t('admin.mirrors.syncTriggered', { name: mirror.name }))
       queryClient.invalidateQueries({ queryKey: queryKeys.mirrors._def })
     } catch (err: unknown) {
-      setError(getErrorMessage(err, t('admin.mirrors.errTriggerSync')))
+      status.setError(getErrorMessage(err, t('admin.mirrors.errTriggerSync')))
     }
   }
 
@@ -644,17 +642,7 @@ const MirrorsPage: React.FC = () => {
             }
           />
 
-          {error && (
-            <Alert severity="error" sx={{ mb: 2 }} onClose={() => setError(null)}>
-              {error}
-            </Alert>
-          )}
-
-          {success && (
-            <Alert severity="success" sx={{ mb: 2 }} onClose={() => setSuccess(null)}>
-              {success}
-            </Alert>
-          )}
+          <StatusAlerts status={status} mb={2} />
 
           <Grid container spacing={3}>
             {mirrors
