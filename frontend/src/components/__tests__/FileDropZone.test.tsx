@@ -129,6 +129,14 @@ describe('FileDropZone', () => {
       />,
     )
     expect(screen.getByText(/Maximum 500\.0 MB/)).toBeInTheDocument()
+
+    const zone = screen.getByTestId('file-drop-zone')
+    fireEvent.drop(zone, {
+      dataTransfer: makeDataTransfer([makeFile('over.zip', PROVIDER_MAX_BYTES + 1)]),
+    })
+    expect(screen.getByTestId('file-drop-zone-error')).toHaveTextContent(
+      'Maximum allowed size is 500.0 MB.',
+    )
   })
 
   it('warns but accepts files between soft and hard limits', () => {
