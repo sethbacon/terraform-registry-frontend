@@ -386,9 +386,9 @@ Critical-path pages (HomePage, LoginPage, ModulesPage, ProvidersPage, etc.) are 
 ## Shared Suite Package (`@4cloudguru/cloud-suite-ui`)
 
 Cross-cutting concerns shared with the other Terraform Suite apps live in the
-private package [`@4cloudguru/cloud-suite-ui`](https://github.com/sethbacon/terraform-suite-ui),
-published to the GitHub Packages npm registry and pinned to an **exact**
-version in `package.json` (see the "Shared private package" section of
+package [`@4cloudguru/cloud-suite-ui`](https://github.com/4cloudguru/cloud-suite-ui),
+published publicly to npmjs and pinned to an **exact**
+version in `package.json` (see the "Shared package" section of
 `SECURITY.md` for the audit/provenance/update policy — the package carries the
 auth/session provider and is treated as load-bearing security code).
 
