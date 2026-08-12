@@ -19,7 +19,6 @@ import {
   DialogActions,
   TextField,
   CircularProgress,
-  Alert,
   FormControl,
   InputLabel,
   Select,
@@ -32,8 +31,10 @@ import HistoryIcon from '@mui/icons-material/History'
 import EmptyState from '../../components/EmptyState'
 import Page from '../../components/Page'
 import PageHeader from '../../components/PageHeader'
+import StatusAlerts from '../../components/StatusAlerts'
 import PageTitleIcon from '@mui/icons-material/History'
 import api from '../../services/api'
+import { useStatusMessage } from '../../hooks/useStatusMessage'
 import { AuditLog } from '../../types'
 import { queryKeys } from '../../services/queryKeys'
 import { usePagination } from '../../hooks/usePagination'
@@ -63,7 +64,7 @@ const resourceTypeLabel = (value: string | null | undefined): string => {
 
 const AuditLogPage: React.FC = () => {
   const { t } = useTranslation()
-  const [error, setError] = useState<string | null>(null)
+  const status = useStatusMessage()
 
   // Pagination (MUI TablePagination uses 0-based page)
   const { page, rowsPerPage, setPage, handleChangePage, handleChangeRowsPerPage } =
@@ -110,11 +111,11 @@ const AuditLogPage: React.FC = () => {
   const logs = data?.logs ?? []
   const total = data?.pagination?.total ?? 0
 
-  if (queryError && !error) {
+  if (queryError && !status.error) {
     // Raw error messages can leak implementation details -- route through the
     // shared getErrorMessage helper, which DEV-gates native Error messages
     // the same way ErrorBoundary.tsx does (#618-class).
-    setError(getErrorMessage(queryError, t('admin.auditLog.errLoad')))
+    status.setError(getErrorMessage(queryError, t('admin.auditLog.errLoad')))
   }
 
   // Debounce text filter changes
@@ -180,7 +181,7 @@ const AuditLogPage: React.FC = () => {
       })
       api.exportAuditLogsCSV(result.logs ?? [])
     } catch {
-      setError('Failed to export audit logs')
+      status.setError('Failed to export audit logs')
     }
   }
 
@@ -197,7 +198,7 @@ const AuditLogPage: React.FC = () => {
       })
       api.exportAuditLogsJSON(result.logs ?? [])
     } catch {
-      setError('Failed to export audit logs')
+      status.setError('Failed to export audit logs')
     }
   }
 
@@ -299,12 +300,7 @@ const AuditLogPage: React.FC = () => {
           </Button>
         </Box>
       </Paper>
-      {/* Error */}
-      {error && (
-        <Alert severity="error" sx={{ mb: 2 }} onClose={() => setError(null)}>
-          {error}
-        </Alert>
-      )}
+      <StatusAlerts status={status} mb={2} />
       {/* Table */}
       <Paper>
         {loading ? (

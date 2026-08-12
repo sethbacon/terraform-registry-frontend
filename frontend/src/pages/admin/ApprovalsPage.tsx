@@ -15,7 +15,6 @@ import {
   DialogContent,
   DialogActions,
   TextField,
-  Alert,
   CircularProgress,
   Select,
   MenuItem,
@@ -29,8 +28,10 @@ import CancelIcon from '@mui/icons-material/Cancel'
 import HourglassEmptyIcon from '@mui/icons-material/HourglassEmpty'
 import Page from '../../components/Page'
 import PageHeader from '../../components/PageHeader'
+import StatusAlerts from '../../components/StatusAlerts'
 import PageTitleIcon from '@mui/icons-material/HourglassEmpty'
 import api from '../../services/api'
+import { useStatusMessage } from '../../hooks/useStatusMessage'
 import { formatDate } from '../../utils'
 import { MirrorApprovalRequest } from '../../types/rbac'
 import { getErrorMessage } from '../../utils/errors'
@@ -48,8 +49,7 @@ const ApprovalsPage: React.FC = () => {
   // viewer would otherwise see fully actionable controls that only fail once
   // clicked (#609).
   const canManage = allowedScopes.includes('admin') || allowedScopes.includes('mirrors:manage')
-  const [error, setError] = useState<string | null>(null)
-  const [success, setSuccess] = useState<string | null>(null)
+  const status = useStatusMessage()
 
   // Create dialog state
   const [createDialogOpen, setCreateDialogOpen] = useState(false)
@@ -86,8 +86,8 @@ const ApprovalsPage: React.FC = () => {
     },
   })
 
-  if (queryError && !error) {
-    setError(getErrorMessage(queryError, t('admin.approvals.errLoad')))
+  if (queryError && !status.error) {
+    status.setError(getErrorMessage(queryError, t('admin.approvals.errLoad')))
   }
 
   const createMutation = useMutation({
@@ -101,12 +101,11 @@ const ApprovalsPage: React.FC = () => {
     onSuccess: () => {
       setCreateDialogOpen(false)
       setCreateForm({ mirror_config_id: '', provider_namespace: '', provider_name: '', reason: '' })
-      setSuccess(t('admin.approvals.msgCreated'))
-      setError(null)
+      status.showSuccess(t('admin.approvals.msgCreated'))
       queryClient.invalidateQueries({ queryKey: queryKeys.approvals._def })
     },
     onError: (err: unknown) => {
-      setError(getErrorMessage(err, t('admin.approvals.errCreate')))
+      status.setError(getErrorMessage(err, t('admin.approvals.errCreate')))
     },
   })
 
@@ -122,14 +121,13 @@ const ApprovalsPage: React.FC = () => {
     }) => api.reviewApproval(id, { status, notes }),
     onSuccess: () => {
       setReviewDialogOpen(false)
-      setSuccess(t('admin.approvals.reviewed', { status: reviewForm.status }))
-      setError(null)
+      status.showSuccess(t('admin.approvals.reviewed', { status: reviewForm.status }))
       setReviewingApproval(null)
       setReviewForm({ status: 'approved', notes: '' })
       queryClient.invalidateQueries({ queryKey: queryKeys.approvals._def })
     },
     onError: (err: unknown) => {
-      setError(getErrorMessage(err, t('admin.approvals.errReview')))
+      status.setError(getErrorMessage(err, t('admin.approvals.errReview')))
     },
   })
 
@@ -246,17 +244,7 @@ const ApprovalsPage: React.FC = () => {
             }
           />
 
-          {error && (
-            <Alert severity="error" sx={{ mb: 2 }} onClose={() => setError(null)}>
-              {error}
-            </Alert>
-          )}
-
-          {success && (
-            <Alert severity="success" sx={{ mb: 2 }} onClose={() => setSuccess(null)}>
-              {success}
-            </Alert>
-          )}
+          <StatusAlerts status={status} mb={2} />
 
           <Grid container spacing={3}>
             {approvals.map((approval) => (

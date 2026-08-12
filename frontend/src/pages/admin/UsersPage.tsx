@@ -43,8 +43,10 @@ import PrivacyTipIcon from '@mui/icons-material/PrivacyTip'
 import EmptyState from '../../components/EmptyState'
 import Page from '../../components/Page'
 import PageHeader from '../../components/PageHeader'
+import StatusAlerts from '../../components/StatusAlerts'
 import PageTitleIcon from '@mui/icons-material/People'
 import api from '../../services/api'
+import { useStatusMessage } from '../../hooks/useStatusMessage'
 import { useAuth } from '../../contexts/AuthContext'
 import { User, UserMembership, Organization } from '../../types'
 import { RoleTemplate } from '../../types/rbac'
@@ -70,8 +72,7 @@ const UsersPage: React.FC = () => {
   // (#609): a users:read-only viewer would otherwise see actionable buttons
   // that only fail once clicked, relying entirely on the server to say no.
   const canManageUsers = isAdmin || allowedScopes.includes('users:write')
-  const [error, setError] = useState<string | null>(null)
-  const [info, setInfo] = useState<string | null>(null)
+  const status = useStatusMessage()
   const [searchQuery, setSearchQuery] = useState('')
   const { page, rowsPerPage, setPage, handleChangePage, handleChangeRowsPerPage } =
     usePagination(10)
@@ -140,8 +141,8 @@ const UsersPage: React.FC = () => {
     membershipsLoading: userMemberships[u.id]?.loading ?? true,
   }))
 
-  if (queryError && !error) {
-    setError(t('admin.users.errLoad'))
+  if (queryError && !status.error) {
+    status.setError(t('admin.users.errLoad'))
   }
 
   // Load memberships whenever rawUsers changes
@@ -238,7 +239,7 @@ const UsersPage: React.FC = () => {
   const handleCloseDialog = () => {
     setOpenDialog(false)
     setEditingUser(null)
-    setError(null)
+    status.setError(null)
     setEditMemberships([])
   }
 
@@ -272,7 +273,7 @@ const UsersPage: React.FC = () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.users._def })
     },
     onError: (err: unknown) => {
-      setError(getErrorMessage(err, t('admin.users.errSave')))
+      status.setError(getErrorMessage(err, t('admin.users.errSave')))
     },
   })
 
@@ -281,12 +282,12 @@ const UsersPage: React.FC = () => {
     onSuccess: () => {
       setDeleteDialogOpen(false)
       setUserToDelete(null)
-      setError(null)
+      status.setError(null)
       setUserMemberships({})
       queryClient.invalidateQueries({ queryKey: queryKeys.users._def })
     },
     onError: (err: unknown) => {
-      setError(getErrorMessage(err, t('admin.users.errDelete')))
+      status.setError(getErrorMessage(err, t('admin.users.errDelete')))
     },
   })
 
@@ -297,21 +298,19 @@ const UsersPage: React.FC = () => {
       setEraseDialogOpen(false)
       setUserToErase(null)
       setEraseConfirmText('')
-      setError(null)
-      setInfo(data.message || t('admin.users.userErased'))
+      status.showSuccess(data.message || t('admin.users.userErased'))
       setUserMemberships({})
       queryClient.invalidateQueries({ queryKey: queryKeys.users._def })
     },
     onError: (err: unknown) => {
-      setError(getErrorMessage(err, t('admin.users.errErase')))
+      status.setError(getErrorMessage(err, t('admin.users.errErase')))
     },
   })
 
   // GDPR Articles 15/20 — full data export. Triggers a browser download
   // by creating a temporary blob URL; cleaned up after the click is dispatched.
   const handleExportClick = async (user: User) => {
-    setError(null)
-    setInfo(null)
+    status.clear()
     setExportingUserId(user.id)
     try {
       const { blob, filename } = await api.exportUserData(user.id)
@@ -323,9 +322,9 @@ const UsersPage: React.FC = () => {
       a.click()
       document.body.removeChild(a)
       URL.revokeObjectURL(url)
-      setInfo(t('admin.users.exportedData', { email: user.email }))
+      status.setSuccess(t('admin.users.exportedData', { email: user.email }))
     } catch (err) {
-      setError(getErrorMessage(err, t('admin.users.errExport')))
+      status.setError(getErrorMessage(err, t('admin.users.errExport')))
     } finally {
       setExportingUserId(null)
     }
@@ -344,7 +343,7 @@ const UsersPage: React.FC = () => {
   }
 
   const handleSaveUser = () => {
-    setError(null)
+    status.setError(null)
     saveUserMutation.mutate()
   }
 
@@ -352,7 +351,7 @@ const UsersPage: React.FC = () => {
     if (!editingUser || !formData.organizationId) return
 
     try {
-      setError(null)
+      status.setError(null)
       await api.addOrganizationMember(formData.organizationId, {
         user_id: editingUser.id,
         role_template_id: formData.roleTemplateId || undefined,
@@ -366,7 +365,7 @@ const UsersPage: React.FC = () => {
       setFormData((prev) => ({ ...prev, organizationId: '', roleTemplateId: '' }))
     } catch (err: unknown) {
       console.error('Failed to add membership:', err)
-      setError(getErrorMessage(err, t('admin.users.errAddMembership')))
+      status.setError(getErrorMessage(err, t('admin.users.errAddMembership')))
     }
   }
 
@@ -374,7 +373,7 @@ const UsersPage: React.FC = () => {
     if (!editingUser) return
 
     try {
-      setError(null)
+      status.setError(null)
       await api.updateOrganizationMember(orgId, editingUser.id, {
         role_template_id: newRoleTemplateId || undefined,
       })
@@ -384,7 +383,7 @@ const UsersPage: React.FC = () => {
       setEditMemberships(memberships)
     } catch (err: unknown) {
       console.error('Failed to update membership role:', err)
-      setError(getErrorMessage(err, t('admin.users.errUpdateRole')))
+      status.setError(getErrorMessage(err, t('admin.users.errUpdateRole')))
     }
   }
 
@@ -392,14 +391,14 @@ const UsersPage: React.FC = () => {
     if (!editingUser) return
 
     try {
-      setError(null)
+      status.setError(null)
       await api.removeOrganizationMember(orgId, editingUser.id)
 
       // Update local state
       setEditMemberships((prev) => prev.filter((m) => m.organization_id !== orgId))
     } catch (err: unknown) {
       console.error('Failed to remove membership:', err)
-      setError(getErrorMessage(err, t('admin.users.errRemoveMembership')))
+      status.setError(getErrorMessage(err, t('admin.users.errRemoveMembership')))
     }
   }
 
@@ -410,7 +409,7 @@ const UsersPage: React.FC = () => {
 
   const handleDeleteConfirm = () => {
     if (!userToDelete) return
-    setError(null)
+    status.setError(null)
     deleteUserMutation.mutate(userToDelete.id)
   }
 
@@ -453,16 +452,7 @@ const UsersPage: React.FC = () => {
           ) : undefined
         }
       />
-      {error && (
-        <Alert severity="error" sx={{ mb: 3 }} onClose={() => setError(null)}>
-          {error}
-        </Alert>
-      )}
-      {info && (
-        <Alert severity="success" sx={{ mb: 3 }} onClose={() => setInfo(null)}>
-          {info}
-        </Alert>
-      )}
+      <StatusAlerts status={status} mb={3} />
       {/* Search Bar */}
       <TextField
         fullWidth

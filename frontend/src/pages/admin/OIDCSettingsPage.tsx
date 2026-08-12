@@ -36,9 +36,11 @@ import EditIcon from '@mui/icons-material/Edit'
 import DeleteIcon from '@mui/icons-material/Delete'
 import ManageAccountsIcon from '@mui/icons-material/ManageAccounts'
 import PageHeader from '../../components/PageHeader'
+import StatusAlerts from '../../components/StatusAlerts'
 import SaveIcon from '@mui/icons-material/Save'
 import Page from '../../components/Page'
 import api from '../../services/api'
+import { useStatusMessage } from '../../hooks/useStatusMessage'
 import type {
   OIDCConfigResponse,
   OIDCGroupMapping,
@@ -57,8 +59,7 @@ const emptyMapping: OIDCGroupMapping = { group: '', organization: '', role: 'vie
 const OIDCSettingsPage: React.FC = () => {
   const { t } = useTranslation()
   const queryClient = useQueryClient()
-  const [error, setError] = useState<string | null>(null)
-  const [success, setSuccess] = useState<string | null>(null)
+  const status = useStatusMessage()
 
   // Group claim name + default role (top-level form fields)
   const [groupClaimName, setGroupClaimName] = useState('')
@@ -104,11 +105,11 @@ const OIDCSettingsPage: React.FC = () => {
     }
   }, [config])
 
-  if (queryError && !error) {
+  if (queryError && !status.error) {
     // Route through getErrorMessage so a leaked backend string is sanitized and
     // bounded before it reaches the <Alert> below, exactly like every other admin
     // page — never render response.data.error verbatim (CWE-209, #601).
-    setError(getErrorMessage(queryError, t('admin.oidcSettings.errLoad')))
+    status.setError(getErrorMessage(queryError, t('admin.oidcSettings.errLoad')))
   }
 
   const saveMutation = useMutation({
@@ -117,21 +118,19 @@ const OIDCSettingsPage: React.FC = () => {
       setGroupClaimName(updated.group_claim_name ?? '')
       setDefaultRole(updated.default_role ?? '')
       setMappings(updated.group_mappings ?? [])
-      setSuccess(t('admin.oidcSettings.msgSaved'))
-      setError(null)
+      status.showSuccess(t('admin.oidcSettings.msgSaved'))
       queryClient.invalidateQueries({ queryKey: queryKeys.oidcConfig._def })
     },
     onError: (err: unknown) => {
       // Same sanitization choke point as the query-error path above (#601).
-      setError(getErrorMessage(err, t('admin.oidcSettings.errSave')))
+      status.setError(getErrorMessage(err, t('admin.oidcSettings.errSave')))
     },
   })
 
   const saving = saveMutation.isPending
 
   const handleSave = () => {
-    setError(null)
-    setSuccess(null)
+    status.clear()
     saveMutation.mutate({
       group_claim_name: groupClaimName,
       group_mappings: mappings,
@@ -200,16 +199,7 @@ const OIDCSettingsPage: React.FC = () => {
             description={t('admin.oidcSettings.pageSubtitle')}
           />
 
-          {error && (
-            <Alert severity="error" sx={{ mb: 3 }} onClose={() => setError(null)}>
-              {error}
-            </Alert>
-          )}
-          {success && (
-            <Alert severity="success" sx={{ mb: 3 }} onClose={() => setSuccess(null)}>
-              {success}
-            </Alert>
-          )}
+          <StatusAlerts status={status} mb={3} />
 
           {/* Active config summary */}
           {config && (
