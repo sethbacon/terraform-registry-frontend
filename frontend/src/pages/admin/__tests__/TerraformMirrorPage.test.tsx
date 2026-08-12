@@ -94,7 +94,7 @@ describe('TerraformMirrorPage', () => {
   })
 
   it('shows loading spinner initially', () => {
-    listTerraformMirrorConfigsMock.mockReturnValue(new Promise(() => { }))
+    listTerraformMirrorConfigsMock.mockReturnValue(new Promise(() => {}))
     renderPage()
     expect(screen.getByRole('progressbar')).toBeInTheDocument()
   })
@@ -761,5 +761,112 @@ describe('TerraformMirrorPage', () => {
     await userEvent.click(screen.getByRole('button', { name: /view details/i }))
     await waitFor(() => expect(screen.getByText('1.5.0')).toBeInTheDocument())
     expect(screen.getByRole('button', { name: /delete version/i })).toBeInTheDocument()
+  })
+
+  // ── behaviour the #675 dialog-flow extraction had to carry across ─────────
+  //
+  // Each of these locks a specific transition that moving a flow into its own
+  // hook could have silently dropped. They assert on the exact banner/field
+  // text, never on a loose /error|failed/ — the GPG panel renders its own
+  // failure alert in every test in this file.
+
+  it('leaves an earlier error banner on screen when a later action succeeds', async () => {
+    // Divergence, preserved deliberately: every flow on this page reports
+    // success with status.setSuccess, where six sibling admin pages use
+    // showSuccess (which also clears the error). Swapping this page to
+    // showSuccess would remove the "sync failed" banner below.
+    listTerraformMirrorConfigsMock.mockResolvedValue({ configs: fakeConfigs })
+    triggerSyncMock.mockRejectedValue(new Error('sync failed'))
+    createMirrorMock.mockResolvedValue({ id: 'new-id' })
+    renderPage()
+    await waitFor(() => expect(screen.getAllByText('terraform').length).toBeGreaterThan(0))
+
+    await userEvent.click(screen.getByRole('button', { name: /^sync mirror$/i }))
+    await waitFor(() => expect(screen.getByText('sync failed')).toBeInTheDocument())
+
+    await userEvent.click(screen.getByRole('button', { name: /add mirror/i }))
+    await waitFor(() => expect(screen.getByRole('dialog')).toBeInTheDocument())
+    await userEvent.type(screen.getByLabelText(/^Name/i), 'later-tf')
+    await userEvent.click(screen.getByRole('button', { name: /^create$/i }))
+
+    await waitFor(() => expect(screen.getByText('Mirror "later-tf" created')).toBeInTheDocument())
+    expect(screen.getByText('sync failed')).toBeInTheDocument()
+  })
+
+  it('blanks a cancelled draft when the create dialog is reopened', async () => {
+    listTerraformMirrorConfigsMock.mockResolvedValue({ configs: [] })
+    renderPage()
+    await waitFor(() =>
+      expect(screen.getByRole('button', { name: /add mirror/i })).toBeInTheDocument(),
+    )
+
+    await userEvent.click(screen.getByRole('button', { name: /add mirror/i }))
+    await waitFor(() => expect(screen.getByRole('dialog')).toBeInTheDocument())
+    await userEvent.type(screen.getByLabelText(/^Name/i), 'abandoned-draft')
+    await userEvent.type(screen.getByLabelText(/version filter/i), '~> 1.5')
+    expect(screen.getByLabelText(/^Name/i)).toHaveValue('abandoned-draft')
+    await userEvent.click(screen.getByRole('button', { name: /^cancel$/i }))
+    await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument())
+
+    await userEvent.click(screen.getByRole('button', { name: /add mirror/i }))
+    await waitFor(() => expect(screen.getByRole('dialog')).toBeInTheDocument())
+    expect(screen.getByLabelText(/^Name/i)).toHaveValue('')
+    expect(screen.getByLabelText(/version filter/i)).toHaveValue('')
+  })
+
+  it('reloads the versions list after a version is deleted', async () => {
+    listTerraformMirrorConfigsMock.mockResolvedValue({ configs: fakeConfigs })
+    listVersionsMock.mockResolvedValue({
+      versions: [
+        {
+          id: 'v1',
+          version: '1.5.0',
+          sync_status: 'synced',
+          is_latest: true,
+          is_deprecated: false,
+          synced_at: '2025-06-01T00:00:00Z',
+        },
+      ],
+    })
+    deleteVersionMock.mockResolvedValue({})
+    renderPage()
+    await waitFor(() => expect(screen.getAllByText('terraform').length).toBeGreaterThan(0))
+    await userEvent.click(screen.getByRole('button', { name: /view details/i }))
+    await waitFor(() => expect(listVersionsMock).toHaveBeenCalledTimes(1))
+
+    await userEvent.click(screen.getByRole('button', { name: /delete version/i }))
+    await waitFor(() => expect(screen.getByText(/Delete Terraform Version/i)).toBeInTheDocument())
+    const dialogs = screen.getAllByRole('dialog')
+    const deleteBtn = dialogs[dialogs.length - 1].querySelector(
+      'button[class*="MuiButton-colorError"]',
+    ) as HTMLButtonElement
+    await userEvent.click(deleteBtn)
+
+    await waitFor(() => expect(screen.getByText('Version 1.5.0 deleted')).toBeInTheDocument())
+    // The browser behind the confirmation refetches so the deleted row goes away.
+    await waitFor(() => expect(listVersionsMock).toHaveBeenCalledTimes(2))
+    expect(listVersionsMock).toHaveBeenLastCalledWith('tm-1', { synced: false })
+  })
+
+  it('shows an empty versions table, and no banner, when the versions load fails', async () => {
+    listTerraformMirrorConfigsMock.mockResolvedValue({ configs: fakeConfigs })
+    listVersionsMock.mockRejectedValue(new Error('versions boom'))
+    renderPage()
+    await waitFor(() => expect(screen.getAllByText('terraform').length).toBeGreaterThan(0))
+    await userEvent.click(screen.getByRole('button', { name: /view details/i }))
+    await waitFor(() =>
+      expect(screen.getByText('No versions have been synced yet.')).toBeInTheDocument(),
+    )
+    expect(screen.queryByText('versions boom')).not.toBeInTheDocument()
+  })
+
+  it('shows an empty history table, and no banner, when the history load fails', async () => {
+    listTerraformMirrorConfigsMock.mockResolvedValue({ configs: fakeConfigs })
+    getHistoryMock.mockRejectedValue(new Error('history boom'))
+    renderPage()
+    await waitFor(() => expect(screen.getAllByText('terraform').length).toBeGreaterThan(0))
+    await userEvent.click(screen.getByRole('button', { name: /view sync history/i }))
+    await waitFor(() => expect(screen.getByText('No sync history yet.')).toBeInTheDocument())
+    expect(screen.queryByText('history boom')).not.toBeInTheDocument()
   })
 })
