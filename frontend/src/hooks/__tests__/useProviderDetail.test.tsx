@@ -84,6 +84,39 @@ describe('useProviderDetail', () => {
     expect(result.current.selectedVersion?.version).toBe('5.1.0')
   })
 
+  it('orders stable ahead of pre-releases, identically to useModuleDetail (#673)', async () => {
+    // Deliberately the same fixture and expectation as the matching test in
+    // useModuleDetail.test.ts and in utils/__tests__/semver.test.ts. The two
+    // hooks each carried a private copy of the comparator and they had already
+    // drifted apart once; asserting the same list from both is what turns a
+    // future re-fork into a failure instead of a quiet difference between the
+    // module page and the provider page.
+    //
+    // The case above passes against the old private copy too — it only has one
+    // pre-release, so nothing distinguishes the implementations. This one adds
+    // two pre-releases of the same version, which the old copy left in whatever
+    // order the API returned.
+    mockApi.getProviderVersions.mockResolvedValue({
+      versions: [
+        version('1.0.0'),
+        version('2.0.0-beta.2'),
+        version('2.0.0-beta.10'),
+        version('2.0.0-rc.1'),
+        version('2.0.0'),
+      ],
+    })
+    const { result } = renderProviderDetail()
+
+    await waitFor(() => expect(result.current.loading).toBe(false))
+    expect(result.current.versions.map((v) => v.version)).toEqual([
+      '2.0.0',
+      '2.0.0-rc.1',
+      '2.0.0-beta.10',
+      '2.0.0-beta.2',
+      '1.0.0',
+    ])
+  })
+
   it('surfaces a not-found error when no provider matches the route', async () => {
     mockApi.searchProviders.mockResolvedValue({ providers: [] })
     const { result } = renderProviderDetail()

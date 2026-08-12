@@ -145,6 +145,44 @@ describe('useModuleDetail', () => {
     expect(result.current.versions[1].version).toBe('1.0.0')
   })
 
+  it('orders stable ahead of pre-releases, identically to useProviderDetail (#673)', async () => {
+    // Deliberately the same fixture and expectation as the matching test in
+    // useProviderDetail.test.tsx and in utils/__tests__/semver.test.ts. Both
+    // hooks used to carry their own copy of the comparator, and the copies had
+    // drifted: this hook had no stable-vs-pre-release tiebreak at all, and
+    // neither copy ordered two pre-releases of the same version against each
+    // other, so the rendered order depended on the API's response order.
+    // Asserting the same list in both places is what makes a future re-fork
+    // show up as a failure instead of a quiet difference between two pages.
+    mockApi.getModuleVersions.mockResolvedValue({
+      modules: [
+        {
+          versions: [
+            { version: '1.0.0' },
+            { version: '2.0.0-beta.2' },
+            { version: '2.0.0-beta.10' },
+            { version: '2.0.0-rc.1' },
+            { version: '2.0.0' },
+          ],
+        },
+      ],
+    })
+
+    const { result } = renderHook(() => useModuleDetail(), { wrapper: createWrapper() })
+
+    await waitFor(() => {
+      expect(result.current.loading).toBe(false)
+    })
+
+    expect(result.current.versions.map((v) => v.version)).toEqual([
+      '2.0.0',
+      '2.0.0-rc.1',
+      '2.0.0-beta.10',
+      '2.0.0-beta.2',
+      '1.0.0',
+    ])
+  })
+
   it('allows changing selected version', async () => {
     const { result } = renderHook(() => useModuleDetail(), { wrapper: createWrapper() })
 

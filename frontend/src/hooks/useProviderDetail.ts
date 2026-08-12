@@ -7,33 +7,10 @@ import { captureError } from '../services/errorReporting'
 import { Provider, ProviderVersion, ProviderDocEntry } from '../types'
 import { useAuth } from '../contexts/AuthContext'
 import { REGISTRY_HOST } from '../config'
+import { sortByVersionDesc } from '../utils/semver'
 
 /** Page size used when walking the paginated provider doc index. */
 const DOCS_PAGE_SIZE = 1000
-
-/**
- * Sort versions newest-first by semver, with stable releases ahead of
- * pre-releases that share the same numeric version.
- */
-function sortVersionsDesc(raw: ProviderVersion[]): ProviderVersion[] {
-  return [...raw].sort((a, b) => {
-    const parseParts = (v: string): [number, number, number] => {
-      const clean = v.replace(/^v/, '').split('-')[0]
-      const [maj = 0, min = 0, pat = 0] = clean.split('.').map(Number)
-      return [maj, min, pat]
-    }
-    const [aMaj, aMin, aPat] = parseParts(a.version)
-    const [bMaj, bMin, bPat] = parseParts(b.version)
-    if (bMaj !== aMaj) return bMaj - aMaj
-    if (bMin !== aMin) return bMin - aMin
-    if (bPat !== aPat) return bPat - aPat
-    // Same numeric version: stable releases (no pre-release suffix) sort before pre-releases
-    const aStable = !a.version.replace(/^v/, '').includes('-')
-    const bStable = !b.version.replace(/^v/, '').includes('-')
-    if (aStable !== bStable) return aStable ? -1 : 1
-    return 0
-  })
-}
 
 /**
  * Data fetching, mutation and UI state for ProviderDetailPage.
@@ -106,7 +83,7 @@ export function useProviderDetail() {
       setProvider(matchingProvider)
 
       // Backend returns { versions: [...] } directly — sort by semver descending
-      const sortedVersions = sortVersionsDesc(versionsData.versions || [])
+      const sortedVersions = sortByVersionDesc(versionsData.versions || [])
       setVersions(sortedVersions)
 
       if (sortedVersions.length > 0) {
