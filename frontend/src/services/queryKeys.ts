@@ -36,6 +36,8 @@ export const queryKeys = {
       [...queryKeys.providers._def, 'detail', namespace, type] as const,
     versions: (namespace: string, type: string) =>
       [...queryKeys.providers._def, 'versions', namespace, type] as const,
+    docs: (namespace: string, type: string, version: string) =>
+      [...queryKeys.providers._def, 'docs', namespace, type, version] as const,
   },
   dashboard: {
     _def: ['dashboard'] as const,

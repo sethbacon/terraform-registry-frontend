@@ -1,22 +1,44 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import type { SyntheticEvent } from 'react'
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import api from '../services/api'
 import { getErrorMessage } from '../utils/errors'
 import { captureError } from '../services/errorReporting'
 import { Provider, ProviderVersion, ProviderDocEntry } from '../types'
 import { useAuth } from '../contexts/AuthContext'
 import { REGISTRY_HOST } from '../config'
+import { queryKeys } from '../services/queryKeys'
 import { sortByVersionDesc } from '../utils/semver'
 
 /** Page size used when walking the paginated provider doc index. */
 const DOCS_PAGE_SIZE = 1000
 
 /**
+ * Stable empty list for the docs query's default, so the auto-select effect
+ * below doesn't see a new array identity on every render.
+ */
+const NO_DOCS: ProviderDocEntry[] = []
+
+// Route params, narrowed once from possibly-undefined useParams() values. Query
+// and mutation functions take this instead of asserting namespace!/type!
+// individually, so a query's `enabled` flag and its queryFn can't drift out of
+// sync -- the same narrowed object gates both. Mirrors ModuleRouteParams in
+// useModuleDetail.
+interface ProviderRouteParams {
+  namespace: string
+  type: string
+}
+
+/**
  * Data fetching, mutation and UI state for ProviderDetailPage.
  *
  * Keeps the page component presentational: everything that touches the API,
  * the route params or the `?tab=`/`?doc=` query state lives here.
+ *
+ * Reads go through React Query and writes through useMutation with cache
+ * invalidation, matching useModuleDetail (#674) -- the two hooks serve the same
+ * page shape and had diverged into two different data-fetching architectures.
  */
 export function useProviderDetail() {
   const { namespace, type } = useParams<{
@@ -24,6 +46,7 @@ export function useProviderDetail() {
     type: string
   }>()
   const navigate = useNavigate()
+  const queryClient = useQueryClient()
   const [searchParams, setSearchParams] = useSearchParams()
   const { isAuthenticated, allowedScopes } = useAuth()
   const canManage =
@@ -39,87 +62,104 @@ export function useProviderDetail() {
   // Use 'type' as the name for display
   const name = type
 
-  const [provider, setProvider] = useState<Provider | null>(null)
-  const [versions, setVersions] = useState<ProviderVersion[]>([])
+  // UI-only state (not server data)
   const [selectedVersion, setSelectedVersion] = useState<ProviderVersion | null>(null)
-  const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [copiedSource, setCopiedSource] = useState(false)
   const [copiedChecksum, setCopiedChecksum] = useState<string | null>(null)
   const [deleteProviderDialogOpen, setDeleteProviderDialogOpen] = useState(false)
   const [deleteVersionDialogOpen, setDeleteVersionDialogOpen] = useState(false)
   const [versionToDelete, setVersionToDelete] = useState<string | null>(null)
-  const [deleting, setDeleting] = useState(false)
   const [deprecateDialogOpen, setDeprecateDialogOpen] = useState(false)
   const [deprecationMessage, setDeprecationMessage] = useState('')
-  const [deprecating, setDeprecating] = useState(false)
 
-  const [docs, setDocs] = useState<ProviderDocEntry[]>([])
-  const [docsLoading, setDocsLoading] = useState(false)
+  // =========================================================================
+  // 1. Provider + versions query (primary)
+  // =========================================================================
+  const routeParams: ProviderRouteParams | null = useMemo(
+    () => (namespace && type ? { namespace, type } : null),
+    [namespace, type],
+  )
+  const providerQueryEnabled = !!routeParams
 
-  const loadProviderDetails = useCallback(async () => {
-    if (!namespace || !type) return
+  const {
+    data: providerData,
+    isLoading: loading,
+    error: providerQueryError,
+  } = useQuery({
+    queryKey: queryKeys.providers.detail(namespace ?? '', type ?? ''),
+    queryFn: async () => {
+      if (!routeParams) throw new Error('Provider route params missing')
 
-    try {
-      setLoading(true)
-      setError(null)
-
-      // Use searchProviders with namespace filter and then find by type
-      const [providerData, versionsData] = await Promise.all([
-        api.searchProviders({ query: type, limit: 100 }), // Search with type as query
-        api.getProviderVersions(namespace, type),
+      // Use searchProviders with the type as the query, then find the exact
+      // namespace/type match in the results.
+      const [providerResults, versionsData] = await Promise.all([
+        api.searchProviders({ query: routeParams.type, limit: 100 }),
+        api.getProviderVersions(routeParams.namespace, routeParams.type),
       ])
 
-      // Filter results to find exact match for namespace/type
-      const matchingProvider = providerData.providers.find(
-        (p: Provider) => p.namespace === namespace && p.type === type,
-      )
+      const matchingProvider =
+        providerResults.providers.find(
+          (p: Provider) => p.namespace === routeParams.namespace && p.type === routeParams.type,
+        ) ?? null
 
-      if (!matchingProvider) {
-        setError('Provider not found')
-        return
-      }
+      // A miss is a cacheable answer, not a transport failure: returning it as
+      // data (rather than throwing) keeps it off the retry path and out of the
+      // telemetry report below, exactly as the previous hand-rolled early
+      // return did.
+      if (!matchingProvider) return { provider: null, versions: [] as ProviderVersion[] }
 
-      setProvider(matchingProvider)
+      // Backend returns { versions: [...] } directly -- sort by semver descending
+      return { provider: matchingProvider, versions: sortByVersionDesc(versionsData.versions || []) }
+    },
+    enabled: providerQueryEnabled,
+  })
 
-      // Backend returns { versions: [...] } directly — sort by semver descending
-      const sortedVersions = sortByVersionDesc(versionsData.versions || [])
-      setVersions(sortedVersions)
+  const provider = providerData?.provider ?? null
+  const versions = useMemo(() => providerData?.versions ?? [], [providerData?.versions])
 
-      if (sortedVersions.length > 0) {
-        setSelectedVersion(sortedVersions[0])
-      }
-    } catch (err) {
-      console.error('Failed to load provider details:', err)
+  // Derive the page-level error string from the query
+  useEffect(() => {
+    if (providerQueryError) {
+      console.error('Failed to load provider details:', providerQueryError)
       // setError() here uses a plain hardcoded string, not getErrorMessage(), so
       // it doesn't get telemetry reporting for free -- report explicitly (#623).
-      captureError(err instanceof Error ? err : new Error(String(err)), {
-        context: 'Failed to load provider details',
-      })
+      captureError(providerQueryError, { context: 'Failed to load provider details' })
       setError('Failed to load provider details. Please try again.')
-    } finally {
-      setLoading(false)
+      return
     }
-  }, [namespace, type])
+    if (!providerData) return
+    setError(providerData.provider ? null : 'Provider not found')
+  }, [providerQueryError, providerData])
 
+  // Auto-select latest version (or preserve current selection on refetch)
   useEffect(() => {
-    loadProviderDetails()
-  }, [loadProviderDetails])
+    if (versions.length === 0) return
+    setSelectedVersion((prev) => {
+      const current = prev?.version
+      const match = current ? versions.find((v) => v.version === current) : null
+      return match || versions[0]
+    })
+  }, [versions])
 
-  // Fetch doc index for mirrored providers when version is selected
-  useEffect(() => {
-    if (!provider?.source || !selectedVersion || !namespace || !type) return
-    let cancelled = false
-    const fetchAllDocs = async () => {
+  // =========================================================================
+  // 2. Doc index for mirrored providers (depends on selectedVersion)
+  // =========================================================================
+  const docsVersion = selectedVersion?.version ?? ''
+
+  const { data: docs = NO_DOCS, isLoading: docsLoading } = useQuery<ProviderDocEntry[]>({
+    queryKey: queryKeys.providers.docs(namespace ?? '', type ?? '', docsVersion),
+    queryFn: async () => {
+      if (!routeParams) return []
       let allDocs: ProviderDocEntry[] = []
       let offset = 0
       let total = Infinity
 
       while (offset < total) {
         const data = await api.getProviderDocs(
-          namespace,
-          type,
-          selectedVersion.version,
+          routeParams.namespace,
+          routeParams.type,
+          docsVersion,
           undefined,
           'hcl',
           DOCS_PAGE_SIZE,
@@ -131,23 +171,9 @@ export function useProviderDetail() {
         if (data.docs.length === 0) break
       }
       return allDocs
-    }
-
-    setDocsLoading(true)
-    fetchAllDocs()
-      .then((allDocs) => {
-        if (!cancelled) setDocs(allDocs)
-      })
-      .catch(() => {
-        /* non-fatal */
-      })
-      .finally(() => {
-        if (!cancelled) setDocsLoading(false)
-      })
-    return () => {
-      cancelled = true
-    }
-  }, [provider?.source, selectedVersion, namespace, type])
+    },
+    enabled: providerQueryEnabled && !!provider?.source && !!docsVersion,
+  })
 
   // Auto-select first doc when Documentation tab is opened with no selection
   useEffect(() => {
@@ -164,6 +190,78 @@ export function useProviderDetail() {
     )
   }, [activeTab, docParam, docs, setSearchParams])
 
+  // =========================================================================
+  // Mutations
+  // =========================================================================
+
+  const deleteProviderMutation = useMutation({
+    mutationFn: (params: ProviderRouteParams) => api.deleteProvider(params.namespace, params.type),
+    onSuccess: () => {
+      navigate('/providers')
+    },
+    onError: (err: unknown) => {
+      console.error('Failed to delete provider:', err)
+      setError(getErrorMessage(err, 'Failed to delete provider. Please try again.'))
+    },
+    onSettled: () => {
+      setDeleteProviderDialogOpen(false)
+    },
+  })
+
+  const deleteVersionMutation = useMutation({
+    mutationFn: (args: ProviderRouteParams & { version: string }) =>
+      api.deleteProviderVersion(args.namespace, args.type, args.version),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.providers.detail(namespace ?? '', type ?? ''),
+      })
+      setVersionToDelete(null)
+    },
+    onError: (err: unknown) => {
+      console.error('Failed to delete version:', err)
+      setError(getErrorMessage(err, 'Failed to delete version. Please try again.'))
+    },
+    onSettled: () => {
+      setDeleteVersionDialogOpen(false)
+    },
+  })
+
+  const deprecateVersionMutation = useMutation({
+    mutationFn: (args: ProviderRouteParams & { version: string; message?: string }) =>
+      api.deprecateProviderVersion(args.namespace, args.type, args.version, args.message),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.providers.detail(namespace ?? '', type ?? ''),
+      })
+      setDeprecationMessage('')
+    },
+    onError: (err: unknown) => {
+      console.error('Failed to deprecate version:', err)
+      setError(getErrorMessage(err, 'Failed to deprecate version. Please try again.'))
+    },
+    onSettled: () => {
+      setDeprecateDialogOpen(false)
+    },
+  })
+
+  const undeprecateVersionMutation = useMutation({
+    mutationFn: (args: ProviderRouteParams & { version: string }) =>
+      api.undeprecateProviderVersion(args.namespace, args.type, args.version),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.providers.detail(namespace ?? '', type ?? ''),
+      })
+    },
+    onError: (err: unknown) => {
+      console.error('Failed to remove deprecation:', err)
+      setError(getErrorMessage(err, 'Failed to remove deprecation. Please try again.'))
+    },
+  })
+
+  // =========================================================================
+  // Handler wrappers (preserve existing call signatures for the page)
+  // =========================================================================
+
   const handleCopySource = () => {
     if (!provider || !selectedVersion) return
 
@@ -179,38 +277,14 @@ export function useProviderDetail() {
     setTimeout(() => setCopiedChecksum(null), 2000)
   }
 
-  const handleDeleteProvider = async () => {
-    if (!namespace || !type) return
-
-    try {
-      setDeleting(true)
-      await api.deleteProvider(namespace, type)
-      navigate('/providers')
-    } catch (err: unknown) {
-      console.error('Failed to delete provider:', err)
-      setError(getErrorMessage(err, 'Failed to delete provider. Please try again.'))
-    } finally {
-      setDeleting(false)
-      setDeleteProviderDialogOpen(false)
-    }
+  const handleDeleteProvider = () => {
+    if (!routeParams) return
+    deleteProviderMutation.mutate(routeParams)
   }
 
-  const handleDeleteVersion = async () => {
-    if (!namespace || !type || !versionToDelete) return
-
-    try {
-      setDeleting(true)
-      await api.deleteProviderVersion(namespace, type, versionToDelete)
-      // Reload the provider details
-      await loadProviderDetails()
-      setVersionToDelete(null)
-    } catch (err: unknown) {
-      console.error('Failed to delete version:', err)
-      setError(getErrorMessage(err, 'Failed to delete version. Please try again.'))
-    } finally {
-      setDeleting(false)
-      setDeleteVersionDialogOpen(false)
-    }
+  const handleDeleteVersion = () => {
+    if (!routeParams || !versionToDelete) return
+    deleteVersionMutation.mutate({ ...routeParams, version: versionToDelete })
   }
 
   const openDeleteVersionDialog = (version: string) => {
@@ -218,27 +292,13 @@ export function useProviderDetail() {
     setDeleteVersionDialogOpen(true)
   }
 
-  const handleDeprecateVersion = async () => {
-    if (!namespace || !type || !selectedVersion) return
-
-    try {
-      setDeprecating(true)
-      await api.deprecateProviderVersion(
-        namespace,
-        type,
-        selectedVersion.version,
-        deprecationMessage || undefined,
-      )
-      // Reload the provider details
-      await loadProviderDetails()
-      setDeprecationMessage('')
-    } catch (err: unknown) {
-      console.error('Failed to deprecate version:', err)
-      setError(getErrorMessage(err, 'Failed to deprecate version. Please try again.'))
-    } finally {
-      setDeprecating(false)
-      setDeprecateDialogOpen(false)
-    }
+  const handleDeprecateVersion = () => {
+    if (!routeParams || !selectedVersion) return
+    deprecateVersionMutation.mutate({
+      ...routeParams,
+      version: selectedVersion.version,
+      message: deprecationMessage || undefined,
+    })
   }
 
   const handlePublishNewVersion = () => {
@@ -250,20 +310,9 @@ export function useProviderDetail() {
     })
   }
 
-  const handleUndeprecateVersion = async () => {
-    if (!namespace || !type || !selectedVersion) return
-
-    try {
-      setDeprecating(true)
-      await api.undeprecateProviderVersion(namespace, type, selectedVersion.version)
-      // Reload the provider details
-      await loadProviderDetails()
-    } catch (err: unknown) {
-      console.error('Failed to remove deprecation:', err)
-      setError(getErrorMessage(err, 'Failed to remove deprecation. Please try again.'))
-    } finally {
-      setDeprecating(false)
-    }
+  const handleUndeprecateVersion = () => {
+    if (!routeParams || !selectedVersion) return
+    undeprecateVersionMutation.mutate({ ...routeParams, version: selectedVersion.version })
   }
 
   const handleTabChange = (_: SyntheticEvent, newValue: number) => {
@@ -357,7 +406,7 @@ provider "${name}" {
     // Delete provider dialog
     deleteProviderDialogOpen,
     setDeleteProviderDialogOpen,
-    deleting,
+    deleting: deleteProviderMutation.isPending || deleteVersionMutation.isPending,
     // Delete version dialog
     deleteVersionDialogOpen,
     setDeleteVersionDialogOpen,
@@ -368,7 +417,7 @@ provider "${name}" {
     setDeprecateDialogOpen,
     deprecationMessage,
     setDeprecationMessage,
-    deprecating,
+    deprecating: deprecateVersionMutation.isPending || undeprecateVersionMutation.isPending,
     // Documentation tab
     activeTab,
     hasDocs,

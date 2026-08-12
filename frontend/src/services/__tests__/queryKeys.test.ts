@@ -84,6 +84,24 @@ describe('queryKeys', () => {
       const key = queryKeys.providers.versions('hashicorp', 'aws')
       expect(key).toEqual(['providers', 'versions', 'hashicorp', 'aws'])
     })
+
+    it('docs key includes namespace/type/version', () => {
+      const key = queryKeys.providers.docs('hashicorp', 'aws', '5.0.0')
+      expect(key).toEqual(['providers', 'docs', 'hashicorp', 'aws', '5.0.0'])
+    })
+
+    it('docs key changes with the version, so one version cannot serve another', () => {
+      expect(queryKeys.providers.docs('hashicorp', 'aws', '5.0.0')).not.toEqual(
+        queryKeys.providers.docs('hashicorp', 'aws', '4.0.0'),
+      )
+    })
+
+    it('docs key is not a prefix collision with the detail key', () => {
+      // invalidateQueries(detail) must not sweep the doc index away with it.
+      expect(queryKeys.providers.docs('hashicorp', 'aws', '5.0.0').slice(0, 2)).not.toEqual(
+        queryKeys.providers.detail('hashicorp', 'aws').slice(0, 2),
+      )
+    })
   })
 
   describe('dashboard', () => {

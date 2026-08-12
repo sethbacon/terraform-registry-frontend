@@ -1,6 +1,7 @@
 import React from 'react'
-import { renderHook, act, waitFor } from '@testing-library/react'
+import { renderHook, act, waitFor, screen } from '@testing-library/react'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 
 const mockApi = vi.hoisted(() => ({
@@ -47,14 +48,32 @@ function version(v: string, extra: Record<string, unknown> = {}) {
   }
 }
 
-/** Renders the hook under the real router so ?tab=/?doc= behave as in the app. */
-function renderProviderDetail(initialPath = '/providers/hashicorp/aws') {
+function createQueryClient(queryOverrides: Record<string, unknown> = {}) {
+  return new QueryClient({
+    defaultOptions: { queries: { retry: false, gcTime: 0, ...queryOverrides } },
+  })
+}
+
+/**
+ * Renders the hook under the real router so ?tab=/?doc= behave as in the app,
+ * and under a React Query client so the hook's queries/mutations behave as in
+ * the app. A fresh client per render unless the caller supplies one, so cached
+ * provider data never leaks between tests.
+ */
+function renderProviderDetail(
+  initialPath = '/providers/hashicorp/aws',
+  queryClient: QueryClient = createQueryClient(),
+) {
   const wrapper = ({ children }: { children: React.ReactNode }) => (
-    <MemoryRouter initialEntries={[initialPath]}>
-      <Routes>
-        <Route path="/providers/:namespace/:type" element={<>{children}</>} />
-      </Routes>
-    </MemoryRouter>
+    <QueryClientProvider client={queryClient}>
+      <MemoryRouter initialEntries={[initialPath]}>
+        <Routes>
+          <Route path="/providers/:namespace/:type" element={<>{children}</>} />
+          {/* Landing route for handleDeleteProvider's navigate('/providers') */}
+          <Route path="/providers" element={<div data-testid="providers-list" />} />
+        </Routes>
+      </MemoryRouter>
+    </QueryClientProvider>
   )
   return renderHook(() => useProviderDetail(), { wrapper })
 }
@@ -248,11 +267,68 @@ describe('useProviderDetail', () => {
     expect(result.current.deleteVersionDialogOpen).toBe(true)
 
     await act(async () => {
-      await result.current.handleDeleteVersion()
+      result.current.handleDeleteVersion()
     })
-    expect(mockApi.deleteProviderVersion).toHaveBeenCalledWith('hashicorp', 'aws', '5.0.0')
-    expect(mockApi.searchProviders).toHaveBeenCalledTimes(2)
+    await waitFor(() =>
+      expect(mockApi.deleteProviderVersion).toHaveBeenCalledWith('hashicorp', 'aws', '5.0.0'),
+    )
+    // The delete invalidates the provider detail query, which refetches it
+    await waitFor(() => expect(mockApi.searchProviders).toHaveBeenCalledTimes(2))
     expect(result.current.deleteVersionDialogOpen).toBe(false)
+    expect(result.current.versionToDelete).toBeNull()
+  })
+
+  it('reloads the provider after deprecating a version', async () => {
+    mockApi.deprecateProviderVersion.mockResolvedValue({})
+    const { result } = renderProviderDetail()
+
+    await waitFor(() => expect(result.current.loading).toBe(false))
+    act(() => result.current.setDeprecationMessage('use 6.x'))
+    await act(async () => {
+      result.current.handleDeprecateVersion()
+    })
+
+    await waitFor(() =>
+      expect(mockApi.deprecateProviderVersion).toHaveBeenCalledWith(
+        'hashicorp',
+        'aws',
+        '5.0.0',
+        'use 6.x',
+      ),
+    )
+    await waitFor(() => expect(mockApi.searchProviders).toHaveBeenCalledTimes(2))
+    expect(result.current.deprecationMessage).toBe('')
+    expect(result.current.deprecateDialogOpen).toBe(false)
+  })
+
+  it('reloads the provider after removing a deprecation', async () => {
+    mockApi.undeprecateProviderVersion.mockResolvedValue({})
+    const { result } = renderProviderDetail()
+
+    await waitFor(() => expect(result.current.loading).toBe(false))
+    await act(async () => {
+      result.current.handleUndeprecateVersion()
+    })
+
+    await waitFor(() =>
+      expect(mockApi.undeprecateProviderVersion).toHaveBeenCalledWith('hashicorp', 'aws', '5.0.0'),
+    )
+    await waitFor(() => expect(mockApi.searchProviders).toHaveBeenCalledTimes(2))
+  })
+
+  it('deletes the provider and navigates away', async () => {
+    mockApi.deleteProvider.mockResolvedValue({})
+    const { result } = renderProviderDetail()
+
+    await waitFor(() => expect(result.current.loading).toBe(false))
+    await act(async () => {
+      result.current.handleDeleteProvider()
+    })
+
+    await waitFor(() => expect(mockApi.deleteProvider).toHaveBeenCalledWith('hashicorp', 'aws'))
+    // Deleting the provider leaves the detail route for the provider list
+    await waitFor(() => expect(screen.getByTestId('providers-list')).toBeInTheDocument())
+    expect(result.current.deleteProviderDialogOpen).toBe(false)
   })
 
   it('reports a failure to deprecate without leaving the dialog open', async () => {
@@ -262,10 +338,140 @@ describe('useProviderDetail', () => {
 
     await waitFor(() => expect(result.current.loading).toBe(false))
     await act(async () => {
-      await result.current.handleDeprecateVersion()
+      result.current.handleDeprecateVersion()
     })
-    expect(result.current.error).toMatch(/failed to deprecate version/i)
+    await waitFor(() => expect(result.current.error).toMatch(/failed to deprecate version/i))
     expect(result.current.deprecateDialogOpen).toBe(false)
     expect(result.current.deprecating).toBe(false)
+    // A failed write must not refetch — the cache is still correct
+    expect(mockApi.searchProviders).toHaveBeenCalledTimes(1)
+  })
+
+  it('reports a failure to delete a version and keeps the queued version', async () => {
+    mockApi.deleteProviderVersion.mockRejectedValue({ status: 500 })
+    const { result } = renderProviderDetail()
+
+    await waitFor(() => expect(result.current.loading).toBe(false))
+    act(() => result.current.openDeleteVersionDialog('5.0.0'))
+    await act(async () => {
+      result.current.handleDeleteVersion()
+    })
+
+    await waitFor(() => expect(result.current.error).toMatch(/failed to delete version/i))
+    expect(result.current.deleteVersionDialogOpen).toBe(false)
+    expect(result.current.versionToDelete).toBe('5.0.0')
+    expect(result.current.deleting).toBe(false)
+  })
+
+  it('keeps the version the user picked when a mutation refetches the provider', async () => {
+    // Bug fix shipped with the React Query port (#674): the hand-rolled reload
+    // reset the selection to versions[0] on every refetch, so deprecating any
+    // version other than the newest snapped the detail panel back to the newest
+    // one and the user never saw the change they had just made. useModuleDetail
+    // already preserved the selection; this asserts the provider page does too.
+    // The refetch has to return *changed* rows, or React Query's structural
+    // sharing hands back the identical array, the selection effect never re-runs
+    // and the assertion would hold even for a hook that resets the selection.
+    mockApi.getProviderVersions
+      .mockResolvedValueOnce({
+        versions: [version('5.0.0'), version('4.0.0', { deprecated: true })],
+      })
+      .mockResolvedValueOnce({
+        versions: [version('5.0.0'), version('4.0.0', { deprecated: false })],
+      })
+    mockApi.undeprecateProviderVersion.mockResolvedValue({})
+    const { result } = renderProviderDetail()
+
+    await waitFor(() => expect(result.current.selectedVersion?.version).toBe('5.0.0'))
+    act(() => result.current.setSelectedVersion(result.current.versions[1]))
+    expect(result.current.selectedVersion?.version).toBe('4.0.0')
+    expect(result.current.selectedVersion?.deprecated).toBe(true)
+
+    await act(async () => {
+      result.current.handleUndeprecateVersion()
+    })
+    await waitFor(() => expect(mockApi.searchProviders).toHaveBeenCalledTimes(2))
+    // The refetched rows have landed (4.0.0 is no longer deprecated)
+    await waitFor(() => expect(result.current.selectedVersion?.deprecated).toBe(false))
+
+    expect(result.current.selectedVersion?.version).toBe('4.0.0')
+  })
+
+  it('picks up the refetched version row rather than the stale one', async () => {
+    // The selection is preserved by version string, but it must point at the
+    // freshly fetched row -- otherwise the panel would keep rendering the
+    // pre-mutation `deprecated: false` copy of the same version.
+    mockApi.getProviderVersions
+      .mockResolvedValueOnce({ versions: [version('5.0.0')] })
+      .mockResolvedValueOnce({
+        versions: [version('5.0.0', { deprecated: true, deprecation_message: 'use 6.x' })],
+      })
+    mockApi.deprecateProviderVersion.mockResolvedValue({})
+    const { result } = renderProviderDetail()
+
+    await waitFor(() => expect(result.current.selectedVersion?.version).toBe('5.0.0'))
+    expect(result.current.selectedVersion?.deprecated).toBe(false)
+
+    await act(async () => {
+      result.current.handleDeprecateVersion()
+    })
+    await waitFor(() => expect(result.current.selectedVersion?.deprecated).toBe(true))
+    expect(result.current.selectedVersion?.deprecation_message).toBe('use 6.x')
+  })
+
+  it('dedupes concurrent readers of the same provider into one request', async () => {
+    // Two mounted consumers of the hook share one cache entry, so the API is hit
+    // once. The hand-rolled version fetched once per consumer (#674).
+    const wrapper = ({ children }: { children: React.ReactNode }) => (
+      <QueryClientProvider client={createQueryClient()}>
+        <MemoryRouter initialEntries={['/providers/hashicorp/aws']}>
+          <Routes>
+            <Route path="/providers/:namespace/:type" element={<>{children}</>} />
+          </Routes>
+        </MemoryRouter>
+      </QueryClientProvider>
+    )
+    const { result } = renderHook(
+      () => ({ first: useProviderDetail(), second: useProviderDetail() }),
+      { wrapper },
+    )
+
+    await waitFor(() => expect(result.current.first.loading).toBe(false))
+    await waitFor(() => expect(result.current.second.loading).toBe(false))
+    expect(mockApi.searchProviders).toHaveBeenCalledTimes(1)
+    expect(mockApi.getProviderVersions).toHaveBeenCalledTimes(1)
+    expect(result.current.second.provider?.type).toBe('aws')
+  })
+
+  it('caches the doc index per version instead of refetching on every switch', async () => {
+    mockApi.searchProviders.mockResolvedValue({
+      providers: [{ ...provider, source: 'hashicorp/aws' }],
+    })
+    mockApi.getProviderVersions.mockResolvedValue({
+      versions: [version('5.0.0'), version('4.0.0')],
+    })
+    mockApi.getProviderDocs.mockResolvedValue({
+      docs: [{ id: 'd1', title: 'Overview', slug: 'index', category: 'overview', language: 'hcl' }],
+      total: 1,
+    })
+    // Mirrors the app's real client (src/queryClient.ts): a 30s stale window and
+    // a live cache. With the test default of gcTime: 0 nothing is retained, so
+    // there would be no caching claim left to make.
+    const { result } = renderProviderDetail(
+      '/providers/hashicorp/aws',
+      createQueryClient({ gcTime: 5 * 60 * 1000, staleTime: 30_000 }),
+    )
+
+    await waitFor(() => expect(result.current.docs).toHaveLength(1))
+    expect(mockApi.getProviderDocs).toHaveBeenCalledTimes(1)
+
+    act(() => result.current.setSelectedVersion(result.current.versions[1]))
+    await waitFor(() => expect(mockApi.getProviderDocs).toHaveBeenCalledTimes(2))
+    expect(mockApi.getProviderDocs.mock.calls[1][2]).toBe('4.0.0')
+
+    // Switching back is served from the cache for that version
+    act(() => result.current.setSelectedVersion(result.current.versions[0]))
+    await waitFor(() => expect(result.current.docs).toHaveLength(1))
+    expect(mockApi.getProviderDocs).toHaveBeenCalledTimes(2)
   })
 })
