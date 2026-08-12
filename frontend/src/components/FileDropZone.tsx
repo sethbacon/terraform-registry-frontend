@@ -3,7 +3,26 @@ import { Box, Button, Stack, Typography, Alert } from '@mui/material'
 import CloudUpload from '@mui/icons-material/CloudUpload'
 import InsertDriveFileIcon from '@mui/icons-material/InsertDriveFile'
 
-export const HARD_MAX_BYTES = 100 * 1024 * 1024 // 100MB (backend limit)
+/**
+ * Default cap, and the real limit for module archives: the backend rejects a
+ * module tar.gz above `archivelimits.MaxBytes` (100MB) in
+ * `internal/validation/archive.go`.
+ *
+ * This is NOT the limit for every upload — provider archives are allowed five
+ * times as much (see PROVIDER_MAX_BYTES). Reusing this one constant for both
+ * was #672: legitimate multi-platform provider releases were refused in the
+ * browser, before the request the backend would have accepted was even sent.
+ */
+export const HARD_MAX_BYTES = 100 * 1024 * 1024 // 100MB
+
+/**
+ * Cap for provider archives, mirroring `MaxProviderBinarySize` in the backend's
+ * `internal/api/providers/upload.go`, which rejects anything larger with
+ * "provider binary too large". The edge proxy is provisioned to match
+ * (`client_max_body_size 500m` in nginx.conf and nginx-ecs.conf.template).
+ */
+export const PROVIDER_MAX_BYTES = 500 * 1024 * 1024 // 500MB
+
 export const SOFT_WARN_BYTES = 50 * 1024 * 1024 // 50MB
 
 export interface FileDropZoneProps {
@@ -13,6 +32,13 @@ export interface FileDropZoneProps {
   onFileSelected: (file: File) => void
   /** Allowed extensions, leading dot required (e.g. ['.tar.gz', '.tgz']). */
   acceptedExtensions: string[]
+  /**
+   * Largest accepted file, in bytes. Defaults to HARD_MAX_BYTES, the module
+   * archive limit. Callers whose endpoint enforces something else must pass it
+   * — a client-side cap below the backend's is a false rejection the user
+   * cannot work around, not extra safety.
+   */
+  maxBytes?: number
   /** Optional callback fired on clear. */
   onClear?: () => void
   /** Disables interaction (e.g., during upload). */
@@ -39,6 +65,7 @@ const FileDropZone: React.FC<FileDropZoneProps> = ({
   onFileSelected,
   onClear,
   acceptedExtensions,
+  maxBytes = HARD_MAX_BYTES,
   disabled,
   idlePrompt,
   'data-testid': testId = 'file-drop-zone',
@@ -56,9 +83,9 @@ const FileDropZone: React.FC<FileDropZoneProps> = ({
         setError(`Invalid file type. Expected ${acceptedExtensions.join(' or ')}.`)
         return
       }
-      if (candidate.size > HARD_MAX_BYTES) {
+      if (candidate.size > maxBytes) {
         setError(
-          `File is too large (${formatBytes(candidate.size)}). Maximum allowed size is ${formatBytes(HARD_MAX_BYTES)}.`,
+          `File is too large (${formatBytes(candidate.size)}). Maximum allowed size is ${formatBytes(maxBytes)}.`,
         )
         return
       }
@@ -67,7 +94,7 @@ const FileDropZone: React.FC<FileDropZoneProps> = ({
       }
       onFileSelected(candidate)
     },
-    [acceptedExtensions, onFileSelected],
+    [acceptedExtensions, maxBytes, onFileSelected],
   )
 
   const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
@@ -207,7 +234,7 @@ const FileDropZone: React.FC<FileDropZoneProps> = ({
                 color: 'text.secondary',
               }}
             >
-              Maximum {formatBytes(HARD_MAX_BYTES)}
+              Maximum {formatBytes(maxBytes)}
             </Typography>
           </Stack>
         )}

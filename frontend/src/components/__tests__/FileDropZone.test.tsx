@@ -1,7 +1,7 @@
 import { render, screen, fireEvent } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, it, expect, vi } from 'vitest'
-import FileDropZone, { HARD_MAX_BYTES, SOFT_WARN_BYTES } from '../FileDropZone'
+import FileDropZone, { HARD_MAX_BYTES, PROVIDER_MAX_BYTES, SOFT_WARN_BYTES } from '../FileDropZone'
 
 function makeFile(name: string, sizeBytes: number, type = 'application/gzip'): File {
   const f = new File(['x'], name, { type })
@@ -71,6 +71,64 @@ describe('FileDropZone', () => {
     fireEvent.drop(zone, { dataTransfer: makeDataTransfer([huge]) })
     expect(onFileSelected).not.toHaveBeenCalled()
     expect(screen.getByTestId('file-drop-zone-error')).toHaveTextContent(/too large/i)
+  })
+
+  it('accepts a file above the default cap when maxBytes raises it (#672)', () => {
+    // The provider case. A 150MB archive is well inside what the backend
+    // accepts for providers (MaxProviderBinarySize, 500MB) but was refused in
+    // the browser because the component's single constant was the module limit.
+    const onFileSelected = vi.fn()
+    render(
+      <FileDropZone
+        file={null}
+        onFileSelected={onFileSelected}
+        acceptedExtensions={['.zip']}
+        maxBytes={PROVIDER_MAX_BYTES}
+      />,
+    )
+    const zone = screen.getByTestId('file-drop-zone')
+    const big = makeFile('terraform-provider-widget_1.0.0.zip', 150 * 1024 * 1024)
+    fireEvent.drop(zone, { dataTransfer: makeDataTransfer([big]) })
+    expect(onFileSelected).toHaveBeenCalledWith(big)
+    expect(screen.queryByTestId('file-drop-zone-error')).not.toBeInTheDocument()
+  })
+
+  it('still blocks a file above the raised cap', () => {
+    // maxBytes moves the limit, it does not remove it.
+    const onFileSelected = vi.fn()
+    render(
+      <FileDropZone
+        file={null}
+        onFileSelected={onFileSelected}
+        acceptedExtensions={['.zip']}
+        maxBytes={PROVIDER_MAX_BYTES}
+      />,
+    )
+    const zone = screen.getByTestId('file-drop-zone')
+    const huge = makeFile('enormous.zip', PROVIDER_MAX_BYTES + 1)
+    fireEvent.drop(zone, { dataTransfer: makeDataTransfer([huge]) })
+    expect(onFileSelected).not.toHaveBeenCalled()
+    expect(screen.getByTestId('file-drop-zone-error')).toHaveTextContent(/500\.0 MB/)
+  })
+
+  it('reports the effective cap, not the default, in the idle hint and the error', () => {
+    // The advertised maximum and the rejection message both have to follow
+    // maxBytes; a zone that accepts 500MB while telling the user "Maximum
+    // 100.0 MB" is the same false rejection moved into the copy.
+    const { rerender } = render(
+      <FileDropZone file={null} onFileSelected={vi.fn()} acceptedExtensions={['.zip']} />,
+    )
+    expect(screen.getByText(/Maximum 100\.0 MB/)).toBeInTheDocument()
+
+    rerender(
+      <FileDropZone
+        file={null}
+        onFileSelected={vi.fn()}
+        acceptedExtensions={['.zip']}
+        maxBytes={PROVIDER_MAX_BYTES}
+      />,
+    )
+    expect(screen.getByText(/Maximum 500\.0 MB/)).toBeInTheDocument()
   })
 
   it('warns but accepts files between soft and hard limits', () => {

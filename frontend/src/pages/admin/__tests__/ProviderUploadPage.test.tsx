@@ -128,6 +128,29 @@ describe('ProviderUploadPage', () => {
     await waitFor(() => expect(mockNavigate).toHaveBeenCalledWith('/providers/myorg/widget'))
   })
 
+  it('accepts a 150MB provider archive the backend would have taken (#672)', async () => {
+    // FileDropZone's default cap is the module archive limit (100MB). The
+    // provider endpoint enforces MaxProviderBinarySize (500MB), and a release
+    // zip carrying several platform binaries routinely lands between the two,
+    // so before #672 this file was refused in the browser and the request the
+    // backend would have accepted was never sent.
+    //
+    // Asserted through the page rather than by rendering FileDropZone with a
+    // prop: the component test cannot tell whether *this page* passes it.
+    const user = userEvent.setup()
+    renderPage()
+    await user.click(screen.getByText('Manual Upload'))
+
+    const input = screen.getByTestId('provider-upload-dropzone-input') as HTMLInputElement
+    const name = 'terraform-provider-widget_1.0.0_linux_amd64.zip'
+    const big = new File(['zipdata'], name, { type: 'application/zip' })
+    Object.defineProperty(big, 'size', { value: 150 * 1024 * 1024 })
+    fireEvent.change(input, { target: { files: [big] } })
+
+    expect(await screen.findByText(name)).toBeInTheDocument()
+    expect(screen.queryByTestId('provider-upload-dropzone-error')).not.toBeInTheDocument()
+  })
+
   it('shows error alert when upload fails', async () => {
     const user = userEvent.setup()
     uploadProviderMock.mockRejectedValue(new Error('upload blew up'))
