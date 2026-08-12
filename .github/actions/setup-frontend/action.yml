@@ -85,7 +85,33 @@ runs:
         # That is the very substitution this step exists to detect, performed by the
         # step itself.
         tarball=$(basename "$(npm pack "@sethbacon/terraform-suite-ui@${version}" --silent --pack-destination "$tmp" | tail -n1)")
-        gh attestation verify "${tmp}/${tarball}" --repo sethbacon/terraform-suite-ui
+        # --owner, not --repo, and this is a KNOWN WEAKENING. Read before changing.
+        #
+        # The library's repo was moved to 4cloudguru/cloud-suite-ui (2026-08-11).
+        # Its attestations did NOT move: they are still indexed under
+        # users/sethbacon (repository_id 1283090189), and the SLSA predicate still
+        # names github.com/sethbacon/terraform-suite-ui as the source. So BOTH
+        # repo-scoped forms now fail --
+        #   --repo sethbacon/terraform-suite-ui   the name redirects to the new
+        #                                          repo, which has no attestations
+        #   --repo 4cloudguru/cloud-suite-ui      no attestations, and the predicate
+        #                                          names the old repo anyway
+        # -- and the failure is a 404 on the digest lookup, which is
+        # indistinguishable from the tampering this step exists to catch.
+        #
+        # --owner still verifies the signature, the digest binding and that the
+        # artifact was built by a repo owned by sethbacon. What it no longer pins
+        # is WHICH repo. That is weaker, and it is deliberate rather than
+        # accidental.
+        #
+        # This is a bridge, not a destination. Retire it by publishing the library
+        # from its new home (which mints attestations under 4cloudguru) and then
+        # restoring the strict form:
+        #   gh attestation verify "${tmp}/${tarball}" --repo 4cloudguru/cloud-suite-ui
+        # The attestations for 0.8.1 will never migrate -- they are immutable
+        # records of a build that happened under the old name -- so this stays
+        # until the dependency moves to a version published from the new repo.
+        gh attestation verify "${tmp}/${tarball}" --owner sethbacon
         rm -rf "$tmp"
 
     - name: Install e2e dependencies
