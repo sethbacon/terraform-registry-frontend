@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, screen, waitFor, fireEvent } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router-dom'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
@@ -173,6 +173,25 @@ describe('ModuleUploadPage — upload form (roadmap 2.5)', () => {
     const file = new File(['x'], 'mod.tar.gz', { type: 'application/gzip' })
     await user.upload(input, file)
     expect(screen.getByText('mod.tar.gz')).toBeInTheDocument()
+  })
+
+  it('still refuses a 150MB module archive — the provider cap is not shared (#672)', async () => {
+    // Companion to the provider-side test. #672 is fixed by making the cap
+    // per-caller, NOT by raising one shared constant: the backend rejects a
+    // module tar.gz over archivelimits.MaxBytes (100MB), so accepting 150MB
+    // here would only move the failure to the server. This test passes against
+    // today's code by design — it exists so that "simplifying" the two limits
+    // back into one 500MB constant fails instead of quietly regressing.
+    const user = userEvent.setup()
+    await openUploadForm(user)
+    const input = screen.getByTestId('module-upload-dropzone-input') as HTMLInputElement
+    const big = new File(['x'], 'huge.tar.gz', { type: 'application/gzip' })
+    Object.defineProperty(big, 'size', { value: 150 * 1024 * 1024 })
+    fireEvent.change(input, { target: { files: [big] } })
+
+    const error = await screen.findByTestId('module-upload-dropzone-error')
+    expect(error).toHaveTextContent(/too large/i)
+    expect(error).toHaveTextContent(/100\.0 MB/)
   })
 
   it('disables Upload Module when a registry segment is invalid', async () => {

@@ -28,7 +28,7 @@ import { getErrorMessage, isCanceledError } from '../../utils/errors'
 import Page from '../../components/Page'
 import PageHeader from '../../components/PageHeader'
 import PageTitleIcon from '@mui/icons-material/Extension'
-import FileDropZone from '../../components/FileDropZone'
+import FileDropZone, { PROVIDER_MAX_BYTES } from '../../components/FileDropZone'
 
 type ProviderMethod = 'choose' | 'upload' | 'mirror'
 
@@ -324,6 +324,10 @@ const ProviderUploadPage: React.FC = () => {
           onFileSelected={handleProviderFileSelected}
           onClear={() => setProviderFile(null)}
           acceptedExtensions={['.zip']}
+          // Provider archives are capped at 500MB by the backend, not at the
+          // 100MB module limit FileDropZone defaults to (#672). A release zip
+          // carrying several platform binaries routinely passes 100MB.
+          maxBytes={PROVIDER_MAX_BYTES}
           disabled={uploading}
           data-testid="provider-upload-dropzone"
         />
