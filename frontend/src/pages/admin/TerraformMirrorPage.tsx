@@ -6,7 +6,6 @@ import PageHeader from '../../components/PageHeader'
 import StatusAlerts from '../../components/StatusAlerts'
 import PageTitleIcon from '@mui/icons-material/GetApp'
 import {
-  Autocomplete,
   Alert,
   Box,
   Button,
@@ -17,18 +16,14 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
-  FormControlLabel,
   Grid,
-  MenuItem,
   Paper,
-  Switch,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
-  TextField,
   Typography,
 } from '@mui/material'
 import AddIcon from '@mui/icons-material/Add'
@@ -44,14 +39,12 @@ import {
   type TerraformMirrorStatusResponse,
   type TerraformVersion,
   type TerraformSyncHistory,
-  type UpdateTerraformMirrorConfigRequest,
-  parsePlatformFilter,
 } from '../../types/terraform_mirror'
 import { SyncStatusChip, ToolChip } from './terraformMirror/StatusChips'
 import MirrorConfigCard from './terraformMirror/MirrorConfigCard'
 import MirrorVersionRow from './terraformMirror/MirrorVersionRow'
 import CreateMirrorDialog, { useCreateMirrorFlow } from './terraformMirror/CreateMirrorDialog'
-import { KNOWN_PLATFORMS, SUPPORTED_TOOLS, toolDefaultUrl } from './terraformMirror/constants'
+import EditMirrorDialog, { useEditMirrorFlow } from './terraformMirror/EditMirrorDialog'
 
 // ---------------------------------------------------------------------------
 // Main page
@@ -72,12 +65,7 @@ const TerraformMirrorPage: React.FC = () => {
 
   const create = useCreateMirrorFlow(status)
 
-  // ---- edit dialog ----
-  const [editConfig, setEditConfig] = useState<TerraformMirrorConfig | null>(null)
-  const [editForm, setEditForm] = useState<UpdateTerraformMirrorConfigRequest>({})
-  const [editVersionFilter, setEditVersionFilter] = useState('')
-  const [editPlatformFilter, setEditPlatformFilter] = useState<string[]>([])
-
+  const edit = useEditMirrorFlow(status)
   // ---- delete dialog ----
   const [deleteConfig, setDeleteConfig] = useState<TerraformMirrorConfig | null>(null)
 
@@ -129,50 +117,6 @@ const TerraformMirrorPage: React.FC = () => {
       }
     })
   }, [configs])
-
-  // ---------------------------------------------------------------------------
-  // Edit
-  // ---------------------------------------------------------------------------
-  const openEdit = (config: TerraformMirrorConfig) => {
-    setEditConfig(config)
-    setEditVersionFilter(config.version_filter ?? '')
-    setEditPlatformFilter(parsePlatformFilter(config.platform_filter))
-    setEditForm({
-      name: config.name,
-      description: config.description ?? '',
-      tool: config.tool,
-      enabled: config.enabled,
-      upstream_url: config.upstream_url,
-      gpg_verify: config.gpg_verify,
-      stable_only: config.stable_only,
-      sync_interval_hours: config.sync_interval_hours,
-      requires_approval: config.requires_approval ?? false,
-    })
-  }
-
-  const editMutation = useMutation({
-    mutationFn: async () => {
-      if (!editConfig) throw new Error('No config to edit')
-      await api.updateTerraformMirrorConfig(editConfig.id, {
-        ...editForm,
-        platform_filter: editPlatformFilter.length > 0 ? editPlatformFilter : [],
-        version_filter: editVersionFilter.trim() || '',
-      })
-    },
-    onSuccess: () => {
-      status.setSuccess(t('admin.terraformMirror.msgUpdated', { name: editConfig?.name }))
-      setEditConfig(null)
-      queryClient.invalidateQueries({ queryKey: queryKeys.terraformMirrors._def })
-    },
-    onError: (err: unknown) => {
-      status.setError(getErrorMessage(err, t('admin.terraformMirror.errUpdate')))
-    },
-  })
-
-  const handleEdit = () => {
-    if (!editConfig) return
-    editMutation.mutate()
-  }
 
   // ---------------------------------------------------------------------------
   // Delete
@@ -344,7 +288,7 @@ const TerraformMirrorPage: React.FC = () => {
                     <MirrorConfigCard
                       config={cfg}
                       status={status}
-                      onEdit={openEdit}
+                      onEdit={edit.openDialog}
                       onDelete={setDeleteConfig}
                       onSync={handleSync}
                       onViewVersions={openVersions}
@@ -360,181 +304,7 @@ const TerraformMirrorPage: React.FC = () => {
 
           <CreateMirrorDialog flow={create} />
 
-          {/* ==================================================================
-          Edit Dialog
-      ================================================================== */}
-          <Dialog open={!!editConfig} onClose={() => setEditConfig(null)} maxWidth="sm" fullWidth>
-            <DialogTitle>
-              {t('admin.terraformMirror.dialogTitleEdit', { name: editConfig?.name })}
-            </DialogTitle>
-            <DialogContent>
-              <Box sx={{ pt: 1, display: 'flex', flexDirection: 'column', gap: 2 }}>
-                <TextField
-                  label={t('admin.terraformMirror.labelName')}
-                  value={editForm.name ?? ''}
-                  onChange={(e) => setEditForm((prev) => ({ ...prev, name: e.target.value }))}
-                  fullWidth
-                />
-                <TextField
-                  label={t('admin.terraformMirror.labelDescription')}
-                  value={editForm.description ?? ''}
-                  onChange={(e) =>
-                    setEditForm((prev) => ({ ...prev, description: e.target.value }))
-                  }
-                  fullWidth
-                />
-                <TextField
-                  select
-                  label={t('admin.terraformMirror.labelTool')}
-                  value={editForm.tool ?? 'terraform'}
-                  onChange={(e) => {
-                    const newTool = e.target.value
-                    setEditForm((prev) => {
-                      const prevDefault = toolDefaultUrl(prev.tool ?? 'terraform')
-                      const shouldUpdate =
-                        (prev.upstream_url ?? '') === prevDefault ||
-                        (prev.upstream_url ?? '') === ''
-                      return {
-                        ...prev,
-                        tool: newTool,
-                        upstream_url: shouldUpdate ? toolDefaultUrl(newTool) : prev.upstream_url,
-                      }
-                    })
-                  }}
-                  fullWidth
-                >
-                  {SUPPORTED_TOOLS.map((toolOption) => (
-                    <MenuItem key={toolOption.value} value={toolOption.value}>
-                      {toolOption.label}
-                    </MenuItem>
-                  ))}
-                  <MenuItem value="custom">{t('admin.terraformMirror.menuCustom')}</MenuItem>
-                </TextField>
-                <TextField
-                  label={t('admin.terraformMirror.labelUpstreamUrl')}
-                  value={editForm.upstream_url ?? ''}
-                  onChange={(e) =>
-                    setEditForm((prev) => ({ ...prev, upstream_url: e.target.value }))
-                  }
-                  helperText={
-                    editForm.tool === 'opentofu'
-                      ? t('admin.terraformMirror.helpUrlOpentofu')
-                      : editForm.tool === 'terraform'
-                        ? t('admin.terraformMirror.helpUrlTerraform')
-                        : t('admin.terraformMirror.helpUrlCustom')
-                  }
-                  fullWidth
-                />
-                <TextField
-                  label={t('admin.terraformMirror.labelSyncInterval')}
-                  type="number"
-                  value={editForm.sync_interval_hours ?? 24}
-                  onChange={(e) =>
-                    setEditForm((prev) => ({
-                      ...prev,
-                      sync_interval_hours: parseInt(e.target.value, 10),
-                    }))
-                  }
-                  fullWidth
-                  slotProps={{
-                    htmlInput: { min: 1 },
-                  }}
-                />
-                <Box sx={{ display: 'flex', gap: 2 }}>
-                  <FormControlLabel
-                    control={
-                      <Switch
-                        checked={editForm.enabled ?? true}
-                        onChange={(e) =>
-                          setEditForm((prev) => ({ ...prev, enabled: e.target.checked }))
-                        }
-                      />
-                    }
-                    label={t('admin.terraformMirror.labelEnabled')}
-                  />
-                  <FormControlLabel
-                    control={
-                      <Switch
-                        checked={editForm.gpg_verify ?? true}
-                        onChange={(e) =>
-                          setEditForm((prev) => ({ ...prev, gpg_verify: e.target.checked }))
-                        }
-                      />
-                    }
-                    label={t('admin.terraformMirror.labelGpgVerify')}
-                  />
-                  <FormControlLabel
-                    control={
-                      <Switch
-                        checked={editForm.stable_only ?? false}
-                        onChange={(e) =>
-                          setEditForm((prev) => ({ ...prev, stable_only: e.target.checked }))
-                        }
-                      />
-                    }
-                    label={t('admin.terraformMirror.labelStableOnly')}
-                  />
-                  <FormControlLabel
-                    control={
-                      <Switch
-                        checked={editForm.requires_approval ?? false}
-                        onChange={(e) =>
-                          setEditForm((prev) => ({
-                            ...prev,
-                            requires_approval: e.target.checked,
-                          }))
-                        }
-                      />
-                    }
-                    label={t('admin.terraformMirror.labelRequiresApproval')}
-                  />
-                </Box>
-                <TextField
-                  label={t('admin.terraformMirror.labelVersionFilter')}
-                  value={editVersionFilter}
-                  onChange={(e) => setEditVersionFilter(e.target.value)}
-                  helperText={t('admin.terraformMirror.helpVersionFilter')}
-                  fullWidth
-                />
-                <Autocomplete
-                  multiple
-                  options={KNOWN_PLATFORMS}
-                  value={editPlatformFilter}
-                  onChange={(_event, newValue) => setEditPlatformFilter(newValue)}
-                  renderInput={(params) => (
-                    <TextField
-                      {...params}
-                      label={t('admin.terraformMirror.labelPlatformFilter')}
-                      placeholder={
-                        editPlatformFilter.length === 0
-                          ? t('admin.terraformMirror.placeholderAllPlatforms')
-                          : ''
-                      }
-                      helperText={t('admin.terraformMirror.helpPlatformFilter')}
-                      fullWidth
-                    />
-                  )}
-                  renderValue={(value, getItemProps) =>
-                    value.map((option, index) => (
-                      <Chip label={option} size="small" {...getItemProps({ index })} key={option} />
-                    ))
-                  }
-                />
-              </Box>
-            </DialogContent>
-            <DialogActions>
-              <Button onClick={() => setEditConfig(null)}>
-                {t('admin.terraformMirror.cancel')}
-              </Button>
-              <Button onClick={handleEdit} variant="contained" disabled={editMutation.isPending}>
-                {editMutation.isPending ? (
-                  <CircularProgress size={18} />
-                ) : (
-                  t('admin.terraformMirror.save')
-                )}
-              </Button>
-            </DialogActions>
-          </Dialog>
+          <EditMirrorDialog flow={edit} />
 
           {/* ==================================================================
           Delete Config Dialog
