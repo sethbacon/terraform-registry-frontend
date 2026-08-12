@@ -2,6 +2,7 @@ import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 
 // Mock api
 const searchProvidersMock = vi.fn()
@@ -50,13 +51,23 @@ vi.mock('../../services/errorReporting', () => ({
 import ProviderDetailPage from '../ProviderDetailPage'
 import { captureError } from '../../services/errorReporting'
 
+function createQueryClient() {
+  return new QueryClient({
+    defaultOptions: { queries: { retry: false, gcTime: 0 } },
+  })
+}
+
 function renderPage(path = '/providers/hashicorp/aws') {
+  // A fresh client per render, so provider data cached by one test can never
+  // satisfy the next one's query and hide a missing fetch.
   return render(
-    <MemoryRouter initialEntries={[path]}>
-      <Routes>
-        <Route path="/providers/:namespace/:type" element={<ProviderDetailPage />} />
-      </Routes>
-    </MemoryRouter>,
+    <QueryClientProvider client={createQueryClient()}>
+      <MemoryRouter initialEntries={[path]}>
+        <Routes>
+          <Route path="/providers/:namespace/:type" element={<ProviderDetailPage />} />
+        </Routes>
+      </MemoryRouter>
+    </QueryClientProvider>,
   )
 }
 
@@ -131,6 +142,16 @@ describe('ProviderDetailPage', () => {
         context: 'Failed to load provider details',
       }),
     )
+  })
+
+  // A namespace/type that matches nothing is a cacheable answer, not a transport
+  // failure: it must not be retried and must not be reported as an app error.
+  it('does not report a not-found provider to telemetry', async () => {
+    searchProvidersMock.mockResolvedValue({ providers: [] })
+    getProviderVersionsMock.mockResolvedValue({ versions: [] })
+    renderPage()
+    await waitFor(() => expect(screen.getByText(/provider not found/i)).toBeInTheDocument())
+    expect(captureError).not.toHaveBeenCalled()
   })
 
   it('renders provider details after loading', async () => {
