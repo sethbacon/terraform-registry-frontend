@@ -40,13 +40,8 @@ jobs:
   npm-audit:
     name: Dependency Audit
     runs-on: ubuntu-latest
-    # Same sibling defect as pr-checks.yml's npm-audit job (#598): without
-    # an explicit grant, this job only has the workflow-level `contents:
-    # read`, and setup-frontend's default `npm ci` needs packages:read to
-    # authenticate to npm.pkg.github.com for @4cloudguru/cloud-suite-ui.
     permissions:
       contents: read
-      packages: read
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
