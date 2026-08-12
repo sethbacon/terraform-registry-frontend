@@ -1,11 +1,12 @@
 import { describe, it, expect } from 'vitest'
-import { isSCMOAuthFailureUrl, checkCsrfOriginConfig } from '../api/http'
+import { isSCMOAuthFailureUrl, checkCsrfOriginConfig, classifySession401 } from '../api/http'
 
 // ─── SCM OAuth vs session 401 classification (#617) ─────────────────────────
 // A 401 on an endpoint that proxies the external SCM API (using the stored OAuth
 // token) means "reconnect your SCM token" and must NOT wipe the app session.
 // Everything else — including the provider record and the OAuth-linkage
-// endpoints — is a real session failure that redirects to /login.
+// endpoints — may be a real session failure, and is confirmed against /auth/me
+// before anything is torn down (see classifySession401 below).
 
 describe('isSCMOAuthFailureUrl', () => {
   it.each([
@@ -27,6 +28,63 @@ describe('isSCMOAuthFailureUrl', () => {
     ['empty', ''],
   ])('classifies %s as a session failure (not OAuth)', (_label, url) => {
     expect(isSCMOAuthFailureUrl(url)).toBe(false)
+  })
+})
+
+// ─── 401 → session-death classification (#677) ──────────────────────────────
+// Only a request the *cookie session* authenticated can report that session's
+// death. Everything else either carries its own credential or has to be
+// confirmed against /auth/me before the tfr_csrf half of the double-submit pair
+// is destroyed.
+
+describe('classifySession401', () => {
+  it.each([
+    ['setup-wizard SetupToken', '/api/v1/setup/admin', { Authorization: 'SetupToken abc123' }],
+    ['lowercase header name', '/api/v1/setup/complete', { authorization: 'SetupToken abc123' }],
+    ['explicit Bearer', '/api/v1/modules', { Authorization: 'Bearer some-jwt' }],
+  ])('treats %s as another credential, never session death', (_label, url, headers) => {
+    expect(classifySession401({ url, headers })).toBe('other-credential')
+  })
+
+  it('reads an Authorization header off an AxiosHeaders-style object', () => {
+    // Axios normalises headers into an AxiosHeaders instance whose values are
+    // only reachable via .get() — a plain property read returns undefined and
+    // would misclassify a SetupToken request as a dead session.
+    const headers = { get: (name: string) => (name === 'Authorization' ? 'SetupToken abc' : null) }
+    expect(classifySession401({ url: '/api/v1/setup/admin', headers })).toBe('other-credential')
+    expect(classifySession401({ url: '/api/v1/setup/admin', headers: { get: () => null } })).toBe(
+      'unconfirmed',
+    )
+  })
+
+  it.each([
+    '/api/v1/scm-providers/123/repositories',
+    '/api/v1/scm-providers/456/repositories/owner/repo/tags',
+  ])('treats an external-SCM proxy call as another credential: %s', (url) => {
+    expect(classifySession401({ url })).toBe('other-credential')
+  })
+
+  it.each([
+    ['bare path', '/api/v1/auth/me'],
+    ['with a query string', '/api/v1/auth/me?fresh=1'],
+  ])('treats the /auth/me session check itself as authoritative (%s)', (_label, url) => {
+    expect(classifySession401({ url })).toBe('session-dead')
+  })
+
+  it.each([
+    [
+      'module SCM sync (backend 401s "not connected to this SCM provider")',
+      '/api/v1/admin/modules/m1/scm/sync',
+    ],
+    ['an authorization failure returned as 401', '/api/v1/admin/users'],
+    ['an SCM endpoint no URL heuristic knows about', '/api/v1/scm-providers/1/pull-requests'],
+    ['no config url at all', ''],
+  ])('leaves a cookie-authenticated 401 unconfirmed: %s', (_label, url) => {
+    expect(classifySession401({ url })).toBe('unconfirmed')
+  })
+
+  it('leaves a missing config unconfirmed rather than assuming session death', () => {
+    expect(classifySession401(undefined)).toBe('unconfirmed')
   })
 })
 
