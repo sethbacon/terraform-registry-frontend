@@ -1,6 +1,18 @@
 <!-- markdownlint-disable MD013 MD024 MD041 -->
 # Changelog
 
+## [2.22.1](https://github.com/sethbacon/terraform-registry-frontend/compare/v2.22.0...v2.22.1) (2026-08-13)
+
+
+### Bug Fixes
+
+* **e2e:** enable identity migrations in the E2E stack ([#775](https://github.com/sethbacon/terraform-registry-frontend/issues/775)) ([a7549ef](https://github.com/sethbacon/terraform-registry-frontend/commit/a7549ef4590e1f9b998aa01b6222e4b49933cc17))
+
+
+### Documentation
+
+* correct the suite-ui package as public on npmjs ([#773](https://github.com/sethbacon/terraform-registry-frontend/issues/773)) ([abfa754](https://github.com/sethbacon/terraform-registry-frontend/commit/abfa754610bf1985177bddc2c3de47d31364e3d7))
+
 ## [2.22.0](https://github.com/sethbacon/terraform-registry-frontend/compare/v2.21.2...v2.22.0) (2026-08-12)
 
 
