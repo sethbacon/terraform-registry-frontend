@@ -29,6 +29,9 @@ services:
       - TFR_DATABASE_USER=registry
       - TFR_DATABASE_PASSWORD=registry
       - TFR_DATABASE_SSL_MODE=disable
+      # The backend writes identity.audit_logs.actor_email, which only exists once
+      # identity migration 000007 runs — and that migration is gated on this flag.
+      - TFR_IDENTITY_MIGRATIONS_ENABLED=true
       # DEV_MODE enables /api/v1/dev/login for Playwright fixtures — test/CI only, never production
       - DEV_MODE=true
       # This stack runs at the default logging.level ("info"), which
