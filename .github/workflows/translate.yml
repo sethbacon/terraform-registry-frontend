@@ -36,6 +36,15 @@ jobs:
         with:
           app-id: "${{ vars.TRANSLATE_APP_ID }}"
           private-key: "${{ secrets.TRANSLATE_APP_KEY }}"
+          # Narrow the token to what this job does, rather than inheriting the
+          # installation's blanket permissions (zizmor: dangerous use of GitHub
+          # App tokens). Request ONLY permissions the installation actually
+          # holds -- asking for one it lacks makes the token step 422, which is
+          # how a sibling repo broke release-please and had to revert. Both of
+          # these are proven present: the same App pushed the i18n branch and
+          # opened the translations PR on a dispatch before this narrowing.
+          permission-contents: write
+          permission-pull-requests: write
 
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
