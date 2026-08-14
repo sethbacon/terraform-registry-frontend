@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
 // @ts-expect-error -- plain ESM script, no type declarations by design
-import { triage, triageOsv, triageReport, render, loadExceptions } from '../audit-gate.mjs'
+import { triage, triageOsv, triageReport, render, loadExceptions, compareVersions } from '../audit-gate.mjs'
 
 type Fix = boolean | { name: string; version: string; isSemVerMajor: boolean }
 
@@ -184,6 +184,84 @@ describe('audit-gate OSV mode', () => {
     r.results[0].packages[0].vulnerabilities[0].database_specific.severity = 'MODERATE'
     const { blocking, advisory, accepted } = triageOsv(r, NONE)
     expect([blocking, advisory, accepted].every((l) => l.length === 0)).toBe(true)
+  })
+
+  // An advisory that spans several release lines publishes one fix per line.
+  // Taking whichever OSV listed first named a fix from an unrelated major and
+  // the gate then wrote the finding off as "breaking only" — silently NOT
+  // blocking on a high with a patch-level fix. Real ranges, from this repo's
+  // own frontend/package-lock.json at e52794c~1.
+  describe('minimal upgrade selection', () => {
+    const multiLine = (installed: string, fixes: string[]) => ({
+      results: [
+        {
+          source: { path: 'frontend/package-lock.json' },
+          packages: [
+            {
+              package: { name: 'brace-expansion', version: installed, ecosystem: 'npm' },
+              vulnerabilities: [
+                {
+                  id: 'GHSA-mh99-v99m-4gvg',
+                  summary: 'Example advisory',
+                  database_specific: { severity: 'HIGH' },
+                  affected: [
+                    {
+                      package: { name: 'brace-expansion' },
+                      ranges: fixes.map((fixed) => ({ type: 'SEMVER', events: [{ introduced: '0' }, { fixed }] })),
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    })
+
+    it.each([
+      ['1.1.16', '1.1.17'],
+      ['5.0.7', '5.0.8'],
+      ['3.0.1', '3.0.3'],
+    ])('picks the lowest fix above %s, not the first listed', (installed, expected) => {
+      const { blocking } = triageOsv(multiLine(installed, ['5.0.8', '3.0.3', '2.1.3', '1.1.17']), NONE)
+      expect(blocking).toHaveLength(1)
+      expect(blocking[0].fix.version).toBe(expected)
+    })
+
+    it('still reports a breaking-only fix as breaking', () => {
+      const { blocking, advisory } = triageOsv(multiLine('3.8.3', ['4.3.9']), NONE)
+      expect(blocking).toHaveLength(0)
+      expect(advisory[0].fix.version).toBe('4.3.9')
+      expect(advisory[0].why).toBe('only a semver-major (breaking) fix is available')
+    })
+
+    it('falls back to the first published fix when none is an upgrade', () => {
+      const { advisory } = triageOsv(multiLine('9.9.9', ['1.1.17']), NONE)
+      expect(advisory[0].fix.version).toBe('1.1.17')
+    })
+
+    it.each([
+      ['1.1.16', '1.1.17', -1],
+      ['1.1.17', '1.1.16', 1],
+      ['1.1.17', '1.1.17', 0],
+      ['2.1.3', '10.0.0', -1],
+      ['1.2', '1.2.0', 0],
+    ])('compareVersions(%s, %s) sorts numerically', (a, b, sign) => {
+      expect(Math.sign(compareVersions(a, b))).toBe(sign)
+    })
+  })
+
+  it('carries the installed version and CVSS score for the issue filer', () => {
+    const r = osvReport('nanoid', '3.3.16', '3.3.18', 'GHSA-2v37-7h3g-55p8')
+    r.results[0].packages[0].groups = [{ ids: ['GHSA-2v37-7h3g-55p8'], aliases: [], max_severity: '8.2' }]
+    const { blocking } = triageOsv(r, NONE)
+    expect(blocking[0].installed).toBe('3.3.16')
+    expect(blocking[0].cvss).toBe('8.2')
+  })
+
+  it('leaves cvss empty when the scanner published no score', () => {
+    const { blocking } = triageOsv(osvReport('lib', '1.0.0', '1.0.1'), NONE)
+    expect(blocking[0].cvss).toBe('')
   })
 
   it('auto-detects report format so callers need not declare the scanner', () => {
