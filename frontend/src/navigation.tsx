@@ -7,6 +7,7 @@ import Dashboard from '@mui/icons-material/Dashboard'
 import Palette from '@mui/icons-material/Palette'
 import Business from '@mui/icons-material/Business'
 import Badge from '@mui/icons-material/Badge'
+import AdminPanelSettings from '@mui/icons-material/AdminPanelSettings'
 import People from '@mui/icons-material/People'
 import ManageAccounts from '@mui/icons-material/ManageAccounts'
 import SyncAlt from '@mui/icons-material/SyncAlt'
@@ -86,6 +87,7 @@ export const adminNavGroups: NavGroup[] = [
     items: [
       { path: '/admin/organizations', labelKey: 'nav.admin.organizations', tooltipKey: 'nav.admin.organizationsTooltip', icon: <Business />, scope: adminScope('/admin/organizations') },
       { path: '/admin/roles', labelKey: 'nav.admin.roles', tooltipKey: 'nav.admin.rolesTooltip', icon: <Badge />, scope: adminScope('/admin/roles') },
+      { path: '/admin/platform-admins', labelKey: 'nav.admin.platformAdmins', tooltipKey: 'nav.admin.platformAdminsTooltip', icon: <AdminPanelSettings />, scope: adminScope('/admin/platform-admins') },
       { path: '/admin/users', labelKey: 'nav.admin.users', tooltipKey: 'nav.admin.usersTooltip', icon: <People />, scope: adminScope('/admin/users') },
       { path: '/admin/oidc', labelKey: 'nav.admin.oidcGroups', tooltipKey: 'nav.admin.oidcGroupsTooltip', icon: <ManageAccounts />, scope: adminScope('/admin/oidc') },
       { path: '/admin/scim', labelKey: 'nav.admin.scim', tooltipKey: 'nav.admin.scimTooltip', icon: <SyncAlt />, scope: adminScope('/admin/scim') },

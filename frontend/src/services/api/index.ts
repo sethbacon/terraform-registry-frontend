@@ -25,6 +25,7 @@ import * as mirrorsApi from './mirrorsApi'
 import * as modulesApi from './modulesApi'
 import * as notificationsApi from './notificationsApi'
 import * as organizationsApi from './organizationsApi'
+import * as platformAdminsApi from './platformAdminsApi'
 import * as providersApi from './providersApi'
 import * as rolesApi from './rolesApi'
 import * as scanningApi from './scanningApi'
@@ -59,6 +60,7 @@ export const apiDomains = {
   modulesApi,
   notificationsApi,
   organizationsApi,
+  platformAdminsApi,
   providersApi,
   rolesApi,
   scanningApi,
@@ -84,6 +86,7 @@ const apiClient = {
   ...modulesApi,
   ...notificationsApi,
   ...organizationsApi,
+  ...platformAdminsApi,
   ...providersApi,
   ...rolesApi,
   ...scanningApi,

@@ -25,6 +25,7 @@ export const ADMIN_ROUTE_SCOPES = {
   '/admin/users': 'users:read',
   '/admin/organizations': 'organizations:read',
   '/admin/roles': 'users:read',
+  '/admin/platform-admins': 'admin',
   '/admin/apikeys': null,
   '/admin/upload/module': 'modules:write',
   '/admin/upload/provider': 'providers:write',

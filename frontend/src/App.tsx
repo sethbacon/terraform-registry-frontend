@@ -40,6 +40,7 @@ const ProviderUploadPage = lazy(() => import('./pages/admin/ProviderUploadPage')
 const SCMProvidersPage = lazy(() => import('./pages/admin/SCMProvidersPage'))
 const MirrorsPage = lazy(() => import('./pages/admin/MirrorsPage'))
 const RolesPage = lazy(() => import('./pages/admin/RolesPage'))
+const PlatformAdminsPage = lazy(() => import('./pages/admin/PlatformAdminsPage'))
 const StoragePage = lazy(() => import('./pages/admin/StoragePage'))
 const TerraformMirrorPage = lazy(() => import('./pages/admin/TerraformMirrorPage'))
 const ApprovalsPage = lazy(() => import('./pages/admin/ApprovalsPage'))
@@ -142,6 +143,15 @@ function App() {
                             <LazyRoute
                               Component={RolesPage}
                               requiredScope={ADMIN_ROUTE_SCOPES['/admin/roles']}
+                            />
+                          }
+                        />
+                        <Route
+                          path="/admin/platform-admins"
+                          element={
+                            <LazyRoute
+                              Component={PlatformAdminsPage}
+                              requiredScope={ADMIN_ROUTE_SCOPES['/admin/platform-admins']}
                             />
                           }
                         />

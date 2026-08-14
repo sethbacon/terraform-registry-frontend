@@ -11,6 +11,33 @@ export interface RoleTemplate {
   updated_at: string
 }
 
+/**
+ * One platform-admin grant (backend `admin.PlatformAdminItem`, issue #766).
+ *
+ * Platform-admin authority is held by this grant, not by a role template, and
+ * the row is the provenance record: who granted it, when, and why.
+ *
+ * `user_resolved` is the orphan flag. The carrier table carries no foreign key
+ * to users, so deleting a user leaves the grant behind; the backend returns
+ * such a row with `user_resolved: false` and no email/name rather than hiding
+ * it. An orphan grant confers no access (sign-in resolves the user before the
+ * grant is read) and does not count as a remaining administrator.
+ *
+ * `granted_by` is null for rows written by the backfill migration — nobody
+ * granted those, they were inferred from an admin-bearing role template.
+ * `granted_by_email` is absent when the grantor themselves no longer resolves.
+ */
+export interface PlatformAdmin {
+  user_id: string
+  email?: string
+  name?: string
+  user_resolved: boolean
+  granted_by: string | null
+  granted_by_email?: string
+  granted_at: string
+  note: string | null
+}
+
 export type ApprovalStatus = 'pending' | 'approved' | 'rejected'
 
 export interface MirrorApprovalRequest {

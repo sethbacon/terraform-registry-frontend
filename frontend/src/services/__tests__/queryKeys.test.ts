@@ -236,6 +236,18 @@ describe('queryKeys', () => {
     })
   })
 
+  describe('platformAdmins', () => {
+    it('list key is stable', () => {
+      expect(queryKeys.platformAdmins.list()).toEqual(['platformAdmins', 'list'])
+    })
+
+    it('list key is under the _def prefix the page invalidates', () => {
+      expect(queryKeys.platformAdmins.list().slice(0, 1)).toEqual([
+        ...queryKeys.platformAdmins._def,
+      ])
+    })
+  })
+
   describe('approvals', () => {
     it('list key includes status param', () => {
       expect(queryKeys.approvals.list({ status: 'pending' })).toEqual([
