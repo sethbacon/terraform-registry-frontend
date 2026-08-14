@@ -1,6 +1,13 @@
 <!-- markdownlint-disable MD013 MD024 MD041 -->
 # Changelog
 
+## [2.23.1](https://github.com/sethbacon/terraform-registry-frontend/compare/v2.23.0...v2.23.1) (2026-08-14)
+
+
+### Bug Fixes
+
+* **e2e:** grant the dev admin a platform-admin carrier row in the E2E seed ([#791](https://github.com/sethbacon/terraform-registry-frontend/issues/791)) ([4ed852e](https://github.com/sethbacon/terraform-registry-frontend/commit/4ed852e20bde907cc70bc22b688f85b9f4e31d72))
+
 ## [2.23.0](https://github.com/sethbacon/terraform-registry-frontend/compare/v2.22.1...v2.23.0) (2026-08-14)
 
 
