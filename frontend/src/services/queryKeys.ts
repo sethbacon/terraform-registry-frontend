@@ -91,6 +91,10 @@ export const queryKeys = {
     _def: ['roles'] as const,
     list: () => [...queryKeys.roles._def, 'list'] as const,
   },
+  platformAdmins: {
+    _def: ['platformAdmins'] as const,
+    list: () => [...queryKeys.platformAdmins._def, 'list'] as const,
+  },
   approvals: {
     _def: ['approvals'] as const,
     list: (params?: { status?: string }) => [...queryKeys.approvals._def, 'list', params] as const,
