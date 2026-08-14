@@ -1,6 +1,18 @@
 <!-- markdownlint-disable MD013 MD024 MD041 -->
 # Changelog
 
+## [2.23.0](https://github.com/sethbacon/terraform-registry-frontend/compare/v2.22.1...v2.23.0) (2026-08-14)
+
+
+### Features
+
+* **admin:** platform-admin management page — grant, revoke and audit the carrier ([#786](https://github.com/sethbacon/terraform-registry-frontend/issues/786)) ([d1ff4ff](https://github.com/sethbacon/terraform-registry-frontend/commit/d1ff4ff6b1e7dc821423eb08ff7fefee9b189875))
+
+
+### Bug Fixes
+
+* **ci:** file OSV findings as a deduplicated tracking issue ([#784](https://github.com/sethbacon/terraform-registry-frontend/issues/784)) ([d635c14](https://github.com/sethbacon/terraform-registry-frontend/commit/d635c141aa2da5d4095f6128d909a78fb45de09b)), closes [#780](https://github.com/sethbacon/terraform-registry-frontend/issues/780)
+
 ## [2.22.1](https://github.com/sethbacon/terraform-registry-frontend/compare/v2.22.0...v2.22.1) (2026-08-13)
 
 
