@@ -74,7 +74,13 @@ jobs:
     name: OSV Scan
     runs-on: ubuntu-latest
     permissions:
-      security-events: write
+      # `security-events: write` used to be requested here and was never used:
+      # nothing in this job uploads SARIF (the scan writes JSON for the triage
+      # gate below). Findings surfaced nowhere as a result -- no alert, no
+      # issue, no notification (#780). It is replaced by the permission the job
+      # actually needs to reach a human.
+      contents: read # checkout
+      issues: write # the tracking issue maintained by "Report OSV findings"
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -93,6 +99,28 @@ jobs:
             --output=osv-results.json
             --lockfile=frontend/package-lock.json
             --lockfile=e2e/package-lock.json
+
+      # Maintains ONE tracking issue naming the advisories, found by the
+      # `osv-report` label rather than by title. Runs BEFORE the gate below so a
+      # blocking finding is filed as well as failing the job, and with
+      # `always()` so it still files when the scan step itself failed.
+      #
+      # The logic lives in a repo script rather than inline YAML so it is
+      # covered by the unit suite (frontend/scripts/__tests__/osv-report.test.ts)
+      # against real scanner output, instead of only ever running in production.
+      - name: Report OSV findings
+        if: always() && steps.osv.outcome != 'skipped'
+        # v8
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3
+        env:
+          # Passed through env, not `${{ }}` inside `script:`, which would be a
+          # template-injection sink. A non-zero scanner exit with no findings at
+          # all is a scan that did not happen; the filer refuses to report clean.
+          OSV_SCAN_OUTCOME: ${{ steps.osv.outcome }}
+        with:
+          script: |
+            const { run } = await import(`${process.env.GITHUB_WORKSPACE}/frontend/scripts/osv-report.mjs`);
+            await run({ github, context, core });
 
       # Triaged through the same gate the npm-audit jobs use, against the same
       # exceptions file, so the two scanners cannot reach opposite conclusions

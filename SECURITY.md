@@ -123,6 +123,7 @@ matching `v*.*.*` with a "Restrict deletions" rule.
 - `npm audit --audit-level=high` in Dockerfile, on every pull request, and in the scheduled security workflow
 - `rehype-sanitize` for Markdown rendering (XSS mitigation)
 - Scheduled weekly security workflow with auto-issue on failure
+- **OSV-Scanner findings are filed, not just logged**: the weekly `OSV Scan` job maintains a single tracking issue carrying the `osv-report` label, naming every high/critical advisory (id, severity, package, installed version, minimal fix, lockfile). It is rewritten in place while the findings persist, comments what changed when the set changes, and closes itself once a scan reports none. An unreadable or absent scan report fails the job rather than reading as clean. Logic and tests: `frontend/scripts/osv-report.mjs`
 - **SLSA provenance attestation** on Docker images via `actions/attest-build-provenance`
 - **SBOM (SPDX) generation and attestation** on Docker images via Syft (`anchore/sbom-action`) and `actions/attest-sbom`
 - **Cosign keyless signing** on Docker images via Sigstore (verify with `cosign verify`)

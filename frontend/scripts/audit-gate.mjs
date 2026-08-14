@@ -42,6 +42,40 @@ import { readFileSync, existsSync, appendFileSync } from 'node:fs'
 
 const BLOCKING_SEVERITIES = new Set(['critical', 'high'])
 
+/** Numeric compare of plain `x.y.z` versions; lockfile versions carry no prerelease tags. */
+export function compareVersions(a, b) {
+  const parts = (v) =>
+    String(v ?? '')
+      .split('.')
+      .map((p) => Number.parseInt(p, 10) || 0)
+  const [x, y] = [parts(a), parts(b)]
+  for (let i = 0; i < Math.max(x.length, y.length); i += 1) {
+    const d = (x[i] ?? 0) - (y[i] ?? 0)
+    if (d !== 0) return d
+  }
+  return 0
+}
+
+/**
+ * The minimal upgrade that clears an advisory: the LOWEST published fixed
+ * version above the installed one.
+ *
+ * An advisory that spans several release lines publishes a fix per line, and
+ * `fixed[0]` is whichever line OSV happens to list first. Real example from
+ * this repo's own history: `brace-expansion@1.1.16` / GHSA-mh99-v99m-4gvg
+ * publishes 1.1.17, 2.1.3, 3.0.3 and 5.0.8; taking the first listed (5.0.8)
+ * made a patch-level fix look like a semver-major, which the gate then reported
+ * as "only a breaking fix is available" and did not block on. Picking the
+ * lowest upgrade names 1.1.17 and blocks, which is correct.
+ *
+ * Falls back to the first published fix when nothing is above the installed
+ * version (an advisory listing only older lines cannot be cleared by upgrading).
+ */
+export function pickFixTarget(fixed, installed) {
+  const upgrades = fixed.filter((v) => compareVersions(v, installed) > 0).sort(compareVersions)
+  return upgrades[0] ?? fixed[0]
+}
+
 export function loadExceptions(path) {
   if (!path || !existsSync(path)) return { byAdvisory: new Map(), byPackage: new Map() }
   const data = JSON.parse(readFileSync(path, 'utf8'))
@@ -91,6 +125,17 @@ export function triageOsv(report, exceptions = { byAdvisory: new Map(), byPackag
     for (const pkg of result?.packages ?? []) {
       const name = pkg?.package?.name ?? '?'
       const installed = pkg?.package?.version ?? '?'
+
+      // osv-scanner reports the qualitative band (HIGH/CRITICAL, used above to
+      // decide what counts) per vulnerability, but the CVSS score only on the
+      // enclosing group. Carried through so osv-report.mjs can print both:
+      // after the high/critical filter the band alone is nearly constant.
+      const cvssById = new Map()
+      for (const group of pkg?.groups ?? []) {
+        if (!group?.max_severity) continue
+        for (const id of group?.ids ?? []) cvssById.set(id, group.max_severity)
+      }
+
       for (const vuln of pkg?.vulnerabilities ?? []) {
         const severity = (vuln?.database_specific?.severity ?? 'HIGH').toLowerCase()
         if (!BLOCKING_SEVERITIES.has(severity)) continue
@@ -107,13 +152,19 @@ export function triageOsv(report, exceptions = { byAdvisory: new Map(), byPackag
         }
 
         const ids = [vuln?.id, ...(vuln?.aliases ?? [])].filter(Boolean)
-        const target = fixed[0]
+        const target = pickFixTarget(fixed, installed)
         const breaking =
           target != null && major(target) != null && major(installed) != null && major(target) !== major(installed)
 
         const entry = {
           package: name,
           severity,
+          // Reporting-only fields (osv-report.mjs); they take no part in the
+          // blocking decision below. `installed` matters because one advisory
+          // can appear twice for two copies of a package at different versions,
+          // one with a non-breaking fix and one without.
+          installed,
+          cvss: cvssById.get(vuln?.id) ?? '',
           advisories: ids,
           titles: [vuln?.summary ?? ''],
           devOnly: false,
