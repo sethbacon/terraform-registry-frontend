@@ -1488,6 +1488,57 @@ describe('ApiClient', () => {
       const result = await client.getCurrentUserWithRole()
       expect(result.role_template).toBeNull()
       expect(result.allowed_scopes).toEqual([])
+      expect(result.memberships).toEqual([])
+    })
+
+    it('getCurrentUserWithRole carries memberships through, nested role_template intact (#795)', async () => {
+      // MeHandler nests the role template under `role_template`; the flat
+      // role_template_* fields declared by admin.MeMembershipEntry (and hence
+      // by swagger.yaml) are never marshalled. This is the shape that must
+      // survive, because the array died here before #795.
+      const client = await getApiClient()
+        ; (mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+          data: {
+            user: { id: 'u1' },
+            memberships: [
+              {
+                organization_id: 'org-a',
+                organization_name: 'acme',
+                created_at: '2025-01-01T00:00:00Z',
+                role_template: {
+                  id: 'rt-1',
+                  name: 'auditor',
+                  display_name: 'Auditor',
+                  scopes: ['audit:read'],
+                },
+              },
+              {
+                organization_id: 'org-b',
+                organization_name: 'beta',
+                created_at: '2025-01-02T00:00:00Z',
+                role_template: null,
+              },
+            ],
+          },
+        })
+      const result = await client.getCurrentUserWithRole()
+      expect(result.memberships).toHaveLength(2)
+      expect(result.memberships[0].organization_name).toBe('acme')
+      expect(result.memberships[0].role_template?.scopes).toEqual(['audit:read'])
+      expect(result.memberships[1].role_template).toBeNull()
+    })
+
+    it('getCurrentUserWithRole degrades a non-array memberships to []', async () => {
+      // This array feeds the shared auth provider, which sorts it on
+      // organization_id. A malformed payload must become "no memberships",
+      // not something the provider will try to iterate — a throw there is
+      // treated as a failed /me and signs the user out.
+      const client = await getApiClient()
+        ; (mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+          data: { user: { id: 'u1' }, memberships: 'not-an-array' },
+        })
+      const result = await client.getCurrentUserWithRole()
+      expect(result.memberships).toEqual([])
     })
 
     // devLogin/getDevStatus/listUsersForImpersonation/impersonateUser are covered
@@ -3277,6 +3328,30 @@ describe('ApiClient', () => {
       expect(mockAxiosInstance.get).toHaveBeenCalledWith('/api/v1/admin/audit-logs', {
         params: { page: 1, per_page: 25, resource_type: 'module' },
       })
+    })
+
+    it('listAuditLogs forwards organization_id (backend #719)', async () => {
+      const client = await getApiClient()
+        ; (mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+          data: { logs: [], pagination: {} },
+        })
+      await client.listAuditLogs({ page: 1, organization_id: 'org-a' })
+      expect(mockAxiosInstance.get).toHaveBeenCalledWith('/api/v1/admin/audit-logs', {
+        params: { page: 1, organization_id: 'org-a' },
+      })
+    })
+
+    it('listAuditLogs omits organization_id entirely when it is not asked for', async () => {
+      // Absent must mean "everything the caller may see", never a default
+      // organization: a platform admin deliberately reads the whole estate.
+      const client = await getApiClient()
+        ; (mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+          data: { logs: [], pagination: {} },
+        })
+      await client.listAuditLogs({ page: 1 })
+      const calls = (mockAxiosInstance.get as ReturnType<typeof vi.fn>).mock.calls
+      const [, config] = calls[calls.length - 1]
+      expect(config.params).not.toHaveProperty('organization_id')
     })
 
     it('getAuditLog', async () => {

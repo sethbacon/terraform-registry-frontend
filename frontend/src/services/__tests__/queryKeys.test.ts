@@ -106,7 +106,7 @@ describe('queryKeys', () => {
 
   describe('dashboard', () => {
     it('stats key is stable', () => {
-      expect(queryKeys.dashboard.stats()).toEqual(['dashboard', 'stats'])
+      expect(queryKeys.dashboard.stats()).toEqual(['dashboard', 'stats', undefined])
     })
   })
 
@@ -117,12 +117,12 @@ describe('queryKeys', () => {
 
     it('list key includes params', () => {
       const key = queryKeys.users.list({ page: 1, perPage: 20, search: 'john' })
-      expect(key).toEqual(['users', 'list', { page: 1, perPage: 20, search: 'john' }])
+      expect(key).toEqual(['users', 'list', { page: 1, perPage: 20, search: 'john' }, undefined])
     })
 
     it('list key works without params', () => {
       const key = queryKeys.users.list()
-      expect(key).toEqual(['users', 'list', undefined])
+      expect(key).toEqual(['users', 'list', undefined, undefined])
     })
 
     it('detail key includes id', () => {
@@ -192,7 +192,7 @@ describe('queryKeys', () => {
 
     it('list key includes params', () => {
       const params = { action: 'create', resource: 'module' }
-      expect(queryKeys.auditLogs.list(params)).toEqual(['auditLogs', 'list', params])
+      expect(queryKeys.auditLogs.list(params)).toEqual(['auditLogs', 'list', params, undefined])
     })
   })
 
@@ -222,7 +222,7 @@ describe('queryKeys', () => {
 
   describe('mirrors', () => {
     it('list key is stable', () => {
-      expect(queryKeys.mirrors.list()).toEqual(['mirrors', 'list'])
+      expect(queryKeys.mirrors.list()).toEqual(['mirrors', 'list', undefined])
     })
 
     it('providers key includes mirrorId', () => {
@@ -254,11 +254,12 @@ describe('queryKeys', () => {
         'approvals',
         'list',
         { status: 'pending' },
+        undefined,
       ])
     })
 
     it('list key works without params', () => {
-      expect(queryKeys.approvals.list()).toEqual(['approvals', 'list', undefined])
+      expect(queryKeys.approvals.list()).toEqual(['approvals', 'list', undefined, undefined])
     })
   })
 
@@ -325,6 +326,44 @@ describe('queryKeys', () => {
       const a = queryKeys.advisories.adminList('binary')
       const b = queryKeys.advisories.adminList('provider')
       expect(a).not.toEqual(b)
+    })
+  })
+
+  // #798. React Query serves a cached entry whenever the key matches, so a key
+  // that cannot name an organization hands the previous organization's rows to
+  // the next one — instantly, because it is a cache hit, and only self-correcting
+  // once the entry goes stale.
+  //
+  // Table-driven over EVERY organization-scoped axis rather than just the ones
+  // #798 widened: the four that already took an organization are the reference
+  // shape, and including them means a future narrowing of any of them fails here
+  // too. Each entry's other arguments are held constant, so the only thing that
+  // can vary the key is the organization.
+  describe('organization-parameterised cache keys (#798)', () => {
+    const axes: Array<[string, (organizationId?: string) => readonly unknown[]]> = [
+      // Widened by #798.
+      ['auditLogs.list', (org) => queryKeys.auditLogs.list({ page: 1 }, org)],
+      ['users.list', (org) => queryKeys.users.list({ page: 1 }, org)],
+      ['mirrors.list', (org) => queryKeys.mirrors.list(org)],
+      ['approvals.list', (org) => queryKeys.approvals.list({ status: 'pending' }, org)],
+      ['versionApprovals.list', (org) => queryKeys.versionApprovals.list({ type: 'module' }, org)],
+      ['versionApprovals.pendingCount', (org) => queryKeys.versionApprovals.pendingCount(org)],
+      ['dashboard.stats', (org) => queryKeys.dashboard.stats(org)],
+      // Already organization-parameterised before #798 — the reference shape.
+      ['apiKeys.list', (org) => queryKeys.apiKeys.list(org)],
+      ['scmProviders.list', (org) => queryKeys.scmProviders.list(org)],
+      ['policies.list', (org) => queryKeys.policies.list(org)],
+      ['quotas.list', (org) => queryKeys.quotas.list(org)],
+    ]
+
+    it.each(axes)('%s serves a distinct cache entry per organization', (_name, key) => {
+      expect(key('org-a')).not.toEqual(key('org-b'))
+    })
+
+    it.each(axes)('%s distinguishes "no organization" from a chosen one', (_name, key) => {
+      // "All organizations" is its own result set — everything the caller may
+      // see — not a synonym for whichever organization was picked last.
+      expect(key(undefined)).not.toEqual(key('org-a'))
     })
   })
 

@@ -41,12 +41,26 @@ export const queryKeys = {
   },
   dashboard: {
     _def: ['dashboard'] as const,
-    stats: () => [...queryKeys.dashboard._def, 'stats'] as const,
+    // ORGANIZATION-PARAMETERISED (#798). The payload is already tenant-derived:
+    // the backend scopes every panel by the caller's resolved organization
+    // scope rather than by a requested id, so today every caller passes
+    // undefined and the key is unchanged. It takes the argument anyway because
+    // the day a picker narrows the dashboard, a key that cannot express the
+    // narrowing serves the previous organization's counts from cache.
+    stats: (organizationId?: string) =>
+      [...queryKeys.dashboard._def, 'stats', organizationId] as const,
   },
   users: {
     _def: ['users'] as const,
-    list: (params?: { page?: number; perPage?: number; search?: string }) =>
-      [...queryKeys.users._def, 'list', params] as const,
+    // ORGANIZATION-PARAMETERISED (#798). Users are listed with their
+    // memberships and are filtered server-side by the caller's organization
+    // scope, so a narrowed list is a different list. The organization is a
+    // separate argument rather than a `params` member so the key varies by
+    // organization whether or not a caller remembered to put it in `params`.
+    list: (
+      params?: { page?: number; perPage?: number; search?: string },
+      organizationId?: string,
+    ) => [...queryKeys.users._def, 'list', params, organizationId] as const,
     detail: (id: string) => [...queryKeys.users._def, 'detail', id] as const,
   },
   organizations: {
@@ -69,8 +83,14 @@ export const queryKeys = {
   },
   auditLogs: {
     _def: ['auditLogs'] as const,
-    list: (params?: Record<string, unknown>) =>
-      [...queryKeys.auditLogs._def, 'list', params] as const,
+    // ORGANIZATION-PARAMETERISED (#798). The backend has accepted
+    // `?organization_id=` since backend #719 and validates it against the
+    // caller's scope, so two organizations are genuinely two result sets.
+    // `organizationId` is passed separately from `params` (which also carries
+    // it on the wire) so the key is org-varying by construction, not by a
+    // caller's discipline.
+    list: (params?: Record<string, unknown>, organizationId?: string) =>
+      [...queryKeys.auditLogs._def, 'list', params, organizationId] as const,
   },
   storageConfigs: {
     _def: ['storageConfigs'] as const,
@@ -84,7 +104,14 @@ export const queryKeys = {
   },
   mirrors: {
     _def: ['mirrors'] as const,
-    list: () => [...queryKeys.mirrors._def, 'list'] as const,
+    // ORGANIZATION-PARAMETERISED (#798). Mirror configs carry an
+    // `organization_id` and `listMirrors` already accepts one as a request
+    // parameter — the key was the only part of the path that could not
+    // express it.
+    list: (organizationId?: string) =>
+      [...queryKeys.mirrors._def, 'list', organizationId] as const,
+    // Deliberately global: a mirror's provider inventory is addressed by
+    // mirror id, which is itself already organization-scoped.
     providers: (mirrorId: string) => [...queryKeys.mirrors._def, 'providers', mirrorId] as const,
   },
   roles: {
@@ -97,7 +124,11 @@ export const queryKeys = {
   },
   approvals: {
     _def: ['approvals'] as const,
-    list: (params?: { status?: string }) => [...queryKeys.approvals._def, 'list', params] as const,
+    // ORGANIZATION-PARAMETERISED (#798). Approval queues are per-organization
+    // work lists; showing one organization's pending items under another's
+    // heading is the failure mode this widening exists to prevent.
+    list: (params?: { status?: string }, organizationId?: string) =>
+      [...queryKeys.approvals._def, 'list', params, organizationId] as const,
   },
   policies: {
     _def: ['policies'] as const,
@@ -133,9 +164,17 @@ export const queryKeys = {
   },
   versionApprovals: {
     _def: ['versionApprovals'] as const,
-    list: (params?: { type?: string; config_id?: string; status?: string }) =>
-      [...queryKeys.versionApprovals._def, 'list', params] as const,
-    pendingCount: () => [...queryKeys.versionApprovals._def, 'pendingCount'] as const,
+    // ORGANIZATION-PARAMETERISED (#798), for the same reason as `approvals`:
+    // the rows are the organization's pending version promotions.
+    list: (
+      params?: { type?: string; config_id?: string; status?: string },
+      organizationId?: string,
+    ) => [...queryKeys.versionApprovals._def, 'list', params, organizationId] as const,
+    // ORGANIZATION-PARAMETERISED (#798). This count is rendered as a nav badge
+    // beside the list above; a badge that keeps the previous organization's
+    // number is the same defect, one pixel smaller.
+    pendingCount: (organizationId?: string) =>
+      [...queryKeys.versionApprovals._def, 'pendingCount', organizationId] as const,
     events: (id: string) => [...queryKeys.versionApprovals._def, 'events', id] as const,
   },
   scanner: {

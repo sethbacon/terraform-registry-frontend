@@ -862,8 +862,14 @@ const DashboardPage: React.FC = () => {
               <Button
                 variant="outlined"
                 startIcon={<Refresh />}
+                // Invalidate the whole `dashboard` namespace, not `stats()`.
+                // Since #798 the stats key can carry an organization, and
+                // invalidateQueries matches by key PREFIX: `stats()` is
+                // ['dashboard','stats',undefined], which would stop matching
+                // the query the moment anything narrows it to an organization,
+                // silently turning Refresh into a no-op.
                 onClick={() =>
-                  queryClient.invalidateQueries({ queryKey: queryKeys.dashboard.stats() })
+                  queryClient.invalidateQueries({ queryKey: queryKeys.dashboard._def })
                 }
                 disabled={refreshing}
               >

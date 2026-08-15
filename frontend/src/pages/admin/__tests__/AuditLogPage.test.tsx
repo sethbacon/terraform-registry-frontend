@@ -2,6 +2,7 @@ import { render, screen, waitFor, fireEvent } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { AxiosError } from 'axios'
 
 // ---- Mocks ----
 
@@ -16,6 +17,13 @@ vi.mock('../../../services/api', () => ({
   },
 }))
 
+// The organization filter's options are the caller's real memberships from
+// /auth/me (#795). Mutable so each test can choose the membership set.
+const authState = vi.hoisted(() => ({
+  memberships: [] as Array<{ organization_id: string; organization_name: string }>,
+}))
+vi.mock('../../../contexts/AuthContext', () => ({ useAuth: () => authState }))
+
 import AuditLogPage from '../../admin/AuditLogPage'
 
 // ---- Helpers ----
@@ -28,11 +36,58 @@ function createQueryClient() {
 
 function renderPage() {
   const queryClient = createQueryClient()
-  return render(
-    <QueryClientProvider client={queryClient}>
-      <AuditLogPage />
-    </QueryClientProvider>,
+  return {
+    queryClient,
+    ...render(
+      <QueryClientProvider client={queryClient}>
+        <AuditLogPage />
+      </QueryClientProvider>,
+    ),
+  }
+}
+
+const MEMBERSHIPS = [
+  { organization_id: 'org-a', organization_name: 'acme' },
+  { organization_id: 'org-b', organization_name: 'beta' },
+]
+
+/** Pick out only the filter-bearing keys of a listAuditLogs call. */
+const FILTER_KEYS = [
+  'resource_type',
+  'action',
+  'user_email',
+  'start_date',
+  'end_date',
+  'organization_id',
+] as const
+function filtersOf(params: Record<string, unknown>): Record<string, unknown> {
+  return Object.fromEntries(FILTER_KEYS.filter((k) => k in params).map((k) => [k, params[k]]))
+}
+
+/**
+ * A real AxiosError — getErrorStatus() narrows with `instanceof`, so a
+ * duck-typed object would read as status-less and silently take the generic
+ * branch, making the 403 guard below pass for the wrong reason.
+ */
+function forbidden(): AxiosError {
+  return new AxiosError(
+    'Request failed with status code 403',
+    'ERR_BAD_REQUEST',
+    undefined,
+    undefined,
+    {
+      status: 403,
+      statusText: 'Forbidden',
+      headers: {},
+      config: { headers: {} },
+      data: { error: 'Not a member of the requested organization' },
+    } as never,
   )
+}
+
+async function selectOrganization(name: string) {
+  await userEvent.click(screen.getByLabelText('Organization'))
+  await userEvent.click(screen.getByRole('option', { name }))
 }
 
 // ---- Mock data ----
@@ -67,6 +122,7 @@ const fakeLogs = {
 describe('AuditLogPage', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    authState.memberships = []
   })
 
   it('shows loading spinner while fetching', () => {
@@ -336,5 +392,165 @@ describe('AuditLogPage', () => {
     })
     expect(screen.queryByText('relation "audit_logs" does not exist')).not.toBeInTheDocument()
     vi.unstubAllEnvs()
+  })
+})
+
+// #797. The organization filter is deliberately a FILTER, not a context:
+// unset means "everything this caller may see", which for a platform admin is
+// the whole estate. The backend's own comment is the reason — an audit trail
+// nobody can review across tenants is not much of an audit trail.
+describe('AuditLogPage — organization filter (#797)', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    authState.memberships = MEMBERSHIPS
+  })
+
+  it('offers the caller\'s memberships plus an explicit "all organizations" option', async () => {
+    listAuditLogsMock.mockResolvedValue(fakeLogs)
+    renderPage()
+    await waitFor(() => expect(screen.getByText('POST /api/v1/modules')).toBeInTheDocument())
+    await userEvent.click(screen.getByLabelText('Organization'))
+    expect(screen.getByRole('option', { name: 'All Organizations' })).toBeInTheDocument()
+    expect(screen.getByRole('option', { name: 'acme' })).toBeInTheDocument()
+    expect(screen.getByRole('option', { name: 'beta' })).toBeInTheDocument()
+  })
+
+  it('is hidden when the caller belongs to no organization', async () => {
+    // Nothing to choose between. Its absence is not a restriction: an unset
+    // filter already returns everything the caller may see.
+    authState.memberships = []
+    listAuditLogsMock.mockResolvedValue(fakeLogs)
+    renderPage()
+    await waitFor(() => expect(screen.getByText('POST /api/v1/modules')).toBeInTheDocument())
+    expect(screen.queryByLabelText('Organization')).not.toBeInTheDocument()
+  })
+
+  it('defaults to unset and sends no organization_id', async () => {
+    // The load-bearing assertion of #797: a default organization would silently
+    // hide the rest of the estate from the person auditing it.
+    listAuditLogsMock.mockResolvedValue(fakeLogs)
+    renderPage()
+    await waitFor(() => expect(listAuditLogsMock).toHaveBeenCalled())
+    for (const [params] of listAuditLogsMock.mock.calls) {
+      expect(params).not.toHaveProperty('organization_id')
+    }
+  })
+
+  it('sends organization_id once an organization is chosen', async () => {
+    listAuditLogsMock.mockResolvedValue(fakeLogs)
+    renderPage()
+    await waitFor(() => expect(screen.getByText('POST /api/v1/modules')).toBeInTheDocument())
+    await selectOrganization('beta')
+    await waitFor(() => {
+      expect(listAuditLogsMock).toHaveBeenCalledWith(
+        expect.objectContaining({ organization_id: 'org-b' }),
+      )
+    })
+  })
+
+  it('puts the organization in the react-query cache key, not only in the request', async () => {
+    // #798: if the key cannot name the organization, switching serves the
+    // previous organization's page from cache — instantly, because it is a hit.
+    listAuditLogsMock.mockResolvedValue(fakeLogs)
+    const { queryClient } = renderPage()
+    await waitFor(() => expect(screen.getByText('POST /api/v1/modules')).toBeInTheDocument())
+    await selectOrganization('beta')
+    await waitFor(() => {
+      const keys = queryClient
+        .getQueryCache()
+        .getAll()
+        .map((q) => q.queryKey)
+      // The organization is its own trailing key element, so the key varies by
+      // organization whether or not it also rode along inside `params`.
+      expect(keys.some((k) => k[k.length - 1] === 'org-b')).toBe(true)
+    })
+  })
+
+  it('clears the organization filter on Reset', async () => {
+    listAuditLogsMock.mockResolvedValue(fakeLogs)
+    renderPage()
+    await waitFor(() => expect(screen.getByText('POST /api/v1/modules')).toBeInTheDocument())
+    await selectOrganization('beta')
+    await waitFor(() =>
+      expect(listAuditLogsMock).toHaveBeenCalledWith(
+        expect.objectContaining({ organization_id: 'org-b' }),
+      ),
+    )
+    listAuditLogsMock.mockClear()
+    await userEvent.click(screen.getByRole('button', { name: /^reset$/i }))
+    await waitFor(() => expect(listAuditLogsMock).toHaveBeenCalled())
+    for (const [params] of listAuditLogsMock.mock.calls) {
+      expect(params).not.toHaveProperty('organization_id')
+    }
+  })
+
+  it('reports a 403 as "not a member" rather than a generic load failure', async () => {
+    // Distinct and recoverable — the user can pick another organization. The
+    // generic message reads like an outage they can do nothing about.
+    listAuditLogsMock.mockRejectedValue(forbidden())
+    renderPage()
+    await waitFor(() => {
+      expect(screen.getByText('You are not a member of that organization')).toBeInTheDocument()
+    })
+    expect(screen.queryByText('Failed to load audit logs')).not.toBeInTheDocument()
+  })
+
+  it('reports a 403 from the export as "not a member" too', async () => {
+    listAuditLogsMock.mockResolvedValueOnce(fakeLogs)
+    listAuditLogsMock.mockRejectedValueOnce(forbidden())
+    renderPage()
+    await waitFor(() => expect(screen.getByText('POST /api/v1/modules')).toBeInTheDocument())
+    await userEvent.click(screen.getByRole('button', { name: /export/i }))
+    await userEvent.click(screen.getByText('Export as CSV'))
+    await waitFor(() => {
+      expect(screen.getByText('You are not a member of that organization')).toBeInTheDocument()
+    })
+  })
+})
+
+// The CSV on this page is compliance evidence. An export that covers a
+// different slice of the estate than the table it was taken from is misleading
+// evidence, not a cosmetic bug — in either direction.
+describe('AuditLogPage — exports describe exactly what the table shows (#797)', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    authState.memberships = MEMBERSHIPS
+  })
+
+  it.each([
+    ['CSV', 'Export as CSV'],
+    ['JSON', 'Export as JSON'],
+  ])('%s export carries the same filters as the table query', async (_label, menuItem) => {
+    listAuditLogsMock.mockResolvedValue(fakeLogs)
+    renderPage()
+    await waitFor(() => expect(screen.getByText('POST /api/v1/modules')).toBeInTheDocument())
+
+    // Narrow on two independent axes so the comparison cannot pass by both
+    // sides happening to be empty.
+    await userEvent.click(screen.getByLabelText('Resource Type'))
+    await userEvent.click(screen.getByRole('option', { name: 'Module' }))
+    await selectOrganization('beta')
+    await waitFor(() =>
+      expect(listAuditLogsMock).toHaveBeenCalledWith(
+        expect.objectContaining({ organization_id: 'org-b', resource_type: 'module' }),
+      ),
+    )
+
+    const tableCalls = listAuditLogsMock.mock.calls
+    const tableParams = tableCalls[tableCalls.length - 1][0] as Record<string, unknown>
+    listAuditLogsMock.mockClear()
+
+    await userEvent.click(screen.getByRole('button', { name: /export/i }))
+    await userEvent.click(screen.getByText(menuItem))
+    await waitFor(() => expect(listAuditLogsMock).toHaveBeenCalled())
+    const exportParams = listAuditLogsMock.mock.calls[0][0] as Record<string, unknown>
+
+    // Whole filter set, not just the organization: any divergence at all —
+    // a filter the export drops, or one it adds — fails here.
+    expect(filtersOf(exportParams)).toEqual(filtersOf(tableParams))
+    expect(filtersOf(exportParams)).toEqual({ resource_type: 'module', organization_id: 'org-b' })
+    // Pagination is the one deliberate difference: the table shows a page, the
+    // export takes the whole filtered set.
+    expect(exportParams.per_page).toBe(1000)
   })
 })

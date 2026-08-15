@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react'
+import React, { useMemo, useState, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useQuery } from '@tanstack/react-query'
 import {
@@ -34,11 +34,12 @@ import PageHeader from '../../components/PageHeader'
 import StatusAlerts from '../../components/StatusAlerts'
 import PageTitleIcon from '@mui/icons-material/History'
 import api from '../../services/api'
+import { useAuth } from '../../contexts/AuthContext'
 import { useStatusMessage } from '../../hooks/useStatusMessage'
 import { AuditLog } from '../../types'
 import { queryKeys } from '../../services/queryKeys'
 import { usePagination } from '../../hooks/usePagination'
-import { getErrorMessage } from '../../utils/errors'
+import { getErrorMessage, getErrorStatus } from '../../utils/errors'
 
 const RESOURCE_TYPES = [
   { value: '', label: 'All Resource Types' },
@@ -62,9 +63,20 @@ const resourceTypeLabel = (value: string | null | undefined): string => {
   return RESOURCE_TYPES.find((rt) => rt.value === value)?.label ?? value
 }
 
+// The "no organization filter" option value. Empty string rather than a
+// sentinel id: it is the MUI Select's own "nothing selected" value, and it must
+// mean "everything this caller may see" — never "some default organization".
+// Platform admins deliberately read the whole estate here, so defaulting the
+// filter to an organization would quietly hide the rest of it.
+const ALL_ORGANIZATIONS = ''
+
 const AuditLogPage: React.FC = () => {
   const { t } = useTranslation()
   const status = useStatusMessage()
+  // Real per-organization memberships from /auth/me (#795). The options a user
+  // may filter by are exactly the organizations they belong to — which is also
+  // what the backend validates the request against before answering 403.
+  const { memberships } = useAuth()
 
   // Pagination (MUI TablePagination uses 0-based page)
   const { page, rowsPerPage, setPage, handleChangePage, handleChangeRowsPerPage } =
@@ -76,6 +88,7 @@ const AuditLogPage: React.FC = () => {
   const [userEmailFilter, setUserEmailFilter] = useState('')
   const [startDate, setStartDate] = useState('')
   const [endDate, setEndDate] = useState('')
+  const [organizationId, setOrganizationId] = useState(ALL_ORGANIZATIONS)
 
   // Debounced values for text inputs
   const [debouncedAction, setDebouncedAction] = useState('')
@@ -89,14 +102,35 @@ const AuditLogPage: React.FC = () => {
   // Export menu
   const [exportAnchor, setExportAnchor] = useState<null | HTMLElement>(null)
 
+  // THE single description of "what the user is currently looking at".
+  //
+  // Both the table query and both exports build from this object, and nothing
+  // rebuilds the filter list by hand. An export that widens or narrows the
+  // filter the table is showing is not a cosmetic bug: the CSV is compliance
+  // evidence, and one that silently covers a different slice of the estate than
+  // the screen it was taken from is misleading evidence. Keeping one object
+  // makes disagreement impossible rather than merely unlikely.
+  //
+  // Pagination is deliberately NOT part of it — the table shows one page, the
+  // export takes the whole filtered set.
+  const filterParams = useMemo(
+    () => ({
+      ...(resourceType ? { resource_type: resourceType } : {}),
+      ...(debouncedAction ? { action: debouncedAction } : {}),
+      ...(debouncedUserEmail ? { user_email: debouncedUserEmail } : {}),
+      ...(startDate ? { start_date: new Date(startDate).toISOString() } : {}),
+      ...(endDate ? { end_date: new Date(endDate).toISOString() } : {}),
+      // Omitted entirely when unset, so the backend applies the caller's own
+      // scope rather than a requested organization.
+      ...(organizationId ? { organization_id: organizationId } : {}),
+    }),
+    [resourceType, debouncedAction, debouncedUserEmail, startDate, endDate, organizationId],
+  )
+
   const queryParams = {
     page: page + 1,
     per_page: rowsPerPage,
-    ...(resourceType ? { resource_type: resourceType } : {}),
-    ...(debouncedAction ? { action: debouncedAction } : {}),
-    ...(debouncedUserEmail ? { user_email: debouncedUserEmail } : {}),
-    ...(startDate ? { start_date: new Date(startDate).toISOString() } : {}),
-    ...(endDate ? { end_date: new Date(endDate).toISOString() } : {}),
+    ...filterParams,
   }
 
   const {
@@ -104,18 +138,31 @@ const AuditLogPage: React.FC = () => {
     isLoading: loading,
     error: queryError,
   } = useQuery({
-    queryKey: queryKeys.auditLogs.list(queryParams),
+    // The organization is passed to the key separately as well as riding in
+    // queryParams, so switching organizations can never be served the previous
+    // organization's page from cache (#798).
+    queryKey: queryKeys.auditLogs.list(queryParams, organizationId || undefined),
     queryFn: () => api.listAuditLogs(queryParams),
   })
 
   const logs = data?.logs ?? []
   const total = data?.pagination?.total ?? 0
 
+  // The backend answers 403 for an organization the caller is not a member of.
+  // That is a distinct, recoverable condition ("pick a different organization"),
+  // not a load failure, and saying so is what makes it actionable — the generic
+  // message reads like an outage the user can do nothing about.
+  const isNotAMember = (err: unknown): boolean => getErrorStatus(err) === 403
+
   if (queryError && !status.error) {
     // Raw error messages can leak implementation details -- route through the
     // shared getErrorMessage helper, which DEV-gates native Error messages
     // the same way ErrorBoundary.tsx does (#618-class).
-    status.setError(getErrorMessage(queryError, t('admin.auditLog.errLoad')))
+    status.setError(
+      isNotAMember(queryError)
+        ? t('admin.auditLog.errNotMember')
+        : getErrorMessage(queryError, t('admin.auditLog.errLoad')),
+    )
   }
 
   // Debounce text filter changes
@@ -142,6 +189,14 @@ const AuditLogPage: React.FC = () => {
     setPage(0)
   }
 
+  const handleOrganizationChange = (e: SelectChangeEvent) => {
+    setOrganizationId(e.target.value)
+    // A stale 403 from a previously-selected organization must not survive the
+    // change that fixes it.
+    status.setError(null)
+    setPage(0)
+  }
+
   const handleStartDateChange = (value: string) => {
     setStartDate(value)
     setPage(0)
@@ -160,6 +215,7 @@ const AuditLogPage: React.FC = () => {
     setDebouncedUserEmail('')
     setStartDate('')
     setEndDate('')
+    setOrganizationId(ALL_ORGANIZATIONS)
     setPage(0)
   }
 
@@ -168,37 +224,30 @@ const AuditLogPage: React.FC = () => {
     setDetailOpen(true)
   }
 
+  // Both exports re-fetch the SAME filter the table is showing, unpaginated.
+  // Spreading `filterParams` (rather than restating the filters) is what keeps
+  // the exported file and the visible table describing the same slice.
   const handleExportCSV = async () => {
     setExportAnchor(null)
     try {
-      const result = await api.listAuditLogs({
-        per_page: 1000,
-        ...(resourceType ? { resource_type: resourceType } : {}),
-        ...(debouncedAction ? { action: debouncedAction } : {}),
-        ...(debouncedUserEmail ? { user_email: debouncedUserEmail } : {}),
-        ...(startDate ? { start_date: new Date(startDate).toISOString() } : {}),
-        ...(endDate ? { end_date: new Date(endDate).toISOString() } : {}),
-      })
+      const result = await api.listAuditLogs({ per_page: 1000, ...filterParams })
       api.exportAuditLogsCSV(result.logs ?? [])
-    } catch {
-      status.setError('Failed to export audit logs')
+    } catch (err) {
+      status.setError(
+        isNotAMember(err) ? t('admin.auditLog.errNotMember') : 'Failed to export audit logs',
+      )
     }
   }
 
   const handleExportJSON = async () => {
     setExportAnchor(null)
     try {
-      const result = await api.listAuditLogs({
-        per_page: 1000,
-        ...(resourceType ? { resource_type: resourceType } : {}),
-        ...(debouncedAction ? { action: debouncedAction } : {}),
-        ...(debouncedUserEmail ? { user_email: debouncedUserEmail } : {}),
-        ...(startDate ? { start_date: new Date(startDate).toISOString() } : {}),
-        ...(endDate ? { end_date: new Date(endDate).toISOString() } : {}),
-      })
+      const result = await api.listAuditLogs({ per_page: 1000, ...filterParams })
       api.exportAuditLogsJSON(result.logs ?? [])
-    } catch {
-      status.setError('Failed to export audit logs')
+    } catch (err) {
+      status.setError(
+        isNotAMember(err) ? t('admin.auditLog.errNotMember') : 'Failed to export audit logs',
+      )
     }
   }
 
@@ -279,6 +328,44 @@ const AuditLogPage: React.FC = () => {
               ))}
             </Select>
           </FormControl>
+          {/*
+            Rendered only when the caller belongs to at least one organization:
+            the options are their memberships, so with none there is nothing to
+            choose between. Its absence is not a restriction — an unset filter
+            already returns everything the caller may see, which for a platform
+            admin is the whole estate.
+          */}
+          {memberships.length > 0 && (
+            <FormControl size="small" sx={{ minWidth: 200 }}>
+              <InputLabel id="organization-label">
+                {t('admin.auditLog.labelOrganization')}
+              </InputLabel>
+              <Select
+                labelId="organization-label"
+                value={organizationId}
+                label={t('admin.auditLog.labelOrganization')}
+                onChange={handleOrganizationChange}
+                inputProps={{ 'data-testid': 'organization-select' }}
+              >
+                <MenuItem value={ALL_ORGANIZATIONS}>
+                  {t('admin.auditLog.optionAllOrganizations')}
+                </MenuItem>
+                {/*
+                  organization_name is the organization's URL-safe SLUG, which
+                  is all /auth/me sends — the human display name is not on this
+                  payload at all. Shown as-is rather than prettified: inventing
+                  a display name here would make the label disagree with the
+                  one the organizations admin page shows. Surfacing the real
+                  display name is a backend change.
+                */}
+                {memberships.map((m) => (
+                  <MenuItem key={m.organization_id} value={m.organization_id}>
+                    {m.organization_name}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          )}
           <TextField
             label={t('admin.auditLog.labelAction')}
             size="small"
