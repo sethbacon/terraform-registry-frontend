@@ -2058,6 +2058,8 @@
       "labelStartDate": "Fecha de inicio",
       "labelEndDate": "Fecha de finalización",
       "labelResourceType": "Tipo de recurso",
+      "labelOrganization": "Organización",
+      "optionAllOrganizations": "Todas las organizaciones",
       "labelAction": "Acción",
       "labelUserEmail": "Correo electrónico del usuario",
       "placeholderUserEmail": "Buscar por correo electrónico...",
@@ -2070,7 +2072,8 @@
       "emptySubtitle": "Las entradas del registro de auditoría aparecen cuando los usuarios realizan cambios. Modifica los filtros de arriba o publica un módulo para ver una.",
       "detailTitle": "Detalles del registro de auditoría",
       "close": "Cerrar",
-      "errLoad": "No se han podido cargar los registros de auditoría"
+      "errLoad": "No se han podido cargar los registros de auditoría",
+      "errNotMember": "No eres miembro de esa organización"
     },
     "notifications": {
       "pageTitle": "Notificaciones",

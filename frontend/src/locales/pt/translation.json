@@ -2058,6 +2058,8 @@
       "labelStartDate": "Data de início",
       "labelEndDate": "Data de término",
       "labelResourceType": "Tipo de recurso",
+      "labelOrganization": "Organização",
+      "optionAllOrganizations": "Todas as organizações",
       "labelAction": "Ação",
       "labelUserEmail": "E-mail do utilizador",
       "placeholderUserEmail": "Pesquisar por e-mail...",
@@ -2070,7 +2072,8 @@
       "emptySubtitle": "As entradas do registo de auditoria aparecem quando os utilizadores efetuam alterações. Ajuste os filtros acima ou publique um módulo para ver uma.",
       "detailTitle": "Detalhes do registo de auditoria",
       "close": "Fechar",
-      "errLoad": "Não foi possível carregar os registos de auditoria"
+      "errLoad": "Não foi possível carregar os registos de auditoria",
+      "errNotMember": "Não fazes parte dessa organização"
     },
     "notifications": {
       "pageTitle": "Notificações",

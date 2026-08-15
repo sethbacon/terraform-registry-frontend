@@ -2058,6 +2058,8 @@
       "labelStartDate": "Data di inizio",
       "labelEndDate": "Data di scadenza",
       "labelResourceType": "Tipo di risorsa",
+      "labelOrganization": "Organizzazione",
+      "optionAllOrganizations": "Tutte le organizzazioni",
       "labelAction": "Azione",
       "labelUserEmail": "Indirizzo e-mail dell'utente",
       "placeholderUserEmail": "Cerca per indirizzo e-mail...",
@@ -2070,7 +2072,8 @@
       "emptySubtitle": "Le voci del registro di controllo vengono visualizzate quando gli utenti apportano modifiche. Modifica i filtri qui sopra o pubblica un modulo per visualizzarne una.",
       "detailTitle": "Dettagli del registro di controllo",
       "close": "Chiudi",
-      "errLoad": "Impossibile caricare i registri di audit"
+      "errLoad": "Impossibile caricare i registri di audit",
+      "errNotMember": "Non sei membro di quell'organizzazione"
     },
     "notifications": {
       "pageTitle": "Notifiche",

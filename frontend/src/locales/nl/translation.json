@@ -2058,6 +2058,8 @@
       "labelStartDate": "Startdatum",
       "labelEndDate": "Einddatum",
       "labelResourceType": "Type bron",
+      "labelOrganization": "Organisatie",
+      "optionAllOrganizations": "Alle organisaties",
       "labelAction": "Actie",
       "labelUserEmail": "E-mailadres van de gebruiker",
       "placeholderUserEmail": "Zoeken op e-mailadres...",
@@ -2070,7 +2072,8 @@
       "emptySubtitle": "Er verschijnen logboekvermeldingen wanneer gebruikers wijzigingen aanbrengen. Pas de bovenstaande filters aan of publiceer een module om er een te bekijken.",
       "detailTitle": "Details van het auditlogboek",
       "close": "Sluiten",
-      "errLoad": "Het laden van de auditlogboeken is mislukt"
+      "errLoad": "Het laden van de auditlogboeken is mislukt",
+      "errNotMember": "Je bent geen lid van die organisatie"
     },
     "notifications": {
       "pageTitle": "Meldingen",
