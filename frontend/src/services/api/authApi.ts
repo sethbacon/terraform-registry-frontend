@@ -66,9 +66,44 @@ export async function getCurrentUser(): Promise<User> {
   return response.data.user
 }
 
+/**
+ * One organization membership exactly as `GET /api/v1/auth/me` emits it.
+ *
+ * This is typed against the HANDLER (`MeHandler`, backend
+ * `internal/api/admin/auth.go`), which builds the payload with `gin.H` and
+ * nests the role template under a single `role_template` key that is
+ * explicitly `null` when the membership carries no role.
+ *
+ * It is deliberately NOT typed against the backend's `admin.MeResponse` /
+ * `admin.MeMembershipEntry` structs, which declare FLAT `role_template_id` /
+ * `role_template_name` / `role_template_display_name` / `role_template_scopes`
+ * fields. Those structs are referenced by nothing but the handler's swagger
+ * annotation — no code path ever marshals them — so `backend/docs/swagger.yaml`
+ * documents a membership shape that no client has ever received. Trusting it
+ * here would silently produce `undefined` for every role field.
+ *
+ * `organization_name` is the organization's URL-safe SLUG (`o.name`). The human
+ * display name (`o.display_name`) is not sent by this endpoint at all; adding
+ * it is a backend change, not something to synthesise here.
+ */
+export interface AuthMembership {
+  organization_id: string
+  organization_name: string
+  created_at: string
+  role_template: RoleTemplateInfo | null
+}
+
 export async function getCurrentUserWithRole(): Promise<{
   user: User
+  /**
+   * The endpoint's deprecated back-compat convenience field: the role template
+   * of `Memberships[0]`, carrying only `name`/`display_name` and no scopes.
+   * Surfaced here because the endpoint sends it, but nothing consumes it —
+   * `AuthContext` derives the display role from `memberships` below, which is
+   * the same information per-organization and with scopes attached.
+   */
   role_template: RoleTemplateInfo | null
+  memberships: AuthMembership[]
   allowed_scopes: string[]
   session_expires_at: string | null
 }> {
@@ -76,6 +111,11 @@ export async function getCurrentUserWithRole(): Promise<{
   return {
     user: response.data.user,
     role_template: response.data.role_template || null,
+    // Array.isArray rather than `|| []`: this array now feeds the shared auth
+    // provider, which sorts it on `organization_id`. A non-array (or absent)
+    // `memberships` must degrade to "no memberships", not to a value the
+    // provider will try to iterate.
+    memberships: Array.isArray(response.data.memberships) ? response.data.memberships : [],
     allowed_scopes: response.data.allowed_scopes || [],
     session_expires_at: response.data.session_expires_at || null,
   }

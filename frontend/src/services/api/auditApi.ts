@@ -15,6 +15,16 @@ export async function listAuditLogs(opts?: {
   user_email?: string
   start_date?: string
   end_date?: string
+  /**
+   * Narrow the trail to one organization (backend #719). OMIT IT — do not pass
+   * a "default" organization — to get everything the caller may see. That
+   * distinction is the endpoint's design, not an accident: a platform admin
+   * deliberately reads the whole estate unfiltered, because an audit trail
+   * nobody can review across tenants is not much of an audit trail. The
+   * backend validates the requested id against the caller's resolved scope and
+   * answers 403 for an organization they are not a member of.
+   */
+  organization_id?: string
 }): Promise<AuditLogListResponse> {
   const response = await http.get<AuditLogListResponse>('/api/v1/admin/audit-logs', {
     params: opts,
