@@ -6,18 +6,15 @@ import api from '../services/api'
 import { useAuth } from '../contexts/AuthContext'
 import { useDebounce } from '../hooks/useDebounce'
 import { queryKeys } from '../services/queryKeys'
+import { ORGANIZATION_PAGE_MAX } from '../services/api/organizationsApi'
 
 /**
- * The largest page `GET /api/v1/organizations` will actually honour.
+ * The page this picker asks for: the largest the endpoint serves.
  *
- * `ListOrganizationsHandler` resets an out-of-range `per_page` to the DEFAULT
- * rather than clamping it to the maximum, so asking for 200 returns 20 — worse
- * than asking for 100 (backend #893, still open; verified unfixed against
- * backend main). 100 is inside the accepted range and is therefore the largest
- * page that does not silently shrink. `OIDCSettingsPage` asking for 200 and
- * receiving 20 is the same bug's other victim.
+ * Re-exported from the API module rather than restated, so the number bounding
+ * the request and the number the endpoint enforces cannot drift apart.
  */
-export const ORGANIZATION_PAGE_SIZE = 100
+export const ORGANIZATION_PAGE_SIZE = ORGANIZATION_PAGE_MAX
 
 /** Debounce for the server-side organization search, in milliseconds. */
 const SEARCH_DEBOUNCE_MS = 300
@@ -74,9 +71,9 @@ export interface OrganizationFilterProps {
  * present a list that is quietly incomplete — an administrator scrolling for an
  * organization that is simply not in the first page has no way to tell that
  * from it not existing. So: a searchable Autocomplete whose typing hits
- * `/organizations/search` server-side, plus an explicit notice when a full page
- * comes back. The list may still be partial; what it may not be is SILENTLY
- * partial.
+ * `/organizations/search` server-side, plus an explicit notice driven by the
+ * server's exact `has_more`. The list may still be partial; what it may not be
+ * is SILENTLY partial.
  */
 const OrganizationFilter: React.FC<OrganizationFilterProps> = ({ value, onChange, label }) => {
   const { t } = useTranslation()
@@ -95,13 +92,13 @@ const OrganizationFilter: React.FC<OrganizationFilterProps> = ({ value, onChange
   // below, because VISIBILITY is decided from it: driving visibility off the
   // currently-displayed options would make the picker vanish mid-typing the
   // moment a search narrowed to a single match.
-  const { data: baseline = [] } = useQuery({
+  const { data: baseline } = useQuery({
     queryKey: queryKeys.organizations.list({ page: 1, perPage: ORGANIZATION_PAGE_SIZE }),
     queryFn: () => api.listOrganizations(1, ORGANIZATION_PAGE_SIZE),
     enabled: isPlatformAdmin,
   })
 
-  const { data: searched = [] } = useQuery({
+  const { data: searched } = useQuery({
     queryKey: queryKeys.organizations.list({
       page: 1,
       perPage: ORGANIZATION_PAGE_SIZE,
@@ -116,20 +113,29 @@ const OrganizationFilter: React.FC<OrganizationFilterProps> = ({ value, onChange
     [memberships],
   )
 
+  // The page currently on screen: the search results once the user has typed,
+  // the unsearched first page otherwise.
+  const shown = search ? searched : baseline
+
   const adminOptions = useMemo<OrganizationOption[]>(
-    () => (search ? searched : baseline).map((o) => ({ id: o.id, label: o.name })),
-    [search, searched, baseline],
+    () => (shown?.organizations ?? []).map((o) => ({ id: o.id, label: o.name })),
+    [shown],
   )
 
   const options = isPlatformAdmin ? adminOptions : membershipOptions
 
-  // A page that came back exactly full is the only evidence available that
-  // there may be more: `listOrganizations` discards the `pagination` object the
-  // backend does send, so the true total never reaches this component (also
-  // backend #893). Saying "there may be more, narrow it" on a full page is the
-  // honest reading of the only signal there is.
-  const mayBeTruncated =
-    isPlatformAdmin && (search ? searched : baseline).length >= ORGANIZATION_PAGE_SIZE
+  // Whether to tell the administrator that organizations exist beyond the ones
+  // on offer.
+  //
+  // Reads the server's `has_more`, which is EXACT — false if and only if
+  // nothing follows this page — rather than re-deriving completeness from the
+  // row count (backend #893). The count heuristic this replaces ("the page came
+  // back full") is wrong for every list whose length is an exact multiple of
+  // the page size: a deployment with precisely 100 organizations would be told
+  // to keep searching for a 101st that does not exist. On the search axis it
+  // was not merely imprecise but unavailable, since that axis cannot count at
+  // all; the server now probes one row past the page to answer honestly.
+  const mayBeTruncated = isPlatformAdmin && (shown?.hasMore ?? false)
 
   /**
    * Shown only when there is a choice to make: more than one organization to
@@ -144,7 +150,9 @@ const OrganizationFilter: React.FC<OrganizationFilterProps> = ({ value, onChange
    * carrier-only administrator (zero memberships, every organization) would
    * never see it.
    */
-  const visible = isPlatformAdmin ? baseline.length > 1 : membershipOptions.length > 1
+  const visible = isPlatformAdmin
+    ? (baseline?.organizations.length ?? 0) > 1
+    : membershipOptions.length > 1
 
   // A deep-linked ?org= naming an organization outside the loaded page still
   // has to render as itself. Synthesising the missing option keeps the URL

@@ -32,6 +32,13 @@ vi.mock('../../../services/api', () => ({
   },
 }))
 
+/** One page of organizations, as the API layer returns it since backend #893. */
+const orgPage = (organizations: unknown[], hasMore = false, total: number | null = null) => ({
+  organizations,
+  hasMore,
+  total,
+})
+
 import OIDCSettingsPage from '../OIDCSettingsPage'
 
 function renderWithProviders(ui: React.ReactElement) {
@@ -80,7 +87,7 @@ const fakeOrgs: Organization[] = [
 describe('OIDCSettingsPage', () => {
   beforeEach(() => {
     vi.clearAllMocks()
-    listOrganizationsMock.mockResolvedValue(fakeOrgs)
+    listOrganizationsMock.mockResolvedValue(orgPage(fakeOrgs))
   })
 
   it('shows loading spinner while fetching', () => {

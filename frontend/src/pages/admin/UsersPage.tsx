@@ -180,8 +180,8 @@ const UsersPage: React.FC = () => {
   const loadOrganizations = async () => {
     try {
       setOrgsLoading(true)
-      const orgs = await api.listOrganizations()
-      setOrganizations(orgs || [])
+      const page = await api.listOrganizations()
+      setOrganizations(page.organizations)
     } catch (err) {
       console.error('Failed to load organizations:', err)
       // No getErrorMessage() call here (list load just resets local state), so

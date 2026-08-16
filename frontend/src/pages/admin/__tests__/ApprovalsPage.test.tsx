@@ -16,8 +16,9 @@ vi.mock('../../../services/api', () => ({
     // The organization picker sources a platform admin's options from these.
     // Empty keeps it hidden, so these tests exercise the page's own filtering
     // rather than the picker's (covered in OrganizationFilter.test.tsx).
-    listOrganizations: () => Promise.resolve([]),
-    searchOrganizations: () => Promise.resolve([]),
+    listOrganizations: () => Promise.resolve({ organizations: [], hasMore: false, total: 0 }),
+    searchOrganizations: () =>
+      Promise.resolve({ organizations: [], hasMore: false, total: null }),
   },
 }))
 

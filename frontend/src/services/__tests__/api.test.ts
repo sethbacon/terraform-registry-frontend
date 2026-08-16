@@ -2035,11 +2035,81 @@ describe('ApiClient', () => {
       expect(mockAxiosInstance.get).toHaveBeenCalledWith('/api/v1/organizations', {
         params: { page: 1, per_page: 20 },
       })
-      expect(result).toHaveLength(1)
+      expect(result.organizations).toHaveLength(1)
       // The transform must pass the IdP binding through — dropping it made the
       // binding invisible and un-clearable in the admin UI (#538).
-      expect(result[0].idp_type).toBe('saml')
-      expect(result[0].idp_name).toBe('corp-idp')
+      expect(result.organizations[0].idp_type).toBe('saml')
+      expect(result.organizations[0].idp_name).toBe('corp-idp')
+    })
+
+    // ── The page window (backend #893) ──────────────────────────────────────
+    //
+    // Discarding `pagination` is what let the organization pickers render a
+    // truncated list with nothing to say it was truncated.
+
+    it('carries the server has_more through rather than re-deriving it', async () => {
+      const client = await getApiClient()
+        ; (mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+          data: {
+            organizations: [{ id: 'o1', name: 'org1', display_name: 'Org 1', created_at: '', updated_at: '' }],
+            pagination: { page: 1, per_page: 100, has_more: true, total: 137 },
+          },
+        })
+      const result = await client.listOrganizations(1, 100)
+      expect(result.hasMore).toBe(true)
+      expect(result.total).toBe(137)
+    })
+
+    // The count heuristic this replaces is wrong for exactly this shape: a page
+    // that is completely full but is nonetheless the last one. Trusting the row
+    // count would tell the user to keep searching for rows that do not exist.
+    it('reports a full but final page as complete', async () => {
+      const client = await getApiClient()
+        ; (mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+          data: {
+            organizations: Array.from({ length: 3 }, (_, i) => ({
+              id: `o${i}`, name: `org${i}`, display_name: `Org ${i}`, created_at: '', updated_at: '',
+            })),
+            pagination: { page: 1, per_page: 3, has_more: false, total: 3 },
+          },
+        })
+      const result = await client.listOrganizations(1, 3)
+      expect(result.organizations).toHaveLength(3)
+      expect(result.hasMore).toBe(false)
+    })
+
+    // null ("this axis does not count") and 0 ("none matched") are different
+    // answers and must not collapse into one.
+    it('keeps an uncounted total distinct from a zero total', async () => {
+      const client = await getApiClient()
+        ; (mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+          data: { organizations: [], pagination: { page: 1, per_page: 20, has_more: false, total: null } },
+        })
+      expect((await client.listOrganizations()).total).toBeNull()
+
+        ; (mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+          data: { organizations: [], pagination: { page: 1, per_page: 20, has_more: false, total: 0 } },
+        })
+      expect((await client.listOrganizations()).total).toBe(0)
+    })
+
+    // A backend predating #893 sends no pagination at all. A full page is then
+    // the only available evidence of a possible next one — the weaker signal,
+    // which is why it is the fallback and not the rule.
+    it('falls back to the row count when the server sends no pagination', async () => {
+      const client = await getApiClient()
+        ; (mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+          data: {
+            organizations: Array.from({ length: 2 }, (_, i) => ({
+              id: `o${i}`, name: `org${i}`, display_name: `Org ${i}`, created_at: '', updated_at: '',
+            })),
+          },
+        })
+      const result = await client.listOrganizations(1, 2)
+      expect(result.hasMore).toBe(true)
+      // Uncounted, because there was no pagination object to count from — not
+      // zero, which would claim the deployment has no organizations.
+      expect(result.total).toBeNull()
     })
 
     it('searchOrganizations', async () => {
@@ -2055,7 +2125,7 @@ describe('ApiClient', () => {
       expect(mockAxiosInstance.get).toHaveBeenCalledWith('/api/v1/organizations/search', {
         params: { q: 'org', page: 1, per_page: 10 },
       })
-      expect(result).toHaveLength(1)
+      expect(result.organizations).toHaveLength(1)
     })
 
     it('getOrganization', async () => {
