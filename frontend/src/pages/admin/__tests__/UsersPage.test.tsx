@@ -38,6 +38,13 @@ vi.mock('../../../services/api', () => ({
   },
 }))
 
+/** One page of organizations, as the API layer returns it since backend #893. */
+const orgPage = (organizations: unknown[], hasMore = false, total: number | null = null) => ({
+  organizations,
+  hasMore,
+  total,
+})
+
 // Default to admin scope so existing tests pass; individual tests can override.
 const useAuthMock = vi.fn(() => ({
   allowedScopes: ['admin'],
@@ -213,7 +220,7 @@ describe('UsersPage', () => {
   it('opens Add User dialog when Add User is clicked', async () => {
     listUsersMock.mockResolvedValue(fakeUsersResponse)
     getUserMembershipsMock.mockResolvedValue([])
-    listOrganizationsMock.mockResolvedValue(fakeOrganizations)
+    listOrganizationsMock.mockResolvedValue(orgPage(fakeOrganizations))
     listRoleTemplatesMock.mockResolvedValue(fakeRoleTemplates)
     renderPage()
     await waitFor(() => expect(screen.getByText('Alice Smith')).toBeInTheDocument())
@@ -224,7 +231,7 @@ describe('UsersPage', () => {
   it('opens Edit User dialog when row edit is clicked', async () => {
     listUsersMock.mockResolvedValue(fakeUsersResponse)
     getUserMembershipsMock.mockResolvedValue([fakeMembership])
-    listOrganizationsMock.mockResolvedValue(fakeOrganizations)
+    listOrganizationsMock.mockResolvedValue(orgPage(fakeOrganizations))
     listRoleTemplatesMock.mockResolvedValue(fakeRoleTemplates)
     renderPage()
     await waitFor(() => expect(screen.getByText('Alice Smith')).toBeInTheDocument())
@@ -257,7 +264,7 @@ describe('UsersPage', () => {
   it('creates a user via Add User dialog', async () => {
     listUsersMock.mockResolvedValue(fakeUsersResponse)
     getUserMembershipsMock.mockResolvedValue([])
-    listOrganizationsMock.mockResolvedValue(fakeOrganizations)
+    listOrganizationsMock.mockResolvedValue(orgPage(fakeOrganizations))
     listRoleTemplatesMock.mockResolvedValue(fakeRoleTemplates)
     createUserMock.mockResolvedValue({ id: 'u-new', email: 'c@example.com', name: 'Carol' })
     renderPage()
@@ -276,7 +283,7 @@ describe('UsersPage', () => {
   it('saves an edited user via Edit User dialog', async () => {
     listUsersMock.mockResolvedValue(fakeUsersResponse)
     getUserMembershipsMock.mockResolvedValue([fakeMembership])
-    listOrganizationsMock.mockResolvedValue(fakeOrganizations)
+    listOrganizationsMock.mockResolvedValue(orgPage(fakeOrganizations))
     listRoleTemplatesMock.mockResolvedValue(fakeRoleTemplates)
     updateUserMock.mockResolvedValue({})
     renderPage()
@@ -296,7 +303,7 @@ describe('UsersPage', () => {
   it('cancels Add User dialog', async () => {
     listUsersMock.mockResolvedValue(fakeUsersResponse)
     getUserMembershipsMock.mockResolvedValue([])
-    listOrganizationsMock.mockResolvedValue(fakeOrganizations)
+    listOrganizationsMock.mockResolvedValue(orgPage(fakeOrganizations))
     listRoleTemplatesMock.mockResolvedValue(fakeRoleTemplates)
     renderPage()
     await waitFor(() => expect(screen.getByText('Alice Smith')).toBeInTheDocument())
@@ -323,7 +330,7 @@ describe('UsersPage', () => {
   it('removes a membership in Edit User dialog', async () => {
     listUsersMock.mockResolvedValue(fakeUsersResponse)
     getUserMembershipsMock.mockResolvedValue([fakeMembership])
-    listOrganizationsMock.mockResolvedValue(fakeOrganizations)
+    listOrganizationsMock.mockResolvedValue(orgPage(fakeOrganizations))
     listRoleTemplatesMock.mockResolvedValue(fakeRoleTemplates)
     removeOrganizationMemberMock.mockResolvedValue({})
     renderPage()
@@ -339,7 +346,7 @@ describe('UsersPage', () => {
   it('shows error alert when create user fails', async () => {
     listUsersMock.mockResolvedValue(fakeUsersResponse)
     getUserMembershipsMock.mockResolvedValue([])
-    listOrganizationsMock.mockResolvedValue(fakeOrganizations)
+    listOrganizationsMock.mockResolvedValue(orgPage(fakeOrganizations))
     listRoleTemplatesMock.mockResolvedValue(fakeRoleTemplates)
     createUserMock.mockRejectedValue(new Error('boom'))
     renderPage()
@@ -376,7 +383,7 @@ describe('UsersPage', () => {
   it('reports a failed role templates load to telemetry', async () => {
     listUsersMock.mockResolvedValue(fakeUsersResponse)
     getUserMembershipsMock.mockResolvedValue([])
-    listOrganizationsMock.mockResolvedValue(fakeOrganizations)
+    listOrganizationsMock.mockResolvedValue(orgPage(fakeOrganizations))
     const loadError = new Error('role templates load failed')
     listRoleTemplatesMock.mockRejectedValue(loadError)
     renderPage()
@@ -392,7 +399,7 @@ describe('UsersPage', () => {
   it('reports a failed "add user to organization" to telemetry', async () => {
     listUsersMock.mockResolvedValue(fakeUsersResponse)
     getUserMembershipsMock.mockResolvedValue([])
-    listOrganizationsMock.mockResolvedValue(fakeOrganizations)
+    listOrganizationsMock.mockResolvedValue(orgPage(fakeOrganizations))
     listRoleTemplatesMock.mockResolvedValue(fakeRoleTemplates)
     createUserMock.mockResolvedValue({ id: 'u-new', email: 'c@example.com', name: 'Carol' })
     const addMemberError = new Error('add member failed')

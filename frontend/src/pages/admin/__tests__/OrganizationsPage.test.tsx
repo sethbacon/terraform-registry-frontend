@@ -30,6 +30,13 @@ vi.mock('../../../services/api', () => ({
   },
 }))
 
+/** One page of organizations, as the API layer returns it since backend #893. */
+const orgPage = (organizations: unknown[], hasMore = false, total: number | null = null) => ({
+  organizations,
+  hasMore,
+  total,
+})
+
 let mockAllowedScopes: string[] = ['admin']
 
 vi.mock('../../../contexts/AuthContext', () => ({
@@ -94,7 +101,7 @@ describe('OrganizationsPage', () => {
   })
 
   it('renders heading and description after load', async () => {
-    listOrganizationsMock.mockResolvedValue(fakeOrgs)
+    listOrganizationsMock.mockResolvedValue(orgPage(fakeOrgs))
     renderPage()
     await waitFor(() => {
       expect(screen.getByText('Organizations')).toBeInTheDocument()
@@ -103,7 +110,7 @@ describe('OrganizationsPage', () => {
   })
 
   it('shows org table with data', async () => {
-    listOrganizationsMock.mockResolvedValue(fakeOrgs)
+    listOrganizationsMock.mockResolvedValue(orgPage(fakeOrgs))
     renderPage()
     await waitFor(() => {
       expect(screen.getByText('acme-corp')).toBeInTheDocument()
@@ -118,7 +125,7 @@ describe('OrganizationsPage', () => {
   })
 
   it('shows Add Organization button', async () => {
-    listOrganizationsMock.mockResolvedValue(fakeOrgs)
+    listOrganizationsMock.mockResolvedValue(orgPage(fakeOrgs))
     renderPage()
     await waitFor(() => {
       expect(screen.getByText('Add Organization')).toBeInTheDocument()
@@ -126,7 +133,7 @@ describe('OrganizationsPage', () => {
   })
 
   it('shows empty state when no organizations exist', async () => {
-    listOrganizationsMock.mockResolvedValue([])
+    listOrganizationsMock.mockResolvedValue(orgPage([]))
     renderPage()
     await waitFor(() => {
       expect(screen.getByText('No organizations found')).toBeInTheDocument()
@@ -144,7 +151,7 @@ describe('OrganizationsPage', () => {
   })
 
   it('opens Add Organization dialog', async () => {
-    listOrganizationsMock.mockResolvedValue(fakeOrgs)
+    listOrganizationsMock.mockResolvedValue(orgPage(fakeOrgs))
     renderPage()
     await waitFor(() => expect(screen.getByText('acme-corp')).toBeInTheDocument())
     await userEvent.click(screen.getByRole('button', { name: /add organization/i }))
@@ -152,7 +159,7 @@ describe('OrganizationsPage', () => {
   })
 
   it('opens Edit Organization dialog', async () => {
-    listOrganizationsMock.mockResolvedValue(fakeOrgs)
+    listOrganizationsMock.mockResolvedValue(orgPage(fakeOrgs))
     renderPage()
     await waitFor(() => expect(screen.getByText('acme-corp')).toBeInTheDocument())
     const editBtns = screen.getAllByRole('button', { name: /edit organization/i })
@@ -161,7 +168,7 @@ describe('OrganizationsPage', () => {
   })
 
   it('opens Delete confirmation dialog', async () => {
-    listOrganizationsMock.mockResolvedValue(fakeOrgs)
+    listOrganizationsMock.mockResolvedValue(orgPage(fakeOrgs))
     renderPage()
     await waitFor(() => expect(screen.getByText('acme-corp')).toBeInTheDocument())
     const delBtns = screen.getAllByRole('button', { name: /delete organization/i })
@@ -170,7 +177,7 @@ describe('OrganizationsPage', () => {
   })
 
   it('opens View Members dialog and loads members', async () => {
-    listOrganizationsMock.mockResolvedValue(fakeOrgs)
+    listOrganizationsMock.mockResolvedValue(orgPage(fakeOrgs))
     listOrganizationMembersMock.mockResolvedValue([
       {
         user_id: 'u1',
@@ -193,7 +200,7 @@ describe('OrganizationsPage', () => {
   })
 
   it('creates a new organization via the Add dialog', async () => {
-    listOrganizationsMock.mockResolvedValue(fakeOrgs)
+    listOrganizationsMock.mockResolvedValue(orgPage(fakeOrgs))
     createOrganizationMock.mockResolvedValue({ id: 'new', name: 'newco' })
     renderPage()
     await waitFor(() => expect(screen.getByText('acme-corp')).toBeInTheDocument())
@@ -209,7 +216,7 @@ describe('OrganizationsPage', () => {
   })
 
   it('shows "No organizations found" and allows creation from empty state', async () => {
-    listOrganizationsMock.mockResolvedValue([])
+    listOrganizationsMock.mockResolvedValue(orgPage([]))
     renderPage()
     await waitFor(() => expect(screen.getByText('No organizations found')).toBeInTheDocument())
     await userEvent.click(screen.getByRole('button', { name: /create first organization/i }))
@@ -217,7 +224,7 @@ describe('OrganizationsPage', () => {
   })
 
   it('cancels the Add Organization dialog', async () => {
-    listOrganizationsMock.mockResolvedValue(fakeOrgs)
+    listOrganizationsMock.mockResolvedValue(orgPage(fakeOrgs))
     renderPage()
     await waitFor(() => expect(screen.getByText('acme-corp')).toBeInTheDocument())
     await userEvent.click(screen.getByRole('button', { name: /add organization/i }))
@@ -227,7 +234,7 @@ describe('OrganizationsPage', () => {
   })
 
   it('saves edits via the Edit Organization dialog', async () => {
-    listOrganizationsMock.mockResolvedValue(fakeOrgs)
+    listOrganizationsMock.mockResolvedValue(orgPage(fakeOrgs))
     updateOrganizationMock.mockResolvedValue({})
     renderPage()
     await waitFor(() => expect(screen.getByText('acme-corp')).toBeInTheDocument())
@@ -248,7 +255,7 @@ describe('OrganizationsPage', () => {
 
   it('clearing the IdP binding sends an explicit empty string, not null', async () => {
     // The backend only clears on idp_type === ""; null is silently ignored (#538).
-    listOrganizationsMock.mockResolvedValue(fakeOrgs)
+    listOrganizationsMock.mockResolvedValue(orgPage(fakeOrgs))
     updateOrganizationMock.mockResolvedValue({})
     renderPage()
     await waitFor(() => expect(screen.getByText('acme-corp')).toBeInTheDocument())
@@ -267,7 +274,7 @@ describe('OrganizationsPage', () => {
   })
 
   it('deletes an organization via Delete confirmation dialog', async () => {
-    listOrganizationsMock.mockResolvedValue(fakeOrgs)
+    listOrganizationsMock.mockResolvedValue(orgPage(fakeOrgs))
     deleteOrganizationMock.mockResolvedValue({})
     renderPage()
     await waitFor(() => expect(screen.getByText('acme-corp')).toBeInTheDocument())
@@ -280,7 +287,7 @@ describe('OrganizationsPage', () => {
   })
 
   it('cancels the Delete confirmation dialog', async () => {
-    listOrganizationsMock.mockResolvedValue(fakeOrgs)
+    listOrganizationsMock.mockResolvedValue(orgPage(fakeOrgs))
     renderPage()
     await waitFor(() => expect(screen.getByText('acme-corp')).toBeInTheDocument())
     const delBtns = screen.getAllByRole('button', { name: /delete organization/i })
@@ -292,7 +299,7 @@ describe('OrganizationsPage', () => {
   })
 
   it('closes Members dialog via Close button', async () => {
-    listOrganizationsMock.mockResolvedValue(fakeOrgs)
+    listOrganizationsMock.mockResolvedValue(orgPage(fakeOrgs))
     listOrganizationMembersMock.mockResolvedValue([])
     listRoleTemplatesMock.mockResolvedValue([])
     renderPage()
@@ -308,7 +315,7 @@ describe('OrganizationsPage', () => {
   })
 
   it('opens Add Member dialog from Members dialog', async () => {
-    listOrganizationsMock.mockResolvedValue(fakeOrgs)
+    listOrganizationsMock.mockResolvedValue(orgPage(fakeOrgs))
     listOrganizationMembersMock.mockResolvedValue([])
     listRoleTemplatesMock.mockResolvedValue([
       { id: 'rt-admin', name: 'admin', display_name: 'Administrator', description: 'Full access' },
@@ -329,7 +336,7 @@ describe('OrganizationsPage', () => {
   })
 
   it('cancels Add Member dialog', async () => {
-    listOrganizationsMock.mockResolvedValue(fakeOrgs)
+    listOrganizationsMock.mockResolvedValue(orgPage(fakeOrgs))
     listOrganizationMembersMock.mockResolvedValue([])
     listRoleTemplatesMock.mockResolvedValue([])
     listUsersMock.mockResolvedValue({ users: [] })
@@ -349,7 +356,7 @@ describe('OrganizationsPage', () => {
   })
 
   it('renders existing members in Members dialog', async () => {
-    listOrganizationsMock.mockResolvedValue(fakeOrgs)
+    listOrganizationsMock.mockResolvedValue(orgPage(fakeOrgs))
     listOrganizationMembersMock.mockResolvedValue([
       {
         user_id: 'u1',
@@ -372,7 +379,7 @@ describe('OrganizationsPage', () => {
   })
 
   it('removes a member via Remove member button', async () => {
-    listOrganizationsMock.mockResolvedValue(fakeOrgs)
+    listOrganizationsMock.mockResolvedValue(orgPage(fakeOrgs))
     listOrganizationMembersMock.mockResolvedValue([
       {
         user_id: 'u1',
@@ -399,7 +406,7 @@ describe('OrganizationsPage', () => {
   // ── Phase 2: Identity Provider fields ─────────────────────────────────────
   it('shows Identity Provider column with IdP chip', async () => {
     const orgsWithIdp = [{ ...fakeOrgs[0], idp_type: 'saml', idp_name: 'Okta' }, { ...fakeOrgs[1] }]
-    listOrganizationsMock.mockResolvedValue(orgsWithIdp)
+    listOrganizationsMock.mockResolvedValue(orgPage(orgsWithIdp))
     renderPage()
     await waitFor(() => expect(screen.getByText('acme-corp')).toBeInTheDocument())
     expect(screen.getByText('Identity Provider')).toBeInTheDocument()
@@ -408,7 +415,7 @@ describe('OrganizationsPage', () => {
 
   it('shows IdP chip without name when idp_name is empty', async () => {
     const orgsWithIdp = [{ ...fakeOrgs[0], idp_type: 'ldap', idp_name: null }]
-    listOrganizationsMock.mockResolvedValue(orgsWithIdp)
+    listOrganizationsMock.mockResolvedValue(orgPage(orgsWithIdp))
     renderPage()
     await waitFor(() => expect(screen.getByText('acme-corp')).toBeInTheDocument())
     expect(screen.getByText('LDAP')).toBeInTheDocument()
@@ -417,7 +424,7 @@ describe('OrganizationsPage', () => {
   // ── Rename tests ──────────────────────────────────────────────────────────
 
   it('includes name in update payload when org name is changed', async () => {
-    listOrganizationsMock.mockResolvedValue(fakeOrgs)
+    listOrganizationsMock.mockResolvedValue(orgPage(fakeOrgs))
     updateOrganizationMock.mockResolvedValue({})
     renderPage()
     await waitFor(() => expect(screen.getByText('acme-corp')).toBeInTheDocument())
@@ -441,7 +448,7 @@ describe('OrganizationsPage', () => {
   })
 
   it('shows rename cascade warning when name is changed to a valid value', async () => {
-    listOrganizationsMock.mockResolvedValue(fakeOrgs)
+    listOrganizationsMock.mockResolvedValue(orgPage(fakeOrgs))
     renderPage()
     await waitFor(() => expect(screen.getByText('acme-corp')).toBeInTheDocument())
     const editBtns = screen.getAllByRole('button', { name: /edit organization/i })
@@ -460,7 +467,7 @@ describe('OrganizationsPage', () => {
   })
 
   it('does not include name in update payload when name is unchanged', async () => {
-    listOrganizationsMock.mockResolvedValue(fakeOrgs)
+    listOrganizationsMock.mockResolvedValue(orgPage(fakeOrgs))
     updateOrganizationMock.mockResolvedValue({})
     renderPage()
     await waitFor(() => expect(screen.getByText('acme-corp')).toBeInTheDocument())
@@ -490,7 +497,7 @@ describe('OrganizationsPage', () => {
 
   it('shows member-management UI for the canonical organizations:write scope', async () => {
     mockAllowedScopes = ['organizations:write']
-    listOrganizationsMock.mockResolvedValue(fakeOrgs)
+    listOrganizationsMock.mockResolvedValue(orgPage(fakeOrgs))
     listOrganizationMembersMock.mockResolvedValue([aliceMember])
     listRoleTemplatesMock.mockResolvedValue([
       { id: 'rt-admin', name: 'admin', display_name: 'Administrator' },
@@ -505,7 +512,7 @@ describe('OrganizationsPage', () => {
 
   it('hides member-management UI for the organizations:read scope', async () => {
     mockAllowedScopes = ['organizations:read']
-    listOrganizationsMock.mockResolvedValue(fakeOrgs)
+    listOrganizationsMock.mockResolvedValue(orgPage(fakeOrgs))
     listOrganizationMembersMock.mockResolvedValue([aliceMember])
     listRoleTemplatesMock.mockResolvedValue([
       { id: 'rt-admin', name: 'admin', display_name: 'Administrator' },
@@ -522,7 +529,7 @@ describe('OrganizationsPage', () => {
 
   it('hides Add/Edit/Delete organization controls for the organizations:read scope', async () => {
     mockAllowedScopes = ['organizations:read']
-    listOrganizationsMock.mockResolvedValue(fakeOrgs)
+    listOrganizationsMock.mockResolvedValue(orgPage(fakeOrgs))
     renderPage()
     await waitFor(() => expect(screen.getByText('acme-corp')).toBeInTheDocument())
 
@@ -535,7 +542,7 @@ describe('OrganizationsPage', () => {
 
   it('shows Add/Edit/Delete organization controls for the canonical organizations:write scope', async () => {
     mockAllowedScopes = ['organizations:write']
-    listOrganizationsMock.mockResolvedValue(fakeOrgs)
+    listOrganizationsMock.mockResolvedValue(orgPage(fakeOrgs))
     renderPage()
     await waitFor(() => expect(screen.getByText('acme-corp')).toBeInTheDocument())
 
@@ -545,7 +552,7 @@ describe('OrganizationsPage', () => {
   })
 
   it('blocks save and shows field error when name format is invalid', async () => {
-    listOrganizationsMock.mockResolvedValue(fakeOrgs)
+    listOrganizationsMock.mockResolvedValue(orgPage(fakeOrgs))
     renderPage()
     await waitFor(() => expect(screen.getByText('acme-corp')).toBeInTheDocument())
 
@@ -570,7 +577,7 @@ describe('OrganizationsPage', () => {
   // Regression guard (#623): a failed members load only reset local state via
   // console.error before this fix -- it must also reach the app's telemetry pipeline.
   it('reports a failed members load to telemetry', async () => {
-    listOrganizationsMock.mockResolvedValue(fakeOrgs)
+    listOrganizationsMock.mockResolvedValue(orgPage(fakeOrgs))
     const loadError = new Error('members load failed')
     listOrganizationMembersMock.mockRejectedValue(loadError)
     listRoleTemplatesMock.mockResolvedValue([])

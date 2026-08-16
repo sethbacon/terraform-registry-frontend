@@ -48,13 +48,25 @@ const organization = (id: string, name: string) => ({
 const organizations = (n: number) =>
   Array.from({ length: n }, (_, i) => organization(`org-${i}`, `slug-${i}`))
 
+/**
+ * One page as the API layer now returns it. `hasMore` is the SERVER's exact
+ * answer, so the tests set it independently of the row count — which is the
+ * whole point of backend #893, and what makes "a full page that is the last
+ * page" expressible at all.
+ */
+const page = (orgs: ReturnType<typeof organization>[], hasMore = false, total: number | null = null) => ({
+  organizations: orgs,
+  hasMore,
+  total,
+})
+
 describe('OrganizationFilter', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     mockAllowedScopes = []
     mockMemberships = []
-    listOrganizationsMock.mockResolvedValue([])
-    searchOrganizationsMock.mockResolvedValue([])
+    listOrganizationsMock.mockResolvedValue(page([]))
+    searchOrganizationsMock.mockResolvedValue(page([]))
   })
 
   // ── Visibility ────────────────────────────────────────────────────────────
@@ -90,10 +102,7 @@ describe('OrganizationFilter', () => {
   it('is shown to a platform admin with no memberships at all', async () => {
     mockAllowedScopes = ['admin']
     mockMemberships = []
-    listOrganizationsMock.mockResolvedValue([
-      organization('org-1', 'acme'),
-      organization('org-2', 'globex'),
-    ])
+    listOrganizationsMock.mockResolvedValue(page([organization('org-1', 'acme'), organization('org-2', 'globex')]))
     renderFilter()
     await waitFor(() => {
       expect(screen.getByTestId('organization-filter-input')).toBeInTheDocument()
@@ -103,11 +112,13 @@ describe('OrganizationFilter', () => {
   it('offers a platform admin every organization, not just their memberships', async () => {
     mockAllowedScopes = ['admin']
     mockMemberships = [membership('org-1', 'acme')]
-    listOrganizationsMock.mockResolvedValue([
-      organization('org-1', 'acme'),
-      organization('org-2', 'globex'),
-      organization('org-3', 'initech'),
-    ])
+    listOrganizationsMock.mockResolvedValue(
+      page([
+        organization('org-1', 'acme'),
+        organization('org-2', 'globex'),
+        organization('org-3', 'initech'),
+      ]),
+    )
     renderFilter()
     const input = await screen.findByTestId('organization-filter-input')
     await userEvent.click(input)
@@ -124,7 +135,7 @@ describe('OrganizationFilter', () => {
 
   it('is hidden from a platform admin when the deployment has only one organization', async () => {
     mockAllowedScopes = ['admin']
-    listOrganizationsMock.mockResolvedValue([organization('org-1', 'acme')])
+    listOrganizationsMock.mockResolvedValue(page([organization('org-1', 'acme')]))
     renderFilter()
     await waitFor(() => expect(listOrganizationsMock).toHaveBeenCalled())
     expect(screen.queryByTestId('organization-filter-input')).not.toBeInTheDocument()
@@ -137,26 +148,49 @@ describe('OrganizationFilter', () => {
   // returns fewer rows, not more. 100 is the largest page that does not shrink.
   it('asks for the largest page the backend actually honours', async () => {
     mockAllowedScopes = ['admin']
-    listOrganizationsMock.mockResolvedValue(organizations(2))
+    listOrganizationsMock.mockResolvedValue(page(organizations(2)))
     renderFilter()
     await waitFor(() => expect(listOrganizationsMock).toHaveBeenCalledWith(1, 100))
     expect(ORGANIZATION_PAGE_SIZE).toBe(100)
     expect(ORGANIZATION_PAGE_SIZE).toBeLessThanOrEqual(100)
   })
 
-  it('says so when the organization list may be incomplete', async () => {
+  it('says so when the server reports more organizations beyond this page', async () => {
     mockAllowedScopes = ['admin']
-    listOrganizationsMock.mockResolvedValue(organizations(ORGANIZATION_PAGE_SIZE))
+    listOrganizationsMock.mockResolvedValue(page(organizations(ORGANIZATION_PAGE_SIZE), true, 137))
     renderFilter()
     expect(await screen.findByTestId('organization-filter-truncated')).toBeInTheDocument()
   })
 
   it('does not claim truncation when the whole list fits in one page', async () => {
     mockAllowedScopes = ['admin']
-    listOrganizationsMock.mockResolvedValue(organizations(ORGANIZATION_PAGE_SIZE - 1))
+    listOrganizationsMock.mockResolvedValue(page(organizations(ORGANIZATION_PAGE_SIZE - 1), false, 99))
     renderFilter()
     await screen.findByTestId('organization-filter-input')
     expect(screen.queryByTestId('organization-filter-truncated')).not.toBeInTheDocument()
+  })
+
+  // The case the old row-count heuristic got WRONG, and the reason this now
+  // reads the server's flag: a page that is completely full and is nonetheless
+  // the last one. Counting rows would tell the administrator to keep searching
+  // for a 101st organization that does not exist.
+  it('does not claim truncation on a full page that is the last page', async () => {
+    mockAllowedScopes = ['admin']
+    listOrganizationsMock.mockResolvedValue(
+      page(organizations(ORGANIZATION_PAGE_SIZE), false, ORGANIZATION_PAGE_SIZE),
+    )
+    renderFilter()
+    await screen.findByTestId('organization-filter-input')
+    expect(screen.queryByTestId('organization-filter-truncated')).not.toBeInTheDocument()
+  })
+
+  // And the converse: a SHORT page the server says is not the end. The row
+  // count would call this complete; only the flag knows better.
+  it('says so on a short page the server reports as incomplete', async () => {
+    mockAllowedScopes = ['admin']
+    listOrganizationsMock.mockResolvedValue(page(organizations(3), true, null))
+    renderFilter()
+    expect(await screen.findByTestId('organization-filter-truncated')).toBeInTheDocument()
   })
 
   // What makes the truncation survivable: an organization outside the first
@@ -164,8 +198,8 @@ describe('OrganizationFilter', () => {
   // filtering the page already in hand.
   it('searches the server for a platform admin rather than filtering one page', async () => {
     mockAllowedScopes = ['admin']
-    listOrganizationsMock.mockResolvedValue(organizations(ORGANIZATION_PAGE_SIZE))
-    searchOrganizationsMock.mockResolvedValue([organization('org-999', 'faraway')])
+    listOrganizationsMock.mockResolvedValue(page(organizations(ORGANIZATION_PAGE_SIZE), true, 137))
+    searchOrganizationsMock.mockResolvedValue(page([organization('org-999', 'faraway')]))
     renderFilter()
     const input = await screen.findByTestId('organization-filter-input')
     await userEvent.type(input, 'faraway')
@@ -212,7 +246,7 @@ describe('OrganizationFilter', () => {
   // filtered is the worst of both: narrowed data, no visible cause.
   it('renders a deep-linked organization that is not in the loaded page', async () => {
     mockAllowedScopes = ['admin']
-    listOrganizationsMock.mockResolvedValue(organizations(3))
+    listOrganizationsMock.mockResolvedValue(page(organizations(3)))
     renderFilter({ value: 'org-outside-the-page' })
     await waitFor(() => {
       expect(screen.getByTestId('organization-filter-input')).toHaveValue('org-outside-the-page')

@@ -94,8 +94,8 @@ const OrganizationsPage: React.FC = () => {
   } = useQuery<Organization[]>({
     queryKey: queryKeys.organizations.list(),
     queryFn: async () => {
-      const orgs = await api.listOrganizations()
-      return orgs || []
+      const page = await api.listOrganizations()
+      return page.organizations
     },
   })
 
