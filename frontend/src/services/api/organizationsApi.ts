@@ -54,11 +54,17 @@ export interface OrganizationPage {
   /**
    * Whether more organizations exist beyond this page.
    *
-   * Taken from the server's exact `has_more` when present. The fallback covers
-   * a backend predating #893, which emitted no pagination at all: there, a
-   * completely full page is the only available evidence of a possible next one.
-   * It is the weaker signal by construction — which is why it is the fallback
-   * and not the rule.
+   * The server's `has_more` and nothing else. There is deliberately no row-count
+   * fallback: counting rows cannot distinguish "the last page happened to be
+   * full" from "another page follows", which is wrong for every list whose
+   * length is a multiple of the page size — the guess this field exists to
+   * replace (backend #893).
+   *
+   * A backend predating #893 always sent a `pagination` object too; it simply
+   * had no `has_more` inside it. So guarding on the object's presence would
+   * silently yield `undefined` there rather than falling back, and the type
+   * would not catch it. Absent or non-boolean therefore reads as false: unknown
+   * is reported as "nothing follows", never as a guess dressed up as an answer.
    */
   hasMore: boolean
   /** Total across all pages, or null when this endpoint does not count. */
@@ -83,14 +89,14 @@ function transformOrganization(org: Record<string, unknown>): Organization {
   }
 }
 
-function toPage(data: ListOrganizationsResponse, perPage: number): OrganizationPage {
+function toPage(data: ListOrganizationsResponse): OrganizationPage {
   const organizations = (data.organizations || []).map((org: Record<string, unknown>) =>
     transformOrganization(org),
   )
   const pagination = data.pagination
   return {
     organizations,
-    hasMore: pagination ? pagination.has_more : organizations.length >= perPage,
+    hasMore: pagination?.has_more === true,
     total: pagination ? (pagination.total ?? null) : null,
   }
 }
@@ -110,7 +116,7 @@ export async function listOrganizations(page = 1, perPage = 20): Promise<Organiz
   const response = await http.get<ListOrganizationsResponse>('/api/v1/organizations', {
     params: { page, per_page: perPage },
   })
-  return toPage(response.data, perPage)
+  return toPage(response.data)
 }
 
 export async function searchOrganizations(
@@ -123,7 +129,7 @@ export async function searchOrganizations(
   })
   // This axis has no counting query, so `total` is null and `has_more` comes
   // from the server probing one row past the page.
-  return toPage(response.data, perPage)
+  return toPage(response.data)
 }
 
 export async function getOrganization(id: string): Promise<Organization> {
