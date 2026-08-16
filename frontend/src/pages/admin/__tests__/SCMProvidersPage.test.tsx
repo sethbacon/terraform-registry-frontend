@@ -3,9 +3,9 @@ import userEvent from '@testing-library/user-event'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { MemoryRouter } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { AxiosError } from 'axios'
 
 const listSCMProvidersMock = vi.fn()
-const getCurrentUserMembershipsMock = vi.fn()
 const getSCMTokenStatusMock = vi.fn()
 const createSCMProviderMock = vi.fn()
 const updateSCMProviderMock = vi.fn()
@@ -18,7 +18,6 @@ const verifySCMProviderMock = vi.fn()
 vi.mock('../../../services/api', () => ({
   default: {
     listSCMProviders: (...args: unknown[]) => listSCMProvidersMock(...args),
-    getCurrentUserMemberships: (...args: unknown[]) => getCurrentUserMembershipsMock(...args),
     getSCMTokenStatus: (...args: unknown[]) => getSCMTokenStatusMock(...args),
     createSCMProvider: (...args: unknown[]) => createSCMProviderMock(...args),
     updateSCMProvider: (...args: unknown[]) => updateSCMProviderMock(...args),
@@ -31,11 +30,16 @@ vi.mock('../../../services/api', () => ({
 }))
 
 let mockAllowedScopes: string[] = ['admin']
+// Real per-organization memberships, as useAuth has published since #795. They
+// default the create form's destination organization, and (for a caller who is
+// not a platform admin) supply the organization filter's options (#779).
+let mockMemberships: Array<{ organization_id: string; organization_name: string }> = []
 
 vi.mock('../../../contexts/AuthContext', () => ({
   useAuth: () => ({
     isAuthenticated: true,
     allowedScopes: mockAllowedScopes,
+    memberships: mockMemberships,
     user: { id: 'u1', email: 'admin@example.com', name: 'Admin', role_template_name: 'admin' },
   }),
 }))
@@ -48,15 +52,32 @@ function createQueryClient() {
   })
 }
 
-function renderPage() {
+function renderPage(initialEntries: string[] = ['/admin/scm-providers']) {
   const qc = createQueryClient()
+  // The organization filter keeps its selection in the URL (#779);
+  // initialEntries is how a test starts already filtered.
   return render(
     <QueryClientProvider client={qc}>
-      <MemoryRouter>
+      <MemoryRouter initialEntries={initialEntries}>
         <SCMProvidersPage />
       </MemoryRouter>
     </QueryClientProvider>,
   )
+}
+
+/**
+ * A real AxiosError — getErrorStatus() narrows with `instanceof`, so a
+ * duck-typed object would read as status-less and silently take the generic
+ * branch, making the 403 guard below pass for the wrong reason.
+ */
+function axiosFailure(status: number, message: string): AxiosError {
+  return new AxiosError(`Request failed with status code ${status}`, 'ERR_BAD_REQUEST', undefined, undefined, {
+    status,
+    statusText: 'Error',
+    headers: {},
+    config: { headers: {} },
+    data: { error: message },
+  } as never)
 }
 
 const fakeProviders = [
@@ -88,7 +109,7 @@ describe('SCMProvidersPage', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     mockAllowedScopes = ['admin']
-    getCurrentUserMembershipsMock.mockResolvedValue([])
+    mockMemberships = []
     getSCMTokenStatusMock.mockResolvedValue({ connected: false })
   })
 
@@ -210,7 +231,7 @@ describe('SCMProvidersPage', () => {
 
   it('opens create provider dialog', async () => {
     listSCMProvidersMock.mockResolvedValue([])
-    getCurrentUserMembershipsMock.mockResolvedValue(fakeMemberships)
+    mockMemberships = fakeMemberships
     renderPage()
     await waitFor(() =>
       expect(screen.getByRole('button', { name: /add provider/i })).toBeInTheDocument(),
@@ -306,7 +327,7 @@ describe('SCMProvidersPage', () => {
 
   it('cancels create dialog without saving', async () => {
     listSCMProvidersMock.mockResolvedValue([])
-    getCurrentUserMembershipsMock.mockResolvedValue(fakeMemberships)
+    mockMemberships = fakeMemberships
     renderPage()
     await waitFor(() =>
       expect(screen.getByRole('button', { name: /add provider/i })).toBeInTheDocument(),
@@ -319,7 +340,7 @@ describe('SCMProvidersPage', () => {
 
   it('creates a new provider via Add dialog', async () => {
     listSCMProvidersMock.mockResolvedValue([])
-    getCurrentUserMembershipsMock.mockResolvedValue(fakeMemberships)
+    mockMemberships = fakeMemberships
     createSCMProviderMock.mockResolvedValue({ id: 'new-scm' })
     renderPage()
     await waitFor(() =>
@@ -336,7 +357,7 @@ describe('SCMProvidersPage', () => {
 
   it('creates a GitHub App provider with app fields and no client secret', async () => {
     listSCMProvidersMock.mockResolvedValue([])
-    getCurrentUserMembershipsMock.mockResolvedValue(fakeMemberships)
+    mockMemberships = fakeMemberships
     createSCMProviderMock.mockResolvedValue({ id: 'gh-app' })
     renderPage()
     await waitFor(() =>
@@ -499,5 +520,46 @@ describe('SCMProvidersPage', () => {
     expect(screen.getByText('ADO')).toBeInTheDocument()
     expect(screen.getByText('BB')).toBeInTheDocument()
     expect(screen.getByText(/Tenant ID: tenant-123/i)).toBeInTheDocument()
+  })
+
+  // ── Organization filter (#779) ─────────────────────────────────────────────
+
+  describe('organization filter', () => {
+    it('lists every provider the caller may see when no organization is selected', async () => {
+      listSCMProvidersMock.mockResolvedValue([])
+      renderPage()
+      await waitFor(() => expect(listSCMProvidersMock).toHaveBeenCalledWith(undefined))
+    })
+
+    it('narrows the request to the organization named in the URL', async () => {
+      listSCMProvidersMock.mockResolvedValue([])
+      renderPage(['/admin/scm-providers?org=org-2'])
+      await waitFor(() => expect(listSCMProvidersMock).toHaveBeenCalledWith('org-2'))
+    })
+
+    // ListProviders answers 403 for an organization the caller holds no
+    // scm:read in. That is recoverable — pick a different organization — and
+    // saying so is what makes it actionable; the generic message reads like an
+    // outage the user can do nothing about.
+    it('reports a 403 as "not a member" rather than a generic load failure', async () => {
+      listSCMProvidersMock.mockRejectedValue(
+        axiosFailure(403, 'Not a member of the requested organization'),
+      )
+      renderPage(['/admin/scm-providers?org=org-nope'])
+      await waitFor(() => {
+        expect(screen.getByText(/not a member of that organization/i)).toBeInTheDocument()
+      })
+    })
+
+    // The other direction of the same guard: widening the 403 branch to catch
+    // every failure would relabel real outages as a membership problem.
+    it('still reports a non-403 failure as a load failure', async () => {
+      listSCMProvidersMock.mockRejectedValue(axiosFailure(500, 'database unavailable'))
+      renderPage(['/admin/scm-providers?org=org-2'])
+      await waitFor(() => {
+        expect(screen.getByText(/database unavailable/i)).toBeInTheDocument()
+      })
+      expect(screen.queryByText(/not a member of that organization/i)).not.toBeInTheDocument()
+    })
   })
 })

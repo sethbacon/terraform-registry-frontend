@@ -2,6 +2,7 @@ import { render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { MemoryRouter } from 'react-router-dom'
 
 // --- Mocks (must be before component import) ---
 
@@ -10,7 +11,6 @@ const createAPIKeyMock = vi.fn()
 const updateAPIKeyMock = vi.fn()
 const deleteAPIKeyMock = vi.fn()
 const rotateAPIKeyMock = vi.fn()
-const getCurrentUserMembershipsMock = vi.fn()
 const getNotificationsConfigMock = vi.fn()
 const saveNotificationsConfigMock = vi.fn()
 
@@ -21,16 +21,31 @@ vi.mock('../../../services/api', () => ({
     updateAPIKey: (...args: unknown[]) => updateAPIKeyMock(...args),
     deleteAPIKey: (...args: unknown[]) => deleteAPIKeyMock(...args),
     rotateAPIKey: (...args: unknown[]) => rotateAPIKeyMock(...args),
-    getCurrentUserMemberships: (...args: unknown[]) => getCurrentUserMembershipsMock(...args),
     getNotificationsConfig: (...args: unknown[]) => getNotificationsConfigMock(...args),
     saveNotificationsConfig: (...args: unknown[]) => saveNotificationsConfigMock(...args),
   },
 }))
 
+// Real per-organization memberships, as useAuth has published since #795. They
+// populate the create dialog's destination organization, and (for a caller who
+// is not a platform admin) the organization filter's options (#779).
+const fakeMemberships = [
+  {
+    organization_id: 'org-1',
+    organization_name: 'acme-corp',
+    role_template_name: 'admin',
+  },
+]
+
 // Default to admin scope so existing tests pass; individual tests can override.
 const useAuthMock = vi.fn(() => ({
   allowedScopes: ['admin'],
   roleTemplate: { display_name: 'Administrator' },
+  memberships: fakeMemberships as Array<{
+    organization_id: string
+    organization_name: string
+    role_template_name?: string
+  }>,
   user: { id: 'user-1' },
 }))
 
@@ -48,22 +63,18 @@ function createQueryClient() {
   })
 }
 
-function renderPage() {
+function renderPage(initialEntries: string[] = ['/admin/apikeys']) {
   const qc = createQueryClient()
+  // The organization filter keeps its selection in the URL (#779), so the page
+  // needs a router; initialEntries is how a test starts already filtered.
   return render(
-    <QueryClientProvider client={qc}>
-      <APIKeysPage />
-    </QueryClientProvider>,
+    <MemoryRouter initialEntries={initialEntries}>
+      <QueryClientProvider client={qc}>
+        <APIKeysPage />
+      </QueryClientProvider>
+    </MemoryRouter>,
   )
 }
-
-const fakeMemberships = [
-  {
-    organization_id: 'org-1',
-    organization_name: 'Acme Corp',
-    role_template_display_name: 'Admin',
-  },
-]
 
 const fakeKeys = [
   {
@@ -107,7 +118,6 @@ const fakeKeys = [
 describe('APIKeysPage', () => {
   beforeEach(() => {
     vi.clearAllMocks()
-    getCurrentUserMembershipsMock.mockResolvedValue(fakeMemberships)
     getNotificationsConfigMock.mockResolvedValue({
       enabled: true,
       smtp: { host: 'smtp.example.com', port: 587, username: '', from: 'notify@example.com', use_tls: true },
@@ -411,7 +421,12 @@ describe('APIKeysPage', () => {
 
   // 19. No organization membership warning
   it('shows a warning when the user has no organization memberships', async () => {
-    getCurrentUserMembershipsMock.mockResolvedValue([])
+    useAuthMock.mockReturnValue({
+      allowedScopes: ['admin'],
+      roleTemplate: { display_name: 'Administrator' },
+      memberships: [],
+      user: { id: 'user-1' },
+    })
     listAPIKeysMock.mockResolvedValue([])
     renderPage()
     await waitFor(() => {
@@ -439,6 +454,7 @@ describe('APIKeysPage', () => {
       useAuthMock.mockReturnValue({
         allowedScopes: ['modules:read'],
         roleTemplate: { display_name: 'Viewer' },
+        memberships: fakeMemberships,
         user: { id: 'user-1' },
       })
       listAPIKeysMock.mockResolvedValue(fakeKeys)
@@ -457,6 +473,7 @@ describe('APIKeysPage', () => {
       useAuthMock.mockReturnValue({
         allowedScopes: ['modules:read'],
         roleTemplate: { display_name: 'Viewer' },
+        memberships: fakeMemberships,
         user: { id: 'user-1' },
       })
       listAPIKeysMock.mockResolvedValue([])
@@ -471,6 +488,7 @@ describe('APIKeysPage', () => {
       useAuthMock.mockReturnValue({
         allowedScopes: ['modules:read', 'api_keys:manage'],
         roleTemplate: { display_name: 'API Key Manager' },
+        memberships: fakeMemberships,
         user: { id: 'user-1' },
       })
       listAPIKeysMock.mockResolvedValue(fakeKeys)
@@ -481,6 +499,45 @@ describe('APIKeysPage', () => {
       expect(screen.getAllByLabelText('Edit API key').length).toBeGreaterThan(0)
       expect(screen.getAllByLabelText('Rotate API key').length).toBeGreaterThan(0)
       expect(screen.getAllByLabelText('Delete API key').length).toBeGreaterThan(0)
+    })
+  })
+  // ── Organization filter (#779) ─────────────────────────────────────────────
+
+  describe('organization filter', () => {
+    it('lists every key the caller may see when no organization is selected', async () => {
+      listAPIKeysMock.mockResolvedValue(fakeKeys)
+      renderPage()
+      await waitFor(() => expect(listAPIKeysMock).toHaveBeenCalledWith(undefined))
+    })
+
+    // The filter is sourced from the URL, which is what makes a narrowed view
+    // survive a reload and be shareable.
+    it('narrows the request to the organization named in the URL', async () => {
+      listAPIKeysMock.mockResolvedValue(fakeKeys)
+      renderPage(['/admin/apikeys?org=org-2'])
+      await waitFor(() => expect(listAPIKeysMock).toHaveBeenCalledWith('org-2'))
+    })
+
+    // React Query serves by key. If the organization does not reach the key,
+    // switching organizations is served the previous organization's keys out of
+    // cache — the request narrows and the screen does not.
+    it('puts the organization in the react-query cache key', async () => {
+      const qc = createQueryClient()
+      listAPIKeysMock.mockResolvedValue(fakeKeys)
+      render(
+        <MemoryRouter initialEntries={['/admin/apikeys?org=org-2']}>
+          <QueryClientProvider client={qc}>
+            <APIKeysPage />
+          </QueryClientProvider>
+        </MemoryRouter>,
+      )
+      await waitFor(() => expect(listAPIKeysMock).toHaveBeenCalledWith('org-2'))
+      const keys = qc
+        .getQueryCache()
+        .getAll()
+        .map((q) => JSON.stringify(q.queryKey))
+        .filter((k) => k.includes('apiKeys'))
+      expect(keys.some((k) => k.includes('org-2'))).toBe(true)
     })
   })
 })

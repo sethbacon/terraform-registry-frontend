@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import {
@@ -41,7 +41,7 @@ import StatusAlerts from '../../components/StatusAlerts'
 import PageTitleIcon from '@mui/icons-material/GitHub'
 import api from '../../services/api'
 import { useStatusMessage } from '../../hooks/useStatusMessage'
-import { getErrorMessage } from '../../utils/errors'
+import { getErrorMessage, getErrorStatus } from '../../utils/errors'
 import { isSafeExternalUrl } from '../../utils/externalUrl'
 import { useAuth } from '../../contexts/AuthContext'
 import type {
@@ -51,7 +51,8 @@ import type {
   CreateSCMProviderRequest,
 } from '../../types/scm'
 import { queryKeys } from '../../services/queryKeys'
-import { useDefaultOrgMembership } from '../../hooks/useDefaultOrgMembership'
+import OrganizationFilter from '../../components/OrganizationFilter'
+import { useOrganizationFilter } from '../../hooks/useOrganizationFilter'
 
 interface TokenStatus {
   connected: boolean
@@ -63,7 +64,10 @@ interface TokenStatus {
 const SCMProvidersPage: React.FC = () => {
   const { t } = useTranslation()
   const queryClient = useQueryClient()
-  const { allowedScopes } = useAuth()
+  // Memberships come from the session (`/auth/me`) rather than a second fetch
+  // of `/users/me/memberships` (#779): both endpoints run the same membership
+  // query for the same user, and two clients for one fact is how they diverged.
+  const { allowedScopes, memberships } = useAuth()
   // The route itself is gated at scm:read (view-only) so auditors/viewers can
   // browse configured providers (routeScopes.ts). Add/Edit/Delete/Connect/
   // Disconnect/Verify/Save-PAT all mutate or exercise live credentials
@@ -102,11 +106,21 @@ const SCMProvidersPage: React.FC = () => {
     {},
   )
 
-  const { memberships } = useDefaultOrgMembership(
-    queryKeys.scmProviders._def,
-    formData.organization_id,
-    (organizationId) => setFormData((prev) => ({ ...prev, organization_id: organizationId })),
-  )
+  // The create form's DESTINATION organization still defaults to the caller's
+  // first membership. That is not the filter defaulting to a membership — a
+  // create has to name an organization to write to, whereas a filter left unset
+  // means "everything", which is why only one of the two gets a default.
+  useEffect(() => {
+    if (memberships.length > 0 && !formData.organization_id) {
+      setFormData((prev) => ({ ...prev, organization_id: memberships[0].organization_id }))
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [memberships])
+
+  // Organization filter (#779). Unset — the default, never auto-populated from
+  // a membership — means every provider this caller may see, which for a
+  // platform admin is deliberately the whole estate.
+  const { organizationId, setOrganizationId } = useOrganizationFilter()
 
   // Providers query
   const {
@@ -115,9 +129,9 @@ const SCMProvidersPage: React.FC = () => {
     error: queryError,
     refetch: loadProviders,
   } = useQuery<SCMProvider[]>({
-    queryKey: queryKeys.scmProviders.list(),
+    queryKey: queryKeys.scmProviders.list(organizationId || undefined),
     queryFn: async () => {
-      const data = await api.listSCMProviders()
+      const data = await api.listSCMProviders(organizationId || undefined)
       return Array.isArray(data) ? data : []
     },
   })
@@ -125,7 +139,14 @@ const SCMProvidersPage: React.FC = () => {
   // Token statuses — separate query so React Query manages its own lifecycle
   // and statuses are not lost when navigating away and back.
   const { data: tokenStatuses = {} } = useQuery<Record<string, TokenStatus>>({
-    queryKey: [...queryKeys.scmProviders.list(), 'token-statuses', providers.map((p) => p.id)],
+    // Derived from the list key, so narrowing the list narrows this too rather
+    // than leaving the previous organization's token statuses addressed by the
+    // new organization's key.
+    queryKey: [
+      ...queryKeys.scmProviders.list(organizationId || undefined),
+      'token-statuses',
+      providers.map((p) => p.id),
+    ],
     queryFn: async () => {
       const statusEntries = await Promise.allSettled(
         providers.map((p) => api.getSCMTokenStatus(p.id).then((s) => [p.id, s] as const)),
@@ -143,7 +164,14 @@ const SCMProvidersPage: React.FC = () => {
   })
 
   if (queryError && !status.error) {
-    status.setError(getErrorMessage(queryError, t('admin.scmProviders.errLoad')))
+    // ListProviders answers 403 "Not a member of the requested organization"
+    // for an organization the caller holds no scm:read in — a distinct,
+    // recoverable condition rather than a load failure.
+    status.setError(
+      getErrorStatus(queryError) === 403
+        ? t('common.organizationFilter.errNotMember')
+        : getErrorMessage(queryError, t('admin.scmProviders.errLoad')),
+    )
   }
 
   const createMutation = useMutation({
@@ -414,7 +442,16 @@ const SCMProvidersPage: React.FC = () => {
             icon={<PageTitleIcon />}
             title={t('admin.scmProviders.pageTitle')}
             actions={
-              <Box sx={{ display: 'flex', gap: 1 }}>
+              <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+                <OrganizationFilter
+                  value={organizationId}
+                  onChange={(next) => {
+                    setOrganizationId(next)
+                    // A stale 403 from a previously-selected organization must
+                    // not survive the change that fixes it.
+                    status.setError(null)
+                  }}
+                />
                 <Button
                   variant="outlined"
                   startIcon={<RefreshIcon />}

@@ -1958,14 +1958,9 @@ describe('ApiClient', () => {
       expect(result).toHaveLength(1)
     })
 
-    it('getCurrentUserMemberships', async () => {
-      const client = await getApiClient()
-        ; (mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
-          data: { memberships: [] },
-        })
-      await client.getCurrentUserMemberships()
-      expect(mockAxiosInstance.get).toHaveBeenCalledWith('/api/v1/users/me/memberships')
-    })
+    // `getCurrentUserMemberships` is gone (#779) — /auth/me is now the single
+    // client-side source of the caller's own memberships. `getUserMemberships`
+    // above (an admin reading somebody else's) is a different question and stays.
 
     it('transformUser handles PascalCase fields', async () => {
       const client = await getApiClient()

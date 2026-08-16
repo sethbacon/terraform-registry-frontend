@@ -18,7 +18,6 @@ vi.mock('../../../services/api', () => ({
   default: {
     uploadModule: vi.fn(),
     createModuleRecord: vi.fn(),
-    getCurrentUserMemberships: vi.fn(),
   },
 }))
 
@@ -26,8 +25,20 @@ vi.mock('../../../components/PublishFromSCMWizard', () => ({
   default: () => <div data-testid="scm-wizard">SCM Wizard</div>,
 }))
 
+// Real per-organization memberships, as useAuth has published since #795. The
+// upload page's organization selector is a WRITE DESTINATION sourced from these
+// rather than from a second /users/me/memberships fetch (#779).
+let mockMemberships: Array<{
+  organization_id: string
+  organization_name: string
+  created_at?: string
+}> = []
+
 vi.mock('../../../contexts/AuthContext', () => ({
-  useAuth: () => ({ user: { id: 'test-user-id', username: 'testuser' } }),
+  useAuth: () => ({
+    user: { id: 'test-user-id', username: 'testuser' },
+    memberships: mockMemberships,
+  }),
 }))
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
@@ -36,7 +47,6 @@ import apiDefault from '../../../services/api'
 const api = apiDefault as unknown as {
   uploadModule: ReturnType<typeof vi.fn>
   createModuleRecord: ReturnType<typeof vi.fn>
-  getCurrentUserMemberships: ReturnType<typeof vi.fn>
 }
 
 const queryClient = new QueryClient({
@@ -62,7 +72,7 @@ describe('ModuleUploadPage', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     queryClient.clear()
-    api.getCurrentUserMemberships.mockResolvedValue([])
+    mockMemberships = []
   })
 
   it('renders the page heading', () => {
@@ -138,7 +148,7 @@ describe('ModuleUploadPage — upload form (roadmap 2.5)', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     queryClient.clear()
-    api.getCurrentUserMemberships.mockResolvedValue([])
+    mockMemberships = []
   })
 
   it('renders identity fields in namespace/name/provider order', async () => {
@@ -335,13 +345,14 @@ describe('ModuleUploadPage — organization picker', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     queryClient.clear()
+    mockMemberships = []
   })
 
   it('renders org picker when user has multiple memberships (SCM flow)', async () => {
-    api.getCurrentUserMemberships.mockResolvedValue([
+    mockMemberships = [
       { organization_id: 'org1', organization_name: 'Org One', created_at: '2024-01-01' },
       { organization_id: 'org2', organization_name: 'Org Two', created_at: '2024-01-02' },
-    ])
+    ]
 
     const user = userEvent.setup()
     renderPage()
@@ -368,9 +379,9 @@ describe('ModuleUploadPage — organization picker', () => {
   })
 
   it('does not render org picker when user has single membership (SCM flow)', async () => {
-    api.getCurrentUserMemberships.mockResolvedValue([
+    mockMemberships = [
       { organization_id: 'org1', organization_name: 'Org One', created_at: '2024-01-01' },
-    ])
+    ]
 
     const user = userEvent.setup()
     renderPage()
@@ -382,10 +393,10 @@ describe('ModuleUploadPage — organization picker', () => {
   })
 
   it('includes organization_id in createModuleRecord when org is selected', async () => {
-    api.getCurrentUserMemberships.mockResolvedValue([
+    mockMemberships = [
       { organization_id: 'org1', organization_name: 'Org One', created_at: '2024-01-01' },
       { organization_id: 'org2', organization_name: 'Org Two', created_at: '2024-01-02' },
-    ])
+    ]
     api.createModuleRecord.mockResolvedValue({
       id: 'mod123',
       namespace: 'ns',
@@ -424,10 +435,10 @@ describe('ModuleUploadPage — organization picker', () => {
   })
 
   it('renders org picker in upload flow when user has multiple memberships', async () => {
-    api.getCurrentUserMemberships.mockResolvedValue([
+    mockMemberships = [
       { organization_id: 'org1', organization_name: 'Org One', created_at: '2024-01-01' },
       { organization_id: 'org2', organization_name: 'Org Two', created_at: '2024-01-02' },
-    ])
+    ]
 
     const user = userEvent.setup()
     renderPage()

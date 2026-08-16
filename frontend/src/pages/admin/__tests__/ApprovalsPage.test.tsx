@@ -2,6 +2,8 @@ import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { MemoryRouter } from 'react-router-dom'
+import { AxiosError } from 'axios'
 
 const listApprovalRequestsMock = vi.fn()
 const createApprovalRequestMock = vi.fn()
@@ -11,22 +13,58 @@ vi.mock('../../../services/api', () => ({
     listApprovalRequests: (...args: unknown[]) => listApprovalRequestsMock(...args),
     createApprovalRequest: (...args: unknown[]) => createApprovalRequestMock(...args),
     reviewApproval: (...args: unknown[]) => reviewApprovalMock(...args),
+    // The organization picker sources a platform admin's options from these.
+    // Empty keeps it hidden, so these tests exercise the page's own filtering
+    // rather than the picker's (covered in OrganizationFilter.test.tsx).
+    listOrganizations: () => Promise.resolve([]),
+    searchOrganizations: () => Promise.resolve([]),
   },
 }))
 
 let mockAllowedScopes: string[] = ['admin']
+// Real per-organization memberships, as useAuth has published since #795. The
+// organization filter (#779) sources a non-platform-admin's options from these.
+let mockMemberships: Array<{ organization_id: string; organization_name: string }> = []
 
 vi.mock('../../../contexts/AuthContext', () => ({
-  useAuth: () => ({ allowedScopes: mockAllowedScopes, user: { id: 'u1' } }),
+  useAuth: () => ({
+    allowedScopes: mockAllowedScopes,
+    memberships: mockMemberships,
+    user: { id: 'u1' },
+  }),
 }))
 
 import ApprovalsPage from '../ApprovalsPage'
 
-function renderWithProviders(ui: React.ReactElement) {
+/**
+ * A real AxiosError — getErrorStatus() narrows with `instanceof`, so a
+ * duck-typed object would read as status-less and silently take the generic
+ * branch, making the 403 guard below pass for the wrong reason.
+ */
+function axiosFailure(status: number, message: string): AxiosError {
+  return new AxiosError(`Request failed with status code ${status}`, 'ERR_BAD_REQUEST', undefined, undefined, {
+    status,
+    statusText: 'Error',
+    headers: {},
+    config: { headers: {} },
+    data: { error: message },
+  } as never)
+}
+
+function renderWithProviders(
+  ui: React.ReactElement,
+  initialEntries: string[] = ['/admin/approvals'],
+) {
   const qc = new QueryClient({
     defaultOptions: { queries: { retry: false } },
   })
-  return render(<QueryClientProvider client={qc}>{ui}</QueryClientProvider>)
+  // The organization filter keeps its selection in the URL (#779), so the page
+  // needs a router to render at all.
+  return render(
+    <MemoryRouter initialEntries={initialEntries}>
+      <QueryClientProvider client={qc}>{ui}</QueryClientProvider>
+    </MemoryRouter>,
+  )
 }
 
 const fakeApprovals = [
@@ -70,6 +108,7 @@ describe('ApprovalsPage', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     mockAllowedScopes = ['admin']
+    mockMemberships = []
   })
 
   it('shows loading spinner while fetching', () => {
@@ -309,5 +348,73 @@ describe('ApprovalsPage', () => {
     expect(screen.getByText('Create Request')).toBeInTheDocument()
     expect(screen.getByText('Approve')).toBeInTheDocument()
     expect(screen.getByText('Reject')).toBeInTheDocument()
+  })
+
+  // ── Organization filter (#779) ─────────────────────────────────────────────
+
+  describe('organization filter', () => {
+    it('sends no organization when none is selected', async () => {
+      listApprovalRequestsMock.mockResolvedValue([])
+      renderWithProviders(<ApprovalsPage />)
+      await waitFor(() => expect(listApprovalRequestsMock).toHaveBeenCalled())
+      expect(listApprovalRequestsMock.mock.calls[0][0]).not.toHaveProperty('organization_id')
+    })
+
+    it('narrows the request to the organization named in the URL', async () => {
+      listApprovalRequestsMock.mockResolvedValue([])
+      renderWithProviders(<ApprovalsPage />, ['/admin/approvals?org=org-2'])
+      await waitFor(() =>
+        expect(listApprovalRequestsMock).toHaveBeenCalledWith(
+          expect.objectContaining({ organization_id: 'org-2' }),
+        ),
+      )
+    })
+
+    // The organization must survive alongside the filters already on the page,
+    // rather than replacing them.
+    it('keeps the status filter alongside the organization', async () => {
+      listApprovalRequestsMock.mockResolvedValue([])
+      renderWithProviders(<ApprovalsPage />, ['/admin/approvals?org=org-2'])
+      // Wait for the loaded view, not merely the first call: the filter bar
+      // lives in the non-loading branch.
+      await waitFor(() => {
+        expect(screen.getByText('No approval requests found.')).toBeInTheDocument()
+      })
+      listApprovalRequestsMock.mockClear()
+
+      // The status Select is the only combobox on the page: the organization
+      // picker is hidden here (no organizations), which the assertion below
+      // relies on and the mock above guarantees.
+      await userEvent.click(screen.getByRole('combobox'))
+      await userEvent.click(await screen.findByRole('option', { name: 'Pending' }))
+
+      await waitFor(() =>
+        expect(listApprovalRequestsMock).toHaveBeenCalledWith({
+          status: 'pending',
+          organization_id: 'org-2',
+        }),
+      )
+    })
+
+    // ListApprovalRequests answers 403 "Not a member of the requested
+    // organization" for an organization the caller holds no mirrors:read in.
+    it('reports a 403 as "not a member" rather than a generic load failure', async () => {
+      listApprovalRequestsMock.mockRejectedValue(
+        axiosFailure(403, 'Not a member of the requested organization'),
+      )
+      renderWithProviders(<ApprovalsPage />, ['/admin/approvals?org=org-nope'])
+      await waitFor(() => {
+        expect(screen.getByText(/not a member of that organization/i)).toBeInTheDocument()
+      })
+    })
+
+    it('still reports a non-403 failure as a load failure', async () => {
+      listApprovalRequestsMock.mockRejectedValue(axiosFailure(500, 'database unavailable'))
+      renderWithProviders(<ApprovalsPage />, ['/admin/approvals?org=org-2'])
+      await waitFor(() => {
+        expect(screen.getByText(/database unavailable/i)).toBeInTheDocument()
+      })
+      expect(screen.queryByText(/not a member of that organization/i)).not.toBeInTheDocument()
+    })
   })
 })
