@@ -185,7 +185,14 @@
     "warning": "Warning",
     "networkError": "Unable to reach the server — check your connection and try again.",
     "timeoutError": "The request took too long and timed out. Please try again.",
-    "offlineWarning": "You're offline. Some features may not work until your connection is restored."
+    "offlineWarning": "You're offline. Some features may not work until your connection is restored.",
+    "organizationFilter": {
+      "label": "Organization",
+      "placeholderAll": "All organizations",
+      "noOptions": "No matching organizations",
+      "mayBeTruncated": "Showing the first {{count}}. Type to search for others.",
+      "errNotMember": "You are not a member of that organization"
+    }
   },
   "modules": {
     "pageTitle": "Terraform Modules",

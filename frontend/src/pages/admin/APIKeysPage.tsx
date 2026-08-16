@@ -58,7 +58,8 @@ import { AVAILABLE_SCOPES } from '../../types/rbac'
 import { getScopeInfo } from '../../utils'
 import { getErrorMessage } from '../../utils/errors'
 import { queryKeys } from '../../services/queryKeys'
-import { useDefaultOrgMembership } from '../../hooks/useDefaultOrgMembership'
+import OrganizationFilter from '../../components/OrganizationFilter'
+import { useOrganizationFilter } from '../../hooks/useOrganizationFilter'
 
 function getExpirationStatus(
   expiresAt?: string | null,
@@ -85,7 +86,10 @@ function toDatetimeLocalValue(isoString?: string | null): string {
 const APIKeysPage: React.FC = () => {
   const { t } = useTranslation()
   const queryClient = useQueryClient()
-  const { allowedScopes, roleTemplate } = useAuth()
+  // Memberships come from the session (`/auth/me`) rather than a second fetch
+  // of `/users/me/memberships` (#779). Both endpoints run the same membership
+  // query for the same user; two clients for one fact is how they diverged.
+  const { allowedScopes, roleTemplate, memberships } = useAuth()
   const isAdmin = allowedScopes.includes('admin')
   // The route itself is gated at no scope at all (routeScopes.ts: null) so any
   // authenticated user can reach this page. listAPIKeys returns keys across the
@@ -124,9 +128,9 @@ const APIKeysPage: React.FC = () => {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: queryKeys.notifications.config() }),
   })
 
-  const { memberships, isLoading: membershipsLoading } = useDefaultOrgMembership(
-    queryKeys.apiKeys._def,
-  )
+  // Organization filter (#779). Unset — the default, never auto-populated from
+  // a membership — means every key this caller may see.
+  const { organizationId, setOrganizationId } = useOrganizationFilter()
 
   // API Keys query
   const {
@@ -134,9 +138,9 @@ const APIKeysPage: React.FC = () => {
     isLoading: loading,
     error: queryError,
   } = useQuery<APIKey[]>({
-    queryKey: queryKeys.apiKeys.list(),
+    queryKey: queryKeys.apiKeys.list(organizationId || undefined),
     queryFn: async () => {
-      const keys = await api.listAPIKeys()
+      const keys = await api.listAPIKeys(organizationId || undefined)
       return Array.isArray(keys) ? keys : []
     },
   })
@@ -507,15 +511,24 @@ const APIKeysPage: React.FC = () => {
         title={t('admin.apiKeys.pageTitle')}
         description={t('admin.apiKeys.pageSubtitle')}
         actions={
-          canManage ? (
-            <Button variant="contained" startIcon={<AddIcon />} onClick={handleOpenDialog}>
-              {t('admin.apiKeys.createApiKey')}
-            </Button>
-          ) : undefined
+          <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+            <OrganizationFilter value={organizationId} onChange={setOrganizationId} />
+            {canManage && (
+              <Button variant="contained" startIcon={<AddIcon />} onClick={handleOpenDialog}>
+                {t('admin.apiKeys.createApiKey')}
+              </Button>
+            )}
+          </Box>
         }
       />
       <StatusAlerts status={status} mb={3} />
-      {!membershipsLoading && memberships.length === 0 && (
+      {/*
+        No loading condition any more: memberships arrive with the session, so
+        by the time this page renders they are already known. The previous
+        `!membershipsLoading &&` guarded against a second in-flight request that
+        no longer exists.
+      */}
+      {memberships.length === 0 && (
         <Alert severity="warning" sx={{ mb: 3 }}>
           {t('admin.apiKeys.warnNoOrg')}
         </Alert>
@@ -737,18 +750,20 @@ const APIKeysPage: React.FC = () => {
                     onChange={(e) => setFormData({ ...formData, organization_id: e.target.value })}
                     label={t('admin.apiKeys.labelOrganization')}
                   >
-                    {memberships.map(
-                      (m: {
-                        organization_id: string
-                        organization_name: string
-                        role_template_display_name?: string
-                      }) => (
-                        <MenuItem key={m.organization_id} value={m.organization_id}>
-                          {m.organization_name}{' '}
-                          {m.role_template_display_name && `(${m.role_template_display_name})`}
-                        </MenuItem>
-                      ),
-                    )}
+                    {/*
+                      The role is named by `role_template_name` (the template's
+                      slug) rather than the display name the previous source
+                      carried: the shared Membership contract has no field for a
+                      display name, so `/auth/me` never sends one. Naming the
+                      role by its slug beside an organization named by ITS slug
+                      is at least consistent; inventing a prettier label here
+                      would disagree with the roles admin page.
+                    */}
+                    {memberships.map((m) => (
+                      <MenuItem key={m.organization_id} value={m.organization_id}>
+                        {m.organization_name} {m.role_template_name && `(${m.role_template_name})`}
+                      </MenuItem>
+                    ))}
                   </Select>
                 </FormControl>
               )}

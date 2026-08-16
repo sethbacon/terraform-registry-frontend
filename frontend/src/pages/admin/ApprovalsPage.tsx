@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import {
@@ -34,9 +34,11 @@ import api from '../../services/api'
 import { useStatusMessage } from '../../hooks/useStatusMessage'
 import { formatDate } from '../../utils'
 import { MirrorApprovalRequest } from '../../types/rbac'
-import { getErrorMessage } from '../../utils/errors'
+import { getErrorMessage, getErrorStatus } from '../../utils/errors'
 import { useAuth } from '../../contexts/AuthContext'
 import { queryKeys } from '../../services/queryKeys'
+import OrganizationFilter from '../../components/OrganizationFilter'
+import { useOrganizationFilter } from '../../hooks/useOrganizationFilter'
 
 const ApprovalsPage: React.FC = () => {
   const { t } = useTranslation()
@@ -70,6 +72,21 @@ const ApprovalsPage: React.FC = () => {
 
   // Status filter
   const [statusFilter, setStatusFilter] = useState<string>('')
+  // Organization filter (#779). Unset — the default, and never auto-populated
+  // from a membership — means every organization this caller may see.
+  const { organizationId, setOrganizationId } = useOrganizationFilter()
+
+  // THE single description of the slice being viewed, so the request and the
+  // cache key cannot describe different ones.
+  const listParams = useMemo(
+    () => ({
+      ...(statusFilter ? { status: statusFilter } : {}),
+      // Omitted entirely when unset, so the backend applies the caller's own
+      // organization scope rather than a requested organization.
+      ...(organizationId ? { organization_id: organizationId } : {}),
+    }),
+    [statusFilter, organizationId],
+  )
 
   const {
     data: approvals = [],
@@ -77,17 +94,27 @@ const ApprovalsPage: React.FC = () => {
     error: queryError,
     refetch: loadApprovals,
   } = useQuery<MirrorApprovalRequest[]>({
-    queryKey: queryKeys.approvals.list(statusFilter ? { status: statusFilter } : undefined),
+    // The organization is passed to the key separately as well as riding in
+    // listParams, so switching organizations can never be served the previous
+    // organization's rows from cache (#798).
+    queryKey: queryKeys.approvals.list(listParams, organizationId || undefined),
     queryFn: async () => {
-      const data = await api.listApprovalRequests(
-        statusFilter ? { status: statusFilter } : undefined,
-      )
+      const data = await api.listApprovalRequests(listParams)
       return Array.isArray(data) ? data : []
     },
   })
 
   if (queryError && !status.error) {
-    status.setError(getErrorMessage(queryError, t('admin.approvals.errLoad')))
+    // ListApprovalRequests answers 403 "Not a member of the requested
+    // organization" for an organization the caller holds no mirrors:read in.
+    // That is a distinct, recoverable condition — pick a different organization
+    // — rather than a load failure, and the generic message reads like an
+    // outage the user can do nothing about.
+    status.setError(
+      getErrorStatus(queryError) === 403
+        ? t('common.organizationFilter.errNotMember')
+        : getErrorMessage(queryError, t('admin.approvals.errLoad')),
+    )
   }
 
   const createMutation = useMutation({
@@ -209,6 +236,15 @@ const ApprovalsPage: React.FC = () => {
             description={t('admin.approvals.pageSubtitle')}
             actions={
               <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+                <OrganizationFilter
+                  value={organizationId}
+                  onChange={(next) => {
+                    setOrganizationId(next)
+                    // A stale 403 from a previously-selected organization must
+                    // not survive the change that fixes it.
+                    status.setError(null)
+                  }}
+                />
                 <FormControl size="small" sx={{ minWidth: 140 }}>
                   <InputLabel>{t('admin.approvals.labelStatus')}</InputLabel>
                   <Select

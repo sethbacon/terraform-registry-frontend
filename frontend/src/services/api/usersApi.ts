@@ -121,10 +121,18 @@ export async function getUserMemberships(userId: string): Promise<UserMembership
   return response.data.memberships || []
 }
 
-// Self-access endpoint for current user's memberships (no special scope required)
-export async function getCurrentUserMemberships(): Promise<UserMembership[]> {
-  const response = await http.get<{ memberships?: UserMembership[] }>(
-    '/api/v1/users/me/memberships',
-  )
-  return response.data.memberships || []
-}
+// The self-access `GET /api/v1/users/me/memberships` client is deliberately
+// gone (#779). It was the SECOND way this app learned the caller's
+// memberships, beside `/auth/me`, and having two is what let them drift: the
+// HTTP boundary discarded /auth/me's real memberships for a fabricated one
+// while this endpoint quietly carried the true list (#795).
+//
+// They are not merely similar. `MeHandler` and `GetCurrentUserMembershipsHandler`
+// both run the shared store's ONE `userMembershipByUserQuery` constant against
+// the same `user_id` from the request context, both overlay registry's own role
+// tables, and both sit in the same authenticated route group with no additional
+// scope — /auth/me's OrgScopeAllOrganizations() adds no predicate. Same rows,
+// same authority, one fewer round trip.
+//
+// `getUserMemberships(userId)` above is a different question (an ADMIN reading
+// somebody else's memberships, gated on users:read) and stays.

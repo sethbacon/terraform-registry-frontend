@@ -9,7 +9,6 @@ const getSetupStatusMock = vi.fn()
 const searchModulesMock = vi.fn()
 const searchProvidersMock = vi.fn()
 const listPublicTerraformMirrorConfigsMock = vi.fn()
-const getCurrentUserMembershipsMock = vi.fn().mockResolvedValue([])
 const createAPIKeyMock = vi.fn()
 
 vi.mock('../../services/api', () => ({
@@ -19,18 +18,27 @@ vi.mock('../../services/api', () => ({
     searchProviders: (...args: unknown[]) => searchProvidersMock(...args),
     listPublicTerraformMirrorConfigs: (...args: unknown[]) =>
       listPublicTerraformMirrorConfigsMock(...args),
-    getCurrentUserMemberships: (...args: unknown[]) => getCurrentUserMembershipsMock(...args),
     createAPIKey: (...args: unknown[]) => createAPIKeyMock(...args),
   },
 }))
 
 // Mock AuthContext — toggle isAuthenticated via setAuthState.
-let authState: { isAuthenticated: boolean } = { isAuthenticated: false }
-function setAuthState(next: { isAuthenticated: boolean }) {
-  authState = next
+//
+// The primary organization now comes from the session's memberships rather than
+// a separate /users/me/memberships fetch (#779), so it is set here.
+type AuthState = {
+  isAuthenticated: boolean
+  memberships: Array<{ organization_id: string; organization_name: string }>
+}
+let authState: AuthState = { isAuthenticated: false, memberships: [] }
+function setAuthState(next: Partial<AuthState>) {
+  authState = { isAuthenticated: false, memberships: [], ...next }
 }
 vi.mock('../../contexts/AuthContext', () => ({
-  useAuth: () => ({ isAuthenticated: authState.isAuthenticated }),
+  useAuth: () => ({
+    isAuthenticated: authState.isAuthenticated,
+    memberships: authState.memberships,
+  }),
 }))
 
 const navigateMock = vi.fn()
@@ -76,7 +84,6 @@ describe('HomePage', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     setAuthState({ isAuthenticated: false })
-    getCurrentUserMembershipsMock.mockResolvedValue([])
   })
 
   it('renders heading after data loads', async () => {
@@ -226,10 +233,10 @@ describe('HomePage', () => {
     })
 
     it('shows Create API key + Manage all keys when authenticated', async () => {
-      setAuthState({ isAuthenticated: true })
-      getCurrentUserMembershipsMock.mockResolvedValue([
-        { organization_id: 'org-1', organization_name: 'Acme' },
-      ])
+      setAuthState({
+        isAuthenticated: true,
+        memberships: [{ organization_id: 'org-1', organization_name: 'Acme' }],
+      })
       mockSuccessfulLoad()
       renderPage()
       await waitFor(() => {
@@ -240,10 +247,10 @@ describe('HomePage', () => {
     })
 
     it('opens the QuickApiKeyDialog when Create API key is clicked', async () => {
-      setAuthState({ isAuthenticated: true })
-      getCurrentUserMembershipsMock.mockResolvedValue([
-        { organization_id: 'org-1', organization_name: 'Acme' },
-      ])
+      setAuthState({
+        isAuthenticated: true,
+        memberships: [{ organization_id: 'org-1', organization_name: 'Acme' }],
+      })
       mockSuccessfulLoad()
       renderPage()
       const btn = await screen.findByTestId('getting-started-create-key')

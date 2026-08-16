@@ -65,34 +65,20 @@ const HomePage: React.FC = () => {
   const navigate = useNavigate()
   const theme = useTheme()
   const isXs = useMediaQuery(theme.breakpoints.down('sm'))
-  const { isAuthenticated } = useAuth()
+  const { isAuthenticated, memberships } = useAuth()
   const { announce } = useAnnouncer()
   const [stats, setStats] = useState<HomeStats>(initialStats)
   const [searchQuery, setSearchQuery] = useState('')
   const [searchType, setSearchType] = useState<'modules' | 'providers'>('modules')
   const [copied, setCopied] = useState(false)
   const [quickKeyOpen, setQuickKeyOpen] = useState(false)
-  const [primaryOrgId, setPrimaryOrgId] = useState<string | null>(null)
-
-  useEffect(() => {
-    if (!isAuthenticated) {
-      setPrimaryOrgId(null)
-      return
-    }
-    let cancelled = false
-    api
-      .getCurrentUserMemberships()
-      .then((memberships: Array<{ organization_id: string }>) => {
-        if (cancelled) return
-        setPrimaryOrgId(memberships?.[0]?.organization_id ?? null)
-      })
-      .catch(() => {
-        if (!cancelled) setPrimaryOrgId(null)
-      })
-    return () => {
-      cancelled = true
-    }
-  }, [isAuthenticated])
+  // The caller's primary organization, read from the session's memberships
+  // rather than fetched separately from `/users/me/memberships` (#779). Both
+  // endpoints run the same membership query for the same user, so this is one
+  // fewer round trip on the landing page for the same answer — and the
+  // isAuthenticated handling comes for free, because `useAuth().memberships` is
+  // already gated on it and empties when the session ends.
+  const primaryOrgId = memberships[0]?.organization_id ?? null
 
   useEffect(() => {
     Promise.allSettled([

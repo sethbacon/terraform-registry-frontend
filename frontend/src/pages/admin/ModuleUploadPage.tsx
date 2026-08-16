@@ -33,8 +33,7 @@ import PublishFromSCMWizard from '../../components/PublishFromSCMWizard'
 import FileDropZone from '../../components/FileDropZone'
 import PolicyResultsPanel from '../../components/PolicyResultsPanel'
 import { PolicyResult } from '../../types'
-import { queryKeys } from '../../services/queryKeys'
-import { useDefaultOrgMembership } from '../../hooks/useDefaultOrgMembership'
+import { useAuth } from '../../contexts/AuthContext'
 
 type ModuleMethod = 'choose' | 'upload' | 'scm'
 
@@ -51,11 +50,22 @@ const ModuleUploadPage: React.FC = () => {
   const [moduleMethod, setModuleMethod] = useState<ModuleMethod>(state?.method ?? 'choose')
   const [selectedOrgId, setSelectedOrgId] = useState<string | undefined>(undefined)
 
-  const { memberships } = useDefaultOrgMembership(
-    queryKeys.users._def,
-    selectedOrgId,
-    setSelectedOrgId,
-  )
+  // Memberships come from the session (`/auth/me`) rather than a second fetch
+  // of `/users/me/memberships` (#779). Both endpoints run the same membership
+  // query for the same user; two clients for one fact is how they diverged.
+  const { memberships } = useAuth()
+
+  // The DESTINATION organization for the upload, defaulted to the caller's
+  // first membership. This is not the organization FILTER (#779) and gets a
+  // default for the reason the filter must not: a publish has to name an
+  // organization to write into, whereas a filter left unset means "everything".
+  // There is nothing on this page to filter — it has no list.
+  useEffect(() => {
+    if (memberships.length > 0 && !selectedOrgId) {
+      setSelectedOrgId(memberships[0].organization_id)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [memberships])
 
   // SCM new-module metadata (before wizard)
   const [scmNamespace, setScmNamespace] = useState(prefilledModule?.namespace || '')
