@@ -2093,10 +2093,33 @@ describe('ApiClient', () => {
       expect((await client.listOrganizations()).total).toBe(0)
     })
 
-    // A backend predating #893 sends no pagination at all. A full page is then
-    // the only available evidence of a possible next one — the weaker signal,
-    // which is why it is the fallback and not the rule.
-    it('falls back to the row count when the server sends no pagination', async () => {
+    // The shape a backend predating #893 ACTUALLY sent: a pagination object was
+    // always present, it simply had no `has_more` inside it. So a guard on the
+    // object's presence never fires here — it takes the "server knows" branch
+    // and yields undefined, which the non-optional `has_more` type cannot catch.
+    // Reading the field itself is what makes this case answerable at all.
+    it('reports not-more when a pre-#893 backend sends pagination without has_more', async () => {
+      const client = await getApiClient()
+        ; (mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+          data: {
+            organizations: Array.from({ length: 2 }, (_, i) => ({
+              id: `o${i}`, name: `org${i}`, display_name: `Org ${i}`, created_at: '', updated_at: '',
+            })),
+            // A full page, and a total that says more exist. Neither is consulted:
+            // guessing from either is the defect #893 built has_more to retire.
+            pagination: { page: 1, per_page: 2, total: 5 },
+          },
+        })
+      const result = await client.listOrganizations(1, 2)
+      expect(result.hasMore).toBe(false)
+      expect(result.total).toBe(5)
+    })
+
+    // Defence in depth for a response with no pagination at all. Unknown reads
+    // as "nothing follows" rather than as a row-count guess dressed up as an
+    // answer, and total stays null — never 0, which would claim the deployment
+    // has no organizations.
+    it('reports not-more when the server sends no pagination object', async () => {
       const client = await getApiClient()
         ; (mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
           data: {
@@ -2106,9 +2129,7 @@ describe('ApiClient', () => {
           },
         })
       const result = await client.listOrganizations(1, 2)
-      expect(result.hasMore).toBe(true)
-      // Uncounted, because there was no pagination object to count from — not
-      // zero, which would claim the deployment has no organizations.
+      expect(result.hasMore).toBe(false)
       expect(result.total).toBeNull()
     })
 
