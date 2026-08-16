@@ -49,6 +49,7 @@ import type {
   IdentityGroupMappings,
 } from '../../types'
 import { queryKeys } from '../../services/queryKeys'
+import { ORGANIZATION_PAGE_MAX } from '../../services/api/organizationsApi'
 import { getErrorMessage } from '../../utils/errors'
 
 // Available roles that can be assigned to mapped groups — must match system role template names
@@ -142,7 +143,12 @@ const OIDCSettingsPage: React.FC = () => {
   const loadOrgs = async () => {
     setOrgLoading(true)
     try {
-      const orgs: Organization[] = await api.listOrganizations(1, 200)
+      // Asks for the endpoint's maximum: this form offers every organization
+      // as a mapping target. It used to ask for 200 and be silently served 20,
+      // because an over-large per_page was reset to the default rather than
+      // clamped (backend #893).
+      const page = await api.listOrganizations(1, ORGANIZATION_PAGE_MAX)
+      const orgs: Organization[] = page.organizations
       setOrgOptions(orgs.map((o) => o.name))
     } catch {
       setOrgOptions([])

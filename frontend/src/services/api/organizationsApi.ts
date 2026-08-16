@@ -5,9 +5,64 @@ import { http, encodeSegment } from './http'
 import { sanitizeServerErrorMessage } from '../../utils/errors'
 import type { Organization, OrganizationMemberWithUser } from '../../types'
 
+/**
+ * The largest `per_page` the organization list/search endpoints serve.
+ *
+ * Since backend #893 an over-large `per_page` clamps to this maximum; it used
+ * to be RESET to the default of 20, so asking for 200 returned fewer rows than
+ * asking for 50. Defined here, beside the requests it bounds, so the pages that
+ * want "as many as possible" name one number rather than each picking their own.
+ */
+export const ORGANIZATION_PAGE_MAX = 100
+
+/**
+ * The page window the admin list endpoints return alongside their rows
+ * (swagger: admin.PaginationMeta), added by backend #893.
+ */
+export interface PaginationMeta {
+  page: number
+  per_page: number
+  /**
+   * Whether any rows follow this page. **False if and only if this is the end
+   * of the list**, on every endpoint emitting this shape — including the search
+   * axes, which cannot count and derive it by fetching one row past the page.
+   *
+   * This is the field to read. Do NOT re-derive completeness from the row
+   * count: "the page came back full" is wrong for every list whose length is an
+   * exact multiple of the page size, which reports a phantom extra page.
+   */
+  has_more: boolean
+  /**
+   * Total matching rows across all pages, or **null when the endpoint does not
+   * count** — the search axes have no counting query and send null.
+   *
+   * Deliberately nullable rather than absent: `null` ("not counted") and `0`
+   * ("none matched") are different answers and must not be collapsed.
+   */
+  total: number | null
+}
+
 /** Wire shape of the list/search organizations endpoints (swagger: admin.ListOrganizationsResponse). */
 interface ListOrganizationsResponse {
   organizations?: Record<string, unknown>[]
+  pagination?: PaginationMeta
+}
+
+/** One page of organizations, plus whether anything follows it. */
+export interface OrganizationPage {
+  organizations: Organization[]
+  /**
+   * Whether more organizations exist beyond this page.
+   *
+   * Taken from the server's exact `has_more` when present. The fallback covers
+   * a backend predating #893, which emitted no pagination at all: there, a
+   * completely full page is the only available evidence of a possible next one.
+   * It is the weaker signal by construction — which is why it is the fallback
+   * and not the rule.
+   */
+  hasMore: boolean
+  /** Total across all pages, or null when this endpoint does not count. */
+  total: number | null
 }
 
 // Helper to transform organization from API format to frontend format
@@ -28,25 +83,47 @@ function transformOrganization(org: Record<string, unknown>): Organization {
   }
 }
 
+function toPage(data: ListOrganizationsResponse, perPage: number): OrganizationPage {
+  const organizations = (data.organizations || []).map((org: Record<string, unknown>) =>
+    transformOrganization(org),
+  )
+  const pagination = data.pagination
+  return {
+    organizations,
+    hasMore: pagination ? pagination.has_more : organizations.length >= perPage,
+    total: pagination ? (pagination.total ?? null) : null,
+  }
+}
+
 // Organizations
-export async function listOrganizations(page = 1, perPage = 20): Promise<Organization[]> {
+/**
+ * One page of organizations.
+ *
+ * Returns the page window as well as the rows: discarding it is what let the
+ * organization pickers render a truncated list with nothing to say it was
+ * truncated (backend #893). There is deliberately ONE function per endpoint
+ * rather than a bare-array convenience beside a paged one — two accessors for
+ * one question is how the caller that forgets to ask about completeness gets
+ * written.
+ */
+export async function listOrganizations(page = 1, perPage = 20): Promise<OrganizationPage> {
   const response = await http.get<ListOrganizationsResponse>('/api/v1/organizations', {
     params: { page, per_page: perPage },
   })
-  const orgs = response.data.organizations || []
-  return orgs.map((org: Record<string, unknown>) => transformOrganization(org))
+  return toPage(response.data, perPage)
 }
 
 export async function searchOrganizations(
   query: string,
   page = 1,
   perPage = 20,
-): Promise<Organization[]> {
+): Promise<OrganizationPage> {
   const response = await http.get<ListOrganizationsResponse>('/api/v1/organizations/search', {
     params: { q: query, page, per_page: perPage },
   })
-  const orgs = response.data.organizations || []
-  return orgs.map((org: Record<string, unknown>) => transformOrganization(org))
+  // This axis has no counting query, so `total` is null and `has_more` comes
+  // from the server probing one row past the page.
+  return toPage(response.data, perPage)
 }
 
 export async function getOrganization(id: string): Promise<Organization> {
