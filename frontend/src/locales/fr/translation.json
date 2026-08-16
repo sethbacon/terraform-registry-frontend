@@ -2058,6 +2058,8 @@
       "labelStartDate": "Date de début",
       "labelEndDate": "Date de fin",
       "labelResourceType": "Type de ressource",
+      "labelOrganization": "Organisation",
+      "optionAllOrganizations": "Toutes les organisations",
       "labelAction": "Action",
       "labelUserEmail": "Adresse e-mail de l'utilisateur",
       "placeholderUserEmail": "Rechercher par e-mail...",
@@ -2070,7 +2072,8 @@
       "emptySubtitle": "Des entrées de journal d'audit s'affichent lorsque les utilisateurs effectuent des modifications. Modifiez les filtres ci-dessus ou publiez un module pour en voir une.",
       "detailTitle": "Détails du journal d'audit",
       "close": "Fermer",
-      "errLoad": "Échec du chargement des journaux d'audit"
+      "errLoad": "Échec du chargement des journaux d'audit",
+      "errNotMember": "Vous n'êtes pas membre de cette organisation"
     },
     "notifications": {
       "pageTitle": "Notifications",

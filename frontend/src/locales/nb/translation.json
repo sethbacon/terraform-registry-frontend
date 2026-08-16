@@ -2058,6 +2058,8 @@
       "labelStartDate": "Startdato",
       "labelEndDate": "Sluttdato",
       "labelResourceType": "Resurstype",
+      "labelOrganization": "Organisasjon",
+      "optionAllOrganizations": "Alle organisasjoner",
       "labelAction": "Handling",
       "labelUserEmail": "Brukerens e-postadresse",
       "placeholderUserEmail": "Søk etter e-postadresse...",
@@ -2070,7 +2072,8 @@
       "emptySubtitle": "Det vises oppføringer i revisjonsloggen når brukere foretar endringer. Juster filtrene ovenfor eller publiser en modul for å se en slik oppføring.",
       "detailTitle": "Detaljer i revisjonsloggen",
       "close": "Lukk",
-      "errLoad": "Det lyktes ikke å laste inn revisjonsloggene"
+      "errLoad": "Det lyktes ikke å laste inn revisjonsloggene",
+      "errNotMember": "Du er ikke medlem av den organisasjonen"
     },
     "notifications": {
       "pageTitle": "Varsler",

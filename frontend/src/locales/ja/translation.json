@@ -2058,6 +2058,8 @@
       "labelStartDate": "開始日",
       "labelEndDate": "終了日",
       "labelResourceType": "リソースの種類",
+      "labelOrganization": "組織",
+      "optionAllOrganizations": "すべての組織",
       "labelAction": "アクション",
       "labelUserEmail": "ユーザーのメールアドレス",
       "placeholderUserEmail": "メールアドレスで検索...",
@@ -2070,7 +2072,8 @@
       "emptySubtitle": "ユーザーが変更を加えると、監査ログのエントリが表示されます。上のフィルターを調整するか、モジュールを公開して確認してください。",
       "detailTitle": "監査ログの詳細",
       "close": "閉じる",
-      "errLoad": "監査ログの読み込みに失敗しました"
+      "errLoad": "監査ログの読み込みに失敗しました",
+      "errNotMember": "あなたはその組織のメンバーではありません"
     },
     "notifications": {
       "pageTitle": "通知",

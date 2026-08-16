@@ -2058,6 +2058,8 @@
       "labelStartDate": "Startdatum",
       "labelEndDate": "Enddatum",
       "labelResourceType": "Ressourcentyp",
+      "labelOrganization": "Organisation",
+      "optionAllOrganizations": "Alle Organisationen",
       "labelAction": "Aktion",
       "labelUserEmail": "E-Mail-Adresse des Benutzers",
       "placeholderUserEmail": "Nach E-Mail-Adresse suchen...",
@@ -2070,7 +2072,8 @@
       "emptySubtitle": "Protokoll-Einträge werden angezeigt, wenn Benutzer Änderungen vornehmen. Passen Sie die Filter oben an oder veröffentlichen Sie ein Modul, um einen Eintrag anzuzeigen.",
       "detailTitle": "Details zum Prüfprotokoll",
       "close": "Schließen",
-      "errLoad": "Das Laden der Audit-Protokolle ist fehlgeschlagen"
+      "errLoad": "Das Laden der Audit-Protokolle ist fehlgeschlagen",
+      "errNotMember": "Sie sind kein Mitglied dieser Organisation."
     },
     "notifications": {
       "pageTitle": "Benachrichtigungen",

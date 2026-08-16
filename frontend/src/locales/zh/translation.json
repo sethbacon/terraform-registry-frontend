@@ -2058,6 +2058,8 @@
       "labelStartDate": "开始日期",
       "labelEndDate": "结束日期",
       "labelResourceType": "资源类型",
+      "labelOrganization": "组织",
+      "optionAllOrganizations": "所有组织",
       "labelAction": "动作",
       "labelUserEmail": "用户邮箱",
       "placeholderUserEmail": "按电子邮件搜索...",
@@ -2070,7 +2072,8 @@
       "emptySubtitle": "当用户进行更改时，系统会生成审计日志条目。请调整上方的筛选条件或发布一个模块，即可查看相关条目。",
       "detailTitle": "审计日志详情",
       "close": "关闭",
-      "errLoad": "无法加载审计日志"
+      "errLoad": "无法加载审计日志",
+      "errNotMember": "您不是该组织的成员"
     },
     "notifications": {
       "pageTitle": "通知",
