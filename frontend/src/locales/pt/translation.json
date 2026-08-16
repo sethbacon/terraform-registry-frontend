@@ -185,7 +185,14 @@
     "warning": "Aviso",
     "networkError": "Não foi possível estabelecer ligação com o servidor — verifique a sua ligação e tente novamente.",
     "timeoutError": "A solicitação demorou demasiado tempo e atingiu o limite de tempo. Por favor, tente novamente.",
-    "offlineWarning": "Está sem ligação à Internet. Algumas funcionalidades poderão não funcionar até que a ligação seja restabelecida."
+    "offlineWarning": "Está sem ligação à Internet. Algumas funcionalidades poderão não funcionar até que a ligação seja restabelecida.",
+    "organizationFilter": {
+      "label": "Organização",
+      "placeholderAll": "Todas as organizações",
+      "noOptions": "Não foram encontradas organizações correspondentes",
+      "mayBeTruncated": "A apresentar o primeiro «{{count}}». Digite para procurar outros.",
+      "errNotMember": "Não fazes parte dessa organização"
+    }
   },
   "modules": {
     "pageTitle": "Módulos do Terraform",
