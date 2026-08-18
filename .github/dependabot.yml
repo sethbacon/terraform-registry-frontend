@@ -90,6 +90,12 @@ updates:
       - docker
     commit-message:
       prefix: "chore(deps)"
+    ignore:
+      # The node builder major is tied to package.json `engines`; Dependabot has
+      # no visibility of that, and #547 silently moved it 24 -> 26. Digest and
+      # minor updates still flow. Raise the major here and in `engines` together.
+      - dependency-name: "node"
+        update-types: ["version-update:semver-major"]
     cooldown:
       default-days: 7
 
