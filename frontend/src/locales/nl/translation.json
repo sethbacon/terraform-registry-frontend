@@ -185,7 +185,14 @@
     "warning": "Waarschuwing",
     "networkError": "De server kan niet worden bereikt — controleer je verbinding en probeer het opnieuw.",
     "timeoutError": "Het verzoek duurde te lang en er is een time-out opgetreden. Probeer het nog eens.",
-    "offlineWarning": "Je bent offline. Sommige functies werken mogelijk pas weer als je verbinding is hersteld."
+    "offlineWarning": "Je bent offline. Sommige functies werken mogelijk pas weer als je verbinding is hersteld.",
+    "organizationFilter": {
+      "label": "Organisatie",
+      "placeholderAll": "Alle organisaties",
+      "noOptions": "Geen overeenkomende organisaties",
+      "mayBeTruncated": "De eerste {{count}} wordt weergegeven. Typ iets om naar andere te zoeken.",
+      "errNotMember": "Je bent geen lid van die organisatie"
+    }
   },
   "modules": {
     "pageTitle": "Terraform-modules",

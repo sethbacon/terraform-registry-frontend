@@ -185,7 +185,14 @@
     "warning": "Avviso",
     "networkError": "Impossibile connettersi al server: controlla la connessione e riprova.",
     "timeoutError": "La richiesta ha richiesto troppo tempo e si è verificato un timeout. Riprova.",
-    "offlineWarning": "Sei offline. Alcune funzioni potrebbero non funzionare finché non verrà ripristinata la connessione."
+    "offlineWarning": "Sei offline. Alcune funzioni potrebbero non funzionare finché non verrà ripristinata la connessione.",
+    "organizationFilter": {
+      "label": "Organizzazione",
+      "placeholderAll": "Tutte le organizzazioni",
+      "noOptions": "Nessuna organizzazione corrispondente",
+      "mayBeTruncated": "Viene visualizzato il primo \"{{count}}\". Digita per cercarne altri.",
+      "errNotMember": "Non sei membro di quell'organizzazione"
+    }
   },
   "modules": {
     "pageTitle": "Moduli Terraform",

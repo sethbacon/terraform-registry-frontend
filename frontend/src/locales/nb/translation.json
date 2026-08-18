@@ -185,7 +185,14 @@
     "warning": "Advarsel",
     "networkError": "Det går ikke an å få kontakt med serveren — sjekk tilkoblingen din og prøv på nytt.",
     "timeoutError": "Forespørselen tok for lang tid, og tidsfristen gikk ut. Prøv på nytt.",
-    "offlineWarning": "Du er frakoblet. Noen funksjoner fungerer kanskje ikke før tilkoblingen din er gjenopprettet."
+    "offlineWarning": "Du er frakoblet. Noen funksjoner fungerer kanskje ikke før tilkoblingen din er gjenopprettet.",
+    "organizationFilter": {
+      "label": "Organisasjon",
+      "placeholderAll": "Alle organisasjoner",
+      "noOptions": "Ingen treff på organisasjoner",
+      "mayBeTruncated": "Viser de første «{{count}}». Skriv inn for å søke etter flere.",
+      "errNotMember": "Du er ikke medlem av den organisasjonen"
+    }
   },
   "modules": {
     "pageTitle": "Terraform-moduler",

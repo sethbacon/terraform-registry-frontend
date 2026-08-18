@@ -185,7 +185,14 @@
     "warning": "Warnung",
     "networkError": "Der Server konnte nicht erreicht werden – bitte überprüfen Sie Ihre Verbindung und versuchen Sie es erneut.",
     "timeoutError": "Die Anfrage hat zu lange gedauert und ist abgelaufen. Bitte versuchen Sie es erneut.",
-    "offlineWarning": "Sie sind offline. Einige Funktionen stehen möglicherweise erst wieder zur Verfügung, wenn Ihre Verbindung wiederhergestellt ist."
+    "offlineWarning": "Sie sind offline. Einige Funktionen stehen möglicherweise erst wieder zur Verfügung, wenn Ihre Verbindung wiederhergestellt ist.",
+    "organizationFilter": {
+      "label": "Organisation",
+      "placeholderAll": "Alle Organisationen",
+      "noOptions": "Keine passenden Organisationen",
+      "mayBeTruncated": "Es wird das erste „{{count}}“ angezeigt. Geben Sie einen Suchbegriff ein, um nach weiteren Ergebnissen zu suchen.",
+      "errNotMember": "Sie sind kein Mitglied dieser Organisation."
+    }
   },
   "modules": {
     "pageTitle": "Terraform-Module",

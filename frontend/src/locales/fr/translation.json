@@ -185,7 +185,14 @@
     "warning": "Avertissement",
     "networkError": "Impossible d'accéder au serveur — vérifiez votre connexion et réessayez.",
     "timeoutError": "La requête a pris trop de temps et a expiré. Veuillez réessayer.",
-    "offlineWarning": "Vous n'êtes pas connecté. Certaines fonctionnalités risquent de ne pas fonctionner tant que votre connexion n'aura pas été rétablie."
+    "offlineWarning": "Vous n'êtes pas connecté. Certaines fonctionnalités risquent de ne pas fonctionner tant que votre connexion n'aura pas été rétablie.",
+    "organizationFilter": {
+      "label": "Organisation",
+      "placeholderAll": "Toutes les organisations",
+      "noOptions": "Aucune organisation correspondante",
+      "mayBeTruncated": "Affichage du premier « {{count}} ». Tapez pour en rechercher d'autres.",
+      "errNotMember": "Vous n'êtes pas membre de cette organisation"
+    }
   },
   "modules": {
     "pageTitle": "Modules Terraform",

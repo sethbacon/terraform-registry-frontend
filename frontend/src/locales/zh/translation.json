@@ -185,7 +185,14 @@
     "warning": "警告",
     "networkError": "无法连接到服务器——请检查网络连接，然后重试。",
     "timeoutError": "请求耗时过长，已超时。请重试。",
-    "offlineWarning": "您当前处于离线状态。在恢复网络连接之前，部分功能可能无法使用。"
+    "offlineWarning": "您当前处于离线状态。在恢复网络连接之前，部分功能可能无法使用。",
+    "organizationFilter": {
+      "label": "组织",
+      "placeholderAll": "所有组织",
+      "noOptions": "没有匹配的组织",
+      "mayBeTruncated": "显示第一个{{count}}。输入内容以搜索其他结果。",
+      "errNotMember": "您不是该组织的成员"
+    }
   },
   "modules": {
     "pageTitle": "Terraform 模块",

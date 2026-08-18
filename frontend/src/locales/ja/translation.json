@@ -185,7 +185,14 @@
     "warning": "警告",
     "networkError": "サーバーに接続できません。接続状態を確認して、もう一度お試しください。",
     "timeoutError": "リクエストの処理に時間がかかりすぎたため、タイムアウトしました。もう一度お試しください。",
-    "offlineWarning": "現在、オフラインです。接続が回復するまで、一部の機能が利用できない場合があります。"
+    "offlineWarning": "現在、オフラインです。接続が回復するまで、一部の機能が利用できない場合があります。",
+    "organizationFilter": {
+      "label": "組織",
+      "placeholderAll": "すべての組織",
+      "noOptions": "該当する組織はありません",
+      "mayBeTruncated": "最初の「{{count}}」を表示しています。他のものを検索するには、キーワードを入力してください。",
+      "errNotMember": "あなたはその組織のメンバーではありません"
+    }
   },
   "modules": {
     "pageTitle": "Terraform モジュール",
