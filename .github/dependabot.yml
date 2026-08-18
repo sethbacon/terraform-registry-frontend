@@ -27,9 +27,13 @@ updates:
         patterns:
           - "*"
     ignore:
-      # Private, released and version-pinned in lockstep with the suite; not
-      # auto-bumped here (resolved via the registry above only).
+      # Public on npmjs and peer-only (zero runtime deps), so patch/minor can
+      # flow like any other dependency — nothing else would ever surface a fix
+      # in the shared UI here. Majors stay manual because its peerDependencies
+      # pin the react/MUI/react-router ranges this app has to satisfy; a
+      # react-router major already broke this pin once (#643).
       - dependency-name: "@4cloudguru/*"
+        update-types: ["version-update:semver-major"]
       # Major React/MUI bumps require manual migration work.
       - dependency-name: "react"
         update-types: ["version-update:semver-major"]
