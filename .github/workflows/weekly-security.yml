@@ -89,7 +89,7 @@ jobs:
       - name: Run OSV Scanner
         # v2.3.8
         id: osv
-        uses: google/osv-scanner-action/osv-scanner-action@9a498708959aeaef5ef730655706c5a1df1edbc2
+        uses: google/osv-scanner-action/osv-scanner-action@8deb546fdb875b9996d27d4950be7312dac076a1
         continue-on-error: true
         with:
           # JSON so the triage step below can classify findings; it prints a
