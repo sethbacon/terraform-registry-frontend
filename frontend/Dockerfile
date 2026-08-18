@@ -1,7 +1,10 @@
 # Multi-stage Dockerfile for Terraform Registry Frontend
 
 # Stage 1: Build the React application
-FROM node:26-alpine@sha256:aadf416b2cdce311a8811ba3f0608a61b77dbf997500e2eafe781b51f6a0b019 AS builder
+# Must stay on the major declared in package.json `engines` (and in
+# @4cloudguru/cloud-suite-ui). .npmrc sets engine-strict=true, so a mismatch
+# fails this build instead of printing an EBADENGINE warning nobody reads.
+FROM node:24-alpine@sha256:d32cdf619f63fe0471182d08996dd516c6275bb5fd31ae06e55a570bd9e1ad43 AS builder
 
 # VITE_MODE controls the Vite build mode.
 # Use "development" to enable the Dev Login button for E2E/staging environments.
