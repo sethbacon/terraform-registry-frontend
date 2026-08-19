@@ -20,3 +20,6 @@ deployments/certs/
 frontend/vite.config.js
 frontend/vite.config.d.ts
 frontend/*.tsbuildinfo
+
+# Node (CI tooling only, under .github/; the lockfile itself is tracked)
+node_modules/
