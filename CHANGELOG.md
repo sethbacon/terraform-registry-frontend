@@ -1,6 +1,22 @@
 <!-- markdownlint-disable MD013 MD024 MD041 -->
 # Changelog
 
+## [2.24.0](https://github.com/sethbacon/terraform-registry-frontend/compare/v2.23.1...v2.24.0) (2026-08-19)
+
+
+### Features
+
+* **admin:** filter admin pages by organization, from one membership source ([#803](https://github.com/sethbacon/terraform-registry-frontend/issues/803)) ([2dd6553](https://github.com/sethbacon/terraform-registry-frontend/commit/2dd6553e2c7bb365de7f20d55346776c4324aa15))
+* **auth:** publish real organization memberships, and filter audit logs by them ([#800](https://github.com/sethbacon/terraform-registry-frontend/issues/800)) ([d0aae6a](https://github.com/sethbacon/terraform-registry-frontend/commit/d0aae6a736bd32cb2038a142282ef0d87ee90a36))
+
+
+### Bug Fixes
+
+* **admin:** give the first administrator a reachable way to create an API key ([#820](https://github.com/sethbacon/terraform-registry-frontend/issues/820)) ([3adc93a](https://github.com/sethbacon/terraform-registry-frontend/commit/3adc93acad23669c5ba742a3cf0b473758f44e71)), closes [#796](https://github.com/sethbacon/terraform-registry-frontend/issues/796)
+* **admin:** read has_more itself, not the presence of the object around it ([#806](https://github.com/sethbacon/terraform-registry-frontend/issues/806)) ([2c04dcf](https://github.com/sethbacon/terraform-registry-frontend/commit/2c04dcf6858d0d091183fe64ebb8e71f10c70bf9))
+* **admin:** read the server has_more instead of guessing from the row count ([#805](https://github.com/sethbacon/terraform-registry-frontend/issues/805)) ([ae9d122](https://github.com/sethbacon/terraform-registry-frontend/commit/ae9d122e1182baa629776bce0a802905f2291286))
+* **ci:** make the E2E release gate actually fire on a release ([#813](https://github.com/sethbacon/terraform-registry-frontend/issues/813)) ([e4a85a4](https://github.com/sethbacon/terraform-registry-frontend/commit/e4a85a4e1ba3ba0601d90974dbbe65374d19d6f7))
+
 ## [2.23.1](https://github.com/sethbacon/terraform-registry-frontend/compare/v2.23.0...v2.23.1) (2026-08-14)
 
 
