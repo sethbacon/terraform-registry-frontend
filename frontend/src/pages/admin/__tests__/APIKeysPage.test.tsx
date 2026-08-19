@@ -419,8 +419,19 @@ describe('APIKeysPage', () => {
     expect(screen.getByText(/\.terraformrc/)).toBeInTheDocument()
   })
 
-  // 19. No organization membership warning
-  it('shows a warning when the user has no organization memberships', async () => {
+  // 19. Zero organization memberships (#796).
+  //
+  // This test used to assert that a caller with `allowedScopes: ['admin']` and
+  // no memberships was shown "You are not a member of any organization. Contact
+  // an administrator..." -- and it passed, which is exactly the problem. Zero
+  // memberships with the admin wildcard IS the bootstrap administrator of a
+  // freshly set-up deployment (setup writes the platform-admin carrier and
+  // deliberately no membership), so the assertion pinned the sole administrator
+  // being told to contact an administrator. The test was right that SOMETHING
+  // must render here and wrong about what; it is re-pointed rather than
+  // deleted, and split in two because the correct message now depends on
+  // whether the caller can act.
+  it('offers a platform admin with no memberships a way to resolve it themselves', async () => {
     useAuthMock.mockReturnValue({
       allowedScopes: ['admin'],
       roleTemplate: { display_name: 'Administrator' },
@@ -430,8 +441,32 @@ describe('APIKeysPage', () => {
     listAPIKeysMock.mockResolvedValue([])
     renderPage()
     await waitFor(() => {
+      expect(screen.getAllByText(/API keys belong to an organization/).length).toBeGreaterThan(0)
+    })
+    // The actionable half: a real link to the page where both remedies live.
+    const link = screen.getAllByRole('link', { name: 'Manage organizations' })[0]
+    expect(link).toHaveAttribute('href', '/admin/organizations')
+    // And it must NOT tell the only administrator to go and find one.
+    expect(screen.queryByText(/Contact an administrator/)).not.toBeInTheDocument()
+  })
+
+  it('still tells a caller who cannot administer organizations to contact one', async () => {
+    // The other half of the branch. "Contact an administrator" is correct
+    // guidance for someone who genuinely cannot self-enrol -- the backend
+    // requires organizations:write to add a member -- so this population keeps
+    // the original copy, and this test keeps the original assertion.
+    useAuthMock.mockReturnValue({
+      allowedScopes: ['modules:read'],
+      roleTemplate: { display_name: 'Viewer' },
+      memberships: [],
+      user: { id: 'user-1' },
+    })
+    listAPIKeysMock.mockResolvedValue([])
+    renderPage()
+    await waitFor(() => {
       expect(screen.getByText(/not a member of any organization/)).toBeInTheDocument()
     })
+    expect(screen.queryByRole('link', { name: 'Manage organizations' })).not.toBeInTheDocument()
   })
 
   // 20. Last used column shows Never when not used

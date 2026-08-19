@@ -65,7 +65,7 @@ const HomePage: React.FC = () => {
   const navigate = useNavigate()
   const theme = useTheme()
   const isXs = useMediaQuery(theme.breakpoints.down('sm'))
-  const { isAuthenticated, memberships } = useAuth()
+  const { isAuthenticated, memberships, allowedScopes } = useAuth()
   const { announce } = useAnnouncer()
   const [stats, setStats] = useState<HomeStats>(initialStats)
   const [searchQuery, setSearchQuery] = useState('')
@@ -79,6 +79,10 @@ const HomePage: React.FC = () => {
   // isAuthenticated handling comes for free, because `useAuth().memberships` is
   // already gated on it and empties when the session ends.
   const primaryOrgId = memberships[0]?.organization_id ?? null
+  // Whether this caller can resolve an empty `primaryOrgId` themselves (#796),
+  // using the same test OrganizationsPage gates its own controls on.
+  const canManageOrganizations =
+    allowedScopes.includes('admin') || allowedScopes.includes('organizations:write')
 
   useEffect(() => {
     Promise.allSettled([
@@ -760,6 +764,7 @@ const HomePage: React.FC = () => {
         open={quickKeyOpen}
         onClose={() => setQuickKeyOpen(false)}
         organizationId={primaryOrgId}
+        canManageOrganizations={canManageOrganizations}
         hostname={typeof window !== 'undefined' ? window.location.hostname : ''}
       />
     </Box>

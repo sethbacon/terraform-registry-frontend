@@ -19,6 +19,8 @@ import {
   CircularProgress,
 } from '@mui/material'
 import ContentCopyIcon from '@mui/icons-material/ContentCopy'
+import { Link as RouterLink } from 'react-router-dom'
+import { Link as MuiLink } from '@mui/material'
 import api from '../services/api'
 import { getErrorMessage } from '../utils/errors'
 import { useAnnouncer } from '../contexts/AnnouncerContext'
@@ -41,6 +43,14 @@ interface QuickApiKeyDialogProps {
    * Scopes requested on the new key. Defaults to read-only when omitted.
    */
   defaultScopes?: string[]
+  /**
+   * Whether the caller can administer organizations themselves (#796). Passed
+   * in rather than read from useAuth here so this dialog stays presentational,
+   * the way `organizationId` already is. Defaults to false, which is the safe
+   * reading: it yields the "ask an administrator" wording, which is wrong for
+   * nobody -- it is only INSUFFICIENT for someone who is the administrator.
+   */
+  canManageOrganizations?: boolean
 }
 
 function buildSnippet(host: string, token: string): string {
@@ -60,6 +70,7 @@ const QuickApiKeyDialog: React.FC<QuickApiKeyDialogProps> = ({
   organizationId,
   hostname,
   defaultScopes,
+  canManageOrganizations = false,
 }) => {
   const { t } = useTranslation()
   const { announce } = useAnnouncer()
@@ -186,7 +197,21 @@ const QuickApiKeyDialog: React.FC<QuickApiKeyDialogProps> = ({
                   <MenuItem value="never">{t('quickApiKey.expiryNever')}</MenuItem>
                 </Select>
               </FormControl>
-              {!organizationId && <Alert severity="warning">{t('quickApiKey.orgRequired')}</Alert>}
+              {!organizationId &&
+                (canManageOrganizations ? (
+                  // Deliberately the same two strings the API keys page uses
+                  // (#796). The wording that drifted into a dead end did so
+                  // while duplicated across surfaces; one copy of a sentence is
+                  // one place to keep it true.
+                  <Alert severity="info">
+                    {t('admin.apiKeys.noOrgSelfServe')}{' '}
+                    <MuiLink component={RouterLink} to="/admin/organizations">
+                      {t('admin.apiKeys.noOrgSelfServeAction')}
+                    </MuiLink>
+                  </Alert>
+                ) : (
+                  <Alert severity="warning">{t('quickApiKey.orgRequired')}</Alert>
+                ))}
             </>
           ) : (
             <>

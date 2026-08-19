@@ -1,5 +1,11 @@
 -- OIDC dev stack seed script
--- Run automatically by the postgres container on first init (via /docker-entrypoint-initdb.d/).
+--
+-- Run by the one-shot `db-seed` service in deployments/docker-compose.oidc.yml,
+-- which mounts this file at /seed.sql and runs `psql -f /seed.sql` AFTER the
+-- backend reports healthy -- i.e. after its migrations have been applied. It is
+-- NOT loaded through /docker-entrypoint-initdb.d/, and it must not be: the
+-- tables it writes do not exist until the backend has migrated.
+--
 -- Marks setup as complete (OIDC is pre-configured via env vars, no wizard needed) and
 -- pre-provisions the Keycloak admin user (admin@example.com / admin.user) as a registry admin.
 --
@@ -11,6 +17,7 @@ DECLARE
     v_user_id              uuid;
     v_org_id               uuid;
     v_admin_role_template_id uuid;
+    v_granted              integer;
 BEGIN
     ---------------------------------------------------------------------------
     -- 1. Mark setup as complete so the "Setup Required" banner does not appear.
@@ -74,5 +81,52 @@ BEGIN
     ON CONFLICT (organization_id, user_id) DO UPDATE
         SET role_template_id = EXCLUDED.role_template_id;
 
-    RAISE NOTICE 'OIDC dev seed: setup marked complete, admin@example.com provisioned as admin.';
+    ---------------------------------------------------------------------------
+    -- 4. Grant platform-admin through the carrier.
+    --
+    -- The organization_members row above is NOT sufficient, and this is the
+    -- third copy of this seed to have been written as though it were (#792).
+    --
+    -- Backend migration 000054 (its issue #766) took the `admin` wildcard scope
+    -- off every role template. Platform-admin authority now comes ONLY from a
+    -- `platform_admins` row, resolved per request. The `admin` template assigned
+    -- above still grants organization administration, but it no longer confers
+    -- platform-wide reach and notably no longer implies `audit:read` -- so
+    -- without the grant below this user logs in through Keycloak, /admin
+    -- renders, and every platform-scoped read fails.
+    --
+    -- 000054 backfilled carrier rows for template holders that existed WHEN IT
+    -- RAN. This stack migrates an empty database and seeds afterwards, so this
+    -- user postdates the backfill and inherits nothing from it.
+    --
+    -- The audit intent MUST be written in the same transaction. Migration
+    -- 000052 puts a DEFERRABLE INITIALLY DEFERRED constraint trigger on
+    -- platform_admins that re-checks at COMMIT for an audit_outbox row carrying
+    -- the same pg_current_xact_id(), the same subject and
+    -- action='platform_admin.granted', so a bare INSERT aborts this whole
+    -- script at COMMIT. Deriving the intent from RETURNING keeps a re-run from
+    -- recording a grant it did not make.
+    ---------------------------------------------------------------------------
+    WITH granted AS (
+        INSERT INTO platform_admins (user_id, note)
+        VALUES (v_user_id, 'granted by deployments/keycloak/seed-oidc-dev.sql (OIDC dev seed)')
+        ON CONFLICT (user_id) DO NOTHING
+        RETURNING user_id
+    )
+    INSERT INTO audit_outbox (event_id, action, resource_type, resource_id, metadata)
+    SELECT gen_random_uuid(), 'platform_admin.granted', 'platform_admin', g.user_id::text,
+           jsonb_build_object(
+             'target_user_id', g.user_id,
+             'source', 'deployments/keycloak/seed-oidc-dev.sql',
+             'origin', 'OIDC dev seed')
+      FROM granted g;
+    GET DIAGNOSTICS v_granted = ROW_COUNT;
+
+    IF v_granted > 0 THEN
+        RAISE NOTICE 'Platform-admin carrier row granted to admin@example.com.';
+    ELSE
+        RAISE NOTICE 'admin@example.com already holds a platform-admin carrier row; nothing to grant.';
+    END IF;
+
+    RAISE NOTICE 'OIDC dev seed: setup marked complete, admin@example.com provisioned as a platform admin.';
 END $$;

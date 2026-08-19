@@ -1,6 +1,7 @@
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { MemoryRouter } from 'react-router-dom'
 
 const createAPIKeyMock = vi.fn()
 vi.mock('../../services/api', () => ({
@@ -22,14 +23,20 @@ function renderDialog(props: Partial<React.ComponentProps<typeof QuickApiKeyDial
     'organizationId' in props ? (props.organizationId as string | null) : 'org-1'
   return {
     onClose,
+    // A MemoryRouter because the zero-membership guidance for a caller who can
+    // administer organizations contains a real <Link> to /admin/organizations
+    // (#796); react-router throws outside a router context.
     ...render(
-      <QuickApiKeyDialog
-        open={props.open ?? true}
-        onClose={onClose}
-        organizationId={organizationId}
-        hostname={props.hostname ?? 'registry.example.com'}
-        defaultScopes={props.defaultScopes}
-      />,
+      <MemoryRouter>
+        <QuickApiKeyDialog
+          open={props.open ?? true}
+          onClose={onClose}
+          organizationId={organizationId}
+          hostname={props.hostname ?? 'registry.example.com'}
+          defaultScopes={props.defaultScopes}
+          canManageOrganizations={props.canManageOrganizations}
+        />
+      </MemoryRouter>,
     ),
   }
 }
@@ -51,8 +58,27 @@ describe('QuickApiKeyDialog', () => {
   })
 
   it('warns when no organization is available and disables submit', () => {
+    // Default canManageOrganizations=false: a caller who genuinely cannot
+    // self-enrol keeps the original wording, which is correct for them.
     renderDialog({ organizationId: null })
     expect(screen.getByText(/You must be a member of an organization/i)).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /^Create$/ })).toBeDisabled()
+  })
+
+  it('offers a self-serve route when the caller can administer organizations', () => {
+    // The bootstrap administrator of a fresh deployment: platform-admin carrier,
+    // zero memberships (#796). Telling them to contact an administrator was the
+    // defect; they are the administrator.
+    renderDialog({ organizationId: null, canManageOrganizations: true })
+    expect(screen.getByText(/API keys belong to an organization/)).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'Manage organizations' })).toHaveAttribute(
+      'href',
+      '/admin/organizations',
+    )
+    expect(screen.queryByText(/Contact an administrator/)).not.toBeInTheDocument()
+    // Still disabled: the backend requires membership for THIS route
+    // (GetMemberWithRole, no wildcard bypass), so the button would 403. The fix
+    // is that the user now knows what to do, not that the button lies.
     expect(screen.getByRole('button', { name: /^Create$/ })).toBeDisabled()
   })
 

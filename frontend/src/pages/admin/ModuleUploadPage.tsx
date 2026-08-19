@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useLocation, useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate, Link as RouterLink } from 'react-router-dom'
 import {
   Typography,
   Box,
@@ -34,6 +34,7 @@ import FileDropZone from '../../components/FileDropZone'
 import PolicyResultsPanel from '../../components/PolicyResultsPanel'
 import { PolicyResult } from '../../types'
 import { useAuth } from '../../contexts/AuthContext'
+import { Link as MuiLink } from '@mui/material'
 
 type ModuleMethod = 'choose' | 'upload' | 'scm'
 
@@ -53,7 +54,43 @@ const ModuleUploadPage: React.FC = () => {
   // Memberships come from the session (`/auth/me`) rather than a second fetch
   // of `/users/me/memberships` (#779). Both endpoints run the same membership
   // query for the same user; two clients for one fact is how they diverged.
-  const { memberships } = useAuth()
+  const { memberships, allowedScopes } = useAuth()
+  const canManageOrganizations =
+    allowedScopes.includes('admin') || allowedScopes.includes('organizations:write')
+
+  // Zero memberships used to render NOTHING here (#796): the selector is gated
+  // on `memberships.length > 1`, and handleUpload only appends organization_id
+  // when one is selected, so the request simply went out without it. That is
+  // not a working fallback. The backend resolves the destination organization
+  // from the NAMESPACE, and only falls back to the caller's memberships when
+  // the namespace is new -- where resolveCallerOrg handles exactly one and more
+  // than one membership, and zero falls through to a fail-closed 403. So a
+  // publisher with no memberships uploading to a NEW namespace picks a file,
+  // waits for it to upload and parse, and is then refused; publishing into an
+  // EXISTING namespace succeeds and silently lands in whatever organization
+  // already owns it.
+  //
+  // Both of those deserve saying out loud, which is the asymmetry #796 asks to
+  // resolve: this page and the API keys page now both explain an absent
+  // organization instead of one erroring and one proceeding in silence.
+  //
+  // Deliberately NOT disabled, unlike the API-key dialog. There the backend
+  // refuses outright; here the existing-namespace path genuinely works, and
+  // blocking it would trade a silent failure for a broken feature.
+  const renderNoOrgNotice = () =>
+    memberships.length === 0 ? (
+      <Alert severity="warning">
+        {t('admin.moduleUpload.warnNoOrg')}
+        {canManageOrganizations && (
+          <>
+            {' '}
+            <MuiLink component={RouterLink} to="/admin/organizations">
+              {t('admin.apiKeys.noOrgSelfServeAction')}
+            </MuiLink>
+          </>
+        )}
+      </Alert>
+    ) : null
 
   // The DESTINATION organization for the upload, defaulted to the caller's
   // first membership. This is not the organization FILTER (#779) and gets a
@@ -311,6 +348,7 @@ const ModuleUploadPage: React.FC = () => {
             {t('admin.moduleUpload.scmSubtitle')}
           </Typography>
           <Stack spacing={3} sx={{ maxWidth: 500 }}>
+            {renderNoOrgNotice()}
             {memberships.length > 1 && (
               <FormControl fullWidth>
                 <InputLabel id="scm-org-label">
@@ -457,6 +495,7 @@ const ModuleUploadPage: React.FC = () => {
       </Box>
 
       <Stack spacing={3}>
+        {renderNoOrgNotice()}
         {memberships.length > 1 && (
           <FormControl fullWidth disabled={uploading}>
             <InputLabel id="upload-org-label">

@@ -60,6 +60,8 @@ import { getErrorMessage } from '../../utils/errors'
 import { queryKeys } from '../../services/queryKeys'
 import OrganizationFilter from '../../components/OrganizationFilter'
 import { useOrganizationFilter } from '../../hooks/useOrganizationFilter'
+import { Link as RouterLink } from 'react-router-dom'
+import { Link as MuiLink } from '@mui/material'
 
 function getExpirationStatus(
   expiresAt?: string | null,
@@ -91,6 +93,48 @@ const APIKeysPage: React.FC = () => {
   // query for the same user; two clients for one fact is how they diverged.
   const { allowedScopes, roleTemplate, memberships } = useAuth()
   const isAdmin = allowedScopes.includes('admin')
+  // Zero memberships is the NORMAL state of a freshly set-up deployment, not an
+  // edge case: setup writes the platform-admin carrier row and deliberately no
+  // membership (backend setup/handlers.go, "the bootstrap administrator
+  // therefore starts with NO organization membership"). The first and only
+  // administrator therefore lands here with an empty array.
+  //
+  // The defect in #796 was that ONE message served two populations whose
+  // remedies are opposites. Someone who cannot administer organizations must
+  // indeed ask someone who can. Someone who CAN -- the bootstrap admin above,
+  // or any holder of organizations:write -- was being told to contact
+  // themselves. So branch on the capability, using the same test
+  // OrganizationsPage gates its own add/edit controls on.
+  //
+  // WHAT WE DELIBERATELY DID NOT DO: let the key be created against an
+  // organization the caller administers but is not a member of. That reads as
+  // the tidiest fix and the backend refuses it -- POST /api/v1/apikeys resolves
+  // the caller with GetMemberWithRole and returns 403 "You are not a member of
+  // this organization" with NO wildcard bypass (admin/apikeys.go, pinned by
+  // TestCreateAPIKey_NotMember). The wildcard crosses organization boundaries
+  // on the /organizations routes, not on this one. Building that path would
+  // ship a button that always 403s.
+  //
+  // Nor do we synthesise a membership: #800 deleted that sentinel (#622) on
+  // purpose, and a fake row would put the same 403 one step later.
+  const canManageOrganizations =
+    allowedScopes.includes('admin') || allowedScopes.includes('organizations:write')
+
+  // One renderer for both sites -- the page banner and the create dialog, where
+  // this replaces the organization selector. Two near-identical copies of a
+  // message is how the old wording drifted; the severity is the only thing that
+  // legitimately differs.
+  const renderNoOrgAlert = (severity: 'warning' | 'error') =>
+    canManageOrganizations ? (
+      <Alert severity="info" icon={<InfoIcon />}>
+        {t('admin.apiKeys.noOrgSelfServe')}{' '}
+        <MuiLink component={RouterLink} to="/admin/organizations">
+          {t('admin.apiKeys.noOrgSelfServeAction')}
+        </MuiLink>
+      </Alert>
+    ) : (
+      <Alert severity={severity}>{t('admin.apiKeys.warnNoOrg')}</Alert>
+    )
   // The route itself is gated at no scope at all (routeScopes.ts: null) so any
   // authenticated user can reach this page. listAPIKeys returns keys across the
   // caller's organization (each key carries its own user_id/user_name), so
@@ -528,11 +572,7 @@ const APIKeysPage: React.FC = () => {
         `!membershipsLoading &&` guarded against a second in-flight request that
         no longer exists.
       */}
-      {memberships.length === 0 && (
-        <Alert severity="warning" sx={{ mb: 3 }}>
-          {t('admin.apiKeys.warnNoOrg')}
-        </Alert>
-      )}
+      {memberships.length === 0 && <Box sx={{ mb: 3 }}>{renderNoOrgAlert('warning')}</Box>}
       {isAdmin && (
         <ApiKeyExpirySettingsCard
           value={{
@@ -739,9 +779,7 @@ const APIKeysPage: React.FC = () => {
                   {t('admin.apiKeys.roleInfoAfter')}
                 </Alert>
               )}
-              {memberships.length === 0 && (
-                <Alert severity="error">{t('admin.apiKeys.errNoOrg')}</Alert>
-              )}
+              {memberships.length === 0 && renderNoOrgAlert('error')}
               {memberships.length > 0 && (
                 <FormControl fullWidth>
                   <InputLabel>{t('admin.apiKeys.labelOrganization')}</InputLabel>
