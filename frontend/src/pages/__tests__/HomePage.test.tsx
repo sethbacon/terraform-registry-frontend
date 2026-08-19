@@ -29,15 +29,19 @@ vi.mock('../../services/api', () => ({
 type AuthState = {
   isAuthenticated: boolean
   memberships: Array<{ organization_id: string; organization_name: string }>
+  allowedScopes: string[]
 }
-let authState: AuthState = { isAuthenticated: false, memberships: [] }
+let authState: AuthState = { isAuthenticated: false, memberships: [], allowedScopes: [] }
 function setAuthState(next: Partial<AuthState>) {
-  authState = { isAuthenticated: false, memberships: [], ...next }
+  authState = { isAuthenticated: false, memberships: [], allowedScopes: [], ...next }
 }
 vi.mock('../../contexts/AuthContext', () => ({
   useAuth: () => ({
     isAuthenticated: authState.isAuthenticated,
     memberships: authState.memberships,
+    // #796: HomePage derives whether the caller can resolve an empty primary
+    // organization themselves, and passes it to QuickApiKeyDialog.
+    allowedScopes: authState.allowedScopes,
   }),
 }))
 

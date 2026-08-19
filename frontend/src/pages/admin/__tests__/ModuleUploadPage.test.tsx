@@ -34,10 +34,16 @@ let mockMemberships: Array<{
   created_at?: string
 }> = []
 
+// Defaults to no scopes: most tests here are about the picker and the upload
+// mechanics, not about who may administer organizations. The zero-membership
+// notice (#796) branches on this, so the tests that care set it explicitly.
+let mockAllowedScopes: string[] = []
+
 vi.mock('../../../contexts/AuthContext', () => ({
   useAuth: () => ({
     user: { id: 'test-user-id', username: 'testuser' },
     memberships: mockMemberships,
+    allowedScopes: mockAllowedScopes,
   }),
 }))
 
@@ -264,7 +270,13 @@ describe('ModuleUploadPage — upload form (roadmap 2.5)', () => {
     await waitFor(() => {
       expect(screen.queryByRole('button', { name: /^Cancel$/i })).not.toBeInTheDocument()
     })
-    expect(screen.queryByRole('alert')).not.toBeInTheDocument()
+    // Scoped to ERROR alerts. This block's fixture has no memberships, which
+    // since #796 legitimately renders a warning about where a module with no
+    // organization would land -- an alert that is present before the upload
+    // starts and has nothing to do with cancelling. The assertion's subject is
+    // "cancelling surfaced no failure", so it now says that rather than "no
+    // alert of any kind exists".
+    expect(screen.queryAllByRole('alert').filter((a) => /Error/.test(a.className))).toHaveLength(0)
     expect(byLabel(/Namespace/).value).toBe('myns')
     expect(byLabel(/Version/).value).toBe('1.0.0')
   })
@@ -346,6 +358,56 @@ describe('ModuleUploadPage — organization picker', () => {
     vi.clearAllMocks()
     queryClient.clear()
     mockMemberships = []
+    mockAllowedScopes = []
+  })
+
+  // #796: zero memberships used to render nothing at all here, and the upload
+  // then omitted organization_id entirely. That is not a fallback -- the
+  // backend resolves the destination from the namespace and, for a NEW
+  // namespace, fail-closed 403s a caller with no memberships AFTER the file has
+  // been uploaded and parsed. The page now says so before the file is picked.
+  it('warns in the upload flow when the user has no memberships', async () => {
+    const user = userEvent.setup()
+    await openUploadForm(user)
+    await waitFor(() => {
+      expect(screen.getByText(/not a member of any organization/i)).toBeInTheDocument()
+    })
+    // No self-serve link for a caller who cannot administer organizations:
+    // "join or create an organization" is not something they can do.
+    expect(screen.queryByRole('link', { name: 'Manage organizations' })).not.toBeInTheDocument()
+  })
+
+  it('warns in the SCM flow too', async () => {
+    const user = userEvent.setup()
+    renderPage()
+    await user.click(screen.getByText('Link from SCM Repository'))
+    await waitFor(() => {
+      expect(screen.getByText(/not a member of any organization/i)).toBeInTheDocument()
+    })
+  })
+
+  it('points a caller who can administer organizations at the page that fixes it', async () => {
+    mockAllowedScopes = ['admin']
+    const user = userEvent.setup()
+    await openUploadForm(user)
+    await waitFor(() => {
+      expect(screen.getByRole('link', { name: 'Manage organizations' })).toHaveAttribute(
+        'href',
+        '/admin/organizations',
+      )
+    })
+  })
+
+  it('does not warn once the user has a membership', async () => {
+    mockMemberships = [
+      { organization_id: 'org1', organization_name: 'Org One', created_at: '2024-01-01' },
+    ]
+    const user = userEvent.setup()
+    await openUploadForm(user)
+    await waitFor(() => {
+      expect(screen.getByLabelText(/Namespace/)).toBeInTheDocument()
+    })
+    expect(screen.queryByText(/not a member of any organization/i)).not.toBeInTheDocument()
   })
 
   it('renders org picker when user has multiple memberships (SCM flow)', async () => {
