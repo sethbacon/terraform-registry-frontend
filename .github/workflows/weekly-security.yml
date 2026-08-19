@@ -226,31 +226,81 @@ jobs:
     if: failure() && github.event_name == 'schedule'
     permissions:
       issues: write
+      actions: read # list this run's jobs, to name what actually failed
     steps:
       - name: Create failure issue
         # v8
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3
         with:
           script: |
-            const title = `Weekly security scan failed — ${new Date().toISOString().slice(0,10)}`;
+            // Name the failure instead of guessing at it.
+            //
+            // This step used to emit a fixed template listing five "common
+            // causes" and never looked at which job failed. Because `ci` is one
+            // of its `needs`, a red E2E test filed an issue titled "Weekly
+            // security scan failed" whose every listed cause was wrong -- see
+            // #807, where OSV had in fact exited 0 and the real failure was a
+            // Playwright upload test. Ten such issues exist historically, two of
+            // them filed on the same day, because nothing deduplicated this path
+            // either (#784 deduplicated the OSV filer, not this one).
+            // Identify security jobs STRUCTURALLY rather than by name matching.
+            // `needs` is [ci, npm-audit, osv-scan, codeql, stale-dependabot], so
+            // everything except `ci` is a security job. Matching on names is what
+            // a first draft of this did, and it silently failed: the job id
+            // `npm-audit` has the display name "Dependency Audit", so the check
+            // would have classed a real audit failure as a mere build break.
+            // Jobs from the called `ci.yml` surface as "CI / <job name>".
+            const isCiJob = (n) => n === 'CI' || n.startsWith('CI / ');
+
+            const jobs = await github.paginate(
+              github.rest.actions.listJobsForWorkflowRun,
+              { owner: context.repo.owner, repo: context.repo.repo, run_id: context.runId },
+            );
+            const failed = jobs.filter((j) => j.conclusion === 'failure');
+
+            // Report the failing STEP too: "CI failed" is a category, "CI /
+            // Run Playwright tests failed" is a lead.
+            const describe = (j) => {
+              const step = (j.steps || []).find((s) => s.conclusion === 'failure');
+              return step ? `**${j.name}** — step \`${step.name}\`` : `**${j.name}**`;
+            };
+
+            // A security job failing and the build merely being broken are
+            // different events and should not share a title.
+            const securityFailed = failed.some((j) => !isCiJob(j.name));
+            const kind = securityFailed ? 'Weekly security scan failed' : 'Weekly scheduled run failed';
+            const marker = kind;
+
+            const { data: open } = await github.rest.issues.listForRepo({
+              owner: context.repo.owner, repo: context.repo.repo,
+              state: 'open', labels: 'bug,ci',
+            });
+            if (open.some((i) => i.title.startsWith(marker))) {
+              core.info(`An open "${marker}" issue already exists — skipping duplicate.`);
+              return;
+            }
+
+            const runUrl = `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
             const body = [
-              '## Weekly Security Scan Failure',
+              `## ${kind}`,
               '',
-              `**Workflow run:** ${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`,
+              `**Workflow run:** ${runUrl}`,
               '',
-              'The weekly security scan failed. Please investigate before the next release.',
+              failed.length
+                ? ['These jobs failed:', '', ...failed.map((j) => `- ${describe(j)}`)].join('\n')
+                : 'No job reported a failure conclusion, which usually means a job was cancelled or timed out. Check the run.',
               '',
-              'Common causes:',
-              '- A new high/critical CVE in a transitive npm dependency',
-              '- OSV Scanner flagged a known-vulnerable package version',
-              '- CodeQL found a security-and-quality issue in new code',
-              '- A Dependabot security PR has been open for more than 14 days',
-              '- The Node.js 22 base image changed in a breaking way',
+              securityFailed
+                ? 'At least one security job is among them — treat as a security finding until triaged.'
+                : 'No security job failed. This is a build or test failure surfaced by the scheduled run, not a vulnerability.',
+              '',
+              'Note: `continue-on-error` makes a failed step report `conclusion: success`, so read the step logs rather than the conclusions when a job looks green but behaved otherwise.',
             ].join('\n');
+
             await github.rest.issues.create({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              title,
+              title: `${kind} — ${new Date().toISOString().slice(0,10)}`,
               body,
               labels: ['bug', 'ci'],
             });
