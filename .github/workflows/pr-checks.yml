@@ -143,6 +143,27 @@ jobs:
   # dropped in silence: the change ships with no changelog entry, no upgrade
   # note, and nothing failing to say so.
   #
+  # WHAT COUNTS is release-please's rule, not the spec's, and the two spellings
+  # of the token are NOT symmetric there. Verified against release-please
+  # 17.11.1's own parser rather than its documentation: `BREAKING CHANGE:`, with
+  # a space, is read only at the START of a line, while the hyphenated spelling
+  # is ALSO matched by an unanchored regex over the commit body -- mid-sentence,
+  # indented, inside a fenced code block, even inside a longer word -- with the
+  # remainder of that line taken as the description.
+  #
+  # This guard used to count only line-anchored matches, so it UNDER-counted
+  # against release-please and passed commits release-please treats as breaking.
+  # abacdb5 in azure-pipelines-terraform, the commit that ADDED the guard there,
+  # is the case: a sentence in its body NAMING the hyphenated spelling made
+  # release-please propose a MAJOR bump over 1.14.4 with a changelog entry
+  # reading "` spelling". The guard counted it 0.
+  #
+  # So the count below is release-please's count -- no more, and no less, since a
+  # guard that rejects legitimate prose is one people route around and then
+  # delete. On top of it the guard rejects a hyphenated token found off the start
+  # of a line at all: that is never a declaration anybody WROTE, and it always
+  # buys a major version bump nobody asked for.
+  #
   # This is not hypothetical. terraform-registry-backend v4.0.0 shipped two
   # undocumented breaking changes this way -- including one that breaks CI
   # tokens -- and terraform-state-manager-backend 3.1.0 lost three before the
@@ -153,12 +174,21 @@ jobs:
   # change. Either open one PR per breaking change, or combine them into a
   # single footer and write each up in the upgrade guide.
   #
-  # MUTATION-PROVED by frontend/scripts/__tests__/breaking-change-footers.test.ts,
-  # which runs in the required "Unit Tests" shards. It EXTRACTS the `run:` block
-  # below out of this file -- a copy would drift from the thing it claims to
-  # prove -- and runs it against fixture commit histories with `gh` stubbed.
-  # The script is bash inside YAML: actionlint checks its syntax, zizmor checks
-  # the workflow around it, and nothing else ever executes it.
+  # MUTATION-PROVED, but no longer here. The guard was a 128-line shell body
+  # duplicated across NINE repositories -- which is why one regex mistake existed
+  # in nine places at once and took nine pull requests to correct -- so it now
+  # lives once as a composite action in 4cloudguru/shared-workflows, with its
+  # 16-case test beside it in that repository's self-check.
+  #
+  # The test still EXTRACTS the script from the action rather than copying it: a
+  # copy drifts from the thing it claims to prove, which is the same defect one
+  # level up.
+  #
+  # This stays a composite action called as a STEP rather than a reusable
+  # workflow, so the job keeps its name and this check keeps reporting as
+  # "Breaking-change footers survive the squash". A reusable workflow reports as
+  # <caller-job-id> / <called-job-name>, and this context is required in
+  # azure-pipelines-release-docs.
   #
   # That includes the `set -euo pipefail` on its first line, which is not
   # decoration. Without it a failed `gh api` still creates an empty
@@ -182,99 +212,21 @@ jobs:
         uses: step-security/harden-runner@05e31511f85b41b11d1cf0ef85d0992719546e2c # v2.21.0
         with:
           egress-policy: audit
+      # The guard is 128 lines of shell that was duplicated across NINE
+      # repositories, which is why one regex mistake existed in nine places at
+      # once and took nine pull requests to correct. It now lives once, in
+      # 4cloudguru/shared-workflows, with its 20-case test beside it.
+      #
+      # A composite ACTION, not a reusable workflow: a reusable workflow reports
+      # as <caller-job-id> / <called-job-name>, which would rename this check.
+      # Called as a step, the job keeps its name and the context keeps reporting
+      # as "Breaking-change footers survive the squash".
       - name: Count breaking-change declarations across this PR's commits
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          PR_NUMBER: ${{ github.event.pull_request.number }}
-          REPO: ${{ github.repository }}
-        run: |
-          set -euo pipefail
-
-          gh api --paginate "repos/$REPO/pulls/$PR_NUMBER/commits" \
-            --jq '.[] | {sha: .sha[0:7], msg: .commit.message}' > commits.ndjson
-
-          total=0
-          report=""
-          while IFS= read -r line; do
-            [ -n "$line" ] || continue
-            sha=$(jq -r '.sha' <<<"$line")
-            msg=$(jq -r '.msg' <<<"$line")
-            subject=$(head -n1 <<<"$msg")
-
-            # Spec allows both spellings of the footer token.
-            footers=$(grep -cE '^BREAKING[ -]CHANGE:' <<<"$msg" || true)
-            if [ "$footers" -gt 0 ]; then
-              # A footer wins over the header's `!`, so they are not additive.
-              n="$footers"
-            elif printf '%s' "$subject" | grep -qE '^[a-zA-Z]+(\([^)]*\))?!:'; then
-              n=1
-            else
-              n=0
-            fi
-
-            if [ "$n" -gt 0 ]; then
-              report="${report}  ${sha}  ${n} declaration(s)  ${subject}"$'\n'
-            fi
-            total=$((total + n))
-          done < commits.ndjson
-
-          echo "Breaking-change declarations in this PR: $total"
-          if [ -n "$report" ]; then
-            printf 'Where they are:\n%s' "$report"
-          fi
-
-          if [ "$total" -le 1 ]; then
-            echo "OK: at most one declaration, so the squash loses nothing."
-            exit 0
-          fi
-
-          {
-            echo "### Breaking-change declarations do not survive the squash"
-            echo
-            echo "This PR declares **$total** breaking changes. The squash-merge"
-            echo "concatenates every commit body into one commit, and release-please"
-            echo "keeps only the **first** \`BREAKING CHANGE:\` footer of a commit."
-            echo "The other $((total - 1)) would ship with no changelog entry and no notice."
-            echo
-            echo '```'
-            printf '%s' "$report"
-            echo '```'
-            echo
-            echo "Two ways out:"
-            echo
-            echo "1. **One PR per breaking change.** Preferred when they are independent."
-            echo "2. **One footer.** Combine the declarations into a single"
-            echo "   \`BREAKING CHANGE:\` footer and write each one up in the upgrade"
-            echo "   guide, which is where an operator preparing an upgrade looks."
-            echo
-            echo "Moving the footers into separate commits within this PR does **not**"
-            echo "work -- the squash concatenates them back into one commit body."
-          } >> "$GITHUB_STEP_SUMMARY"
-
-          echo "::error::This PR declares $total breaking changes; the squash keeps only the first. See the job summary."
-          exit 1
-
-  # ── The merged commit has to be readable by release-please ─────────────
-  # release-please chooses what to release by parsing the commits on main
-  # with a strict reading of the Conventional Commits grammar. A message it
-  # cannot parse is not an error to it: it logs `commit could not be parsed`
-  # at debug level, reports success, and drops the commit. That change then
-  # gets no changelog entry and no version bump, and never will -- every
-  # later run re-reads the same commit and skips it again.
-  #
-  # This is not hypothetical. terraform-state-manager-backend#405, a
-  # dependency migration that cleared seven advisories, merged with a body
-  # line that happened to begin with `WithArgs(pq.Array(...))`. The grammar
-  # reads a line starting with `name(` as a structured token, so its
-  # brackets have to be flat and closed, and nested ones void the whole
-  # commit. The same text one word further along the line is ordinary prose
-  # and parses cleanly. Whether that release got cut came down to where the
-  # paragraph wrapped.
-  #
-  # Its sibling repository made the identical change and released normally,
-  # on the same config and the same action version. Nothing in CI could tell
-  # the two apart, because a PR title check reads only the title and both
-  # titles were correct.
+        uses: 4cloudguru/shared-workflows/.github/actions/breaking-change-footers@f38de4ea7ae1f75a35ad07604a6b7ce79625206b # v1.10.1
+        with:
+          gh-token: ${{ secrets.GITHUB_TOKEN }}
+          pr-number: ${{ github.event.pull_request.number }}
+          repo: ${{ github.repository }}
   release-please-can-read-the-commit:
     name: release-please can read the merged commit
     runs-on: ubuntu-latest
