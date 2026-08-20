@@ -19,6 +19,7 @@ jobs:
   translate:
     name: Translate and open PR
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     # GITHUB_TOKEN only needs to read the tree. The branch push and the pull
     # request are made with a GitHub App token minted below, because this
     # repository's default workflow permissions are read-only and a workflow
@@ -28,6 +29,14 @@ jobs:
     permissions:
       contents: read
     steps:
+      # hardening-exception: egress-audit — this job installs from the npm registry
+      #   and clones this repository; harden-runner has never run in this repository,
+      #   so no endpoint baseline exists and a block policy written without one fails
+      #   closed on its first run; audit is what produces that list
+      - name: Harden the runner
+        uses: step-security/harden-runner@05e31511f85b41b11d1cf0ef85d0992719546e2c # v2.21.0
+        with:
+          egress-policy: audit
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1 # zizmor: ignore[artipacked] -- opens the translations PR
 
       - name: Mint a token for the translations branch and PR
@@ -57,7 +66,7 @@ jobs:
 
       - name: Create PR with translations
         # v8.1.1
-        uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1
+        uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1 # v8.1.1
         with:
           token: "${{ steps.app-token.outputs.token }}"
           branch: i18n/auto-translate
