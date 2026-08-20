@@ -40,9 +40,18 @@ jobs:
   npm-audit:
     name: Dependency Audit
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     permissions:
       contents: read
     steps:
+      # hardening-exception: egress-audit — this job clones this repository;
+      #   harden-runner has never run in this repository, so no endpoint baseline
+      #   exists and a block policy written without one fails closed on its first run;
+      #   audit is what produces that list
+      - name: Harden the runner
+        uses: step-security/harden-runner@05e31511f85b41b11d1cf0ef85d0992719546e2c # v2.21.0
+        with:
+          egress-policy: audit
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
@@ -73,6 +82,7 @@ jobs:
   osv-scan:
     name: OSV Scan
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     permissions:
       # `security-events: write` used to be requested here and was never used:
       # nothing in this job uploads SARIF (the scan writes JSON for the triage
@@ -82,6 +92,15 @@ jobs:
       contents: read # checkout
       issues: write # the tracking issue maintained by "Report OSV findings"
     steps:
+      # hardening-exception: egress-audit — this job queries the OSV vulnerability
+      #   database, calls the GitHub API, and clones this repository; harden-runner
+      #   has never run in this repository, so no endpoint baseline exists and a block
+      #   policy written without one fails closed on its first run; audit is what
+      #   produces that list
+      - name: Harden the runner
+        uses: step-security/harden-runner@05e31511f85b41b11d1cf0ef85d0992719546e2c # v2.21.0
+        with:
+          egress-policy: audit
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
@@ -89,7 +108,7 @@ jobs:
       - name: Run OSV Scanner
         # v2.3.8
         id: osv
-        uses: google/osv-scanner-action/osv-scanner-action@8deb546fdb875b9996d27d4950be7312dac076a1
+        uses: google/osv-scanner-action/osv-scanner-action@8deb546fdb875b9996d27d4950be7312dac076a1 # v2.5.0
         continue-on-error: true
         with:
           # JSON so the triage step below can classify findings; it prints a
@@ -111,7 +130,7 @@ jobs:
       - name: Report OSV findings
         if: always() && steps.osv.outcome != 'skipped'
         # v8
-        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         env:
           # Passed through env, not `${{ }}` inside `script:`, which would be a
           # template-injection sink. A non-zero scanner exit with no findings at
@@ -148,6 +167,7 @@ jobs:
   codeql:
     name: CodeQL (${{ matrix.language }})
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     permissions:
       security-events: write
       actions: read
@@ -157,24 +177,31 @@ jobs:
       matrix:
         language: [javascript-typescript, actions, python]
     steps:
+      # hardening-exception: egress-audit — this job downloads the CodeQL bundle and
+      #   its query packs and clones this repository; harden-runner has never run in
+      #   this repository, so no endpoint baseline exists and a block policy written
+      #   without one fails closed on its first run; audit is what produces that list
+      - name: Harden the runner
+        uses: step-security/harden-runner@05e31511f85b41b11d1cf0ef85d0992719546e2c # v2.21.0
+        with:
+          egress-policy: audit
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
 
       - name: Initialize CodeQL
         # v4
-        uses: github/codeql-action/init@5595ccaf912efad79be6eef63a5619ff05969be3
+        uses: github/codeql-action/init@5595ccaf912efad79be6eef63a5619ff05969be3 # v4.37.6
         with:
           languages: ${{ matrix.language }}
           queries: security-and-quality
 
       - name: Autobuild
         # v4
-        uses: github/codeql-action/autobuild@5595ccaf912efad79be6eef63a5619ff05969be3
-
+        uses: github/codeql-action/autobuild@5595ccaf912efad79be6eef63a5619ff05969be3 # v4.37.6
       - name: Analyze
         # v4
-        uses: github/codeql-action/analyze@5595ccaf912efad79be6eef63a5619ff05969be3
+        uses: github/codeql-action/analyze@5595ccaf912efad79be6eef63a5619ff05969be3 # v4.37.6
         with:
           category: /language:${{ matrix.language }}
 
@@ -182,12 +209,21 @@ jobs:
   stale-dependabot:
     name: Flag stale Dependabot PRs
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     permissions:
       pull-requests: write
     steps:
+      # hardening-exception: egress-audit — this job calls the GitHub API;
+      #   harden-runner has never run in this repository, so no endpoint baseline
+      #   exists and a block policy written without one fails closed on its first run;
+      #   audit is what produces that list
+      - name: Harden the runner
+        uses: step-security/harden-runner@05e31511f85b41b11d1cf0ef85d0992719546e2c # v2.21.0
+        with:
+          egress-policy: audit
       - name: Label Dependabot PRs open >14 days (lockfile changes)
         # v8
-        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         with:
           script: |
             const cutoff = new Date();
@@ -222,15 +258,24 @@ jobs:
   notify-on-failure:
     name: Create issue on failure
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     needs: [ci, npm-audit, osv-scan, codeql, stale-dependabot]
     if: failure() && github.event_name == 'schedule'
     permissions:
       issues: write
       actions: read # list this run's jobs, to name what actually failed
     steps:
+      # hardening-exception: egress-audit — this job calls the GitHub API;
+      #   harden-runner has never run in this repository, so no endpoint baseline
+      #   exists and a block policy written without one fails closed on its first run;
+      #   audit is what produces that list
+      - name: Harden the runner
+        uses: step-security/harden-runner@05e31511f85b41b11d1cf0ef85d0992719546e2c # v2.21.0
+        with:
+          egress-policy: audit
       - name: Create failure issue
         # v8
-        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         with:
           script: |
             // Name the failure instead of guessing at it.
