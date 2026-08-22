@@ -1,6 +1,18 @@
 <!-- markdownlint-disable MD013 MD024 MD041 -->
 # Changelog
 
+## [2.24.1](https://github.com/sethbacon/terraform-registry-frontend/compare/v2.24.0...v2.24.1) (2026-08-22)
+
+
+### Bug Fixes
+
+* **ci:** refuse to run signature-replay when Dependabot edited the workflow ([#824](https://github.com/sethbacon/terraform-registry-frontend/issues/824)) ([35e7210](https://github.com/sethbacon/terraform-registry-frontend/commit/35e7210aef144481f9f8fa8c6a79b21441f3a6ce))
+
+
+### Documentation
+
+* **security:** record the shared-workflow trust relationship, and fix what it invalidated ([#835](https://github.com/sethbacon/terraform-registry-frontend/issues/835)) ([870fff0](https://github.com/sethbacon/terraform-registry-frontend/commit/870fff0af27b893d8c1e36410b47295b4640d2d5))
+
 ## [2.24.0](https://github.com/sethbacon/terraform-registry-frontend/compare/v2.23.1...v2.24.0) (2026-08-19)
 
 
