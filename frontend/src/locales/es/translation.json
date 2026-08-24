@@ -2354,7 +2354,12 @@
   },
   "adminUserStep": {
     "adminEmail": "Correo electrónico del administrador",
-    "emailMustMatch": "Esta dirección de correo electrónico debe coincidir con la identidad de tu proveedor OIDC"
+    "back": "← Atrás",
+    "configureButton": "Configurar usuario administrador",
+    "description": "Indica la dirección de correo electrónico del primer usuario administrador. Debe coincidir con la dirección de correo electrónico de tu proveedor OIDC. Cuando este usuario inicie sesión a través de OIDC por primera vez, obtendrá automáticamente privilegios de administrador.",
+    "emailMustMatch": "Esta dirección de correo electrónico debe coincidir con la identidad de tu proveedor OIDC",
+    "platformAdminNote": "Este usuario figura como administrador de la plataforma, lo que le otorga acceso a todas las organizaciones del registro. No se le ha añadido a ninguna organización: la administración de la plataforma es independiente de la pertenencia a una organización.",
+    "title": "Usuario administrador inicial"
   },
   "authenticateStep": {
     "findingToken": "Cómo encontrar tu token de configuración",
