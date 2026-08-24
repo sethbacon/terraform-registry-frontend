@@ -1,13 +1,19 @@
 import { render, screen, waitFor, act } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { MemoryRouter } from 'react-router-dom'
+import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 
 const mockLogin = vi.fn()
 const mockDevLogin = vi.fn().mockResolvedValue(undefined)
 const mockLdapLogin = vi.fn().mockResolvedValue(undefined)
+const mockAuth = { isAuthenticated: false, isLoading: false }
 vi.mock('../../contexts/AuthContext', () => ({
-  useAuth: () => ({ login: mockLogin, devLogin: mockDevLogin, ldapLogin: mockLdapLogin }),
+  useAuth: () => ({
+    login: mockLogin,
+    devLogin: mockDevLogin,
+    ldapLogin: mockLdapLogin,
+    ...mockAuth,
+  }),
 }))
 
 const mockNavigate = vi.fn()
@@ -59,6 +65,8 @@ function renderLoginPage() {
 
 beforeEach(() => {
   mockGetDevStatus.mockResolvedValue({ dev_mode: false })
+  mockAuth.isAuthenticated = false
+  mockAuth.isLoading = false
   vi.clearAllMocks()
 })
 
@@ -270,5 +278,73 @@ describe('Dev Login gate (#667)', () => {
     renderLoginPage()
     await waitFor(() => expect(mockGetDevStatus).toHaveBeenCalled())
     expect(screen.queryByRole('button', { name: /dev login/i })).not.toBeInTheDocument()
+  })
+})
+
+/**
+ * Defence in depth after #677 (#781). A live session reaching /login should be
+ * recognised, not handed a login form.
+ *
+ * These render through <Routes> rather than asserting on a navigate() spy,
+ * because the guard uses <Navigate> — the same render-time redirect
+ * ProtectedRoute uses — and a spy on useNavigate cannot see it.
+ */
+describe('LoginPage — an already-authenticated visitor (#781)', () => {
+  function renderAtLogin() {
+    return render(
+      <MemoryRouter initialEntries={['/login']}>
+        <Routes>
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/" element={<div>home</div>} />
+        </Routes>
+      </MemoryRouter>,
+    )
+  }
+
+  it('redirects a resolved, authenticated session away from the form', async () => {
+    mockProviders([{ type: 'oidc', name: 'Corp SSO', id: 'corp' }])
+    mockAuth.isAuthenticated = true
+
+    renderAtLogin()
+
+    expect(await screen.findByText('home')).toBeInTheDocument()
+    expect(screen.queryByText('Terraform Registry')).not.toBeInTheDocument()
+  })
+
+  it('shows the form while the session is still resolving', async () => {
+    // isAuthenticated fails CLOSED — false while resolving and false again if
+    // resolution errored — so the unresolved state needs no separate gate.
+    mockProviders([{ type: 'oidc', name: 'Corp SSO', id: 'corp' }])
+    mockAuth.isAuthenticated = false
+    mockAuth.isLoading = true
+
+    renderAtLogin()
+
+    expect(await screen.findByText('Terraform Registry')).toBeInTheDocument()
+    expect(screen.queryByText('home')).not.toBeInTheDocument()
+  })
+
+  it('redirects a live session that is mid-refresh', async () => {
+    // The two flags are independent: isAuthenticated is `user !== null` and
+    // isLoading is its own state, so both are true while an authenticated
+    // session refreshes. An earlier draft gated on `!isLoading && isAuthenticated`
+    // and would have shown the login form for exactly that window — the bug this
+    // guard exists to prevent, reintroduced by the guard itself.
+    mockProviders([{ type: 'oidc', name: 'Corp SSO', id: 'corp' }])
+    mockAuth.isAuthenticated = true
+    mockAuth.isLoading = true
+
+    renderAtLogin()
+
+    expect(await screen.findByText('home')).toBeInTheDocument()
+  })
+
+  it('shows the form to a visitor who is genuinely signed out', async () => {
+    mockProviders([{ type: 'oidc', name: 'Corp SSO', id: 'corp' }])
+
+    renderAtLogin()
+
+    expect(await screen.findByText('Terraform Registry')).toBeInTheDocument()
+    expect(screen.queryByText('home')).not.toBeInTheDocument()
   })
 })
