@@ -407,6 +407,23 @@ The following local files are thin wrappers or re-exports around it:
 | `components/SuiteSwitcher.tsx` | `SuiteSwitcher` (cross-app switcher)                                |
 | `navigation.tsx`               | `NavItem` / `NavGroup` types for the sidebar config                 |
 
+These files are not wrappers — they **consume** the package's components and
+types directly, adding this app's own data fetching and policy around them:
+
+| Local file                           | Consumes from the package                                                                           |
+| ------------------------------------ | --------------------------------------------------------------------------------------------------- |
+| `pages/admin/APIKeysPage.tsx`        | `ApiKeyExpirySettingsCard`, `ApiKeyExpirySettingsInput`                                             |
+| `pages/admin/NotificationsPage.tsx`  | `NotificationChannelsSection`, `NotificationChannelTypeOption`                                      |
+| `pages/admin/BrandingPage.tsx`       | `BrandingSettingsCard`, `UIThemeConfig`                                                             |
+| `pages/setup/steps/BrandingStep.tsx` | `BrandingSettingsCard`, `UIThemeConfig` — the setup-wizard counterpart of the admin page above      |
+| `services/api/themeApi.ts`           | `UIThemeConfig` (type only)                                                                         |
+| `utils/externalUrl.ts`               | `isSafeUrl`, composed with this app's scheme narrowing and origin allowlist rather than re-exported |
+
+`routeScopes.ts` and `services/errorReporting.ts` mention the package in
+comments but import nothing from it, so they are deliberately absent from both
+tables. `suitePackageDocumented.test.ts` keeps these lists in step with the
+imports themselves.
+
 ## Shared Components
 
 | Component                | Purpose                                                                        |
