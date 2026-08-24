@@ -2354,7 +2354,12 @@
   },
   "adminUserStep": {
     "adminEmail": "E-mail de l'administrateur",
-    "emailMustMatch": "Cette adresse e-mail doit correspondre à l'identité fournie par votre fournisseur OIDC"
+    "back": "← Retour",
+    "configureButton": "Configurer l'utilisateur administrateur",
+    "description": "Indiquez l'adresse e-mail du premier utilisateur administrateur. Celle-ci doit correspondre à l'adresse e-mail enregistrée auprès de votre fournisseur OIDC. Lorsque cet utilisateur se connectera via OIDC pour la première fois, il se verra automatiquement attribuer des privilèges d'administrateur.",
+    "emailMustMatch": "Cette adresse e-mail doit correspondre à l'identité fournie par votre fournisseur OIDC",
+    "platformAdminNote": "Cet utilisateur est enregistré en tant qu'administrateur de la plateforme, ce qui lui confère un accès à toutes les organisations du registre. Il n'est pas rattaché à une organisation particulière : l'administration de la plateforme est distincte de l'appartenance à une organisation.",
+    "title": "Utilisateur administrateur par défaut"
   },
   "authenticateStep": {
     "findingToken": "Trouver votre jeton de configuration",

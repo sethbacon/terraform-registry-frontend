@@ -2354,7 +2354,12 @@
   },
   "adminUserStep": {
     "adminEmail": "管理员邮箱",
-    "emailMustMatch": "此电子邮件地址必须与您的 OIDC 提供商身份一致"
+    "back": "← 返回",
+    "configureButton": "配置管理员用户",
+    "description": "请指定首位管理员用户的电子邮箱地址。该地址必须与您在 OIDC 提供商中注册的电子邮箱一致。当该用户首次通过 OIDC 登录时，将自动获得管理员权限。",
+    "emailMustMatch": "此电子邮件地址必须与您的 OIDC 提供商身份一致",
+    "platformAdminNote": "该用户被记录为平台管理员，这使其拥有对注册表中所有组织的访问权限。该用户并未被添加到任何组织中——平台管理权限与组织成员身份是分开管理的。",
+    "title": "初始管理员用户"
   },
   "authenticateStep": {
     "findingToken": "查找您的设置令牌",

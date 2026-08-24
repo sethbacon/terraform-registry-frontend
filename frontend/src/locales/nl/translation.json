@@ -2354,7 +2354,12 @@
   },
   "adminUserStep": {
     "adminEmail": "E-mailadres beheerder",
-    "emailMustMatch": "Deze e-mailadres moet overeenkomen met de identiteit van uw OIDC-provider"
+    "back": "← Terug",
+    "configureButton": "Beheerdersgebruiker configureren",
+    "description": "Geef het e-mailadres van de eerste beheerdersgebruiker op. Dit moet overeenkomen met het e-mailadres bij uw OIDC-provider. Wanneer deze gebruiker zich voor het eerst via OIDC aanmeldt, krijgt hij of zij automatisch beheerdersrechten.",
+    "emailMustMatch": "Deze e-mailadres moet overeenkomen met de identiteit van uw OIDC-provider",
+    "platformAdminNote": "Deze gebruiker staat geregistreerd als platformbeheerder, waardoor hij toegang heeft tot alle organisaties in het register. Hij is niet toegevoegd aan een organisatie — het platformbeheer staat los van het lidmaatschap.",
+    "title": "Eerste beheerdersgebruiker"
   },
   "authenticateStep": {
     "findingToken": "Je configuratietoken vinden",
