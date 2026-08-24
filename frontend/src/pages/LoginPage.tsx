@@ -16,7 +16,7 @@ import {
 import LoginIcon from '@mui/icons-material/Login'
 import { useAuth } from '../contexts/AuthContext'
 import { useThemeMode } from '../contexts/ThemeContext'
-import { useNavigate } from 'react-router-dom'
+import { Navigate, useNavigate } from 'react-router-dom'
 import api from '../services/api'
 import * as devApi from '../services/api/devApi'
 
@@ -51,7 +51,7 @@ function providerSx(p: AuthProvider): Record<string, unknown> | undefined {
 
 const LoginPage: React.FC = () => {
   const { t } = useTranslation()
-  const { login, devLogin, ldapLogin } = useAuth()
+  const { login, devLogin, ldapLogin, isAuthenticated } = useAuth()
   const { productName } = useThemeMode()
   const navigate = useNavigate()
   const [loginError, setLoginError] = React.useState<string | null>(null)
@@ -148,6 +148,33 @@ const LoginPage: React.FC = () => {
   const ssoProviders = providers.filter((p) => p.type !== 'ldap')
   const hasLdap = providers.some((p) => p.type === 'ldap')
   const showNoProvidersAlert = !loading && providers.length === 0 && !isDev
+
+  // Defence in depth after #677 (#781). That issue's cause is fixed — the 401
+  // interceptor no longer tears down a live session on a non-session 401, so a
+  // valid session is no longer bounced here — and this covers the paths nobody
+  // enumerated: if a live session reaches /login by any other route, recognise
+  // it rather than presenting a login form to someone already signed in.
+  //
+  // NOT gated on isLoading, which an earlier draft of this did. The two flags
+  // are independent in cloud-suite-ui (isAuthenticated is `user !== null`;
+  // isLoading is its own state), so they are both true while a live session
+  // refreshes — and `!isLoading && isAuthenticated` would show the login form
+  // to an authenticated user for exactly that window, which is the bug. On the
+  // initial resolve isAuthenticated is false anyway, because it fails closed
+  // there and on error alike, so the gate bought nothing and cost that.
+  //
+  // Destination is '/', matching what this page's own successful logins do, not
+  // the stored returnUrl. That key is CallbackPage's to consume — it carries the
+  // open-redirect validation, and reading it from a second place would either
+  // duplicate that check or skip it, on a value that may be stale from an
+  // earlier bounce.
+  //
+  // <Navigate> rather than a navigate() effect, matching ProtectedRoute: a
+  // route-level redirect belongs in render, and an effect would show the form
+  // for a frame first.
+  if (isAuthenticated) {
+    return <Navigate to="/" replace />
+  }
 
   return (
     <Container maxWidth="sm" sx={{ mx: 'auto' }}>
