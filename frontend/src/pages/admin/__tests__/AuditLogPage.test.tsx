@@ -126,13 +126,13 @@ describe('AuditLogPage', () => {
   })
 
   it('shows loading spinner while fetching', () => {
-    listAuditLogsMock.mockReturnValue(new Promise(() => { }))
+    listAuditLogsMock.mockReturnValue(new Promise(() => {}))
     renderPage()
     expect(screen.getByRole('progressbar')).toBeInTheDocument()
   })
 
   it('renders heading "Audit Logs"', () => {
-    listAuditLogsMock.mockReturnValue(new Promise(() => { }))
+    listAuditLogsMock.mockReturnValue(new Promise(() => {}))
     renderPage()
     expect(screen.getByText('Audit Logs')).toBeInTheDocument()
   })
@@ -150,7 +150,7 @@ describe('AuditLogPage', () => {
   })
 
   it('shows filter controls', () => {
-    listAuditLogsMock.mockReturnValue(new Promise(() => { }))
+    listAuditLogsMock.mockReturnValue(new Promise(() => {}))
     renderPage()
     expect(screen.getByLabelText('Resource Type')).toBeInTheDocument()
     expect(screen.getByLabelText('Action')).toBeInTheDocument()
@@ -158,7 +158,7 @@ describe('AuditLogPage', () => {
   })
 
   it('shows Export button', () => {
-    listAuditLogsMock.mockReturnValue(new Promise(() => { }))
+    listAuditLogsMock.mockReturnValue(new Promise(() => {}))
     renderPage()
     expect(screen.getByText('Export')).toBeInTheDocument()
   })

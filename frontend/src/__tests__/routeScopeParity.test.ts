@@ -41,16 +41,12 @@ describe('admin route scope parity (#693)', () => {
     // differently), every assertion below would vacuously pass over an empty
     // list. An empty universe is the failure mode this whole guard exists to
     // prevent, so it is asserted first.
-    expect(blocks.length).toBeGreaterThanOrEqual(
-      Object.keys(ADMIN_ROUTE_SCOPES).length,
-    )
+    expect(blocks.length).toBeGreaterThanOrEqual(Object.keys(ADMIN_ROUTE_SCOPES).length)
   })
 
   it('every gated admin route reads its scope from ADMIN_ROUTE_SCOPES', () => {
     const gated = blocks.filter((b) => b.element.includes('<LazyRoute'))
-    const missing = gated
-      .filter((b) => !(b.path in ADMIN_ROUTE_SCOPES))
-      .map((b) => b.path)
+    const missing = gated.filter((b) => !(b.path in ADMIN_ROUTE_SCOPES)).map((b) => b.path)
     expect(missing, 'admin routes with no entry in ADMIN_ROUTE_SCOPES').toEqual([])
   })
 
@@ -58,9 +54,7 @@ describe('admin route scope parity (#693)', () => {
     // `isPublic` on an /admin route compiles cleanly — it is a legitimate shape
     // for the public pages — but on an admin path it is the #686 fail-open
     // reintroduced deliberately rather than by accident.
-    const publicAdmin = blocks
-      .filter((b) => b.element.includes('isPublic'))
-      .map((b) => b.path)
+    const publicAdmin = blocks.filter((b) => b.element.includes('isPublic')).map((b) => b.path)
     expect(publicAdmin, 'admin routes wired with isPublic').toEqual([])
   })
 

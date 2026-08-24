@@ -31,12 +31,17 @@ export async function updateMirror(
   id: string,
   data: UpdateMirrorConfigRequest,
 ): Promise<MirrorConfiguration> {
-  const response = await http.put<MirrorConfiguration>(`/api/v1/admin/mirrors/${encodeSegment(id)}`, data)
+  const response = await http.put<MirrorConfiguration>(
+    `/api/v1/admin/mirrors/${encodeSegment(id)}`,
+    data,
+  )
   return response.data
 }
 
 export async function deleteMirror(id: string): Promise<{ message: string }> {
-  const response = await http.delete<{ message: string }>(`/api/v1/admin/mirrors/${encodeSegment(id)}`)
+  const response = await http.delete<{ message: string }>(
+    `/api/v1/admin/mirrors/${encodeSegment(id)}`,
+  )
   return response.data
 }
 
@@ -57,7 +62,9 @@ export async function triggerMirrorSync(
 }
 
 export async function getMirrorStatus(id: string): Promise<MirrorSyncStatus> {
-  const response = await http.get<MirrorSyncStatus>(`/api/v1/admin/mirrors/${encodeSegment(id)}/status`)
+  const response = await http.get<MirrorSyncStatus>(
+    `/api/v1/admin/mirrors/${encodeSegment(id)}/status`,
+  )
   return response.data
 }
 
@@ -84,7 +91,9 @@ export async function listApprovalRequests(options?: {
 }
 
 export async function getApprovalRequest(id: string): Promise<MirrorApprovalRequest> {
-  const response = await http.get<MirrorApprovalRequest>(`/api/v1/admin/approvals/${encodeSegment(id)}`)
+  const response = await http.get<MirrorApprovalRequest>(
+    `/api/v1/admin/approvals/${encodeSegment(id)}`,
+  )
   return response.data
 }
 
@@ -159,7 +168,9 @@ export async function updateMirrorPolicy(
 }
 
 export async function deleteMirrorPolicy(id: string): Promise<{ message: string }> {
-  const response = await http.delete<{ message: string }>(`/api/v1/admin/policies/${encodeSegment(id)}`)
+  const response = await http.delete<{ message: string }>(
+    `/api/v1/admin/policies/${encodeSegment(id)}`,
+  )
   return response.data
 }
 

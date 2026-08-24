@@ -1071,7 +1071,7 @@ describe('ApiClient', () => {
       const client = await getApiClient()
 
       const mockResponse = { data: { valid: true } }
-        ; (mockAxiosInstance.post as ReturnType<typeof vi.fn>).mockResolvedValueOnce(mockResponse)
+      ;(mockAxiosInstance.post as ReturnType<typeof vi.fn>).mockResolvedValueOnce(mockResponse)
 
       await client.validateSetupToken('my-setup-token')
 
@@ -1092,7 +1092,7 @@ describe('ApiClient', () => {
       const client = await getApiClient()
 
       const mockResponse = { data: { modules: [], meta: { total: 0 } } }
-        ; (mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce(mockResponse)
+      ;(mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce(mockResponse)
 
       const result = await client.searchModules({ query: 'vpc', limit: 10, offset: 0 })
 
@@ -1108,7 +1108,7 @@ describe('ApiClient', () => {
       const client = await getApiClient()
 
       const mockResponse = { data: { providers: [], meta: { total: 0 } } }
-        ; (mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce(mockResponse)
+      ;(mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce(mockResponse)
 
       const result = await client.searchProviders({ query: 'aws', limit: 5, offset: 0 })
 
@@ -1129,7 +1129,7 @@ describe('ApiClient', () => {
           pagination: { page: 1, per_page: 20, total: 1 },
         },
       }
-        ; (mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce(mockResponse)
+      ;(mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce(mockResponse)
 
       const result = await client.listUsers(1, 20)
 
@@ -1146,7 +1146,7 @@ describe('ApiClient', () => {
       const client = await getApiClient()
 
       const mockResponse = { data: { id: 's1', backend_type: 'local', is_active: true } }
-        ; (mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce(mockResponse)
+      ;(mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce(mockResponse)
 
       const result = await client.getActiveStorageConfig()
 
@@ -1162,7 +1162,7 @@ describe('ApiClient', () => {
       const client = await getApiClient()
 
       const mockResponse = { data: { id: 'scan-1', status: 'completed' } }
-        ; (mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce(mockResponse)
+      ;(mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce(mockResponse)
 
       const result = await client.getScanByID('scan-1')
 
@@ -1182,7 +1182,7 @@ describe('ApiClient', () => {
           signature_supported: true,
         },
       }
-        ; (mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce(mockResponse)
+      ;(mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce(mockResponse)
 
       const result = await client.checkScannerLatest('trivy')
 
@@ -1196,7 +1196,7 @@ describe('ApiClient', () => {
       const client = await getApiClient()
 
       const mockResponse = { data: { tool: 'trivy', installed_version: '0.50.0', activated: true } }
-        ; (mockAxiosInstance.post as ReturnType<typeof vi.fn>).mockResolvedValueOnce(mockResponse)
+      ;(mockAxiosInstance.post as ReturnType<typeof vi.fn>).mockResolvedValueOnce(mockResponse)
 
       const payload = { tool: 'trivy', version: '0.50.0', activate: true }
       const result = await client.adminInstallScanner(payload)
@@ -1209,7 +1209,7 @@ describe('ApiClient', () => {
       const client = await getApiClient()
 
       const mockResponse = { data: { message: 'check queued' } }
-        ; (mockAxiosInstance.post as ReturnType<typeof vi.fn>).mockResolvedValueOnce(mockResponse)
+      ;(mockAxiosInstance.post as ReturnType<typeof vi.fn>).mockResolvedValueOnce(mockResponse)
 
       const result = await client.triggerScannerCheck()
 
@@ -1221,9 +1221,14 @@ describe('ApiClient', () => {
       const client = await getApiClient()
 
       const mockResponse = {
-        data: { enabled: true, interval_hours: 24, requires_approval: true, auto_approve_rules: '' },
+        data: {
+          enabled: true,
+          interval_hours: 24,
+          requires_approval: true,
+          auto_approve_rules: '',
+        },
       }
-        ; (mockAxiosInstance.put as ReturnType<typeof vi.fn>).mockResolvedValueOnce(mockResponse)
+      ;(mockAxiosInstance.put as ReturnType<typeof vi.fn>).mockResolvedValueOnce(mockResponse)
 
       const payload = {
         enabled: true,
@@ -1233,7 +1238,10 @@ describe('ApiClient', () => {
       }
       const result = await client.saveScannerAutoUpdate(payload)
 
-      expect(mockAxiosInstance.put).toHaveBeenCalledWith('/api/v1/admin/scanning/auto-update', payload)
+      expect(mockAxiosInstance.put).toHaveBeenCalledWith(
+        '/api/v1/admin/scanning/auto-update',
+        payload,
+      )
       expect(result).toEqual(mockResponse.data)
     })
   })
@@ -1245,7 +1253,7 @@ describe('ApiClient', () => {
       const client = await getApiClient()
 
       const mockResponse = { data: { enabled: true, password_configured: false } }
-        ; (mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce(mockResponse)
+      ;(mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce(mockResponse)
 
       const result = await client.getNotificationsConfig()
 
@@ -1257,7 +1265,7 @@ describe('ApiClient', () => {
       const client = await getApiClient()
 
       const mockResponse = { data: { enabled: true } }
-        ; (mockAxiosInstance.put as ReturnType<typeof vi.fn>).mockResolvedValueOnce(mockResponse)
+      ;(mockAxiosInstance.put as ReturnType<typeof vi.fn>).mockResolvedValueOnce(mockResponse)
 
       const payload = {
         enabled: true,
@@ -1282,7 +1290,10 @@ describe('ApiClient', () => {
       }
       const result = await client.saveNotificationsConfig(payload)
 
-      expect(mockAxiosInstance.put).toHaveBeenCalledWith('/api/v1/admin/notifications/config', payload)
+      expect(mockAxiosInstance.put).toHaveBeenCalledWith(
+        '/api/v1/admin/notifications/config',
+        payload,
+      )
       expect(result).toEqual(mockResponse.data)
     })
 
@@ -1290,12 +1301,15 @@ describe('ApiClient', () => {
       const client = await getApiClient()
 
       const mockResponse = { data: { success: true, message: 'sent' } }
-        ; (mockAxiosInstance.post as ReturnType<typeof vi.fn>).mockResolvedValueOnce(mockResponse)
+      ;(mockAxiosInstance.post as ReturnType<typeof vi.fn>).mockResolvedValueOnce(mockResponse)
 
       const payload = { recipients: ['ops@example.com'] }
       const result = await client.sendTestNotification(payload)
 
-      expect(mockAxiosInstance.post).toHaveBeenCalledWith('/api/v1/admin/notifications/test', payload)
+      expect(mockAxiosInstance.post).toHaveBeenCalledWith(
+        '/api/v1/admin/notifications/test',
+        payload,
+      )
       expect(result).toEqual(mockResponse.data)
     })
 
@@ -1303,7 +1317,7 @@ describe('ApiClient', () => {
       const client = await getApiClient()
 
       const mockResponse = { data: { success: true, message: 'sent' } }
-        ; (mockAxiosInstance.post as ReturnType<typeof vi.fn>).mockResolvedValueOnce(mockResponse)
+      ;(mockAxiosInstance.post as ReturnType<typeof vi.fn>).mockResolvedValueOnce(mockResponse)
 
       const result = await client.sendTestNotification()
 
@@ -1380,9 +1394,9 @@ describe('ApiClient', () => {
             targets: [],
           },
         ]
-          ; (mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
-            data: advisories,
-          })
+        ;(mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+          data: advisories,
+        })
 
         const result = await client.getActiveAdvisories()
 
@@ -1394,7 +1408,7 @@ describe('ApiClient', () => {
       it('returns empty array when response is not an array', async () => {
         const client = await getApiClient()
 
-          ; (mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({ data: null })
+        ;(mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({ data: null })
 
         const result = await client.getActiveAdvisories()
 
@@ -1407,7 +1421,7 @@ describe('ApiClient', () => {
         const client = await getApiClient()
 
         const mockResponse = { data: { advisories: [], total: 0 } }
-          ; (mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce(mockResponse)
+        ;(mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce(mockResponse)
 
         const result = await client.listAdminAdvisories()
 
@@ -1421,7 +1435,7 @@ describe('ApiClient', () => {
         const client = await getApiClient()
 
         const mockResponse = { data: { advisories: [], total: 0 } }
-          ; (mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce(mockResponse)
+        ;(mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce(mockResponse)
 
         await client.listAdminAdvisories('binary')
 
@@ -1435,9 +1449,9 @@ describe('ApiClient', () => {
       it('calls POST /api/v1/admin/advisories/poll and returns message', async () => {
         const client = await getApiClient()
 
-          ; (mockAxiosInstance.post as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
-            data: { message: 'poll queued' },
-          })
+        ;(mockAxiosInstance.post as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+          data: { message: 'poll queued' },
+        })
 
         const result = await client.triggerAdvisoryPoll()
 
@@ -1451,9 +1465,9 @@ describe('ApiClient', () => {
   describe('auth methods', () => {
     it('refreshToken calls POST /api/v1/auth/refresh and returns expires_in (no token)', async () => {
       const client = await getApiClient()
-        ; (mockAxiosInstance.post as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
-          data: { expires_in: 900 },
-        })
+      ;(mockAxiosInstance.post as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+        data: { expires_in: 900 },
+      })
       const result = await client.refreshToken()
       expect(mockAxiosInstance.post).toHaveBeenCalledWith('/api/v1/auth/refresh')
       expect(result.expires_in).toBe(900)
@@ -1461,9 +1475,9 @@ describe('ApiClient', () => {
 
     it('getCurrentUser calls GET /api/v1/auth/me', async () => {
       const client = await getApiClient()
-        ; (mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
-          data: { user: { id: 'u1', email: 'a@b.com' } },
-        })
+      ;(mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+        data: { user: { id: 'u1', email: 'a@b.com' } },
+      })
       const result = await client.getCurrentUser()
       expect(mockAxiosInstance.get).toHaveBeenCalledWith('/api/v1/auth/me')
       expect(result.id).toBe('u1')
@@ -1471,9 +1485,9 @@ describe('ApiClient', () => {
 
     it('getCurrentUserWithRole returns user, role_template, allowed_scopes', async () => {
       const client = await getApiClient()
-        ; (mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
-          data: { user: { id: 'u1' }, role_template: { id: 'r1' }, allowed_scopes: ['admin'] },
-        })
+      ;(mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+        data: { user: { id: 'u1' }, role_template: { id: 'r1' }, allowed_scopes: ['admin'] },
+      })
       const result = await client.getCurrentUserWithRole()
       expect(result.user.id).toBe('u1')
       expect(result.role_template?.id).toBe('r1')
@@ -1482,9 +1496,9 @@ describe('ApiClient', () => {
 
     it('getCurrentUserWithRole defaults missing fields', async () => {
       const client = await getApiClient()
-        ; (mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
-          data: { user: { id: 'u1' } },
-        })
+      ;(mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+        data: { user: { id: 'u1' } },
+      })
       const result = await client.getCurrentUserWithRole()
       expect(result.role_template).toBeNull()
       expect(result.allowed_scopes).toEqual([])
@@ -1497,30 +1511,30 @@ describe('ApiClient', () => {
       // by swagger.yaml) are never marshalled. This is the shape that must
       // survive, because the array died here before #795.
       const client = await getApiClient()
-        ; (mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
-          data: {
-            user: { id: 'u1' },
-            memberships: [
-              {
-                organization_id: 'org-a',
-                organization_name: 'acme',
-                created_at: '2025-01-01T00:00:00Z',
-                role_template: {
-                  id: 'rt-1',
-                  name: 'auditor',
-                  display_name: 'Auditor',
-                  scopes: ['audit:read'],
-                },
+      ;(mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+        data: {
+          user: { id: 'u1' },
+          memberships: [
+            {
+              organization_id: 'org-a',
+              organization_name: 'acme',
+              created_at: '2025-01-01T00:00:00Z',
+              role_template: {
+                id: 'rt-1',
+                name: 'auditor',
+                display_name: 'Auditor',
+                scopes: ['audit:read'],
               },
-              {
-                organization_id: 'org-b',
-                organization_name: 'beta',
-                created_at: '2025-01-02T00:00:00Z',
-                role_template: null,
-              },
-            ],
-          },
-        })
+            },
+            {
+              organization_id: 'org-b',
+              organization_name: 'beta',
+              created_at: '2025-01-02T00:00:00Z',
+              role_template: null,
+            },
+          ],
+        },
+      })
       const result = await client.getCurrentUserWithRole()
       expect(result.memberships).toHaveLength(2)
       expect(result.memberships[0].organization_name).toBe('acme')
@@ -1534,9 +1548,9 @@ describe('ApiClient', () => {
       // not something the provider will try to iterate — a throw there is
       // treated as a failed /me and signs the user out.
       const client = await getApiClient()
-        ; (mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
-          data: { user: { id: 'u1' }, memberships: 'not-an-array' },
-        })
+      ;(mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+        data: { user: { id: 'u1' }, memberships: 'not-an-array' },
+      })
       const result = await client.getCurrentUserWithRole()
       expect(result.memberships).toEqual([])
     })
@@ -1551,9 +1565,9 @@ describe('ApiClient', () => {
   describe('module methods', () => {
     it('getModuleVersions', async () => {
       const client = await getApiClient()
-        ; (mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
-          data: { versions: [] },
-        })
+      ;(mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+        data: { versions: [] },
+      })
       await client.getModuleVersions('hashicorp', 'consul', 'aws')
       expect(mockAxiosInstance.get).toHaveBeenCalledWith(
         '/v1/modules/hashicorp/consul/aws/versions',
@@ -1562,9 +1576,9 @@ describe('ApiClient', () => {
 
     it('createModuleRecord', async () => {
       const client = await getApiClient()
-        ; (mockAxiosInstance.post as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
-          data: { id: 'm1' },
-        })
+      ;(mockAxiosInstance.post as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+        data: { id: 'm1' },
+      })
       const result = await client.createModuleRecord({
         namespace: 'ns',
         name: 'mod',
@@ -1583,9 +1597,9 @@ describe('ApiClient', () => {
     it('uploadModule sends FormData', async () => {
       const client = await getApiClient()
       const fd = new FormData()
-        ; (mockAxiosInstance.post as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
-          data: { ok: true },
-        })
+      ;(mockAxiosInstance.post as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+        data: { ok: true },
+      })
       await client.uploadModule(fd)
       expect(mockAxiosInstance.post).toHaveBeenCalledWith(
         '/api/v1/modules',
@@ -1602,7 +1616,7 @@ describe('ApiClient', () => {
       const client = await getApiClient()
       const fd = new FormData()
       const controller = new AbortController()
-        ; (mockAxiosInstance.post as ReturnType<typeof vi.fn>).mockResolvedValueOnce({ data: {} })
+      ;(mockAxiosInstance.post as ReturnType<typeof vi.fn>).mockResolvedValueOnce({ data: {} })
       await client.uploadModule(fd, { signal: controller.signal })
       expect(mockAxiosInstance.post).toHaveBeenCalledWith(
         '/api/v1/modules',
@@ -1613,23 +1627,23 @@ describe('ApiClient', () => {
 
     it('getModule', async () => {
       const client = await getApiClient()
-        ; (mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
-          data: { id: 'm1' },
-        })
+      ;(mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+        data: { id: 'm1' },
+      })
       await client.getModule('ns', 'mod', 'aws')
       expect(mockAxiosInstance.get).toHaveBeenCalledWith('/api/v1/modules/ns/mod/aws')
     })
 
     it('deleteModule', async () => {
       const client = await getApiClient()
-        ; (mockAxiosInstance.delete as ReturnType<typeof vi.fn>).mockResolvedValueOnce({ data: {} })
+      ;(mockAxiosInstance.delete as ReturnType<typeof vi.fn>).mockResolvedValueOnce({ data: {} })
       await client.deleteModule('ns', 'mod', 'aws')
       expect(mockAxiosInstance.delete).toHaveBeenCalledWith('/api/v1/modules/ns/mod/aws')
     })
 
     it('deleteModuleVersion', async () => {
       const client = await getApiClient()
-        ; (mockAxiosInstance.delete as ReturnType<typeof vi.fn>).mockResolvedValueOnce({ data: {} })
+      ;(mockAxiosInstance.delete as ReturnType<typeof vi.fn>).mockResolvedValueOnce({ data: {} })
       await client.deleteModuleVersion('ns', 'mod', 'aws', '1.0.0')
       expect(mockAxiosInstance.delete).toHaveBeenCalledWith(
         '/api/v1/modules/ns/mod/aws/versions/1.0.0',
@@ -1638,7 +1652,7 @@ describe('ApiClient', () => {
 
     it('deprecateModuleVersion with message', async () => {
       const client = await getApiClient()
-        ; (mockAxiosInstance.post as ReturnType<typeof vi.fn>).mockResolvedValueOnce({ data: {} })
+      ;(mockAxiosInstance.post as ReturnType<typeof vi.fn>).mockResolvedValueOnce({ data: {} })
       await client.deprecateModuleVersion('ns', 'mod', 'aws', '1.0.0', 'old')
       expect(mockAxiosInstance.post).toHaveBeenCalledWith(
         '/api/v1/modules/ns/mod/aws/versions/1.0.0/deprecate',
@@ -1648,7 +1662,7 @@ describe('ApiClient', () => {
 
     it('deprecateModuleVersion without message', async () => {
       const client = await getApiClient()
-        ; (mockAxiosInstance.post as ReturnType<typeof vi.fn>).mockResolvedValueOnce({ data: {} })
+      ;(mockAxiosInstance.post as ReturnType<typeof vi.fn>).mockResolvedValueOnce({ data: {} })
       await client.deprecateModuleVersion('ns', 'mod', 'aws', '1.0.0')
       expect(mockAxiosInstance.post).toHaveBeenCalledWith(
         '/api/v1/modules/ns/mod/aws/versions/1.0.0/deprecate',
@@ -1658,7 +1672,7 @@ describe('ApiClient', () => {
 
     it('undeprecateModuleVersion', async () => {
       const client = await getApiClient()
-        ; (mockAxiosInstance.delete as ReturnType<typeof vi.fn>).mockResolvedValueOnce({ data: {} })
+      ;(mockAxiosInstance.delete as ReturnType<typeof vi.fn>).mockResolvedValueOnce({ data: {} })
       await client.undeprecateModuleVersion('ns', 'mod', 'aws', '1.0.0')
       expect(mockAxiosInstance.delete).toHaveBeenCalledWith(
         '/api/v1/modules/ns/mod/aws/versions/1.0.0/deprecate',
@@ -1667,7 +1681,7 @@ describe('ApiClient', () => {
 
     it('deprecateModule', async () => {
       const client = await getApiClient()
-        ; (mockAxiosInstance.post as ReturnType<typeof vi.fn>).mockResolvedValueOnce({ data: {} })
+      ;(mockAxiosInstance.post as ReturnType<typeof vi.fn>).mockResolvedValueOnce({ data: {} })
       await client.deprecateModule('ns', 'mod', 'aws', { message: 'eol' })
       expect(mockAxiosInstance.post).toHaveBeenCalledWith('/api/v1/modules/ns/mod/aws/deprecate', {
         message: 'eol',
@@ -1676,14 +1690,14 @@ describe('ApiClient', () => {
 
     it('undeprecateModule', async () => {
       const client = await getApiClient()
-        ; (mockAxiosInstance.delete as ReturnType<typeof vi.fn>).mockResolvedValueOnce({ data: {} })
+      ;(mockAxiosInstance.delete as ReturnType<typeof vi.fn>).mockResolvedValueOnce({ data: {} })
       await client.undeprecateModule('ns', 'mod', 'aws')
       expect(mockAxiosInstance.delete).toHaveBeenCalledWith('/api/v1/modules/ns/mod/aws/deprecate')
     })
 
     it('updateModule', async () => {
       const client = await getApiClient()
-        ; (mockAxiosInstance.put as ReturnType<typeof vi.fn>).mockResolvedValueOnce({ data: {} })
+      ;(mockAxiosInstance.put as ReturnType<typeof vi.fn>).mockResolvedValueOnce({ data: {} })
       await client.updateModule('m1', { description: 'new desc' })
       expect(mockAxiosInstance.put).toHaveBeenCalledWith('/api/v1/admin/modules/m1', {
         description: 'new desc',
@@ -1692,9 +1706,9 @@ describe('ApiClient', () => {
 
     it('getModuleScan', async () => {
       const client = await getApiClient()
-        ; (mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
-          data: { status: 'clean' },
-        })
+      ;(mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+        data: { status: 'clean' },
+      })
       await client.getModuleScan('ns', 'mod', 'aws', '1.0.0')
       expect(mockAxiosInstance.get).toHaveBeenCalledWith(
         '/api/v1/modules/ns/mod/aws/versions/1.0.0/scan',
@@ -1703,9 +1717,9 @@ describe('ApiClient', () => {
 
     it('getModuleDocs', async () => {
       const client = await getApiClient()
-        ; (mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
-          data: { content: '' },
-        })
+      ;(mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+        data: { content: '' },
+      })
       await client.getModuleDocs('ns', 'mod', 'aws', '1.0.0')
       expect(mockAxiosInstance.get).toHaveBeenCalledWith(
         '/api/v1/modules/ns/mod/aws/versions/1.0.0/docs',
@@ -1717,9 +1731,9 @@ describe('ApiClient', () => {
   describe('provider methods', () => {
     it('getProviderVersions', async () => {
       const client = await getApiClient()
-        ; (mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
-          data: { versions: [] },
-        })
+      ;(mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+        data: { versions: [] },
+      })
       await client.getProviderVersions('hashicorp', 'aws')
       expect(mockAxiosInstance.get).toHaveBeenCalledWith('/v1/providers/hashicorp/aws/versions')
     })
@@ -1727,7 +1741,7 @@ describe('ApiClient', () => {
     it('uploadProvider sends FormData', async () => {
       const client = await getApiClient()
       const fd = new FormData()
-        ; (mockAxiosInstance.post as ReturnType<typeof vi.fn>).mockResolvedValueOnce({ data: {} })
+      ;(mockAxiosInstance.post as ReturnType<typeof vi.fn>).mockResolvedValueOnce({ data: {} })
       await client.uploadProvider(fd)
       expect(mockAxiosInstance.post).toHaveBeenCalledWith(
         '/api/v1/providers',
@@ -1744,7 +1758,7 @@ describe('ApiClient', () => {
       const client = await getApiClient()
       const fd = new FormData()
       const controller = new AbortController()
-        ; (mockAxiosInstance.post as ReturnType<typeof vi.fn>).mockResolvedValueOnce({ data: {} })
+      ;(mockAxiosInstance.post as ReturnType<typeof vi.fn>).mockResolvedValueOnce({ data: {} })
       await client.uploadProvider(fd, { signal: controller.signal })
       expect(mockAxiosInstance.post).toHaveBeenCalledWith(
         '/api/v1/providers',
@@ -1755,23 +1769,23 @@ describe('ApiClient', () => {
 
     it('getProvider', async () => {
       const client = await getApiClient()
-        ; (mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
-          data: { id: 'p1' },
-        })
+      ;(mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+        data: { id: 'p1' },
+      })
       await client.getProvider('hashicorp', 'aws')
       expect(mockAxiosInstance.get).toHaveBeenCalledWith('/api/v1/providers/hashicorp/aws')
     })
 
     it('deleteProvider', async () => {
       const client = await getApiClient()
-        ; (mockAxiosInstance.delete as ReturnType<typeof vi.fn>).mockResolvedValueOnce({ data: {} })
+      ;(mockAxiosInstance.delete as ReturnType<typeof vi.fn>).mockResolvedValueOnce({ data: {} })
       await client.deleteProvider('hashicorp', 'aws')
       expect(mockAxiosInstance.delete).toHaveBeenCalledWith('/api/v1/providers/hashicorp/aws')
     })
 
     it('deleteProviderVersion', async () => {
       const client = await getApiClient()
-        ; (mockAxiosInstance.delete as ReturnType<typeof vi.fn>).mockResolvedValueOnce({ data: {} })
+      ;(mockAxiosInstance.delete as ReturnType<typeof vi.fn>).mockResolvedValueOnce({ data: {} })
       await client.deleteProviderVersion('hashicorp', 'aws', '5.0.0')
       expect(mockAxiosInstance.delete).toHaveBeenCalledWith(
         '/api/v1/providers/hashicorp/aws/versions/5.0.0',
@@ -1780,7 +1794,7 @@ describe('ApiClient', () => {
 
     it('deprecateProviderVersion with message', async () => {
       const client = await getApiClient()
-        ; (mockAxiosInstance.post as ReturnType<typeof vi.fn>).mockResolvedValueOnce({ data: {} })
+      ;(mockAxiosInstance.post as ReturnType<typeof vi.fn>).mockResolvedValueOnce({ data: {} })
       await client.deprecateProviderVersion('hashicorp', 'aws', '5.0.0', 'old')
       expect(mockAxiosInstance.post).toHaveBeenCalledWith(
         '/api/v1/providers/hashicorp/aws/versions/5.0.0/deprecate',
@@ -1790,7 +1804,7 @@ describe('ApiClient', () => {
 
     it('deprecateProviderVersion without message', async () => {
       const client = await getApiClient()
-        ; (mockAxiosInstance.post as ReturnType<typeof vi.fn>).mockResolvedValueOnce({ data: {} })
+      ;(mockAxiosInstance.post as ReturnType<typeof vi.fn>).mockResolvedValueOnce({ data: {} })
       await client.deprecateProviderVersion('hashicorp', 'aws', '5.0.0')
       expect(mockAxiosInstance.post).toHaveBeenCalledWith(
         '/api/v1/providers/hashicorp/aws/versions/5.0.0/deprecate',
@@ -1800,7 +1814,7 @@ describe('ApiClient', () => {
 
     it('undeprecateProviderVersion', async () => {
       const client = await getApiClient()
-        ; (mockAxiosInstance.delete as ReturnType<typeof vi.fn>).mockResolvedValueOnce({ data: {} })
+      ;(mockAxiosInstance.delete as ReturnType<typeof vi.fn>).mockResolvedValueOnce({ data: {} })
       await client.undeprecateProviderVersion('hashicorp', 'aws', '5.0.0')
       expect(mockAxiosInstance.delete).toHaveBeenCalledWith(
         '/api/v1/providers/hashicorp/aws/versions/5.0.0/deprecate',
@@ -1809,9 +1823,9 @@ describe('ApiClient', () => {
 
     it('getProviderDocs with all params', async () => {
       const client = await getApiClient()
-        ; (mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
-          data: { docs: [] },
-        })
+      ;(mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+        data: { docs: [] },
+      })
       await client.getProviderDocs('hashicorp', 'aws', '5.0.0', 'resources', 'en', 10, 0)
       expect(mockAxiosInstance.get).toHaveBeenCalledWith(
         '/api/v1/providers/hashicorp/aws/versions/5.0.0/docs',
@@ -1821,9 +1835,9 @@ describe('ApiClient', () => {
 
     it('getProviderDocs without optional params', async () => {
       const client = await getApiClient()
-        ; (mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
-          data: { docs: [] },
-        })
+      ;(mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+        data: { docs: [] },
+      })
       await client.getProviderDocs('hashicorp', 'aws', '5.0.0')
       expect(mockAxiosInstance.get).toHaveBeenCalledWith(
         '/api/v1/providers/hashicorp/aws/versions/5.0.0/docs',
@@ -1833,9 +1847,9 @@ describe('ApiClient', () => {
 
     it('getProviderDocContent', async () => {
       const client = await getApiClient()
-        ; (mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
-          data: { content: '# Doc' },
-        })
+      ;(mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+        data: { content: '# Doc' },
+      })
       await client.getProviderDocContent('hashicorp', 'aws', '5.0.0', 'resources', 'aws_instance')
       expect(mockAxiosInstance.get).toHaveBeenCalledWith(
         '/api/v1/providers/hashicorp/aws/versions/5.0.0/docs/resources/aws_instance',
@@ -1851,16 +1865,16 @@ describe('ApiClient', () => {
   describe('path-segment encoding at call sites', () => {
     it('getModule encodes a fragment character in a route param so the request is not truncated', async () => {
       const client = await getApiClient()
-        ; (mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
-          data: { id: 'm1' },
-        })
+      ;(mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+        data: { id: 'm1' },
+      })
       await client.getModule('ns', 'mod#evil', 'aws')
       expect(mockAxiosInstance.get).toHaveBeenCalledWith('/api/v1/modules/ns/mod%23evil/aws')
     })
 
     it('deleteModuleVersion encodes a path separator in the version so the target resource cannot shift', async () => {
       const client = await getApiClient()
-        ; (mockAxiosInstance.delete as ReturnType<typeof vi.fn>).mockResolvedValueOnce({ data: {} })
+      ;(mockAxiosInstance.delete as ReturnType<typeof vi.fn>).mockResolvedValueOnce({ data: {} })
       await client.deleteModuleVersion('ns', 'mod', 'aws', '../other')
       expect(mockAxiosInstance.delete).toHaveBeenCalledWith(
         '/api/v1/modules/ns/mod/aws/versions/..%2Fother',
@@ -1869,9 +1883,9 @@ describe('ApiClient', () => {
 
     it('getProvider encodes a query-string character in a route param so it cannot inject query params', async () => {
       const client = await getApiClient()
-        ; (mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
-          data: { id: 'p1' },
-        })
+      ;(mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+        data: { id: 'p1' },
+      })
       await client.getProvider('hashicorp', 'aws?admin=true')
       expect(mockAxiosInstance.get).toHaveBeenCalledWith(
         '/api/v1/providers/hashicorp/aws%3Fadmin%3Dtrue',
@@ -1880,9 +1894,9 @@ describe('ApiClient', () => {
 
     it('getSCMProvider encodes a fragment character in the id so the request is not truncated', async () => {
       const client = await getApiClient()
-        ; (mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
-          data: { id: 'scm-1' },
-        })
+      ;(mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+        data: { id: 'scm-1' },
+      })
       await client.getSCMProvider('scm-1#evil')
       expect(mockAxiosInstance.get).toHaveBeenCalledWith('/api/v1/scm-providers/scm-1%23evil')
     })
@@ -1892,12 +1906,12 @@ describe('ApiClient', () => {
   describe('user methods', () => {
     it('searchUsers', async () => {
       const client = await getApiClient()
-        ; (mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
-          data: {
-            users: [{ id: 'u1', email: 'a@b.com', name: 'A', created_at: '', updated_at: '' }],
-            pagination: {},
-          },
-        })
+      ;(mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+        data: {
+          users: [{ id: 'u1', email: 'a@b.com', name: 'A', created_at: '', updated_at: '' }],
+          pagination: {},
+        },
+      })
       const result = await client.searchUsers('test', 1, 10)
       expect(mockAxiosInstance.get).toHaveBeenCalledWith('/api/v1/users/search', {
         params: { q: 'test', page: 1, per_page: 10 },
@@ -1907,18 +1921,18 @@ describe('ApiClient', () => {
 
     it('getUser', async () => {
       const client = await getApiClient()
-        ; (mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
-          data: { user: { id: 'u1', email: 'a@b.com', name: 'A', created_at: '', updated_at: '' } },
-        })
+      ;(mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+        data: { user: { id: 'u1', email: 'a@b.com', name: 'A', created_at: '', updated_at: '' } },
+      })
       const result = await client.getUser('u1')
       expect(result.id).toBe('u1')
     })
 
     it('createUser', async () => {
       const client = await getApiClient()
-        ; (mockAxiosInstance.post as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
-          data: { user: { id: 'u2', email: 'b@b.com', name: 'B', created_at: '', updated_at: '' } },
-        })
+      ;(mockAxiosInstance.post as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+        data: { user: { id: 'u2', email: 'b@b.com', name: 'B', created_at: '', updated_at: '' } },
+      })
       const result = await client.createUser({ email: 'b@b.com', name: 'B' })
       expect(mockAxiosInstance.post).toHaveBeenCalledWith('/api/v1/users', {
         email: 'b@b.com',
@@ -1929,11 +1943,11 @@ describe('ApiClient', () => {
 
     it('updateUser', async () => {
       const client = await getApiClient()
-        ; (mockAxiosInstance.put as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
-          data: {
-            user: { id: 'u1', email: 'a@b.com', name: 'Updated', created_at: '', updated_at: '' },
-          },
-        })
+      ;(mockAxiosInstance.put as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+        data: {
+          user: { id: 'u1', email: 'a@b.com', name: 'Updated', created_at: '', updated_at: '' },
+        },
+      })
       const result = await client.updateUser('u1', { name: 'Updated' })
       expect(mockAxiosInstance.put).toHaveBeenCalledWith('/api/v1/users/u1', { name: 'Updated' })
       expect(result.name).toBe('Updated')
@@ -1941,18 +1955,18 @@ describe('ApiClient', () => {
 
     it('deleteUser', async () => {
       const client = await getApiClient()
-        ; (mockAxiosInstance.delete as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
-          data: { ok: true },
-        })
+      ;(mockAxiosInstance.delete as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+        data: { ok: true },
+      })
       await client.deleteUser('u1')
       expect(mockAxiosInstance.delete).toHaveBeenCalledWith('/api/v1/users/u1')
     })
 
     it('getUserMemberships', async () => {
       const client = await getApiClient()
-        ; (mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
-          data: { memberships: [{ org_id: 'o1' }] },
-        })
+      ;(mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+        data: { memberships: [{ org_id: 'o1' }] },
+      })
       const result = await client.getUserMemberships('u1')
       expect(mockAxiosInstance.get).toHaveBeenCalledWith('/api/v1/users/u1/memberships')
       expect(result).toHaveLength(1)
@@ -1964,18 +1978,18 @@ describe('ApiClient', () => {
 
     it('transformUser handles PascalCase fields', async () => {
       const client = await getApiClient()
-        ; (mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
-          data: {
-            user: {
-              ID: 'u1',
-              Email: 'a@b.com',
-              Name: 'A',
-              CreatedAt: '2025-01-01',
-              UpdatedAt: '2025-01-01',
-              RoleTemplateID: 'r1',
-            },
+      ;(mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+        data: {
+          user: {
+            ID: 'u1',
+            Email: 'a@b.com',
+            Name: 'A',
+            CreatedAt: '2025-01-01',
+            UpdatedAt: '2025-01-01',
+            RoleTemplateID: 'r1',
           },
-        })
+        },
+      })
       const result = await client.getUser('u1')
       expect(result.id).toBe('u1')
       expect(result.email).toBe('a@b.com')
@@ -1990,21 +2004,21 @@ describe('ApiClient', () => {
         role_template_name: 'admin',
         created_at: '2025-01-01',
       }
-        ; (mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
-          data: {
-            users: [
-              {
-                id: 'u1',
-                email: 'a@b.com',
-                name: 'A',
-                created_at: '2025-01-01',
-                updated_at: '2025-01-01',
-                memberships: [inlineMembership],
-              },
-            ],
-            pagination: { total: 1, page: 1, per_page: 20 },
-          },
-        })
+      ;(mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+        data: {
+          users: [
+            {
+              id: 'u1',
+              email: 'a@b.com',
+              name: 'A',
+              created_at: '2025-01-01',
+              updated_at: '2025-01-01',
+              memberships: [inlineMembership],
+            },
+          ],
+          pagination: { total: 1, page: 1, per_page: 20 },
+        },
+      })
       const result = await client.listUsers(1, 20)
       expect(result.users).toHaveLength(1)
       expect(result.users[0].memberships).toHaveLength(1)
@@ -2016,21 +2030,21 @@ describe('ApiClient', () => {
   describe('organization methods', () => {
     it('listOrganizations', async () => {
       const client = await getApiClient()
-        ; (mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
-          data: {
-            organizations: [
-              {
-                id: 'o1',
-                name: 'org1',
-                display_name: 'Org 1',
-                idp_type: 'saml',
-                idp_name: 'corp-idp',
-                created_at: '',
-                updated_at: '',
-              },
-            ],
-          },
-        })
+      ;(mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+        data: {
+          organizations: [
+            {
+              id: 'o1',
+              name: 'org1',
+              display_name: 'Org 1',
+              idp_type: 'saml',
+              idp_name: 'corp-idp',
+              created_at: '',
+              updated_at: '',
+            },
+          ],
+        },
+      })
       const result = await client.listOrganizations(1, 20)
       expect(mockAxiosInstance.get).toHaveBeenCalledWith('/api/v1/organizations', {
         params: { page: 1, per_page: 20 },
@@ -2049,12 +2063,14 @@ describe('ApiClient', () => {
 
     it('carries the server has_more through rather than re-deriving it', async () => {
       const client = await getApiClient()
-        ; (mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
-          data: {
-            organizations: [{ id: 'o1', name: 'org1', display_name: 'Org 1', created_at: '', updated_at: '' }],
-            pagination: { page: 1, per_page: 100, has_more: true, total: 137 },
-          },
-        })
+      ;(mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+        data: {
+          organizations: [
+            { id: 'o1', name: 'org1', display_name: 'Org 1', created_at: '', updated_at: '' },
+          ],
+          pagination: { page: 1, per_page: 100, has_more: true, total: 137 },
+        },
+      })
       const result = await client.listOrganizations(1, 100)
       expect(result.hasMore).toBe(true)
       expect(result.total).toBe(137)
@@ -2065,14 +2081,18 @@ describe('ApiClient', () => {
     // count would tell the user to keep searching for rows that do not exist.
     it('reports a full but final page as complete', async () => {
       const client = await getApiClient()
-        ; (mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
-          data: {
-            organizations: Array.from({ length: 3 }, (_, i) => ({
-              id: `o${i}`, name: `org${i}`, display_name: `Org ${i}`, created_at: '', updated_at: '',
-            })),
-            pagination: { page: 1, per_page: 3, has_more: false, total: 3 },
-          },
-        })
+      ;(mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+        data: {
+          organizations: Array.from({ length: 3 }, (_, i) => ({
+            id: `o${i}`,
+            name: `org${i}`,
+            display_name: `Org ${i}`,
+            created_at: '',
+            updated_at: '',
+          })),
+          pagination: { page: 1, per_page: 3, has_more: false, total: 3 },
+        },
+      })
       const result = await client.listOrganizations(1, 3)
       expect(result.organizations).toHaveLength(3)
       expect(result.hasMore).toBe(false)
@@ -2082,14 +2102,20 @@ describe('ApiClient', () => {
     // answers and must not collapse into one.
     it('keeps an uncounted total distinct from a zero total', async () => {
       const client = await getApiClient()
-        ; (mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
-          data: { organizations: [], pagination: { page: 1, per_page: 20, has_more: false, total: null } },
-        })
+      ;(mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+        data: {
+          organizations: [],
+          pagination: { page: 1, per_page: 20, has_more: false, total: null },
+        },
+      })
       expect((await client.listOrganizations()).total).toBeNull()
 
-        ; (mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
-          data: { organizations: [], pagination: { page: 1, per_page: 20, has_more: false, total: 0 } },
-        })
+      ;(mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+        data: {
+          organizations: [],
+          pagination: { page: 1, per_page: 20, has_more: false, total: 0 },
+        },
+      })
       expect((await client.listOrganizations()).total).toBe(0)
     })
 
@@ -2100,16 +2126,20 @@ describe('ApiClient', () => {
     // Reading the field itself is what makes this case answerable at all.
     it('reports not-more when a pre-#893 backend sends pagination without has_more', async () => {
       const client = await getApiClient()
-        ; (mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
-          data: {
-            organizations: Array.from({ length: 2 }, (_, i) => ({
-              id: `o${i}`, name: `org${i}`, display_name: `Org ${i}`, created_at: '', updated_at: '',
-            })),
-            // A full page, and a total that says more exist. Neither is consulted:
-            // guessing from either is the defect #893 built has_more to retire.
-            pagination: { page: 1, per_page: 2, total: 5 },
-          },
-        })
+      ;(mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+        data: {
+          organizations: Array.from({ length: 2 }, (_, i) => ({
+            id: `o${i}`,
+            name: `org${i}`,
+            display_name: `Org ${i}`,
+            created_at: '',
+            updated_at: '',
+          })),
+          // A full page, and a total that says more exist. Neither is consulted:
+          // guessing from either is the defect #893 built has_more to retire.
+          pagination: { page: 1, per_page: 2, total: 5 },
+        },
+      })
       const result = await client.listOrganizations(1, 2)
       expect(result.hasMore).toBe(false)
       expect(result.total).toBe(5)
@@ -2121,13 +2151,17 @@ describe('ApiClient', () => {
     // has no organizations.
     it('reports not-more when the server sends no pagination object', async () => {
       const client = await getApiClient()
-        ; (mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
-          data: {
-            organizations: Array.from({ length: 2 }, (_, i) => ({
-              id: `o${i}`, name: `org${i}`, display_name: `Org ${i}`, created_at: '', updated_at: '',
-            })),
-          },
-        })
+      ;(mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+        data: {
+          organizations: Array.from({ length: 2 }, (_, i) => ({
+            id: `o${i}`,
+            name: `org${i}`,
+            display_name: `Org ${i}`,
+            created_at: '',
+            updated_at: '',
+          })),
+        },
+      })
       const result = await client.listOrganizations(1, 2)
       expect(result.hasMore).toBe(false)
       expect(result.total).toBeNull()
@@ -2135,13 +2169,13 @@ describe('ApiClient', () => {
 
     it('searchOrganizations', async () => {
       const client = await getApiClient()
-        ; (mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
-          data: {
-            organizations: [
-              { id: 'o1', name: 'org1', display_name: 'Org 1', created_at: '', updated_at: '' },
-            ],
-          },
-        })
+      ;(mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+        data: {
+          organizations: [
+            { id: 'o1', name: 'org1', display_name: 'Org 1', created_at: '', updated_at: '' },
+          ],
+        },
+      })
       const result = await client.searchOrganizations('org', 1, 10)
       expect(mockAxiosInstance.get).toHaveBeenCalledWith('/api/v1/organizations/search', {
         params: { q: 'org', page: 1, per_page: 10 },
@@ -2151,35 +2185,35 @@ describe('ApiClient', () => {
 
     it('getOrganization', async () => {
       const client = await getApiClient()
-        ; (mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
-          data: {
-            organization: {
-              id: 'o1',
-              name: 'org1',
-              display_name: 'Org 1',
-              created_at: '',
-              updated_at: '',
-            },
+      ;(mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+        data: {
+          organization: {
+            id: 'o1',
+            name: 'org1',
+            display_name: 'Org 1',
+            created_at: '',
+            updated_at: '',
           },
-        })
+        },
+      })
       const result = await client.getOrganization('o1')
       expect(result.id).toBe('o1')
     })
 
     it('createOrganization', async () => {
       const client = await getApiClient()
-        ; (mockAxiosInstance.post as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
-          status: 201,
-          data: {
-            organization: {
-              id: 'o2',
-              name: 'new',
-              display_name: 'New',
-              created_at: '',
-              updated_at: '',
-            },
+      ;(mockAxiosInstance.post as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+        status: 201,
+        data: {
+          organization: {
+            id: 'o2',
+            name: 'new',
+            display_name: 'New',
+            created_at: '',
+            updated_at: '',
           },
-        })
+        },
+      })
       const result = await client.createOrganization({ name: 'new', display_name: 'New' })
       expect(result.id).toBe('o2')
     })
@@ -2190,53 +2224,53 @@ describe('ApiClient', () => {
       // through the plain-Error branch that bypasses getErrorMessage's sanitizer.
       const client = await getApiClient()
       const leaked = 'pq: duplicate key value violates unique constraint "orgs_name_key"'
-        ; (mockAxiosInstance.post as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
-          status: 202,
-          data: { error: leaked },
-        })
-      await expect(
-        client.createOrganization({ name: 'dup', display_name: 'Dup' }),
-      ).rejects.toThrow('Failed to create organization')
+      ;(mockAxiosInstance.post as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+        status: 202,
+        data: { error: leaked },
+      })
+      await expect(client.createOrganization({ name: 'dup', display_name: 'Dup' })).rejects.toThrow(
+        'Failed to create organization',
+      )
     })
 
     it('createOrganization still surfaces a short, clean backend error', async () => {
       const client = await getApiClient()
-        ; (mockAxiosInstance.post as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
-          status: 202,
-          data: { error: 'Organization name already taken' },
-        })
-      await expect(
-        client.createOrganization({ name: 'dup', display_name: 'Dup' }),
-      ).rejects.toThrow('Organization name already taken')
+      ;(mockAxiosInstance.post as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+        status: 202,
+        data: { error: 'Organization name already taken' },
+      })
+      await expect(client.createOrganization({ name: 'dup', display_name: 'Dup' })).rejects.toThrow(
+        'Organization name already taken',
+      )
     })
 
     it('updateOrganization', async () => {
       const client = await getApiClient()
-        ; (mockAxiosInstance.put as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
-          data: {
-            organization: {
-              id: 'o1',
-              name: 'org1',
-              display_name: 'Updated',
-              created_at: '',
-              updated_at: '',
-            },
+      ;(mockAxiosInstance.put as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+        data: {
+          organization: {
+            id: 'o1',
+            name: 'org1',
+            display_name: 'Updated',
+            created_at: '',
+            updated_at: '',
           },
-        })
+        },
+      })
       const result = await client.updateOrganization('o1', { display_name: 'Updated' })
       expect(result.display_name).toBe('Updated')
     })
 
     it('deleteOrganization', async () => {
       const client = await getApiClient()
-        ; (mockAxiosInstance.delete as ReturnType<typeof vi.fn>).mockResolvedValueOnce({ data: {} })
+      ;(mockAxiosInstance.delete as ReturnType<typeof vi.fn>).mockResolvedValueOnce({ data: {} })
       await client.deleteOrganization('o1')
       expect(mockAxiosInstance.delete).toHaveBeenCalledWith('/api/v1/organizations/o1')
     })
 
     it('addOrganizationMember', async () => {
       const client = await getApiClient()
-        ; (mockAxiosInstance.post as ReturnType<typeof vi.fn>).mockResolvedValueOnce({ data: {} })
+      ;(mockAxiosInstance.post as ReturnType<typeof vi.fn>).mockResolvedValueOnce({ data: {} })
       await client.addOrganizationMember('o1', { user_id: 'u1' })
       expect(mockAxiosInstance.post).toHaveBeenCalledWith('/api/v1/organizations/o1/members', {
         user_id: 'u1',
@@ -2245,7 +2279,7 @@ describe('ApiClient', () => {
 
     it('updateOrganizationMember', async () => {
       const client = await getApiClient()
-        ; (mockAxiosInstance.put as ReturnType<typeof vi.fn>).mockResolvedValueOnce({ data: {} })
+      ;(mockAxiosInstance.put as ReturnType<typeof vi.fn>).mockResolvedValueOnce({ data: {} })
       await client.updateOrganizationMember('o1', 'u1', { role_template_id: 'r1' })
       expect(mockAxiosInstance.put).toHaveBeenCalledWith('/api/v1/organizations/o1/members/u1', {
         role_template_id: 'r1',
@@ -2254,16 +2288,16 @@ describe('ApiClient', () => {
 
     it('removeOrganizationMember', async () => {
       const client = await getApiClient()
-        ; (mockAxiosInstance.delete as ReturnType<typeof vi.fn>).mockResolvedValueOnce({ data: {} })
+      ;(mockAxiosInstance.delete as ReturnType<typeof vi.fn>).mockResolvedValueOnce({ data: {} })
       await client.removeOrganizationMember('o1', 'u1')
       expect(mockAxiosInstance.delete).toHaveBeenCalledWith('/api/v1/organizations/o1/members/u1')
     })
 
     it('listOrganizationMembers', async () => {
       const client = await getApiClient()
-        ; (mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
-          data: { members: [{ user_id: 'u1' }] },
-        })
+      ;(mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+        data: { members: [{ user_id: 'u1' }] },
+      })
       const result = await client.listOrganizationMembers('o1')
       expect(mockAxiosInstance.get).toHaveBeenCalledWith('/api/v1/organizations/o1/members')
       expect(result).toHaveLength(1)
@@ -2271,9 +2305,9 @@ describe('ApiClient', () => {
 
     it('transformOrganization throws for undefined org', async () => {
       const client = await getApiClient()
-        ; (mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
-          data: { organization: undefined },
-        })
+      ;(mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+        data: { organization: undefined },
+      })
       await expect(client.getOrganization('bad')).rejects.toThrow(
         'Cannot transform undefined organization',
       )
@@ -2284,9 +2318,9 @@ describe('ApiClient', () => {
   describe('API key methods', () => {
     it('listAPIKeys without org filter', async () => {
       const client = await getApiClient()
-        ; (mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
-          data: { keys: [{ id: 'k1', name: 'key1', scopes: [], created_at: '' }] },
-        })
+      ;(mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+        data: { keys: [{ id: 'k1', name: 'key1', scopes: [], created_at: '' }] },
+      })
       const result = await client.listAPIKeys()
       expect(mockAxiosInstance.get).toHaveBeenCalledWith('/api/v1/apikeys', { params: {} })
       expect(result).toHaveLength(1)
@@ -2294,9 +2328,9 @@ describe('ApiClient', () => {
 
     it('listAPIKeys with org filter', async () => {
       const client = await getApiClient()
-        ; (mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
-          data: { keys: [] },
-        })
+      ;(mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+        data: { keys: [] },
+      })
       await client.listAPIKeys('org-1')
       expect(mockAxiosInstance.get).toHaveBeenCalledWith('/api/v1/apikeys', {
         params: { organization_id: 'org-1' },
@@ -2305,9 +2339,9 @@ describe('ApiClient', () => {
 
     it('listAPIKeys normalizes PascalCase keys', async () => {
       const client = await getApiClient()
-        ; (mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
-          data: { keys: [{ ID: 'k1', Name: 'mykey', Scopes: ['read'], CreatedAt: '2025-01-01' }] },
-        })
+      ;(mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+        data: { keys: [{ ID: 'k1', Name: 'mykey', Scopes: ['read'], CreatedAt: '2025-01-01' }] },
+      })
       const result = await client.listAPIKeys()
       expect(result[0].id).toBe('k1')
       expect(result[0].name).toBe('mykey')
@@ -2316,9 +2350,9 @@ describe('ApiClient', () => {
 
     it('createAPIKey', async () => {
       const client = await getApiClient()
-        ; (mockAxiosInstance.post as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
-          data: { key: 'secret', id: 'k1' },
-        })
+      ;(mockAxiosInstance.post as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+        data: { key: 'secret', id: 'k1' },
+      })
       const data = { name: 'key1', organization_id: 'o1', scopes: ['read'] }
       await client.createAPIKey(data)
       expect(mockAxiosInstance.post).toHaveBeenCalledWith('/api/v1/apikeys', data)
@@ -2326,32 +2360,32 @@ describe('ApiClient', () => {
 
     it('getAPIKey', async () => {
       const client = await getApiClient()
-        ; (mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
-          data: { id: 'k1' },
-        })
+      ;(mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+        data: { id: 'k1' },
+      })
       await client.getAPIKey('k1')
       expect(mockAxiosInstance.get).toHaveBeenCalledWith('/api/v1/apikeys/k1')
     })
 
     it('updateAPIKey', async () => {
       const client = await getApiClient()
-        ; (mockAxiosInstance.put as ReturnType<typeof vi.fn>).mockResolvedValueOnce({ data: {} })
+      ;(mockAxiosInstance.put as ReturnType<typeof vi.fn>).mockResolvedValueOnce({ data: {} })
       await client.updateAPIKey('k1', { name: 'updated' })
       expect(mockAxiosInstance.put).toHaveBeenCalledWith('/api/v1/apikeys/k1', { name: 'updated' })
     })
 
     it('deleteAPIKey', async () => {
       const client = await getApiClient()
-        ; (mockAxiosInstance.delete as ReturnType<typeof vi.fn>).mockResolvedValueOnce({ data: {} })
+      ;(mockAxiosInstance.delete as ReturnType<typeof vi.fn>).mockResolvedValueOnce({ data: {} })
       await client.deleteAPIKey('k1')
       expect(mockAxiosInstance.delete).toHaveBeenCalledWith('/api/v1/apikeys/k1')
     })
 
     it('rotateAPIKey', async () => {
       const client = await getApiClient()
-        ; (mockAxiosInstance.post as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
-          data: { new_key: 'secret2' },
-        })
+      ;(mockAxiosInstance.post as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+        data: { new_key: 'secret2' },
+      })
       await client.rotateAPIKey('k1', 24)
       expect(mockAxiosInstance.post).toHaveBeenCalledWith('/api/v1/apikeys/k1/rotate', {
         grace_period_hours: 24,
@@ -2363,14 +2397,14 @@ describe('ApiClient', () => {
   describe('SCM provider methods', () => {
     it('listSCMProviders', async () => {
       const client = await getApiClient()
-        ; (mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({ data: [] })
+      ;(mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({ data: [] })
       await client.listSCMProviders()
       expect(mockAxiosInstance.get).toHaveBeenCalledWith('/api/v1/scm-providers', { params: {} })
     })
 
     it('listSCMProviders with org', async () => {
       const client = await getApiClient()
-        ; (mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({ data: [] })
+      ;(mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({ data: [] })
       await client.listSCMProviders('org-1')
       expect(mockAxiosInstance.get).toHaveBeenCalledWith('/api/v1/scm-providers', {
         params: { organization_id: 'org-1' },
@@ -2379,9 +2413,9 @@ describe('ApiClient', () => {
 
     it('createSCMProvider', async () => {
       const client = await getApiClient()
-        ; (mockAxiosInstance.post as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
-          data: { id: 'scm-1' },
-        })
+      ;(mockAxiosInstance.post as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+        data: { id: 'scm-1' },
+      })
       await client.createSCMProvider({ organization_id: 'o1', provider_type: 'github', name: 'GH' })
       expect(mockAxiosInstance.post).toHaveBeenCalledWith(
         '/api/v1/scm-providers',
@@ -2391,16 +2425,16 @@ describe('ApiClient', () => {
 
     it('getSCMProvider', async () => {
       const client = await getApiClient()
-        ; (mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
-          data: { id: 'scm-1' },
-        })
+      ;(mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+        data: { id: 'scm-1' },
+      })
       await client.getSCMProvider('scm-1')
       expect(mockAxiosInstance.get).toHaveBeenCalledWith('/api/v1/scm-providers/scm-1')
     })
 
     it('updateSCMProvider', async () => {
       const client = await getApiClient()
-        ; (mockAxiosInstance.put as ReturnType<typeof vi.fn>).mockResolvedValueOnce({ data: {} })
+      ;(mockAxiosInstance.put as ReturnType<typeof vi.fn>).mockResolvedValueOnce({ data: {} })
       await client.updateSCMProvider('scm-1', { name: 'Updated' })
       expect(mockAxiosInstance.put).toHaveBeenCalledWith('/api/v1/scm-providers/scm-1', {
         name: 'Updated',
@@ -2409,16 +2443,16 @@ describe('ApiClient', () => {
 
     it('deleteSCMProvider', async () => {
       const client = await getApiClient()
-        ; (mockAxiosInstance.delete as ReturnType<typeof vi.fn>).mockResolvedValueOnce({ data: {} })
+      ;(mockAxiosInstance.delete as ReturnType<typeof vi.fn>).mockResolvedValueOnce({ data: {} })
       await client.deleteSCMProvider('scm-1')
       expect(mockAxiosInstance.delete).toHaveBeenCalledWith('/api/v1/scm-providers/scm-1')
     })
 
     it('verifySCMProvider', async () => {
       const client = await getApiClient()
-        ; (mockAxiosInstance.post as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
-          data: { ok: true, expires_at: '2026-01-01T00:00:00Z' },
-        })
+      ;(mockAxiosInstance.post as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+        data: { ok: true, expires_at: '2026-01-01T00:00:00Z' },
+      })
       const result = await client.verifySCMProvider('scm-1')
       expect(mockAxiosInstance.post).toHaveBeenCalledWith('/api/v1/scm-providers/scm-1/verify')
       expect(result.ok).toBe(true)
@@ -2426,9 +2460,9 @@ describe('ApiClient', () => {
 
     it('initiateSCMOAuth', async () => {
       const client = await getApiClient()
-        ; (mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
-          data: { redirect_url: 'https://github.com/oauth' },
-        })
+      ;(mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+        data: { redirect_url: 'https://github.com/oauth' },
+      })
       await client.initiateSCMOAuth('scm-1')
       expect(mockAxiosInstance.get).toHaveBeenCalledWith(
         '/api/v1/scm-providers/scm-1/oauth/authorize',
@@ -2437,7 +2471,7 @@ describe('ApiClient', () => {
 
     it('refreshSCMToken', async () => {
       const client = await getApiClient()
-        ; (mockAxiosInstance.post as ReturnType<typeof vi.fn>).mockResolvedValueOnce({ data: {} })
+      ;(mockAxiosInstance.post as ReturnType<typeof vi.fn>).mockResolvedValueOnce({ data: {} })
       await client.refreshSCMToken('scm-1')
       expect(mockAxiosInstance.post).toHaveBeenCalledWith(
         '/api/v1/scm-providers/scm-1/oauth/refresh',
@@ -2446,18 +2480,18 @@ describe('ApiClient', () => {
 
     it('getSCMTokenStatus', async () => {
       const client = await getApiClient()
-        ; (mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
-          data: { connected: true },
-        })
+      ;(mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+        data: { connected: true },
+      })
       const result = await client.getSCMTokenStatus('scm-1')
       expect(result.connected).toBe(true)
     })
 
     it('listSCMRepositories', async () => {
       const client = await getApiClient()
-        ; (mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
-          data: { repositories: [] },
-        })
+      ;(mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+        data: { repositories: [] },
+      })
       await client.listSCMRepositories('scm-1', 'search')
       expect(mockAxiosInstance.get).toHaveBeenCalledWith(
         '/api/v1/scm-providers/scm-1/repositories',
@@ -2467,9 +2501,9 @@ describe('ApiClient', () => {
 
     it('listSCMRepositoryTags', async () => {
       const client = await getApiClient()
-        ; (mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
-          data: { tags: [] },
-        })
+      ;(mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+        data: { tags: [] },
+      })
       await client.listSCMRepositoryTags('scm-1', 'owner', 'repo')
       expect(mockAxiosInstance.get).toHaveBeenCalledWith(
         '/api/v1/scm-providers/scm-1/repositories/owner/repo/tags',
@@ -2478,9 +2512,9 @@ describe('ApiClient', () => {
 
     it('listSCMRepositoryBranches', async () => {
       const client = await getApiClient()
-        ; (mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
-          data: { branches: [] },
-        })
+      ;(mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+        data: { branches: [] },
+      })
       await client.listSCMRepositoryBranches('scm-1', 'owner', 'repo')
       expect(mockAxiosInstance.get).toHaveBeenCalledWith(
         '/api/v1/scm-providers/scm-1/repositories/owner/repo/branches',
@@ -2489,7 +2523,7 @@ describe('ApiClient', () => {
 
     it('revokeSCMToken', async () => {
       const client = await getApiClient()
-        ; (mockAxiosInstance.delete as ReturnType<typeof vi.fn>).mockResolvedValueOnce({ data: {} })
+      ;(mockAxiosInstance.delete as ReturnType<typeof vi.fn>).mockResolvedValueOnce({ data: {} })
       await client.revokeSCMToken('scm-1')
       expect(mockAxiosInstance.delete).toHaveBeenCalledWith(
         '/api/v1/scm-providers/scm-1/oauth/token',
@@ -2498,7 +2532,7 @@ describe('ApiClient', () => {
 
     it('saveSCMToken', async () => {
       const client = await getApiClient()
-        ; (mockAxiosInstance.post as ReturnType<typeof vi.fn>).mockResolvedValueOnce({ data: {} })
+      ;(mockAxiosInstance.post as ReturnType<typeof vi.fn>).mockResolvedValueOnce({ data: {} })
       await client.saveSCMToken('scm-1', 'token123')
       expect(mockAxiosInstance.post).toHaveBeenCalledWith('/api/v1/scm-providers/scm-1/token', {
         access_token: 'token123',
@@ -2510,7 +2544,7 @@ describe('ApiClient', () => {
   describe('module SCM linking', () => {
     it('linkModuleToSCM', async () => {
       const client = await getApiClient()
-        ; (mockAxiosInstance.post as ReturnType<typeof vi.fn>).mockResolvedValueOnce({ data: {} })
+      ;(mockAxiosInstance.post as ReturnType<typeof vi.fn>).mockResolvedValueOnce({ data: {} })
       await client.linkModuleToSCM('m1', {
         provider_id: 'scm-1',
         repository_owner: 'org',
@@ -2524,16 +2558,16 @@ describe('ApiClient', () => {
 
     it('getModuleSCMInfo', async () => {
       const client = await getApiClient()
-        ; (mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
-          data: { linked: true },
-        })
+      ;(mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+        data: { linked: true },
+      })
       await client.getModuleSCMInfo('m1')
       expect(mockAxiosInstance.get).toHaveBeenCalledWith('/api/v1/admin/modules/m1/scm')
     })
 
     it('updateModuleSCMLink', async () => {
       const client = await getApiClient()
-        ; (mockAxiosInstance.put as ReturnType<typeof vi.fn>).mockResolvedValueOnce({ data: {} })
+      ;(mockAxiosInstance.put as ReturnType<typeof vi.fn>).mockResolvedValueOnce({ data: {} })
       await client.updateModuleSCMLink('m1', { auto_publish_enabled: true })
       expect(mockAxiosInstance.put).toHaveBeenCalledWith('/api/v1/admin/modules/m1/scm', {
         auto_publish_enabled: true,
@@ -2542,14 +2576,14 @@ describe('ApiClient', () => {
 
     it('unlinkModuleFromSCM', async () => {
       const client = await getApiClient()
-        ; (mockAxiosInstance.delete as ReturnType<typeof vi.fn>).mockResolvedValueOnce({ data: {} })
+      ;(mockAxiosInstance.delete as ReturnType<typeof vi.fn>).mockResolvedValueOnce({ data: {} })
       await client.unlinkModuleFromSCM('m1')
       expect(mockAxiosInstance.delete).toHaveBeenCalledWith('/api/v1/admin/modules/m1/scm')
     })
 
     it('triggerManualSync', async () => {
       const client = await getApiClient()
-        ; (mockAxiosInstance.post as ReturnType<typeof vi.fn>).mockResolvedValueOnce({ data: {} })
+      ;(mockAxiosInstance.post as ReturnType<typeof vi.fn>).mockResolvedValueOnce({ data: {} })
       await client.triggerManualSync('m1', { tag_name: 'v1.0.0' })
       expect(mockAxiosInstance.post).toHaveBeenCalledWith('/api/v1/admin/modules/m1/scm/sync', {
         tag_name: 'v1.0.0',
@@ -2558,7 +2592,7 @@ describe('ApiClient', () => {
 
     it('triggerManualSync without data', async () => {
       const client = await getApiClient()
-        ; (mockAxiosInstance.post as ReturnType<typeof vi.fn>).mockResolvedValueOnce({ data: {} })
+      ;(mockAxiosInstance.post as ReturnType<typeof vi.fn>).mockResolvedValueOnce({ data: {} })
       await client.triggerManualSync('m1')
       expect(mockAxiosInstance.post).toHaveBeenCalledWith('/api/v1/admin/modules/m1/scm/sync', {})
     })
@@ -2569,9 +2603,9 @@ describe('ApiClient', () => {
         { id: 'e1', event_type: 'tag', state: 'succeeded' },
         { id: 'e2', event_type: 'push', state: 'failed' },
       ]
-        ; (mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
-          data: { events: sample },
-        })
+      ;(mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+        data: { events: sample },
+      })
       const result = await client.getWebhookEvents('m1')
       expect(mockAxiosInstance.get).toHaveBeenCalledWith('/api/v1/admin/modules/m1/scm/events')
       // Regression: the backend returns { events: [...] } — the client must hand
@@ -2582,9 +2616,9 @@ describe('ApiClient', () => {
 
     it('getWebhookEvents returns [] when the envelope is missing events', async () => {
       const client = await getApiClient()
-        ; (mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
-          data: {},
-        })
+      ;(mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+        data: {},
+      })
       const result = await client.getWebhookEvents('m1')
       expect(result).toEqual([])
     })
@@ -2594,18 +2628,18 @@ describe('ApiClient', () => {
   describe('scanning methods', () => {
     it('getScanningConfig', async () => {
       const client = await getApiClient()
-        ; (mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
-          data: { enabled: true },
-        })
+      ;(mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+        data: { enabled: true },
+      })
       await client.getScanningConfig()
       expect(mockAxiosInstance.get).toHaveBeenCalledWith('/api/v1/admin/scanning/config')
     })
 
     it('getScanningStats', async () => {
       const client = await getApiClient()
-        ; (mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
-          data: { total: 10 },
-        })
+      ;(mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+        data: { total: 10 },
+      })
       await client.getScanningStats()
       expect(mockAxiosInstance.get).toHaveBeenCalledWith('/api/v1/admin/scanning/stats', {
         params: undefined,
@@ -2614,9 +2648,9 @@ describe('ApiClient', () => {
 
     it('getScanningStats with params', async () => {
       const client = await getApiClient()
-        ; (mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
-          data: { total: 5, total_filtered: 5 },
-        })
+      ;(mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+        data: { total: 5, total_filtered: 5 },
+      })
       await client.getScanningStats({ status: 'failed', limit: 10, offset: 0 })
       expect(mockAxiosInstance.get).toHaveBeenCalledWith('/api/v1/admin/scanning/stats', {
         params: { status: 'failed', limit: 10, offset: 0 },
@@ -2628,9 +2662,9 @@ describe('ApiClient', () => {
   describe('dashboard methods', () => {
     it('getDashboardStats', async () => {
       const client = await getApiClient()
-        ; (mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
-          data: { modules: {} },
-        })
+      ;(mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+        data: { modules: {} },
+      })
       await client.getDashboardStats()
       expect(mockAxiosInstance.get).toHaveBeenCalledWith('/api/v1/admin/stats/dashboard')
     })
@@ -2640,9 +2674,9 @@ describe('ApiClient', () => {
   describe('mirror methods', () => {
     it('listMirrors', async () => {
       const client = await getApiClient()
-        ; (mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
-          data: { mirrors: [{ id: 'mir-1' }] },
-        })
+      ;(mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+        data: { mirrors: [{ id: 'mir-1' }] },
+      })
       const result = await client.listMirrors()
       expect(mockAxiosInstance.get).toHaveBeenCalledWith('/api/v1/admin/mirrors', { params: {} })
       expect(result).toHaveLength(1)
@@ -2650,9 +2684,9 @@ describe('ApiClient', () => {
 
     it('listMirrors enabledOnly', async () => {
       const client = await getApiClient()
-        ; (mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
-          data: { mirrors: [] },
-        })
+      ;(mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+        data: { mirrors: [] },
+      })
       await client.listMirrors(true)
       expect(mockAxiosInstance.get).toHaveBeenCalledWith('/api/v1/admin/mirrors', {
         params: { enabled: 'true' },
@@ -2661,18 +2695,18 @@ describe('ApiClient', () => {
 
     it('getMirror', async () => {
       const client = await getApiClient()
-        ; (mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
-          data: { id: 'mir-1' },
-        })
+      ;(mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+        data: { id: 'mir-1' },
+      })
       await client.getMirror('mir-1')
       expect(mockAxiosInstance.get).toHaveBeenCalledWith('/api/v1/admin/mirrors/mir-1')
     })
 
     it('createMirror', async () => {
       const client = await getApiClient()
-        ; (mockAxiosInstance.post as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
-          data: { id: 'mir-2' },
-        })
+      ;(mockAxiosInstance.post as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+        data: { id: 'mir-2' },
+      })
       await client.createMirror({
         name: 'test',
         upstream_registry_url: 'https://registry.terraform.io',
@@ -2685,7 +2719,7 @@ describe('ApiClient', () => {
 
     it('updateMirror', async () => {
       const client = await getApiClient()
-        ; (mockAxiosInstance.put as ReturnType<typeof vi.fn>).mockResolvedValueOnce({ data: {} })
+      ;(mockAxiosInstance.put as ReturnType<typeof vi.fn>).mockResolvedValueOnce({ data: {} })
       await client.updateMirror('mir-1', { name: 'updated' })
       expect(mockAxiosInstance.put).toHaveBeenCalledWith('/api/v1/admin/mirrors/mir-1', {
         name: 'updated',
@@ -2694,14 +2728,14 @@ describe('ApiClient', () => {
 
     it('deleteMirror', async () => {
       const client = await getApiClient()
-        ; (mockAxiosInstance.delete as ReturnType<typeof vi.fn>).mockResolvedValueOnce({ data: {} })
+      ;(mockAxiosInstance.delete as ReturnType<typeof vi.fn>).mockResolvedValueOnce({ data: {} })
       await client.deleteMirror('mir-1')
       expect(mockAxiosInstance.delete).toHaveBeenCalledWith('/api/v1/admin/mirrors/mir-1')
     })
 
     it('triggerMirrorSync', async () => {
       const client = await getApiClient()
-        ; (mockAxiosInstance.post as ReturnType<typeof vi.fn>).mockResolvedValueOnce({ data: {} })
+      ;(mockAxiosInstance.post as ReturnType<typeof vi.fn>).mockResolvedValueOnce({ data: {} })
       await client.triggerMirrorSync('mir-1', { namespace: 'hashicorp' })
       expect(mockAxiosInstance.post).toHaveBeenCalledWith(
         '/api/v1/admin/mirrors/mir-1/sync',
@@ -2715,18 +2749,18 @@ describe('ApiClient', () => {
 
     it('getMirrorStatus', async () => {
       const client = await getApiClient()
-        ; (mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
-          data: { status: 'idle' },
-        })
+      ;(mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+        data: { status: 'idle' },
+      })
       await client.getMirrorStatus('mir-1')
       expect(mockAxiosInstance.get).toHaveBeenCalledWith('/api/v1/admin/mirrors/mir-1/status')
     })
 
     it('getMirrorProviders', async () => {
       const client = await getApiClient()
-        ; (mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
-          data: { providers: ['hashicorp/aws'] },
-        })
+      ;(mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+        data: { providers: ['hashicorp/aws'] },
+      })
       const result = await client.getMirrorProviders('mir-1')
       expect(result).toEqual(['hashicorp/aws'])
     })
@@ -2736,9 +2770,9 @@ describe('ApiClient', () => {
   describe('role template methods', () => {
     it('listRoleTemplates', async () => {
       const client = await getApiClient()
-        ; (mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
-          data: [{ id: 'r1' }],
-        })
+      ;(mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+        data: [{ id: 'r1' }],
+      })
       const result = await client.listRoleTemplates()
       expect(mockAxiosInstance.get).toHaveBeenCalledWith('/api/v1/admin/role-templates')
       expect(result).toHaveLength(1)
@@ -2746,18 +2780,18 @@ describe('ApiClient', () => {
 
     it('getRoleTemplate', async () => {
       const client = await getApiClient()
-        ; (mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
-          data: { id: 'r1' },
-        })
+      ;(mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+        data: { id: 'r1' },
+      })
       await client.getRoleTemplate('r1')
       expect(mockAxiosInstance.get).toHaveBeenCalledWith('/api/v1/admin/role-templates/r1')
     })
 
     it('createRoleTemplate', async () => {
       const client = await getApiClient()
-        ; (mockAxiosInstance.post as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
-          data: { id: 'r2' },
-        })
+      ;(mockAxiosInstance.post as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+        data: { id: 'r2' },
+      })
       await client.createRoleTemplate({ name: 'editor', display_name: 'Editor', scopes: ['write'] })
       expect(mockAxiosInstance.post).toHaveBeenCalledWith(
         '/api/v1/admin/role-templates',
@@ -2767,7 +2801,7 @@ describe('ApiClient', () => {
 
     it('updateRoleTemplate', async () => {
       const client = await getApiClient()
-        ; (mockAxiosInstance.put as ReturnType<typeof vi.fn>).mockResolvedValueOnce({ data: {} })
+      ;(mockAxiosInstance.put as ReturnType<typeof vi.fn>).mockResolvedValueOnce({ data: {} })
       await client.updateRoleTemplate('r1', { display_name: 'Updated' })
       expect(mockAxiosInstance.put).toHaveBeenCalledWith('/api/v1/admin/role-templates/r1', {
         display_name: 'Updated',
@@ -2776,7 +2810,7 @@ describe('ApiClient', () => {
 
     it('deleteRoleTemplate', async () => {
       const client = await getApiClient()
-        ; (mockAxiosInstance.delete as ReturnType<typeof vi.fn>).mockResolvedValueOnce({ data: {} })
+      ;(mockAxiosInstance.delete as ReturnType<typeof vi.fn>).mockResolvedValueOnce({ data: {} })
       await client.deleteRoleTemplate('r1')
       expect(mockAxiosInstance.delete).toHaveBeenCalledWith('/api/v1/admin/role-templates/r1')
     })
@@ -2786,9 +2820,9 @@ describe('ApiClient', () => {
   describe('approval methods', () => {
     it('listApprovalRequests', async () => {
       const client = await getApiClient()
-        ; (mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
-          data: [{ id: 'a1' }],
-        })
+      ;(mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+        data: [{ id: 'a1' }],
+      })
       const result = await client.listApprovalRequests({ status: 'pending' })
       expect(mockAxiosInstance.get).toHaveBeenCalledWith('/api/v1/admin/approvals', {
         params: { status: 'pending' },
@@ -2798,25 +2832,25 @@ describe('ApiClient', () => {
 
     it('listApprovalRequests without filters', async () => {
       const client = await getApiClient()
-        ; (mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({ data: [] })
+      ;(mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({ data: [] })
       await client.listApprovalRequests()
       expect(mockAxiosInstance.get).toHaveBeenCalledWith('/api/v1/admin/approvals', { params: {} })
     })
 
     it('getApprovalRequest', async () => {
       const client = await getApiClient()
-        ; (mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
-          data: { id: 'a1' },
-        })
+      ;(mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+        data: { id: 'a1' },
+      })
       await client.getApprovalRequest('a1')
       expect(mockAxiosInstance.get).toHaveBeenCalledWith('/api/v1/admin/approvals/a1')
     })
 
     it('createApprovalRequest', async () => {
       const client = await getApiClient()
-        ; (mockAxiosInstance.post as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
-          data: { id: 'a2' },
-        })
+      ;(mockAxiosInstance.post as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+        data: { id: 'a2' },
+      })
       await client.createApprovalRequest({
         mirror_config_id: 'mir-1',
         provider_namespace: 'hashicorp',
@@ -2829,7 +2863,7 @@ describe('ApiClient', () => {
 
     it('reviewApproval', async () => {
       const client = await getApiClient()
-        ; (mockAxiosInstance.put as ReturnType<typeof vi.fn>).mockResolvedValueOnce({ data: {} })
+      ;(mockAxiosInstance.put as ReturnType<typeof vi.fn>).mockResolvedValueOnce({ data: {} })
       await client.reviewApproval('a1', { status: 'approved', notes: 'lgtm' })
       expect(mockAxiosInstance.put).toHaveBeenCalledWith('/api/v1/admin/approvals/a1/review', {
         status: 'approved',
@@ -2842,16 +2876,16 @@ describe('ApiClient', () => {
   describe('mirror policy methods', () => {
     it('listMirrorPolicies', async () => {
       const client = await getApiClient()
-        ; (mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
-          data: [{ id: 'p1' }],
-        })
+      ;(mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+        data: [{ id: 'p1' }],
+      })
       await client.listMirrorPolicies()
       expect(mockAxiosInstance.get).toHaveBeenCalledWith('/api/v1/admin/policies', { params: {} })
     })
 
     it('listMirrorPolicies with org', async () => {
       const client = await getApiClient()
-        ; (mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({ data: [] })
+      ;(mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({ data: [] })
       await client.listMirrorPolicies('org-1')
       expect(mockAxiosInstance.get).toHaveBeenCalledWith('/api/v1/admin/policies', {
         params: { organization_id: 'org-1' },
@@ -2860,18 +2894,18 @@ describe('ApiClient', () => {
 
     it('getMirrorPolicy', async () => {
       const client = await getApiClient()
-        ; (mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
-          data: { id: 'p1' },
-        })
+      ;(mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+        data: { id: 'p1' },
+      })
       await client.getMirrorPolicy('p1')
       expect(mockAxiosInstance.get).toHaveBeenCalledWith('/api/v1/admin/policies/p1')
     })
 
     it('createMirrorPolicy', async () => {
       const client = await getApiClient()
-        ; (mockAxiosInstance.post as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
-          data: { id: 'p2' },
-        })
+      ;(mockAxiosInstance.post as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+        data: { id: 'p2' },
+      })
       await client.createMirrorPolicy({ name: 'allow-all', policy_type: 'allow' })
       expect(mockAxiosInstance.post).toHaveBeenCalledWith(
         '/api/v1/admin/policies',
@@ -2881,7 +2915,7 @@ describe('ApiClient', () => {
 
     it('updateMirrorPolicy', async () => {
       const client = await getApiClient()
-        ; (mockAxiosInstance.put as ReturnType<typeof vi.fn>).mockResolvedValueOnce({ data: {} })
+      ;(mockAxiosInstance.put as ReturnType<typeof vi.fn>).mockResolvedValueOnce({ data: {} })
       await client.updateMirrorPolicy('p1', { name: 'updated' })
       expect(mockAxiosInstance.put).toHaveBeenCalledWith('/api/v1/admin/policies/p1', {
         name: 'updated',
@@ -2890,16 +2924,16 @@ describe('ApiClient', () => {
 
     it('deleteMirrorPolicy', async () => {
       const client = await getApiClient()
-        ; (mockAxiosInstance.delete as ReturnType<typeof vi.fn>).mockResolvedValueOnce({ data: {} })
+      ;(mockAxiosInstance.delete as ReturnType<typeof vi.fn>).mockResolvedValueOnce({ data: {} })
       await client.deleteMirrorPolicy('p1')
       expect(mockAxiosInstance.delete).toHaveBeenCalledWith('/api/v1/admin/policies/p1')
     })
 
     it('evaluateMirrorPolicy', async () => {
       const client = await getApiClient()
-        ; (mockAxiosInstance.post as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
-          data: { allowed: true },
-        })
+      ;(mockAxiosInstance.post as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+        data: { allowed: true },
+      })
       await client.evaluateMirrorPolicy(
         { registry: 'https://registry.terraform.io', namespace: 'hashicorp', provider: 'aws' },
         'org-1',
@@ -2916,36 +2950,36 @@ describe('ApiClient', () => {
   describe('storage methods', () => {
     it('getSetupStatus', async () => {
       const client = await getApiClient()
-        ; (mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
-          data: { setup_required: false },
-        })
+      ;(mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+        data: { setup_required: false },
+      })
       await client.getSetupStatus()
       expect(mockAxiosInstance.get).toHaveBeenCalledWith('/api/v1/setup/status')
     })
 
     it('listStorageConfigs', async () => {
       const client = await getApiClient()
-        ; (mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
-          data: [{ id: 's1' }],
-        })
+      ;(mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+        data: [{ id: 's1' }],
+      })
       await client.listStorageConfigs()
       expect(mockAxiosInstance.get).toHaveBeenCalledWith('/api/v1/storage/configs')
     })
 
     it('getStorageConfig', async () => {
       const client = await getApiClient()
-        ; (mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
-          data: { id: 's1' },
-        })
+      ;(mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+        data: { id: 's1' },
+      })
       await client.getStorageConfig('s1')
       expect(mockAxiosInstance.get).toHaveBeenCalledWith('/api/v1/storage/configs/s1')
     })
 
     it('createStorageConfig', async () => {
       const client = await getApiClient()
-        ; (mockAxiosInstance.post as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
-          data: { id: 's2' },
-        })
+      ;(mockAxiosInstance.post as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+        data: { id: 's2' },
+      })
       await client.createStorageConfig({ backend_type: 's3' } as never)
       expect(mockAxiosInstance.post).toHaveBeenCalledWith(
         '/api/v1/storage/configs',
@@ -2955,7 +2989,7 @@ describe('ApiClient', () => {
 
     it('updateStorageConfig', async () => {
       const client = await getApiClient()
-        ; (mockAxiosInstance.put as ReturnType<typeof vi.fn>).mockResolvedValueOnce({ data: {} })
+      ;(mockAxiosInstance.put as ReturnType<typeof vi.fn>).mockResolvedValueOnce({ data: {} })
       await client.updateStorageConfig('s1', { backend_type: 's3' } as never)
       expect(mockAxiosInstance.put).toHaveBeenCalledWith(
         '/api/v1/storage/configs/s1',
@@ -2965,25 +2999,25 @@ describe('ApiClient', () => {
 
     it('deleteStorageConfig', async () => {
       const client = await getApiClient()
-        ; (mockAxiosInstance.delete as ReturnType<typeof vi.fn>).mockResolvedValueOnce({ data: {} })
+      ;(mockAxiosInstance.delete as ReturnType<typeof vi.fn>).mockResolvedValueOnce({ data: {} })
       await client.deleteStorageConfig('s1')
       expect(mockAxiosInstance.delete).toHaveBeenCalledWith('/api/v1/storage/configs/s1')
     })
 
     it('activateStorageConfig', async () => {
       const client = await getApiClient()
-        ; (mockAxiosInstance.post as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
-          data: { message: 'activated' },
-        })
+      ;(mockAxiosInstance.post as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+        data: { message: 'activated' },
+      })
       await client.activateStorageConfig('s1')
       expect(mockAxiosInstance.post).toHaveBeenCalledWith('/api/v1/storage/configs/s1/activate')
     })
 
     it('testStorageConfig', async () => {
       const client = await getApiClient()
-        ; (mockAxiosInstance.post as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
-          data: { success: true, message: 'ok' },
-        })
+      ;(mockAxiosInstance.post as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+        data: { success: true, message: 'ok' },
+      })
       await client.testStorageConfig({ backend_type: 'local' } as never)
       expect(mockAxiosInstance.post).toHaveBeenCalledWith(
         '/api/v1/storage/configs/test',
@@ -2993,9 +3027,9 @@ describe('ApiClient', () => {
 
     it('planStorageMigration', async () => {
       const client = await getApiClient()
-        ; (mockAxiosInstance.post as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
-          data: { items: 10 },
-        })
+      ;(mockAxiosInstance.post as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+        data: { items: 10 },
+      })
       await client.planStorageMigration('s1', 's2')
       expect(mockAxiosInstance.post).toHaveBeenCalledWith('/api/v1/admin/storage/migrations/plan', {
         source_config_id: 's1',
@@ -3005,9 +3039,9 @@ describe('ApiClient', () => {
 
     it('startStorageMigration', async () => {
       const client = await getApiClient()
-        ; (mockAxiosInstance.post as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
-          data: { id: 'mig-1' },
-        })
+      ;(mockAxiosInstance.post as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+        data: { id: 'mig-1' },
+      })
       await client.startStorageMigration('s1', 's2')
       expect(mockAxiosInstance.post).toHaveBeenCalledWith('/api/v1/admin/storage/migrations', {
         source_config_id: 's1',
@@ -3017,18 +3051,18 @@ describe('ApiClient', () => {
 
     it('getStorageMigration', async () => {
       const client = await getApiClient()
-        ; (mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
-          data: { id: 'mig-1' },
-        })
+      ;(mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+        data: { id: 'mig-1' },
+      })
       await client.getStorageMigration('mig-1')
       expect(mockAxiosInstance.get).toHaveBeenCalledWith('/api/v1/admin/storage/migrations/mig-1')
     })
 
     it('cancelStorageMigration', async () => {
       const client = await getApiClient()
-        ; (mockAxiosInstance.post as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
-          data: { id: 'mig-1', status: 'cancelled' },
-        })
+      ;(mockAxiosInstance.post as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+        data: { id: 'mig-1', status: 'cancelled' },
+      })
       await client.cancelStorageMigration('mig-1')
       expect(mockAxiosInstance.post).toHaveBeenCalledWith(
         '/api/v1/admin/storage/migrations/mig-1/cancel',
@@ -3037,9 +3071,9 @@ describe('ApiClient', () => {
 
     it('listStorageMigrations', async () => {
       const client = await getApiClient()
-        ; (mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
-          data: [{ id: 'mig-1' }],
-        })
+      ;(mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+        data: [{ id: 'mig-1' }],
+      })
       await client.listStorageMigrations()
       expect(mockAxiosInstance.get).toHaveBeenCalledWith('/api/v1/admin/storage/migrations')
     })
@@ -3049,9 +3083,9 @@ describe('ApiClient', () => {
   describe('setup wizard methods', () => {
     it('testOIDCConfig', async () => {
       const client = await getApiClient()
-        ; (mockAxiosInstance.post as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
-          data: { success: true },
-        })
+      ;(mockAxiosInstance.post as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+        data: { success: true },
+      })
       await client.testOIDCConfig('tok', {
         issuer_url: 'https://auth.example.com',
         client_id: 'id',
@@ -3066,7 +3100,7 @@ describe('ApiClient', () => {
 
     it('saveOIDCConfig', async () => {
       const client = await getApiClient()
-        ; (mockAxiosInstance.post as ReturnType<typeof vi.fn>).mockResolvedValueOnce({ data: {} })
+      ;(mockAxiosInstance.post as ReturnType<typeof vi.fn>).mockResolvedValueOnce({ data: {} })
       await client.saveOIDCConfig('tok', { issuer_url: 'https://auth.example.com' } as never)
       expect(mockAxiosInstance.post).toHaveBeenCalledWith(
         '/api/v1/setup/oidc',
@@ -3077,16 +3111,16 @@ describe('ApiClient', () => {
 
     it('getAdminOIDCConfig', async () => {
       const client = await getApiClient()
-        ; (mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
-          data: { issuer_url: 'https://auth.example.com' },
-        })
+      ;(mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+        data: { issuer_url: 'https://auth.example.com' },
+      })
       await client.getAdminOIDCConfig()
       expect(mockAxiosInstance.get).toHaveBeenCalledWith('/api/v1/admin/oidc/config')
     })
 
     it('updateOIDCGroupMapping', async () => {
       const client = await getApiClient()
-        ; (mockAxiosInstance.put as ReturnType<typeof vi.fn>).mockResolvedValueOnce({ data: {} })
+      ;(mockAxiosInstance.put as ReturnType<typeof vi.fn>).mockResolvedValueOnce({ data: {} })
       await client.updateOIDCGroupMapping({ group_claim_name: 'groups' } as never)
       expect(mockAxiosInstance.put).toHaveBeenCalledWith(
         '/api/v1/admin/oidc/group-mapping',
@@ -3096,9 +3130,9 @@ describe('ApiClient', () => {
 
     it('testSetupStorageConfig', async () => {
       const client = await getApiClient()
-        ; (mockAxiosInstance.post as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
-          data: { success: true },
-        })
+      ;(mockAxiosInstance.post as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+        data: { success: true },
+      })
       await client.testSetupStorageConfig('tok', { backend_type: 'local' } as never)
       expect(mockAxiosInstance.post).toHaveBeenCalledWith(
         '/api/v1/setup/storage/test',
@@ -3109,9 +3143,9 @@ describe('ApiClient', () => {
 
     it('saveSetupStorageConfig', async () => {
       const client = await getApiClient()
-        ; (mockAxiosInstance.post as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
-          data: { message: 'saved' },
-        })
+      ;(mockAxiosInstance.post as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+        data: { message: 'saved' },
+      })
       await client.saveSetupStorageConfig('tok', { backend_type: 'local' } as never)
       expect(mockAxiosInstance.post).toHaveBeenCalledWith(
         '/api/v1/setup/storage',
@@ -3122,9 +3156,9 @@ describe('ApiClient', () => {
 
     it('testScanningConfig', async () => {
       const client = await getApiClient()
-        ; (mockAxiosInstance.post as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
-          data: { success: true },
-        })
+      ;(mockAxiosInstance.post as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+        data: { success: true },
+      })
       await client.testScanningConfig('tok', { enabled: true } as never)
       expect(mockAxiosInstance.post).toHaveBeenCalledWith(
         '/api/v1/setup/scanning/test',
@@ -3135,9 +3169,9 @@ describe('ApiClient', () => {
 
     it('saveScanningConfig', async () => {
       const client = await getApiClient()
-        ; (mockAxiosInstance.post as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
-          data: { message: 'saved' },
-        })
+      ;(mockAxiosInstance.post as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+        data: { message: 'saved' },
+      })
       await client.saveScanningConfig('tok', { enabled: true } as never)
       expect(mockAxiosInstance.post).toHaveBeenCalledWith(
         '/api/v1/setup/scanning',
@@ -3148,7 +3182,7 @@ describe('ApiClient', () => {
 
     it('configureAdmin', async () => {
       const client = await getApiClient()
-        ; (mockAxiosInstance.post as ReturnType<typeof vi.fn>).mockResolvedValueOnce({ data: {} })
+      ;(mockAxiosInstance.post as ReturnType<typeof vi.fn>).mockResolvedValueOnce({ data: {} })
       await client.configureAdmin('tok', { admin_email: 'admin@example.com' } as never)
       expect(mockAxiosInstance.post).toHaveBeenCalledWith(
         '/api/v1/setup/admin',
@@ -3159,9 +3193,9 @@ describe('ApiClient', () => {
 
     it('completeSetup', async () => {
       const client = await getApiClient()
-        ; (mockAxiosInstance.post as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
-          data: { success: true },
-        })
+      ;(mockAxiosInstance.post as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+        data: { success: true },
+      })
       await client.completeSetup('tok')
       expect(mockAxiosInstance.post).toHaveBeenCalledWith(
         '/api/v1/setup/complete',
@@ -3175,9 +3209,9 @@ describe('ApiClient', () => {
   describe('terraform mirror admin methods', () => {
     it('listPublicTerraformMirrorConfigs', async () => {
       const client = await getApiClient()
-        ; (mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
-          data: [{ name: 'tf' }],
-        })
+      ;(mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+        data: [{ name: 'tf' }],
+      })
       const result = await client.listPublicTerraformMirrorConfigs()
       expect(mockAxiosInstance.get).toHaveBeenCalledWith('/terraform/binaries')
       expect(result).toHaveLength(1)
@@ -3185,25 +3219,25 @@ describe('ApiClient', () => {
 
     it('listPublicTerraformMirrorConfigs handles non-array', async () => {
       const client = await getApiClient()
-        ; (mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({ data: null })
+      ;(mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({ data: null })
       const result = await client.listPublicTerraformMirrorConfigs()
       expect(result).toEqual([])
     })
 
     it('listTerraformMirrorConfigs', async () => {
       const client = await getApiClient()
-        ; (mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
-          data: { configs: [] },
-        })
+      ;(mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+        data: { configs: [] },
+      })
       await client.listTerraformMirrorConfigs()
       expect(mockAxiosInstance.get).toHaveBeenCalledWith('/api/v1/admin/terraform-mirrors')
     })
 
     it('createTerraformMirrorConfig', async () => {
       const client = await getApiClient()
-        ; (mockAxiosInstance.post as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
-          data: { id: 'tc-1' },
-        })
+      ;(mockAxiosInstance.post as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+        data: { id: 'tc-1' },
+      })
       await client.createTerraformMirrorConfig({ name: 'test', tool: 'terraform' } as never)
       expect(mockAxiosInstance.post).toHaveBeenCalledWith(
         '/api/v1/admin/terraform-mirrors',
@@ -3213,18 +3247,18 @@ describe('ApiClient', () => {
 
     it('getTerraformMirrorConfig', async () => {
       const client = await getApiClient()
-        ; (mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
-          data: { id: 'tc-1' },
-        })
+      ;(mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+        data: { id: 'tc-1' },
+      })
       await client.getTerraformMirrorConfig('tc-1')
       expect(mockAxiosInstance.get).toHaveBeenCalledWith('/api/v1/admin/terraform-mirrors/tc-1')
     })
 
     it('getTerraformMirrorStatus', async () => {
       const client = await getApiClient()
-        ; (mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
-          data: { status: 'idle' },
-        })
+      ;(mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+        data: { status: 'idle' },
+      })
       await client.getTerraformMirrorStatus('tc-1')
       expect(mockAxiosInstance.get).toHaveBeenCalledWith(
         '/api/v1/admin/terraform-mirrors/tc-1/status',
@@ -3233,7 +3267,7 @@ describe('ApiClient', () => {
 
     it('updateTerraformMirrorConfig', async () => {
       const client = await getApiClient()
-        ; (mockAxiosInstance.put as ReturnType<typeof vi.fn>).mockResolvedValueOnce({ data: {} })
+      ;(mockAxiosInstance.put as ReturnType<typeof vi.fn>).mockResolvedValueOnce({ data: {} })
       await client.updateTerraformMirrorConfig('tc-1', { name: 'updated' } as never)
       expect(mockAxiosInstance.put).toHaveBeenCalledWith(
         '/api/v1/admin/terraform-mirrors/tc-1',
@@ -3243,16 +3277,16 @@ describe('ApiClient', () => {
 
     it('deleteTerraformMirrorConfig', async () => {
       const client = await getApiClient()
-        ; (mockAxiosInstance.delete as ReturnType<typeof vi.fn>).mockResolvedValueOnce({ data: {} })
+      ;(mockAxiosInstance.delete as ReturnType<typeof vi.fn>).mockResolvedValueOnce({ data: {} })
       await client.deleteTerraformMirrorConfig('tc-1')
       expect(mockAxiosInstance.delete).toHaveBeenCalledWith('/api/v1/admin/terraform-mirrors/tc-1')
     })
 
     it('triggerTerraformMirrorSync', async () => {
       const client = await getApiClient()
-        ; (mockAxiosInstance.post as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
-          data: { message: 'started' },
-        })
+      ;(mockAxiosInstance.post as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+        data: { message: 'started' },
+      })
       await client.triggerTerraformMirrorSync('tc-1')
       expect(mockAxiosInstance.post).toHaveBeenCalledWith(
         '/api/v1/admin/terraform-mirrors/tc-1/sync',
@@ -3266,9 +3300,9 @@ describe('ApiClient', () => {
 
     it('listTerraformVersions', async () => {
       const client = await getApiClient()
-        ; (mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
-          data: { versions: [] },
-        })
+      ;(mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+        data: { versions: [] },
+      })
       await client.listTerraformVersions('tc-1', { synced: true })
       expect(mockAxiosInstance.get).toHaveBeenCalledWith(
         '/api/v1/admin/terraform-mirrors/tc-1/versions',
@@ -3278,9 +3312,9 @@ describe('ApiClient', () => {
 
     it('listTerraformVersions without filter', async () => {
       const client = await getApiClient()
-        ; (mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
-          data: { versions: [] },
-        })
+      ;(mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+        data: { versions: [] },
+      })
       await client.listTerraformVersions('tc-1')
       expect(mockAxiosInstance.get).toHaveBeenCalledWith(
         '/api/v1/admin/terraform-mirrors/tc-1/versions',
@@ -3290,9 +3324,9 @@ describe('ApiClient', () => {
 
     it('getTerraformVersion', async () => {
       const client = await getApiClient()
-        ; (mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
-          data: { version: '1.5.0' },
-        })
+      ;(mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+        data: { version: '1.5.0' },
+      })
       await client.getTerraformVersion('tc-1', '1.5.0')
       expect(mockAxiosInstance.get).toHaveBeenCalledWith(
         '/api/v1/admin/terraform-mirrors/tc-1/versions/1.5.0',
@@ -3301,7 +3335,7 @@ describe('ApiClient', () => {
 
     it('deleteTerraformVersion', async () => {
       const client = await getApiClient()
-        ; (mockAxiosInstance.delete as ReturnType<typeof vi.fn>).mockResolvedValueOnce({ data: {} })
+      ;(mockAxiosInstance.delete as ReturnType<typeof vi.fn>).mockResolvedValueOnce({ data: {} })
       await client.deleteTerraformVersion('tc-1', '1.5.0')
       expect(mockAxiosInstance.delete).toHaveBeenCalledWith(
         '/api/v1/admin/terraform-mirrors/tc-1/versions/1.5.0',
@@ -3310,7 +3344,7 @@ describe('ApiClient', () => {
 
     it('deprecateTerraformVersion', async () => {
       const client = await getApiClient()
-        ; (mockAxiosInstance.post as ReturnType<typeof vi.fn>).mockResolvedValueOnce({ data: {} })
+      ;(mockAxiosInstance.post as ReturnType<typeof vi.fn>).mockResolvedValueOnce({ data: {} })
       await client.deprecateTerraformVersion('tc-1', '1.5.0')
       expect(mockAxiosInstance.post).toHaveBeenCalledWith(
         '/api/v1/admin/terraform-mirrors/tc-1/versions/1.5.0/deprecate',
@@ -3320,7 +3354,7 @@ describe('ApiClient', () => {
 
     it('undeprecateTerraformVersion', async () => {
       const client = await getApiClient()
-        ; (mockAxiosInstance.delete as ReturnType<typeof vi.fn>).mockResolvedValueOnce({ data: {} })
+      ;(mockAxiosInstance.delete as ReturnType<typeof vi.fn>).mockResolvedValueOnce({ data: {} })
       await client.undeprecateTerraformVersion('tc-1', '1.5.0')
       expect(mockAxiosInstance.delete).toHaveBeenCalledWith(
         '/api/v1/admin/terraform-mirrors/tc-1/versions/1.5.0/deprecate',
@@ -3329,27 +3363,27 @@ describe('ApiClient', () => {
 
     it('listTerraformVersionPlatforms returns array from data', async () => {
       const client = await getApiClient()
-        ; (mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
-          data: [{ os: 'linux', arch: 'amd64' }],
-        })
+      ;(mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+        data: [{ os: 'linux', arch: 'amd64' }],
+      })
       const result = await client.listTerraformVersionPlatforms('tc-1', '1.5.0')
       expect(result).toHaveLength(1)
     })
 
     it('listTerraformVersionPlatforms returns platforms from nested', async () => {
       const client = await getApiClient()
-        ; (mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
-          data: { platforms: [{ os: 'linux' }] },
-        })
+      ;(mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+        data: { platforms: [{ os: 'linux' }] },
+      })
       const result = await client.listTerraformVersionPlatforms('tc-1', '1.5.0')
       expect(result).toHaveLength(1)
     })
 
     it('getTerraformMirrorHistory', async () => {
       const client = await getApiClient()
-        ; (mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
-          data: { history: [] },
-        })
+      ;(mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+        data: { history: [] },
+      })
       await client.getTerraformMirrorHistory('tc-1', 10)
       expect(mockAxiosInstance.get).toHaveBeenCalledWith(
         '/api/v1/admin/terraform-mirrors/tc-1/history',
@@ -3362,18 +3396,18 @@ describe('ApiClient', () => {
   describe('terraform mirror public methods', () => {
     it('listPublicTerraformVersions', async () => {
       const client = await getApiClient()
-        ; (mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
-          data: { versions: [] },
-        })
+      ;(mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+        data: { versions: [] },
+      })
       await client.listPublicTerraformVersions('terraform')
       expect(mockAxiosInstance.get).toHaveBeenCalledWith('/terraform/binaries/terraform/versions')
     })
 
     it('getPublicLatestTerraformVersion', async () => {
       const client = await getApiClient()
-        ; (mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
-          data: { version: '1.9.0' },
-        })
+      ;(mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+        data: { version: '1.9.0' },
+      })
       await client.getPublicLatestTerraformVersion('terraform')
       expect(mockAxiosInstance.get).toHaveBeenCalledWith(
         '/terraform/binaries/terraform/versions/latest',
@@ -3382,9 +3416,9 @@ describe('ApiClient', () => {
 
     it('getPublicTerraformVersion', async () => {
       const client = await getApiClient()
-        ; (mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
-          data: { version: '1.5.0' },
-        })
+      ;(mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+        data: { version: '1.5.0' },
+      })
       await client.getPublicTerraformVersion('terraform', '1.5.0')
       expect(mockAxiosInstance.get).toHaveBeenCalledWith(
         '/terraform/binaries/terraform/versions/1.5.0',
@@ -3393,9 +3427,9 @@ describe('ApiClient', () => {
 
     it('getTerraformBinaryDownload', async () => {
       const client = await getApiClient()
-        ; (mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
-          data: { download_url: 'https://...' },
-        })
+      ;(mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+        data: { download_url: 'https://...' },
+      })
       await client.getTerraformBinaryDownload('terraform', '1.5.0', 'linux', 'amd64')
       expect(mockAxiosInstance.get).toHaveBeenCalledWith(
         '/terraform/binaries/terraform/versions/1.5.0/linux/amd64',
@@ -3407,9 +3441,9 @@ describe('ApiClient', () => {
   describe('audit log methods', () => {
     it('listAuditLogs with filters', async () => {
       const client = await getApiClient()
-        ; (mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
-          data: { logs: [], pagination: {} },
-        })
+      ;(mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+        data: { logs: [], pagination: {} },
+      })
       await client.listAuditLogs({ page: 1, per_page: 25, resource_type: 'module' })
       expect(mockAxiosInstance.get).toHaveBeenCalledWith('/api/v1/admin/audit-logs', {
         params: { page: 1, per_page: 25, resource_type: 'module' },
@@ -3418,9 +3452,9 @@ describe('ApiClient', () => {
 
     it('listAuditLogs forwards organization_id (backend #719)', async () => {
       const client = await getApiClient()
-        ; (mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
-          data: { logs: [], pagination: {} },
-        })
+      ;(mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+        data: { logs: [], pagination: {} },
+      })
       await client.listAuditLogs({ page: 1, organization_id: 'org-a' })
       expect(mockAxiosInstance.get).toHaveBeenCalledWith('/api/v1/admin/audit-logs', {
         params: { page: 1, organization_id: 'org-a' },
@@ -3431,9 +3465,9 @@ describe('ApiClient', () => {
       // Absent must mean "everything the caller may see", never a default
       // organization: a platform admin deliberately reads the whole estate.
       const client = await getApiClient()
-        ; (mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
-          data: { logs: [], pagination: {} },
-        })
+      ;(mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+        data: { logs: [], pagination: {} },
+      })
       await client.listAuditLogs({ page: 1 })
       const calls = (mockAxiosInstance.get as ReturnType<typeof vi.fn>).mock.calls
       const [, config] = calls[calls.length - 1]
@@ -3442,9 +3476,9 @@ describe('ApiClient', () => {
 
     it('getAuditLog', async () => {
       const client = await getApiClient()
-        ; (mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
-          data: { id: 'log-1' },
-        })
+      ;(mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+        data: { id: 'log-1' },
+      })
       await client.getAuditLog('log-1')
       expect(mockAxiosInstance.get).toHaveBeenCalledWith('/api/v1/admin/audit-logs/log-1')
     })
@@ -3452,7 +3486,7 @@ describe('ApiClient', () => {
     it('exportAuditLogsCSV creates download', async () => {
       const client = await getApiClient()
       const createElementSpy = vi.spyOn(document, 'createElement')
-      const revokeURLSpy = vi.spyOn(URL, 'revokeObjectURL').mockImplementation(() => { })
+      const revokeURLSpy = vi.spyOn(URL, 'revokeObjectURL').mockImplementation(() => {})
       const createURLSpy = vi.spyOn(URL, 'createObjectURL').mockReturnValue('blob:url')
       const clickSpy = vi.fn()
       createElementSpy.mockReturnValue({
@@ -3477,7 +3511,7 @@ describe('ApiClient', () => {
     it('exportAuditLogsJSON creates download', async () => {
       const client = await getApiClient()
       const createElementSpy = vi.spyOn(document, 'createElement')
-      const revokeURLSpy = vi.spyOn(URL, 'revokeObjectURL').mockImplementation(() => { })
+      const revokeURLSpy = vi.spyOn(URL, 'revokeObjectURL').mockImplementation(() => {})
       const createURLSpy = vi.spyOn(URL, 'createObjectURL').mockReturnValue('blob:url')
       const clickSpy = vi.fn()
       createElementSpy.mockReturnValue({
@@ -3501,14 +3535,14 @@ describe('ApiClient', () => {
   describe('enterprise identity methods', () => {
     it('getAuthProviders calls GET /api/v1/auth/providers', async () => {
       const client = await getApiClient()
-        ; (mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
-          data: {
-            providers: [
-              { type: 'oidc', name: 'Corporate' },
-              { type: 'saml', name: 'Okta', id: 's1' },
-            ],
-          },
-        })
+      ;(mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+        data: {
+          providers: [
+            { type: 'oidc', name: 'Corporate' },
+            { type: 'saml', name: 'Okta', id: 's1' },
+          ],
+        },
+      })
       const result = await client.getAuthProviders()
       expect(mockAxiosInstance.get).toHaveBeenCalledWith('/api/v1/auth/providers')
       expect(result.providers).toHaveLength(2)
@@ -3517,9 +3551,9 @@ describe('ApiClient', () => {
 
     it('ldapLogin calls POST /api/v1/auth/ldap/login with credentials (cookie is set server-side)', async () => {
       const client = await getApiClient()
-        ; (mockAxiosInstance.post as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
-          data: {},
-        })
+      ;(mockAxiosInstance.post as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+        data: {},
+      })
       await client.ldapLogin('admin', 'secret')
       expect(mockAxiosInstance.post).toHaveBeenCalledWith('/api/v1/auth/ldap/login', {
         username: 'admin',
@@ -3529,9 +3563,9 @@ describe('ApiClient', () => {
 
     it('getIdentityGroupMappings calls GET /api/v1/admin/identity/group-mappings', async () => {
       const client = await getApiClient()
-        ; (mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
-          data: { saml: { group_mappings: [] }, ldap: { group_mappings: [] } },
-        })
+      ;(mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+        data: { saml: { group_mappings: [] }, ldap: { group_mappings: [] } },
+      })
       const result = await client.getIdentityGroupMappings()
       expect(mockAxiosInstance.get).toHaveBeenCalledWith('/api/v1/admin/identity/group-mappings')
       expect(result).toHaveProperty('saml')
@@ -3540,9 +3574,9 @@ describe('ApiClient', () => {
 
     it('getMTLSConfig calls GET /api/v1/admin/mtls/config', async () => {
       const client = await getApiClient()
-        ; (mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
-          data: { enabled: true, client_ca_file: '/ca.pem', mappings: [] },
-        })
+      ;(mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+        data: { enabled: true, client_ca_file: '/ca.pem', mappings: [] },
+      })
       const result = await client.getMTLSConfig()
       expect(mockAxiosInstance.get).toHaveBeenCalledWith('/api/v1/admin/mtls/config')
       expect(result.enabled).toBe(true)
@@ -3553,9 +3587,9 @@ describe('ApiClient', () => {
   describe('version info', () => {
     it('getVersionInfo', async () => {
       const client = await getApiClient()
-        ; (mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
-          data: { version: '1.0.0' },
-        })
+      ;(mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+        data: { version: '1.0.0' },
+      })
       const result = await client.getVersionInfo()
       expect(mockAxiosInstance.get).toHaveBeenCalledWith('/version')
       expect(result.version).toBe('1.0.0')
@@ -3570,9 +3604,9 @@ describe('ApiClient', () => {
     it('returns the theme config on success', async () => {
       const client = await getApiClient()
       const theme = { product_name: 'Acme Registry', primary_color: '#5C4EE5' }
-        ; (mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
-          data: theme,
-        })
+      ;(mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+        data: theme,
+      })
 
       const result = await client.getUITheme()
 
@@ -3582,11 +3616,11 @@ describe('ApiClient', () => {
 
     it('returns null without reporting an error on 404 (endpoint not implemented)', async () => {
       const client = await getApiClient()
-      const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => { })
-        ; (mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockRejectedValueOnce({
-          isAxiosError: true,
-          response: { status: 404 },
-        })
+      const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
+      ;(mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockRejectedValueOnce({
+        isAxiosError: true,
+        response: { status: 404 },
+      })
 
       const result = await client.getUITheme()
 
@@ -3596,12 +3630,12 @@ describe('ApiClient', () => {
 
     it('returns null and reports the error on a non-404 failure', async () => {
       const client = await getApiClient()
-      const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => { })
+      const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
       const serverError = Object.assign(new Error('Internal Server Error'), {
         isAxiosError: true,
         response: { status: 500 },
       })
-        ; (mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockRejectedValueOnce(serverError)
+      ;(mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockRejectedValueOnce(serverError)
 
       const result = await client.getUITheme()
 
@@ -3613,10 +3647,10 @@ describe('ApiClient', () => {
 
     it('returns null and reports the error on a network failure with no response', async () => {
       const client = await getApiClient()
-      const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => { })
-        ; (mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockRejectedValueOnce(
-          new Error('Network Error'),
-        )
+      const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
+      ;(mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockRejectedValueOnce(
+        new Error('Network Error'),
+      )
 
       const result = await client.getUITheme()
 

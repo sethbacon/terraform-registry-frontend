@@ -3,8 +3,9 @@ import { isSafeUrl } from '@4cloudguru/cloud-suite-ui'
 import { allowedExternalOrigins, isSafeExternalUrl } from '../externalUrl'
 
 vi.mock('@4cloudguru/cloud-suite-ui', async () => {
-  const actual =
-    await vi.importActual<typeof import('@4cloudguru/cloud-suite-ui')>('@4cloudguru/cloud-suite-ui')
+  const actual = await vi.importActual<typeof import('@4cloudguru/cloud-suite-ui')>(
+    '@4cloudguru/cloud-suite-ui',
+  )
   return { ...actual, isSafeUrl: vi.fn(actual.isSafeUrl) }
 })
 
@@ -74,12 +75,15 @@ describe('isSafeExternalUrl origin allowlist (#559)', () => {
   })
 
   it('accepts multiple listed origins and ignores surrounding whitespace', () => {
-    vi.stubEnv('VITE_ALLOWED_EXTERNAL_ORIGINS', ' https://tsm.example.com , https://cdn.example.com ')
+    vi.stubEnv(
+      'VITE_ALLOWED_EXTERNAL_ORIGINS',
+      ' https://tsm.example.com , https://cdn.example.com ',
+    )
     expect(isSafeExternalUrl('https://cdn.example.com/logo.png')).toBe(true)
     expect(isSafeExternalUrl('https://tsm.example.com')).toBe(true)
   })
 
-  it('always accepts the app\'s own origin without listing it', () => {
+  it("always accepts the app's own origin without listing it", () => {
     vi.stubEnv('VITE_ALLOWED_EXTERNAL_ORIGINS', 'https://tsm.example.com')
     expect(isSafeExternalUrl(`${window.location.origin}/admin`)).toBe(true)
   })

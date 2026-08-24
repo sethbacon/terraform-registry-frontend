@@ -110,7 +110,10 @@ export function useProviderDetail() {
       if (!matchingProvider) return { provider: null, versions: [] as ProviderVersion[] }
 
       // Backend returns { versions: [...] } directly -- sort by semver descending
-      return { provider: matchingProvider, versions: sortByVersionDesc(versionsData.versions || []) }
+      return {
+        provider: matchingProvider,
+        versions: sortByVersionDesc(versionsData.versions || []),
+      }
     },
     enabled: providerQueryEnabled,
   })

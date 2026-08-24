@@ -8,12 +8,7 @@ import { SuiteLayout } from '@4cloudguru/cloud-suite-ui'
 import { useAuth } from '../contexts/AuthContext'
 import { useHelp } from '../contexts/HelpContext'
 import { useHotkey } from '../hooks/useHotkey'
-import {
-  homeItem,
-  primaryNavItems,
-  componentShowcaseItem,
-  adminNavGroups,
-} from '../navigation'
+import { homeItem, primaryNavItems, componentShowcaseItem, adminNavGroups } from '../navigation'
 import { SuiteSwitcher } from './SuiteSwitcher'
 import HelpPanel, { HELP_PANEL_WIDTH } from './HelpPanel'
 import AboutModal from './AboutModal'
@@ -69,7 +64,9 @@ const Layout = () => {
   )
 
   // The dev-only Component Showcase sits at the end of the flat public nav.
-  const primary = import.meta.env.DEV ? [...primaryNavItems, componentShowcaseItem] : primaryNavItems
+  const primary = import.meta.env.DEV
+    ? [...primaryNavItems, componentShowcaseItem]
+    : primaryNavItems
 
   return (
     <>

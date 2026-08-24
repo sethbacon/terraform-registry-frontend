@@ -181,11 +181,7 @@ const HomePage: React.FC = () => {
             mb: 6,
           }}
         >
-          <Typography
-            variant="h3"
-            component="h1"
-            sx={{ fontWeight: 'bold', mb: 1.5 }}
-          >
+          <Typography variant="h3" component="h1" sx={{ fontWeight: 'bold', mb: 1.5 }}>
             {t('home.heroTitle')}
           </Typography>
           <Typography variant="h6" sx={{ mb: 4, opacity: 0.9, maxWidth: 720 }}>

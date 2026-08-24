@@ -633,7 +633,9 @@ export function useModuleDetail() {
     // Defense-in-depth: sibling.publicUrl comes from the backend /api/v1/ui/config;
     // validate it at the app boundary before ConsumedByPanel hands it to its
     // window.open() navigation sink (#559).
-    suiteSiblingUrl: isSafeExternalUrl(suiteSibling?.publicUrl) ? suiteSibling?.publicUrl : undefined,
+    suiteSiblingUrl: isSafeExternalUrl(suiteSibling?.publicUrl)
+      ? suiteSibling?.publicUrl
+      : undefined,
     // Security scan
     moduleScan,
     scanLoading,

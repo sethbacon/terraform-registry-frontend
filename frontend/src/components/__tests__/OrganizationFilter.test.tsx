@@ -54,7 +54,11 @@ const organizations = (n: number) =>
  * whole point of backend #893, and what makes "a full page that is the last
  * page" expressible at all.
  */
-const page = (orgs: ReturnType<typeof organization>[], hasMore = false, total: number | null = null) => ({
+const page = (
+  orgs: ReturnType<typeof organization>[],
+  hasMore = false,
+  total: number | null = null,
+) => ({
   organizations: orgs,
   hasMore,
   total,
@@ -102,7 +106,9 @@ describe('OrganizationFilter', () => {
   it('is shown to a platform admin with no memberships at all', async () => {
     mockAllowedScopes = ['admin']
     mockMemberships = []
-    listOrganizationsMock.mockResolvedValue(page([organization('org-1', 'acme'), organization('org-2', 'globex')]))
+    listOrganizationsMock.mockResolvedValue(
+      page([organization('org-1', 'acme'), organization('org-2', 'globex')]),
+    )
     renderFilter()
     await waitFor(() => {
       expect(screen.getByTestId('organization-filter-input')).toBeInTheDocument()
@@ -164,7 +170,9 @@ describe('OrganizationFilter', () => {
 
   it('does not claim truncation when the whole list fits in one page', async () => {
     mockAllowedScopes = ['admin']
-    listOrganizationsMock.mockResolvedValue(page(organizations(ORGANIZATION_PAGE_SIZE - 1), false, 99))
+    listOrganizationsMock.mockResolvedValue(
+      page(organizations(ORGANIZATION_PAGE_SIZE - 1), false, 99),
+    )
     renderFilter()
     await screen.findByTestId('organization-filter-input')
     expect(screen.queryByTestId('organization-filter-truncated')).not.toBeInTheDocument()

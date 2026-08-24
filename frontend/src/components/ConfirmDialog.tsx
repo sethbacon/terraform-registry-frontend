@@ -124,9 +124,7 @@ const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
       // Raw error messages can leak implementation details -- only show them
       // to developers, same DEV gate as ErrorBoundary.tsx (#618).
       const message =
-        import.meta.env.DEV && err instanceof Error
-          ? err.message
-          : 'An unexpected error occurred.'
+        import.meta.env.DEV && err instanceof Error ? err.message : 'An unexpected error occurred.'
       setError(message)
     } finally {
       setInternalLoading(false)

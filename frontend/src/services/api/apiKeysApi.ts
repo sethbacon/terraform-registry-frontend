@@ -79,8 +79,11 @@ export async function rotateAPIKey(
   id: string,
   gracePeriodHours: number = 0,
 ): Promise<RotateAPIKeyResponse> {
-  const response = await http.post<RotateAPIKeyResponse>(`/api/v1/apikeys/${encodeSegment(id)}/rotate`, {
-    grace_period_hours: gracePeriodHours,
-  })
+  const response = await http.post<RotateAPIKeyResponse>(
+    `/api/v1/apikeys/${encodeSegment(id)}/rotate`,
+    {
+      grace_period_hours: gracePeriodHours,
+    },
+  )
   return response.data
 }

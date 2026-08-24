@@ -38,7 +38,10 @@ import {
 import DeleteIcon from '@mui/icons-material/Delete'
 import AddIcon from '@mui/icons-material/Add'
 import KeyIcon from '@mui/icons-material/Key'
-import { ApiKeyExpirySettingsCard, type ApiKeyExpirySettingsInput } from '@4cloudguru/cloud-suite-ui'
+import {
+  ApiKeyExpirySettingsCard,
+  type ApiKeyExpirySettingsInput,
+} from '@4cloudguru/cloud-suite-ui'
 import EmptyState from '../../components/EmptyState'
 import Page from '../../components/Page'
 import PageHeader from '../../components/PageHeader'
@@ -601,10 +604,10 @@ const APIKeysPage: React.FC = () => {
             primaryAction={
               canManage
                 ? {
-                  label: t('admin.apiKeys.emptyAction'),
-                  icon: <AddIcon />,
-                  onClick: handleOpenDialog,
-                }
+                    label: t('admin.apiKeys.emptyAction'),
+                    icon: <AddIcon />,
+                    onClick: handleOpenDialog,
+                  }
                 : undefined
             }
             data-testid="apikeys-empty-state"
@@ -956,8 +959,8 @@ const APIKeysPage: React.FC = () => {
                   {rotateResult.oldStatus === 'revoked'
                     ? t('admin.apiKeys.rotateOldRevoked')
                     : t('admin.apiKeys.rotateOldValid', {
-                      date: new Date(rotateResult.oldExpiresAt!).toLocaleString(),
-                    })}
+                        date: new Date(rotateResult.oldExpiresAt!).toLocaleString(),
+                      })}
                 </Alert>
               )}
             </Box>

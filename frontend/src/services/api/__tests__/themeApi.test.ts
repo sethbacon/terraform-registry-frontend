@@ -49,10 +49,13 @@ describe('getAdminUITheme', () => {
   // branding configured", the admin would be shown an empty form and their next
   // Save would blank every field they were never shown -- so unlike getUITheme,
   // this must reject rather than swallow.
-  it.each([500, 502, 401, 403])('propagates a %i so the editor can refuse to render', async (status) => {
-    vi.spyOn(http, 'get').mockRejectedValue(axiosStatusError(status))
-    await expect(getAdminUITheme()).rejects.toBeInstanceOf(AxiosError)
-  })
+  it.each([500, 502, 401, 403])(
+    'propagates a %i so the editor can refuse to render',
+    async (status) => {
+      vi.spyOn(http, 'get').mockRejectedValue(axiosStatusError(status))
+      await expect(getAdminUITheme()).rejects.toBeInstanceOf(AxiosError)
+    },
+  )
 
   it('propagates a network failure that has no response at all', async () => {
     vi.spyOn(http, 'get').mockRejectedValue(new AxiosError('Network Error'))

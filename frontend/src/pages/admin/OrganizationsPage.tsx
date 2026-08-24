@@ -58,8 +58,7 @@ const OrganizationsPage: React.FC = () => {
   // the membership-management controls below) on organizations:write/admin —
   // a read-only viewer would otherwise see actionable buttons that only fail
   // once clicked, relying entirely on the server to say no (#609).
-  const canManage =
-    allowedScopes.includes('admin') || allowedScopes.includes('organizations:write')
+  const canManage = allowedScopes.includes('admin') || allowedScopes.includes('organizations:write')
   const [error, setError] = useState<string | null>(null)
 
   // Dialog state

@@ -89,7 +89,9 @@ function maskComments(conf: string): string {
  * with identical bodies, or a body that also occurs verbatim earlier, silently
  * strip the wrong region and take real server-level directives with them.
  */
-function locationBlocks(rawConf: string): { match: string; body: string; start: number; end: number }[] {
+function locationBlocks(
+  rawConf: string,
+): { match: string; body: string; start: number; end: number }[] {
   // Parse the MASKED text throughout: offsets are identical, so the ranges stay
   // valid against the raw config, and no directive is read out of a comment.
   const conf = maskComments(rawConf)
@@ -148,9 +150,13 @@ describe('config parser', () => {
   })
 
   it('does not count a commented-out add_header as declared', () => {
-    const conf = ['server {', '    location /x/ {', '        # add_header X-Frame-Options "DENY";', '    }', '}'].join(
-      '\n',
-    )
+    const conf = [
+      'server {',
+      '    location /x/ {',
+      '        # add_header X-Frame-Options "DENY";',
+      '    }',
+      '}',
+    ].join('\n')
 
     expect(locationBlocks(conf)[0].body).not.toContain('add_header')
     expect(serverLevelOnly(conf)).not.toContain('add_header')

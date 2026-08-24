@@ -475,7 +475,11 @@ const ModulesPage: React.FC = () => {
                       do not stop assistive tech from focusing it). A plain span
                       keeps the IconButton's small-size footprint without the
                       interactive semantics. */}
-                  <Box component="span" aria-hidden="true" sx={{ display: 'inline-flex', p: '5px' }}>
+                  <Box
+                    component="span"
+                    aria-hidden="true"
+                    sx={{ display: 'inline-flex', p: '5px' }}
+                  >
                     {isCollapsed ? <ExpandMore /> : <ExpandLess />}
                   </Box>
                   <ProviderIcon provider={provider} size={28} />

@@ -73,14 +73,18 @@ export async function verifySCMProvider(
 
 // SCM OAuth
 export async function initiateSCMOAuth(providerId: string) {
-  const response = await http.get(`/api/v1/scm-providers/${encodeSegment(providerId)}/oauth/authorize`)
+  const response = await http.get(
+    `/api/v1/scm-providers/${encodeSegment(providerId)}/oauth/authorize`,
+  )
   return response.data
 }
 
 export async function refreshSCMToken(
   providerId: string,
 ): Promise<{ message: string; expires_at?: string }> {
-  const response = await http.post(`/api/v1/scm-providers/${encodeSegment(providerId)}/oauth/refresh`)
+  const response = await http.post(
+    `/api/v1/scm-providers/${encodeSegment(providerId)}/oauth/refresh`,
+  )
   return response.data
 }
 
@@ -99,9 +103,12 @@ export async function listSCMRepositories(
   search?: string,
 ): Promise<{ repositories: SCMRepository[] | null }> {
   const params = search ? { search } : {}
-  const response = await http.get(`/api/v1/scm-providers/${encodeSegment(providerId)}/repositories`, {
-    params,
-  })
+  const response = await http.get(
+    `/api/v1/scm-providers/${encodeSegment(providerId)}/repositories`,
+    {
+      params,
+    },
+  )
   return response.data
 }
 
@@ -128,7 +135,9 @@ export async function listSCMRepositoryBranches(
 }
 
 export async function revokeSCMToken(providerId: string): Promise<{ message: string }> {
-  const response = await http.delete(`/api/v1/scm-providers/${encodeSegment(providerId)}/oauth/token`)
+  const response = await http.delete(
+    `/api/v1/scm-providers/${encodeSegment(providerId)}/oauth/token`,
+  )
   return response.data
 }
 
@@ -166,7 +175,9 @@ export async function linkModuleToSCM(
 }
 
 export async function getModuleSCMInfo(moduleId: string): Promise<ModuleSCMLink> {
-  const response = await http.get<ModuleSCMLink>(`/api/v1/admin/modules/${encodeSegment(moduleId)}/scm`)
+  const response = await http.get<ModuleSCMLink>(
+    `/api/v1/admin/modules/${encodeSegment(moduleId)}/scm`,
+  )
   return response.data
 }
 
@@ -192,7 +203,10 @@ export async function triggerManualSync(
   moduleId: string,
   data?: { tag_name?: string; commit_sha?: string },
 ): Promise<{ message: string }> {
-  const response = await http.post(`/api/v1/admin/modules/${encodeSegment(moduleId)}/scm/sync`, data || {})
+  const response = await http.post(
+    `/api/v1/admin/modules/${encodeSegment(moduleId)}/scm/sync`,
+    data || {},
+  )
   return response.data
 }
 

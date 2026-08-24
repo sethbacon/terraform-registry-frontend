@@ -96,18 +96,20 @@ export async function uploadModule(
     },
     onUploadProgress: options?.onUploadProgress
       ? (event) => {
-        if (event.total && event.total > 0) {
-          const percent = Math.round((event.loaded / event.total) * 100)
-          options.onUploadProgress?.(percent)
+          if (event.total && event.total > 0) {
+            const percent = Math.round((event.loaded / event.total) * 100)
+            options.onUploadProgress?.(percent)
+          }
         }
-      }
       : undefined,
   })
   return response.data
 }
 
 export async function getModule(namespace: string, name: string, system: string): Promise<Module> {
-  const response = await http.get<Module>(`/api/v1/modules/${encodeSegment(namespace)}/${encodeSegment(name)}/${encodeSegment(system)}`)
+  const response = await http.get<Module>(
+    `/api/v1/modules/${encodeSegment(namespace)}/${encodeSegment(name)}/${encodeSegment(system)}`,
+  )
   return response.data
 }
 

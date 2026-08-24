@@ -87,7 +87,9 @@ export async function uploadProvider(
 }
 
 export async function getProvider(namespace: string, type: string) {
-  const response = await http.get(`/api/v1/providers/${encodeSegment(namespace)}/${encodeSegment(type)}`)
+  const response = await http.get(
+    `/api/v1/providers/${encodeSegment(namespace)}/${encodeSegment(type)}`,
+  )
   return response.data
 }
 
@@ -95,7 +97,9 @@ export async function deleteProvider(
   namespace: string,
   type: string,
 ): Promise<{ message: string }> {
-  const response = await http.delete<{ message: string }>(`/api/v1/providers/${encodeSegment(namespace)}/${encodeSegment(type)}`)
+  const response = await http.delete<{ message: string }>(
+    `/api/v1/providers/${encodeSegment(namespace)}/${encodeSegment(type)}`,
+  )
   return response.data
 }
 

@@ -8,4 +8,3 @@ export type { ConsentPreferences } from '@4cloudguru/cloud-suite-ui'
 export const ConsentProvider = ({ children }: { children: ReactNode }) => (
   <SuiteConsentProvider storageKey="terraform-registry-consent">{children}</SuiteConsentProvider>
 )
-

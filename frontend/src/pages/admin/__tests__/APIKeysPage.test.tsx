@@ -120,7 +120,13 @@ describe('APIKeysPage', () => {
     vi.clearAllMocks()
     getNotificationsConfigMock.mockResolvedValue({
       enabled: true,
-      smtp: { host: 'smtp.example.com', port: 587, username: '', from: 'notify@example.com', use_tls: true },
+      smtp: {
+        host: 'smtp.example.com',
+        port: 587,
+        username: '',
+        from: 'notify@example.com',
+        use_tls: true,
+      },
       recipients: [],
       events: {
         api_key_expiring: true,

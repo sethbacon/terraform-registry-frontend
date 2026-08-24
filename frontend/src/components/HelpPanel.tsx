@@ -89,7 +89,13 @@ const HELP_ACTION_KEYS: Record<string, string[]> = {
   securityScanning: ['viewConfiguration', 'summaryStatistics', 'reviewScanResults'],
   mtls: ['viewStatus', 'certificateMappings', 'configurationSource'],
   scim: ['endpointUrls', 'authentication', 'supportedOperations'],
-  notifications: ['smtpConfig', 'testEmail', 'notificationChannels', 'recipientsEvents', 'apiKeyExpiry'],
+  notifications: [
+    'smtpConfig',
+    'testEmail',
+    'notificationChannels',
+    'recipientsEvents',
+    'apiKeyExpiry',
+  ],
 }
 
 function makeContent(key: string, t: TStr): HelpContent {

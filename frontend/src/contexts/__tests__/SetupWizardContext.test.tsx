@@ -249,7 +249,10 @@ describe('SetupWizardContext (roadmap 1.3)', () => {
   })
 
   it('testLDAP preserves a short, clean backend failure message', async () => {
-    mockApi.testLDAPConfig.mockResolvedValue({ success: false, message: 'Invalid bind credentials' })
+    mockApi.testLDAPConfig.mockResolvedValue({
+      success: false,
+      message: 'Invalid bind credentials',
+    })
     const { result } = renderHook(() => useSetupWizard(), { wrapper })
     await waitFor(() => expect(result.current.loading).toBe(false))
     await act(async () => {

@@ -108,8 +108,7 @@ export const queryKeys = {
     // `organization_id` and `listMirrors` already accepts one as a request
     // parameter — the key was the only part of the path that could not
     // express it.
-    list: (organizationId?: string) =>
-      [...queryKeys.mirrors._def, 'list', organizationId] as const,
+    list: (organizationId?: string) => [...queryKeys.mirrors._def, 'list', organizationId] as const,
     // Deliberately global: a mirror's provider inventory is addressed by
     // mirror id, which is itself already organization-scoped.
     providers: (mirrorId: string) => [...queryKeys.mirrors._def, 'providers', mirrorId] as const,

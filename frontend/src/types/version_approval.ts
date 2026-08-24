@@ -37,10 +37,7 @@ export interface VersionApprovalBulkResponse {
 }
 
 export type AutoApproveRuleType =
-  | 'patch_only'
-  | 'delay_hours'
-  | 'gpg_verified'
-  | 'semver_constraint'
+  'patch_only' | 'delay_hours' | 'gpg_verified' | 'semver_constraint'
 
 export interface AutoApproveRule {
   type: AutoApproveRuleType
