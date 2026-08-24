@@ -1,4 +1,5 @@
 <!-- markdownlint-disable MD013 -->
+
 # Architecture
 
 This document describes the frontend architecture for the Terraform Registry, covering component hierarchy, routing, data fetching, authentication, and state management.
@@ -89,28 +90,28 @@ Routes are defined in `App.tsx`. The app uses React Router v6 with the following
 
 All admin routes are lazy-loaded and wrapped in `<ProtectedRoute requiredScope="...">`.
 
-| Path                       | Component              | Required Scope       |
-| -------------------------- | ---------------------- | -------------------- |
-| `/admin`                   | `DashboardPage`        | (authenticated)      |
-| `/admin/users`             | `UsersPage`            | `users:read`         |
-| `/admin/organizations`     | `OrganizationsPage`    | `organizations:read` |
-| `/admin/roles`             | `RolesPage`            | `users:read`         |
-| `/admin/apikeys`           | `APIKeysPage`          | (authenticated)      |
-| `/admin/upload`            | redirect → `/admin/upload/module` | —         |
-| `/admin/upload/module`     | `ModuleUploadPage`     | `modules:write`      |
-| `/admin/upload/provider`   | `ProviderUploadPage`   | `providers:write`    |
-| `/admin/scm-providers`     | `SCMProvidersPage`     | `scm:read`           |
-| `/admin/mirrors`           | `MirrorsPage`          | `mirrors:read`       |
-| `/admin/terraform-mirror`  | `TerraformMirrorPage`  | `mirrors:read`       |
-| `/admin/storage`           | `StoragePage`          | `admin`              |
-| `/admin/approvals`         | `ApprovalsPage`        | `mirrors:read`       |
-| `/admin/version-approvals` | `VersionApprovalsPage` | `mirrors:read`       |
-| `/admin/policies`          | `MirrorPoliciesPage`   | `admin`              |
-| `/admin/oidc`              | `OIDCSettingsPage`     | `admin`              |
-| `/admin/scim`              | `SCIMProvisioningPage` | `admin`              |
-| `/admin/mtls`              | `MTLSPage`             | `admin`              |
-| `/admin/audit-logs`        | `AuditLogPage`         | `audit:read`         |
-| `/admin/security-scanning` | `SecurityScanningPage` | `admin`              |
+| Path                       | Component                         | Required Scope       |
+| -------------------------- | --------------------------------- | -------------------- |
+| `/admin`                   | `DashboardPage`                   | (authenticated)      |
+| `/admin/users`             | `UsersPage`                       | `users:read`         |
+| `/admin/organizations`     | `OrganizationsPage`               | `organizations:read` |
+| `/admin/roles`             | `RolesPage`                       | `users:read`         |
+| `/admin/apikeys`           | `APIKeysPage`                     | (authenticated)      |
+| `/admin/upload`            | redirect → `/admin/upload/module` | —                    |
+| `/admin/upload/module`     | `ModuleUploadPage`                | `modules:write`      |
+| `/admin/upload/provider`   | `ProviderUploadPage`              | `providers:write`    |
+| `/admin/scm-providers`     | `SCMProvidersPage`                | `scm:read`           |
+| `/admin/mirrors`           | `MirrorsPage`                     | `mirrors:read`       |
+| `/admin/terraform-mirror`  | `TerraformMirrorPage`             | `mirrors:read`       |
+| `/admin/storage`           | `StoragePage`                     | `admin`              |
+| `/admin/approvals`         | `ApprovalsPage`                   | `mirrors:read`       |
+| `/admin/version-approvals` | `VersionApprovalsPage`            | `mirrors:read`       |
+| `/admin/policies`          | `MirrorPoliciesPage`              | `admin`              |
+| `/admin/oidc`              | `OIDCSettingsPage`                | `admin`              |
+| `/admin/scim`              | `SCIMProvisioningPage`            | `admin`              |
+| `/admin/mtls`              | `MTLSPage`                        | `admin`              |
+| `/admin/audit-logs`        | `AuditLogPage`                    | `audit:read`         |
+| `/admin/security-scanning` | `SecurityScanningPage`            | `admin`              |
 
 `ProtectedRoute` checks `useAuth()` for authentication and scope. If loading, it shows a spinner. If unauthenticated, it redirects to `/login`. If the required scope is missing (and the user does not have `admin`), it shows "Access Denied".
 
@@ -188,8 +189,8 @@ The `QueryClient` is configured in `App.tsx`:
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 30_000,       // Data considered fresh for 30 seconds
-      retry: 1,                // One retry on failure
+      staleTime: 30_000, // Data considered fresh for 30 seconds
+      retry: 1, // One retry on failure
       refetchOnWindowFocus: false,
     },
   },
@@ -394,41 +395,58 @@ auth/session provider and is treated as load-bearing security code).
 
 The following local files are thin wrappers or re-exports around it:
 
-| Local file                     | Wraps / re-exports from the package                                 |
-| ------------------------------ | ------------------------------------------------------------------- |
-| `contexts/AuthContext.tsx`     | `AuthProvider`, `useAuth` (session lifecycle, expiry, scopes)       |
-| `contexts/ConsentContext.tsx`  | `ConsentProvider`, `useConsent` (GDPR consent preferences)          |
-| `contexts/ThemeContext.tsx`    | `SuiteThemeProvider`, `useThemeMode` (light/dark, RTL, whitelabel)  |
-| `components/Layout.tsx`        | `SuiteLayout` (sidebar/topbar app shell)                            |
-| `components/Page.tsx`          | `Page` + `PageProps`                                                |
-| `components/PageHeader.tsx`    | `PageHeader` + `PageHeaderProps`                                    |
-| `components/DashboardCard.tsx` | `DashboardCard` + `DashboardCardProps`                              |
-| `components/ConsentBanner.tsx` | `ConsentBanner`                                                     |
-| `components/SuiteSwitcher.tsx` | `SuiteSwitcher` (cross-app switcher)                                |
-| `navigation.tsx`               | `NavItem` / `NavGroup` types for the sidebar config                 |
+| Local file                     | Wraps / re-exports from the package                                |
+| ------------------------------ | ------------------------------------------------------------------ |
+| `contexts/AuthContext.tsx`     | `AuthProvider`, `useAuth` (session lifecycle, expiry, scopes)      |
+| `contexts/ConsentContext.tsx`  | `ConsentProvider`, `useConsent` (GDPR consent preferences)         |
+| `contexts/ThemeContext.tsx`    | `SuiteThemeProvider`, `useThemeMode` (light/dark, RTL, whitelabel) |
+| `components/Layout.tsx`        | `SuiteLayout` (sidebar/topbar app shell)                           |
+| `components/Page.tsx`          | `Page` + `PageProps`                                               |
+| `components/PageHeader.tsx`    | `PageHeader` + `PageHeaderProps`                                   |
+| `components/DashboardCard.tsx` | `DashboardCard` + `DashboardCardProps`                             |
+| `components/ConsentBanner.tsx` | `ConsentBanner`                                                    |
+| `components/SuiteSwitcher.tsx` | `SuiteSwitcher` (cross-app switcher)                               |
+| `navigation.tsx`               | `NavItem` / `NavGroup` types for the sidebar config                |
+
+These files are not wrappers — they **consume** the package's components and
+types directly, adding this app's own data fetching and policy around them:
+
+| Local file                           | Consumes from the package                                                                           |
+| ------------------------------------ | --------------------------------------------------------------------------------------------------- |
+| `pages/admin/APIKeysPage.tsx`        | `ApiKeyExpirySettingsCard`, `ApiKeyExpirySettingsInput`                                             |
+| `pages/admin/NotificationsPage.tsx`  | `NotificationChannelsSection`, `NotificationChannelTypeOption`                                      |
+| `pages/admin/BrandingPage.tsx`       | `BrandingSettingsCard`, `UIThemeConfig`                                                             |
+| `pages/setup/steps/BrandingStep.tsx` | `BrandingSettingsCard`, `UIThemeConfig` — the setup-wizard counterpart of the admin page above      |
+| `services/api/themeApi.ts`           | `UIThemeConfig` (type only)                                                                         |
+| `utils/externalUrl.ts`               | `isSafeUrl`, composed with this app's scheme narrowing and origin allowlist rather than re-exported |
+
+`routeScopes.ts` and `services/errorReporting.ts` mention the package in
+comments but import nothing from it, so they are deliberately absent from both
+tables. `suitePackageDocumented.test.ts` keeps these lists in step with the
+imports themselves.
 
 ## Shared Components
 
-| Component                | Purpose                                                                        |
-| ------------------------ | ------------------------------------------------------------------------------ |
-| `Layout`                 | App shell with collapsible sidebar, topbar, and `<Outlet />` for nested routes |
-| `ProtectedRoute`         | Auth guard checking authentication and scope                                   |
-| `ErrorBoundary`          | Catches render errors with fallback UI                                         |
-| `RegistryItemCard`       | Card component for module/provider search results                              |
-| `MarkdownRenderer`       | Renders markdown content (README files) with GFM and HTML sanitization         |
-| `SecurityScanPanel`      | Displays security scan results for a module version                            |
-| `VersionDetailsPanel`    | Shows version metadata, inputs/outputs, dependencies                           |
-| `WebhookEventsPanel`     | Collapsible panel showing SCM webhook events                                   |
-| `ProviderDetailHeader`   | Breadcrumbs, title, version selector and manage actions for a provider        |
-| `ProviderUsageExample`   | `required_providers` snippet with copy-source action                          |
-| `ProviderPlatformsTable` | OS/arch build matrix with copyable SHA256 sums                                |
-| `ProviderInfoPanel`      | Provider sidebar card (namespace, latest version, repo/changelog links)       |
-| `ProviderVersionDetailsPanel` | Provider version sidebar card with deprecation status and actions        |
-| `TerraformBinaryDetailHeader` | Breadcrumbs, title, tool chip and mirror-URL hint for a binary mirror     |
-| `TerraformBinaryVersionsTable` | Synced-version table for a binary mirror (or its empty state)           |
-| `TerraformBinaryVersionRow` | One version row with expandable platform detail; exports `getChangelogUrl` |
-| `TerraformBinaryPlatformRows` | Lazily loaded OS/arch rows with SHA256 / GPG verification state          |
-| `RepositoryBrowser`      | SCM repository picker with branch/tag selection                                |
-| `StorageMigrationWizard` | Multi-step dialog for storage backend migration                                |
-| `ProviderIcon`           | Renders provider brand icons from simple-icons                                 |
-| `HelpPanel`              | Slide-out contextual help panel                                                |
+| Component                      | Purpose                                                                        |
+| ------------------------------ | ------------------------------------------------------------------------------ |
+| `Layout`                       | App shell with collapsible sidebar, topbar, and `<Outlet />` for nested routes |
+| `ProtectedRoute`               | Auth guard checking authentication and scope                                   |
+| `ErrorBoundary`                | Catches render errors with fallback UI                                         |
+| `RegistryItemCard`             | Card component for module/provider search results                              |
+| `MarkdownRenderer`             | Renders markdown content (README files) with GFM and HTML sanitization         |
+| `SecurityScanPanel`            | Displays security scan results for a module version                            |
+| `VersionDetailsPanel`          | Shows version metadata, inputs/outputs, dependencies                           |
+| `WebhookEventsPanel`           | Collapsible panel showing SCM webhook events                                   |
+| `ProviderDetailHeader`         | Breadcrumbs, title, version selector and manage actions for a provider         |
+| `ProviderUsageExample`         | `required_providers` snippet with copy-source action                           |
+| `ProviderPlatformsTable`       | OS/arch build matrix with copyable SHA256 sums                                 |
+| `ProviderInfoPanel`            | Provider sidebar card (namespace, latest version, repo/changelog links)        |
+| `ProviderVersionDetailsPanel`  | Provider version sidebar card with deprecation status and actions              |
+| `TerraformBinaryDetailHeader`  | Breadcrumbs, title, tool chip and mirror-URL hint for a binary mirror          |
+| `TerraformBinaryVersionsTable` | Synced-version table for a binary mirror (or its empty state)                  |
+| `TerraformBinaryVersionRow`    | One version row with expandable platform detail; exports `getChangelogUrl`     |
+| `TerraformBinaryPlatformRows`  | Lazily loaded OS/arch rows with SHA256 / GPG verification state                |
+| `RepositoryBrowser`            | SCM repository picker with branch/tag selection                                |
+| `StorageMigrationWizard`       | Multi-step dialog for storage backend migration                                |
+| `ProviderIcon`                 | Renders provider brand icons from simple-icons                                 |
+| `HelpPanel`                    | Slide-out contextual help panel                                                |
