@@ -1,10 +1,10 @@
 import { describe, it, expect } from 'vitest'
-import { readFileSync } from 'node:fs'
-import { resolve } from 'node:path'
-
-// Read rather than imported with `?raw`: ARCHITECTURE.md sits at the repo root,
-// one level above this Vite project, and Vite denies module ids outside it.
-const architecture = readFileSync(resolve(process.cwd(), '../ARCHITECTURE.md'), 'utf8')
+// ARCHITECTURE.md sits at the repo root, one level above this Vite project, so
+// vitest.config.ts extends server.fs.allow to reach it. Imported rather than
+// read through node:fs because tsconfig.json covers src/ without node types,
+// and pulling them in for one doc check would widen what the whole app may
+// call.
+import architecture from '../../../ARCHITECTURE.md?raw'
 
 /**
  * ARCHITECTURE.md's two suite-package tables have to name every local file that

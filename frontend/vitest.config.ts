@@ -23,6 +23,14 @@ export default defineConfig({
       '@': resolve(__dirname, './src'),
     },
   },
+  server: {
+    fs: {
+      // suitePackageDocumented.test.ts (#603) asserts against ARCHITECTURE.md,
+      // which lives at the repo root — outside this Vite project, and therefore
+      // denied by default.
+      allow: [resolve(__dirname, '..')],
+    },
+  },
   test: {
     environment: 'happy-dom',
     setupFiles: './src/setupTests.ts',
