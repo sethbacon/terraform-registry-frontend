@@ -99,3 +99,37 @@ describe('AdminUserStep', () => {
     expect(mockCtx.goToStep).toHaveBeenCalledWith(6)
   })
 })
+
+/**
+ * The step told the operator the admin would be "added to the default
+ * organization with the admin role template". Backend #874 (migration 000054)
+ * made both halves false: setup writes only the platform_admins carrier row and
+ * deliberately creates no organization membership. The operator was told to
+ * expect a state the system no longer creates (#799).
+ *
+ * Asserting the corrected sentence alone would not catch a revert that re-adds
+ * the old one beside it, so the absence of the false claim is asserted too.
+ */
+describe('AdminUserStep — what it claims about the admin (#799)', () => {
+  it('does not promise an organization membership or a role template', () => {
+    render(<AdminUserStep />)
+    const text = document.body.textContent ?? ''
+    expect(text).not.toMatch(/default organization/i)
+    expect(text).not.toMatch(/role template/i)
+  })
+
+  it('says the admin is a platform administrator held apart from membership', () => {
+    render(<AdminUserStep />)
+    expect(screen.getByText(/platform administrator/i)).toBeInTheDocument()
+    expect(document.body.textContent ?? '').toMatch(/not added to an organization/i)
+  })
+
+  it('resolves every translation key it renders', () => {
+    // i18next renders the KEY when a lookup misses, so a typo or a key absent
+    // from en/translation.json shows up as "adminUserStep.title" on screen —
+    // visible to an operator, invisible to a test that only checks for the
+    // strings it expects.
+    render(<AdminUserStep />)
+    expect(document.body.textContent ?? '').not.toMatch(/adminUserStep\./)
+  })
+})

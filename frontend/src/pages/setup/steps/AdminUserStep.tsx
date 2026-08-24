@@ -14,7 +14,7 @@ const AdminUserStep: React.FC = () => {
       <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
         <PersonIcon sx={{ mr: 1, color: 'primary.main' }} />
         <Typography variant="h6" component="h2">
-          Initial Admin User
+          {t('adminUserStep.title')}
         </Typography>
       </Box>
       <Typography
@@ -24,13 +24,10 @@ const AdminUserStep: React.FC = () => {
           mb: 3,
         }}
       >
-        Specify the email address of the first admin user. This must match the email in your OIDC
-        provider. When this user logs in via OIDC for the first time, they will automatically
-        receive admin privileges.
+        {t('adminUserStep.description')}
       </Typography>
       <Alert severity="info" sx={{ mb: 2 }}>
-        The admin user will be added to the default organization with the &quot;admin&quot; role
-        template, granting full access to all registry features.
+        {t('adminUserStep.platformAdminNote')}
       </Alert>
       <Stack spacing={2}>
         <TextField
@@ -46,7 +43,7 @@ const AdminUserStep: React.FC = () => {
 
         <Stack direction="row" spacing={2}>
           <Button variant="text" onClick={() => goToStep(4)}>
-            ← Back
+            {t('adminUserStep.back')}
           </Button>
           <Button
             variant="contained"
@@ -54,7 +51,7 @@ const AdminUserStep: React.FC = () => {
             disabled={adminSaving || !adminEmail.trim() || !adminEmail.includes('@')}
           >
             {adminSaving ? <CircularProgress size={20} sx={{ mr: 1 }} /> : null}
-            Configure Admin User
+            {t('adminUserStep.configureButton')}
           </Button>
         </Stack>
 

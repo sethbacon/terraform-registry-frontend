@@ -530,11 +530,20 @@ export interface ConfigureAdminInput {
   email: string
 }
 
+/**
+ * Response from POST /api/v1/setup/admin.
+ *
+ * `organization` and `role` were removed backend-side (#874, migration 000054):
+ * the wizard no longer writes an organization membership, so reporting one
+ * described a grant that did not happen. This interface kept declaring both
+ * long after the backend stopped sending them — a consumer reading
+ * `response.organization` would have got `undefined` with the type system
+ * asserting a string.
+ */
 export interface ConfigureAdminResponse {
   message: string
   email: string
-  organization: string
-  role: string
+  platform_admin: boolean
 }
 
 export interface CompleteSetupResponse {
