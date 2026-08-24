@@ -2354,7 +2354,12 @@
   },
   "adminUserStep": {
     "adminEmail": "E-mail dell'amministratore",
-    "emailMustMatch": "L'indirizzo e-mail deve corrispondere all'identità del tuo provider OIDC"
+    "back": "← Indietro",
+    "configureButton": "Configura utente amministratore",
+    "description": "Specificare l'indirizzo e-mail del primo utente amministratore. Questo deve corrispondere all'indirizzo e-mail registrato presso il proprio provider OIDC. Quando questo utente effettuerà l'accesso tramite OIDC per la prima volta, riceverà automaticamente i privilegi di amministratore.",
+    "emailMustMatch": "L'indirizzo e-mail deve corrispondere all'identità del tuo provider OIDC",
+    "platformAdminNote": "Questo utente è registrato come amministratore della piattaforma, ruolo che gli garantisce l'accesso a tutte le organizzazioni presenti nel registro. Non è stato aggiunto a nessuna organizzazione: l'amministrazione della piattaforma è gestita separatamente dall'appartenenza alle organizzazioni.",
+    "title": "Utente amministratore iniziale"
   },
   "authenticateStep": {
     "findingToken": "Come trovare il proprio token di configurazione",

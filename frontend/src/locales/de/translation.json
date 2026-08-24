@@ -2354,7 +2354,12 @@
   },
   "adminUserStep": {
     "adminEmail": "E-Mail-Adresse des Administrators",
-    "emailMustMatch": "Diese E-Mail-Adresse muss mit der Identität Ihres OIDC-Anbieters übereinstimmen"
+    "back": "← Zurück",
+    "configureButton": "Admin-Benutzer konfigurieren",
+    "description": "Geben Sie die E-Mail-Adresse des ersten Administrators ein. Diese muss mit der E-Mail-Adresse bei Ihrem OIDC-Anbieter übereinstimmen. Wenn sich dieser Benutzer zum ersten Mal über OIDC anmeldet, erhält er automatisch Administratorrechte.",
+    "emailMustMatch": "Diese E-Mail-Adresse muss mit der Identität Ihres OIDC-Anbieters übereinstimmen",
+    "platformAdminNote": "Dieser Benutzer ist als Plattformadministrator registriert, wodurch er Zugriff auf alle Organisationen im Register hat. Er wird keiner Organisation zugeordnet – die Plattformverwaltung erfolgt unabhängig von der Mitgliedschaft.",
+    "title": "Anfänglicher Administrator-Benutzer"
   },
   "authenticateStep": {
     "findingToken": "So finden Sie Ihr Setup-Token",

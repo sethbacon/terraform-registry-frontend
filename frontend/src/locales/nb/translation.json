@@ -2354,7 +2354,12 @@
   },
   "adminUserStep": {
     "adminEmail": "E-post til administrator",
-    "emailMustMatch": "Denne e-postadressen må samsvare med identiteten din hos OIDC-leverandøren"
+    "back": "← Tilbake",
+    "configureButton": "Konfigurer administratorbruker",
+    "description": "Angi e-postadressen til den første administratorbrukeren. Denne må stemme overens med e-postadressen hos OIDC-leverandøren din. Når denne brukeren logger seg på via OIDC for første gang, vil vedkommende automatisk få administratorrettigheter.",
+    "emailMustMatch": "Denne e-postadressen må samsvare med identiteten din hos OIDC-leverandøren",
+    "platformAdminNote": "Denne brukeren er registrert som plattformadministrator, noe som gir tilgang til alle organisasjoner i registeret. Brukeren er ikke tilknyttet noen organisasjon – plattformadministrasjonen skilles fra medlemskapet.",
+    "title": "Første administratorbruker"
   },
   "authenticateStep": {
     "findingToken": "Finne oppsettstokenet ditt",
