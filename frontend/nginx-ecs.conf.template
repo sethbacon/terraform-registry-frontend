@@ -105,7 +105,7 @@ server {
     sub_filter '__CSP_NONCE__' '$csp_nonce';
 
     # Upload size limit (matches backend: 100MB modules, 500MB providers)
-    client_max_body_size 500m;
+    client_max_body_size 512m;
 
     # SPA fallback - serve index.html for all non-file requests
     location / {

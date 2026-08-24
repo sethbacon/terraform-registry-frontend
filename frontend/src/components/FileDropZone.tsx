@@ -18,8 +18,16 @@ export const HARD_MAX_BYTES = 100 * 1024 * 1024 // 100MB
 /**
  * Cap for provider archives, mirroring `MaxProviderBinarySize` in the backend's
  * `internal/api/providers/upload.go`, which rejects anything larger with
- * "provider binary too large". The edge proxy is provisioned to match
- * (`client_max_body_size 500m` in nginx.conf and nginx-ecs.conf.template).
+ * "provider binary too large".
+ *
+ * The edge proxy is deliberately provisioned ABOVE this, not equal to it
+ * (#766). `client_max_body_size` bounds the REQUEST BODY, and a multipart
+ * upload carries boundary delimiters, per-part headers and CRLFs on top of the
+ * file — so a 500MB archive produces a body slightly over 500MB, and a proxy
+ * set to exactly 500m rejected it with a bare 413 before the backend could
+ * explain why. The proxy limit is a coarse DoS guard; this constant and the
+ * backend's are the authoritative caps, and they are the ones that return a
+ * useful error. nginxBodySize.test.ts pins the ordering.
  */
 export const PROVIDER_MAX_BYTES = 500 * 1024 * 1024 // 500MB
 
