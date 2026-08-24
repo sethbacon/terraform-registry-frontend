@@ -981,7 +981,9 @@ describe('MirrorsPage', () => {
 
     await user.click(screen.getByLabelText('Edit mirror'))
     expect(screen.getByLabelText('Require approval for new versions')).toBeChecked()
-    expect(screen.getByLabelText('Auto-approve rules (JSON)')).toHaveValue('{"rules":[],"mode":"all"}')
+    expect(screen.getByLabelText('Auto-approve rules (JSON)')).toHaveValue(
+      '{"rules":[],"mode":"all"}',
+    )
     expect(screen.getByLabelText('Enable pull-through caching')).toBeChecked()
     expect(screen.getByLabelText('Pull-through cache TTL (hours)')).toHaveValue(6)
   })

@@ -71,13 +71,19 @@ function renderPage(initialEntries: string[] = ['/admin/scm-providers']) {
  * branch, making the 403 guard below pass for the wrong reason.
  */
 function axiosFailure(status: number, message: string): AxiosError {
-  return new AxiosError(`Request failed with status code ${status}`, 'ERR_BAD_REQUEST', undefined, undefined, {
-    status,
-    statusText: 'Error',
-    headers: {},
-    config: { headers: {} },
-    data: { error: message },
-  } as never)
+  return new AxiosError(
+    `Request failed with status code ${status}`,
+    'ERR_BAD_REQUEST',
+    undefined,
+    undefined,
+    {
+      status,
+      statusText: 'Error',
+      headers: {},
+      config: { headers: {} },
+      data: { error: message },
+    } as never,
+  )
 }
 
 const fakeProviders = [
@@ -158,7 +164,7 @@ describe('SCMProvidersPage', () => {
   })
 
   it('shows loading spinner initially', () => {
-    listSCMProvidersMock.mockReturnValue(new Promise(() => { }))
+    listSCMProvidersMock.mockReturnValue(new Promise(() => {}))
     renderPage()
     expect(screen.getByRole('progressbar')).toBeInTheDocument()
   })
@@ -398,9 +404,7 @@ describe('SCMProvidersPage', () => {
     renderPage()
     await waitFor(() => expect(screen.getByText('ADO App')).toBeInTheDocument())
     // App-mode providers expose Test connection, not the per-user Connect button.
-    expect(
-      screen.queryByRole('button', { name: /connect scm provider/i }),
-    ).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /connect scm provider/i })).not.toBeInTheDocument()
     await userEvent.click(screen.getByRole('button', { name: /test connection/i }))
     await waitFor(() => expect(verifySCMProviderMock).toHaveBeenCalledWith('scm-app'))
     await waitFor(() => expect(screen.getByText('Connection OK')).toBeInTheDocument())

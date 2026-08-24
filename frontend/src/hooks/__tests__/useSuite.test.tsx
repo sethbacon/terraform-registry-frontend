@@ -26,9 +26,15 @@ describe('useSuite', () => {
   // resolution in the split-origin deployment mode, CSRF/401 handling, and
   // scripts/contract-check.ts coverage like every other backend call.
   it('resolves the sibling config via the shared http client, not a bare fetch()', async () => {
-    const getSpy = vi
-      .spyOn(http, 'get')
-      .mockResolvedValue(axiosResponse({ sibling: { app: 'terraform-state-manager', state: 'active', publicUrl: 'https://tsm.example.com' } }))
+    const getSpy = vi.spyOn(http, 'get').mockResolvedValue(
+      axiosResponse({
+        sibling: {
+          app: 'terraform-state-manager',
+          state: 'active',
+          publicUrl: 'https://tsm.example.com',
+        },
+      }),
+    )
     const fetchSpy = vi.spyOn(globalThis, 'fetch')
 
     const { result } = renderHook(() => useSuite(), { wrapper: withQuery() })

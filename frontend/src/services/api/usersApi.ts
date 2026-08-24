@@ -68,7 +68,9 @@ export async function searchUsers(
 }
 
 export async function getUser(id: string) {
-  const response = await http.get<{ user: Record<string, unknown> }>(`/api/v1/users/${encodeSegment(id)}`)
+  const response = await http.get<{ user: Record<string, unknown> }>(
+    `/api/v1/users/${encodeSegment(id)}`,
+  )
   return transformUser(response.data.user)
 }
 
@@ -78,7 +80,10 @@ export async function createUser(data: { email: string; name: string }) {
 }
 
 export async function updateUser(id: string, data: { name?: string; email?: string }) {
-  const response = await http.put<{ user: Record<string, unknown> }>(`/api/v1/users/${encodeSegment(id)}`, data)
+  const response = await http.put<{ user: Record<string, unknown> }>(
+    `/api/v1/users/${encodeSegment(id)}`,
+    data,
+  )
   return transformUser(response.data.user)
 }
 

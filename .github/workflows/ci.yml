@@ -47,6 +47,17 @@ jobs:
         working-directory: frontend
         run: npm run lint
 
+      # In the SAME job as lint, deliberately: both are "the source is in the
+      # shape we agreed" and neither needs a build. A separate job would double
+      # the checkout and install for one prettier invocation.
+      #
+      # This gate did not exist, and format:check had drifted to 65 failing
+      # files on pristine main -- a script the repo ships, that nothing ran, and
+      # that therefore said nothing about the tree. See #782.
+      - name: Format check
+        working-directory: frontend
+        run: npm run format:check
+
   # ── Typecheck ─────────────────────────────────────────
   typecheck:
     name: Typecheck

@@ -116,18 +116,25 @@ export async function getTerraformVersion(
 }
 
 export async function deleteTerraformVersion(configId: string, version: string): Promise<void> {
-  await http.delete(`/api/v1/admin/terraform-mirrors/${encodeSegment(configId)}/versions/${encodeSegment(version)}`)
+  await http.delete(
+    `/api/v1/admin/terraform-mirrors/${encodeSegment(configId)}/versions/${encodeSegment(version)}`,
+  )
 }
 
 export async function deprecateTerraformVersion(configId: string, version: string): Promise<void> {
-  await http.post(`/api/v1/admin/terraform-mirrors/${encodeSegment(configId)}/versions/${encodeSegment(version)}/deprecate`, {})
+  await http.post(
+    `/api/v1/admin/terraform-mirrors/${encodeSegment(configId)}/versions/${encodeSegment(version)}/deprecate`,
+    {},
+  )
 }
 
 export async function undeprecateTerraformVersion(
   configId: string,
   version: string,
 ): Promise<void> {
-  await http.delete(`/api/v1/admin/terraform-mirrors/${encodeSegment(configId)}/versions/${encodeSegment(version)}/deprecate`)
+  await http.delete(
+    `/api/v1/admin/terraform-mirrors/${encodeSegment(configId)}/versions/${encodeSegment(version)}/deprecate`,
+  )
 }
 
 export async function listTerraformVersionPlatforms(
@@ -136,7 +143,9 @@ export async function listTerraformVersionPlatforms(
 ): Promise<TerraformVersionPlatform[]> {
   const response = await http.get<
     TerraformVersionPlatform[] | { platforms?: TerraformVersionPlatform[] }
-  >(`/api/v1/admin/terraform-mirrors/${encodeSegment(configId)}/versions/${encodeSegment(version)}/platforms`)
+  >(
+    `/api/v1/admin/terraform-mirrors/${encodeSegment(configId)}/versions/${encodeSegment(version)}/platforms`,
+  )
   return Array.isArray(response.data) ? response.data : (response.data.platforms ?? [])
 }
 
@@ -175,7 +184,9 @@ export async function listPublicTerraformVersions(
 }
 
 export async function getPublicLatestTerraformVersion(name: string): Promise<TerraformVersion> {
-  const response = await http.get<TerraformVersion>(`/terraform/binaries/${encodeSegment(name)}/versions/latest`)
+  const response = await http.get<TerraformVersion>(
+    `/terraform/binaries/${encodeSegment(name)}/versions/latest`,
+  )
   return response.data
 }
 

@@ -181,7 +181,9 @@ export async function updateOrganization(
 }
 
 export async function deleteOrganization(id: string): Promise<{ message: string }> {
-  const response = await http.delete<{ message: string }>(`/api/v1/organizations/${encodeSegment(id)}`)
+  const response = await http.delete<{ message: string }>(
+    `/api/v1/organizations/${encodeSegment(id)}`,
+  )
   return response.data
 }
 
@@ -198,7 +200,10 @@ export async function updateOrganizationMember(
   userId: string,
   data: { role_template_id?: string },
 ) {
-  const response = await http.put(`/api/v1/organizations/${encodeSegment(orgId)}/members/${encodeSegment(userId)}`, data)
+  const response = await http.put(
+    `/api/v1/organizations/${encodeSegment(orgId)}/members/${encodeSegment(userId)}`,
+    data,
+  )
   return response.data
 }
 

@@ -10,7 +10,7 @@ import { csvCell, toCsv } from '../csv'
  */
 describe('csvCell', () => {
   it.each([
-    ['=cmd|\'/c calc\'!A1', '='],
+    ["=cmd|'/c calc'!A1", '='],
     ['+1+1', '+'],
     ['-1+1', '-'],
     ['@SUM(1,1)', '@'],

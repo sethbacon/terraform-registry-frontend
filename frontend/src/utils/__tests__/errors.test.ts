@@ -56,9 +56,12 @@ describe('getErrorMessage', () => {
 
   it('wraps a non-Error, non-string thrown value using the fallback as the message', () => {
     getErrorMessage({ code: 123 }, 'Failed fallback')
-    expect(captureError).toHaveBeenCalledWith(expect.objectContaining({ message: 'Failed fallback' }), {
-      context: 'Failed fallback',
-    })
+    expect(captureError).toHaveBeenCalledWith(
+      expect.objectContaining({ message: 'Failed fallback' }),
+      {
+        context: 'Failed fallback',
+      },
+    )
   })
 
   it('extracts error message from AxiosError with response.data.error', () => {

@@ -17,8 +17,7 @@ vi.mock('../../../services/api', () => ({
     // Empty keeps it hidden, so these tests exercise the page's own filtering
     // rather than the picker's (covered in OrganizationFilter.test.tsx).
     listOrganizations: () => Promise.resolve({ organizations: [], hasMore: false, total: 0 }),
-    searchOrganizations: () =>
-      Promise.resolve({ organizations: [], hasMore: false, total: null }),
+    searchOrganizations: () => Promise.resolve({ organizations: [], hasMore: false, total: null }),
   },
 }))
 
@@ -43,13 +42,19 @@ import ApprovalsPage from '../ApprovalsPage'
  * branch, making the 403 guard below pass for the wrong reason.
  */
 function axiosFailure(status: number, message: string): AxiosError {
-  return new AxiosError(`Request failed with status code ${status}`, 'ERR_BAD_REQUEST', undefined, undefined, {
-    status,
-    statusText: 'Error',
-    headers: {},
-    config: { headers: {} },
-    data: { error: message },
-  } as never)
+  return new AxiosError(
+    `Request failed with status code ${status}`,
+    'ERR_BAD_REQUEST',
+    undefined,
+    undefined,
+    {
+      status,
+      statusText: 'Error',
+      headers: {},
+      config: { headers: {} },
+      data: { error: message },
+    } as never,
+  )
 }
 
 function renderWithProviders(

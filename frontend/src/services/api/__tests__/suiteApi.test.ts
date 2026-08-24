@@ -17,9 +17,7 @@ describe('getUIConfig', () => {
   // inherits API_BASE_URL resolution, CSRF/401 handling, and is visible to
   // scripts/contract-check.ts, which only walks domain modules in this directory.
   it('requests the sibling config via the shared http client', async () => {
-    const getSpy = vi
-      .spyOn(http, 'get')
-      .mockResolvedValue(axiosResponse({ sibling: null }))
+    const getSpy = vi.spyOn(http, 'get').mockResolvedValue(axiosResponse({ sibling: null }))
 
     const result = await getUIConfig()
 

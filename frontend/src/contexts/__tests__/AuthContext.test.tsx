@@ -66,7 +66,7 @@ beforeEach(() => {
 
 describe('AuthProvider', () => {
   it('throws when used outside the provider', () => {
-    const spy = vi.spyOn(console, 'error').mockImplementation(() => { })
+    const spy = vi.spyOn(console, 'error').mockImplementation(() => {})
     expect(() => render(<Consumer />)).toThrow(/within an AuthProvider/)
     spy.mockRestore()
   })
@@ -295,7 +295,7 @@ describe('memberships reach consumers (#795, the blocker for #779)', () => {
     expect(latest.hasScope('audit:read', 'org-b')).toBe(false)
   })
 
-  it("ignores the deprecated flat role_template: no memberships means no role", async () => {
+  it('ignores the deprecated flat role_template: no memberships means no role', async () => {
     // The back-compat field is still on the wire and still populated. If the
     // adapter were still deriving a membership from it, roleTemplate would be
     // non-null here and one fabricated organization would be published.
@@ -328,7 +328,7 @@ describe('memberships reach consumers (#795, the blocker for #779)', () => {
     // (so `user` stays null); without the isAuthenticated gate on the way out,
     // the discarded response would still leave a signed-out session holding a
     // populated membership list.
-    let resolveMe: (v: unknown) => void = () => { }
+    let resolveMe: (v: unknown) => void = () => {}
     mockApi.getCurrentUserWithRole.mockReturnValue(
       new Promise((resolve) => {
         resolveMe = resolve

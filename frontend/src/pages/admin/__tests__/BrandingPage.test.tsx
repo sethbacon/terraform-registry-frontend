@@ -35,7 +35,10 @@ describe('BrandingPage', () => {
   beforeEach(() => {
     vi.clearAllMocks()
     mockAllowedScopes = ['admin']
-    getAdminUIThemeMock.mockResolvedValue({ product_name: 'Acme Registry', primary_color: '#5C4EE5' })
+    getAdminUIThemeMock.mockResolvedValue({
+      product_name: 'Acme Registry',
+      primary_color: '#5C4EE5',
+    })
     updateAdminUIThemeMock.mockResolvedValue({})
   })
 

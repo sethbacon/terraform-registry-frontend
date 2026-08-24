@@ -523,12 +523,12 @@ const UsersPage: React.FC = () => {
                               title={
                                 m.role_template_display_name
                                   ? t('admin.users.tooltipMembership', {
-                                    org: m.organization_name,
-                                    role: m.role_template_display_name,
-                                  })
+                                      org: m.organization_name,
+                                      role: m.role_template_display_name,
+                                    })
                                   : t('admin.users.tooltipMembershipNoRole', {
-                                    org: m.organization_name,
-                                  })
+                                      org: m.organization_name,
+                                    })
                               }
                             >
                               <Chip

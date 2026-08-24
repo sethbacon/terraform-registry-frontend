@@ -14,7 +14,10 @@ import {
   FormControlLabel,
   Button,
 } from '@mui/material'
-import { NotificationChannelsSection, type NotificationChannelTypeOption } from '@4cloudguru/cloud-suite-ui'
+import {
+  NotificationChannelsSection,
+  type NotificationChannelTypeOption,
+} from '@4cloudguru/cloud-suite-ui'
 import Page from '../../components/Page'
 import PageHeader from '../../components/PageHeader'
 import PageTitleIcon from '@mui/icons-material/Notifications'
@@ -121,11 +124,11 @@ const NotificationsPage: React.FC = () => {
       api.sendTestNotification(
         testRecipients.trim()
           ? {
-            recipients: testRecipients
-              .split(',')
-              .map((r) => r.trim())
-              .filter(Boolean),
-          }
+              recipients: testRecipients
+                .split(',')
+                .map((r) => r.trim())
+                .filter(Boolean),
+            }
           : undefined,
       ),
     onSuccess: (data) => {
@@ -168,8 +171,12 @@ const NotificationsPage: React.FC = () => {
     queryKey: queryKeys.notifications.channels(),
     queryFn: api.listNotificationChannels,
   })
-  const invalidateChannels = () => queryClient.invalidateQueries({ queryKey: queryKeys.notifications.channels() })
-  const channelEventOptions = CHANNEL_EVENT_TYPES.map((e) => ({ value: e, label: t(`admin.notifications.event.${e}`) }))
+  const invalidateChannels = () =>
+    queryClient.invalidateQueries({ queryKey: queryKeys.notifications.channels() })
+  const channelEventOptions = CHANNEL_EVENT_TYPES.map((e) => ({
+    value: e,
+    label: t(`admin.notifications.event.${e}`),
+  }))
 
   return (
     <Page maxWidth="md">
@@ -277,7 +284,11 @@ const NotificationsPage: React.FC = () => {
                 disabled={!isAdmin || saveMutation.isPending}
                 onClick={handleSave}
               >
-                {saveMutation.isPending ? <CircularProgress size={20} /> : t('admin.notifications.save')}
+                {saveMutation.isPending ? (
+                  <CircularProgress size={20} />
+                ) : (
+                  t('admin.notifications.save')
+                )}
               </Button>
             </Box>
 

@@ -107,7 +107,10 @@ function App() {
                         />
 
                         {/* Settings & Privacy */}
-                        <Route path="/settings" element={<LazyRoute Component={SettingsPage} isPublic />} />
+                        <Route
+                          path="/settings"
+                          element={<LazyRoute Component={SettingsPage} isPublic />}
+                        />
 
                         {/* Admin routes (protected with scope requirements from routeScopes.ts) */}
                         <Route

@@ -34,11 +34,16 @@ export async function updateRoleTemplate(
     scopes?: string[]
   },
 ): Promise<RoleTemplate> {
-  const response = await http.put<RoleTemplate>(`/api/v1/admin/role-templates/${encodeSegment(id)}`, data)
+  const response = await http.put<RoleTemplate>(
+    `/api/v1/admin/role-templates/${encodeSegment(id)}`,
+    data,
+  )
   return response.data
 }
 
 export async function deleteRoleTemplate(id: string): Promise<{ message: string }> {
-  const response = await http.delete<{ message: string }>(`/api/v1/admin/role-templates/${encodeSegment(id)}`)
+  const response = await http.delete<{ message: string }>(
+    `/api/v1/admin/role-templates/${encodeSegment(id)}`,
+  )
   return response.data
 }

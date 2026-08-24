@@ -905,34 +905,34 @@ const SCMProvidersPage: React.FC = () => {
 
                 {((editingProvider?.provider_type || formData.provider_type) === 'github' ||
                   (editingProvider?.provider_type || formData.provider_type) === 'azuredevops') && (
-                    <FormControl fullWidth>
-                      <InputLabel id="auth-mode-label">
-                        {t('admin.scmProviders.labelAuthMode')}
-                      </InputLabel>
-                      <Select
-                        labelId="auth-mode-label"
-                        value={formData.auth_mode || 'oauth_user'}
-                        label={t('admin.scmProviders.labelAuthMode')}
-                        onChange={(e) =>
-                          setFormData({ ...formData, auth_mode: e.target.value as SCMAuthMode })
+                  <FormControl fullWidth>
+                    <InputLabel id="auth-mode-label">
+                      {t('admin.scmProviders.labelAuthMode')}
+                    </InputLabel>
+                    <Select
+                      labelId="auth-mode-label"
+                      value={formData.auth_mode || 'oauth_user'}
+                      label={t('admin.scmProviders.labelAuthMode')}
+                      onChange={(e) =>
+                        setFormData({ ...formData, auth_mode: e.target.value as SCMAuthMode })
+                      }
+                    >
+                      <MenuItem value="oauth_user">
+                        {t('admin.scmProviders.authModeOAuth')}
+                      </MenuItem>
+                      <MenuItem
+                        value={
+                          (editingProvider?.provider_type || formData.provider_type) === 'github'
+                            ? 'github_app'
+                            : 'entra_app'
                         }
                       >
-                        <MenuItem value="oauth_user">
-                          {t('admin.scmProviders.authModeOAuth')}
-                        </MenuItem>
-                        <MenuItem
-                          value={
-                            (editingProvider?.provider_type || formData.provider_type) === 'github'
-                              ? 'github_app'
-                              : 'entra_app'
-                          }
-                        >
-                          {t('admin.scmProviders.authModeApp')}
-                        </MenuItem>
-                      </Select>
-                      <FormHelperText>{t('admin.scmProviders.helpAuthMode')}</FormHelperText>
-                    </FormControl>
-                  )}
+                        {t('admin.scmProviders.authModeApp')}
+                      </MenuItem>
+                    </Select>
+                    <FormHelperText>{t('admin.scmProviders.helpAuthMode')}</FormHelperText>
+                  </FormControl>
+                )}
 
                 {(editingProvider?.provider_type || formData.provider_type) === 'azuredevops' && (
                   <TextField
@@ -971,7 +971,9 @@ const SCMProvidersPage: React.FC = () => {
                         type="password"
                         fullWidth
                         value={formData.client_secret}
-                        onChange={(e) => setFormData({ ...formData, client_secret: e.target.value })}
+                        onChange={(e) =>
+                          setFormData({ ...formData, client_secret: e.target.value })
+                        }
                         required={!editingProvider}
                         helperText={
                           editingProvider ? t('admin.scmProviders.helpClientSecretKeep') : ''

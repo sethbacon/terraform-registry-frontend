@@ -124,7 +124,7 @@ describe('NotificationsPage', () => {
   })
 
   it('shows a loading spinner while the config query is pending', () => {
-    getNotificationsConfigMock.mockReturnValue(new Promise(() => { }))
+    getNotificationsConfigMock.mockReturnValue(new Promise(() => {}))
     renderPage()
     expect(screen.getByRole('progressbar')).toBeInTheDocument()
   })

@@ -344,9 +344,21 @@ export interface ScannerLatestInfo {
   update_available: boolean
   signature_supported: boolean
 }
-export interface ScannerInstallRequest { tool: string; version?: string; activate?: boolean }
-export interface ScannerInstallResult extends ScanningInstallResult { activated?: boolean }
-export interface NotificationsSmtpConfig { host: string; port: number; username: string; from: string; use_tls: boolean }
+export interface ScannerInstallRequest {
+  tool: string
+  version?: string
+  activate?: boolean
+}
+export interface ScannerInstallResult extends ScanningInstallResult {
+  activated?: boolean
+}
+export interface NotificationsSmtpConfig {
+  host: string
+  port: number
+  username: string
+  from: string
+  use_tls: boolean
+}
 export interface NotificationEvents {
   api_key_expiring: boolean
   module_published: boolean
@@ -371,8 +383,15 @@ export interface NotificationsConfigInput {
   api_key_expiry_warning_days: number
   api_key_expiry_check_interval_hours: number
 }
-export interface NotificationsTestRequest { recipients?: string[]; subject?: string; smtp?: Partial<NotificationsSmtpConfig & { password: string }> }
-export interface NotificationsTestResult { success: boolean; message: string }
+export interface NotificationsTestRequest {
+  recipients?: string[]
+  subject?: string
+  smtp?: Partial<NotificationsSmtpConfig & { password: string }>
+}
+export interface NotificationsTestResult {
+  success: boolean
+  message: string
+}
 
 // Notification channels — additional delivery destinations (webhook, Slack,
 // Microsoft Teams, or an ad-hoc email recipient list) for the
@@ -380,10 +399,7 @@ export interface NotificationsTestResult { success: boolean; message: string }
 // scanner_update_available events, alongside the shared SMTP recipients list.
 export type NotificationChannelType = 'webhook' | 'slack' | 'teams' | 'email'
 export type NotificationChannelEvent =
-  | 'module_published'
-  | 'approval_pending'
-  | 'cve_detected'
-  | 'scanner_update_available'
+  'module_published' | 'approval_pending' | 'cve_detected' | 'scanner_update_available'
 export interface NotificationChannel {
   id: string
   name: string

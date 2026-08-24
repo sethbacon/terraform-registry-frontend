@@ -651,7 +651,11 @@ describe('useModuleDetail', () => {
   // ever sees it, instead of trusting the backend value verbatim.
   it('passes through a safe suite sibling URL', async () => {
     mockUseSuite.mockReturnValue({
-      sibling: { app: 'terraform-state-manager', state: 'active', publicUrl: 'https://tsm.example.com' },
+      sibling: {
+        app: 'terraform-state-manager',
+        state: 'active',
+        publicUrl: 'https://tsm.example.com',
+      },
       active: true,
     })
     const { result } = renderHook(() => useModuleDetail(), { wrapper: createWrapper() })

@@ -95,15 +95,15 @@ describe('SecurityScanningPage', () => {
   })
 
   it('shows loading spinner initially', () => {
-    getScanningConfigMock.mockReturnValue(new Promise(() => { }))
-    getScanningStatsMock.mockReturnValue(new Promise(() => { }))
+    getScanningConfigMock.mockReturnValue(new Promise(() => {}))
+    getScanningStatsMock.mockReturnValue(new Promise(() => {}))
     renderPage()
     expect(screen.getByRole('progressbar')).toBeInTheDocument()
   })
 
   it('renders page heading', () => {
-    getScanningConfigMock.mockReturnValue(new Promise(() => { }))
-    getScanningStatsMock.mockReturnValue(new Promise(() => { }))
+    getScanningConfigMock.mockReturnValue(new Promise(() => {}))
+    getScanningStatsMock.mockReturnValue(new Promise(() => {}))
     renderPage()
     expect(screen.getByText('Security Scanning')).toBeInTheDocument()
   })
@@ -497,7 +497,9 @@ describe('SecurityScanningPage', () => {
 
       await waitFor(() => {
         expect(
-          screen.getByText('Optional JSON rules to auto-approve matching versions (e.g. patch-only). Leave blank to require manual approval.'),
+          screen.getByText(
+            'Optional JSON rules to auto-approve matching versions (e.g. patch-only). Leave blank to require manual approval.',
+          ),
         ).toBeInTheDocument()
       })
       expect(screen.getByRole('button', { name: 'Save Auto-Update Settings' })).not.toBeDisabled()
@@ -550,9 +552,7 @@ describe('SecurityScanningPage', () => {
       expect(screen.getByLabelText('Version (optional, defaults to latest)')).toBeDisabled()
       expect(screen.getByRole('checkbox', { name: 'Activate after install' })).toBeDisabled()
       expect(screen.getByRole('button', { name: 'Save Auto-Update Settings' })).toBeDisabled()
-      expect(
-        screen.getByRole('switch', { name: 'Enable scheduled update checks' }),
-      ).toBeDisabled()
+      expect(screen.getByRole('switch', { name: 'Enable scheduled update checks' })).toBeDisabled()
     })
   })
 })

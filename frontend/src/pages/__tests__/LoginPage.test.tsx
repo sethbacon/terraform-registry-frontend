@@ -70,7 +70,7 @@ describe('LoginPage', () => {
   })
 
   it('shows loading skeletons while fetching providers', () => {
-    mockGetAuthProviders.mockReturnValue(new Promise(() => { })) // never resolves
+    mockGetAuthProviders.mockReturnValue(new Promise(() => {})) // never resolves
     renderLoginPage()
     expect(screen.getByTestId('provider-loading')).toBeInTheDocument()
   })

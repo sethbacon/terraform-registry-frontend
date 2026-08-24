@@ -47,9 +47,9 @@ function getDevApi() {
 describe('devApi', () => {
   it('devLogin calls POST /api/v1/dev/login (cookie is set server-side, token-less body)', async () => {
     const devApi = await getDevApi()
-      ; (mockAxiosInstance.post as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
-        data: { user: { id: 'u1' }, expires_in: 3600 },
-      })
+    ;(mockAxiosInstance.post as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+      data: { user: { id: 'u1' }, expires_in: 3600 },
+    })
     const result = await devApi.devLogin()
     expect(mockAxiosInstance.post).toHaveBeenCalledWith('/api/v1/dev/login')
     expect(result.expires_in).toBe(3600)
@@ -57,9 +57,9 @@ describe('devApi', () => {
 
   it('getDevStatus calls GET /api/v1/dev/status', async () => {
     const devApi = await getDevApi()
-      ; (mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
-        data: { dev_mode: true },
-      })
+    ;(mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+      data: { dev_mode: true },
+    })
     const result = await devApi.getDevStatus()
     expect(mockAxiosInstance.get).toHaveBeenCalledWith('/api/v1/dev/status')
     expect(result.dev_mode).toBe(true)
@@ -67,9 +67,9 @@ describe('devApi', () => {
 
   it('listUsersForImpersonation calls GET /api/v1/dev/users', async () => {
     const devApi = await getDevApi()
-      ; (mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
-        data: { users: [], dev_mode: true },
-      })
+    ;(mockAxiosInstance.get as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+      data: { users: [], dev_mode: true },
+    })
     const result = await devApi.listUsersForImpersonation()
     expect(mockAxiosInstance.get).toHaveBeenCalledWith('/api/v1/dev/users')
     expect(result.dev_mode).toBe(true)
@@ -77,9 +77,9 @@ describe('devApi', () => {
 
   it('impersonateUser calls POST /api/v1/dev/impersonate/:id (cookie swap, token-less body)', async () => {
     const devApi = await getDevApi()
-      ; (mockAxiosInstance.post as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
-        data: { user: { id: 'u1', email: 'a@b.com', name: 'A' }, message: 'ok' },
-      })
+    ;(mockAxiosInstance.post as ReturnType<typeof vi.fn>).mockResolvedValueOnce({
+      data: { user: { id: 'u1', email: 'a@b.com', name: 'A' }, message: 'ok' },
+    })
     const result = await devApi.impersonateUser('u1')
     expect(mockAxiosInstance.post).toHaveBeenCalledWith('/api/v1/dev/impersonate/u1')
     expect(result.message).toBe('ok')

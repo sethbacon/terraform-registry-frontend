@@ -240,10 +240,7 @@ describe('ModuleUploadPage — upload form (roadmap 2.5)', () => {
     const user = userEvent.setup()
     // Stalled upload: never resolves on its own, only rejects when aborted.
     api.uploadModule.mockImplementationOnce(
-      (
-        _fd: FormData,
-        opts?: { onUploadProgress?: (p: number) => void; signal?: AbortSignal },
-      ) => {
+      (_fd: FormData, opts?: { onUploadProgress?: (p: number) => void; signal?: AbortSignal }) => {
         opts?.onUploadProgress?.(15)
         return new Promise((_resolve, reject) => {
           opts?.signal?.addEventListener('abort', () => reject(new CanceledError('canceled')))
@@ -286,10 +283,7 @@ describe('ModuleUploadPage — upload form (roadmap 2.5)', () => {
     let capturedSignal: AbortSignal | undefined
     // Stalled upload: never resolves on its own, only rejects when aborted.
     api.uploadModule.mockImplementationOnce(
-      (
-        _fd: FormData,
-        opts?: { onUploadProgress?: (p: number) => void; signal?: AbortSignal },
-      ) => {
+      (_fd: FormData, opts?: { onUploadProgress?: (p: number) => void; signal?: AbortSignal }) => {
         capturedSignal = opts?.signal
         opts?.onUploadProgress?.(10)
         return new Promise((_resolve, reject) => {
