@@ -106,6 +106,10 @@ updates:
   # ---------------------------------------------------------------------------
   # GitHub Actions
   # ---------------------------------------------------------------------------
+    groups:
+      docker-dependencies:
+        patterns:
+          - '*'
   - package-ecosystem: github-actions
     directory: /
     schedule:
@@ -119,7 +123,7 @@ updates:
       - dependencies
       - github-actions
     commit-message:
-      prefix: "chore(ci)"
+      prefix: "chore(deps)"
     groups:
       github-actions-dependencies:
         patterns:
@@ -145,7 +149,7 @@ updates:
       - dependencies
       - github-actions
     commit-message:
-      prefix: "chore(ci)"
+      prefix: "chore(deps)"
     groups:
       commit-message-check:
         patterns:
