@@ -1,6 +1,21 @@
 <!-- markdownlint-disable MD013 MD024 MD041 -->
 # Changelog
 
+## [2.24.2](https://github.com/sethbacon/terraform-registry-frontend/compare/v2.24.1...v2.24.2) (2026-08-24)
+
+
+### Bug Fixes
+
+* **ci:** format the tree and wire format:check into CI ([#842](https://github.com/sethbacon/terraform-registry-frontend/issues/842)) ([67a3cae](https://github.com/sethbacon/terraform-registry-frontend/commit/67a3cae4889b5ba303bcb9ac31f944527b589843))
+* **login:** redirect an already-authenticated visitor away from /login ([#781](https://github.com/sethbacon/terraform-registry-frontend/issues/781)) ([#846](https://github.com/sethbacon/terraform-registry-frontend/issues/846)) ([b7fe40e](https://github.com/sethbacon/terraform-registry-frontend/commit/b7fe40ecdf21a510760cd8b019b3efaba06a1a4d))
+* **nginx:** raise the proxy body limit above the application file limit ([#766](https://github.com/sethbacon/terraform-registry-frontend/issues/766)) ([#844](https://github.com/sethbacon/terraform-registry-frontend/issues/844)) ([0d336fa](https://github.com/sethbacon/terraform-registry-frontend/commit/0d336fac1ff5e7e870ab59fdd275b1350f3ed573))
+* **setup:** stop promising an organization membership setup no longer creates ([#799](https://github.com/sethbacon/terraform-registry-frontend/issues/799)) ([#845](https://github.com/sethbacon/terraform-registry-frontend/issues/845)) ([0b01ca7](https://github.com/sethbacon/terraform-registry-frontend/commit/0b01ca76c7f0bff33c6243ce4e84e9ad003ca8f4))
+
+
+### Documentation
+
+* complete the suite-package inventory, and stop it drifting again ([#603](https://github.com/sethbacon/terraform-registry-frontend/issues/603)) ([#847](https://github.com/sethbacon/terraform-registry-frontend/issues/847)) ([0e92478](https://github.com/sethbacon/terraform-registry-frontend/commit/0e924788bb82b93ceb6496051e0e85f78c0496f8))
+
 ## [2.24.1](https://github.com/sethbacon/terraform-registry-frontend/compare/v2.24.0...v2.24.1) (2026-08-22)
 
 
