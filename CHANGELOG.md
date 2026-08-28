@@ -1,6 +1,13 @@
 <!-- markdownlint-disable MD013 MD024 MD041 -->
 # Changelog
 
+## [2.24.4](https://github.com/sethbacon/terraform-registry-frontend/compare/v2.24.3...v2.24.4) (2026-08-28)
+
+
+### Bug Fixes
+
+* **e2e:** ensureMirroringExpanded collapsed the group it was meant to open ([#858](https://github.com/sethbacon/terraform-registry-frontend/issues/858)) ([11d100b](https://github.com/sethbacon/terraform-registry-frontend/commit/11d100bd080c9796c02c74a39994d190e0a9349c))
+
 ## [2.24.3](https://github.com/sethbacon/terraform-registry-frontend/compare/v2.24.2...v2.24.3) (2026-08-28)
 
 
