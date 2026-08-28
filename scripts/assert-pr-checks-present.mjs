@@ -70,13 +70,76 @@ async function gh(path) {
   return res.json();
 }
 
-/** check-runs + commit statuses on one SHA. */
+// GATE_CONTEXTS are the checks that actually GATE a merge here -- this
+// repository's required status contexts. They are committed rather than fetched
+// because reading branch protection needs administration scope and this job holds
+// only pull-requests:read, and a guard that degrades to "could not read, assume
+// fine" is precisely the failure this file exists to prevent.
+//
+// IT IS SELF-VALIDATING. proveNotBlind grades recent default-branch commits with
+// the SAME predicate, so a stale or misspelled entry here means nothing on main
+// looks covered and the guard exits 2 instead of passing. Drift is loud, not silent.
+const GATE_CONTEXTS = new Set([
+  'Lint',
+  'Typecheck',
+  'Build',
+  'Conventional PR Title',
+  'Unit Tests (1/4)',
+  'Unit Tests (2/4)',
+  'Unit Tests (3/4)',
+  'Unit Tests (4/4)',
+]);
+
+// A SKIPPED check-run inspected nothing, and one still queued or in progress has
+// not finished inspecting. Only these conclusions mean a gate reached a verdict.
+const REAL_CONCLUSIONS = new Set([
+  'success',
+  'failure',
+  'neutral',
+  'timed_out',
+  'action_required',
+  'cancelled',
+]);
+
+/**
+ * Coverage on one SHA, counting only checks that actually GATE.
+ *
+ * WHY NOT "any check run at all". This read
+ *   covered: checkRuns > 0 || statuses > 0
+ * which ANY check-run object satisfies -- including a `skipped` one from a
+ * workflow that is not a gate. This repository ships a Dependabot auto-merge
+ * workflow on `pull_request_target`, a trigger GitHub's CI-skip keywords do NOT
+ * suppress, so it attached exactly one check-run to EVERY pull request. Every
+ * suppressed PR therefore had checkRuns >= 1 and read as covered, and this layer
+ * -- the one described as load-bearing -- was blind here from the day it landed.
+ *
+ * Requiring "more than one check-run" would NOT fix it: that is the same
+ * predicate with a bigger number, and the next non-gate workflow re-breaks it.
+ * Coverage has to mean A NAMED GATE REACHED A VERDICT.
+ */
 async function coverage(sha) {
   const [checks, status] = await Promise.all([
-    gh(`/repos/${REPO}/commits/${sha}/check-runs?per_page=1`),
+    gh(`/repos/${REPO}/commits/${sha}/check-runs?per_page=100`),
     gh(`/repos/${REPO}/commits/${sha}/status`),
   ]);
-  return { checkRuns: checks.total_count ?? 0, statuses: status.total_count ?? 0 };
+
+  const runs = Array.isArray(checks.check_runs) ? checks.check_runs : [];
+  const gating = runs.filter(
+    (r) => GATE_CONTEXTS.has(r.name) && REAL_CONCLUSIONS.has(r.conclusion)
+  );
+  const gatingStatuses = (Array.isArray(status.statuses) ? status.statuses : []).filter(
+    (st) => GATE_CONTEXTS.has(st.context) && st.state !== 'pending'
+  );
+
+  return {
+    checkRuns: checks.total_count ?? runs.length,
+    statuses: status.total_count ?? 0,
+    gating: gating.length + gatingStatuses.length,
+    gateNames: [
+      ...new Set([...gating.map((r) => r.name), ...gatingStatuses.map((st) => st.context)]),
+    ],
+    covered: gating.length > 0 || gatingStatuses.length > 0,
+  };
 }
 
 /**
@@ -90,19 +153,22 @@ async function proveNotBlind(defaultBranch) {
     process.exit(2);
   }
   for (const c of commits) {
-    const { checkRuns, statuses } = await coverage(c.sha);
-    if (checkRuns > 0 || statuses > 0) {
+    const cov = await coverage(c.sha);
+    if (cov.covered) {
       console.log(
-        `vision check: ${c.sha.slice(0, 8)} on ${defaultBranch} has ` +
-          `${checkRuns} check run(s) / ${statuses} status(es) -- the guard can see checks`
+        `vision check: ${c.sha.slice(0, 8)} on ${defaultBranch} was graded by ` +
+          `${cov.gateNames.join(', ')} -- the guard can see real gates`
       );
       return;
     }
   }
   console.error(
-    `ERROR: none of the last ${commits.length} commits on ${defaultBranch} has a single ` +
-      'check run or status.\nThis guard cannot distinguish "every PR is covered" from ' +
-      '"I am unable to observe checks", so it refuses to report clean.'
+    `ERROR: none of the last ${commits.length} commits on ${defaultBranch} was graded by any ` +
+      `gate context this guard knows about:\n  ${[...GATE_CONTEXTS].join('\n  ')}\n\n` +
+      'Either the guard cannot observe checks, or GATE_CONTEXTS no longer matches this ' +
+      "repository's required status contexts. Both make every pull request look covered, so " +
+      'it refuses to report clean. Compare against:\n' +
+      `  gh api repos/${REPO}/branches/${defaultBranch}/protection/required_status_checks --jq .contexts`
   );
   process.exit(2);
 }
@@ -113,15 +179,16 @@ async function evaluate(pr) {
   const sha = pr.head.sha;
   const commit = await gh(`/repos/${REPO}/commits/${sha}`);
   const committedAt = commit.commit.committer?.date || commit.commit.author?.date;
-  const { checkRuns, statuses } = await coverage(sha);
+  const cov = await coverage(sha);
   return {
     number: pr.number,
     title: pr.title,
     sha,
-    checkRuns,
-    statuses,
+    checkRuns: cov.checkRuns,
+    statuses: cov.statuses,
+    gating: cov.gating,
     ageMin: ageMinutes(committedAt),
-    covered: checkRuns > 0 || statuses > 0,
+    covered: cov.covered,
   };
 }
 
@@ -169,8 +236,9 @@ async function main() {
   for (const r of results) {
     const mark = r.covered ? 'ok  ' : 'NONE';
     console.log(
-      `  ${mark} #${r.number} ${r.sha.slice(0, 8)} checks=${r.checkRuns} ` +
-        `statuses=${r.statuses} age=${r.ageMin.toFixed(0)}m  ${r.title}`
+      `  ${mark} #${r.number} ${r.sha.slice(0, 8)} gating=${r.gating} ` +
+        `of ${r.checkRuns} check-run(s)/${r.statuses} status(es) ` +
+        `age=${r.ageMin.toFixed(0)}m  ${r.title}`
     );
   }
 
@@ -181,7 +249,7 @@ async function main() {
     : results.filter((r) => !r.covered && r.ageMin >= GRACE_MIN);
 
   if (failing.length > 0) {
-    console.error('\nPull requests with NO check runs and NO commit statuses:\n');
+    console.error('\nPull requests that NO GATE has graded:\n');
     for (const r of failing) {
       console.error(`  #${r.number}  ${r.sha}  (head is ${r.ageMin.toFixed(0)} minutes old)`);
       console.error(`    https://github.com/${REPO}/pull/${r.number}`);
