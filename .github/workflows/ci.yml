@@ -43,6 +43,21 @@ jobs:
           persist-credentials: false
       - uses: ./.github/actions/setup-frontend
 
+      # Runs before the ESLint pass, and from the repository root rather than frontend/.
+      #
+      # PREVENTIVE layer: it stops a CI-skip directive reaching a workflow or action file
+      # at all. Deliberately not the only layer -- it is a check, and the directive it
+      # looks for is the thing that stops checks running, so a PR already carrying one in
+      # its head commit skips this job along with every other. The suppression-immune half
+      # lives in pr-ci-presence.yml, on a schedule, where no commit message can reach it.
+      #
+      # Needs frontend/node_modules, so it runs after setup-frontend: the scanner parses
+      # the YAML and tests resolved string values, because four different spellings of the
+      # same directive all resolve to the live one while defeating a source-text regex.
+      # Without the parser it exits 2 rather than reporting clean.
+      - name: No CI-skip directives in workflow or action files
+        run: node scripts/check-workflow-ci-skip.mjs
+
       - name: Lint
         working-directory: frontend
         run: npm run lint
