@@ -354,6 +354,69 @@ Once `DEEPL_API_KEY` is configured, the workflow:
 - Translates new/changed keys for every supported locale via DeepL.
 - Opens a PR (`i18n/auto-translate`) titled `i18n: update translations` for review.
 
+### Translation PRs must have CI attached
+
+`translate.yml` used to commit with a **CI-skip directive** in its message. GitHub honours one
+on a branch's **head commit** for both the `push` and the `pull_request` event, and
+`create-pull-request` never rewrites that head commit — so every PR the workflow opened was
+born with zero real check runs, branch protection sat at "Expected — waiting for status", and
+the only way to land it was an override of a PR no gate had inspected. **Seventeen of the
+twenty-seven merged translation PRs went in that way.**
+
+The natural experiment is on the branch itself: PR #849, head carrying the directive, has one
+check run — `Auto-merge Dependabot`, conclusion `skipped`. PR #822, whose head is a
+`Merge branch 'main'` commit written by the **Update branch** button and carrying no directive,
+has twenty-one. Same branch, same token, same triggers; the commit message is the only variable.
+
+Three layers keep it fixed, because each one alone has a hole the other two cover:
+
+| Layer | Where | Catches |
+|---|---|---|
+| `scripts/check-workflow-ci-skip.mjs` | step in the required **Lint** check | the directive reaching any workflow or action file |
+| `scripts/assert-pr-checks-present.mjs` | `.github/workflows/pr-ci-presence.yml`, on a **schedule** | any open PR with no checks, whatever the cause |
+| the same script, `--pr` mode | last step of `translate.yml` | the translation PR itself, with no scheduler latency |
+
+The scheduled auditor is the load-bearing one. A guard for *"no checks ran"* that is itself a
+check cannot fire in the one situation it exists to detect — the suppression that hides the CI
+hides the guard with it. GitHub's skip keywords apply to `push` and `pull_request` only, so
+`schedule` is the trigger a commit message cannot reach.
+
+The static scanner runs **two passes**. Pass 1 reads raw text. Pass 2 parses the YAML and tests
+the **resolved string values** — what GitHub itself reads — because YAML has many spellings for
+one string and all of these resolve to the live directive while defeating a source-text regex:
+
+```yaml
+commit-message: "... [skip\x20ci]"      # hex escape for the space
+commit-message: "... [skip\u0020ci]"    # unicode escape for the space
+commit-message: "... \x5Bskip ci]"      # hex escape for the opening bracket
+commit-message: "... [skip \
+  ci]"                                  # double-quoted line continuation
+```
+
+The last is the instructive case: whitespace-normalising the whole file closes the `>-` folded
+scalar **only**, because a line continuation leaves a literal backslash between the words that
+survives normalisation. Testing the resolved value closes all of them at once. Pass 1 is kept
+because comments do not survive parsing and an unparseable file still gets read; a directive
+must evade **both**.
+
+The scanner enumerates **every YAML file under `.github`**, recursively, plus any `action.yml`
+elsewhere — not just `.github/workflows/*.yml`. `.github/dependabot.yml` has a `commit-message:`
+key of its own, and a composite action can `git commit` in a `run:` block. It then cross-checks
+what it read against an independent enumeration and exits non-zero if the two disagree, because
+a walk that quietly narrows goes green over the files it stopped reading.
+
+Run them locally:
+
+```bash
+node scripts/check-workflow-ci-skip.mjs
+GITHUB_REPOSITORY=sethbacon/terraform-registry-frontend \
+  node scripts/assert-pr-checks-present.mjs
+```
+
+Never re-add a skip directive to a commit message. If a workflow needs to avoid re-triggering
+itself, express that as a `paths:` or `branches:` filter on the trigger, where it is visible
+and reviewable.
+
 ---
 
 ## Pull Request Process

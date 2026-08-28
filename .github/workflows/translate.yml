@@ -65,6 +65,7 @@ jobs:
           DEEPL_API_KEY: ${{ secrets.DEEPL_API_KEY }}
 
       - name: Create PR with translations
+        id: cpr
         # v8.1.1
         uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1 # v8.1.1
         with:
@@ -78,5 +79,31 @@ jobs:
             - [ ] Spot-check a few strings in each language for accuracy
             - [ ] No English source strings appear verbatim in non-English files
             - [ ] Interpolation tokens (`{{name}}`) are preserved correctly
-          commit-message: "chore(i18n): update translations [skip ci]"
+          # NO CI-skip directive here, and never again. GitHub honours one on a
+          # branch HEAD COMMIT for both the push and the pull_request event, and
+          # create-pull-request never rewrites that head commit, so the suppression
+          # lasted the entire life of every PR this workflow opened. Seventeen of
+          # twenty-seven merged with no gate having inspected them.
+          #
+          # Removing it cannot loop: this job triggers on pushes that touch
+          # frontend/src/locales/en/translation.json, and scripts/translate.mjs only
+          # ever writes the non-English bundles and scripts/.translation-hashes.json.
+          # Merging its own PR therefore does not re-trigger it. The recursion the
+          # directive appeared to guard against was never possible.
+          #
+          # scripts/check-workflow-ci-skip.mjs fails CI if it comes back, in any
+          # spelling: it tests the resolved YAML value, not the source text.
+          commit-message: "chore(i18n): update translations"
           delete-branch: true
+
+      # Zero-latency half of the guard. The scheduled auditor in pr-ci-presence.yml is
+      # the suppression-immune backstop, but it runs on a cadence and these PRs are
+      # sometimes merged within the hour. This asserts, in the run that opens the PR,
+      # that checks actually attached to it -- and this job is reachable, because it is
+      # triggered by a human push to main rather than by the bot commit under test.
+      - name: Assert the translation PR has checks
+        if: steps.cpr.outputs.pull-request-number != ''
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ steps.cpr.outputs.pull-request-number }}
+        run: node scripts/assert-pr-checks-present.mjs --pr "$PR_NUMBER" --wait 10
