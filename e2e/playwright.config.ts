@@ -82,6 +82,12 @@ export default defineConfig({
         {
           name: 'webkit',
           use: { ...devices['Desktop Safari'] },
+          // WebKit is the slowest engine here and runs four workers deep in CI,
+          // where a first paint can exceed the 5s global expect timeout on an
+          // otherwise correct page. This raises the assertion budget for THIS
+          // project only, so chromium and firefox keep the tighter bound and a
+          // genuine regression there still shows up as one.
+          expect: { timeout: 15_000 },
         },
       ]
       : []),
