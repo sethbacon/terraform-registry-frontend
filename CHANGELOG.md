@@ -1,6 +1,19 @@
 <!-- markdownlint-disable MD013 MD024 MD041 -->
 # Changelog
 
+## [2.24.3](https://github.com/sethbacon/terraform-registry-frontend/compare/v2.24.2...v2.24.3) (2026-08-28)
+
+
+### Bug Fixes
+
+* **ci:** coverage must mean a real gate graded the commit ([#857](https://github.com/sethbacon/terraform-registry-frontend/issues/857)) ([3256512](https://github.com/sethbacon/terraform-registry-frontend/commit/32565124aee0ba4bcf50ad21d860bc5322910f29)), closes [#379](https://github.com/sethbacon/terraform-registry-frontend/issues/379)
+* **ci:** give translation PRs the CI every other PR gets ([#856](https://github.com/sethbacon/terraform-registry-frontend/issues/856)) ([0901970](https://github.com/sethbacon/terraform-registry-frontend/commit/090197082209d308debc87d1bbaafe77735b9f07))
+
+
+### Documentation
+
+* point at the estate tenancy model ([#853](https://github.com/sethbacon/terraform-registry-frontend/issues/853)) ([731f6da](https://github.com/sethbacon/terraform-registry-frontend/commit/731f6da232fbb5c189db2cee4a63ec47d9b4a46f))
+
 ## [2.24.2](https://github.com/sethbacon/terraform-registry-frontend/compare/v2.24.1...v2.24.2) (2026-08-24)
 
 
