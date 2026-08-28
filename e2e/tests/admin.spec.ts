@@ -397,17 +397,33 @@ test.describe('Admin: SCM Providers', () => {
 });
 
 test.describe('Admin: Sidebar Navigation', () => {
-  // Helper: expand the MIRRORING nav group by clicking its header if collapsed
+  // Helper: expand the MIRRORING nav group, idempotently.
+  //
+  // The previous version sampled `link.isVisible()` to decide whether the group
+  // was already open. isVisible() reports the CURRENT state and does NOT wait --
+  // its `timeout` option does not make it retry -- so on a slow first paint it
+  // answers "not visible" for a group that is already EXPANDED, and the click
+  // below then COLLAPSES it. The 10s assertion in the caller can never recover
+  // from that, because the group is now shut. It only misfires when the paint
+  // loses the race, which is why it failed on webkit (the slowest engine, four
+  // workers deep) and passed everywhere else.
+  //
+  // So: actually wait for the link before concluding it is absent, and after
+  // clicking wait for the link itself rather than guessing an animation duration.
   async function ensureMirroringExpanded(page: Page) {
-    // If Approvals link is already visible, nothing to do
     const link = page.locator('a', { hasText: /^Approvals$/ });
-    const isVisible = await link.isVisible({ timeout: 2_000 }).catch(() => false);
-    if (isVisible) return;
-    // Click the MIRRORING group header to expand it
+    const alreadyOpen = await link
+      .waitFor({ state: 'visible', timeout: 5_000 })
+      .then(() => true)
+      .catch(() => false);
+    if (alreadyOpen) return;
+
     const header = page.locator('[class*="MuiListItemButton"]', { hasText: /^MIRRORING$/i });
-    if (await header.isVisible({ timeout: 2_000 }).catch(() => false)) {
+    if (await header.isVisible().catch(() => false)) {
       await header.click();
-      await page.waitForTimeout(300); // allow collapse animation
+      // Wait for the thing the caller needs, not for a fixed 300ms that is a
+      // guess about an animation on the fastest engine.
+      await link.waitFor({ state: 'visible', timeout: 10_000 }).catch(() => {});
     }
   }
 
