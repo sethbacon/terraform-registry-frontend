@@ -504,6 +504,31 @@ describe('PlatformAdminsPage', () => {
     await waitFor(() => expect(revokePlatformAdminMock).toHaveBeenCalledWith(ORPHAN_ID))
   })
 
+  it('re-reads the listing when the grant is already gone (404)', async () => {
+    // Somebody else revoked Alice between this client's last read and this click.
+    // Before the 404 branch, the error was reported but the listing was NOT
+    // invalidated, so Alice's row stayed in the table and stayed clickable -- the
+    // next click repeated the same 404 against a row the server says is gone.
+    listPlatformAdminsMock.mockResolvedValue([alice, bob])
+    revokePlatformAdminMock.mockRejectedValue(
+      axiosError(404, { error: 'User does not hold platform-admin' }),
+    )
+    renderPage()
+    await screen.findByText('Alice Admin')
+
+    await userEvent.click(
+      screen.getByRole('button', { name: 'Revoke platform admin from alice@example.com' }),
+    )
+    const dialog = await screen.findByRole('dialog')
+    // The refetch the invalidation triggers returns the server's truth: Alice is gone.
+    listPlatformAdminsMock.mockResolvedValue([bob])
+    await userEvent.click(within(dialog).getByRole('button', { name: 'Revoke' }))
+
+    expect(await screen.findByText('User does not hold platform-admin')).toBeInTheDocument()
+    // The stale row is gone, which only happens if the 404 invalidated the listing.
+    await waitFor(() => expect(screen.queryByText('Alice Admin')).not.toBeInTheDocument())
+  })
+
   it('turns the backend’s 409 into the same explanation, with no error banner', async () => {
     // Both rows resolve, so the client cannot know Alice's user was deleted
     // under it; only the backend can refuse.

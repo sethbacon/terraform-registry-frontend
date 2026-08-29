@@ -1967,7 +1967,7 @@
       "grantDialogIntro": "The grant is recorded with your name, the time, and the note below.",
       "labelUser": "User",
       "placeholderUser": "Search by name or email",
-      "noUserOptions": "No users left to grant — everyone is already an administrator.",
+      "noUserOptions": "No matching users",
       "labelNote": "Note",
       "helpNote": "Why this user holds platform-admin ({{used}}/{{max}} characters).",
       "errNoteTooLong": "The note must be at most {{max}} characters.",
