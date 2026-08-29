@@ -1967,7 +1967,7 @@
       "grantDialogIntro": "De toekenning wordt vastgelegd met uw naam, het tijdstip en de onderstaande opmerking.",
       "labelUser": "Gebruiker",
       "placeholderUser": "Zoeken op naam of e-mailadres",
-      "noUserOptions": "Er zijn geen gebruikers meer aan wie rechten kunnen worden toegekend — iedereen is al beheerder.",
+      "noUserOptions": "Geen overeenkomende gebruikers",
       "labelNote": "Opmerking",
       "helpNote": "Waarom deze gebruiker de rol van platformbeheerder heeft (de tekens {{used}} / {{max}}).",
       "errNoteTooLong": "De notitie mag maximaal {{max}} tekens bevatten.",

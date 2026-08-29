@@ -1967,7 +1967,7 @@
       "grantDialogIntro": "A doação é registada com o seu nome, a hora e a nota abaixo.",
       "labelUser": "Utilizador",
       "placeholderUser": "Pesquisar por nome ou e-mail",
-      "noUserOptions": "Já não há utilizadores a quem atribuir direitos — todos já são administradores.",
+      "noUserOptions": "Não foram encontrados utilizadores correspondentes",
       "labelNote": "Nota",
       "helpNote": "Por que razão este utilizador detém o direito de administrador da plataforma (características {{used}} / {{max}}).",
       "errNoteTooLong": "A nota não pode ter mais de {{max}} caracteres.",

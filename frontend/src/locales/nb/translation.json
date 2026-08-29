@@ -1967,7 +1967,7 @@
       "grantDialogIntro": "Tilskuddet er registrert med ditt navn, klokkeslettet og merknaden nedenfor.",
       "labelUser": "Bruker",
       "placeholderUser": "Søk etter navn eller e-postadresse",
-      "noUserOptions": "Det er ingen brukere igjen å gi rettigheter til — alle er allerede administratorer.",
+      "noUserOptions": "Ingen treff",
       "labelNote": "Merknad",
       "helpNote": "Hvorfor denne brukeren har rollen som plattformadministrator ({{used}} / {{max}}).",
       "errNoteTooLong": "Notatet må inneholde maksimalt {{max}} tegn.",
