@@ -1,6 +1,13 @@
 <!-- markdownlint-disable MD013 MD024 MD041 -->
 # Changelog
 
+## [2.24.5](https://github.com/sethbacon/terraform-registry-frontend/compare/v2.24.4...v2.24.5) (2026-08-29)
+
+
+### Bug Fixes
+
+* **platform-admins:** backport TSM's corrections to the sibling page ([#860](https://github.com/sethbacon/terraform-registry-frontend/issues/860)) ([44deaa4](https://github.com/sethbacon/terraform-registry-frontend/commit/44deaa4c4b41c7c1f368c366be4b10aaffe2f2ad))
+
 ## [2.24.4](https://github.com/sethbacon/terraform-registry-frontend/compare/v2.24.3...v2.24.4) (2026-08-28)
 
 

@@ -1,6 +1,6 @@
 {
   "name": "terraform-registry-frontend",
-  "version": "2.24.4",
+  "version": "2.24.5",
   "private": true,
   "engines": {
     "node": ">=24.0.0 <25"
