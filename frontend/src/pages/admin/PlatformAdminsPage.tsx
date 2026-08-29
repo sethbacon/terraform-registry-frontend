@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import {
@@ -84,9 +84,17 @@ const PlatformAdminsPage: React.FC = () => {
     queryFn: () => api.listPlatformAdmins(),
   })
 
-  if (queryError && !status.error) {
-    status.setError(getErrorMessage(queryError, t('admin.platformAdmins.errLoad')))
-  }
+  // In an effect, not during render. Calling setError() in the render body is a
+  // setState-during-render, and the `!status.error` guard made the banner
+  // UNDISMISSABLE: dismissing set it to null, the next render saw the query still
+  // errored, and put it straight back. Keyed on queryError so a dismissal sticks
+  // until the query's outcome actually changes.
+  useEffect(() => {
+    if (queryError) {
+      status.setError(getErrorMessage(queryError, t('admin.platformAdmins.errLoad')))
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [queryError])
 
   // Only needed to populate the grant dialog's picker.
   const { data: userPage } = useQuery({
@@ -152,6 +160,12 @@ const PlatformAdminsPage: React.FC = () => {
         setServerRefusedLastAdmin(true)
         queryClient.invalidateQueries({ queryKey: queryKeys.platformAdmins._def })
         return
+      }
+      // A grant that is already gone means somebody else got there first. Without
+      // this the row the server says no longer exists stays in the table and stays
+      // clickable, so the operator's next click repeats the same 404.
+      if (getErrorStatus(err) === 404) {
+        queryClient.invalidateQueries({ queryKey: queryKeys.platformAdmins._def })
       }
       status.setError(getErrorMessage(err, t('admin.platformAdmins.errRevoke')))
       closeRevokeDialog()
@@ -249,7 +263,7 @@ const PlatformAdminsPage: React.FC = () => {
                           <>
                             <Stack direction="row" spacing={1} sx={{ alignItems: 'center' }}>
                               <Typography variant="body2" sx={{ fontWeight: 'medium' }}>
-                                {admin.name || admin.email}
+                                {admin.name || admin.email || admin.user_id}
                               </Typography>
                               {isSelf(admin) && (
                                 <Chip label={t('admin.platformAdmins.chipYou')} size="small" />
