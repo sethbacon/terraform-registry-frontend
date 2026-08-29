@@ -1967,7 +1967,7 @@
       "grantDialogIntro": "この助成金は、ご氏名、日時、および以下の備考とともに記録されています。",
       "labelUser": "ユーザー",
       "placeholderUser": "名前またはメールアドレスで検索",
-      "noUserOptions": "付与できるユーザーはいません。全員がすでに管理者です。",
+      "noUserOptions": "該当するユーザーはいません",
       "labelNote": "注記",
       "helpNote": "このユーザーがプラットフォーム管理者権限（{{used}} / {{max}} 文字）を持っている理由。",
       "errNoteTooLong": "メモの文字数は{{max}}文字以内である必要があります。",

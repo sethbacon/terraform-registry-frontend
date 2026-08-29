@@ -1967,7 +1967,7 @@
       "grantDialogIntro": "该拨款已记录在案，其中包含您的姓名、时间以及以下备注。",
       "labelUser": "用户",
       "placeholderUser": "按姓名或电子邮箱搜索",
-      "noUserOptions": "已无用户可授予权限——所有用户均已是管理员。",
+      "noUserOptions": "没有匹配的用户",
       "labelNote": "注",
       "helpNote": "该用户为何拥有平台管理员权限（{{used}} / {{max}} 角色）。",
       "errNoteTooLong": "备注的字符数不得超过{{max}}个。",

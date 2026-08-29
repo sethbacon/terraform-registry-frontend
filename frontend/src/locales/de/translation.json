@@ -1967,7 +1967,7 @@
       "grantDialogIntro": "Die Zuwendung wird unter Angabe Ihres Namens, des Zeitpunkts und des untenstehenden Vermerks erfasst.",
       "labelUser": "Benutzer",
       "placeholderUser": "Nach Name oder E-Mail-Adresse suchen",
-      "noUserOptions": "Es gibt keine Benutzer mehr, denen Berechtigungen erteilt werden könnten – alle sind bereits Administratoren.",
+      "noUserOptions": "Keine passenden Nutzer gefunden",
       "labelNote": "Anmerkung",
       "helpNote": "Warum dieser Benutzer die Rolle „platform-admin“ innehat ({{used}} / {{max}} Zeichen).",
       "errNoteTooLong": "Die Notiz darf höchstens {{max}} Zeichen lang sein.",
