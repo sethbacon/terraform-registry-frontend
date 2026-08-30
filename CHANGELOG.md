@@ -1,6 +1,13 @@
 <!-- markdownlint-disable MD013 MD024 MD041 -->
 # Changelog
 
+## [2.25.0](https://github.com/sethbacon/terraform-registry-frontend/compare/v2.24.5...v2.25.0) (2026-08-30)
+
+
+### Features
+
+* **auth:** consume the session's remaining lifetime from /auth/me ([#864](https://github.com/sethbacon/terraform-registry-frontend/issues/864)) ([bb671e3](https://github.com/sethbacon/terraform-registry-frontend/commit/bb671e3ab603f6a86ee81c5a2ce0587f26e64f87))
+
 ## [2.24.5](https://github.com/sethbacon/terraform-registry-frontend/compare/v2.24.4...v2.24.5) (2026-08-29)
 
 
