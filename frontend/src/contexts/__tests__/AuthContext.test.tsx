@@ -94,6 +94,30 @@ describe('AuthProvider', () => {
     expect(latest.hasScope('modules:write')).toBe(true)
   })
 
+  // #181 — the duration must survive BOTH mapping hops (authApi's shape, then this
+  // adapter's object literal) and then be preferred by the provider. A library-level
+  // test cannot prove that; only this one covers the wiring in between.
+  it('prefers the backend duration over its absolute instant', async () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    mockApi.getCurrentUserWithRole.mockResolvedValue({
+      ...me,
+      // Long lapsed against this clock — the severe-skew shape that would otherwise
+      // trip the #178 guard.
+      session_expires_at: new Date(Date.now() - 60 * 60 * 1000).toISOString(),
+      session_expires_in: 5 * 60,
+    })
+    await renderAuth()
+    await waitFor(() => expect(latest.isAuthenticated).toBe(true))
+    // An expiry is actually SCHEDULED, which is what distinguishes "used the duration"
+    // from "the skew guard rescued us" — the skew branch schedules nothing and leaves
+    // this null. Without it this test would pass even if the field were dropped in
+    // either hop.
+    expect(latest.sessionExpiresAt).not.toBeNull()
+    expect(latest.sessionExpiresAt!.getTime()).toBeGreaterThan(Date.now() + 4 * 60 * 1000)
+    expect(warn).not.toHaveBeenCalledWith(expect.stringContaining('clock'))
+    warn.mockRestore()
+  })
+
   it('keeps a session whose server expiry is already past, treating it as clock skew', async () => {
     // @4cloudguru/cloud-suite-ui 0.11.1 (4cloudguru/cloud-suite-ui#178) changed this again, and
     // reversed the 0.8.1 behaviour this test used to pin. Failing closed here was a hard lockout:
