@@ -1967,7 +1967,7 @@
       "grantDialogIntro": "La subvention est enregistrée avec votre nom, l'heure et la note ci-dessous.",
       "labelUser": "Utilisateur",
       "placeholderUser": "Recherche par nom ou par adresse e-mail",
-      "noUserOptions": "Il n'y a plus d'utilisateurs à désigner : tout le monde est déjà administrateur.",
+      "noUserOptions": "Aucun utilisateur correspondant",
       "labelNote": "Remarque",
       "helpNote": "Pourquoi cet utilisateur détient le rôle d'administrateur de la plateforme (personnages de « {{used}} » / « {{max}} »).",
       "errNoteTooLong": "La note ne doit pas dépasser {{max}} caractères.",
