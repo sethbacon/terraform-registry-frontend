@@ -106,6 +106,14 @@ export async function getCurrentUserWithRole(): Promise<{
   memberships: AuthMembership[]
   allowed_scopes: string[]
   session_expires_at: string | null
+  /**
+   * Remaining session lifetime in seconds, measured by the backend as it built the response.
+   * Preferred by the shared auth provider over `session_expires_at`, because the absolute instant
+   * must be compared against this browser's clock and is wrong by exactly the skew between the
+   * two; a duration the backend measures and the browser applies shares no clock at all
+   * (4cloudguru/cloud-suite-ui#181). Null when the backend does not send it.
+   */
+  session_expires_in: number | null
 }> {
   const response = await http.get('/api/v1/auth/me')
   return {
@@ -118,5 +126,13 @@ export async function getCurrentUserWithRole(): Promise<{
     memberships: Array.isArray(response.data.memberships) ? response.data.memberships : [],
     allowed_scopes: response.data.allowed_scopes || [],
     session_expires_at: response.data.session_expires_at || null,
+    // typeof rather than `|| null` like its neighbours: this one is a NUMBER, and `0 || null` is
+    // null. Zero means "no life left", which the provider fails closed on — collapsing it to null
+    // would silently downgrade that to "no duration sent" and fall back to the instant. The
+    // backend omits non-positive values today, so this is defence against a change there, not a
+    // live path. Number.isFinite also rejects a NaN a malformed body could carry.
+    session_expires_in: Number.isFinite(response.data.session_expires_in)
+      ? Number(response.data.session_expires_in)
+      : null,
   }
 }

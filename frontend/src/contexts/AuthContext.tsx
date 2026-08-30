@@ -105,6 +105,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           user: r.user,
           allowed_scopes: r.allowed_scopes,
           session_expires_at: r.session_expires_at ?? undefined,
+          session_expires_in: r.session_expires_in ?? undefined,
           memberships: suiteMemberships,
         }
       },

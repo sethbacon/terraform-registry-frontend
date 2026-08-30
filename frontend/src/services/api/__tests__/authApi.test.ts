@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { logout } from '../authApi'
+import { logout, getCurrentUserWithRole } from '../authApi'
 import { http } from '../http'
 
 // Logout is a CSRF-protected POST rather than a full-page GET navigation. A GET
@@ -60,5 +60,50 @@ describe('authApi.logout', () => {
     await logout()
 
     expect(window.location.href).toBe(APP_ROOT)
+  })
+})
+
+// #181 — the mapping in getCurrentUserWithRole itself. The AuthContext test cannot
+// reach this: it mocks getCurrentUserWithRole, so this function never runs there.
+// Proven, not assumed — mutating this mapping left that test green.
+describe('authApi.getCurrentUserWithRole session lifetime', () => {
+  afterEach(() => {
+    vi.restoreAllMocks()
+  })
+
+  const body = (extra: Record<string, unknown>) => ({
+    data: {
+      user: { id: 'u1', email: 'a@b.c', name: 'Ada' },
+      role_template: null,
+      memberships: [],
+      allowed_scopes: ['modules:read'],
+      session_expires_at: null,
+      ...extra,
+    },
+  })
+
+  it('carries the remaining lifetime through', async () => {
+    vi.spyOn(http, 'get').mockResolvedValue(body({ session_expires_in: 300 }))
+    expect((await getCurrentUserWithRole()).session_expires_in).toBe(300)
+  })
+
+  it('keeps a zero rather than collapsing it to null', async () => {
+    // The trap this mapping exists to avoid: `0 || null` is null. Zero means "no
+    // life left", which the provider fails closed on — collapsing it would
+    // silently downgrade that to "no duration sent" and fall back to the instant.
+    vi.spyOn(http, 'get').mockResolvedValue(body({ session_expires_in: 0 }))
+    expect((await getCurrentUserWithRole()).session_expires_in).toBe(0)
+  })
+
+  it('maps an absent duration to null', async () => {
+    vi.spyOn(http, 'get').mockResolvedValue(body({}))
+    expect((await getCurrentUserWithRole()).session_expires_in).toBeNull()
+  })
+
+  it('rejects a non-numeric duration rather than passing NaN on', async () => {
+    // Date.now() + NaN is NaN, and setTimeout(fn, NaN) fires immediately — a
+    // malformed body must not be able to end the session.
+    vi.spyOn(http, 'get').mockResolvedValue(body({ session_expires_in: 'soon' }))
+    expect((await getCurrentUserWithRole()).session_expires_in).toBeNull()
   })
 })
