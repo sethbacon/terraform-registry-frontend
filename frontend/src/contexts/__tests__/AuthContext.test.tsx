@@ -94,22 +94,28 @@ describe('AuthProvider', () => {
     expect(latest.hasScope('modules:write')).toBe(true)
   })
 
-  it('ends an already-expired session immediately rather than warning about it', async () => {
-    // @4cloudguru/cloud-suite-ui 0.8.1 changed this to fail closed: a session
-    // already past its expiry when /me resolves is ENDED, not flagged with
-    // sessionExpiresSoon. Warning about a session the client already knows is dead
-    // leaves the UI rendered against it until the user acts on the warning, so the
-    // assertion here is that authentication is gone -- sessionExpiresSoon staying
-    // false is the point, not an omission.
+  it('keeps a session whose server expiry is already past, treating it as clock skew', async () => {
+    // @4cloudguru/cloud-suite-ui 0.11.1 (4cloudguru/cloud-suite-ui#178) changed this again, and
+    // reversed the 0.8.1 behaviour this test used to pin. Failing closed here was a hard lockout:
+    // the instant comes from the SERVER and was compared against the CLIENT's clock, so a browser
+    // ahead of the server by more than the session's remaining lifetime ended the session on
+    // EVERY /me. The user could never get past login, with nothing on screen to explain it.
+    //
+    // A 200 from /me is the server asserting the session is live, so it outranks our unsynchronised
+    // clock; a genuinely expired session 401s and is failed closed by the error path instead. The
+    // library now schedules nothing and warns. sessionExpiresSoon staying false is still the point
+    // -- what changed is that authentication survives.
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
     mockApi.getCurrentUserWithRole.mockResolvedValue({
       ...me,
       session_expires_at: new Date(Date.now() - 1000).toISOString(),
     })
     await renderAuth()
-    await waitFor(() => expect(latest.isAuthenticated).toBe(false))
-    expect(latest.user).toBeNull()
-    expect(latest.allowedScopes).toEqual([])
+    await waitFor(() => expect(latest.isAuthenticated).toBe(true))
+    expect(latest.user).not.toBeNull()
     expect(latest.sessionExpiresSoon).toBe(false)
+    expect(warn).toHaveBeenCalledWith(expect.stringContaining('clock'))
+    warn.mockRestore()
   })
 
   it('devLogin establishes a cookie session then re-resolves the user (no localStorage write)', async () => {
