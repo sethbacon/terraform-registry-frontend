@@ -1,6 +1,16 @@
 <!-- markdownlint-disable MD013 MD024 MD041 -->
 # Changelog
 
+## [2.25.1](https://github.com/sethbacon/terraform-registry-frontend/compare/v2.25.0...v2.25.1) (2026-08-31)
+
+
+### Bug Fixes
+
+* **ci:** a non-empty, non-ref-shaped comment satisfies both pin gates ([0fa2144](https://github.com/sethbacon/terraform-registry-frontend/commit/0fa2144227122ef7b2ded412319af9ee4a3f9569))
+* **ci:** correct the pin comment to name the commit actually referenced ([16c1190](https://github.com/sethbacon/terraform-registry-frontend/commit/16c1190f5f656c89901b5decdfcfb5ab52ccda8a))
+* **ci:** drop the unresolvable pin comment zizmor's ref-version-mismatch flagged ([cec52cf](https://github.com/sethbacon/terraform-registry-frontend/commit/cec52cf32a3b2be2a09fe90aa091cff5ee567a9a))
+* **ci:** re-pin the release-close guard to the fixed shared-workflows commit ([2cd4090](https://github.com/sethbacon/terraform-registry-frontend/commit/2cd4090de811b9acac4f17cfb59a6391f2258059))
+
 ## [2.25.0](https://github.com/sethbacon/terraform-registry-frontend/compare/v2.24.5...v2.25.0) (2026-08-30)
 
 
