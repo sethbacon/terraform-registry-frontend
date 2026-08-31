@@ -1,6 +1,13 @@
 <!-- markdownlint-disable MD013 MD024 MD041 -->
 # Changelog
 
+## [2.26.0](https://github.com/sethbacon/terraform-registry-frontend/compare/v2.25.1...v2.26.0) (2026-08-31)
+
+
+### Features
+
+* **ci:** adopt the shared Dependabot CI-health check ([#871](https://github.com/sethbacon/terraform-registry-frontend/issues/871)) ([058ce09](https://github.com/sethbacon/terraform-registry-frontend/commit/058ce092709016448b441ad0d4b3849753f1fb5b))
+
 ## [2.25.1](https://github.com/sethbacon/terraform-registry-frontend/compare/v2.25.0...v2.25.1) (2026-08-31)
 
 
