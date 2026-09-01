@@ -44,6 +44,9 @@ vi.mock('../../../contexts/AuthContext', () => ({
     user: { id: 'test-user-id', username: 'testuser' },
     memberships: mockMemberships,
     allowedScopes: mockAllowedScopes,
+    // As the suite provider resolves it: one membership is the acting
+    // organization without picking; several means nothing chosen yet.
+    currentOrganizationId: mockMemberships.length === 1 ? mockMemberships[0].organization_id : null,
   }),
 }))
 
@@ -418,10 +421,10 @@ describe('ModuleUploadPage — organization picker', () => {
       expect(screen.getByLabelText(/Organization/i)).toBeInTheDocument()
     })
 
-    // Default to first org - check displayed text
-    await waitFor(() => {
-      expect(screen.getByText('Org One')).toBeInTheDocument()
-    })
+    // Nothing is preselected: with several organizations and none picked in
+    // the app bar, the destination is the user's choice (terraform-registry-backend#1011) — the
+    // first membership is no longer chosen for them silently.
+    expect(screen.queryByText('Org One')).toBeNull()
 
     // Can select a different org
     const orgSelect = screen.getByLabelText(/Organization/i)

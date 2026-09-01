@@ -3,8 +3,17 @@
 // membership — which, since #795, is a real organization membership rather than a
 // fabricated one. useAuth/SESSION_WARNING_LEAD_MS are re-exported so existing
 // imports keep working; useAuth additionally publishes `memberships` (see below).
-import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from 'react'
 import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+  type ReactNode,
+} from 'react'
+import {
+  ADMIN_SCOPE,
   AuthProvider as SuiteAuthProvider,
   useAuth as useSuiteAuth,
   SESSION_WARNING_LEAD_MS,
@@ -12,8 +21,11 @@ import {
   type AuthContextType,
   type MeResponse,
   type Membership,
+  type SelectableOrganization,
 } from '@4cloudguru/cloud-suite-ui'
 import api from '../services/api'
+import { setActingOrganization } from '../services/api/http'
+import { ORGANIZATION_PAGE_MAX } from '../services/api/organizationsApi'
 import type { AuthMembership } from '../services/api/authApi'
 import { clearAuthStorage } from '../utils/authStorage'
 import { queryClient } from '../queryClient'
@@ -70,8 +82,118 @@ export function toSuiteMemberships(memberships: AuthMembership[]): Membership[] 
  */
 const MembershipsContext = createContext<Membership[]>([])
 
+/**
+ * Pushes the selected organization into the HTTP layer, which stamps it on
+ * every request as the X-Organization-Id header (terraform-registry-backend#1011, suite
+ * terraform-state-manager-backend#437). The provider owns the decision — it re-resolves the
+ * selection against the memberships the server just returned — and the HTTP
+ * layer only carries it. Null is pushed deliberately when there is no valid
+ * selection: a multi-organization caller who has not chosen has nothing to
+ * claim, and the backend refuses an unnamed write in exactly that case.
+ * Clearing on unmount matters for the same reason a logout clears it — a stale
+ * organization outliving its session is the one value that must not be
+ * inherited by whoever signs in next.
+ */
+function OrganizationBridge() {
+  const { currentOrganizationId } = useSuiteAuth()
+  useEffect(() => {
+    setActingOrganization(currentOrganizationId)
+    return () => setActingOrganization(null)
+  }, [currentOrganizationId])
+  return null
+}
+
+/** Upper bound on the pages fetched for a platform administrator's universe. */
+const PLATFORM_ADMIN_ORGANIZATION_PAGES = 20
+
+/**
+ * Supplies the organization directory a PLATFORM ADMINISTRATOR must choose from.
+ *
+ * The backend's tenant scope for an admin spans every organization and carries
+ * none, so the shared rule refuses an unnamed create from them UNCONDITIONALLY
+ * — not only when they reach several. A picker driven by memberships alone
+ * therefore offered nothing to exactly the caller the server always requires
+ * to choose. This fetches the estate's organizations for that caller and hands
+ * them to the provider as `selectableOrganizations`, a DISPLAY universe and
+ * not a grant: the server re-derives scope on every request regardless.
+ *
+ * The predicate is "admin scope AND no memberships": /auth/me publishes no
+ * platform-admin flag, but the shared provider reports `admin` only when the
+ * session actually carries it, and with no memberships the role-template union
+ * is empty, so the only remaining carrier is the platform_admins table. An
+ * admin WITH memberships already has a universe to pick from and is left alone.
+ *
+ * Failure degrades to "no extra choices": the refusal the admin then sees on a
+ * create is the pre-existing one, not a new crash.
+ */
+function PlatformAdminOrganizations({
+  onChoices,
+}: {
+  onChoices: (organizations: SelectableOrganization[] | undefined) => void
+}) {
+  const { isAuthenticated, memberships, hasScope } = useSuiteAuth()
+  const isPlatformAdmin = isAuthenticated && memberships.length === 0 && hasScope(ADMIN_SCOPE)
+
+  useEffect(() => {
+    if (!isPlatformAdmin) {
+      // Covers sign-out and a demotion mid-session as well as the ordinary
+      // user: an acting-organization universe must not outlive the standing
+      // that justified it.
+      onChoices(undefined)
+      return
+    }
+    let live = true
+    const load = async () => {
+      try {
+        const choices: SelectableOrganization[] = []
+        for (let page = 1; page <= PLATFORM_ADMIN_ORGANIZATION_PAGES; page++) {
+          const result = await api.listOrganizations(page, ORGANIZATION_PAGE_MAX)
+          if (!live) return
+          for (const o of result.organizations) {
+            choices.push({ organization_id: o.id, organization_name: o.display_name || o.name })
+          }
+          if (!result.hasMore) break
+        }
+        onChoices(choices)
+      } catch {
+        if (live) onChoices(undefined)
+      }
+    }
+    void load()
+    return () => {
+      live = false
+    }
+  }, [isPlatformAdmin, onChoices])
+
+  return null
+}
+
+/**
+ * Where the selected organization is remembered across reloads. Namespaced to
+ * this app rather than reusing the shared DEFAULT_ORGANIZATION_KEY: the suite
+ * apps are separate origins with separate onboarding, so a user may
+ * legitimately act in a different organization in each, and one shared key
+ * would make picking in one silently re-point the other.
+ *
+ * The stored value is a HINT and never an authority — the provider matches it
+ * against the memberships the server just returned and discards anything that
+ * does not match.
+ */
+const ORGANIZATION_STORAGE_KEY = 'registry.organization'
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [memberships, setMemberships] = useState<Membership[]>([])
+  // Lifted to the provider's own parent because the directory is a PROP of the
+  // provider while the standing that decides whether to fetch it is INSIDE:
+  // PlatformAdminOrganizations reads the resolved session and hands the answer
+  // back up. The provider re-resolves the selection when the extra
+  // organizations land, which they do after /me has already settled.
+  const [selectableOrganizations, setSelectableOrganizations] = useState<
+    SelectableOrganization[] | undefined
+  >(undefined)
+  const handleChoices = useCallback((organizations: SelectableOrganization[] | undefined) => {
+    setSelectableOrganizations(organizations)
+  }, [])
 
   // On sign-out, also drop the react-query cache so prior-user admin/query data does not
   // linger in memory until a full page reload (a retention gap on shared/kiosk machines),
@@ -132,7 +254,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   return (
     <MembershipsContext.Provider value={memberships}>
-      <SuiteAuthProvider api={authApi} onClearStorage={handleClearStorage}>
+      <SuiteAuthProvider
+        api={authApi}
+        onClearStorage={handleClearStorage}
+        organizationStorageKey={ORGANIZATION_STORAGE_KEY}
+        selectableOrganizations={selectableOrganizations}
+      >
+        <OrganizationBridge />
+        <PlatformAdminOrganizations onChoices={handleChoices} />
         {children}
       </SuiteAuthProvider>
     </MembershipsContext.Provider>

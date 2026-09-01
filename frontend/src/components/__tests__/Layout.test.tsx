@@ -37,14 +37,21 @@ import '../../i18n'
 // SuiteLayout consumes the package's own useAuth/useThemeMode, so drive auth
 // through a real package AuthProvider with a mock backend contract. Pass null
 // scopes for an unauthenticated session (getCurrentUser rejects).
-function makeApi(scopes: string[] | null): AuthApi {
+type TestMembership = {
+  organization_id: string
+  organization_name: string
+  role_template_name: string | null
+  role_template_scopes: string[]
+}
+
+function makeApi(scopes: string[] | null, memberships: TestMembership[] = []): AuthApi {
   return {
     getCurrentUser:
       scopes === null
         ? vi.fn().mockRejectedValue(new Error('unauthenticated'))
         : vi.fn().mockResolvedValue({
             user: { id: '1', email: 'alice@example.com', name: 'Alice' },
-            memberships: [],
+            memberships,
             allowed_scopes: scopes,
           }),
     login: vi.fn(),
@@ -58,8 +65,9 @@ function makeApi(scopes: string[] | null): AuthApi {
 function renderLayout({
   scopes = null,
   route = '/',
-}: { scopes?: string[] | null; route?: string } = {}) {
-  const api = makeApi(scopes)
+  memberships = [],
+}: { scopes?: string[] | null; route?: string; memberships?: TestMembership[] } = {}) {
+  const api = makeApi(scopes, memberships)
   render(
     <SuiteThemeProvider
       defaultProductName="Terraform Registry"
@@ -265,5 +273,38 @@ describe('Layout', () => {
     await waitFor(() =>
       expect(JSON.parse(localStorage.getItem('adminNavGroups') ?? '{}').identity).toBe(false),
     )
+  })
+})
+
+// ── Organization picker ────────────────────────────────────────────────────
+// The suite picker (terraform-registry-backend#1011) is the only way a multi-organization user
+// can name the organization a create belongs to. It renders nothing for a
+// caller with a single organization, so a single-organization deployment is
+// visually unchanged.
+describe('Layout organization picker', () => {
+  const membership = (id: string, name: string): TestMembership => ({
+    organization_id: id,
+    organization_name: name,
+    role_template_name: 'publisher',
+    role_template_scopes: ['modules:write'],
+  })
+
+  it('offers the organization picker to a member of several organizations', async () => {
+    renderLayout({
+      scopes: ['modules:write'],
+      memberships: [membership('org-1', 'Acme'), membership('org-2', 'Globex')],
+    })
+    expect(await screen.findByRole('button', { name: 'Switch organization' })).toBeInTheDocument()
+  })
+
+  it('renders no picker for a member of exactly one organization', async () => {
+    const api = renderLayout({
+      scopes: ['modules:write'],
+      memberships: [membership('org-1', 'Acme')],
+    })
+    await waitFor(() => expect(api.getCurrentUser).toHaveBeenCalled())
+    // The account control renders once the session resolves; the picker must not.
+    await screen.findByRole('button', { name: /account/i })
+    expect(screen.queryByRole('button', { name: 'Switch organization' })).toBeNull()
   })
 })

@@ -65,20 +65,20 @@ const HomePage: React.FC = () => {
   const navigate = useNavigate()
   const theme = useTheme()
   const isXs = useMediaQuery(theme.breakpoints.down('sm'))
-  const { isAuthenticated, memberships, allowedScopes } = useAuth()
+  const { isAuthenticated, allowedScopes, currentOrganizationId } = useAuth()
   const { announce } = useAnnouncer()
   const [stats, setStats] = useState<HomeStats>(initialStats)
   const [searchQuery, setSearchQuery] = useState('')
   const [searchType, setSearchType] = useState<'modules' | 'providers'>('modules')
   const [copied, setCopied] = useState(false)
   const [quickKeyOpen, setQuickKeyOpen] = useState(false)
-  // The caller's primary organization, read from the session's memberships
-  // rather than fetched separately from `/users/me/memberships` (#779). Both
-  // endpoints run the same membership query for the same user, so this is one
-  // fewer round trip on the landing page for the same answer — and the
-  // isAuthenticated handling comes for free, because `useAuth().memberships` is
-  // already gated on it and empties when the session ends.
-  const primaryOrgId = memberships[0]?.organization_id ?? null
+  // The organization the caller is acting in — the suite picker's selection,
+  // which for a single-organization caller is that organization without any
+  // picking (terraform-registry-backend#1011). It used to be the FIRST membership, which chose
+  // silently for a multi-organization user; null now means "nothing chosen",
+  // and QuickApiKeyDialog already handles that honestly. The provider clears
+  // the selection when the session ends, so isAuthenticated comes for free.
+  const primaryOrgId = currentOrganizationId
   // Whether this caller can resolve an empty `primaryOrgId` themselves (#796),
   // using the same test OrganizationsPage gates its own controls on.
   const canManageOrganizations =
