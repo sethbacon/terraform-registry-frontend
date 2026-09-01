@@ -1,6 +1,13 @@
 <!-- markdownlint-disable MD013 MD024 MD041 -->
 # Changelog
 
+## [2.26.1](https://github.com/sethbacon/terraform-registry-frontend/compare/v2.26.0...v2.26.1) (2026-09-01)
+
+
+### Bug Fixes
+
+* **ci:** dev-admin seed's role-mirror gap, and Firefox's timeout/retries budget in E2E ([6be39fd](https://github.com/sethbacon/terraform-registry-frontend/commit/6be39fd197f5498d3420680b3463fe98cd8afa74))
+
 ## [2.26.0](https://github.com/sethbacon/terraform-registry-frontend/compare/v2.25.1...v2.26.0) (2026-08-31)
 
 
