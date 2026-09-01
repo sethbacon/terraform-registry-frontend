@@ -447,6 +447,48 @@ jobs:
         run: >-
           docker compose -f deployments/docker-compose.test.yml up -d
 
+      - name: Restart backend to reconcile the freshly-seeded membership
+        # seed-db (which frontend's own depends_on already waited for, above)
+        # inserts the dev-admin user's organization_members row directly
+        # against the shared identity tables -- it does not touch registry's
+        # own role-template mirror (organization_member_roles,
+        # terraform-suite-identity#206 phase 3b). That mirror is derived by
+        # repositories.ReconcileMemberRoles, which registry's router.go runs
+        # exactly once, synchronously, at process start -- before /health is
+        # even registered -- so the FIRST boot's reconcile pass necessarily
+        # ran before this seed existed. Nothing re-triggers it afterward, so
+        # every accessor that reads the mirror as authoritative serves the
+        # dev-admin NO role for the rest of the run: "registry has no
+        # mirrored role for a membership that exists in identity" in the
+        # backend's own logs, and whichever admin-gated page a Playwright
+        # worker reaches first times out waiting for content that a role-less
+        # session never renders (issue #875).
+        #
+        # docker compose restart re-runs the same one-shot reconcile a second
+        # time, now against identity data that includes the seed -- exactly
+        # the log line's own documented remedy ("restarting the backend
+        # re-derives the mirror"). Application code is untouched; this is
+        # purely a test-harness ordering fix.
+        run: |
+          docker compose -f deployments/docker-compose.test.yml restart backend
+          echo "Waiting for backend to become healthy again..."
+          backend_up=0
+          for i in {1..60}; do
+            code=$(curl -s http://localhost:8080/health \
+              -o /dev/null -w "%{http_code}" 2>/dev/null || true)
+            if [ "$code" = "200" ]; then
+              echo "Backend healthy again (HTTP $code)"
+              backend_up=1
+              break
+            fi
+            sleep 3
+          done
+          if [ "$backend_up" -eq 0 ]; then
+            echo "ERROR: backend never became healthy again after restart"
+            docker compose -f deployments/docker-compose.test.yml logs backend --tail=100
+            exit 1
+          fi
+
       - name: Wait for frontend
         run: |
           echo "Waiting for frontend on port 3000..."
@@ -474,8 +516,15 @@ jobs:
         # exhausting the single retry and tripping --max-failures=1. Same
         # mitigation that PR #182 originally applied; see #233 post-merge run
         # 25007086815 for the regression that prompted reverting to 2.
+        #
+        # Retries come from playwright.config.ts, not a --retries flag here:
+        # a CLI --retries unconditionally overrides EVERY project's own
+        # retries setting, including firefox/webkit's deliberately higher
+        # one (verified directly against a minimal repro) -- passing it here
+        # would silently put every project back on the same one-retry budget
+        # regardless of what the config says.
         run: >-
-          npx playwright test --workers=2 --max-failures=1 --retries=1
+          npx playwright test --workers=2 --max-failures=1
           --reporter=list --grep-invert="Visual regression"
 
       - name: Upload Playwright artifacts
@@ -565,6 +614,48 @@ jobs:
         run: >-
           docker compose -f deployments/docker-compose.test.yml up -d
 
+      - name: Restart backend to reconcile the freshly-seeded membership
+        # seed-db (which frontend's own depends_on already waited for, above)
+        # inserts the dev-admin user's organization_members row directly
+        # against the shared identity tables -- it does not touch registry's
+        # own role-template mirror (organization_member_roles,
+        # terraform-suite-identity#206 phase 3b). That mirror is derived by
+        # repositories.ReconcileMemberRoles, which registry's router.go runs
+        # exactly once, synchronously, at process start -- before /health is
+        # even registered -- so the FIRST boot's reconcile pass necessarily
+        # ran before this seed existed. Nothing re-triggers it afterward, so
+        # every accessor that reads the mirror as authoritative serves the
+        # dev-admin NO role for the rest of the run: "registry has no
+        # mirrored role for a membership that exists in identity" in the
+        # backend's own logs, and whichever admin-gated page a Playwright
+        # worker reaches first times out waiting for content that a role-less
+        # session never renders (issue #875).
+        #
+        # docker compose restart re-runs the same one-shot reconcile a second
+        # time, now against identity data that includes the seed -- exactly
+        # the log line's own documented remedy ("restarting the backend
+        # re-derives the mirror"). Application code is untouched; this is
+        # purely a test-harness ordering fix.
+        run: |
+          docker compose -f deployments/docker-compose.test.yml restart backend
+          echo "Waiting for backend to become healthy again..."
+          backend_up=0
+          for i in {1..60}; do
+            code=$(curl -s http://localhost:8080/health \
+              -o /dev/null -w "%{http_code}" 2>/dev/null || true)
+            if [ "$code" = "200" ]; then
+              echo "Backend healthy again (HTTP $code)"
+              backend_up=1
+              break
+            fi
+            sleep 3
+          done
+          if [ "$backend_up" -eq 0 ]; then
+            echo "ERROR: backend never became healthy again after restart"
+            docker compose -f deployments/docker-compose.test.yml logs backend --tail=100
+            exit 1
+          fi
+
       - name: Wait for frontend
         run: |
           echo "Waiting for frontend on port 3000..."
@@ -587,9 +678,15 @@ jobs:
 
       - name: Run Playwright security tests
         working-directory: e2e
+        # chromium only here, so this specific job never actually hit the
+        # CLI --retries-overrides-every-project trap (see the other E2E
+        # job's comment) -- but a --retries flag here would silently spring
+        # it the moment this job's project list grows to include firefox or
+        # webkit, so it's left off in favor of the root retries: 1 in
+        # playwright.config.ts, same as the other job.
         run: >-
           npx playwright test tests/security.spec.ts --project=chromium
-          --workers=2 --max-failures=1 --retries=1 --reporter=list
+          --workers=2 --max-failures=1 --reporter=list
 
       - name: Upload Playwright artifacts
         # always() — see the identical step in e2e-gated above for the rationale.

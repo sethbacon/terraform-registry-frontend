@@ -24,15 +24,24 @@ async function devLogin(page: Page): Promise<void> {
   const devLoginBtn = page.getByRole('button', { name: 'Dev Login (Admin)' });
 
   // Verify the dev login button is present; if not, the backend is not in dev mode.
+  //
+  // This is the worker's first navigation in a brand new browser context --
+  // no cache, no JIT warmup -- and on Firefox specifically it intermittently
+  // exceeded 10s under CI load (the docker-compose stack already busy from
+  // chromium's full run before firefox's workers start). 20s matches the
+  // margin playwright.config.ts's own firefox/webkit `expect.timeout` bump
+  // uses elsewhere for the identical first-paint-under-load reasoning,
+  // rounded up because this wait is explicit here and so does not inherit
+  // that project-level default.
   await expect(devLoginBtn).toBeVisible({
-    timeout: 10_000,
+    timeout: 20_000,
   });
 
   await devLoginBtn.click();
 
   // After dev login the app redirects to / (dashboard or modules page).
   await page.waitForURL((url) => !url.pathname.endsWith('/login'), {
-    timeout: 10_000,
+    timeout: 20_000,
   });
 }
 
