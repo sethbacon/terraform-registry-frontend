@@ -28,8 +28,16 @@ export default defineConfig({
   timeout: 60_000,
   expect: { timeout: 5_000 },
 
-  /* No retries — failures should be visible immediately */
-  retries: 0,
+  // Set here, not via the CI step's CLI flags: a `--retries=N` CLI flag
+  // overrides EVERY project's own `retries` setting unconditionally,
+  // including a project that sets its own (verified directly -- a project
+  // configured for 2 retries got exactly 1 when the CLI passed
+  // --retries=1, and correctly got 2 once the CLI flag was removed and the
+  // count came from config alone). 1 here matches what the CI step's now-
+  // removed --retries=1 gave every project; firefox and webkit override it
+  // below, for the same environmental-flakiness reasoning their
+  // expect.timeout override exists for.
+  retries: 1,
 
   /* Stop after the first failure so CI feedback is fast */
   maxFailures: 1,
@@ -94,8 +102,8 @@ export default defineConfig({
           // same underlying reason.) Same reasoning as webkit below; chromium
           // alone keeps the original tight bound.
           expect: { timeout: 15_000 },
-          // The CI step's own `--retries=1` CLI flag gives every project one
-          // retry by default -- a test must fail twice in a row to count as
+          // The root `retries: 1` above gives every project one retry by
+          // default -- a test must fail twice in a row to count as
           // exhausted. maxFailures: 1 (below) then stops the ENTIRE run the
           // moment any single test exhausts its retries. Across ~250+ Firefox
           // test attempts under the same resource contention `expect.timeout`

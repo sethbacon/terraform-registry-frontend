@@ -516,8 +516,15 @@ jobs:
         # exhausting the single retry and tripping --max-failures=1. Same
         # mitigation that PR #182 originally applied; see #233 post-merge run
         # 25007086815 for the regression that prompted reverting to 2.
+        #
+        # Retries come from playwright.config.ts, not a --retries flag here:
+        # a CLI --retries unconditionally overrides EVERY project's own
+        # retries setting, including firefox/webkit's deliberately higher
+        # one (verified directly against a minimal repro) -- passing it here
+        # would silently put every project back on the same one-retry budget
+        # regardless of what the config says.
         run: >-
-          npx playwright test --workers=2 --max-failures=1 --retries=1
+          npx playwright test --workers=2 --max-failures=1
           --reporter=list --grep-invert="Visual regression"
 
       - name: Upload Playwright artifacts
@@ -671,9 +678,15 @@ jobs:
 
       - name: Run Playwright security tests
         working-directory: e2e
+        # chromium only here, so this specific job never actually hit the
+        # CLI --retries-overrides-every-project trap (see the other E2E
+        # job's comment) -- but a --retries flag here would silently spring
+        # it the moment this job's project list grows to include firefox or
+        # webkit, so it's left off in favor of the root retries: 1 in
+        # playwright.config.ts, same as the other job.
         run: >-
           npx playwright test tests/security.spec.ts --project=chromium
-          --workers=2 --max-failures=1 --retries=1 --reporter=list
+          --workers=2 --max-failures=1 --reporter=list
 
       - name: Upload Playwright artifacts
         # always() — see the identical step in e2e-gated above for the rationale.
