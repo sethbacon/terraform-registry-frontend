@@ -447,6 +447,48 @@ jobs:
         run: >-
           docker compose -f deployments/docker-compose.test.yml up -d
 
+      - name: Restart backend to reconcile the freshly-seeded membership
+        # seed-db (which frontend's own depends_on already waited for, above)
+        # inserts the dev-admin user's organization_members row directly
+        # against the shared identity tables -- it does not touch registry's
+        # own role-template mirror (organization_member_roles,
+        # terraform-suite-identity#206 phase 3b). That mirror is derived by
+        # repositories.ReconcileMemberRoles, which registry's router.go runs
+        # exactly once, synchronously, at process start -- before /health is
+        # even registered -- so the FIRST boot's reconcile pass necessarily
+        # ran before this seed existed. Nothing re-triggers it afterward, so
+        # every accessor that reads the mirror as authoritative serves the
+        # dev-admin NO role for the rest of the run: "registry has no
+        # mirrored role for a membership that exists in identity" in the
+        # backend's own logs, and whichever admin-gated page a Playwright
+        # worker reaches first times out waiting for content that a role-less
+        # session never renders (issue #875).
+        #
+        # docker compose restart re-runs the same one-shot reconcile a second
+        # time, now against identity data that includes the seed -- exactly
+        # the log line's own documented remedy ("restarting the backend
+        # re-derives the mirror"). Application code is untouched; this is
+        # purely a test-harness ordering fix.
+        run: |
+          docker compose -f deployments/docker-compose.test.yml restart backend
+          echo "Waiting for backend to become healthy again..."
+          backend_up=0
+          for i in {1..60}; do
+            code=$(curl -s http://localhost:8080/health \
+              -o /dev/null -w "%{http_code}" 2>/dev/null || true)
+            if [ "$code" = "200" ]; then
+              echo "Backend healthy again (HTTP $code)"
+              backend_up=1
+              break
+            fi
+            sleep 3
+          done
+          if [ "$backend_up" -eq 0 ]; then
+            echo "ERROR: backend never became healthy again after restart"
+            docker compose -f deployments/docker-compose.test.yml logs backend --tail=100
+            exit 1
+          fi
+
       - name: Wait for frontend
         run: |
           echo "Waiting for frontend on port 3000..."
@@ -564,6 +606,48 @@ jobs:
         # Images are pre-pulled above; this builds the frontend and starts everything.
         run: >-
           docker compose -f deployments/docker-compose.test.yml up -d
+
+      - name: Restart backend to reconcile the freshly-seeded membership
+        # seed-db (which frontend's own depends_on already waited for, above)
+        # inserts the dev-admin user's organization_members row directly
+        # against the shared identity tables -- it does not touch registry's
+        # own role-template mirror (organization_member_roles,
+        # terraform-suite-identity#206 phase 3b). That mirror is derived by
+        # repositories.ReconcileMemberRoles, which registry's router.go runs
+        # exactly once, synchronously, at process start -- before /health is
+        # even registered -- so the FIRST boot's reconcile pass necessarily
+        # ran before this seed existed. Nothing re-triggers it afterward, so
+        # every accessor that reads the mirror as authoritative serves the
+        # dev-admin NO role for the rest of the run: "registry has no
+        # mirrored role for a membership that exists in identity" in the
+        # backend's own logs, and whichever admin-gated page a Playwright
+        # worker reaches first times out waiting for content that a role-less
+        # session never renders (issue #875).
+        #
+        # docker compose restart re-runs the same one-shot reconcile a second
+        # time, now against identity data that includes the seed -- exactly
+        # the log line's own documented remedy ("restarting the backend
+        # re-derives the mirror"). Application code is untouched; this is
+        # purely a test-harness ordering fix.
+        run: |
+          docker compose -f deployments/docker-compose.test.yml restart backend
+          echo "Waiting for backend to become healthy again..."
+          backend_up=0
+          for i in {1..60}; do
+            code=$(curl -s http://localhost:8080/health \
+              -o /dev/null -w "%{http_code}" 2>/dev/null || true)
+            if [ "$code" = "200" ]; then
+              echo "Backend healthy again (HTTP $code)"
+              backend_up=1
+              break
+            fi
+            sleep 3
+          done
+          if [ "$backend_up" -eq 0 ]; then
+            echo "ERROR: backend never became healthy again after restart"
+            docker compose -f deployments/docker-compose.test.yml logs backend --tail=100
+            exit 1
+          fi
 
       - name: Wait for frontend
         run: |
