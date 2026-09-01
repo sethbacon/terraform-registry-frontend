@@ -78,6 +78,22 @@ export default defineConfig({
         {
           name: 'firefox',
           use: { ...devices['Desktop Firefox'] },
+          // Firefox runs second in this job, after chromium's full run has
+          // already had the docker-compose stack (postgres+backend+frontend)
+          // under sustained load, and each worker's cold browser context
+          // pays a first-paint cost the warmed-up chromium run does not see.
+          // Observed directly: bare `expect(...).toBeVisible()` assertions in
+          // test bodies (no local override, so they ran on the 5s global
+          // default) intermittently timed out under that load, and a
+          // different spec file failed the same way run to run -- the
+          // signature of a budget that is occasionally too tight, not a
+          // deterministic regression. (devLogin's own waits in
+          // fixtures/auth.ts already carry an explicit, larger timeout of
+          // their own and so are untouched by this project-level default --
+          // that cold-start-sensitive path was bumped separately, for the
+          // same underlying reason.) Same reasoning as webkit below; chromium
+          // alone keeps the original tight bound.
+          expect: { timeout: 15_000 },
         },
         {
           name: 'webkit',
@@ -85,8 +101,8 @@ export default defineConfig({
           // WebKit is the slowest engine here and runs four workers deep in CI,
           // where a first paint can exceed the 5s global expect timeout on an
           // otherwise correct page. This raises the assertion budget for THIS
-          // project only, so chromium and firefox keep the tighter bound and a
-          // genuine regression there still shows up as one.
+          // project only, so chromium keeps the tighter bound and a genuine
+          // regression there still shows up as one.
           expect: { timeout: 15_000 },
         },
       ]
