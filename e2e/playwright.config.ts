@@ -94,6 +94,22 @@ export default defineConfig({
           // same underlying reason.) Same reasoning as webkit below; chromium
           // alone keeps the original tight bound.
           expect: { timeout: 15_000 },
+          // The CI step's own `--retries=1` CLI flag gives every project one
+          // retry by default -- a test must fail twice in a row to count as
+          // exhausted. maxFailures: 1 (below) then stops the ENTIRE run the
+          // moment any single test exhausts its retries. Across ~250+ Firefox
+          // test attempts under the same resource contention `expect.timeout`
+          // above exists for, a spurious double-failure is close to
+          // inevitable even though the large majority of individual
+          // failures self-heal on their first retry alone (observed
+          // directly: a test that failed its first attempt at 60s passed its
+          // retry in 4.3s). This project-level override needs 3 consecutive
+          // failures, not 2, before maxFailures triggers -- a genuine
+          // deterministic regression still fails fast, because it fails
+          // every attempt regardless of how many are allowed; only the
+          // false-positive full-suite stop from environmental flakiness gets
+          // rarer. Chromium keeps the CLI default of one retry.
+          retries: 2,
         },
         {
           name: 'webkit',
@@ -104,6 +120,10 @@ export default defineConfig({
           // project only, so chromium keeps the tighter bound and a genuine
           // regression there still shows up as one.
           expect: { timeout: 15_000 },
+          // Same reasoning as firefox above: one extra retry before
+          // maxFailures can trigger, so a run isn't stopped by the same class
+          // of environmental flakiness the expect.timeout bump exists for.
+          retries: 2,
         },
       ]
       : []),
