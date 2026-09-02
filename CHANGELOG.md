@@ -1,6 +1,18 @@
 <!-- markdownlint-disable MD013 MD024 MD041 -->
 # Changelog
 
+## [2.27.0](https://github.com/sethbacon/terraform-registry-frontend/compare/v2.26.1...v2.27.0) (2026-09-02)
+
+
+### Features
+
+* **auth:** render the suite organization picker and send X-Organization-Id on every request ([#879](https://github.com/sethbacon/terraform-registry-frontend/issues/879)) ([527b3e4](https://github.com/sethbacon/terraform-registry-frontend/commit/527b3e45d0c809653c315cda1db8f67e8cda5183))
+
+
+### Bug Fixes
+
+* **deps:** move browserslist past GHSA-c83g-rgw3-j3cx ([#880](https://github.com/sethbacon/terraform-registry-frontend/issues/880)) ([06983fe](https://github.com/sethbacon/terraform-registry-frontend/commit/06983feed0902c0a0a9d6e6f88d78b4599c6c13d))
+
 ## [2.26.1](https://github.com/sethbacon/terraform-registry-frontend/compare/v2.26.0...v2.26.1) (2026-09-01)
 
 
