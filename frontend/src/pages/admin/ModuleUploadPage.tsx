@@ -54,7 +54,7 @@ const ModuleUploadPage: React.FC = () => {
   // Memberships come from the session (`/auth/me`) rather than a second fetch
   // of `/users/me/memberships` (#779). Both endpoints run the same membership
   // query for the same user; two clients for one fact is how they diverged.
-  const { memberships, allowedScopes } = useAuth()
+  const { memberships, allowedScopes, currentOrganizationId } = useAuth()
   const canManageOrganizations =
     allowedScopes.includes('admin') || allowedScopes.includes('organizations:write')
 
@@ -92,17 +92,20 @@ const ModuleUploadPage: React.FC = () => {
       </Alert>
     ) : null
 
-  // The DESTINATION organization for the upload, defaulted to the caller's
-  // first membership. This is not the organization FILTER (#779) and gets a
-  // default for the reason the filter must not: a publish has to name an
-  // organization to write into, whereas a filter left unset means "everything".
-  // There is nothing on this page to filter — it has no list.
+  // The DESTINATION organization for the upload follows the organization the
+  // user is acting in — the suite picker's selection (terraform-registry-backend#1011). It is no
+  // longer the caller's FIRST membership: that default was invisible, and for
+  // a multi-organization user it silently chose for them. With no selection
+  // (several organizations, none picked yet) the form is left empty and the
+  // user picks here or in the app bar; the backend refuses an unnamed create
+  // in exactly that case. This is not the organization FILTER (#779) — a
+  // publish has to name an organization to write into, whereas a filter left
+  // unset means "everything". There is nothing on this page to filter.
   useEffect(() => {
-    if (memberships.length > 0 && !selectedOrgId) {
-      setSelectedOrgId(memberships[0].organization_id)
+    if (currentOrganizationId) {
+      setSelectedOrgId(currentOrganizationId)
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [memberships])
+  }, [currentOrganizationId])
 
   // SCM new-module metadata (before wizard)
   const [scmNamespace, setScmNamespace] = useState(prefilledModule?.namespace || '')

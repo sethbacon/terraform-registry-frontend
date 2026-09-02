@@ -40,6 +40,9 @@ vi.mock('../../../contexts/AuthContext', () => ({
     isAuthenticated: true,
     allowedScopes: mockAllowedScopes,
     memberships: mockMemberships,
+    // As the suite provider resolves it: one membership is the acting
+    // organization without picking; several means nothing chosen yet.
+    currentOrganizationId: mockMemberships.length === 1 ? mockMemberships[0].organization_id : null,
     user: { id: 'u1', email: 'admin@example.com', name: 'Admin', role_template_name: 'admin' },
   }),
 }))

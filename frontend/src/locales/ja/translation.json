@@ -72,7 +72,9 @@
     "support": "サポート",
     "accountMenu": "アカウント",
     "login": "ログイン",
-    "language": "言語"
+    "language": "言語",
+    "switchOrganization": "組織を切り替え",
+    "selectOrganization": "組織を選択"
   },
   "settings": {
     "title": "設定",

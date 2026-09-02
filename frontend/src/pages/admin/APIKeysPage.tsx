@@ -94,7 +94,7 @@ const APIKeysPage: React.FC = () => {
   // Memberships come from the session (`/auth/me`) rather than a second fetch
   // of `/users/me/memberships` (#779). Both endpoints run the same membership
   // query for the same user; two clients for one fact is how they diverged.
-  const { allowedScopes, roleTemplate, memberships } = useAuth()
+  const { allowedScopes, roleTemplate, memberships, currentOrganizationId } = useAuth()
   const isAdmin = allowedScopes.includes('admin')
   // Zero memberships is the NORMAL state of a freshly set-up deployment, not an
   // edge case: setup writes the platform-admin carrier row and deliberately no
@@ -249,7 +249,11 @@ const APIKeysPage: React.FC = () => {
     const defaultScopes = ['modules:read', 'providers:read'].filter((s) =>
       availableScopes.includes(s),
     )
-    const defaultOrgId = memberships.length > 0 ? memberships[0].organization_id : ''
+    // The organization the user is acting in (the suite picker's selection,
+    // terraform-registry-backend#1011), not the first membership: that default chose silently
+    // for a multi-organization user. Empty means "pick one" — the dialog's own
+    // select offers the memberships, and the backend refuses an unnamed create.
+    const defaultOrgId = currentOrganizationId ?? ''
     setFormData({
       name: '',
       description: '',
@@ -268,8 +272,7 @@ const APIKeysPage: React.FC = () => {
   const handleCreateAPIKey = async () => {
     try {
       status.setError(null)
-      const orgId =
-        formData.organization_id || (memberships.length > 0 ? memberships[0].organization_id : '')
+      const orgId = formData.organization_id || currentOrganizationId || ''
       if (!orgId) {
         status.setError(t('admin.apiKeys.errNoOrg'))
         return

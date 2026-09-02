@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
+import { ORGANIZATION_HEADER } from '@4cloudguru/cloud-suite-ui'
 import type { AxiosInstance, InternalAxiosRequestConfig, AxiosResponse, AxiosError } from 'axios'
 
 // ---------------------------------------------------------------------------
@@ -134,6 +135,44 @@ describe('ApiClient', () => {
   })
 
   // ─── Request interceptor – config-build error passthrough ─────────────
+
+  // ─── Acting organization ───────────────────────────────────────────────
+  // The suite organization picker's selection is sent as X-Organization-Id on
+  // EVERY request (terraform-registry-backend#1011). It is a claim the server verifies, not an
+  // authorization boundary; the property that matters here is that the door
+  // always stamps and never invents a value.
+  describe('request interceptor – acting organization', () => {
+    it.each(['get', 'post', 'put', 'patch', 'delete', 'head', undefined])(
+      'stamps the selected organization on %s requests',
+      async (method) => {
+        await getApiClient()
+        const { setActingOrganization } = await import('../api/http')
+        setActingOrganization('11111111-1111-4111-8111-111111111111')
+        try {
+          const config = {
+            method,
+            headers: {} as Record<string, string>,
+          } as InternalAxiosRequestConfig
+          const result = capturedReqFulfilled(config)
+          expect(result.headers[ORGANIZATION_HEADER]).toBe('11111111-1111-4111-8111-111111111111')
+        } finally {
+          setActingOrganization(null)
+        }
+      },
+    )
+
+    it('sends nothing when no organization is selected', async () => {
+      await getApiClient()
+      const { setActingOrganization } = await import('../api/http')
+      setActingOrganization(null)
+      const config = {
+        method: 'post',
+        headers: {} as Record<string, string>,
+      } as InternalAxiosRequestConfig
+      const result = capturedReqFulfilled(config)
+      expect(result.headers[ORGANIZATION_HEADER]).toBeUndefined()
+    })
+  })
 
   describe('request interceptor – error passthrough', () => {
     it('re-rejects a request-config-build error unchanged', async () => {

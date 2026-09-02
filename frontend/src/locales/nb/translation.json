@@ -72,7 +72,9 @@
     "support": "Støtte",
     "accountMenu": "Konto",
     "login": "Logg inn",
-    "language": "Språk"
+    "language": "Språk",
+    "switchOrganization": "Bytt organisasjon",
+    "selectOrganization": "Velg organisasjon"
   },
   "settings": {
     "title": "Innstillinger",

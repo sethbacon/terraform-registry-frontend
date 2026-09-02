@@ -72,7 +72,9 @@
     "support": "Ondersteuning",
     "accountMenu": "Account",
     "login": "Inloggen",
-    "language": "Taal"
+    "language": "Taal",
+    "switchOrganization": "Organisatie wisselen",
+    "selectOrganization": "Organisatie selecteren"
   },
   "settings": {
     "title": "Instellingen",

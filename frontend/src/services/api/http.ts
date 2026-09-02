@@ -1,4 +1,5 @@
 import axios, { AxiosError, AxiosRequestConfig, InternalAxiosRequestConfig } from 'axios'
+import { ORGANIZATION_HEADER } from '@4cloudguru/cloud-suite-ui'
 import { addApiBreadcrumb } from '../errorReporting'
 import { clearAuthStorage } from '../../utils/authStorage'
 import { captureReturnUrl } from '../../utils/returnUrl'
@@ -255,10 +256,31 @@ if (csrfOriginWarning) {
 }
 
 /**
+ * The organization the user is acting in, registered by the auth layer.
+ *
+ * It lives here as a module variable rather than being read from storage,
+ * because AuthProvider is the only thing that knows whether a remembered
+ * choice is still valid — it re-resolves the selection against the memberships
+ * the server just returned and discards anything that does not match. A value
+ * read straight from localStorage would be exactly the stale, hand-edited or
+ * other-user's value the provider exists to reject.
+ *
+ * Null means "nothing to claim": a caller who reaches several organizations
+ * and has not chosen yet has nothing to send, and the backend refuses an
+ * unnamed write in exactly that case (terraform-registry-backend#1011). Inventing a value here —
+ * the first membership, say — would be the tenancy bug, not the fix. See
+ * OrganizationBridge in contexts/AuthContext.
+ */
+let actingOrganization: string | null = null
+export function setActingOrganization(organizationId: string | null): void {
+  actingOrganization = organizationId
+}
+
+/**
  * The single shared Axios instance behind every domain API module. All
- * cross-cutting behavior — CSRF double-submit echo, 401 session handling,
- * breadcrumb timing — lives in the interceptors below so domain modules
- * stay pure endpoint bindings.
+ * cross-cutting behavior — CSRF double-submit echo, acting-organization
+ * claim, 401 session handling, breadcrumb timing — lives in the interceptors
+ * below so domain modules stay pure endpoint bindings.
  */
 export const http = axios.create({
   baseURL: API_BASE_URL,
@@ -285,6 +307,17 @@ http.interceptors.request.use(
       if (csrfToken) {
         config.headers['X-CSRF-Token'] = csrfToken
       }
+    }
+
+    // Name the organization the user is acting in, on EVERY request — not only
+    // mutations. The backend verifies it against a scope it resolved itself and
+    // refuses anything the caller may not reach, so this is a claim, never an
+    // authorization boundary. Uniform stamping is one fewer thing to get right,
+    // and it lets /auth/me answer with the scopes for the SELECTED organization
+    // rather than a union. The header name is the shared constant: two ends
+    // spelling it differently is the drift the suite package exists to close.
+    if (actingOrganization) {
+      config.headers[ORGANIZATION_HEADER] = actingOrganization
     }
 
     // Stamp the request start time for breadcrumb duration tracking

@@ -37,15 +37,28 @@ const fakeMemberships = [
   },
 ]
 
-// Default to admin scope so existing tests pass; individual tests can override.
-const useAuthMock = vi.fn(() => ({
-  allowedScopes: ['admin'],
-  roleTemplate: { display_name: 'Administrator' },
-  memberships: fakeMemberships as Array<{
+type AuthMock = {
+  allowedScopes: string[]
+  roleTemplate: { display_name: string }
+  memberships: Array<{
     organization_id: string
     organization_name: string
     role_template_name?: string
-  }>,
+  }>
+  // The organization the user is acting in, as the suite provider resolves
+  // it. Optional so per-test overrides that only care about memberships or
+  // scopes need not name it; absent reads as "nothing chosen".
+  currentOrganizationId?: string | null
+  user: { id: string }
+}
+
+// Default to admin scope so existing tests pass; individual tests can override.
+const useAuthMock = vi.fn<() => AuthMock>(() => ({
+  allowedScopes: ['admin'],
+  roleTemplate: { display_name: 'Administrator' },
+  memberships: fakeMemberships,
+  // The single membership is the acting organization without any picking.
+  currentOrganizationId: 'org-1',
   user: { id: 'user-1' },
 }))
 

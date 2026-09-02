@@ -72,7 +72,9 @@
     "support": "支持",
     "accountMenu": "账户",
     "login": "登录",
-    "language": "语言"
+    "language": "语言",
+    "switchOrganization": "切换组织",
+    "selectOrganization": "选择组织"
   },
   "settings": {
     "title": "设置",

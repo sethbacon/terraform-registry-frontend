@@ -39,6 +39,10 @@ vi.mock('../../contexts/AuthContext', () => ({
   useAuth: () => ({
     isAuthenticated: authState.isAuthenticated,
     memberships: authState.memberships,
+    // As the suite provider resolves it: one membership is the acting
+    // organization without picking; several means nothing chosen yet.
+    currentOrganizationId:
+      authState.memberships.length === 1 ? authState.memberships[0].organization_id : null,
     // #796: HomePage derives whether the caller can resolve an empty primary
     // organization themselves, and passes it to QuickApiKeyDialog.
     allowedScopes: authState.allowedScopes,

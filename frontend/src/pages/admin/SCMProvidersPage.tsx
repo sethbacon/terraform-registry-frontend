@@ -67,7 +67,7 @@ const SCMProvidersPage: React.FC = () => {
   // Memberships come from the session (`/auth/me`) rather than a second fetch
   // of `/users/me/memberships` (#779): both endpoints run the same membership
   // query for the same user, and two clients for one fact is how they diverged.
-  const { allowedScopes, memberships } = useAuth()
+  const { allowedScopes, memberships, currentOrganizationId } = useAuth()
   // The route itself is gated at scm:read (view-only) so auditors/viewers can
   // browse configured providers (routeScopes.ts). Add/Edit/Delete/Connect/
   // Disconnect/Verify/Save-PAT all mutate or exercise live credentials
@@ -106,16 +106,18 @@ const SCMProvidersPage: React.FC = () => {
     {},
   )
 
-  // The create form's DESTINATION organization still defaults to the caller's
-  // first membership. That is not the filter defaulting to a membership — a
-  // create has to name an organization to write to, whereas a filter left unset
-  // means "everything", which is why only one of the two gets a default.
+  // The create form's DESTINATION organization follows the organization the
+  // user is acting in — the suite picker's selection (terraform-registry-backend#1011) — and no
+  // longer the caller's first membership, which chose silently for a
+  // multi-organization user. With no selection the field stays empty for the
+  // user to pick; the backend refuses an unnamed create in that case. That is
+  // not the filter defaulting to a membership — a create has to name an
+  // organization to write to, whereas a filter left unset means "everything".
   useEffect(() => {
-    if (memberships.length > 0 && !formData.organization_id) {
-      setFormData((prev) => ({ ...prev, organization_id: memberships[0].organization_id }))
+    if (currentOrganizationId) {
+      setFormData((prev) => ({ ...prev, organization_id: currentOrganizationId }))
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [memberships])
+  }, [currentOrganizationId])
 
   // Organization filter (#779). Unset — the default, never auto-populated from
   // a membership — means every provider this caller may see, which for a

@@ -72,7 +72,9 @@
     "support": "Support",
     "accountMenu": "Konto",
     "login": "Anmelden",
-    "language": "Sprache"
+    "language": "Sprache",
+    "switchOrganization": "Organisation wechseln",
+    "selectOrganization": "Organisation auswählen"
   },
   "settings": {
     "title": "Einstellungen",

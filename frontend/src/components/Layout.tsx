@@ -4,7 +4,7 @@ import { IconButton, ListItemIcon, Menu, MenuItem, Tooltip } from '@mui/material
 import SearchIcon from '@mui/icons-material/Search'
 import HelpOutline from '@mui/icons-material/HelpOutlined'
 import InfoOutlined from '@mui/icons-material/InfoOutlined'
-import { SuiteLayout } from '@4cloudguru/cloud-suite-ui'
+import { OrganizationPicker, SuiteLayout } from '@4cloudguru/cloud-suite-ui'
 import { useAuth } from '../contexts/AuthContext'
 import { useHelp } from '../contexts/HelpContext'
 import { useHotkey } from '../hooks/useHotkey'
@@ -90,6 +90,22 @@ const Layout = () => {
         contentInsetRight={helpOpen ? HELP_PANEL_WIDTH : 0}
         appBarActions={
           <>
+            {/* The organization the user is acting in (terraform-registry-backend#1011, suite
+                terraform-state-manager-backend#437). Renders nothing for a caller with one
+                organization; for several it is the only way to name the
+                organization a create belongs to — the backend refuses an
+                unnamed create with "specify organization_id or send the
+                X-Organization-Id header". It renders from the provider's
+                choice universe, not from memberships, which is what lets it
+                also serve a platform administrator: they reach every
+                organization and belong to none. AuthContext supplies their
+                universe — see PlatformAdminOrganizations. */}
+            {isAuthenticated && (
+              <OrganizationPicker
+                tooltip={t('header.switchOrganization')}
+                unselectedLabel={t('header.selectOrganization')}
+              />
+            )}
             {isAuthenticated && import.meta.env.DEV && (
               <Suspense fallback={null}>
                 <DevUserSwitcher />
