@@ -1,6 +1,13 @@
 <!-- markdownlint-disable MD013 MD024 MD041 -->
 # Changelog
 
+## [2.27.3](https://github.com/sethbacon/terraform-registry-frontend/compare/v2.27.2...v2.27.3) (2026-09-03)
+
+
+### Bug Fixes
+
+* proxy /version to backend in ACA/Cloud Run nginx template ([#891](https://github.com/sethbacon/terraform-registry-frontend/issues/891)) ([3ea5a47](https://github.com/sethbacon/terraform-registry-frontend/commit/3ea5a47f7e97a351673a146f6cf9fc10e1ee9896))
+
 ## [2.27.2](https://github.com/sethbacon/terraform-registry-frontend/compare/v2.27.1...v2.27.2) (2026-09-03)
 
 
