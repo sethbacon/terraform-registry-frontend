@@ -1,9 +1,8 @@
-import React, { useState, useEffect } from 'react'
+import React, { useEffect } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import {
-  Autocomplete,
   Box,
   Button,
   Card,
@@ -13,14 +12,7 @@ import {
   Grid,
   IconButton,
   Chip,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
   TablePagination,
-  TextField,
-  Switch,
-  FormControlLabel,
   Alert,
   CircularProgress,
   Tooltip,
@@ -40,20 +32,16 @@ import PageTitleIcon from '@mui/icons-material/CloudDownload'
 import api from '../../services/api'
 import { useStatusMessage } from '../../hooks/useStatusMessage'
 import { useAuth } from '../../contexts/AuthContext'
-import {
-  type MirrorConfiguration,
-  type CreateMirrorConfigRequest,
-  parseMirrorConfig,
-} from '../../types/mirror'
+import { type MirrorConfiguration, parseMirrorConfig } from '../../types/mirror'
 import { formatDate } from '../../utils'
 import { getErrorMessage } from '../../utils/errors'
 import { queryKeys } from '../../services/queryKeys'
 import { usePagination } from '../../hooks/usePagination'
-import { KNOWN_PLATFORMS, emptyMirrorForm } from './mirrors/constants'
 import { MirrorSyncStatusChip } from './mirrors/StatusChips'
 import MirrorProvidersDialog, { useMirrorProvidersFlow } from './mirrors/MirrorProvidersDialog'
 import MirrorHistoryDialog, { useMirrorHistoryFlow } from './mirrors/MirrorHistoryDialog'
 import DeleteMirrorDialog, { useDeleteMirrorFlow } from './mirrors/DeleteMirrorDialog'
+import MirrorFormDialog, { useMirrorFormFlow } from './mirrors/MirrorFormDialog'
 
 const MirrorsPage: React.FC = () => {
   const { t } = useTranslation()
@@ -67,8 +55,7 @@ const MirrorsPage: React.FC = () => {
   // fully actionable controls that only fail once clicked (#609).
   const canManage = allowedScopes.includes('admin') || allowedScopes.includes('mirrors:manage')
   const status = useStatusMessage()
-  const [createDialogOpen, setCreateDialogOpen] = useState(false)
-  const [editingMirror, setEditingMirror] = useState<MirrorConfiguration | null>(null)
+  const mirrorForm = useMirrorFormFlow(status)
   const deleteMirror = useDeleteMirrorFlow(status)
   const providers = useMirrorProvidersFlow()
 
@@ -81,14 +68,6 @@ const MirrorsPage: React.FC = () => {
     handleChangePage: handleMirrorsPageChange,
     handleChangeRowsPerPage: handleMirrorsRowsPerPageChange,
   } = usePagination(10)
-
-  const [formData, setFormData] = useState<Partial<CreateMirrorConfigRequest>>(emptyMirrorForm)
-
-  // For the filters input
-  const [namespaceFilterInput, setNamespaceFilterInput] = useState('')
-  const [providerFilterInput, setProviderFilterInput] = useState('')
-  const [versionFilterInput, setVersionFilterInput] = useState('')
-  const [platformFilterInput, setPlatformFilterInput] = useState<string[]>([])
 
   const [searchParams] = useSearchParams()
 
@@ -115,99 +94,13 @@ const MirrorsPage: React.FC = () => {
   // button (#609).
   useEffect(() => {
     if (canManage && searchParams.get('action') === 'add') {
-      setCreateDialogOpen(true)
+      mirrorForm.openCreateFromDeepLink()
     }
+    // mirrorForm is rebuilt on every render, so it is deliberately not a
+    // dependency: adding it would re-run this effect on every keystroke in the
+    // form and re-open a dialog the admin had just closed.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams, canManage])
-
-  const createMutation = useMutation({
-    mutationFn: (data: CreateMirrorConfigRequest) => api.createMirror(data),
-    onSuccess: () => {
-      setCreateDialogOpen(false)
-      resetForm()
-      status.showSuccess(t('admin.mirrors.msgCreated'))
-      queryClient.invalidateQueries({ queryKey: queryKeys.mirrors._def })
-    },
-    onError: (err: unknown) => {
-      status.setError(getErrorMessage(err, t('admin.mirrors.errCreate')))
-    },
-  })
-
-  const updateMutation = useMutation({
-    mutationFn: ({ id, data }: { id: string; data: Parameters<typeof api.updateMirror>[1] }) =>
-      api.updateMirror(id, data),
-    onSuccess: () => {
-      setEditingMirror(null)
-      resetForm()
-      status.showSuccess(t('admin.mirrors.msgUpdated'))
-      queryClient.invalidateQueries({ queryKey: queryKeys.mirrors._def })
-    },
-    onError: (err: unknown) => {
-      status.setError(getErrorMessage(err, t('admin.mirrors.errUpdate')))
-    },
-  })
-
-  // auto_approve_rules is a JSON string ({ rules: [...], mode: "any" | "all" }).
-  // It is only meaningful — and only editable — when approval is required, so it
-  // is "active" only when requires_approval is on and the field is non-empty.
-  // Gating on that keeps a hidden field from ever blocking submit or leaking a
-  // stale value into the payload. Validate it parses while active so an invalid
-  // blob can't be saved and then fail silently at sync time.
-  const autoApproveTrimmed = (formData.auto_approve_rules ?? '').trim()
-  const autoApproveActive = (formData.requires_approval ?? false) && autoApproveTrimmed !== ''
-  let autoApproveInvalid = false
-  if (autoApproveActive) {
-    try {
-      JSON.parse(autoApproveTrimmed)
-    } catch {
-      autoApproveInvalid = true
-    }
-  }
-
-  const handleCreate = () => {
-    status.setError(null)
-    const data = {
-      ...formData,
-      namespace_filter: namespaceFilterInput
-        .split(',')
-        .map((s) => s.trim())
-        .filter(Boolean),
-      provider_filter: providerFilterInput
-        .split(',')
-        .map((s) => s.trim())
-        .filter(Boolean),
-      version_filter: versionFilterInput.trim() || undefined,
-      platform_filter: platformFilterInput.length > 0 ? platformFilterInput : undefined,
-      auto_approve_rules: autoApproveActive ? autoApproveTrimmed : undefined,
-    }
-    createMutation.mutate(data as CreateMirrorConfigRequest)
-  }
-
-  const handleUpdate = () => {
-    if (!editingMirror) return
-    status.setError(null)
-    const data = {
-      name: formData.name,
-      description: formData.description,
-      upstream_registry_url: formData.upstream_registry_url,
-      namespace_filter: namespaceFilterInput
-        .split(',')
-        .map((s) => s.trim())
-        .filter(Boolean),
-      provider_filter: providerFilterInput
-        .split(',')
-        .map((s) => s.trim())
-        .filter(Boolean),
-      version_filter: versionFilterInput.trim() || undefined,
-      platform_filter: platformFilterInput.length > 0 ? platformFilterInput : undefined,
-      enabled: formData.enabled,
-      sync_interval_hours: formData.sync_interval_hours,
-      requires_approval: formData.requires_approval,
-      auto_approve_rules: autoApproveActive ? autoApproveTrimmed : undefined,
-      pull_through_enabled: formData.pull_through_enabled,
-      pull_through_cache_ttl_hours: formData.pull_through_cache_ttl_hours,
-    }
-    updateMutation.mutate({ id: editingMirror.id, data })
-  }
 
   const handleTriggerSync = async (mirror: MirrorConfiguration) => {
     try {
@@ -218,34 +111,6 @@ const MirrorsPage: React.FC = () => {
     } catch (err: unknown) {
       status.setError(getErrorMessage(err, t('admin.mirrors.errTriggerSync')))
     }
-  }
-
-  const resetForm = () => {
-    setFormData(emptyMirrorForm())
-    setNamespaceFilterInput('')
-    setProviderFilterInput('')
-    setVersionFilterInput('')
-    setPlatformFilterInput([])
-  }
-
-  const openEditDialog = (mirror: MirrorConfiguration) => {
-    setEditingMirror(mirror)
-    const parsed = parseMirrorConfig(mirror)
-    setFormData({
-      name: mirror.name,
-      description: mirror.description,
-      upstream_registry_url: mirror.upstream_registry_url,
-      enabled: mirror.enabled,
-      sync_interval_hours: mirror.sync_interval_hours,
-      requires_approval: mirror.requires_approval ?? false,
-      auto_approve_rules: mirror.auto_approve_rules ?? '',
-      pull_through_enabled: mirror.pull_through_enabled ?? false,
-      pull_through_cache_ttl_hours: mirror.pull_through_cache_ttl_hours ?? 24,
-    })
-    setNamespaceFilterInput(parsed.namespaceFilters.join(', '))
-    setProviderFilterInput(parsed.providerFilters.join(', '))
-    setVersionFilterInput(mirror.version_filter || '')
-    setPlatformFilterInput(parsed.platformFilters)
   }
 
   return (
@@ -282,10 +147,7 @@ const MirrorsPage: React.FC = () => {
                   <Button
                     variant="contained"
                     startIcon={<AddIcon />}
-                    onClick={() => {
-                      resetForm()
-                      setCreateDialogOpen(true)
-                    }}
+                    onClick={mirrorForm.openCreate}
                   >
                     {t('admin.mirrors.addMirror')}
                   </Button>
@@ -482,7 +344,7 @@ const MirrorsPage: React.FC = () => {
                               <IconButton
                                 size="small"
                                 aria-label={t('admin.mirrors.ariaEditMirror')}
-                                onClick={() => openEditDialog(mirror)}
+                                onClick={() => mirrorForm.openEdit(mirror)}
                               >
                                 <EditIcon fontSize="small" />
                               </IconButton>
@@ -531,211 +393,7 @@ const MirrorsPage: React.FC = () => {
             />
           )}
 
-          {/* Create/Edit Dialog */}
-          <Dialog
-            open={createDialogOpen || !!editingMirror}
-            onClose={() => {
-              setCreateDialogOpen(false)
-              setEditingMirror(null)
-              resetForm()
-            }}
-            maxWidth="sm"
-            fullWidth
-          >
-            <DialogTitle>
-              {editingMirror
-                ? t('admin.mirrors.dialogTitleEdit')
-                : t('admin.mirrors.dialogTitleAdd')}
-            </DialogTitle>
-            <DialogContent>
-              <Box sx={{ pt: 2, display: 'flex', flexDirection: 'column', gap: 2 }}>
-                <TextField
-                  label={t('admin.mirrors.labelName')}
-                  fullWidth
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  required
-                  helperText={t('admin.mirrors.helpName')}
-                />
-
-                <TextField
-                  label={t('admin.mirrors.labelDescription')}
-                  fullWidth
-                  multiline
-                  rows={2}
-                  value={formData.description || ''}
-                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                />
-
-                <TextField
-                  label={t('admin.mirrors.labelUpstreamUrl')}
-                  fullWidth
-                  value={formData.upstream_registry_url}
-                  onChange={(e) =>
-                    setFormData({ ...formData, upstream_registry_url: e.target.value })
-                  }
-                  required
-                  helperText={t('admin.mirrors.helpUpstreamUrl')}
-                />
-
-                <TextField
-                  label={t('admin.mirrors.labelNamespaceFilter')}
-                  fullWidth
-                  value={namespaceFilterInput}
-                  onChange={(e) => setNamespaceFilterInput(e.target.value)}
-                  helperText={t('admin.mirrors.helpNamespaceFilter')}
-                />
-
-                <TextField
-                  label={t('admin.mirrors.labelProviderFilter')}
-                  fullWidth
-                  value={providerFilterInput}
-                  onChange={(e) => setProviderFilterInput(e.target.value)}
-                  helperText={t('admin.mirrors.helpProviderFilter')}
-                />
-
-                <TextField
-                  label={t('admin.mirrors.labelVersionFilter')}
-                  fullWidth
-                  value={versionFilterInput}
-                  onChange={(e) => setVersionFilterInput(e.target.value)}
-                  helperText={t('admin.mirrors.helpVersionFilter')}
-                  placeholder={t('admin.mirrors.placeholderVersionFilter')}
-                />
-
-                <Autocomplete
-                  multiple
-                  options={KNOWN_PLATFORMS}
-                  value={platformFilterInput}
-                  onChange={(_event, newValue) => setPlatformFilterInput(newValue)}
-                  renderInput={(params) => (
-                    <TextField
-                      {...params}
-                      label={t('admin.mirrors.labelPlatformFilter')}
-                      placeholder={
-                        platformFilterInput.length === 0
-                          ? t('admin.mirrors.placeholderAllPlatforms')
-                          : ''
-                      }
-                      helperText={t('admin.mirrors.helpPlatformFilter')}
-                    />
-                  )}
-                  renderValue={(value, getItemProps) =>
-                    value.map((option, index) => (
-                      <Chip label={option} size="small" {...getItemProps({ index })} key={option} />
-                    ))
-                  }
-                />
-
-                <TextField
-                  label={t('admin.mirrors.labelSyncInterval')}
-                  type="number"
-                  fullWidth
-                  value={formData.sync_interval_hours}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      sync_interval_hours: parseInt(e.target.value) || 24,
-                    })
-                  }
-                  helperText={t('admin.mirrors.helpSyncInterval')}
-                  slotProps={{
-                    htmlInput: { min: 1 },
-                  }}
-                />
-
-                <FormControlLabel
-                  control={
-                    <Switch
-                      checked={formData.enabled}
-                      onChange={(e) => setFormData({ ...formData, enabled: e.target.checked })}
-                    />
-                  }
-                  label={t('admin.mirrors.enabled')}
-                />
-
-                <FormControlLabel
-                  control={
-                    <Switch
-                      checked={formData.requires_approval ?? false}
-                      onChange={(e) =>
-                        setFormData({ ...formData, requires_approval: e.target.checked })
-                      }
-                    />
-                  }
-                  label={t('admin.mirrors.requiresApproval')}
-                />
-
-                {formData.requires_approval && (
-                  <TextField
-                    label={t('admin.mirrors.labelAutoApproveRules')}
-                    fullWidth
-                    multiline
-                    minRows={3}
-                    value={formData.auto_approve_rules ?? ''}
-                    onChange={(e) =>
-                      setFormData({ ...formData, auto_approve_rules: e.target.value })
-                    }
-                    error={autoApproveInvalid}
-                    helperText={
-                      autoApproveInvalid
-                        ? t('admin.mirrors.errAutoApproveRules')
-                        : t('admin.mirrors.helpAutoApproveRules')
-                    }
-                  />
-                )}
-
-                <FormControlLabel
-                  control={
-                    <Switch
-                      checked={formData.pull_through_enabled ?? false}
-                      onChange={(e) =>
-                        setFormData({ ...formData, pull_through_enabled: e.target.checked })
-                      }
-                    />
-                  }
-                  label={t('admin.mirrors.pullThroughEnabled')}
-                />
-
-                {formData.pull_through_enabled && (
-                  <TextField
-                    label={t('admin.mirrors.labelPullThroughTtl')}
-                    type="number"
-                    fullWidth
-                    value={formData.pull_through_cache_ttl_hours ?? 24}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        pull_through_cache_ttl_hours: parseInt(e.target.value) || 24,
-                      })
-                    }
-                    helperText={t('admin.mirrors.helpPullThroughTtl')}
-                    slotProps={{
-                      htmlInput: { min: 1 },
-                    }}
-                  />
-                )}
-              </Box>
-            </DialogContent>
-            <DialogActions>
-              <Button
-                onClick={() => {
-                  setCreateDialogOpen(false)
-                  setEditingMirror(null)
-                  resetForm()
-                }}
-              >
-                {t('admin.mirrors.cancel')}
-              </Button>
-              <Button
-                variant="contained"
-                onClick={editingMirror ? handleUpdate : handleCreate}
-                disabled={!formData.name || !formData.upstream_registry_url || autoApproveInvalid}
-              >
-                {editingMirror ? t('admin.mirrors.update') : t('admin.mirrors.create')}
-              </Button>
-            </DialogActions>
-          </Dialog>
+          <MirrorFormDialog flow={mirrorForm} />
 
           <DeleteMirrorDialog flow={deleteMirror} />
 
