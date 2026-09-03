@@ -40,6 +40,7 @@ import PersonAddIcon from '@mui/icons-material/PersonAdd'
 import Page from '../../components/Page'
 import PageHeader from '../../components/PageHeader'
 import PageTitleIcon from '@mui/icons-material/Business'
+import StatusAlerts from '../../components/StatusAlerts'
 import api from '../../services/api'
 import { Organization, OrganizationMemberWithUser, User } from '../../types'
 import { RoleTemplate } from '../../types/rbac'
@@ -47,6 +48,7 @@ import { useAuth } from '../../contexts/AuthContext'
 import { getErrorMessage } from '../../utils/errors'
 import { captureError } from '../../services/errorReporting'
 import { queryKeys } from '../../services/queryKeys'
+import { useStatusMessage } from '../../hooks/useStatusMessage'
 
 const OrganizationsPage: React.FC = () => {
   const { t } = useTranslation()
@@ -59,7 +61,9 @@ const OrganizationsPage: React.FC = () => {
   // a read-only viewer would otherwise see actionable buttons that only fail
   // once clicked, relying entirely on the server to say no (#609).
   const canManage = allowedScopes.includes('admin') || allowedScopes.includes('organizations:write')
-  const [error, setError] = useState<string | null>(null)
+  // This page only ever sets the error half of the pair; the success half comes
+  // along with the shared hook and stays null, so no success banner can appear.
+  const status = useStatusMessage()
 
   // Dialog state
   const [openDialog, setOpenDialog] = useState(false)
@@ -98,8 +102,8 @@ const OrganizationsPage: React.FC = () => {
     },
   })
 
-  if (queryError && !error && !import.meta.env.DEV) {
-    setError(t('admin.organizations.errLoad'))
+  if (queryError && !status.error && !import.meta.env.DEV) {
+    status.setError(t('admin.organizations.errLoad'))
   }
 
   const handleOpenDialog = (org?: Organization) => {
@@ -126,7 +130,7 @@ const OrganizationsPage: React.FC = () => {
   const handleCloseDialog = () => {
     setOpenDialog(false)
     setEditingOrg(null)
-    setError(null)
+    status.setError(null)
   }
 
   const saveOrgMutation = useMutation({
@@ -150,7 +154,7 @@ const OrganizationsPage: React.FC = () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.organizations._def })
     },
     onError: (err: unknown) => {
-      setError(getErrorMessage(err, t('admin.organizations.errSave')))
+      status.setError(getErrorMessage(err, t('admin.organizations.errSave')))
     },
   })
 
@@ -159,18 +163,18 @@ const OrganizationsPage: React.FC = () => {
     onSuccess: () => {
       setDeleteDialogOpen(false)
       setOrgToDelete(null)
-      setError(null)
+      status.setError(null)
       queryClient.invalidateQueries({ queryKey: queryKeys.organizations._def })
     },
     onError: (err: unknown) => {
-      setError(getErrorMessage(err, t('admin.organizations.errDelete')))
+      status.setError(getErrorMessage(err, t('admin.organizations.errDelete')))
     },
   })
 
   const handleSaveOrganization = () => {
-    setError(null)
+    status.setError(null)
     if (!REGISTRY_SEGMENT_RE.test(formData.name)) {
-      setError(t('admin.organizations.errName'))
+      status.setError(t('admin.organizations.errName'))
       return
     }
     saveOrgMutation.mutate()
@@ -183,7 +187,7 @@ const OrganizationsPage: React.FC = () => {
 
   const handleDeleteConfirm = () => {
     if (!orgToDelete) return
-    setError(null)
+    status.setError(null)
     deleteOrgMutation.mutate(orgToDelete.id)
   }
 
@@ -248,7 +252,7 @@ const OrganizationsPage: React.FC = () => {
     if (!selectedOrg || !selectedUser) return
 
     try {
-      setError(null)
+      status.setError(null)
       await api.addOrganizationMember(selectedOrg.id, {
         user_id: selectedUser.id,
         role_template_id: selectedRoleTemplateId || undefined,
@@ -257,7 +261,7 @@ const OrganizationsPage: React.FC = () => {
       await loadMembers(selectedOrg.id)
     } catch (err: unknown) {
       console.error('Failed to add member:', err)
-      setError(getErrorMessage(err, t('admin.organizations.errAddMember')))
+      status.setError(getErrorMessage(err, t('admin.organizations.errAddMember')))
     }
   }
 
@@ -265,14 +269,14 @@ const OrganizationsPage: React.FC = () => {
     if (!selectedOrg) return
 
     try {
-      setError(null)
+      status.setError(null)
       await api.updateOrganizationMember(selectedOrg.id, userId, {
         role_template_id: newRoleTemplateId || undefined,
       })
       await loadMembers(selectedOrg.id)
     } catch (err: unknown) {
       console.error('Failed to update member role:', err)
-      setError(getErrorMessage(err, t('admin.organizations.errUpdateRole')))
+      status.setError(getErrorMessage(err, t('admin.organizations.errUpdateRole')))
     }
   }
 
@@ -280,12 +284,12 @@ const OrganizationsPage: React.FC = () => {
     if (!selectedOrg) return
 
     try {
-      setError(null)
+      status.setError(null)
       await api.removeOrganizationMember(selectedOrg.id, userId)
       await loadMembers(selectedOrg.id)
     } catch (err: unknown) {
       console.error('Failed to remove member:', err)
-      setError(getErrorMessage(err, t('admin.organizations.errRemoveMember')))
+      status.setError(getErrorMessage(err, t('admin.organizations.errRemoveMember')))
     }
   }
 
@@ -303,10 +307,16 @@ const OrganizationsPage: React.FC = () => {
           ) : undefined
         }
       />
-      {error && !import.meta.env.DEV && (
-        <Alert severity="error" sx={{ mb: 3 }}>
-          {error}
-        </Alert>
+      {/*
+        Non-dismissible, and gated on !DEV. The DEV gate is behavioural rather
+        than presentational — in a dev build the org-load failure is suppressed
+        entirely so the seeded-empty local stack does not shout — so it stays a
+        plain conditional at the call site instead of becoming a component prop.
+        It wraps the whole pair rather than just the error because this page
+        never sets a success message.
+      */}
+      {!import.meta.env.DEV && (
+        <StatusAlerts status={status} mb={3} order="error-first" dismissible={false} />
       )}
       {/* Organizations Table */}
       <Paper>
