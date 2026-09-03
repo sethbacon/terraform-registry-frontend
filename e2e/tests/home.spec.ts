@@ -154,7 +154,7 @@ test.describe('API Documentation page', () => {
     // Subtitle describing how to authenticate should also be present
     await expect(
       page.getByText('Interactive API reference')
-    ).toBeVisible({ timeout: 5_000 });
+    ).toBeVisible();
 
     // Wait for Swagger UI to mount — the JS chunk is ~1.3 MB so allow extra time.
     // Swagger UI renders a .swagger-ui root div; the .info section appears once

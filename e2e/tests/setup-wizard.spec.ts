@@ -101,7 +101,7 @@ test.describe('Setup Wizard — page structure (mocked API)', () => {
     await page.getByRole('button', { name: 'Verify Token' }).click();
 
     // Error alert should appear
-    await expect(page.getByText('Invalid setup token')).toBeVisible({ timeout: 5_000 });
+    await expect(page.getByText('Invalid setup token')).toBeVisible();
   });
 
   test('valid token advances to OIDC step', async ({ page }) => {

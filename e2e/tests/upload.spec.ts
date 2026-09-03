@@ -127,7 +127,7 @@ test.describe('Module Upload page', () => {
 
     // The "Upload Module" submit button should be disabled because no file has been chosen
     const submitBtn = page.getByRole('button', { name: 'Upload Module' });
-    await expect(submitBtn).toBeVisible({ timeout: 5_000 });
+    await expect(submitBtn).toBeVisible();
     await expect(submitBtn).toBeDisabled();
   });
 });
@@ -210,7 +210,7 @@ test.describe('Provider Upload page', () => {
 
     // The "Upload Provider" submit button should be disabled because no file has been chosen
     const submitBtn = page.getByRole('button', { name: 'Upload Provider' });
-    await expect(submitBtn).toBeVisible({ timeout: 5_000 });
+    await expect(submitBtn).toBeVisible();
     await expect(submitBtn).toBeDisabled();
   });
 });
@@ -252,7 +252,7 @@ test.describe('Real file upload (#605)', () => {
     await page.getByTestId('module-upload-dropzone-input').setInputFiles(DISALLOWED_EXTENSION_FILE);
 
     const error = page.getByTestId('module-upload-dropzone-error');
-    await expect(error).toBeVisible({ timeout: 5_000 });
+    await expect(error).toBeVisible();
     await expect(error).toContainText(/Invalid file type/i);
 
     // Rejected files never reach onFileSelected, so the form still has no file.
@@ -302,7 +302,7 @@ test.describe('Real file upload (#605)', () => {
       .setInputFiles(DISALLOWED_EXTENSION_FILE);
 
     const error = page.getByTestId('provider-upload-dropzone-error');
-    await expect(error).toBeVisible({ timeout: 5_000 });
+    await expect(error).toBeVisible();
     await expect(error).toContainText(/Invalid file type/i);
 
     await expect(page.getByRole('button', { name: 'Upload Provider' })).toBeDisabled();

@@ -61,7 +61,7 @@ test.describe('Admin: Mirror Policies', () => {
 
     await page.getByRole('button', { name: /Create Policy/i }).click();
 
-    await expect(page.getByRole('dialog')).toBeVisible({ timeout: 5_000 });
+    await expect(page.getByRole('dialog')).toBeVisible();
     await expect(
       page.getByRole('heading', { name: /Create Mirror Policy/i })
     ).toBeVisible();
@@ -77,7 +77,7 @@ test.describe('Admin: Mirror Policies', () => {
     }
 
     await page.getByRole('button', { name: /Create Policy/i }).click();
-    await expect(page.getByRole('dialog')).toBeVisible({ timeout: 5_000 });
+    await expect(page.getByRole('dialog')).toBeVisible();
 
     // Required: Name (textbox) and Policy Type (MUI Select)
     await expect(page.getByRole('textbox', { name: 'Name', exact: true })).toBeVisible();
@@ -97,7 +97,7 @@ test.describe('Admin: Mirror Policies', () => {
     }
 
     await page.getByRole('button', { name: /Create Policy/i }).click();
-    await expect(page.getByRole('dialog')).toBeVisible({ timeout: 5_000 });
+    await expect(page.getByRole('dialog')).toBeVisible();
 
     const submitBtn = page.getByRole('button', { name: /^Create$/i });
     await expect(submitBtn).toBeDisabled();
@@ -113,10 +113,10 @@ test.describe('Admin: Mirror Policies', () => {
     }
 
     await page.getByRole('button', { name: /Create Policy/i }).click();
-    await expect(page.getByRole('dialog')).toBeVisible({ timeout: 5_000 });
+    await expect(page.getByRole('dialog')).toBeVisible();
 
     await page.getByRole('button', { name: /Cancel/i }).click();
-    await expect(page.getByRole('dialog')).toBeHidden({ timeout: 5_000 });
+    await expect(page.getByRole('dialog')).toBeHidden();
   });
 
   test('delete button opens confirmation dialog', async ({ loggedInPage: page }) => {
@@ -134,14 +134,14 @@ test.describe('Admin: Mirror Policies', () => {
     test.skip(!hasPolicies, 'No policies in test environment — skipping delete test');
 
     await deleteBtn.click();
-    await expect(page.getByRole('dialog')).toBeVisible({ timeout: 5_000 });
+    await expect(page.getByRole('dialog')).toBeVisible();
     await expect(
       page.getByRole('heading', { name: /Confirm Delete/i })
     ).toBeVisible();
 
     // Cancel the delete
     await page.getByRole('button', { name: /Cancel/i }).click();
-    await expect(page.getByRole('dialog')).toBeHidden({ timeout: 5_000 });
+    await expect(page.getByRole('dialog')).toBeHidden();
   });
 
   test('evaluate button opens evaluate dialog', async ({ loggedInPage: page }) => {
@@ -155,7 +155,7 @@ test.describe('Admin: Mirror Policies', () => {
 
     await page.getByRole('button', { name: /Evaluate/i }).click();
 
-    await expect(page.getByRole('dialog')).toBeVisible({ timeout: 5_000 });
+    await expect(page.getByRole('dialog')).toBeVisible();
     await expect(
       page.getByRole('heading', { name: /Evaluate Policy/i })
     ).toBeVisible();
@@ -172,7 +172,7 @@ test.describe('Admin: Mirror Policies', () => {
 
     await page.getByRole('button', { name: /Evaluate/i }).click();
     const dialog = page.getByRole('dialog');
-    await expect(dialog).toBeVisible({ timeout: 5_000 });
+    await expect(dialog).toBeVisible();
 
     await expect(dialog.getByLabel(/Registry/i)).toBeVisible();
     await expect(dialog.getByLabel(/Namespace/i)).toBeVisible();
@@ -189,7 +189,7 @@ test.describe('Admin: Mirror Policies', () => {
     }
 
     await page.getByRole('button', { name: /Evaluate/i }).click();
-    await expect(page.getByRole('dialog')).toBeVisible({ timeout: 5_000 });
+    await expect(page.getByRole('dialog')).toBeVisible();
 
     const evaluateBtn = page.getByRole('button', { name: /^Evaluate$/i });
     await expect(evaluateBtn).toBeDisabled();

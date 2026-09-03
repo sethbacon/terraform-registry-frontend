@@ -51,8 +51,24 @@ Two rules, and the reason for each:
   `page.goto` read). A handful of genuinely slow surfaces — Swagger UI's
   ~1.3 MB chunk, the mirror-admin poll — still override upward on purpose.
 
-`frontend/src/__tests__/e2eWaitBudget.test.ts` enforces both rules, because
-neither is visible to `tsc` or to eslint (which does not cover this directory).
+The same reasoning retired the 36 `timeout: 5_000` **assertions**: a bound at
+or below the baseline budget buys nothing on chromium and costs firefox and
+webkit their raise. What survives is deliberate and stays:
+
+- **Probes** — `isVisible({ timeout: 3_000 }).catch(() => false)` and friends,
+  which ask a yes/no question to steer the test ("is the spinner up yet?").
+  A short bound is the *point*; a probe that takes 20 s to answer "no" is a
+  bug.
+- **Raises above the baseline** — 15 s, 20 s and 30 s waits, which say this
+  particular surface is slower than everything else. (Note that a 15 s raise is
+  now *below* firefox's and webkit's 20 s project budget, so on those two it
+  still caps rather than extends. Left as found: dropping it would tighten
+  chromium from 15 s to 10 s, and there is no evidence about those surfaces
+  either way.)
+
+`frontend/src/__tests__/e2eWaitBudget.test.ts` enforces these rules, because
+none of them is visible to `tsc` or to eslint (which does not cover this
+directory).
 
 When converting a `waitForSelector`, keep the `.first()`:
 `page.waitForSelector('a, b')` resolves the selector, takes `elements[0]`, and

@@ -70,16 +70,16 @@ test.describe('Admin: OIDC Groups', () => {
     // Dialog should open
     await expect(
       page.getByRole('heading', { name: /Add Group Mapping/i })
-    ).toBeVisible({ timeout: 5_000 });
+    ).toBeVisible();
 
     // IdP Group field must be present
-    await expect(page.getByLabel(/IdP Group/i)).toBeVisible({ timeout: 5_000 });
+    await expect(page.getByLabel(/IdP Group/i)).toBeVisible();
 
     // Add button in dialog
     const addBtn = page
       .locator('[class*="MuiDialog"]')
       .getByRole('button', { name: /^Add$/i });
-    await expect(addBtn).toBeVisible({ timeout: 5_000 });
+    await expect(addBtn).toBeVisible();
   });
 
   test('Add Mapping dialog Organization field uses Autocomplete', async ({ loggedInPage: page }) => {
@@ -95,13 +95,13 @@ test.describe('Admin: OIDC Groups', () => {
 
     await expect(
       page.getByRole('heading', { name: /Add Group Mapping/i })
-    ).toBeVisible({ timeout: 5_000 });
+    ).toBeVisible();
 
     // PR 2 fix: Organization field should be an MUI Autocomplete (not a plain TextField)
     // Use role=combobox which is the accessible role of an MUI Autocomplete input
     const dialog = page.locator('[class*="MuiDialog"]');
     const autocomplete = dialog.getByRole('combobox', { name: /Organization/i });
-    await expect(autocomplete).toBeVisible({ timeout: 5_000 });
+    await expect(autocomplete).toBeVisible();
   });
 
   test('Add Mapping dialog Add button is disabled with empty fields', async ({ loggedInPage: page }) => {
@@ -117,13 +117,13 @@ test.describe('Admin: OIDC Groups', () => {
 
     await expect(
       page.getByRole('heading', { name: /Add Group Mapping/i })
-    ).toBeVisible({ timeout: 5_000 });
+    ).toBeVisible();
 
     // With no IdP Group or Organization filled in, the Add button should be disabled
     const addBtn = page
       .locator('[class*="MuiDialog"]')
       .getByRole('button', { name: /^Add$/i });
-    await expect(addBtn).toBeDisabled({ timeout: 5_000 });
+    await expect(addBtn).toBeDisabled();
   });
 });
 
