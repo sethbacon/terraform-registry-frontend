@@ -36,9 +36,10 @@ npx playwright show-report
 Two rules, and the reason for each:
 
 - **Assert, don't `waitForSelector`.** Every wait in `tests/` is an
-  auto-retrying `expect(locator).toBeVisible()`. `page.waitForSelector` is
-  Playwright-deprecated and, more importantly here, it does not read
-  `expect.timeout`, so a suite built on it has no per-project budget at all.
+  auto-retrying `expect(locator).toBeVisible()`. Playwright's own docs steer
+  away from `page.waitForSelector` ("use web assertions ... instead") and, more
+  importantly here, it does not read `expect.timeout`, so a suite built on it
+  has no per-project budget at all.
 
 - **Don't pass a `timeout` unless the site genuinely needs more than its
   project gets.** An explicit per-call timeout beats the project's

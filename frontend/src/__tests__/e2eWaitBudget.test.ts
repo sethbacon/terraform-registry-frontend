@@ -66,9 +66,38 @@ function hits(files: SourceFile[], pattern: RegExp): string[] {
   return found
 }
 
+/**
+ * Every `timeout:` value a spec states, as a NUMBER, with `file:line` context.
+ *
+ * Parsed rather than matched against a list of spellings. `timeout: 10_000`,
+ * `timeout:10_000` and `timeout: 10000` are the same budget, and a guard that
+ * only recognises the one the tree happens to use today is not a guard: none
+ * of the alternatives is reachable by eslint (which does not cover `e2e/`),
+ * by prettier (ditto) or by `tsc`, so the next contributor's spelling would
+ * sail past it and back into the red tag run this file exists to prevent.
+ */
+function statedBudgets(files: SourceFile[]): { where: string; ms: number }[] {
+  const found: { where: string; ms: number }[] = []
+  for (const file of files) {
+    file.text.split('\n').forEach((line, i) => {
+      for (const m of line.matchAll(/\btimeout:\s*([0-9][0-9_]*)\b/g)) {
+        found.push({
+          where: `${file.name}:${i + 1}: ${line.trim()}`,
+          ms: Number(m[1].replace(/_/g, '')),
+        })
+      }
+    })
+  }
+  return found
+}
+
 describe('E2E wait budget is config-owned (#883)', () => {
   const files = specSources()
   const config = readFileSync(path.join(E2E, 'playwright.config.ts'), 'utf8')
+  const budgets = [...config.matchAll(/expect: \{ timeout: ([0-9_]+) \}/g)].map((m) =>
+    Number(m[1].replace(/_/g, '')),
+  )
+  const baseline = budgets[0]
 
   it('finds the spec files at all', () => {
     // An empty universe passes every "there are no bad waits" assertion below
@@ -81,16 +110,26 @@ describe('E2E wait budget is config-owned (#883)', () => {
   })
 
   it('states no wait budget at or below the baseline expect.timeout', () => {
-    // 10 s is the baseline (chromium) budget in playwright.config.ts, so a
-    // wait bounded at 10 s or less buys nothing on chromium and costs firefox
-    // and webkit the raise they were given. Probes are the exception below.
-    const tooTight = hits(files, /timeout: (?:10_000|5_000|3_000|2_000|1_000|1000)\b/).filter(
-      // A PROBE asks a yes/no question to steer the test ("is the spinner up
-      // yet?") and swallows the rejection. Its short bound is the point: a
-      // probe that takes 20 s to answer "no" is a bug, not a fix. Only these
-      // two shapes are exempt, and only these two.
-      (hit) => !/\.isVisible\(|\.waitFor\(\{ state:/.test(hit),
-    )
+    // The baseline is read from the config rather than hard-coded here, and
+    // the comparison is numeric: a wait bounded at or below the chromium
+    // budget buys nothing on chromium and costs firefox and webkit the raise
+    // they were given -- whatever spelling the number is written in. Probes
+    // are the exception below.
+    //
+    // Asserted, not assumed: if the config parse below ever stops matching,
+    // `baseline` is undefined and every `<=` comparison is silently false,
+    // which is this assertion going green while checking nothing.
+    expect(baseline).toBeGreaterThan(0)
+    const tooTight = statedBudgets(files)
+      .filter((b) => b.ms <= baseline)
+      .map((b) => b.where)
+      .filter(
+        // A PROBE asks a yes/no question to steer the test ("is the spinner up
+        // yet?") and swallows the rejection. Its short bound is the point: a
+        // probe that takes 20 s to answer "no" is a bug, not a fix. Only these
+        // two shapes are exempt, and only these two.
+        (hit) => !/\.isVisible\(|\.waitFor\(\{ state:/.test(hit),
+      )
     expect(tooTight).toEqual([])
   })
 
@@ -106,12 +145,9 @@ describe('E2E wait budget is config-owned (#883)', () => {
     // The whole point of removing the per-call overrides is that this raise now
     // reaches the suite. If someone flattens the projects back to one budget,
     // the specs are left with no protection at all for the slow engines.
-    const budgets = [...config.matchAll(/expect: \{ timeout: ([0-9_]+) \}/g)].map((m) =>
-      Number(m[1].replace(/_/g, '')),
-    )
     // root + firefox + webkit
     expect(budgets).toHaveLength(3)
-    const [baseline, ...perProject] = budgets
+    const [, ...perProject] = budgets
     expect(baseline).toBeGreaterThanOrEqual(10_000)
     for (const budget of perProject) expect(budget).toBeGreaterThan(baseline)
   })

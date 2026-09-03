@@ -545,8 +545,10 @@ jobs:
         #
         # Set here rather than in playwright.config.ts's `maxFailures` because
         # this CLI flag overrides that field unconditionally (the same trap the
-        # --retries note above describes), and because the sibling chromium-only
-        # security-subset job passes no flag and must keep the config's 1.
+        # --retries note above describes), so raising the config field would
+        # have had no effect on either E2E job while this flag is passed. The
+        # sibling chromium-only security-subset job keeps its own hard-coded
+        # --max-failures=1: it is PR-scoped and never gates a release.
         env:
           MAX_FAILURES: ${{ startsWith(github.ref, 'refs/tags/') && '5' || '1' }}
         run: >-
