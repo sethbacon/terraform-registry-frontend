@@ -30,7 +30,6 @@ import {
   FormControlLabel,
   Alert,
   CircularProgress,
-  Collapse,
   Tooltip,
 } from '@mui/material'
 import AddIcon from '@mui/icons-material/Add'
@@ -40,10 +39,7 @@ import HistoryIcon from '@mui/icons-material/History'
 import SyncIcon from '@mui/icons-material/Sync'
 import RefreshIcon from '@mui/icons-material/Refresh'
 import CloudDownloadIcon from '@mui/icons-material/CloudDownload'
-import CheckCircleIcon from '@mui/icons-material/CheckCircle'
 import ErrorIcon from '@mui/icons-material/Error'
-import ExpandLessIcon from '@mui/icons-material/ExpandLess'
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import ScheduleIcon from '@mui/icons-material/Schedule'
 import Page from '../../components/Page'
 import PageHeader from '../../components/PageHeader'
@@ -55,9 +51,6 @@ import { useAuth } from '../../contexts/AuthContext'
 import {
   type MirrorConfiguration,
   type MirrorSyncHistory,
-  type MirroredProvider,
-  type MirroredProviderVersion,
-  type MirroredProviderPlatform,
   type CreateMirrorConfigRequest,
   parseMirrorConfig,
 } from '../../types/mirror'
@@ -67,210 +60,7 @@ import { queryKeys } from '../../services/queryKeys'
 import { usePagination } from '../../hooks/usePagination'
 import { KNOWN_PLATFORMS, emptyMirrorForm } from './mirrors/constants'
 import { MirrorSyncStatusChip, SyncRunStatusChip } from './mirrors/StatusChips'
-
-// ---------------------------------------------------------------------------
-// Version sub-row with expandable platform list
-// ---------------------------------------------------------------------------
-const VersionPlatformRow: React.FC<{ version: MirroredProviderVersion }> = ({ version }) => {
-  const { t } = useTranslation()
-  const [open, setOpen] = useState(false)
-  const platforms: MirroredProviderPlatform[] = version.platforms ?? []
-
-  return (
-    <>
-      <TableRow sx={{ '& > *': { borderBottom: 'unset' } }}>
-        <TableCell sx={{ pl: 1 }}>
-          <IconButton
-            size="small"
-            aria-label={t('admin.mirrors.ariaTogglePlatforms')}
-            onClick={() => setOpen((p) => !p)}
-            disabled={platforms.length === 0}
-          >
-            {open ? <ExpandLessIcon fontSize="inherit" /> : <ExpandMoreIcon fontSize="inherit" />}
-          </IconButton>
-        </TableCell>
-        <TableCell>
-          <Typography
-            variant="caption"
-            sx={{
-              fontFamily: 'monospace',
-            }}
-          >
-            {version.upstream_version}
-          </Typography>
-        </TableCell>
-        <TableCell>
-          {version.approval_status && (
-            <Chip
-              label={t(`admin.versionApprovals.status.${version.approval_status}`)}
-              size="small"
-              color={
-                version.approval_status === 'approved'
-                  ? 'success'
-                  : version.approval_status === 'rejected'
-                    ? 'error'
-                    : 'warning'
-              }
-            />
-          )}
-        </TableCell>
-        <TableCell>{new Date(version.synced_at).toLocaleString()}</TableCell>
-        <TableCell>
-          {version.shasum_verified ? (
-            <CheckCircleIcon color="success" fontSize="small" />
-          ) : (
-            <ErrorIcon color="disabled" fontSize="small" />
-          )}
-        </TableCell>
-        <TableCell>
-          {version.gpg_verified ? (
-            <CheckCircleIcon color="success" fontSize="small" />
-          ) : (
-            <ErrorIcon color="disabled" fontSize="small" />
-          )}
-        </TableCell>
-        <TableCell>{platforms.length}</TableCell>
-      </TableRow>
-      <TableRow>
-        <TableCell colSpan={7} sx={{ pb: 0, pt: 0 }}>
-          <Collapse in={open} unmountOnExit>
-            <Box sx={{ ml: 4, mb: 1 }}>
-              <Table size="small">
-                <TableHead>
-                  <TableRow>
-                    <TableCell>OS</TableCell>
-                    <TableCell>{t('admin.mirrors.thArch')}</TableCell>
-                    <TableCell>{t('admin.mirrors.thFilename')}</TableCell>
-                    <TableCell>SHA256</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {platforms.map((p) => (
-                    <TableRow key={p.id}>
-                      <TableCell>{p.os}</TableCell>
-                      <TableCell>{p.arch}</TableCell>
-                      <TableCell>
-                        <Typography
-                          variant="caption"
-                          sx={{
-                            fontFamily: 'monospace',
-                            wordBreak: 'break-all',
-                          }}
-                        >
-                          {p.filename}
-                        </Typography>
-                      </TableCell>
-                      <TableCell>
-                        <Typography
-                          variant="caption"
-                          sx={{
-                            fontFamily: 'monospace',
-                          }}
-                        >
-                          {p.shasum ? p.shasum.slice(0, 12) + '…' : '—'}
-                        </Typography>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </Box>
-          </Collapse>
-        </TableCell>
-      </TableRow>
-    </>
-  )
-}
-
-// ---------------------------------------------------------------------------
-// Expandable provider row — shows synced versions when expanded
-// ---------------------------------------------------------------------------
-const ProviderRow: React.FC<{ provider: MirroredProvider }> = ({ provider }) => {
-  const { t } = useTranslation()
-  const [open, setOpen] = useState(false)
-  const versions: MirroredProviderVersion[] = provider.versions ?? []
-
-  return (
-    <>
-      <TableRow hover sx={{ '& > *': { borderBottom: 'unset' } }}>
-        <TableCell>
-          <IconButton
-            size="small"
-            aria-label={t('admin.mirrors.ariaToggleVersions')}
-            onClick={() => setOpen((p) => !p)}
-            disabled={versions.length === 0}
-          >
-            {open ? <ExpandLessIcon /> : <ExpandMoreIcon />}
-          </IconButton>
-        </TableCell>
-        <TableCell>{provider.upstream_namespace}</TableCell>
-        <TableCell>{provider.upstream_type}</TableCell>
-        <TableCell>
-          <Typography
-            variant="body2"
-            sx={{
-              fontFamily: 'monospace',
-            }}
-          >
-            {provider.last_sync_version ?? '—'}
-          </Typography>
-        </TableCell>
-        <TableCell>{versions.length}</TableCell>
-        <TableCell>
-          {provider.last_synced_at ? new Date(provider.last_synced_at).toLocaleString() : '—'}
-        </TableCell>
-        <TableCell>
-          <Chip
-            label={
-              provider.sync_enabled
-                ? t('admin.mirrors.chipSyncEnabled')
-                : t('admin.mirrors.chipSyncDisabled')
-            }
-            size="small"
-            color={provider.sync_enabled ? 'success' : 'default'}
-          />
-        </TableCell>
-      </TableRow>
-      <TableRow>
-        <TableCell colSpan={7} sx={{ pb: 0, pt: 0 }}>
-          <Collapse in={open} unmountOnExit>
-            <Box sx={{ mx: 2, mb: 2 }}>
-              {versions.length === 0 ? (
-                <Typography
-                  variant="caption"
-                  sx={{
-                    color: 'text.secondary',
-                  }}
-                >
-                  {t('admin.mirrors.noVersionsSynced')}
-                </Typography>
-              ) : (
-                <Table size="small">
-                  <TableHead>
-                    <TableRow>
-                      <TableCell width={40} />
-                      <TableCell>{t('admin.mirrors.thVersion')}</TableCell>
-                      <TableCell>{t('admin.mirrors.thStatus')}</TableCell>
-                      <TableCell>{t('admin.mirrors.thSyncedAt')}</TableCell>
-                      <TableCell>{t('admin.mirrors.thShasum')}</TableCell>
-                      <TableCell>GPG</TableCell>
-                      <TableCell>{t('admin.mirrors.thPlatforms')}</TableCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {versions.map((v) => (
-                      <VersionPlatformRow key={v.id} version={v} />
-                    ))}
-                  </TableBody>
-                </Table>
-              )}
-            </Box>
-          </Collapse>
-        </TableCell>
-      </TableRow>
-    </>
-  )
-}
+import MirrorProvidersDialog, { useMirrorProvidersFlow } from './mirrors/MirrorProvidersDialog'
 
 const MirrorsPage: React.FC = () => {
   const { t } = useTranslation()
@@ -288,10 +78,7 @@ const MirrorsPage: React.FC = () => {
   const [editingMirror, setEditingMirror] = useState<MirrorConfiguration | null>(null)
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false)
   const [mirrorToDelete, setMirrorToDelete] = useState<MirrorConfiguration | null>(null)
-  const [providersDialogOpen, setProvidersDialogOpen] = useState(false)
-  const [providersDialogName, setProvidersDialogName] = useState('')
-  const [mirrorProviders, setMirrorProviders] = useState<MirroredProvider[]>([])
-  const [providersLoading, setProvidersLoading] = useState(false)
+  const providers = useMirrorProvidersFlow()
 
   const [historyDialogOpen, setHistoryDialogOpen] = useState(false)
   const [mirrorHistory, setMirrorHistory] = useState<MirrorSyncHistory[]>([])
@@ -460,20 +247,6 @@ const MirrorsPage: React.FC = () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.mirrors._def })
     } catch (err: unknown) {
       status.setError(getErrorMessage(err, t('admin.mirrors.errTriggerSync')))
-    }
-  }
-
-  const handleViewStatus = async (mirror: MirrorConfiguration) => {
-    setProvidersDialogName(mirror.name)
-    setProvidersDialogOpen(true)
-    setProvidersLoading(true)
-    try {
-      const providers = await api.getMirrorProviders(mirror.id)
-      setMirrorProviders(Array.isArray(providers) ? providers : [])
-    } catch {
-      setMirrorProviders([])
-    } finally {
-      setProvidersLoading(false)
     }
   }
 
@@ -720,7 +493,7 @@ const MirrorsPage: React.FC = () => {
                       >
                         <Box>
                           <Tooltip title={t('admin.mirrors.tooltipViewStatus')}>
-                            <Button size="small" onClick={() => handleViewStatus(mirror)}>
+                            <Button size="small" onClick={() => providers.openDialog(mirror)}>
                               {t('admin.mirrors.viewDetails')}
                             </Button>
                           </Tooltip>
@@ -1109,66 +882,7 @@ const MirrorsPage: React.FC = () => {
             </DialogActions>
           </Dialog>
 
-          {/* View Details — Synced Providers Dialog */}
-          <Dialog
-            open={providersDialogOpen}
-            onClose={() => {
-              setProvidersDialogOpen(false)
-              setMirrorProviders([])
-            }}
-            maxWidth="lg"
-            fullWidth
-          >
-            <DialogTitle>
-              {t('admin.mirrors.providersTitle', { name: providersDialogName })}
-            </DialogTitle>
-            <DialogContent>
-              {providersLoading ? (
-                <Box
-                  sx={{
-                    display: 'flex',
-                    justifyContent: 'center',
-                    py: 4,
-                  }}
-                >
-                  <CircularProgress />
-                </Box>
-              ) : mirrorProviders.length === 0 ? (
-                <Alert severity="info">{t('admin.mirrors.noProvidersSynced')}</Alert>
-              ) : (
-                <TableContainer component={Paper} variant="outlined">
-                  <Table size="small">
-                    <TableHead>
-                      <TableRow>
-                        <TableCell width={48} />
-                        <TableCell>{t('admin.mirrors.thNamespace')}</TableCell>
-                        <TableCell>{t('admin.mirrors.thType')}</TableCell>
-                        <TableCell>{t('admin.mirrors.thLatestVersion')}</TableCell>
-                        <TableCell>{t('admin.mirrors.thVersions')}</TableCell>
-                        <TableCell>{t('admin.mirrors.thLastSynced')}</TableCell>
-                        <TableCell>{t('admin.mirrors.enabled')}</TableCell>
-                      </TableRow>
-                    </TableHead>
-                    <TableBody>
-                      {mirrorProviders.map((p) => (
-                        <ProviderRow key={p.id} provider={p} />
-                      ))}
-                    </TableBody>
-                  </Table>
-                </TableContainer>
-              )}
-            </DialogContent>
-            <DialogActions>
-              <Button
-                onClick={() => {
-                  setProvidersDialogOpen(false)
-                  setMirrorProviders([])
-                }}
-              >
-                {t('admin.mirrors.close')}
-              </Button>
-            </DialogActions>
-          </Dialog>
+          <MirrorProvidersDialog flow={providers} />
         </>
       )}
     </Page>
