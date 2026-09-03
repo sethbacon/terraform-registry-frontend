@@ -1,4 +1,4 @@
-import { isSafeUrl } from '@4cloudguru/cloud-suite-ui'
+import { isSafeUrl } from '../suite'
 
 /**
  * App-boundary validator for URLs sourced from the backend / whitelabel config (the

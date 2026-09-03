@@ -1,5 +1,5 @@
 import axios, { AxiosError, AxiosRequestConfig, InternalAxiosRequestConfig } from 'axios'
-import { ORGANIZATION_HEADER } from '@4cloudguru/cloud-suite-ui'
+import { ORGANIZATION_HEADER } from '../../suite'
 import { addApiBreadcrumb } from '../errorReporting'
 import { clearAuthStorage } from '../../utils/authStorage'
 import { captureReturnUrl } from '../../utils/returnUrl'
