@@ -52,9 +52,11 @@ describe.each([
   })
 
   it('does not count a commented-out location as declared', () => {
-    const conf = ['server {', '    # location /version { proxy_pass http://backend/version; }', '}'].join(
-      '\n'
-    )
+    const conf = [
+      'server {',
+      '    # location /version { proxy_pass http://backend/version; }',
+      '}',
+    ].join('\n')
     expect(maskComments(conf)).not.toMatch(/location\s+\/version\s*\{[^}]*proxy_pass/)
   })
 })
