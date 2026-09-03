@@ -136,7 +136,7 @@ test.describe('/admin/upload redirect', () => {
   test('/admin/upload redirects to /admin/upload/module', async ({ loggedInPage: page }) => {
     await page.goto('/admin/upload');
 
-    await page.waitForURL('**/admin/upload/module', { timeout: 10_000 });
+    await page.waitForURL('**/admin/upload/module');
     expect(page.url()).toContain('/admin/upload/module');
   });
 });
@@ -220,7 +220,7 @@ test.describe('FileDropZone (roadmap 2.5)', () => {
     await page.goto('/admin/upload/module');
     await page.getByText('Upload from File').click();
     const zone = page.getByTestId('module-upload-dropzone');
-    await expect(zone).toBeVisible({ timeout: 10_000 });
+    await expect(zone).toBeVisible();
     await expect(zone).toContainText(/Drop .+ file here or click to browse/i);
   });
 
@@ -228,7 +228,7 @@ test.describe('FileDropZone (roadmap 2.5)', () => {
     await page.goto('/admin/upload/provider');
     await page.getByText('Manual Upload').click();
     const zone = page.getByTestId('provider-upload-dropzone');
-    await expect(zone).toBeVisible({ timeout: 10_000 });
+    await expect(zone).toBeVisible();
     await expect(zone).toContainText(/\.zip/);
   });
 });
@@ -247,7 +247,7 @@ test.describe('Real file upload (#605)', () => {
   }) => {
     await page.goto('/admin/upload/module');
     await page.getByText('Upload from File').click();
-    await expect(page.getByTestId('module-upload-dropzone')).toBeVisible({ timeout: 10_000 });
+    await expect(page.getByTestId('module-upload-dropzone')).toBeVisible();
 
     await page.getByTestId('module-upload-dropzone-input').setInputFiles(DISALLOWED_EXTENSION_FILE);
 
@@ -295,7 +295,7 @@ test.describe('Real file upload (#605)', () => {
   }) => {
     await page.goto('/admin/upload/provider');
     await page.getByText('Manual Upload').click();
-    await expect(page.getByTestId('provider-upload-dropzone')).toBeVisible({ timeout: 10_000 });
+    await expect(page.getByTestId('provider-upload-dropzone')).toBeVisible();
 
     await page
       .getByTestId('provider-upload-dropzone-input')

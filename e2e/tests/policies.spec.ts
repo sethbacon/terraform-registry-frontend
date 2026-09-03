@@ -26,7 +26,7 @@ test.describe('Admin: Mirror Policies', () => {
 
     await expect(
       page.getByRole('heading', { name: /Mirror Policies/i })
-    ).toBeVisible({ timeout: 10_000 });
+    ).toBeVisible();
   });
 
   test('policies page shows cards or empty state', async ({ loggedInPage: page }) => {
@@ -203,7 +203,7 @@ baseTest.describe('Admin: Mirror Policies — unauthenticated', () => {
 
     await page.goto('/admin/policies');
 
-    await page.waitForURL('**/login', { timeout: 10_000 });
+    await page.waitForURL('**/login');
     expect(page.url()).toContain('/login');
 
     await context.close();

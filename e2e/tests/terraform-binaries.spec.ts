@@ -24,7 +24,7 @@ test.describe('Terraform Binaries list', () => {
 
     await expect(
       page.getByRole('heading', { name: /Hosted Binary Mirrors/i })
-    ).toBeVisible({ timeout: 10_000 });
+    ).toBeVisible();
   });
 
   test('shows cards or empty state after loading', async ({ page }) => {
@@ -60,7 +60,7 @@ test.describe('Terraform Binaries list', () => {
     // PR 2 fix: button should say "View Details" not "View Versions"
     await expect(
       page.getByRole('button', { name: /View Details/i }).first()
-    ).toBeVisible({ timeout: 10_000 });
+    ).toBeVisible();
   });
 
   test('clicking a card navigates to the detail page', async ({ page }) => {
@@ -79,7 +79,7 @@ test.describe('Terraform Binaries list', () => {
 
     await page.getByRole('button', { name: /View Details/i }).first().click();
 
-    await page.waitForURL('**/terraform-binaries/**', { timeout: 10_000 });
+    await page.waitForURL('**/terraform-binaries/**');
     expect(page.url()).toMatch(/\/terraform-binaries\/.+/);
   });
 });
@@ -98,7 +98,7 @@ test.describe('Terraform Binary detail page', () => {
     test.skip(!hasCards, 'No binary mirror cards in test environment — skipping detail page test');
 
     await page.getByRole('button', { name: /View Details/i }).first().click();
-    await page.waitForURL('**/terraform-binaries/**', { timeout: 10_000 });
+    await page.waitForURL('**/terraform-binaries/**');
 
     // Wait for detail page to settle
     const detailSpinner = page.locator('[class*="MuiCircularProgress"]').first();

@@ -44,7 +44,7 @@ test.describe('Setup Wizard — page structure (mocked API)', () => {
     // Heading
     await expect(
       page.getByRole('heading', { name: 'Terraform Registry Setup' }),
-    ).toBeVisible({ timeout: 10_000 });
+    ).toBeVisible();
 
     // All 6 stepper labels should be present
     const stepLabels = ['Authenticate', 'Identity Provider', 'Storage Backend', 'Security Scanning', 'Admin User', 'Complete'];
@@ -58,7 +58,7 @@ test.describe('Setup Wizard — page structure (mocked API)', () => {
 
     await expect(
       page.getByRole('heading', { name: 'Setup Token' }),
-    ).toBeVisible({ timeout: 10_000 });
+    ).toBeVisible();
 
     // Token text field
     const tokenInput = page.getByLabel('Setup Token');
@@ -74,7 +74,7 @@ test.describe('Setup Wizard — page structure (mocked API)', () => {
     await page.goto('/setup');
 
     const tokenInput = page.getByLabel('Setup Token');
-    await expect(tokenInput).toBeVisible({ timeout: 10_000 });
+    await expect(tokenInput).toBeVisible();
 
     await tokenInput.fill('tfr_setup_test_token_12345');
 
@@ -95,7 +95,7 @@ test.describe('Setup Wizard — page structure (mocked API)', () => {
     await page.goto('/setup');
 
     const tokenInput = page.getByLabel('Setup Token');
-    await expect(tokenInput).toBeVisible({ timeout: 10_000 });
+    await expect(tokenInput).toBeVisible();
     await tokenInput.fill('bad_token');
 
     await page.getByRole('button', { name: 'Verify Token' }).click();
@@ -117,7 +117,7 @@ test.describe('Setup Wizard — page structure (mocked API)', () => {
     await page.goto('/setup');
 
     const tokenInput = page.getByLabel('Setup Token');
-    await expect(tokenInput).toBeVisible({ timeout: 10_000 });
+    await expect(tokenInput).toBeVisible();
     await tokenInput.fill('tfr_setup_valid_token');
 
     await page.getByRole('button', { name: 'Verify Token' }).click();
@@ -125,7 +125,7 @@ test.describe('Setup Wizard — page structure (mocked API)', () => {
     // Should advance to Identity Provider step
     await expect(
       page.getByRole('heading', { name: 'Identity Provider' }),
-    ).toBeVisible({ timeout: 10_000 });
+    ).toBeVisible();
 
     // OIDC form fields should be visible (default auth method)
     await expect(page.getByLabel('Issuer URL')).toBeVisible();
@@ -161,14 +161,14 @@ test.describe('Setup Wizard — OIDC & Storage steps (mocked API)', () => {
 
     // Advance past token step
     const tokenInput = page.getByLabel('Setup Token');
-    await expect(tokenInput).toBeVisible({ timeout: 10_000 });
+    await expect(tokenInput).toBeVisible();
     await tokenInput.fill('tfr_setup_valid_token');
     await page.getByRole('button', { name: 'Verify Token' }).click();
 
     // Wait for Identity Provider step
     await expect(
       page.getByRole('heading', { name: 'Identity Provider' }),
-    ).toBeVisible({ timeout: 10_000 });
+    ).toBeVisible();
 
     // Save button should be disabled (required fields are empty)
     const saveBtn = page.getByRole('button', { name: 'Save OIDC Configuration' });
@@ -189,12 +189,12 @@ test.describe('Setup Wizard — OIDC & Storage steps (mocked API)', () => {
 
     // Advance past token step
     const tokenInput = page.getByLabel('Setup Token');
-    await expect(tokenInput).toBeVisible({ timeout: 10_000 });
+    await expect(tokenInput).toBeVisible();
     await tokenInput.fill('tfr_setup_valid_token');
     await page.getByRole('button', { name: 'Verify Token' }).click();
 
     // Fill OIDC required fields
-    await expect(page.getByLabel('Issuer URL')).toBeVisible({ timeout: 10_000 });
+    await expect(page.getByLabel('Issuer URL')).toBeVisible();
     await page.getByLabel('Issuer URL').fill('https://accounts.example.com');
     await page.getByLabel('Client ID').fill('test-client-id');
     await page.getByLabel('Client Secret').fill('test-client-secret');
@@ -205,13 +205,13 @@ test.describe('Setup Wizard — OIDC & Storage steps (mocked API)', () => {
     // Advance to storage step
     await expect(
       page.getByRole('button', { name: /Next: Configure Storage/i }),
-    ).toBeVisible({ timeout: 10_000 });
+    ).toBeVisible();
     await page.getByRole('button', { name: /Next: Configure Storage/i }).click();
 
     // Storage step heading
     await expect(
       page.getByRole('heading', { name: 'Storage Backend Configuration' }),
-    ).toBeVisible({ timeout: 10_000 });
+    ).toBeVisible();
 
     // Backend type chips should be present
     await expect(page.getByRole('button', { name: 'Local' })).toBeVisible();
@@ -252,7 +252,7 @@ test.describe('Setup Wizard — accessibility', () => {
     // Should show the setup wizard
     await expect(
       page.getByRole('heading', { name: 'Terraform Registry Setup' }),
-    ).toBeVisible({ timeout: 10_000 });
+    ).toBeVisible();
 
     await context.close();
   });

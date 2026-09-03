@@ -25,7 +25,7 @@ test.describe('Admin: OIDC Groups', () => {
 
     await expect(
       page.getByRole('heading', { name: /OIDC Groups/i })
-    ).toBeVisible({ timeout: 10_000 });
+    ).toBeVisible();
   });
 
   test('page shows group mapping section with Save Changes button', async ({ loggedInPage: page }) => {
@@ -39,7 +39,7 @@ test.describe('Admin: OIDC Groups', () => {
 
     await expect(
       page.getByRole('button', { name: /Save Changes/i })
-    ).toBeVisible({ timeout: 10_000 });
+    ).toBeVisible();
   });
 
   test('page has Add Mapping button', async ({ loggedInPage: page }) => {
@@ -53,7 +53,7 @@ test.describe('Admin: OIDC Groups', () => {
 
     await expect(
       page.getByRole('button', { name: /Add Mapping/i })
-    ).toBeVisible({ timeout: 10_000 });
+    ).toBeVisible();
   });
 
   test('Add Mapping dialog opens with required fields', async ({ loggedInPage: page }) => {
@@ -134,7 +134,7 @@ test.describe('Admin: OIDC Groups — unauthenticated', () => {
 
     await page.goto('/admin/oidc');
 
-    await page.waitForURL('**/login', { timeout: 10_000 });
+    await page.waitForURL('**/login');
     expect(page.url()).toContain('/login');
 
     await context.close();

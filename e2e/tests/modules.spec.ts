@@ -72,7 +72,7 @@ test.describe('Modules list', () => {
     await firstViewDetails.click();
 
     // URL should change to a module detail path: /modules/:namespace/:name/:system
-    await page.waitForURL('**/modules/**/**/**', { timeout: 10_000 });
+    await page.waitForURL('**/modules/**/**/**');
     expect(page.url()).toMatch(/\/modules\/[^/]+\/[^/]+\/[^/]+/);
   });
 });
@@ -89,7 +89,7 @@ test.describe('Module detail page', () => {
     test.skip(!hasCards, 'No modules available — skipping detail page test');
 
     await page.getByRole('button', { name: /View Details/i }).first().click();
-    await page.waitForURL('**/modules/**/**/**', { timeout: 10_000 });
+    await page.waitForURL('**/modules/**/**/**');
 
     // Wait for the page's loading spinner to disappear before asserting content.
     // ModuleDetailPage renders a CircularProgress while fetching, then swaps to content.
@@ -125,7 +125,7 @@ test.describe('Module detail page', () => {
     test.skip(!hasCards, 'No modules available — skipping webhook events test');
 
     await page.getByRole('button', { name: /View Details/i }).first().click();
-    await page.waitForURL('**/modules/**/**/**', { timeout: 10_000 });
+    await page.waitForURL('**/modules/**/**/**');
 
     const spinner = page.locator('[class*="MuiCircularProgress"]').first();
     const spinnerVisible = await spinner.isVisible({ timeout: 5_000 }).catch(() => false);
@@ -153,7 +153,7 @@ test.describe('Module detail page', () => {
     test.skip(!hasCards, 'No modules available — skipping webhook events test');
 
     await page.getByRole('button', { name: /View Details/i }).first().click();
-    await page.waitForURL('**/modules/**/**/**', { timeout: 10_000 });
+    await page.waitForURL('**/modules/**/**/**');
 
     const spinner = page.locator('[class*="MuiCircularProgress"]').first();
     const spinnerVisible = await spinner.isVisible({ timeout: 5_000 }).catch(() => false);

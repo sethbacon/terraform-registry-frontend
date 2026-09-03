@@ -25,7 +25,7 @@ test.describe('Admin: Approval Requests', () => {
 
     await expect(
       page.getByRole('heading', { name: /Approval Requests/i })
-    ).toBeVisible({ timeout: 10_000 });
+    ).toBeVisible();
   });
 
   test('approvals page shows cards or empty state', async ({ loggedInPage: page }) => {
@@ -60,7 +60,7 @@ test.describe('Admin: Approval Requests', () => {
 
     // The status filter Select should be visible
     const filterSelect = page.locator('[class*="MuiSelect"]').first();
-    await expect(filterSelect).toBeVisible({ timeout: 10_000 });
+    await expect(filterSelect).toBeVisible();
   });
 
   test('create request button opens dialog', async ({ loggedInPage: page }) => {
@@ -181,7 +181,7 @@ baseTest.describe('Admin: Approval Requests — unauthenticated', () => {
 
     await page.goto('/admin/approvals');
 
-    await page.waitForURL('**/login', { timeout: 10_000 });
+    await page.waitForURL('**/login');
     expect(page.url()).toContain('/login');
 
     await context.close();

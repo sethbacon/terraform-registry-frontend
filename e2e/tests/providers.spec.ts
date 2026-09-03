@@ -85,7 +85,7 @@ test.describe('Providers list', () => {
     await page.getByRole('button', { name: /View Details/i }).first().click();
 
     // URL should change to: /providers/:namespace/:type
-    await page.waitForURL('**/providers/**/**', { timeout: 10_000 });
+    await page.waitForURL('**/providers/**/**');
     expect(page.url()).toMatch(/\/providers\/[^/]+\/[^/]+/);
   });
 });
@@ -102,7 +102,7 @@ test.describe('Provider detail page', () => {
     test.skip(!hasCards, 'No providers available — skipping detail page test');
 
     await page.getByRole('button', { name: /View Details/i }).first().click();
-    await page.waitForURL('**/providers/**/**', { timeout: 10_000 });
+    await page.waitForURL('**/providers/**/**');
 
     // Wait for the page's loading spinner to disappear before asserting content.
     // ProviderDetailPage renders a CircularProgress while fetching, then swaps to content.

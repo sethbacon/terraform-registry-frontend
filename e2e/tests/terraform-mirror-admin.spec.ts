@@ -24,7 +24,7 @@ test.describe('Admin: Terraform Binary Mirrors', () => {
 
     await expect(
       page.getByRole('heading', { name: /Binary Mirrors/i })
-    ).toBeVisible({ timeout: 10_000 });
+    ).toBeVisible();
   });
 
   test('shows cards or empty state', async ({ loggedInPage: page }) => {
@@ -54,11 +54,11 @@ test.describe('Admin: Terraform Binary Mirrors', () => {
     // PR 1 fix: Refresh should be a labelled outlined button, not an icon-only button
     await expect(
       page.getByRole('button', { name: /^Refresh$/i })
-    ).toBeVisible({ timeout: 10_000 });
+    ).toBeVisible();
 
     await expect(
       page.getByRole('button', { name: /Add Mirror/i })
-    ).toBeVisible({ timeout: 10_000 });
+    ).toBeVisible();
   });
 
   test('Add Mirror dialog opens with required fields', async ({ loggedInPage: page }) => {
@@ -109,7 +109,7 @@ test.describe('Admin: Terraform Binary Mirrors', () => {
     // PR 2 fix: button should say "View Details" not "Versions"
     await expect(
       page.getByRole('button', { name: /View Details/i }).first()
-    ).toBeVisible({ timeout: 10_000 });
+    ).toBeVisible();
   });
 });
 
@@ -120,7 +120,7 @@ test.describe('Admin: Terraform Binary Mirrors — unauthenticated', () => {
 
     await page.goto('/admin/terraform-mirror');
 
-    await page.waitForURL('**/login', { timeout: 10_000 });
+    await page.waitForURL('**/login');
     expect(page.url()).toContain('/login');
 
     await context.close();

@@ -36,7 +36,7 @@ test.describe('Login page', () => {
     await devLoginBtn.click();
 
     // Should navigate away from /login
-    await page.waitForURL((url) => !url.pathname.endsWith('/login'), { timeout: 10_000 });
+    await page.waitForURL((url) => !url.pathname.endsWith('/login'));
     expect(page.url()).not.toContain('/login');
   });
 });
@@ -50,7 +50,7 @@ test.describe('Protected route redirect', () => {
     await page.goto('/admin/users');
 
     // Should redirect to login (React Router ProtectedRoute redirects client-side)
-    await page.waitForURL('**/login', { timeout: 10_000 });
+    await page.waitForURL('**/login');
     expect(page.url()).toContain('/login');
 
     await context.close();
@@ -66,7 +66,7 @@ test.describe('Logout', () => {
     test.skip(!isDevMode, 'Dev login not available — backend not running in DEV_MODE');
 
     await devLoginBtn.click();
-    await page.waitForURL((url) => !url.pathname.endsWith('/login'), { timeout: 10_000 });
+    await page.waitForURL((url) => !url.pathname.endsWith('/login'));
 
     // Seed the key the security assertion at the end of this test guards. Nothing
     // else in this flow writes it, so without seeding that assertion reads null
@@ -121,7 +121,7 @@ test.describe('Provider probing (UX roadmap 1.2)', () => {
     await page.goto('/login');
 
     // Wait for the probe loading state to disappear.
-    await expect(page.getByTestId('provider-probing')).toHaveCount(0, { timeout: 10_000 });
+    await expect(page.getByTestId('provider-probing')).toHaveCount(0);
 
     await expect(page.getByRole('button', { name: 'Sign in with SSO' })).toHaveCount(0);
   });
