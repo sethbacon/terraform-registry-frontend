@@ -51,13 +51,23 @@ const sources = import.meta.glob('../**/*.{ts,tsx}', {
 
 const PACKAGE = '@4cloudguru/cloud-suite-ui'
 
-/** `../suite`, `../../suite`, `@/suite` — any spelling of this app's facade. */
-const FACADE = String.raw`(?:@\/|(?:\.\.?\/)+)suite`
+/**
+ * `../suite`, `../../suite`, `@/suite`, and the explicit `/index` form of each —
+ * every spelling that resolves to the facade. Missing one would drop that file
+ * from this check silently rather than fail on it.
+ */
+const FACADE = String.raw`(?:@\/|(?:\.\.?\/)+)suite(?:\/index)?`
 
-/** True only for a real import statement, not a mention in a comment. */
+/**
+ * True only for a real dependency, not a mention in a comment: a static
+ * `import`/`export ... from`, or a dynamic `import('...')` of either the package
+ * or the facade.
+ */
 function importsSuite(source: string): boolean {
+  const target = `(?:${PACKAGE}|${FACADE})`
   return new RegExp(
-    `(?:^|\\n)\\s*(?:import|export)[^;]*?from\\s*['"](?:${PACKAGE}|${FACADE})['"]`,
+    `(?:^|\\n)\\s*(?:import|export)[^;]*?from\\s*['"]${target}['"]` +
+      `|\\bimport\\s*\\(\\s*['"]${target}['"]`,
   ).test(source)
 }
 
@@ -86,5 +96,9 @@ describe('ARCHITECTURE.md documents every suite-package importer (#603)', () => 
     expect(importsSuite(`import { isSafeUrl } from '${PACKAGE}'`)).toBe(true)
     expect(importsSuite(`import { isSafeUrl } from '../suite'`)).toBe(true)
     expect(importsSuite(`import { useSuite } from '../hooks/useSuite'`)).toBe(false)
+    // Spellings that resolve to the same modules and must not go uncounted.
+    expect(importsSuite(`import { isSafeUrl } from '../suite/index'`)).toBe(true)
+    expect(importsSuite(`export { Page as default } from '../suite'`)).toBe(true)
+    expect(importsSuite(`const m = await import('${PACKAGE}')`)).toBe(true)
   })
 })

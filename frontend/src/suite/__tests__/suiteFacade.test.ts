@@ -48,8 +48,14 @@ const FACADE = path.join(SRC, 'suite', 'index.ts')
 
 const PACKAGE = '@4cloudguru/cloud-suite-ui'
 
-/** `../suite`, `../../suite`, `@/suite` — any spelling of this app's facade. */
-const FACADE_SPECIFIER = /^(?:@\/|(?:\.\.?\/)+)suite$/
+/**
+ * `../suite`, `../../suite`, `@/suite`, and the explicit `/index` form of each —
+ * every spelling TypeScript and Vite resolve to this app's facade. The `/index`
+ * suffix is not hypothetical: it type-checks, builds and tests identically, so a
+ * pattern that missed it would drop that importer from the checks below rather
+ * than fail on it, and a blind axis looks exactly like a clean one.
+ */
+const FACADE_SPECIFIER = /^(?:@\/|(?:\.\.?\/)+)suite(?:\/index)?$/
 
 /** A brace-form `import`/`export ... from '<specifier>'`, type-only or not. */
 const BINDING_STATEMENT =
@@ -101,8 +107,16 @@ function requiredExports(): [string, string][] {
   return pairs.sort()
 }
 
+/**
+ * A direct dependency on the package: a static `import`/`export ... from`, or a
+ * dynamic `import('...')`, which reaches the package just as directly and would
+ * otherwise walk straight past this guard.
+ */
 function importsPackageDirectly(source: string): boolean {
-  return new RegExp(`(?:^|\\n)\\s*(?:import|export)[^;]*?from\\s*['"]${PACKAGE}['"]`).test(source)
+  return new RegExp(
+    `(?:^|\\n)\\s*(?:import|export)[^;]*?from\\s*['"]${PACKAGE}['"]` +
+      `|\\bimport\\s*\\(\\s*['"]${PACKAGE}['"]`,
+  ).test(source)
 }
 
 describe('suite facade (#603)', () => {
@@ -139,5 +153,19 @@ describe('suite facade (#603)', () => {
     expect(facadeValueImports(`export { Page as default } from '../../suite'`)).toEqual(['Page'])
     expect(facadeValueImports(`import type { NavItem } from '../suite'`)).toEqual([])
     expect(facadeValueImports(`import { useSuite } from '../hooks/useSuite'`)).toEqual([])
+    // The `/index` spelling resolves to the same module; see FACADE_SPECIFIER.
+    expect(facadeValueImports(`import { Page } from '../suite/index'`)).toEqual(['Page'])
+    expect(facadeValueImports(`import { isSafeUrl } from '@/suite/index'`)).toEqual(['isSafeUrl'])
+    expect(facadeValueImports(`import { x } from '../suitecase'`)).toEqual([])
+  })
+
+  it('counts every spelling of a direct dependency on the package', () => {
+    expect(importsPackageDirectly(`import { isSafeUrl } from '${PACKAGE}'`)).toBe(true)
+    expect(importsPackageDirectly(`export { Page as default } from '${PACKAGE}'`)).toBe(true)
+    expect(importsPackageDirectly(`const m = await import('${PACKAGE}')`)).toBe(true)
+    expect(importsPackageDirectly(`// see ${PACKAGE} for the contract\nexport const x = 1`)).toBe(
+      false,
+    )
+    expect(importsPackageDirectly(`import { isSafeUrl } from '../suite'`)).toBe(false)
   })
 })
