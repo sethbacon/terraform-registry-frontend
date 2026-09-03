@@ -321,6 +321,58 @@ describe('NotificationsPage', () => {
     expect(screen.queryByText(/10\.0\.5\.23/)).not.toBeInTheDocument()
   })
 
+  // ── banner behaviour this page keeps that its siblings do not (#765) ─────
+  //
+  // Converting to StatusAlerts had to carry both of these across, so they are
+  // pinned here rather than trusted to the shared component's own tests.
+
+  it('leaves a successful test-send banner on screen when a later save fails, success on top', async () => {
+    const user = userEvent.setup()
+    getNotificationsConfigMock.mockResolvedValue(fakeConfig)
+    sendTestNotificationMock.mockResolvedValue({ success: true, message: 'Test email sent' })
+    saveNotificationsConfigMock.mockRejectedValue(new Error('save blew up'))
+    renderPage()
+
+    await waitFor(() => {
+      expect(screen.getByDisplayValue('smtp.example.com')).toBeInTheDocument()
+    })
+
+    await user.click(screen.getByRole('button', { name: 'Send Test Email' }))
+    expect(await screen.findByText('Test email sent')).toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: 'Save' }))
+    expect(await screen.findByText('save blew up')).toBeInTheDocument()
+
+    // Simultaneous: setError must not clear the success this page already showed.
+    const successText = screen.getByText('Test email sent')
+    const errorText = screen.getByText('save blew up')
+    expect(successText).toBeInTheDocument()
+
+    // Ordered: success sits ABOVE the error, the reverse of every other
+    // StatusAlerts page. Compared by document position so an unrelated alert
+    // elsewhere on the page cannot make this pass by accident.
+    expect(
+      successText.compareDocumentPosition(errorText) & Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy()
+  })
+
+  it('keeps both banners dismissible', async () => {
+    const user = userEvent.setup()
+    getNotificationsConfigMock.mockResolvedValue(fakeConfig)
+    sendTestNotificationMock.mockResolvedValue({ success: true, message: 'Test email sent' })
+    renderPage()
+
+    await waitFor(() => {
+      expect(screen.getByDisplayValue('smtp.example.com')).toBeInTheDocument()
+    })
+
+    await user.click(screen.getByRole('button', { name: 'Send Test Email' }))
+    const banner = (await screen.findByText('Test email sent')).closest('[role="alert"]')!
+    await user.click(within(banner as HTMLElement).getByRole('button'))
+
+    await waitFor(() => expect(screen.queryByText('Test email sent')).not.toBeInTheDocument())
+  })
+
   it('shows an error alert when the test mutation throws', async () => {
     const user = userEvent.setup()
     getNotificationsConfigMock.mockResolvedValue(fakeConfig)
