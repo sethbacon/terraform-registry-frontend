@@ -151,9 +151,11 @@ export function useMirrorFormFlow(status: StatusMessage): MirrorFormFlow {
     createMutation.mutate(data as CreateMirrorConfigRequest)
   }
 
-  // Update sends an explicit field list rather than spreading the draft: the
-  // edit form is seeded from the mirror without the filter keys, so a spread
-  // would carry whatever the create defaults happened to leave behind.
+  // Update names every field it sends rather than spreading the draft. Today
+  // the two are equivalent — the explicit filter assignments below already
+  // override every key emptyMirrorForm() sets — so this is an allow-list, not
+  // a fix: a field added to the create draft later is not silently sent on
+  // update until someone adds it here deliberately.
   const handleUpdate = () => {
     if (!editing) return
     status.setError(null)

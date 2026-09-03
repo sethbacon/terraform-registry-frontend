@@ -1156,4 +1156,51 @@ describe('MirrorsPage', () => {
     await waitFor(() => expect(screen.queryByText('Confirm Delete')).not.toBeInTheDocument())
     expect(deleteMirrorMock).not.toHaveBeenCalled()
   })
+  // Both of the following pin a divergence the page has always had, at the
+  // moment it is observable: MUI keeps a closing Dialog mounted through its
+  // exit transition, so what each flow clears on close — and what it keeps —
+  // is on screen for the length of the fade. Asserting synchronously after the
+  // click is what makes these bite; a waitFor would retire past the transition
+  // and see nothing either way.
+
+  it('clears the provider rows but keeps the title while the details dialog fades out', async () => {
+    listMirrorsMock.mockResolvedValue([baseMirror])
+    getMirrorProvidersMock.mockResolvedValue([halfVerifiedProvider()])
+    const user = userEvent.setup()
+    renderWithProviders(<MirrorsPage />)
+    await waitFor(() => expect(screen.getByText('Upstream Public')).toBeInTheDocument())
+
+    await user.click(screen.getByText('View Details'))
+    await waitFor(() => expect(screen.getByText('hashicorp')).toBeInTheDocument())
+
+    await user.click(screen.getByText('Close'))
+
+    // Still mounted, mid-fade: the rows are gone but the heading is not, so the
+    // dialog does not blank its own title on the way out.
+    expect(screen.getByText('Providers — Upstream Public')).toBeInTheDocument()
+    expect(screen.queryByText('hashicorp')).not.toBeInTheDocument()
+    expect(screen.getByText('No providers have been synced yet.')).toBeInTheDocument()
+
+    await waitFor(() =>
+      expect(screen.queryByText('Providers — Upstream Public')).not.toBeInTheDocument(),
+    )
+  })
+
+  it('keeps the mirror name in the delete prompt while it fades out after a cancel', async () => {
+    listMirrorsMock.mockResolvedValue([baseMirror])
+    const user = userEvent.setup()
+    renderWithProviders(<MirrorsPage />)
+    await waitFor(() => expect(screen.getByText('Upstream Public')).toBeInTheDocument())
+
+    await user.click(screen.getByLabelText('Delete mirror'))
+    expect(screen.getByText(/delete the mirror "Upstream Public"/)).toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: 'Cancel' }))
+
+    // The flow keeps `mirror` when it clears `open`, so the prompt still names
+    // the mirror instead of reading 'delete the mirror ""' during the fade.
+    expect(screen.getByText(/delete the mirror "Upstream Public"/)).toBeInTheDocument()
+
+    await waitFor(() => expect(screen.queryByText('Confirm Delete')).not.toBeInTheDocument())
+  })
 })
