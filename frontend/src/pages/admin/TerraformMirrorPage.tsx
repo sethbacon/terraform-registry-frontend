@@ -166,7 +166,7 @@ const TerraformMirrorPage: React.FC = () => {
             </Typography>
           </Alert>
 
-          <StatusAlerts status={status} mb={2} />
+          <StatusAlerts status={status} mb={2} order="error-first" dismissible />
 
           {/* Release signing key status panel */}
           <ReleasesGPGKeyStatus />

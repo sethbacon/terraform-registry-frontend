@@ -271,7 +271,7 @@ const MirrorPoliciesPage: React.FC = () => {
             }
           />
 
-          <StatusAlerts status={status} mb={2} />
+          <StatusAlerts status={status} mb={2} order="error-first" dismissible />
 
           <Grid container spacing={3}>
             {policies.map((policy) => (

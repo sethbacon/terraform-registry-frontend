@@ -683,7 +683,7 @@ const StoragePage: React.FC = () => {
         ))}
       </Stepper>
 
-      <StatusAlerts status={status} mb={2} />
+      <StatusAlerts status={status} mb={2} order="error-first" dismissible />
 
       <Paper sx={{ p: 3, mb: 3 }}>
         {activeStep === 0 && renderBackendSelection()}
@@ -772,7 +772,7 @@ const StoragePage: React.FC = () => {
         }
       />
 
-      <StatusAlerts status={status} mb={2} />
+      <StatusAlerts status={status} mb={2} order="error-first" dismissible />
 
       <Alert severity="info" sx={{ mb: 3 }}>
         <Box
