@@ -66,7 +66,8 @@ describe('nginx-ecs.conf.template proxied Host header', () => {
 
   it('preserves the public hostname in X-Forwarded-Host wherever Host is overridden', () => {
     const hostCount = (masked.match(/proxy_set_header\s+Host\s+\$proxy_host\s*;/g) ?? []).length
-    const fwdCount = (masked.match(/proxy_set_header\s+X-Forwarded-Host\s+\$host\s*;/g) ?? []).length
+    const fwdCount = (masked.match(/proxy_set_header\s+X-Forwarded-Host\s+\$host\s*;/g) ?? [])
+      .length
     expect(fwdCount).toBe(hostCount)
   })
 
