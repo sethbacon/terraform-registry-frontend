@@ -204,4 +204,11 @@ server {
     location /ready {
         proxy_pass ${BACKEND_URL}/ready;
     }
+
+    # Missing here (unlike nginx.conf) meant /version fell through to the SPA
+    # location and served index.html, so the About box always got a 200 of HTML
+    # instead of the version JSON.
+    location /version {
+        proxy_pass ${BACKEND_URL}/version;
+    }
 }
