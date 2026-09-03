@@ -38,7 +38,7 @@ test.describe('Admin: Mirror Policies', () => {
       await expect(spinner).toBeHidden({ timeout: 20_000 });
     }
 
-    await page.waitForSelector('[class*="MuiCard"], [class*="MuiAlert"]', { timeout: 10_000 });
+    await expect(page.locator('[class*="MuiCard"], [class*="MuiAlert"]').first()).toBeVisible();
 
     const hasCards = (await page.locator('[class*="MuiCard"]').count()) > 0;
     const hasEmptyText = await page

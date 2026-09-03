@@ -159,9 +159,8 @@ test.describe('API Documentation page', () => {
     // Wait for Swagger UI to mount — the JS chunk is ~1.3 MB so allow extra time.
     // Swagger UI renders a .swagger-ui root div; the .info section appears once
     // the spec has been fetched and parsed.
-    await page.waitForSelector(
-      '.swagger-ui, [class*="MuiCircularProgress"], [role="progressbar"]',
-      { timeout: 30_000 }
+    await expect(page.locator('.swagger-ui, [class*="MuiCircularProgress"], [role="progressbar"]').first()).toBeVisible(
+      { timeout: 30_000 },
     );
 
     // If a spinner is still visible give it time to finish
@@ -185,7 +184,7 @@ test.describe('API Documentation page', () => {
     await page.goto('/api-docs');
 
     // Wait for Swagger UI to mount before checking for errors
-    await page.waitForSelector('.swagger-ui', { timeout: 30_000 });
+    await expect(page.locator('.swagger-ui').first()).toBeVisible({ timeout: 30_000 });
 
     // A red MUI error Alert should not be visible
     const errorAlert = page.locator('[class*="MuiAlert-standardError"], [class*="MuiAlert-filledError"]');

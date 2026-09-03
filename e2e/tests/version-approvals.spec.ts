@@ -74,7 +74,7 @@ test.describe('Admin: Version Approvals', () => {
     // spinner isn't on screen at that exact instant the helper returns early and
     // we can race ahead of the first render. The table (with its empty-state row)
     // or a load-error alert is the settled DOM — wait for one to appear.
-    await page.waitForSelector('table, [class*="MuiAlert"]', { timeout: 10_000 });
+    await expect(page.locator('table, [class*="MuiAlert"]').first()).toBeVisible();
 
     // Either gated versions are listed in the table, or the "no versions" empty
     // state is shown — both render inside the table, so its presence is enough.

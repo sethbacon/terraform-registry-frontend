@@ -31,7 +31,9 @@ test.describe('Admin: Terraform Binary Mirrors', () => {
     await page.goto('/admin/terraform-mirror');
 
     // Wait for loading to complete: MuiAlert (empty state) or MuiCard (configs) appears after spinner gone
-    await page.waitForSelector('[class*="MuiAlert"], [class*="MuiCard"]', { timeout: 20_000 });
+    await expect(page.locator('[class*="MuiAlert"], [class*="MuiCard"]').first()).toBeVisible(
+      { timeout: 20_000 },
+    );
 
     const hasCards = (await page.locator('[class*="MuiCard"]').count()) > 0;
     const hasEmptyState = await page
@@ -47,7 +49,7 @@ test.describe('Admin: Terraform Binary Mirrors', () => {
     await page.goto('/admin/terraform-mirror');
 
     // Wait for page to finish loading (info banner always appears after spinner)
-    await page.waitForSelector('[class*="MuiAlert"]', { timeout: 20_000 });
+    await expect(page.locator('[class*="MuiAlert"]').first()).toBeVisible({ timeout: 20_000 });
 
     // PR 1 fix: Refresh should be a labelled outlined button, not an icon-only button
     await expect(
@@ -63,7 +65,7 @@ test.describe('Admin: Terraform Binary Mirrors', () => {
     await page.goto('/admin/terraform-mirror');
 
     // Wait for page to finish loading (info banner always appears after spinner)
-    await page.waitForSelector('[class*="MuiAlert"]', { timeout: 20_000 });
+    await expect(page.locator('[class*="MuiAlert"]').first()).toBeVisible({ timeout: 20_000 });
 
     await page.getByRole('button', { name: /Add Mirror/i }).click();
 
@@ -82,7 +84,7 @@ test.describe('Admin: Terraform Binary Mirrors', () => {
 
   test('Add Mirror dialog exposes the Require approval toggle', async ({ loggedInPage: page }) => {
     await page.goto('/admin/terraform-mirror');
-    await page.waitForSelector('[class*="MuiAlert"]', { timeout: 20_000 });
+    await expect(page.locator('[class*="MuiAlert"]').first()).toBeVisible({ timeout: 20_000 });
 
     await page.getByRole('button', { name: /Add Mirror/i }).click();
     await expect(page.locator('[class*="MuiDialog"]').first()).toBeVisible({ timeout: 5_000 });
@@ -97,7 +99,7 @@ test.describe('Admin: Terraform Binary Mirrors', () => {
     await page.goto('/admin/terraform-mirror');
 
     // Wait for page to finish loading (info banner always appears after spinner)
-    await page.waitForSelector('[class*="MuiAlert"]', { timeout: 20_000 });
+    await expect(page.locator('[class*="MuiAlert"]').first()).toBeVisible({ timeout: 20_000 });
 
     const hasCards = (await page.locator('[class*="MuiCard"]').count()) > 0;
     if (!hasCards) {

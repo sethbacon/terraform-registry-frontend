@@ -31,7 +31,7 @@ test.describe('Terraform Binaries list', () => {
     await page.goto('/terraform-binaries');
 
     // Wait until either a card or the empty-state h6 appears (neither shows during loading)
-    await page.waitForSelector('[class*="MuiCard"], h6', { timeout: 20_000 });
+    await expect(page.locator('[class*="MuiCard"], h6').first()).toBeVisible({ timeout: 20_000 });
 
     const hasCards = (await page.locator('[class*="MuiCard"]').count()) > 0;
     const hasEmptyState = await page
@@ -107,9 +107,9 @@ test.describe('Terraform Binary detail page', () => {
       await expect(detailSpinner).toBeHidden({ timeout: 20_000 });
     }
 
-    await page.waitForSelector('[class*="MuiContainer"], [class*="MuiPaper"]', {
-      timeout: 10_000,
-    });
+    await expect(
+      page.locator('[class*="MuiContainer"], [class*="MuiPaper"]').first(),
+    ).toBeVisible();
 
     const content = await page
       .locator('[class*="MuiContainer"]')
