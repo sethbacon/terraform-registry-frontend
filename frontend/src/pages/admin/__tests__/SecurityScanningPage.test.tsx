@@ -350,6 +350,41 @@ describe('SecurityScanningPage', () => {
       ).toBeInTheDocument()
     })
 
+    // ── banner behaviour this panel keeps that its siblings do not (#765) ───
+    //
+    // The scanner panel shows the success ABOVE the error and can show both at
+    // once; converting it to StatusAlerts had to carry that across.
+    it('keeps an install success on screen above a later check-for-updates failure', async () => {
+      const user = userEvent.setup()
+      adminInstallScannerMock.mockResolvedValue({
+        success: true,
+        tool: 'trivy',
+        version: '0.51.0',
+        binary_path: '/opt/scanners/trivy',
+        sha256: 'abc123',
+        source_url: 'https://example.com/trivy',
+        activated: true,
+      })
+      checkScannerLatestMock.mockRejectedValue(new Error('latest check failed'))
+      await renderReady()
+
+      await user.click(screen.getByRole('button', { name: 'Install & Activate' }))
+      const successText = await screen.findByText(
+        'Installed scanner version 0.51.0 at /opt/scanners/trivy',
+      )
+
+      await user.click(screen.getByRole('button', { name: 'Check for Updates' }))
+      const errorText = await screen.findByText('latest check failed')
+
+      // Simultaneous: setError leaves the install confirmation alone.
+      expect(successText).toBeInTheDocument()
+      // Ordered: success above error, compared by document position so the
+      // config-load alert elsewhere on the page cannot satisfy this by accident.
+      expect(
+        successText.compareDocumentPosition(errorText) & Node.DOCUMENT_POSITION_FOLLOWING,
+      ).toBeTruthy()
+    }, 30000)
+
     it('installs a specific version without activating when unchecked', async () => {
       const user = userEvent.setup()
       adminInstallScannerMock.mockResolvedValue({
