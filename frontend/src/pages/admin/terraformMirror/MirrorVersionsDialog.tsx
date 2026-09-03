@@ -86,6 +86,8 @@ export function useMirrorVersionsFlow(status: StatusMessage): MirrorVersionsFlow
     setDeleting(true)
     try {
       await api.deleteTerraformVersion(config.id, pendingDelete.version)
+      // setSuccess, not showSuccess — this page deliberately leaves a previous
+      // error banner on screen (see TerraformMirrorPage).
       status.setSuccess(
         t('admin.terraformMirror.versionDeleted', { version: pendingDelete.version }),
       )

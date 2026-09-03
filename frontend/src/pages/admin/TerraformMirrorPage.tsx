@@ -44,6 +44,14 @@ const TerraformMirrorPage: React.FC = () => {
   // mirrors:read-only viewer would otherwise see fully actionable controls
   // that only fail once clicked (#609).
   const canManage = allowedScopes.includes('admin') || allowedScopes.includes('mirrors:manage')
+  // Every flow on this page reports success with `setSuccess`, never the hook's
+  // `showSuccess`, so a success does NOT clear an error already on screen. Six
+  // sibling admin pages do the opposite; the divergence was reviewed in #765
+  // and kept, because this page acts on N independent mirrors at once: a
+  // "sync failed" for mirror A is still true after mirror B is created, and
+  // erasing it would hide a failure the user has not acknowledged. Both banners
+  // are dismissible, so a stale one is one click away from gone.
+  // Pinned by TerraformMirrorPage.test.tsx; do not "fix" it to showSuccess.
   const status = useStatusMessage()
 
   // The five dialog flows. Each hook owns its own dialog's state and requests;
@@ -101,6 +109,7 @@ const TerraformMirrorPage: React.FC = () => {
     setSyncingIds((prev) => new Set([...prev, config.id]))
     try {
       await api.triggerTerraformMirrorSync(config.id)
+      // setSuccess, not showSuccess — see the note on `status` above.
       status.setSuccess(t('admin.terraformMirror.syncTriggered', { name: config.name }))
     } catch (err: unknown) {
       status.setError(getErrorMessage(err, t('admin.terraformMirror.errTriggerSync')))

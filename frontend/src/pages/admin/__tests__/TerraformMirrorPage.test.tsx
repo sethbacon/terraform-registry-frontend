@@ -793,6 +793,36 @@ describe('TerraformMirrorPage', () => {
     expect(screen.getByText('sync failed')).toBeInTheDocument()
   })
 
+  // The mirror-image of the case above, covering handleSync's own setSuccess
+  // rather than a dialog flow's. #765 asked whether this page's refusal to
+  // clear the error on success is intentional; it is (see the note on `status`
+  // in TerraformMirrorPage), so both directions are pinned.
+  it('leaves an earlier error banner on screen when a sync succeeds', async () => {
+    listTerraformMirrorConfigsMock.mockResolvedValue({ configs: fakeConfigs })
+    createMirrorMock.mockRejectedValue(new Error('create failed'))
+    triggerSyncMock.mockResolvedValue({})
+    renderPage()
+    await waitFor(() => expect(screen.getAllByText('terraform').length).toBeGreaterThan(0))
+
+    await userEvent.click(screen.getByRole('button', { name: /add mirror/i }))
+    await waitFor(() => expect(screen.getByRole('dialog')).toBeInTheDocument())
+    await userEvent.type(screen.getByLabelText(/^Name/i), 'doomed')
+    await userEvent.click(screen.getByRole('button', { name: /^create$/i }))
+    await waitFor(() => expect(screen.getByText('create failed')).toBeInTheDocument())
+
+    // The dialog stays open on a failed create and its modal hides the page
+    // behind it; cancelling closes it without touching the banner.
+    await userEvent.click(screen.getByRole('button', { name: /^cancel$/i }))
+    await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument())
+    expect(screen.getByText('create failed')).toBeInTheDocument()
+
+    await userEvent.click(screen.getByRole('button', { name: /^sync mirror$/i }))
+    await waitFor(() =>
+      expect(screen.getByText('Sync triggered for "terraform"')).toBeInTheDocument(),
+    )
+    expect(screen.getByText('create failed')).toBeInTheDocument()
+  })
+
   it('blanks a cancelled draft when the create dialog is reopened', async () => {
     listTerraformMirrorConfigsMock.mockResolvedValue({ configs: [] })
     renderPage()
