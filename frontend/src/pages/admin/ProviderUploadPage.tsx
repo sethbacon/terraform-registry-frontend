@@ -7,7 +7,6 @@ import {
   Paper,
   TextField,
   Button,
-  Alert,
   Stack,
   Select,
   MenuItem,
@@ -24,6 +23,8 @@ import CloudUpload from '@mui/icons-material/CloudUpload'
 import CloudDownload from '@mui/icons-material/CloudDownload'
 import ArrowBack from '@mui/icons-material/ArrowBack'
 import api from '../../services/api'
+import StatusAlerts from '../../components/StatusAlerts'
+import { useStatusMessage } from '../../hooks/useStatusMessage'
 import { getErrorMessage, isCanceledError } from '../../utils/errors'
 import Page from '../../components/Page'
 import PageHeader from '../../components/PageHeader'
@@ -48,8 +49,10 @@ const ProviderUploadPage: React.FC = () => {
 
   const [uploading, setUploading] = useState(false)
   const [uploadPercent, setUploadPercent] = useState<number | null>(null)
-  const [error, setError] = useState<string | null>(null)
-  const [success, setSuccess] = useState<string | null>(null)
+  // No code path on this page sets a success message today — the happy path
+  // navigates straight to the new provider. The pair still comes from the
+  // shared hook so the success banner is wired correctly if one is ever added.
+  const status = useStatusMessage()
   // Lets the user abort an in-flight upload (which uses timeout: 0) instead of
   // being stuck watching a frozen progress bar with no affordance (audit #602).
   const uploadAbortRef = useRef<AbortController | null>(null)
@@ -73,7 +76,7 @@ const ProviderUploadPage: React.FC = () => {
 
   const handleProviderFileSelected = (file: File) => {
     setProviderFile(file)
-    setError(null)
+    status.setError(null)
   }
 
   const handleProviderUpload = async () => {
@@ -85,7 +88,7 @@ const ProviderUploadPage: React.FC = () => {
       !providerOS ||
       !providerArch
     ) {
-      setError('Please fill in all required fields')
+      status.setError('Please fill in all required fields')
       return
     }
 
@@ -94,8 +97,7 @@ const ProviderUploadPage: React.FC = () => {
 
     try {
       setUploading(true)
-      setError(null)
-      setSuccess(null)
+      status.clear()
 
       const formData = new FormData()
       formData.append('namespace', providerNamespace)
@@ -116,7 +118,7 @@ const ProviderUploadPage: React.FC = () => {
       // A user-initiated cancel is not an error — reset to idle silently, keeping
       // the typed metadata intact for a retry.
       if (!isCanceledError(err)) {
-        setError(getErrorMessage(err, 'Failed to upload provider. Please try again.'))
+        status.setError(getErrorMessage(err, 'Failed to upload provider. Please try again.'))
       }
       setUploading(false)
       setUploadPercent(null)
@@ -200,8 +202,7 @@ const ProviderUploadPage: React.FC = () => {
         startIcon={<ArrowBack />}
         onClick={() => {
           setProviderMethod('choose')
-          setError(null)
-          setSuccess(null)
+          status.clear()
         }}
         sx={{ mb: 2 }}
       >
@@ -346,8 +347,12 @@ const ProviderUploadPage: React.FC = () => {
           </Box>
         )}
 
-        {error && <Alert severity="error">{error}</Alert>}
-        {success && <Alert severity="success">{success}</Alert>}
+        {/*
+          mb={0} and non-dismissible, matching ModuleUploadPage: these alerts
+          sit in a Stack-spaced form column with no margin of their own, and the
+          page has never offered a close button on them.
+        */}
+        <StatusAlerts status={status} mb={0} order="error-first" dismissible={false} />
 
         <Stack direction="row" spacing={2}>
           <Button

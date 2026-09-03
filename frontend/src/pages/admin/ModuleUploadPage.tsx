@@ -23,6 +23,7 @@ import {
 import CloudUpload from '@mui/icons-material/CloudUpload'
 import SCMIcon from '@mui/icons-material/AccountTree'
 import ArrowBack from '@mui/icons-material/ArrowBack'
+import StatusAlerts from '../../components/StatusAlerts'
 import api from '../../services/api'
 import { getErrorMessage, isCanceledError } from '../../utils/errors'
 import { isValidRegistrySegment, REGISTRY_SEGMENT_HELP } from '../../utils/registrySegment'
@@ -34,6 +35,7 @@ import FileDropZone from '../../components/FileDropZone'
 import PolicyResultsPanel from '../../components/PolicyResultsPanel'
 import { PolicyResult } from '../../types'
 import { useAuth } from '../../contexts/AuthContext'
+import { useStatusMessage } from '../../hooks/useStatusMessage'
 import { Link as MuiLink } from '@mui/material'
 
 type ModuleMethod = 'choose' | 'upload' | 'scm'
@@ -118,8 +120,7 @@ const ModuleUploadPage: React.FC = () => {
 
   const [uploading, setUploading] = useState(false)
   const [uploadPercent, setUploadPercent] = useState<number | null>(null)
-  const [error, setError] = useState<string | null>(null)
-  const [success, setSuccess] = useState<string | null>(null)
+  const status = useStatusMessage()
   const [policyResult, setPolicyResult] = useState<PolicyResult | null>(null)
   // Lets the user abort an in-flight upload (which uses timeout: 0) instead of
   // being stuck watching a frozen progress bar with no affordance (audit #602).
@@ -144,12 +145,12 @@ const ModuleUploadPage: React.FC = () => {
 
   const handleModuleFileSelected = (file: File) => {
     setModuleFile(file)
-    setError(null)
+    status.setError(null)
   }
 
   const handleModuleUpload = async () => {
     if (!moduleFile || !moduleNamespace || !moduleName || !moduleProvider || !moduleVersion) {
-      setError('Please fill in all required fields')
+      status.setError('Please fill in all required fields')
       return
     }
     for (const [label, val] of [
@@ -158,7 +159,9 @@ const ModuleUploadPage: React.FC = () => {
       ['Provider', moduleProvider],
     ] as const) {
       if (!isValidRegistrySegment(val)) {
-        setError(`${label} is not a valid Terraform registry segment. ${REGISTRY_SEGMENT_HELP}`)
+        status.setError(
+          `${label} is not a valid Terraform registry segment. ${REGISTRY_SEGMENT_HELP}`,
+        )
         return
       }
     }
@@ -169,8 +172,7 @@ const ModuleUploadPage: React.FC = () => {
     try {
       setUploading(true)
       setUploadPercent(0)
-      setError(null)
-      setSuccess(null)
+      status.clear()
       setPolicyResult(null)
 
       const formData = new FormData()
@@ -193,7 +195,10 @@ const ModuleUploadPage: React.FC = () => {
         setUploading(false)
         setUploadPercent(null)
         if (pr.allowed) {
-          setSuccess('Module uploaded successfully.')
+          // Plain setSuccess, not showSuccess: this handler already cleared
+          // both messages when the upload started, so there is no error left
+          // for showSuccess to drop.
+          status.setSuccess('Module uploaded successfully.')
         }
       } else {
         navigate(`/modules/${moduleNamespace}/${moduleName}/${moduleProvider}`)
@@ -202,7 +207,7 @@ const ModuleUploadPage: React.FC = () => {
       // A user-initiated cancel is not an error — reset to idle silently, keeping
       // the typed metadata intact for a retry.
       if (!isCanceledError(err)) {
-        setError(getErrorMessage(err, 'Failed to upload module. Please try again.'))
+        status.setError(getErrorMessage(err, 'Failed to upload module. Please try again.'))
       }
       setUploading(false)
       setUploadPercent(null)
@@ -454,8 +459,7 @@ const ModuleUploadPage: React.FC = () => {
         startIcon={<ArrowBack />}
         onClick={() => {
           setModuleMethod('choose')
-          setError(null)
-          setSuccess(null)
+          status.clear()
         }}
         sx={{ mb: 2 }}
       >
@@ -618,8 +622,12 @@ const ModuleUploadPage: React.FC = () => {
           </Box>
         )}
 
-        {error && <Alert severity="error">{error}</Alert>}
-        {success && <Alert severity="success">{success}</Alert>}
+        {/*
+          mb={0} and non-dismissible: these alerts sit in a Stack-spaced form
+          column with no margin of their own, and the page has never offered a
+          close button on them.
+        */}
+        <StatusAlerts status={status} mb={0} order="error-first" dismissible={false} />
 
         {policyResult && <PolicyResultsPanel policyResult={policyResult} />}
 
