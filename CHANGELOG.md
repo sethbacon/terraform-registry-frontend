@@ -1,6 +1,13 @@
 <!-- markdownlint-disable MD013 MD024 MD041 -->
 # Changelog
 
+## [2.27.2](https://github.com/sethbacon/terraform-registry-frontend/compare/v2.27.1...v2.27.2) (2026-09-03)
+
+
+### Bug Fixes
+
+* stop corrupting Content-Type on the network mirror ([#887](https://github.com/sethbacon/terraform-registry-frontend/issues/887)) ([825d13c](https://github.com/sethbacon/terraform-registry-frontend/commit/825d13c302b0cc209fb39809305f55b6b4019a79))
+
 ## [2.27.1](https://github.com/sethbacon/terraform-registry-frontend/compare/v2.27.0...v2.27.1) (2026-09-03)
 
 
