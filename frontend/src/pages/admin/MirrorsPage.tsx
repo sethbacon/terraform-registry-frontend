@@ -7,24 +7,13 @@ import {
   Button,
   Card,
   CardContent,
-  CardActions,
   Typography,
   Grid,
-  IconButton,
-  Chip,
   TablePagination,
-  Alert,
   CircularProgress,
-  Tooltip,
 } from '@mui/material'
 import AddIcon from '@mui/icons-material/Add'
-import EditIcon from '@mui/icons-material/Edit'
-import DeleteIcon from '@mui/icons-material/Delete'
-import HistoryIcon from '@mui/icons-material/History'
-import SyncIcon from '@mui/icons-material/Sync'
 import RefreshIcon from '@mui/icons-material/Refresh'
-import CloudDownloadIcon from '@mui/icons-material/CloudDownload'
-import ScheduleIcon from '@mui/icons-material/Schedule'
 import Page from '../../components/Page'
 import PageHeader from '../../components/PageHeader'
 import StatusAlerts from '../../components/StatusAlerts'
@@ -32,16 +21,15 @@ import PageTitleIcon from '@mui/icons-material/CloudDownload'
 import api from '../../services/api'
 import { useStatusMessage } from '../../hooks/useStatusMessage'
 import { useAuth } from '../../contexts/AuthContext'
-import { type MirrorConfiguration, parseMirrorConfig } from '../../types/mirror'
-import { formatDate } from '../../utils'
+import { type MirrorConfiguration } from '../../types/mirror'
 import { getErrorMessage } from '../../utils/errors'
 import { queryKeys } from '../../services/queryKeys'
 import { usePagination } from '../../hooks/usePagination'
-import { MirrorSyncStatusChip } from './mirrors/StatusChips'
 import MirrorProvidersDialog, { useMirrorProvidersFlow } from './mirrors/MirrorProvidersDialog'
 import MirrorHistoryDialog, { useMirrorHistoryFlow } from './mirrors/MirrorHistoryDialog'
 import DeleteMirrorDialog, { useDeleteMirrorFlow } from './mirrors/DeleteMirrorDialog'
 import MirrorFormDialog, { useMirrorFormFlow } from './mirrors/MirrorFormDialog'
+import MirrorConfigCard from './mirrors/MirrorConfigCard'
 
 const MirrorsPage: React.FC = () => {
   const { t } = useTranslation()
@@ -55,10 +43,13 @@ const MirrorsPage: React.FC = () => {
   // fully actionable controls that only fail once clicked (#609).
   const canManage = allowedScopes.includes('admin') || allowedScopes.includes('mirrors:manage')
   const status = useStatusMessage()
+  // The four dialog flows. Each hook owns its own dialog's state and requests;
+  // the page only holds the flow object so a card's button can open it and the
+  // matching dialog can render against it. Create and edit share one flow
+  // because they share one dialog and one draft.
   const mirrorForm = useMirrorFormFlow(status)
   const deleteMirror = useDeleteMirrorFlow(status)
   const providers = useMirrorProvidersFlow()
-
   const history = useMirrorHistoryFlow()
 
   // Client-side pagination
@@ -164,208 +155,19 @@ const MirrorsPage: React.FC = () => {
                 mirrorsPage * mirrorsRowsPerPage,
                 mirrorsPage * mirrorsRowsPerPage + mirrorsRowsPerPage,
               )
-              .map((mirror) => {
-                const parsed = parseMirrorConfig(mirror)
-                return (
-                  <Grid size={{ xs: 12, md: 6 }} key={mirror.id}>
-                    <Card>
-                      <CardContent>
-                        <Box
-                          sx={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            mb: 2,
-                          }}
-                        >
-                          <CloudDownloadIcon sx={{ mr: 2, color: 'primary.main' }} />
-                          <Box
-                            sx={{
-                              flexGrow: 1,
-                            }}
-                          >
-                            <Typography variant="h6">{mirror.name}</Typography>
-                            <Typography variant="body2" color="textSecondary" noWrap>
-                              {mirror.upstream_registry_url}
-                            </Typography>
-                          </Box>
-                          <Box
-                            sx={{
-                              display: 'flex',
-                              flexDirection: 'column',
-                              alignItems: 'flex-end',
-                              gap: 0.5,
-                            }}
-                          >
-                            <Chip
-                              label={
-                                mirror.enabled
-                                  ? t('admin.mirrors.enabled')
-                                  : t('admin.mirrors.disabled')
-                              }
-                              color={mirror.enabled ? 'success' : 'default'}
-                              size="small"
-                            />
-                            <MirrorSyncStatusChip status={mirror.last_sync_status} />
-                          </Box>
-                        </Box>
-
-                        {mirror.description && (
-                          <Typography
-                            variant="body2"
-                            color="textSecondary"
-                            sx={{
-                              marginBottom: '16px',
-                            }}
-                          >
-                            {mirror.description}
-                          </Typography>
-                        )}
-
-                        <Box
-                          sx={{
-                            display: 'flex',
-                            gap: 1,
-                            flexWrap: 'wrap',
-                            mb: 1,
-                          }}
-                        >
-                          {parsed.namespaceFilters.length > 0 && (
-                            <Tooltip title={t('admin.mirrors.tooltipNamespaceFilters')}>
-                              <Chip
-                                size="small"
-                                label={t('admin.mirrors.chipNamespaces', {
-                                  list: parsed.namespaceFilters.join(', '),
-                                })}
-                                variant="outlined"
-                              />
-                            </Tooltip>
-                          )}
-                          {parsed.providerFilters.length > 0 && (
-                            <Tooltip title={t('admin.mirrors.tooltipProviderFilters')}>
-                              <Chip
-                                size="small"
-                                label={t('admin.mirrors.chipProviders', {
-                                  list: parsed.providerFilters.join(', '),
-                                })}
-                                variant="outlined"
-                              />
-                            </Tooltip>
-                          )}
-                          {mirror.version_filter && (
-                            <Tooltip title={t('admin.mirrors.tooltipVersionFilter')}>
-                              <Chip
-                                size="small"
-                                label={t('admin.mirrors.chipVersions', {
-                                  value: mirror.version_filter,
-                                })}
-                                variant="outlined"
-                                color="primary"
-                              />
-                            </Tooltip>
-                          )}
-                          {parsed.platformFilters.length > 0 && (
-                            <Tooltip title={t('admin.mirrors.tooltipPlatformFilters')}>
-                              <Chip
-                                size="small"
-                                label={t('admin.mirrors.chipPlatforms', {
-                                  list: parsed.platformFilters.join(', '),
-                                })}
-                                variant="outlined"
-                                color="secondary"
-                              />
-                            </Tooltip>
-                          )}
-                        </Box>
-
-                        <Typography
-                          variant="caption"
-                          color="textSecondary"
-                          sx={{
-                            display: 'block',
-                          }}
-                        >
-                          <ScheduleIcon sx={{ fontSize: 14, verticalAlign: 'middle', mr: 0.5 }} />
-                          {t('admin.mirrors.syncInterval', { hours: mirror.sync_interval_hours })}
-                        </Typography>
-                        <Typography
-                          variant="caption"
-                          color="textSecondary"
-                          sx={{
-                            display: 'block',
-                          }}
-                        >
-                          {t('admin.mirrors.lastSync', {
-                            date: formatDate(mirror.last_sync_at, t('admin.mirrors.never')),
-                          })}
-                        </Typography>
-
-                        {mirror.last_sync_error && (
-                          <Alert severity="error" sx={{ mt: 1 }}>
-                            <Typography variant="caption">{mirror.last_sync_error}</Typography>
-                          </Alert>
-                        )}
-                      </CardContent>
-
-                      <CardActions
-                        sx={{ justifyContent: 'space-between', flexWrap: 'wrap', gap: 0.5 }}
-                      >
-                        <Box>
-                          <Tooltip title={t('admin.mirrors.tooltipViewStatus')}>
-                            <Button size="small" onClick={() => providers.openDialog(mirror)}>
-                              {t('admin.mirrors.viewDetails')}
-                            </Button>
-                          </Tooltip>
-                          <Tooltip title={t('admin.mirrors.tooltipViewHistory')}>
-                            <IconButton
-                              size="small"
-                              aria-label={t('admin.mirrors.ariaViewHistory')}
-                              onClick={() => history.openDialog(mirror)}
-                            >
-                              <HistoryIcon fontSize="small" />
-                            </IconButton>
-                          </Tooltip>
-                        </Box>
-                        {canManage && (
-                          <Box>
-                            <Tooltip title={t('admin.mirrors.tooltipTriggerSync')}>
-                              <span>
-                                <IconButton
-                                  size="small"
-                                  aria-label={t('admin.mirrors.ariaSyncMirror')}
-                                  color="primary"
-                                  onClick={() => handleTriggerSync(mirror)}
-                                  disabled={mirror.last_sync_status === 'in_progress'}
-                                >
-                                  <SyncIcon fontSize="small" />
-                                </IconButton>
-                              </span>
-                            </Tooltip>
-                            <Tooltip title={t('admin.mirrors.tooltipEdit')}>
-                              <IconButton
-                                size="small"
-                                aria-label={t('admin.mirrors.ariaEditMirror')}
-                                onClick={() => mirrorForm.openEdit(mirror)}
-                              >
-                                <EditIcon fontSize="small" />
-                              </IconButton>
-                            </Tooltip>
-                            <Tooltip title={t('admin.mirrors.tooltipDelete')}>
-                              <IconButton
-                                size="small"
-                                aria-label={t('admin.mirrors.ariaDeleteMirror')}
-                                color="error"
-                                onClick={() => deleteMirror.openDialog(mirror)}
-                              >
-                                <DeleteIcon fontSize="small" />
-                              </IconButton>
-                            </Tooltip>
-                          </Box>
-                        )}
-                      </CardActions>
-                    </Card>
-                  </Grid>
-                )
-              })}
+              .map((mirror) => (
+                <Grid size={{ xs: 12, md: 6 }} key={mirror.id}>
+                  <MirrorConfigCard
+                    mirror={mirror}
+                    canManage={canManage}
+                    onViewDetails={providers.openDialog}
+                    onViewHistory={history.openDialog}
+                    onTriggerSync={handleTriggerSync}
+                    onEdit={mirrorForm.openEdit}
+                    onDelete={deleteMirror.openDialog}
+                  />
+                </Grid>
+              ))}
 
             {mirrors.length === 0 && !loading && (
               <Grid size={12}>
