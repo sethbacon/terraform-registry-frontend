@@ -33,22 +33,6 @@ import {
   Collapse,
   Tooltip,
 } from '@mui/material'
-
-/** Known Terraform provider platform combinations (os/arch). */
-const KNOWN_PLATFORMS = [
-  'linux/amd64',
-  'linux/arm64',
-  'linux/386',
-  'linux/arm',
-  'darwin/amd64',
-  'darwin/arm64',
-  'windows/amd64',
-  'windows/386',
-  'windows/arm64',
-  'freebsd/amd64',
-  'freebsd/386',
-  'freebsd/arm',
-] as const
 import AddIcon from '@mui/icons-material/Add'
 import EditIcon from '@mui/icons-material/Edit'
 import DeleteIcon from '@mui/icons-material/Delete'
@@ -81,6 +65,8 @@ import { formatDate } from '../../utils'
 import { getErrorMessage } from '../../utils/errors'
 import { queryKeys } from '../../services/queryKeys'
 import { usePagination } from '../../hooks/usePagination'
+import { KNOWN_PLATFORMS, emptyMirrorForm } from './mirrors/constants'
+import { MirrorSyncStatusChip, SyncRunStatusChip } from './mirrors/StatusChips'
 
 // ---------------------------------------------------------------------------
 // Version sub-row with expandable platform list
@@ -320,20 +306,7 @@ const MirrorsPage: React.FC = () => {
     handleChangeRowsPerPage: handleMirrorsRowsPerPageChange,
   } = usePagination(10)
 
-  const [formData, setFormData] = useState<Partial<CreateMirrorConfigRequest>>({
-    name: '',
-    description: '',
-    upstream_registry_url: 'https://registry.terraform.io',
-    namespace_filter: [],
-    provider_filter: [],
-    version_filter: '',
-    enabled: true,
-    sync_interval_hours: 24,
-    requires_approval: false,
-    auto_approve_rules: '',
-    pull_through_enabled: false,
-    pull_through_cache_ttl_hours: 24,
-  })
+  const [formData, setFormData] = useState<Partial<CreateMirrorConfigRequest>>(emptyMirrorForm)
 
   // For the filters input
   const [namespaceFilterInput, setNamespaceFilterInput] = useState('')
@@ -519,20 +492,7 @@ const MirrorsPage: React.FC = () => {
   }
 
   const resetForm = () => {
-    setFormData({
-      name: '',
-      description: '',
-      upstream_registry_url: 'https://registry.terraform.io',
-      namespace_filter: [],
-      provider_filter: [],
-      version_filter: '',
-      enabled: true,
-      sync_interval_hours: 24,
-      requires_approval: false,
-      auto_approve_rules: '',
-      pull_through_enabled: false,
-      pull_through_cache_ttl_hours: 24,
-    })
+    setFormData(emptyMirrorForm())
     setNamespaceFilterInput('')
     setProviderFilterInput('')
     setVersionFilterInput('')
@@ -557,43 +517,6 @@ const MirrorsPage: React.FC = () => {
     setProviderFilterInput(parsed.providerFilters.join(', '))
     setVersionFilterInput(mirror.version_filter || '')
     setPlatformFilterInput(parsed.platformFilters)
-  }
-
-  const getStatusChip = (mirror: MirrorConfiguration) => {
-    if (!mirror.last_sync_status) {
-      return <Chip label={t('admin.mirrors.statusNeverSynced')} size="small" color="default" />
-    }
-    switch (mirror.last_sync_status) {
-      case 'success':
-        return (
-          <Chip
-            label={t('admin.mirrors.statusSuccess')}
-            size="small"
-            color="success"
-            icon={<CheckCircleIcon />}
-          />
-        )
-      case 'failed':
-        return (
-          <Chip
-            label={t('admin.mirrors.statusFailed')}
-            size="small"
-            color="error"
-            icon={<ErrorIcon />}
-          />
-        )
-      case 'in_progress':
-        return (
-          <Chip
-            label={t('admin.mirrors.statusSyncing')}
-            size="small"
-            color="info"
-            icon={<SyncIcon />}
-          />
-        )
-      default:
-        return <Chip label={mirror.last_sync_status} size="small" />
-    }
   }
 
   return (
@@ -691,7 +614,7 @@ const MirrorsPage: React.FC = () => {
                               color={mirror.enabled ? 'success' : 'default'}
                               size="small"
                             />
-                            {getStatusChip(mirror)}
+                            <MirrorSyncStatusChip status={mirror.last_sync_status} />
                           </Box>
                         </Box>
 
@@ -1154,26 +1077,7 @@ const MirrorsPage: React.FC = () => {
                             {sync.completed_at ? formatDate(sync.completed_at) : '—'}
                           </TableCell>
                           <TableCell>
-                            <Chip
-                              label={sync.status}
-                              size="small"
-                              color={
-                                sync.status === 'success'
-                                  ? 'success'
-                                  : sync.status === 'failed'
-                                    ? 'error'
-                                    : sync.status === 'running'
-                                      ? 'info'
-                                      : 'default'
-                              }
-                              icon={
-                                sync.status === 'success' ? (
-                                  <CheckCircleIcon />
-                                ) : sync.status === 'failed' ? (
-                                  <ErrorIcon />
-                                ) : undefined
-                              }
-                            />
+                            <SyncRunStatusChip status={sync.status} />
                             {sync.error_message && (
                               <Tooltip title={sync.error_message}>
                                 <ErrorIcon
