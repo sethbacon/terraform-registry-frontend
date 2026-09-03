@@ -1,4 +1,4 @@
-import { render, screen, waitFor, fireEvent } from '@testing-library/react'
+import { render, screen, waitFor, fireEvent, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
@@ -986,5 +986,221 @@ describe('MirrorsPage', () => {
     )
     expect(screen.getByLabelText('Enable pull-through caching')).toBeChecked()
     expect(screen.getByLabelText('Pull-through cache TTL (hours)')).toHaveValue(6)
+  })
+  // -------------------------------------------------------------------------
+  // Extracted modules (#783): behaviour that only the sub-components own.
+  // -------------------------------------------------------------------------
+
+  /** A provider whose one version is shasum-verified but NOT GPG-verified. */
+  const halfVerifiedProvider = (
+    overrides: Record<string, unknown> = {},
+    versionOverrides: Record<string, unknown> = {},
+  ) => ({
+    id: 'prov-1',
+    mirror_config_id: 'mirror-1',
+    provider_id: 'p1',
+    upstream_namespace: 'hashicorp',
+    upstream_type: 'aws',
+    last_synced_at: '2025-07-01T08:00:00Z',
+    last_sync_version: '5.10.0',
+    sync_enabled: true,
+    created_at: '2025-06-01T00:00:00Z',
+    versions: [
+      {
+        id: 'v1',
+        mirrored_provider_id: 'prov-1',
+        provider_version_id: 'pv1',
+        upstream_version: '5.10.0',
+        synced_at: '2025-07-01T08:00:00Z',
+        shasum_verified: true,
+        gpg_verified: false,
+        platforms: [],
+        ...versionOverrides,
+      },
+    ],
+    ...overrides,
+  })
+
+  it('marks a version row shasum-verified but not GPG-verified', async () => {
+    listMirrorsMock.mockResolvedValue([baseMirror])
+    getMirrorProvidersMock.mockResolvedValue([halfVerifiedProvider()])
+    const user = userEvent.setup()
+    renderWithProviders(<MirrorsPage />)
+    await waitFor(() => expect(screen.getByText('Upstream Public')).toBeInTheDocument())
+    await user.click(screen.getByText('View Details'))
+    await waitFor(() => expect(screen.getByText('hashicorp')).toBeInTheDocument())
+    await user.click(screen.getByLabelText('Toggle versions'))
+
+    // Scope to the version row itself: the mirror card behind the dialog also
+    // renders a CheckCircleIcon in its "Success" status chip.
+    const versionRow = (await screen.findByLabelText('Toggle platforms')).closest(
+      'tr',
+    ) as HTMLElement
+    // getByTestId throws on more than one match, so this pins BOTH columns:
+    // exactly one verified tick (shasum) and one unverified mark (GPG).
+    expect(within(versionRow).getByTestId('CheckCircleIcon')).toBeInTheDocument()
+    expect(within(versionRow).getByTestId('ErrorIcon')).toBeInTheDocument()
+  })
+
+  it('truncates a platform shasum and shows an em dash when there is none', async () => {
+    listMirrorsMock.mockResolvedValue([baseMirror])
+    getMirrorProvidersMock.mockResolvedValue([
+      halfVerifiedProvider(
+        {},
+        {
+          platforms: [
+            {
+              id: 'plat-1',
+              provider_version_id: 'pv1',
+              os: 'linux',
+              arch: 'amd64',
+              filename: 'terraform-provider-aws_5.10.0_linux_amd64.zip',
+              shasum: 'abc123def456abc123def456abc123de',
+            },
+            {
+              id: 'plat-2',
+              provider_version_id: 'pv1',
+              os: 'darwin',
+              arch: 'arm64',
+              filename: 'terraform-provider-aws_5.10.0_darwin_arm64.zip',
+              shasum: '',
+            },
+          ],
+        },
+      ),
+    ])
+    const user = userEvent.setup()
+    renderWithProviders(<MirrorsPage />)
+    await waitFor(() => expect(screen.getByText('Upstream Public')).toBeInTheDocument())
+    await user.click(screen.getByText('View Details'))
+    await waitFor(() => expect(screen.getByText('hashicorp')).toBeInTheDocument())
+    await user.click(screen.getByLabelText('Toggle versions'))
+    await user.click(await screen.findByLabelText('Toggle platforms'))
+
+    // 12 hex characters plus an ellipsis, never the full digest.
+    expect(await screen.findByText('abc123def456…')).toBeInTheDocument()
+    expect(screen.queryByText('abc123def456abc123def456abc123de')).not.toBeInTheDocument()
+    expect(screen.getByText('—')).toBeInTheDocument()
+  })
+
+  it('falls back to em dashes and disables expansion for a never-synced provider', async () => {
+    listMirrorsMock.mockResolvedValue([baseMirror])
+    getMirrorProvidersMock.mockResolvedValue([
+      {
+        id: 'prov-bare',
+        mirror_config_id: 'mirror-1',
+        provider_id: 'p2',
+        upstream_namespace: 'datadog',
+        upstream_type: 'monitors',
+        last_synced_at: '',
+        last_sync_version: undefined,
+        sync_enabled: false,
+        created_at: '2025-06-01T00:00:00Z',
+        versions: [],
+      },
+    ])
+    const user = userEvent.setup()
+    renderWithProviders(<MirrorsPage />)
+    await waitFor(() => expect(screen.getByText('Upstream Public')).toBeInTheDocument())
+    await user.click(screen.getByText('View Details'))
+    await waitFor(() => expect(screen.getByText('datadog')).toBeInTheDocument())
+
+    const providerRow = screen.getByText('monitors').closest('tr') as HTMLElement
+    // No last synced version and no last synced time: both cells fall back.
+    expect(within(providerRow).getAllByText('—')).toHaveLength(2)
+    expect(within(providerRow).getByText('disabled')).toBeInTheDocument()
+    // With no versions there is nothing to expand, so the toggle is disabled —
+    // which is why ProviderRow's "no versions synced" note is unreachable.
+    expect(screen.getByLabelText('Toggle versions')).toBeDisabled()
+  })
+
+  it('shows the raw sync-run status on history rows, not the translated card label', async () => {
+    // The mirror card and the history table read two different status
+    // vocabularies from two different endpoints; StatusChips keeps them as two
+    // components on purpose. in_progress is translated to "Syncing..." on the
+    // card, while a history row's "running" is shown verbatim.
+    listMirrorsMock.mockResolvedValue([inProgressMirror])
+    getMirrorStatusMock.mockResolvedValue({
+      mirror_config: inProgressMirror,
+      recent_syncs: [
+        {
+          id: 'sync-run',
+          mirror_config_id: 'mirror-3',
+          started_at: '2025-07-02T07:00:00Z',
+          status: 'running',
+          providers_synced: 1,
+          providers_failed: 0,
+        },
+      ],
+    })
+    const user = userEvent.setup()
+    renderWithProviders(<MirrorsPage />)
+    await waitFor(() => expect(screen.getByText('Syncing...')).toBeInTheDocument())
+
+    await user.click(screen.getByLabelText('View sync history'))
+    await waitFor(() => expect(screen.getByText('running')).toBeInTheDocument())
+    // The card's chip is still the translated one; the history row is not.
+    expect(screen.getByText('Syncing...')).toBeInTheDocument()
+  })
+
+  it('cancelling the delete confirmation leaves the mirror alone', async () => {
+    listMirrorsMock.mockResolvedValue([baseMirror])
+    const user = userEvent.setup()
+    renderWithProviders(<MirrorsPage />)
+    await waitFor(() => expect(screen.getByText('Upstream Public')).toBeInTheDocument())
+
+    await user.click(screen.getByLabelText('Delete mirror'))
+    expect(screen.getByText('Confirm Delete')).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: 'Cancel' }))
+
+    await waitFor(() => expect(screen.queryByText('Confirm Delete')).not.toBeInTheDocument())
+    expect(deleteMirrorMock).not.toHaveBeenCalled()
+  })
+  // Both of the following pin a divergence the page has always had, at the
+  // moment it is observable: MUI keeps a closing Dialog mounted through its
+  // exit transition, so what each flow clears on close — and what it keeps —
+  // is on screen for the length of the fade. Asserting synchronously after the
+  // click is what makes these bite; a waitFor would retire past the transition
+  // and see nothing either way.
+
+  it('clears the provider rows but keeps the title while the details dialog fades out', async () => {
+    listMirrorsMock.mockResolvedValue([baseMirror])
+    getMirrorProvidersMock.mockResolvedValue([halfVerifiedProvider()])
+    const user = userEvent.setup()
+    renderWithProviders(<MirrorsPage />)
+    await waitFor(() => expect(screen.getByText('Upstream Public')).toBeInTheDocument())
+
+    await user.click(screen.getByText('View Details'))
+    await waitFor(() => expect(screen.getByText('hashicorp')).toBeInTheDocument())
+
+    await user.click(screen.getByText('Close'))
+
+    // Still mounted, mid-fade: the rows are gone but the heading is not, so the
+    // dialog does not blank its own title on the way out.
+    expect(screen.getByText('Providers — Upstream Public')).toBeInTheDocument()
+    expect(screen.queryByText('hashicorp')).not.toBeInTheDocument()
+    expect(screen.getByText('No providers have been synced yet.')).toBeInTheDocument()
+
+    await waitFor(() =>
+      expect(screen.queryByText('Providers — Upstream Public')).not.toBeInTheDocument(),
+    )
+  })
+
+  it('keeps the mirror name in the delete prompt while it fades out after a cancel', async () => {
+    listMirrorsMock.mockResolvedValue([baseMirror])
+    const user = userEvent.setup()
+    renderWithProviders(<MirrorsPage />)
+    await waitFor(() => expect(screen.getByText('Upstream Public')).toBeInTheDocument())
+
+    await user.click(screen.getByLabelText('Delete mirror'))
+    expect(screen.getByText(/delete the mirror "Upstream Public"/)).toBeInTheDocument()
+
+    await user.click(screen.getByRole('button', { name: 'Cancel' }))
+
+    // The flow keeps `mirror` when it clears `open`, so the prompt still names
+    // the mirror instead of reading 'delete the mirror ""' during the fade.
+    expect(screen.getByText(/delete the mirror "Upstream Public"/)).toBeInTheDocument()
+
+    await waitFor(() => expect(screen.queryByText('Confirm Delete')).not.toBeInTheDocument())
   })
 })
