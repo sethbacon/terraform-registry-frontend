@@ -53,6 +53,7 @@ import { KNOWN_PLATFORMS, emptyMirrorForm } from './mirrors/constants'
 import { MirrorSyncStatusChip } from './mirrors/StatusChips'
 import MirrorProvidersDialog, { useMirrorProvidersFlow } from './mirrors/MirrorProvidersDialog'
 import MirrorHistoryDialog, { useMirrorHistoryFlow } from './mirrors/MirrorHistoryDialog'
+import DeleteMirrorDialog, { useDeleteMirrorFlow } from './mirrors/DeleteMirrorDialog'
 
 const MirrorsPage: React.FC = () => {
   const { t } = useTranslation()
@@ -68,8 +69,7 @@ const MirrorsPage: React.FC = () => {
   const status = useStatusMessage()
   const [createDialogOpen, setCreateDialogOpen] = useState(false)
   const [editingMirror, setEditingMirror] = useState<MirrorConfiguration | null>(null)
-  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false)
-  const [mirrorToDelete, setMirrorToDelete] = useState<MirrorConfiguration | null>(null)
+  const deleteMirror = useDeleteMirrorFlow(status)
   const providers = useMirrorProvidersFlow()
 
   const history = useMirrorHistoryFlow()
@@ -146,19 +146,6 @@ const MirrorsPage: React.FC = () => {
     },
   })
 
-  const deleteMutation = useMutation({
-    mutationFn: (id: string) => api.deleteMirror(id),
-    onSuccess: () => {
-      setDeleteConfirmOpen(false)
-      setMirrorToDelete(null)
-      status.showSuccess(t('admin.mirrors.msgDeleted'))
-      queryClient.invalidateQueries({ queryKey: queryKeys.mirrors._def })
-    },
-    onError: (err: unknown) => {
-      status.setError(getErrorMessage(err, t('admin.mirrors.errDelete')))
-    },
-  })
-
   // auto_approve_rules is a JSON string ({ rules: [...], mode: "any" | "all" }).
   // It is only meaningful — and only editable — when approval is required, so it
   // is "active" only when requires_approval is on and the field is non-empty.
@@ -220,12 +207,6 @@ const MirrorsPage: React.FC = () => {
       pull_through_cache_ttl_hours: formData.pull_through_cache_ttl_hours,
     }
     updateMutation.mutate({ id: editingMirror.id, data })
-  }
-
-  const handleDelete = () => {
-    if (!mirrorToDelete) return
-    status.setError(null)
-    deleteMutation.mutate(mirrorToDelete.id)
   }
 
   const handleTriggerSync = async (mirror: MirrorConfiguration) => {
@@ -511,10 +492,7 @@ const MirrorsPage: React.FC = () => {
                                 size="small"
                                 aria-label={t('admin.mirrors.ariaDeleteMirror')}
                                 color="error"
-                                onClick={() => {
-                                  setMirrorToDelete(mirror)
-                                  setDeleteConfirmOpen(true)
-                                }}
+                                onClick={() => deleteMirror.openDialog(mirror)}
                               >
                                 <DeleteIcon fontSize="small" />
                               </IconButton>
@@ -759,23 +737,7 @@ const MirrorsPage: React.FC = () => {
             </DialogActions>
           </Dialog>
 
-          {/* Delete Confirmation Dialog */}
-          <Dialog open={deleteConfirmOpen} onClose={() => setDeleteConfirmOpen(false)}>
-            <DialogTitle>{t('admin.mirrors.confirmDeleteTitle')}</DialogTitle>
-            <DialogContent>
-              <Typography>
-                {t('admin.mirrors.confirmDeleteText', { name: mirrorToDelete?.name })}
-              </Typography>
-            </DialogContent>
-            <DialogActions>
-              <Button onClick={() => setDeleteConfirmOpen(false)}>
-                {t('admin.mirrors.cancel')}
-              </Button>
-              <Button variant="contained" color="error" onClick={handleDelete}>
-                {t('admin.mirrors.delete')}
-              </Button>
-            </DialogActions>
-          </Dialog>
+          <DeleteMirrorDialog flow={deleteMirror} />
 
           <MirrorHistoryDialog flow={history} />
 
