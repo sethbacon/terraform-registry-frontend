@@ -36,3 +36,21 @@ rules:
       # supply-chain reduction against a real chance of breaking publishing.
       # Worth revisiting deliberately, not as part of a lint sweep.
       - release.yml
+
+  self-repository:
+    ignore:
+      # zizmor asks for GitHub's self-repository form, `uses: $/...`, in place of
+      # `uses: ./...` for in-repo actions and reusable workflows. actionlint
+      # rejects `$/` outright -- it is neither "owner/repo/path@ref" nor
+      # "./path" -- and actionlint is a required check here via the shared
+      # workflow-security gate, so applying the remediation trades a lint
+      # finding for a permanently red required check. Proven, not assumed: the
+      # conversion was tried, `$/` resolved correctly at runtime, and actionlint
+      # failed it anyway. Support is requested in rhysd/actionlint#711.
+      #
+      # Tracked in 4cloudguru/shared-workflows#45; drop this entry once
+      # actionlint understands the syntax.
+      - ci.yml
+      - pr-checks.yml
+      - release.yml
+      - weekly-security.yml
