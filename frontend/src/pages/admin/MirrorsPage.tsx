@@ -17,13 +17,6 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
-  Paper,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
   TablePagination,
   TextField,
   Switch,
@@ -39,7 +32,6 @@ import HistoryIcon from '@mui/icons-material/History'
 import SyncIcon from '@mui/icons-material/Sync'
 import RefreshIcon from '@mui/icons-material/Refresh'
 import CloudDownloadIcon from '@mui/icons-material/CloudDownload'
-import ErrorIcon from '@mui/icons-material/Error'
 import ScheduleIcon from '@mui/icons-material/Schedule'
 import Page from '../../components/Page'
 import PageHeader from '../../components/PageHeader'
@@ -50,7 +42,6 @@ import { useStatusMessage } from '../../hooks/useStatusMessage'
 import { useAuth } from '../../contexts/AuthContext'
 import {
   type MirrorConfiguration,
-  type MirrorSyncHistory,
   type CreateMirrorConfigRequest,
   parseMirrorConfig,
 } from '../../types/mirror'
@@ -59,8 +50,9 @@ import { getErrorMessage } from '../../utils/errors'
 import { queryKeys } from '../../services/queryKeys'
 import { usePagination } from '../../hooks/usePagination'
 import { KNOWN_PLATFORMS, emptyMirrorForm } from './mirrors/constants'
-import { MirrorSyncStatusChip, SyncRunStatusChip } from './mirrors/StatusChips'
+import { MirrorSyncStatusChip } from './mirrors/StatusChips'
 import MirrorProvidersDialog, { useMirrorProvidersFlow } from './mirrors/MirrorProvidersDialog'
+import MirrorHistoryDialog, { useMirrorHistoryFlow } from './mirrors/MirrorHistoryDialog'
 
 const MirrorsPage: React.FC = () => {
   const { t } = useTranslation()
@@ -80,10 +72,7 @@ const MirrorsPage: React.FC = () => {
   const [mirrorToDelete, setMirrorToDelete] = useState<MirrorConfiguration | null>(null)
   const providers = useMirrorProvidersFlow()
 
-  const [historyDialogOpen, setHistoryDialogOpen] = useState(false)
-  const [mirrorHistory, setMirrorHistory] = useState<MirrorSyncHistory[]>([])
-  const [historyLoading, setHistoryLoading] = useState(false)
-  const [historyMirrorName, setHistoryMirrorName] = useState('')
+  const history = useMirrorHistoryFlow()
 
   // Client-side pagination
   const {
@@ -247,20 +236,6 @@ const MirrorsPage: React.FC = () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.mirrors._def })
     } catch (err: unknown) {
       status.setError(getErrorMessage(err, t('admin.mirrors.errTriggerSync')))
-    }
-  }
-
-  const handleViewHistory = async (mirror: MirrorConfiguration) => {
-    setHistoryMirrorName(mirror.name)
-    setHistoryDialogOpen(true)
-    setHistoryLoading(true)
-    try {
-      const status = await api.getMirrorStatus(mirror.id)
-      setMirrorHistory(status.recent_syncs ?? [])
-    } catch {
-      setMirrorHistory([])
-    } finally {
-      setHistoryLoading(false)
     }
   }
 
@@ -501,7 +476,7 @@ const MirrorsPage: React.FC = () => {
                             <IconButton
                               size="small"
                               aria-label={t('admin.mirrors.ariaViewHistory')}
-                              onClick={() => handleViewHistory(mirror)}
+                              onClick={() => history.openDialog(mirror)}
                             >
                               <HistoryIcon fontSize="small" />
                             </IconButton>
@@ -802,85 +777,7 @@ const MirrorsPage: React.FC = () => {
             </DialogActions>
           </Dialog>
 
-          {/* History Dialog */}
-          <Dialog
-            open={historyDialogOpen}
-            onClose={() => {
-              setHistoryDialogOpen(false)
-              setMirrorHistory([])
-            }}
-            maxWidth="lg"
-            fullWidth
-          >
-            <DialogTitle>
-              {t('admin.mirrors.syncHistoryTitle', { name: historyMirrorName })}
-            </DialogTitle>
-            <DialogContent>
-              {historyLoading ? (
-                <Box
-                  sx={{
-                    display: 'flex',
-                    justifyContent: 'center',
-                    p: 4,
-                  }}
-                >
-                  <CircularProgress />
-                </Box>
-              ) : mirrorHistory.length === 0 ? (
-                <Typography color="textSecondary" sx={{ py: 2 }}>
-                  {t('admin.mirrors.noSyncHistory')}
-                </Typography>
-              ) : (
-                <TableContainer component={Paper} variant="outlined">
-                  <Table size="small">
-                    <TableHead>
-                      <TableRow>
-                        <TableCell>{t('admin.mirrors.thStarted')}</TableCell>
-                        <TableCell>{t('admin.mirrors.thCompleted')}</TableCell>
-                        <TableCell>{t('admin.mirrors.thStatus')}</TableCell>
-                        <TableCell align="right">{t('admin.mirrors.thProvidersSynced')}</TableCell>
-                        <TableCell align="right">{t('admin.mirrors.thFailures')}</TableCell>
-                      </TableRow>
-                    </TableHead>
-                    <TableBody>
-                      {mirrorHistory.map((sync) => (
-                        <TableRow key={sync.id}>
-                          <TableCell>{formatDate(sync.started_at)}</TableCell>
-                          <TableCell>
-                            {sync.completed_at ? formatDate(sync.completed_at) : '—'}
-                          </TableCell>
-                          <TableCell>
-                            <SyncRunStatusChip status={sync.status} />
-                            {sync.error_message && (
-                              <Tooltip title={sync.error_message}>
-                                <ErrorIcon
-                                  color="error"
-                                  fontSize="small"
-                                  sx={{ ml: 0.5, verticalAlign: 'middle' }}
-                                />
-                              </Tooltip>
-                            )}
-                          </TableCell>
-                          <TableCell align="right">{sync.providers_synced}</TableCell>
-                          <TableCell align="right">{sync.providers_failed}</TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </TableContainer>
-              )}
-            </DialogContent>
-            <DialogActions>
-              <Button
-                onClick={() => {
-                  setHistoryDialogOpen(false)
-                  setMirrorHistory([])
-                }}
-              >
-                {t('admin.mirrors.close')}
-              </Button>
-            </DialogActions>
-          </Dialog>
+          <MirrorHistoryDialog flow={history} />
 
           <MirrorProvidersDialog flow={providers} />
         </>
