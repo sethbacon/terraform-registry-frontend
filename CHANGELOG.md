@@ -1,6 +1,13 @@
 <!-- markdownlint-disable MD013 MD024 MD041 -->
 # Changelog
 
+## [2.27.1](https://github.com/sethbacon/terraform-registry-frontend/compare/v2.27.0...v2.27.1) (2026-09-03)
+
+
+### Bug Fixes
+
+* send the upstream Host when proxying to the backend (nginx) ([#884](https://github.com/sethbacon/terraform-registry-frontend/issues/884)) ([cf85fc7](https://github.com/sethbacon/terraform-registry-frontend/commit/cf85fc75c8aee3e55557819a64f31b5e4e9856ee))
+
 ## [2.27.0](https://github.com/sethbacon/terraform-registry-frontend/compare/v2.26.1...v2.27.0) (2026-09-02)
 
 
