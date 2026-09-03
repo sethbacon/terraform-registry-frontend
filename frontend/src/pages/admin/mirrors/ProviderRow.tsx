@@ -21,6 +21,11 @@ import VersionPlatformRow from './VersionPlatformRow'
  * One mirrored upstream provider inside the "View Details" dialog, expanding to
  * the versions that have been synced for it. Owns only its own
  * expand/collapse; the versions arrive with the provider payload.
+ *
+ * Note the "no versions synced" note below is unreachable in practice: the
+ * toggle is disabled on exactly the condition that would show it. Kept as-is
+ * rather than deleted, because it is the safety net if the toggle ever stops
+ * being disabled (#783).
  */
 const ProviderRow: React.FC<{ provider: MirroredProvider }> = ({ provider }) => {
   const { t } = useTranslation()
