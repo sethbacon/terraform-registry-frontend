@@ -1,6 +1,19 @@
 <!-- markdownlint-disable MD013 MD024 MD041 -->
 # Changelog
 
+## [2.28.0](https://github.com/sethbacon/terraform-registry-frontend/compare/v2.27.3...v2.28.0) (2026-09-04)
+
+
+### Features
+
+* **status-alerts:** cover the five hand-rolled pages with required variants ([#896](https://github.com/sethbacon/terraform-registry-frontend/issues/896)) ([7d0bca0](https://github.com/sethbacon/terraform-registry-frontend/commit/7d0bca05ac82a00b23c3e9fa04cb9b1dbc65a829))
+
+
+### Refactor
+
+* **mirrors:** extract MirrorsPage's flows into their own modules ([#895](https://github.com/sethbacon/terraform-registry-frontend/issues/895)) ([7e493a4](https://github.com/sethbacon/terraform-registry-frontend/commit/7e493a4fd7b10e852f77f42869da385e857ca606))
+* **suite:** route every cloud-suite-ui import through a local facade ([#897](https://github.com/sethbacon/terraform-registry-frontend/issues/897)) ([3c05b7b](https://github.com/sethbacon/terraform-registry-frontend/commit/3c05b7bff9307268ff7428a1aa2a0ff267d68d58)), closes [#603](https://github.com/sethbacon/terraform-registry-frontend/issues/603)
+
 ## [2.27.3](https://github.com/sethbacon/terraform-registry-frontend/compare/v2.27.2...v2.27.3) (2026-09-03)
 
 
