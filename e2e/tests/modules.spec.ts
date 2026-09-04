@@ -34,10 +34,9 @@ test.describe('Modules list', () => {
     await page.goto('/modules');
 
     // Wait for loading to finish — either cards or empty state appears
-    await page.waitForSelector(
-      '[class*="MuiCard"], [class*="MuiCircularProgress"], h6:has-text("No modules found")',
-      { timeout: 10_000 }
-    );
+    await expect(
+      page.locator('[class*="MuiCard"], [class*="MuiCircularProgress"], h6:has-text("No modules found")').first(),
+    ).toBeVisible();
 
     // The page should not be stuck in a loading state indefinitely
     // Use .first() to avoid a strict-mode violation — MUI renders the spinner
@@ -58,9 +57,9 @@ test.describe('Modules list', () => {
     await page.goto('/modules');
 
     // Wait for content
-    await page.waitForSelector('[class*="MuiCard"], h6:has-text("No modules found")', {
-      timeout: 10_000,
-    });
+    await expect(
+      page.locator('[class*="MuiCard"], h6:has-text("No modules found")').first(),
+    ).toBeVisible();
 
     const hasCards = await page.locator('[class*="MuiCard"]').count() > 0;
 
@@ -73,7 +72,7 @@ test.describe('Modules list', () => {
     await firstViewDetails.click();
 
     // URL should change to a module detail path: /modules/:namespace/:name/:system
-    await page.waitForURL('**/modules/**/**/**', { timeout: 10_000 });
+    await page.waitForURL('**/modules/**/**/**');
     expect(page.url()).toMatch(/\/modules\/[^/]+\/[^/]+\/[^/]+/);
   });
 });
@@ -82,15 +81,15 @@ test.describe('Module detail page', () => {
   test('detail page shows version selector when navigated to', async ({ loggedInPage: page }) => {
     await page.goto('/modules');
 
-    await page.waitForSelector('[class*="MuiCard"], h6:has-text("No modules found")', {
-      timeout: 10_000,
-    });
+    await expect(
+      page.locator('[class*="MuiCard"], h6:has-text("No modules found")').first(),
+    ).toBeVisible();
 
     const hasCards = await page.locator('[class*="MuiCard"]').count() > 0;
     test.skip(!hasCards, 'No modules available — skipping detail page test');
 
     await page.getByRole('button', { name: /View Details/i }).first().click();
-    await page.waitForURL('**/modules/**/**/**', { timeout: 10_000 });
+    await page.waitForURL('**/modules/**/**/**');
 
     // Wait for the page's loading spinner to disappear before asserting content.
     // ModuleDetailPage renders a CircularProgress while fetching, then swaps to content.
@@ -101,9 +100,9 @@ test.describe('Module detail page', () => {
     }
 
     // After loading, a Paper with module info should be present
-    await page.waitForSelector('[class*="MuiPaper"], [class*="MuiChip"], [class*="MuiSelect"]', {
-      timeout: 15_000,
-    });
+    await expect(page.locator('[class*="MuiPaper"], [class*="MuiChip"], [class*="MuiSelect"]').first()).toBeVisible(
+      { timeout: 15_000 },
+    );
 
     // Detail page should have at least a heading with the module name
     const pageContent = await page
@@ -118,15 +117,15 @@ test.describe('Module detail page', () => {
   test('webhook events panel is visible on modules with an SCM link', async ({ loggedInPage: page }) => {
     await page.goto('/modules');
 
-    await page.waitForSelector('[class*="MuiCard"], h6:has-text("No modules found")', {
-      timeout: 10_000,
-    });
+    await expect(
+      page.locator('[class*="MuiCard"], h6:has-text("No modules found")').first(),
+    ).toBeVisible();
 
     const hasCards = (await page.locator('[class*="MuiCard"]').count()) > 0;
     test.skip(!hasCards, 'No modules available — skipping webhook events test');
 
     await page.getByRole('button', { name: /View Details/i }).first().click();
-    await page.waitForURL('**/modules/**/**/**', { timeout: 10_000 });
+    await page.waitForURL('**/modules/**/**/**');
 
     const spinner = page.locator('[class*="MuiCircularProgress"]').first();
     const spinnerVisible = await spinner.isVisible({ timeout: 5_000 }).catch(() => false);
@@ -146,15 +145,15 @@ test.describe('Module detail page', () => {
   test('webhook events panel expands and shows events or empty state', async ({ loggedInPage: page }) => {
     await page.goto('/modules');
 
-    await page.waitForSelector('[class*="MuiCard"], h6:has-text("No modules found")', {
-      timeout: 10_000,
-    });
+    await expect(
+      page.locator('[class*="MuiCard"], h6:has-text("No modules found")').first(),
+    ).toBeVisible();
 
     const hasCards = (await page.locator('[class*="MuiCard"]').count()) > 0;
     test.skip(!hasCards, 'No modules available — skipping webhook events test');
 
     await page.getByRole('button', { name: /View Details/i }).first().click();
-    await page.waitForURL('**/modules/**/**/**', { timeout: 10_000 });
+    await page.waitForURL('**/modules/**/**/**');
 
     const spinner = page.locator('[class*="MuiCircularProgress"]').first();
     const spinnerVisible = await spinner.isVisible({ timeout: 5_000 }).catch(() => false);

@@ -62,7 +62,7 @@ test.describe('Home page', () => {
     // The first "Browse Modules" button is in the hero section
     await page.getByRole('button', { name: 'Browse Modules' }).first().click();
 
-    await page.waitForURL('**/modules', { timeout: 10_000 });
+    await page.waitForURL('**/modules');
     expect(page.url()).toContain('/modules');
   });
 
@@ -71,7 +71,7 @@ test.describe('Home page', () => {
 
     await page.getByRole('button', { name: 'Browse Providers' }).first().click();
 
-    await page.waitForURL('**/providers', { timeout: 10_000 });
+    await page.waitForURL('**/providers');
     expect(page.url()).toContain('/providers');
   });
 
@@ -87,7 +87,7 @@ test.describe('Home page', () => {
 
     await expect(
       page.getByRole('heading', { name: /Private Terraform Registry/i })
-    ).toBeVisible({ timeout: 10_000 });
+    ).toBeVisible();
 
     await context.close();
   });
@@ -97,7 +97,7 @@ test.describe('Home page', () => {
     const input = page.getByRole('textbox', { name: /Search modules/i });
     await input.fill('example');
     await input.press('Enter');
-    await page.waitForURL(/\/modules\?q=example/, { timeout: 10_000 });
+    await page.waitForURL(/\/modules\?q=example/);
     expect(page.url()).toMatch(/\/modules\?q=example/);
   });
 
@@ -108,7 +108,7 @@ test.describe('Home page', () => {
     await expect(input).toBeVisible();
     await input.fill('aws');
     await input.press('Enter');
-    await page.waitForURL(/\/providers\?q=aws/, { timeout: 10_000 });
+    await page.waitForURL(/\/providers\?q=aws/);
     expect(page.url()).toMatch(/\/providers\?q=aws/);
   });
 });
@@ -133,10 +133,10 @@ test.describe('Getting Started API key CTA (roadmap 1.1)', () => {
     test.skip(!isDevMode, 'Dev login not available — backend not running in DEV_MODE');
 
     await devLoginBtn.click();
-    await page.waitForURL((url) => !url.pathname.endsWith('/login'), { timeout: 10_000 });
+    await page.waitForURL((url) => !url.pathname.endsWith('/login'));
     await page.goto('/');
     const createBtn = page.getByTestId('getting-started-create-key');
-    await expect(createBtn).toBeVisible({ timeout: 10_000 });
+    await expect(createBtn).toBeVisible();
     await createBtn.click();
     await expect(page.getByRole('dialog', { name: /Create API key/i })).toBeVisible();
   });
@@ -149,19 +149,18 @@ test.describe('API Documentation page', () => {
     // The MUI page title heading is rendered immediately on mount
     await expect(
       page.getByRole('heading', { name: 'API Swagger Documentation' })
-    ).toBeVisible({ timeout: 10_000 });
+    ).toBeVisible();
 
     // Subtitle describing how to authenticate should also be present
     await expect(
       page.getByText('Interactive API reference')
-    ).toBeVisible({ timeout: 5_000 });
+    ).toBeVisible();
 
     // Wait for Swagger UI to mount — the JS chunk is ~1.3 MB so allow extra time.
     // Swagger UI renders a .swagger-ui root div; the .info section appears once
     // the spec has been fetched and parsed.
-    await page.waitForSelector(
-      '.swagger-ui, [class*="MuiCircularProgress"], [role="progressbar"]',
-      { timeout: 30_000 }
+    await expect(page.locator('.swagger-ui, [class*="MuiCircularProgress"], [role="progressbar"]').first()).toBeVisible(
+      { timeout: 30_000 },
     );
 
     // If a spinner is still visible give it time to finish
@@ -185,7 +184,7 @@ test.describe('API Documentation page', () => {
     await page.goto('/api-docs');
 
     // Wait for Swagger UI to mount before checking for errors
-    await page.waitForSelector('.swagger-ui', { timeout: 30_000 });
+    await expect(page.locator('.swagger-ui').first()).toBeVisible({ timeout: 30_000 });
 
     // A red MUI error Alert should not be visible
     const errorAlert = page.locator('[class*="MuiAlert-standardError"], [class*="MuiAlert-filledError"]');

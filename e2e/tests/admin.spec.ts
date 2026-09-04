@@ -21,9 +21,9 @@ test.describe('Admin: Users', () => {
     await page.goto('/admin/users');
 
     // Wait for the page content to load
-    await page.waitForSelector('table, [class*="MuiTable"], h6:has-text("No users")', {
-      timeout: 10_000,
-    });
+    await expect(
+      page.locator('table, [class*="MuiTable"], h6:has-text("No users")').first(),
+    ).toBeVisible();
 
     const hasTable = await page.locator('table, [class*="MuiTable"]').count() > 0;
     const hasEmptyState = await page.getByText(/no users/i).isVisible().catch(() => false);
@@ -35,9 +35,9 @@ test.describe('Admin: Users', () => {
   test('users page has an "Add User" or create button', async ({ loggedInPage: page }) => {
     await page.goto('/admin/users');
 
-    await page.waitForSelector('[class*="MuiButton"], [class*="MuiIconButton"]', {
-      timeout: 10_000,
-    });
+    await expect(
+      page.locator('[class*="MuiButton"], [class*="MuiIconButton"]').first(),
+    ).toBeVisible();
 
     // At least one action button should be present (Add, Create, etc.)
     const actionBtns = page.locator('[class*="MuiButton"], [class*="MuiIconButton"]');
@@ -48,7 +48,7 @@ test.describe('Admin: Users', () => {
     loggedInPage: page,
   }) => {
     await page.goto('/admin/users');
-    await page.waitForSelector('table, h6:has-text("No users")', { timeout: 10_000 });
+    await expect(page.locator('table, h6:has-text("No users")').first()).toBeVisible();
 
     // If empty state, skip the assertion — there's nothing to act on.
     const hasUsers = await page.locator('table tbody tr').count();
@@ -66,7 +66,7 @@ test.describe('Admin: Users', () => {
     loggedInPage: page,
   }) => {
     await page.goto('/admin/users');
-    await page.waitForSelector('table, h6:has-text("No users")', { timeout: 10_000 });
+    await expect(page.locator('table, h6:has-text("No users")').first()).toBeVisible();
 
     const hasUsers = await page.locator('table tbody tr').count();
     if (hasUsers === 0) {
@@ -85,7 +85,7 @@ test.describe('Admin: Users', () => {
 
   test('Erase confirmation requires typing the user email', async ({ loggedInPage: page }) => {
     await page.goto('/admin/users');
-    await page.waitForSelector('table, h6:has-text("No users")', { timeout: 10_000 });
+    await expect(page.locator('table, h6:has-text("No users")').first()).toBeVisible();
 
     const hasUsers = await page.locator('table tbody tr').count();
     if (hasUsers === 0) {
@@ -112,10 +112,9 @@ test.describe('Admin: Organizations', () => {
   test('organizations page loads', async ({ loggedInPage: page }) => {
     await page.goto('/admin/organizations');
 
-    await page.waitForSelector(
-      'table, [class*="MuiTable"], h6:has-text("No organizations"), [class*="MuiCircularProgress"]',
-      { timeout: 10_000 }
-    );
+    await expect(
+      page.locator('table, [class*="MuiTable"], h6:has-text("No organizations"), [class*="MuiCircularProgress"]').first(),
+    ).toBeVisible();
 
     const loadingSpinner = page.locator('[class*="MuiCircularProgress"]').first();
     if (await loadingSpinner.isVisible()) {
@@ -155,9 +154,9 @@ test.describe('Admin: API Keys', () => {
   test('api keys page has a create button', async ({ loggedInPage: page }) => {
     await page.goto('/admin/apikeys');
 
-    await page.waitForSelector('[class*="MuiButton"], [class*="MuiIconButton"]', {
-      timeout: 10_000,
-    });
+    await expect(
+      page.locator('[class*="MuiButton"], [class*="MuiIconButton"]').first(),
+    ).toBeVisible();
 
     const actionBtns = page.locator('[class*="MuiButton"], [class*="MuiIconButton"]');
     expect(await actionBtns.count()).toBeGreaterThan(0);
@@ -183,7 +182,7 @@ test.describe('Admin: Provider Mirrors', () => {
     // After loading the page renders a heading "Mirroring — Provider Config"
     await expect(
       page.getByRole('heading', { name: /Provider Config/i })
-    ).toBeVisible({ timeout: 10_000 });
+    ).toBeVisible();
 
     // Cards (if mirrors exist) or an empty-state message should be present
     const hasCards = (await page.locator('[class*="MuiCard"]').count()) > 0;
@@ -209,11 +208,11 @@ test.describe('Admin: Provider Mirrors', () => {
     // PR 1 fix: Refresh should be a labelled button
     await expect(
       page.getByRole('button', { name: /^Refresh$/i })
-    ).toBeVisible({ timeout: 10_000 });
+    ).toBeVisible();
 
     await expect(
       page.getByRole('button', { name: /Add Mirror/i })
-    ).toBeVisible({ timeout: 10_000 });
+    ).toBeVisible();
   });
 
   test('mirror cards use two-group CardActions layout with View Details button', async ({ loggedInPage: page }) => {
@@ -238,7 +237,7 @@ test.describe('Admin: Provider Mirrors', () => {
     // Note: the button has tooltip title "View status and current sync" so we match by visible text
     await expect(
       page.locator('[class*="MuiCardActions"] button', { hasText: /View Details/i }).first()
-    ).toBeVisible({ timeout: 10_000 });
+    ).toBeVisible();
   });
 });
 
@@ -251,7 +250,7 @@ test.describe('Admin: Unauthenticated access', () => {
     await page.goto('/admin/users');
 
     // React Router ProtectedRoute redirects client-side to /login
-    await page.waitForURL('**/login', { timeout: 10_000 });
+    await page.waitForURL('**/login');
     expect(page.url()).toContain('/login');
 
     await context.close();
@@ -300,10 +299,9 @@ test.describe('Admin: Roles', () => {
   test('roles page loads', async ({ loggedInPage: page }) => {
     await page.goto('/admin/roles');
 
-    await page.waitForSelector(
-      '[class*="MuiAccordion"], [class*="MuiCircularProgress"], [class*="MuiAlert"], table',
-      { timeout: 10_000 }
-    );
+    await expect(
+      page.locator('[class*="MuiAccordion"], [class*="MuiCircularProgress"], [class*="MuiAlert"], table').first(),
+    ).toBeVisible();
 
     const loadingSpinner = page.locator('[class*="MuiCircularProgress"]').first();
     if (await loadingSpinner.isVisible()) {
@@ -323,9 +321,8 @@ test.describe('Admin: Roles', () => {
       await expect(loadingSpinner).toBeHidden({ timeout: 20_000 });
     }
 
-    await page.waitForSelector(
-      '[class*="MuiAccordion"], table, [class*="MuiAlert"]',
-      { timeout: 15_000 }
+    await expect(page.locator('[class*="MuiAccordion"], table, [class*="MuiAlert"]').first()).toBeVisible(
+      { timeout: 15_000 },
     );
 
     const hasAccordion = (await page.locator('[class*="MuiAccordion"]').count()) > 0;
@@ -341,10 +338,9 @@ test.describe('Admin: SCM Providers', () => {
   test('SCM providers page loads', async ({ loggedInPage: page }) => {
     await page.goto('/admin/scm-providers');
 
-    await page.waitForSelector(
-      '[class*="MuiCard"], [class*="MuiCircularProgress"], [class*="MuiAlert"]',
-      { timeout: 10_000 }
-    );
+    await expect(
+      page.locator('[class*="MuiCard"], [class*="MuiCircularProgress"], [class*="MuiAlert"]').first(),
+    ).toBeVisible();
 
     const loadingSpinner = page.locator('[class*="MuiCircularProgress"]').first();
     if (await loadingSpinner.isVisible()) {
@@ -364,9 +360,9 @@ test.describe('Admin: SCM Providers', () => {
       await expect(loadingSpinner).toBeHidden({ timeout: 15_000 });
     }
 
-    await page.waitForSelector('[class*="MuiButton"], [class*="MuiIconButton"]', {
-      timeout: 10_000,
-    });
+    await expect(
+      page.locator('[class*="MuiButton"], [class*="MuiIconButton"]').first(),
+    ).toBeVisible();
 
     // An add / create button should exist on this page
     const actionBtns = page.locator('[class*="MuiButton"], [class*="MuiIconButton"]');
@@ -381,9 +377,7 @@ test.describe('Admin: SCM Providers', () => {
       await expect(loadingSpinner).toBeHidden({ timeout: 15_000 });
     }
 
-    await page.waitForSelector('[class*="MuiCard"], [class*="MuiAlert"]', {
-      timeout: 10_000,
-    });
+    await expect(page.locator('[class*="MuiCard"], [class*="MuiAlert"]').first()).toBeVisible();
 
     const hasCards = (await page.locator('[class*="MuiCard"]').count()) > 0;
     const hasEmptyState = await page
@@ -423,7 +417,14 @@ test.describe('Admin: Sidebar Navigation', () => {
       await header.click();
       // Wait for the thing the caller needs, not for a fixed 300ms that is a
       // guess about an animation on the fastest engine.
-      await link.waitFor({ state: 'visible', timeout: 10_000 }).catch(() => {});
+      //
+      // `expect`, not `locator.waitFor`, so the budget comes from the project's
+      // `expect.timeout` like every other wait in the suite (#883). A bare
+      // `waitFor` with its explicit timeout dropped defaults to NO timeout,
+      // which would turn this best-effort nudge into a hang until the whole
+      // test times out. The rejection stays swallowed on purpose: the caller
+      // asserts this link for real immediately afterwards.
+      await expect(link).toBeVisible().catch(() => {});
     }
   }
 
@@ -433,7 +434,7 @@ test.describe('Admin: Sidebar Navigation', () => {
     await ensureMirroringExpanded(page);
 
     // Sidebar nav link exists and is reachable
-    await expect(page.locator('a', { hasText: /^Approvals$/ })).toBeVisible({ timeout: 10_000 });
+    await expect(page.locator('a', { hasText: /^Approvals$/ })).toBeVisible();
   });
 
   test('sidebar Approvals link navigates to /admin/approvals', async ({ loggedInPage: page }) => {
@@ -442,7 +443,7 @@ test.describe('Admin: Sidebar Navigation', () => {
     await ensureMirroringExpanded(page);
 
     await page.locator('a', { hasText: /^Approvals$/ }).click();
-    await page.waitForURL('**/admin/approvals', { timeout: 10_000 });
+    await page.waitForURL('**/admin/approvals');
     expect(page.url()).toContain('/admin/approvals');
   });
 
@@ -451,7 +452,7 @@ test.describe('Admin: Sidebar Navigation', () => {
     await page.waitForLoadState('networkidle', { timeout: 15_000 });
     await ensureMirroringExpanded(page);
 
-    await expect(page.locator('a', { hasText: /^Mirror Policies$/ })).toBeVisible({ timeout: 10_000 });
+    await expect(page.locator('a', { hasText: /^Mirror Policies$/ })).toBeVisible();
   });
 
   test('sidebar Mirror Policies link navigates to /admin/policies', async ({ loggedInPage: page }) => {
@@ -460,7 +461,7 @@ test.describe('Admin: Sidebar Navigation', () => {
     await ensureMirroringExpanded(page);
 
     await page.locator('a', { hasText: /^Mirror Policies$/ }).click();
-    await page.waitForURL('**/admin/policies', { timeout: 10_000 });
+    await page.waitForURL('**/admin/policies');
     expect(page.url()).toContain('/admin/policies');
   });
 });

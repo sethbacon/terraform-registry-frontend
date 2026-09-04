@@ -41,9 +41,9 @@ test.describe('Providers list', () => {
     await apiResponsePromise;
 
     // Ensure either provider cards render or the empty state is shown.
-    await page.waitForSelector('[class*="MuiCard"], h6:has-text("No providers found")', {
-      timeout: 10_000,
-    });
+    await expect(
+      page.locator('[class*="MuiCard"], h6:has-text("No providers found")').first(),
+    ).toBeVisible();
 
     const hasCards = (await page.locator('[class*="MuiCard"]').count()) > 0;
     const hasEmptyState = await page.getByText('No providers found').isVisible().catch(() => false);
@@ -57,9 +57,9 @@ test.describe('Providers list', () => {
   }) => {
     await page.goto('/providers');
 
-    await page.waitForSelector('[class*="MuiCard"], h6:has-text("No providers found")', {
-      timeout: 10_000,
-    });
+    await expect(
+      page.locator('[class*="MuiCard"], h6:has-text("No providers found")').first(),
+    ).toBeVisible();
 
     const mirroredBadge = page.getByText('Network Mirrored');
     const hasMirrored = await mirroredBadge.count() > 0;
@@ -75,9 +75,9 @@ test.describe('Providers list', () => {
   test('clicking a provider opens the detail page', async ({ loggedInPage: page }) => {
     await page.goto('/providers');
 
-    await page.waitForSelector('[class*="MuiCard"], h6:has-text("No providers found")', {
-      timeout: 10_000,
-    });
+    await expect(
+      page.locator('[class*="MuiCard"], h6:has-text("No providers found")').first(),
+    ).toBeVisible();
 
     const hasCards = await page.locator('[class*="MuiCard"]').count() > 0;
     test.skip(!hasCards, 'No providers available in test environment — skipping detail page test');
@@ -85,7 +85,7 @@ test.describe('Providers list', () => {
     await page.getByRole('button', { name: /View Details/i }).first().click();
 
     // URL should change to: /providers/:namespace/:type
-    await page.waitForURL('**/providers/**/**', { timeout: 10_000 });
+    await page.waitForURL('**/providers/**/**');
     expect(page.url()).toMatch(/\/providers\/[^/]+\/[^/]+/);
   });
 });
@@ -94,15 +94,15 @@ test.describe('Provider detail page', () => {
   test('detail page renders content', async ({ loggedInPage: page }) => {
     await page.goto('/providers');
 
-    await page.waitForSelector('[class*="MuiCard"], h6:has-text("No providers found")', {
-      timeout: 10_000,
-    });
+    await expect(
+      page.locator('[class*="MuiCard"], h6:has-text("No providers found")').first(),
+    ).toBeVisible();
 
     const hasCards = await page.locator('[class*="MuiCard"]').count() > 0;
     test.skip(!hasCards, 'No providers available — skipping detail page test');
 
     await page.getByRole('button', { name: /View Details/i }).first().click();
-    await page.waitForURL('**/providers/**/**', { timeout: 10_000 });
+    await page.waitForURL('**/providers/**/**');
 
     // Wait for the page's loading spinner to disappear before asserting content.
     // ProviderDetailPage renders a CircularProgress while fetching, then swaps to content.
@@ -115,9 +115,9 @@ test.describe('Provider detail page', () => {
     }
 
     // After loading, a Paper/Chip/Select with provider info should be present
-    await page.waitForSelector('[class*="MuiPaper"], [class*="MuiChip"], [class*="MuiTypography"]', {
-      timeout: 15_000,
-    });
+    await expect(page.locator('[class*="MuiPaper"], [class*="MuiChip"], [class*="MuiTypography"]').first()).toBeVisible(
+      { timeout: 15_000 },
+    );
 
     const pageContent = await page
       .locator('[class*="MuiContainer"], [class*="MuiPaper"]')

@@ -32,10 +32,10 @@ test.describe('Audit Logs page (authenticated)', () => {
     test.skip(!isDevMode, 'Dev login not available — backend not running in DEV_MODE');
 
     await devLoginBtn.click();
-    await page.waitForURL((url) => !url.pathname.endsWith('/login'), { timeout: 10_000 });
+    await page.waitForURL((url) => !url.pathname.endsWith('/login'));
 
     await page.goto('/admin/audit-logs');
-    await expect(page.getByRole('heading', { name: 'Audit Logs' })).toBeVisible({ timeout: 10_000 });
+    await expect(page.getByRole('heading', { name: 'Audit Logs' })).toBeVisible();
   });
 
   test('page shows table column headers', async ({ page }) => {
@@ -43,10 +43,10 @@ test.describe('Audit Logs page (authenticated)', () => {
     test.skip(!isDevMode, 'Dev login not available — backend not running in DEV_MODE');
 
     await devLoginBtn.click();
-    await page.waitForURL((url) => !url.pathname.endsWith('/login'), { timeout: 10_000 });
+    await page.waitForURL((url) => !url.pathname.endsWith('/login'));
 
     await page.goto('/admin/audit-logs');
-    await expect(page.getByRole('heading', { name: 'Audit Logs' })).toBeVisible({ timeout: 10_000 });
+    await expect(page.getByRole('heading', { name: 'Audit Logs' })).toBeVisible();
 
     await expect(page.getByRole('columnheader', { name: 'Timestamp' })).toBeVisible();
     await expect(page.getByRole('columnheader', { name: 'Action' })).toBeVisible();
@@ -60,10 +60,10 @@ test.describe('Audit Logs page (authenticated)', () => {
     test.skip(!isDevMode, 'Dev login not available — backend not running in DEV_MODE');
 
     await devLoginBtn.click();
-    await page.waitForURL((url) => !url.pathname.endsWith('/login'), { timeout: 10_000 });
+    await page.waitForURL((url) => !url.pathname.endsWith('/login'));
 
     await page.goto('/admin/audit-logs');
-    await expect(page.getByRole('heading', { name: 'Audit Logs' })).toBeVisible({ timeout: 10_000 });
+    await expect(page.getByRole('heading', { name: 'Audit Logs' })).toBeVisible();
 
     await expect(page.getByRole('button', { name: /export/i })).toBeVisible();
   });
@@ -73,10 +73,10 @@ test.describe('Audit Logs page (authenticated)', () => {
     test.skip(!isDevMode, 'Dev login not available — backend not running in DEV_MODE');
 
     await devLoginBtn.click();
-    await page.waitForURL((url) => !url.pathname.endsWith('/login'), { timeout: 10_000 });
+    await page.waitForURL((url) => !url.pathname.endsWith('/login'));
 
     await page.goto('/admin/audit-logs');
-    await expect(page.getByRole('heading', { name: 'Audit Logs' })).toBeVisible({ timeout: 10_000 });
+    await expect(page.getByRole('heading', { name: 'Audit Logs' })).toBeVisible();
 
     await expect(page.getByLabel('Start Date')).toBeVisible();
     await expect(page.getByLabel('End Date')).toBeVisible();
@@ -89,9 +89,9 @@ test.describe('Audit Logs page (authenticated)', () => {
     test.skip(!isDevMode, 'Dev login not available — backend not running in DEV_MODE');
 
     await devLoginBtn.click();
-    await page.waitForURL((url) => !url.pathname.endsWith('/login'), { timeout: 10_000 });
+    await page.waitForURL((url) => !url.pathname.endsWith('/login'));
 
-    await expect(page.getByRole('link', { name: 'Audit Logs' })).toBeVisible({ timeout: 10_000 });
+    await expect(page.getByRole('link', { name: 'Audit Logs' })).toBeVisible();
   });
 });
 
@@ -106,7 +106,7 @@ test.describe('Audit Logs — unauthenticated access', () => {
 
     await page.goto('/admin/audit-logs');
 
-    await page.waitForURL('**/login', { timeout: 10_000 });
+    await page.waitForURL('**/login');
     expect(page.url()).toContain('/login');
 
     await context.close();
