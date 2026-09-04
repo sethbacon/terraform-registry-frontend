@@ -28,8 +28,13 @@ npx playwright show-report
 
 ## Debugging
 
-- For failing tests, run with `npx playwright show-trace <trace.zip>` to inspect network and DOM.
-- Playwright artifacts (videos, traces, screenshots) are written to `e2e/test-results/` by default.
+- Tracing and video are off (`playwright.config.ts`), because always-on recording is
+  load on the runner and this suite's failures are timing failures. A failing test
+  still writes a screenshot and the HTML report.
+- To inspect network and DOM for a failure, re-run that test with tracing on:
+  `npx playwright test <spec> --trace on`, then `npx playwright show-trace <trace.zip>`.
+- Playwright artifacts (screenshots, and traces when enabled) are written to
+  `e2e/test-results/` by default.
 
 ## Waiting for the UI (#883)
 

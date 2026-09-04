@@ -76,12 +76,30 @@ export default defineConfig({
     // finished in 30 s is not going to, and failing on the goto names the step
     // that hung instead of reporting a whole-test timeout with no culprit.
     navigationTimeout: 30_000,
-    // Collect full Playwright trace for every test run so network + console
-    // events are recorded for debugging failing tests.
-    trace: 'on',
-    // Record video too (useful when diagnosing UI hangs). Artifacts are
-    // written to Playwright's default output directory under playwright-report.
-    video: 'on',
+    // Tracing and video are OFF, and that is a deliberate trade against this
+    // suite's failure mode rather than a saving for its own sake.
+    //
+    // Both were 'on', so every test in every project recorded a full trace and
+    // a video whether it passed or not. Playwright's own CI guidance calls
+    // always-on tracing "performance heavy" -- it instruments the page and
+    // writes to disk continuously -- and this suite's failures are TIMING
+    // failures on a loaded runner: the v2.27.0 tag run died on a Firefox render
+    // that did not finish inside its budget (#883). Spending runner capacity on
+    // recording every passing test, to diagnose the rare failing one, competes
+    // with the thing that is already short.
+    //
+    // What this costs: a failing test no longer ships a trace or a video. It
+    // still ships the screenshot below, the error and stack, and the HTML
+    // report, which is what named the culprit on v2.27.0.
+    //
+    // If a failure ever needs a trace again, the middle setting is one word --
+    // `trace: 'on-first-retry'` records only the retry of a test that already
+    // failed, so the passing path stays uninstrumented. Prefer that to going
+    // back to 'on'.
+    trace: 'off',
+    video: 'off',
+    // Kept: this one only fires on a failing test, so it costs nothing on the
+    // passing path and is the cheapest artefact that still shows the page.
     screenshot: 'only-on-failure',
     // Pre-set consent preferences so the ConsentBanner overlay does not block
     // pointer events during E2E tests.
