@@ -24,14 +24,16 @@ test.describe('Admin: Terraform Binary Mirrors', () => {
 
     await expect(
       page.getByRole('heading', { name: /Binary Mirrors/i })
-    ).toBeVisible({ timeout: 10_000 });
+    ).toBeVisible();
   });
 
   test('shows cards or empty state', async ({ loggedInPage: page }) => {
     await page.goto('/admin/terraform-mirror');
 
     // Wait for loading to complete: MuiAlert (empty state) or MuiCard (configs) appears after spinner gone
-    await page.waitForSelector('[class*="MuiAlert"], [class*="MuiCard"]', { timeout: 20_000 });
+    await expect(page.locator('[class*="MuiAlert"], [class*="MuiCard"]').first()).toBeVisible(
+      { timeout: 20_000 },
+    );
 
     const hasCards = (await page.locator('[class*="MuiCard"]').count()) > 0;
     const hasEmptyState = await page
@@ -47,57 +49,57 @@ test.describe('Admin: Terraform Binary Mirrors', () => {
     await page.goto('/admin/terraform-mirror');
 
     // Wait for page to finish loading (info banner always appears after spinner)
-    await page.waitForSelector('[class*="MuiAlert"]', { timeout: 20_000 });
+    await expect(page.locator('[class*="MuiAlert"]').first()).toBeVisible({ timeout: 20_000 });
 
     // PR 1 fix: Refresh should be a labelled outlined button, not an icon-only button
     await expect(
       page.getByRole('button', { name: /^Refresh$/i })
-    ).toBeVisible({ timeout: 10_000 });
+    ).toBeVisible();
 
     await expect(
       page.getByRole('button', { name: /Add Mirror/i })
-    ).toBeVisible({ timeout: 10_000 });
+    ).toBeVisible();
   });
 
   test('Add Mirror dialog opens with required fields', async ({ loggedInPage: page }) => {
     await page.goto('/admin/terraform-mirror');
 
     // Wait for page to finish loading (info banner always appears after spinner)
-    await page.waitForSelector('[class*="MuiAlert"]', { timeout: 20_000 });
+    await expect(page.locator('[class*="MuiAlert"]').first()).toBeVisible({ timeout: 20_000 });
 
     await page.getByRole('button', { name: /Add Mirror/i }).click();
 
     // Dialog should open
     await expect(
       page.locator('[class*="MuiDialog"]').first()
-    ).toBeVisible({ timeout: 5_000 });
+    ).toBeVisible();
 
     // Name field and Tool select should be present
-    await expect(page.getByLabel(/Name/i).first()).toBeVisible({ timeout: 5_000 });
+    await expect(page.getByLabel(/Name/i).first()).toBeVisible();
 
     // Create button should be present in the dialog
     const createBtn = page.locator('[class*="MuiDialog"]').getByRole('button', { name: /Create/i });
-    await expect(createBtn).toBeVisible({ timeout: 5_000 });
+    await expect(createBtn).toBeVisible();
   });
 
   test('Add Mirror dialog exposes the Require approval toggle', async ({ loggedInPage: page }) => {
     await page.goto('/admin/terraform-mirror');
-    await page.waitForSelector('[class*="MuiAlert"]', { timeout: 20_000 });
+    await expect(page.locator('[class*="MuiAlert"]').first()).toBeVisible({ timeout: 20_000 });
 
     await page.getByRole('button', { name: /Add Mirror/i }).click();
-    await expect(page.locator('[class*="MuiDialog"]').first()).toBeVisible({ timeout: 5_000 });
+    await expect(page.locator('[class*="MuiDialog"]').first()).toBeVisible();
 
     // Version approval gate toggle from the version-approval feature.
     await expect(
       page.getByLabel(/Require approval for new versions/i),
-    ).toBeVisible({ timeout: 5_000 });
+    ).toBeVisible();
   });
 
   test('cards show "View Details" button', async ({ loggedInPage: page }) => {
     await page.goto('/admin/terraform-mirror');
 
     // Wait for page to finish loading (info banner always appears after spinner)
-    await page.waitForSelector('[class*="MuiAlert"]', { timeout: 20_000 });
+    await expect(page.locator('[class*="MuiAlert"]').first()).toBeVisible({ timeout: 20_000 });
 
     const hasCards = (await page.locator('[class*="MuiCard"]').count()) > 0;
     if (!hasCards) {
@@ -107,7 +109,7 @@ test.describe('Admin: Terraform Binary Mirrors', () => {
     // PR 2 fix: button should say "View Details" not "Versions"
     await expect(
       page.getByRole('button', { name: /View Details/i }).first()
-    ).toBeVisible({ timeout: 10_000 });
+    ).toBeVisible();
   });
 });
 
@@ -118,7 +120,7 @@ test.describe('Admin: Terraform Binary Mirrors — unauthenticated', () => {
 
     await page.goto('/admin/terraform-mirror');
 
-    await page.waitForURL('**/login', { timeout: 10_000 });
+    await page.waitForURL('**/login');
     expect(page.url()).toContain('/login');
 
     await context.close();

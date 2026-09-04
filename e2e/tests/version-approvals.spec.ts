@@ -29,7 +29,7 @@ test.describe('Admin: Version Approvals', () => {
 
     await expect(
       page.getByRole('heading', { name: /Version Approvals/i }),
-    ).toBeVisible({ timeout: 10_000 });
+    ).toBeVisible();
   });
 
   test('shows status tabs and switches between them', async ({ loggedInPage: page }) => {
@@ -40,7 +40,7 @@ test.describe('Admin: Version Approvals', () => {
     const approvedTab = page.getByRole('tab', { name: /^Approved$/i });
     const rejectedTab = page.getByRole('tab', { name: /^Rejected$/i });
 
-    await expect(pendingTab).toBeVisible({ timeout: 10_000 });
+    await expect(pendingTab).toBeVisible();
     await expect(approvedTab).toBeVisible();
     await expect(rejectedTab).toBeVisible();
 
@@ -59,7 +59,7 @@ test.describe('Admin: Version Approvals', () => {
 
     await expect(
       page.getByRole('button', { name: /Provider Versions/i }),
-    ).toBeVisible({ timeout: 10_000 });
+    ).toBeVisible();
     await expect(
       page.getByRole('button', { name: /Terraform Versions/i }),
     ).toBeVisible();
@@ -74,7 +74,7 @@ test.describe('Admin: Version Approvals', () => {
     // spinner isn't on screen at that exact instant the helper returns early and
     // we can race ahead of the first render. The table (with its empty-state row)
     // or a load-error alert is the settled DOM — wait for one to appear.
-    await page.waitForSelector('table, [class*="MuiAlert"]', { timeout: 10_000 });
+    await expect(page.locator('table, [class*="MuiAlert"]').first()).toBeVisible();
 
     // Either gated versions are listed in the table, or the "no versions" empty
     // state is shown — both render inside the table, so its presence is enough.
@@ -96,10 +96,10 @@ test.describe('Admin: Version Approvals', () => {
     test.skip(!navVisible, 'Version Approvals nav entry not rendered in this layout');
 
     await navLink.click();
-    await page.waitForURL('**/admin/version-approvals', { timeout: 10_000 });
+    await page.waitForURL('**/admin/version-approvals');
     await expect(
       page.getByRole('heading', { name: /Version Approvals/i }),
-    ).toBeVisible({ timeout: 10_000 });
+    ).toBeVisible();
   });
 });
 
@@ -110,7 +110,7 @@ baseTest.describe('Admin: Version Approvals — unauthenticated', () => {
 
     await page.goto('/admin/version-approvals');
 
-    await page.waitForURL('**/login', { timeout: 10_000 });
+    await page.waitForURL('**/login');
     expect(page.url()).toContain('/login');
 
     await context.close();

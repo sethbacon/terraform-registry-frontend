@@ -24,14 +24,14 @@ test.describe('Terraform Binaries list', () => {
 
     await expect(
       page.getByRole('heading', { name: /Hosted Binary Mirrors/i })
-    ).toBeVisible({ timeout: 10_000 });
+    ).toBeVisible();
   });
 
   test('shows cards or empty state after loading', async ({ page }) => {
     await page.goto('/terraform-binaries');
 
     // Wait until either a card or the empty-state h6 appears (neither shows during loading)
-    await page.waitForSelector('[class*="MuiCard"], h6', { timeout: 20_000 });
+    await expect(page.locator('[class*="MuiCard"], h6').first()).toBeVisible({ timeout: 20_000 });
 
     const hasCards = (await page.locator('[class*="MuiCard"]').count()) > 0;
     const hasEmptyState = await page
@@ -60,7 +60,7 @@ test.describe('Terraform Binaries list', () => {
     // PR 2 fix: button should say "View Details" not "View Versions"
     await expect(
       page.getByRole('button', { name: /View Details/i }).first()
-    ).toBeVisible({ timeout: 10_000 });
+    ).toBeVisible();
   });
 
   test('clicking a card navigates to the detail page', async ({ page }) => {
@@ -79,7 +79,7 @@ test.describe('Terraform Binaries list', () => {
 
     await page.getByRole('button', { name: /View Details/i }).first().click();
 
-    await page.waitForURL('**/terraform-binaries/**', { timeout: 10_000 });
+    await page.waitForURL('**/terraform-binaries/**');
     expect(page.url()).toMatch(/\/terraform-binaries\/.+/);
   });
 });
@@ -98,7 +98,7 @@ test.describe('Terraform Binary detail page', () => {
     test.skip(!hasCards, 'No binary mirror cards in test environment — skipping detail page test');
 
     await page.getByRole('button', { name: /View Details/i }).first().click();
-    await page.waitForURL('**/terraform-binaries/**', { timeout: 10_000 });
+    await page.waitForURL('**/terraform-binaries/**');
 
     // Wait for detail page to settle
     const detailSpinner = page.locator('[class*="MuiCircularProgress"]').first();
@@ -107,9 +107,9 @@ test.describe('Terraform Binary detail page', () => {
       await expect(detailSpinner).toBeHidden({ timeout: 20_000 });
     }
 
-    await page.waitForSelector('[class*="MuiContainer"], [class*="MuiPaper"]', {
-      timeout: 10_000,
-    });
+    await expect(
+      page.locator('[class*="MuiContainer"], [class*="MuiPaper"]').first(),
+    ).toBeVisible();
 
     const content = await page
       .locator('[class*="MuiContainer"]')

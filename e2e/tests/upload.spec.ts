@@ -60,9 +60,7 @@ test.describe('Module Upload page', () => {
   test('page loads and shows upload method selector', async ({ loggedInPage: page }) => {
     await page.goto('/admin/upload/module');
 
-    await page.waitForSelector('[class*="MuiCard"], [class*="MuiContainer"]', {
-      timeout: 10_000,
-    });
+    await expect(page.locator('[class*="MuiCard"], [class*="MuiContainer"]').first()).toBeVisible();
 
     // Should have some content — heading or method cards
     const content = await page.locator('main, [class*="MuiContainer"]').first().textContent();
@@ -73,9 +71,7 @@ test.describe('Module Upload page', () => {
   test('page has at least one action button', async ({ loggedInPage: page }) => {
     await page.goto('/admin/upload/module');
 
-    await page.waitForSelector('[class*="MuiButton"], [class*="MuiCard"]', {
-      timeout: 10_000,
-    });
+    await expect(page.locator('[class*="MuiButton"], [class*="MuiCard"]').first()).toBeVisible();
 
     const buttons = page.locator('[class*="MuiButton"]');
     expect(await buttons.count()).toBeGreaterThan(0);
@@ -84,7 +80,7 @@ test.describe('Module Upload page', () => {
   test('upload method cards are visible', async ({ loggedInPage: page }) => {
     await page.goto('/admin/upload/module');
 
-    await page.waitForSelector('[class*="MuiCard"]', { timeout: 10_000 });
+    await expect(page.locator('[class*="MuiCard"]').first()).toBeVisible();
 
     // Method selection cards (Upload .zip / SCM) should be rendered
     const cards = page.locator('[class*="MuiCard"]');
@@ -95,7 +91,7 @@ test.describe('Module Upload page', () => {
     await page.goto('/admin/upload/module');
 
     // Wait for method selection cards
-    await page.waitForSelector('[class*="MuiCard"]', { timeout: 10_000 });
+    await expect(page.locator('[class*="MuiCard"]').first()).toBeVisible();
 
     // Click the upload / "Manual Upload" card if method selection is shown
     const uploadCard = page
@@ -115,7 +111,7 @@ test.describe('Module Upload page', () => {
     await uploadCard.click();
 
     // After selecting, form fields (namespace, name, version, etc.) should appear
-    await page.waitForSelector('input', { timeout: 10_000 });
+    await expect(page.locator('input').first()).toBeVisible();
     expect(await page.locator('input').count()).toBeGreaterThan(0);
   });
 
@@ -123,15 +119,15 @@ test.describe('Module Upload page', () => {
     loggedInPage: page,
   }) => {
     await page.goto('/admin/upload/module');
-    await page.waitForSelector('[class*="MuiCard"]', { timeout: 10_000 });
+    await expect(page.locator('[class*="MuiCard"]').first()).toBeVisible();
 
     // Click the "Upload from File" method card to reveal the upload form
     await page.getByText('Upload from File').click();
-    await page.waitForSelector('input[type="text"], input[placeholder]', { timeout: 10_000 });
+    await expect(page.locator('input[type="text"], input[placeholder]').first()).toBeVisible();
 
     // The "Upload Module" submit button should be disabled because no file has been chosen
     const submitBtn = page.getByRole('button', { name: 'Upload Module' });
-    await expect(submitBtn).toBeVisible({ timeout: 5_000 });
+    await expect(submitBtn).toBeVisible();
     await expect(submitBtn).toBeDisabled();
   });
 });
@@ -140,7 +136,7 @@ test.describe('/admin/upload redirect', () => {
   test('/admin/upload redirects to /admin/upload/module', async ({ loggedInPage: page }) => {
     await page.goto('/admin/upload');
 
-    await page.waitForURL('**/admin/upload/module', { timeout: 10_000 });
+    await page.waitForURL('**/admin/upload/module');
     expect(page.url()).toContain('/admin/upload/module');
   });
 });
@@ -149,9 +145,7 @@ test.describe('Provider Upload page', () => {
   test('page loads and shows upload method selector', async ({ loggedInPage: page }) => {
     await page.goto('/admin/upload/provider');
 
-    await page.waitForSelector('[class*="MuiCard"], [class*="MuiContainer"]', {
-      timeout: 10_000,
-    });
+    await expect(page.locator('[class*="MuiCard"], [class*="MuiContainer"]').first()).toBeVisible();
 
     const content = await page.locator('main, [class*="MuiContainer"]').first().textContent();
     expect(content).not.toBeNull();
@@ -161,9 +155,7 @@ test.describe('Provider Upload page', () => {
   test('page has at least one action button', async ({ loggedInPage: page }) => {
     await page.goto('/admin/upload/provider');
 
-    await page.waitForSelector('[class*="MuiButton"], [class*="MuiCard"]', {
-      timeout: 10_000,
-    });
+    await expect(page.locator('[class*="MuiButton"], [class*="MuiCard"]').first()).toBeVisible();
 
     const buttons = page.locator('[class*="MuiButton"]');
     expect(await buttons.count()).toBeGreaterThan(0);
@@ -172,7 +164,7 @@ test.describe('Provider Upload page', () => {
   test('upload method cards are visible', async ({ loggedInPage: page }) => {
     await page.goto('/admin/upload/provider');
 
-    await page.waitForSelector('[class*="MuiCard"]', { timeout: 10_000 });
+    await expect(page.locator('[class*="MuiCard"]').first()).toBeVisible();
 
     const cards = page.locator('[class*="MuiCard"]');
     expect(await cards.count()).toBeGreaterThan(0);
@@ -183,7 +175,7 @@ test.describe('Provider Upload page', () => {
   }) => {
     await page.goto('/admin/upload/provider');
 
-    await page.waitForSelector('[class*="MuiCard"]', { timeout: 10_000 });
+    await expect(page.locator('[class*="MuiCard"]').first()).toBeVisible();
 
     // Click the "Upload" card
     const uploadCard = page
@@ -201,7 +193,7 @@ test.describe('Provider Upload page', () => {
 
     await uploadCard.click();
 
-    await page.waitForSelector('input', { timeout: 10_000 });
+    await expect(page.locator('input').first()).toBeVisible();
     // Provider upload should have fields for namespace, type, version, os, arch
     expect(await page.locator('input').count()).toBeGreaterThan(0);
   });
@@ -210,15 +202,15 @@ test.describe('Provider Upload page', () => {
     loggedInPage: page,
   }) => {
     await page.goto('/admin/upload/provider');
-    await page.waitForSelector('[class*="MuiCard"]', { timeout: 10_000 });
+    await expect(page.locator('[class*="MuiCard"]').first()).toBeVisible();
 
     // The provider chooser card is labelled "Manual Upload" (not "Upload from File")
     await page.getByText('Manual Upload').click();
-    await page.waitForSelector('input[type="text"], input[placeholder]', { timeout: 10_000 });
+    await expect(page.locator('input[type="text"], input[placeholder]').first()).toBeVisible();
 
     // The "Upload Provider" submit button should be disabled because no file has been chosen
     const submitBtn = page.getByRole('button', { name: 'Upload Provider' });
-    await expect(submitBtn).toBeVisible({ timeout: 5_000 });
+    await expect(submitBtn).toBeVisible();
     await expect(submitBtn).toBeDisabled();
   });
 });
@@ -228,7 +220,7 @@ test.describe('FileDropZone (roadmap 2.5)', () => {
     await page.goto('/admin/upload/module');
     await page.getByText('Upload from File').click();
     const zone = page.getByTestId('module-upload-dropzone');
-    await expect(zone).toBeVisible({ timeout: 10_000 });
+    await expect(zone).toBeVisible();
     await expect(zone).toContainText(/Drop .+ file here or click to browse/i);
   });
 
@@ -236,7 +228,7 @@ test.describe('FileDropZone (roadmap 2.5)', () => {
     await page.goto('/admin/upload/provider');
     await page.getByText('Manual Upload').click();
     const zone = page.getByTestId('provider-upload-dropzone');
-    await expect(zone).toBeVisible({ timeout: 10_000 });
+    await expect(zone).toBeVisible();
     await expect(zone).toContainText(/\.zip/);
   });
 });
@@ -255,12 +247,12 @@ test.describe('Real file upload (#605)', () => {
   }) => {
     await page.goto('/admin/upload/module');
     await page.getByText('Upload from File').click();
-    await expect(page.getByTestId('module-upload-dropzone')).toBeVisible({ timeout: 10_000 });
+    await expect(page.getByTestId('module-upload-dropzone')).toBeVisible();
 
     await page.getByTestId('module-upload-dropzone-input').setInputFiles(DISALLOWED_EXTENSION_FILE);
 
     const error = page.getByTestId('module-upload-dropzone-error');
-    await expect(error).toBeVisible({ timeout: 5_000 });
+    await expect(error).toBeVisible();
     await expect(error).toContainText(/Invalid file type/i);
 
     // Rejected files never reach onFileSelected, so the form still has no file.
@@ -303,14 +295,14 @@ test.describe('Real file upload (#605)', () => {
   }) => {
     await page.goto('/admin/upload/provider');
     await page.getByText('Manual Upload').click();
-    await expect(page.getByTestId('provider-upload-dropzone')).toBeVisible({ timeout: 10_000 });
+    await expect(page.getByTestId('provider-upload-dropzone')).toBeVisible();
 
     await page
       .getByTestId('provider-upload-dropzone-input')
       .setInputFiles(DISALLOWED_EXTENSION_FILE);
 
     const error = page.getByTestId('provider-upload-dropzone-error');
-    await expect(error).toBeVisible({ timeout: 5_000 });
+    await expect(error).toBeVisible();
     await expect(error).toContainText(/Invalid file type/i);
 
     await expect(page.getByRole('button', { name: 'Upload Provider' })).toBeDisabled();
