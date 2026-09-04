@@ -280,7 +280,7 @@ const ApprovalsPage: React.FC = () => {
             }
           />
 
-          <StatusAlerts status={status} mb={2} />
+          <StatusAlerts status={status} mb={2} order="error-first" dismissible />
 
           <Grid container spacing={3}>
             {approvals.map((approval) => (

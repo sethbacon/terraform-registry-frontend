@@ -387,7 +387,7 @@ const AuditLogPage: React.FC = () => {
           </Button>
         </Box>
       </Paper>
-      <StatusAlerts status={status} mb={2} />
+      <StatusAlerts status={status} mb={2} order="error-first" dismissible />
       {/* Table */}
       <Paper>
         {loading ? (

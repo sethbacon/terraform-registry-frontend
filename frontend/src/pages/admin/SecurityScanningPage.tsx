@@ -38,11 +38,13 @@ import PageHeader from '../../components/PageHeader'
 import PageTitleIcon from '@mui/icons-material/Security'
 import ScanDiagnostics from '../../components/ScanDiagnostics'
 import ScanFindingsModal from '../../components/ScanFindingsModal'
+import StatusAlerts from '../../components/StatusAlerts'
 import api from '../../services/api'
 import { queryKeys } from '../../services/queryKeys'
 import { useAuth } from '../../contexts/AuthContext'
 import { getErrorMessage } from '../../utils/errors'
 import { usePagination } from '../../hooks/usePagination'
+import { useStatusMessage } from '../../hooks/useStatusMessage'
 import type {
   ModuleScan,
   RecentScanEntry,
@@ -154,8 +156,10 @@ const SecurityScanningPage: React.FC = () => {
   const { page, rowsPerPage, setPage, handleChangePage, handleChangeRowsPerPage } =
     usePagination(20)
 
-  const [scannerSuccess, setScannerSuccess] = useState<string | null>(null)
-  const [scannerError, setScannerError] = useState<string | null>(null)
+  // Named `scanner` rather than `status` because this page's banner pair belongs
+  // to the scanner-management panel only, not to the page: the scan-config query
+  // failure renders its own alert further up.
+  const scanner = useStatusMessage()
   const [scannerVersionInput, setScannerVersionInput] = useState('')
   const [scannerActivate, setScannerActivate] = useState(true)
   const [scannerLatest, setScannerLatest] = useState<ScannerLatestInfo | null>(null)
@@ -166,10 +170,10 @@ const SecurityScanningPage: React.FC = () => {
     mutationFn: () => api.checkScannerLatest(config!.tool),
     onSuccess: (data) => {
       setScannerLatest(data)
-      setScannerError(null)
+      scanner.setError(null)
     },
     onError: (err: unknown) => {
-      setScannerError(getErrorMessage(err, t('admin.securityScanning.scanner.checkError')))
+      scanner.setError(getErrorMessage(err, t('admin.securityScanning.scanner.checkError')))
     },
   })
 
@@ -181,29 +185,27 @@ const SecurityScanningPage: React.FC = () => {
         activate: scannerActivate,
       }),
     onSuccess: (data) => {
-      setScannerSuccess(
+      scanner.showSuccess(
         t('admin.securityScanning.scanner.installSuccess', {
           version: data.version,
           path: data.binary_path,
         }),
       )
-      setScannerError(null)
       queryClient.invalidateQueries({ queryKey: ['scanning'] })
       queryClient.invalidateQueries({ queryKey: queryKeys.scanner._def })
     },
     onError: (err: unknown) => {
-      setScannerError(getErrorMessage(err, t('admin.securityScanning.scanner.installError')))
+      scanner.setError(getErrorMessage(err, t('admin.securityScanning.scanner.installError')))
     },
   })
 
   const triggerCheckMutation = useMutation({
     mutationFn: () => api.triggerScannerCheck(),
     onSuccess: () => {
-      setScannerSuccess(t('admin.securityScanning.scanner.checkQueued'))
-      setScannerError(null)
+      scanner.showSuccess(t('admin.securityScanning.scanner.checkQueued'))
     },
     onError: (err: unknown) => {
-      setScannerError(getErrorMessage(err, t('admin.securityScanning.scanner.checkError')))
+      scanner.setError(getErrorMessage(err, t('admin.securityScanning.scanner.checkError')))
     },
   })
 
@@ -238,12 +240,11 @@ const SecurityScanningPage: React.FC = () => {
   const saveAutoUpdateMutation = useMutation({
     mutationFn: () => api.saveScannerAutoUpdate(autoUpdateForm),
     onSuccess: () => {
-      setScannerSuccess(t('admin.securityScanning.scanner.autoUpdate.saveSuccess'))
-      setScannerError(null)
+      scanner.showSuccess(t('admin.securityScanning.scanner.autoUpdate.saveSuccess'))
       queryClient.invalidateQueries({ queryKey: ['scanning'] })
     },
     onError: (err: unknown) => {
-      setScannerError(
+      scanner.setError(
         getErrorMessage(err, t('admin.securityScanning.scanner.autoUpdate.saveError')),
       )
     },
@@ -563,16 +564,12 @@ const SecurityScanningPage: React.FC = () => {
             </Box>
             <Collapse in={scannerMgmtExpanded} timeout="auto">
               <Divider sx={{ mb: 2, mt: 1 }} />
-              {scannerSuccess && (
-                <Alert severity="success" sx={{ mb: 2 }} onClose={() => setScannerSuccess(null)}>
-                  {scannerSuccess}
-                </Alert>
-              )}
-              {scannerError && (
-                <Alert severity="error" sx={{ mb: 2 }} onClose={() => setScannerError(null)}>
-                  {scannerError}
-                </Alert>
-              )}
+              {/*
+                success-first, same as NotificationsPage: an install success
+                stays on top, and a later "check for updates" failure does not
+                erase it (setError leaves the success alone).
+              */}
+              <StatusAlerts status={scanner} mb={2} order="success-first" dismissible />
               <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', flexWrap: 'wrap', mb: 2 }}>
                 <Button
                   variant="outlined"

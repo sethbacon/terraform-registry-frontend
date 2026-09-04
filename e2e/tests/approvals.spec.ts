@@ -25,7 +25,7 @@ test.describe('Admin: Approval Requests', () => {
 
     await expect(
       page.getByRole('heading', { name: /Approval Requests/i })
-    ).toBeVisible({ timeout: 10_000 });
+    ).toBeVisible();
   });
 
   test('approvals page shows cards or empty state', async ({ loggedInPage: page }) => {
@@ -37,7 +37,7 @@ test.describe('Admin: Approval Requests', () => {
       await expect(spinner).toBeHidden({ timeout: 20_000 });
     }
 
-    await page.waitForSelector('[class*="MuiCard"], [class*="MuiAlert"]', { timeout: 10_000 });
+    await expect(page.locator('[class*="MuiCard"], [class*="MuiAlert"]').first()).toBeVisible();
 
     const hasCards = (await page.locator('[class*="MuiCard"]').count()) > 0;
     const hasEmptyText = await page
@@ -60,7 +60,7 @@ test.describe('Admin: Approval Requests', () => {
 
     // The status filter Select should be visible
     const filterSelect = page.locator('[class*="MuiSelect"]').first();
-    await expect(filterSelect).toBeVisible({ timeout: 10_000 });
+    await expect(filterSelect).toBeVisible();
   });
 
   test('create request button opens dialog', async ({ loggedInPage: page }) => {
@@ -75,7 +75,7 @@ test.describe('Admin: Approval Requests', () => {
     await page.getByRole('button', { name: /Create Request/i }).click();
 
     // Dialog should open
-    await expect(page.getByRole('dialog')).toBeVisible({ timeout: 5_000 });
+    await expect(page.getByRole('dialog')).toBeVisible();
     await expect(
       page.getByRole('heading', { name: /Create Approval Request/i })
     ).toBeVisible();
@@ -91,7 +91,7 @@ test.describe('Admin: Approval Requests', () => {
     }
 
     await page.getByRole('button', { name: /Create Request/i }).click();
-    await expect(page.getByRole('dialog')).toBeVisible({ timeout: 5_000 });
+    await expect(page.getByRole('dialog')).toBeVisible();
 
     // Required fields: Mirror Config ID and Provider Namespace
     await expect(page.getByLabel(/Mirror Config ID/i)).toBeVisible();
@@ -108,7 +108,7 @@ test.describe('Admin: Approval Requests', () => {
     }
 
     await page.getByRole('button', { name: /Create Request/i }).click();
-    await expect(page.getByRole('dialog')).toBeVisible({ timeout: 5_000 });
+    await expect(page.getByRole('dialog')).toBeVisible();
 
     // Submit button should be disabled with empty required fields
     const submitBtn = page.getByRole('button', { name: /Submit Request/i });
@@ -125,10 +125,10 @@ test.describe('Admin: Approval Requests', () => {
     }
 
     await page.getByRole('button', { name: /Create Request/i }).click();
-    await expect(page.getByRole('dialog')).toBeVisible({ timeout: 5_000 });
+    await expect(page.getByRole('dialog')).toBeVisible();
 
     await page.getByRole('button', { name: /Cancel/i }).click();
-    await expect(page.getByRole('dialog')).toBeHidden({ timeout: 5_000 });
+    await expect(page.getByRole('dialog')).toBeHidden();
   });
 
   test('review dialog opens when approve button is clicked on a pending approval', async ({ loggedInPage: page }) => {
@@ -146,7 +146,7 @@ test.describe('Admin: Approval Requests', () => {
     test.skip(!hasPendingApprovals, 'No pending approval requests in test environment');
 
     await approveBtn.click();
-    await expect(page.getByRole('dialog')).toBeVisible({ timeout: 5_000 });
+    await expect(page.getByRole('dialog')).toBeVisible();
     await expect(
       page.getByRole('heading', { name: /Review Approval Request/i })
     ).toBeVisible();
@@ -166,7 +166,7 @@ test.describe('Admin: Approval Requests', () => {
     test.skip(!hasPendingApprovals, 'No pending approval requests in test environment');
 
     await approveBtn.click();
-    await expect(page.getByRole('dialog')).toBeVisible({ timeout: 5_000 });
+    await expect(page.getByRole('dialog')).toBeVisible();
 
     // The Decision select should contain Approve and Reject options
     const decisionSelect = page.getByLabel(/Decision/i);
@@ -181,7 +181,7 @@ baseTest.describe('Admin: Approval Requests — unauthenticated', () => {
 
     await page.goto('/admin/approvals');
 
-    await page.waitForURL('**/login', { timeout: 10_000 });
+    await page.waitForURL('**/login');
     expect(page.url()).toContain('/login');
 
     await context.close();

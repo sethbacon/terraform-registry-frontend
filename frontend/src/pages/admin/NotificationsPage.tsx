@@ -18,7 +18,9 @@ import { NotificationChannelsSection, type NotificationChannelTypeOption } from 
 import Page from '../../components/Page'
 import PageHeader from '../../components/PageHeader'
 import PageTitleIcon from '@mui/icons-material/Notifications'
+import StatusAlerts from '../../components/StatusAlerts'
 import api from '../../services/api'
+import { useStatusMessage } from '../../hooks/useStatusMessage'
 import { queryKeys } from '../../services/queryKeys'
 import { useAuth } from '../../contexts/AuthContext'
 import { getErrorMessage, sanitizeServerErrorMessage } from '../../utils/errors'
@@ -83,8 +85,7 @@ const NotificationsPage: React.FC = () => {
   })
 
   const [form, setForm] = useState<FormState>(defaultFormState)
-  const [success, setSuccess] = useState<string | null>(null)
-  const [error, setError] = useState<string | null>(null)
+  const status = useStatusMessage()
   const [testRecipients, setTestRecipients] = useState('')
 
   useEffect(() => {
@@ -100,19 +101,18 @@ const NotificationsPage: React.FC = () => {
     }
   }, [config])
 
-  if (queryError && !error) {
-    setError(getErrorMessage(queryError, t('admin.notifications.loadError')))
+  if (queryError && !status.error) {
+    status.setError(getErrorMessage(queryError, t('admin.notifications.loadError')))
   }
 
   const saveMutation = useMutation({
     mutationFn: (data: NotificationsConfigInput) => api.saveNotificationsConfig(data),
     onSuccess: () => {
-      setSuccess(t('admin.notifications.saveSuccess'))
-      setError(null)
+      status.showSuccess(t('admin.notifications.saveSuccess'))
       queryClient.invalidateQueries({ queryKey: queryKeys.notifications._def })
     },
     onError: (err: unknown) => {
-      setError(getErrorMessage(err, t('admin.notifications.saveError')))
+      status.setError(getErrorMessage(err, t('admin.notifications.saveError')))
     },
   })
 
@@ -130,23 +130,24 @@ const NotificationsPage: React.FC = () => {
       ),
     onSuccess: (data) => {
       if (data.success) {
-        setSuccess(data.message || t('admin.notifications.testSuccess'))
-        setError(null)
+        status.showSuccess(data.message || t('admin.notifications.testSuccess'))
       } else {
         // Never render the backend test-failure string verbatim: an SMTP send
         // test can surface host:port / dial detail (CWE-209, #601). Sanitize,
         // falling back to the generic message.
-        setError(sanitizeServerErrorMessage(data.message) ?? t('admin.notifications.testError'))
+        status.setError(
+          sanitizeServerErrorMessage(data.message) ?? t('admin.notifications.testError'),
+        )
       }
     },
     onError: (err: unknown) => {
-      setError(getErrorMessage(err, t('admin.notifications.testError')))
+      status.setError(getErrorMessage(err, t('admin.notifications.testError')))
     },
   })
 
   const handleSave = () => {
     if (!config) return
-    setError(null)
+    status.setError(null)
     saveMutation.mutate({
       enabled: config.enabled,
       smtp: {
@@ -186,20 +187,21 @@ const NotificationsPage: React.FC = () => {
         <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
           <CircularProgress />
         </Box>
-      ) : error && !config ? (
-        <Alert severity="error">{error}</Alert>
+      ) : status.error && !config ? (
+        // Load failure with nothing to show behind it: a bare, full-width alert
+        // that replaces the form entirely. Deliberately not StatusAlerts — this
+        // is a page state, not the banner pair that sits above the form.
+        <Alert severity="error">{status.error}</Alert>
       ) : (
         <>
-          {success && (
-            <Alert severity="success" sx={{ mb: 2 }} onClose={() => setSuccess(null)}>
-              {success}
-            </Alert>
-          )}
-          {error && (
-            <Alert severity="error" sx={{ mb: 2 }} onClose={() => setError(null)}>
-              {error}
-            </Alert>
-          )}
+          {/*
+            success-first, and both banners can be on screen together: a save
+            failure after a successful test send leaves the "test email sent"
+            confirmation in place (setError does not clear the success), and the
+            confirmation stays on top. Both are user-visible, so they are stated
+            here rather than inherited.
+          */}
+          <StatusAlerts status={status} mb={2} order="success-first" dismissible />
 
           <Paper sx={{ p: 3, mb: 3 }}>
             <Typography variant="h6" sx={{ mt: 2 }} gutterBottom>

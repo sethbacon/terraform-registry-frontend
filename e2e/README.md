@@ -28,8 +28,60 @@ npx playwright show-report
 
 ## Debugging
 
-- For failing tests, run with `npx playwright show-trace <trace.zip>` to inspect network and DOM.
-- Playwright artifacts (videos, traces, screenshots) are written to `e2e/test-results/` by default.
+- Tracing and video are off (`playwright.config.ts`), because always-on recording is
+  load on the runner and this suite's failures are timing failures. A failing test
+  still writes a screenshot and the HTML report.
+- To inspect network and DOM for a failure, re-run that test with tracing on:
+  `npx playwright test <spec> --trace on`, then `npx playwright show-trace <trace.zip>`.
+- Playwright artifacts (screenshots, and traces when enabled) are written to
+  `e2e/test-results/` by default.
+
+## Waiting for the UI (#883)
+
+Two rules, and the reason for each:
+
+- **Assert, don't `waitForSelector`.** Every wait in `tests/` is an
+  auto-retrying `expect(locator).toBeVisible()`. Playwright's own docs steer
+  away from `page.waitForSelector` ("use web assertions ... instead") and, more
+  importantly here, it does not read `expect.timeout`, so a suite built on it
+  has no per-project budget at all.
+
+- **Don't pass a `timeout` unless the site genuinely needs more than its
+  project gets.** An explicit per-call timeout beats the project's
+  `expect.timeout` unconditionally. That is how 119 hand-written
+  `timeout: 10_000` waits kept firefox on a 10 s budget after
+  `playwright.config.ts` had already raised firefox to 15 s, and why one slow
+  Firefox render failed the `v2.27.0` tag run. The budgets now live in
+  `playwright.config.ts`: 10 s on chromium, 20 s on firefox and webkit, 30 s
+  for navigation (`use.navigationTimeout`, which `page.waitForURL` and
+  `page.goto` read). A handful of genuinely slow surfaces — Swagger UI's
+  ~1.3 MB chunk, the mirror-admin poll — still override upward on purpose.
+
+The same reasoning retired the 36 `timeout: 5_000` **assertions**: a bound at
+or below the baseline budget buys nothing on chromium and costs firefox and
+webkit their raise. What survives is deliberate and stays:
+
+- **Probes** — `isVisible({ timeout: 3_000 }).catch(() => false)` and friends,
+  which ask a yes/no question to steer the test ("is the spinner up yet?").
+  A short bound is the *point*; a probe that takes 20 s to answer "no" is a
+  bug.
+- **Raises above the baseline** — 15 s, 20 s and 30 s waits, which say this
+  particular surface is slower than everything else. (Note that a 15 s raise is
+  now *below* firefox's and webkit's 20 s project budget, so on those two it
+  still caps rather than extends. Left as found: dropping it would tighten
+  chromium from 15 s to 10 s, and there is no evidence about those surfaces
+  either way.)
+
+`frontend/src/__tests__/e2eWaitBudget.test.ts` enforces these rules, because
+none of them is visible to `tsc` or to eslint (which does not cover this
+directory).
+
+When converting a `waitForSelector`, keep the `.first()`:
+`page.waitForSelector('a, b')` resolves the selector, takes `elements[0]`, and
+waits for **that** element to be visible — it is not "any match is visible".
+`page.locator('a, b').first()` is the exact equivalent; a bare locator would
+also be a strict-mode violation whenever the selector matches more than one
+node.
 
 ## Notes
 

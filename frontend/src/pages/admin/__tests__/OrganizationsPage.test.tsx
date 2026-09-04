@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
@@ -148,6 +148,61 @@ describe('OrganizationsPage', () => {
     await waitFor(() => {
       expect(screen.getByText('No organizations found')).toBeInTheDocument()
     })
+  })
+
+  // ── the two things that kept this page off StatusAlerts until #765 ───────
+  //
+  // The DEV gate is behavioural, not presentational, and the banner carries no
+  // dismiss button. Both are invisible to the rest of this file because vitest
+  // runs with import.meta.env.DEV true, which is exactly why they need stating.
+
+  it('renders the load-failure banner, undismissable, in a non-dev build', async () => {
+    vi.stubEnv('DEV', false)
+    listOrganizationsMock.mockRejectedValue(new Error('Network error'))
+    renderPage()
+
+    const banner = await screen.findByRole('alert')
+    expect(banner).toHaveTextContent('Failed to load organizations. Please try again.')
+    // Non-dismissible: no close button, unlike the admin CRUD pages.
+    expect(within(banner).queryByRole('button')).not.toBeInTheDocument()
+
+    vi.unstubAllEnvs()
+  })
+
+  // The name-format rejection is what makes the render-site DEV gate testable:
+  // it is set synchronously in the click handler (so absence is a real absence,
+  // not a race), and unlike the load failure it is not gated a second time
+  // where the message is set.
+  async function submitAnInvalidOrganizationName() {
+    listOrganizationsMock.mockResolvedValue(orgPage(fakeOrgs))
+    renderPage()
+    await waitFor(() => expect(screen.getByText('acme-corp')).toBeInTheDocument())
+    await userEvent.click(screen.getByRole('button', { name: /add organization/i }))
+    await waitFor(() => expect(screen.getByRole('dialog')).toBeInTheDocument())
+    await userEvent.type(screen.getByLabelText(/^Name/i), 'Bad Name!')
+    await userEvent.type(screen.getByLabelText(/Display Name/i), 'Something')
+    await userEvent.click(screen.getByRole('button', { name: /^create$/i }))
+    expect(createOrganizationMock).not.toHaveBeenCalled()
+  }
+
+  // Queried by text, not by role: the create dialog stays open on a rejected
+  // name and MUI's modal marks the rest of the page aria-hidden.
+  it('shows the name-format banner in a non-dev build', async () => {
+    vi.stubEnv('DEV', false)
+    await submitAnInvalidOrganizationName()
+
+    expect(screen.getByText(/^Organization name must be 1–64 characters/)).toBeInTheDocument()
+
+    vi.unstubAllEnvs()
+  })
+
+  it('suppresses the name-format banner in a dev build', async () => {
+    vi.stubEnv('DEV', true)
+    await submitAnInvalidOrganizationName()
+
+    expect(screen.queryByText(/^Organization name must be 1–64 characters/)).not.toBeInTheDocument()
+
+    vi.unstubAllEnvs()
   })
 
   it('opens Add Organization dialog', async () => {

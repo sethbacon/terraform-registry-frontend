@@ -452,7 +452,7 @@ const UsersPage: React.FC = () => {
           ) : undefined
         }
       />
-      <StatusAlerts status={status} mb={3} />
+      <StatusAlerts status={status} mb={3} order="error-first" dismissible />
       {/* Search Bar */}
       <TextField
         fullWidth

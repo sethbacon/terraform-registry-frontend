@@ -26,7 +26,19 @@ export default defineConfig({
   // which performs a complete dev-login round-trip (goto /login → click → waitForURL)
   // before the test body even starts.  30 s was too tight on slower machines.
   timeout: 60_000,
-  expect: { timeout: 5_000 },
+  // 10 s, raised from 5 s when the 119 hand-written `timeout: 10_000` overrides
+  // came out of the spec files (#883). Those overrides WON over every
+  // project-level `expect.timeout` below -- an explicit per-call timeout always
+  // does -- which is why raising firefox to 15 s in #876 changed nothing for
+  // them and a Firefox card-render still blew a 10 s budget on the v2.27.0 tag
+  // run. 10 s here is deliberately the same number those call sites used, so
+  // dropping them is not also a silent tightening on chromium; firefox and
+  // webkit now genuinely get more, because there is nothing left overriding
+  // them. A site that needs longer than its project's budget still says so
+  // explicitly (the surviving 15/20/30 s waits on swagger-ui, the mirror admin
+  // poll and similar) -- what is gone is the layer that pinned every ORDINARY
+  // wait to one hard-coded number.
+  expect: { timeout: 10_000 },
 
   // Set here, not via the CI step's CLI flags: a `--retries=N` CLI flag
   // overrides EVERY project's own `retries` setting unconditionally,
@@ -50,12 +62,44 @@ export default defineConfig({
     baseURL: process.env.BASE_URL ?? 'https://localhost:3000',
     /* Accept self-signed certificates used in the docker-compose deployment */
     ignoreHTTPSErrors: true,
-    // Collect full Playwright trace for every test run so network + console
-    // events are recorded for debugging failing tests.
-    trace: 'on',
-    // Record video too (useful when diagnosing UI hangs). Artifacts are
-    // written to Playwright's default output directory under playwright-report.
-    video: 'on',
+    // The navigation counterpart to `expect.timeout` above, and the reason the
+    // 32 `page.waitForURL(..., { timeout: 10_000 })` overrides could be dropped
+    // with the rest (#883): waitForURL is not an assertion, so it never read
+    // `expect.timeout` and had no config-owned budget to fall back on at all.
+    // 30 s, not 10 s, because the failure being fixed is a slow runner rather
+    // than a wrong URL -- a wrong URL is wrong immediately and stays wrong for
+    // the whole budget either way.
+    //
+    // Deliberate second effect: this also bounds `page.goto`, which until now
+    // was limited only by the 60 s per-test timeout. That is a tightening, and
+    // an intended one -- a navigation to the local compose stack that has not
+    // finished in 30 s is not going to, and failing on the goto names the step
+    // that hung instead of reporting a whole-test timeout with no culprit.
+    navigationTimeout: 30_000,
+    // Tracing and video are OFF, and that is a deliberate trade against this
+    // suite's failure mode rather than a saving for its own sake.
+    //
+    // Both were 'on', so every test in every project recorded a full trace and
+    // a video whether it passed or not. Playwright's own CI guidance calls
+    // always-on tracing "performance heavy" -- it instruments the page and
+    // writes to disk continuously -- and this suite's failures are TIMING
+    // failures on a loaded runner: the v2.27.0 tag run died on a Firefox render
+    // that did not finish inside its budget (#883). Spending runner capacity on
+    // recording every passing test, to diagnose the rare failing one, competes
+    // with the thing that is already short.
+    //
+    // What this costs: a failing test no longer ships a trace or a video. It
+    // still ships the screenshot below, the error and stack, and the HTML
+    // report, which is what named the culprit on v2.27.0.
+    //
+    // If a failure ever needs a trace again, the middle setting is one word --
+    // `trace: 'on-first-retry'` records only the retry of a test that already
+    // failed, so the passing path stays uninstrumented. Prefer that to going
+    // back to 'on'.
+    trace: 'off',
+    video: 'off',
+    // Kept: this one only fires on a failing test, so it costs nothing on the
+    // passing path and is the cheapest artefact that still shows the page.
     screenshot: 'only-on-failure',
     // Pre-set consent preferences so the ConsentBanner overlay does not block
     // pointer events during E2E tests.
@@ -101,7 +145,16 @@ export default defineConfig({
           // that cold-start-sensitive path was bumped separately, for the
           // same underlying reason.) Same reasoning as webkit below; chromium
           // alone keeps the original tight bound.
-          expect: { timeout: 15_000 },
+          //
+          // 20 s, raised from 15 s in #883. 15 s was never the budget the
+          // ordinary waits in the specs actually ran on: each carried its own
+          // `timeout: 10_000`, and an explicit per-call timeout beats the
+          // project default, so this line governed only the handful of waits
+          // that had no override. With those overrides gone it now governs
+          // nearly every wait firefox performs, and 20 s matches what
+          // fixtures/auth.ts already found this browser needs cold, under the
+          // same load, for the same first-paint reason.
+          expect: { timeout: 20_000 },
           // The root `retries: 1` above gives every project one retry by
           // default -- a test must fail twice in a row to count as
           // exhausted. maxFailures: 1 (below) then stops the ENTIRE run the
@@ -126,8 +179,11 @@ export default defineConfig({
           // where a first paint can exceed the 5s global expect timeout on an
           // otherwise correct page. This raises the assertion budget for THIS
           // project only, so chromium keeps the tighter bound and a genuine
-          // regression there still shows up as one.
-          expect: { timeout: 15_000 },
+          // regression there still shows up as one. Raised 15 s -> 20 s with
+          // firefox in #883, for the reason spelled out there: this default
+          // only started applying to the bulk of the suite's waits once their
+          // own `timeout: 10_000` overrides were removed.
+          expect: { timeout: 20_000 },
           // Same reasoning as firefox above: one extra retry before
           // maxFailures can trigger, so a run isn't stopped by the same class
           // of environmental flakiness the expect.timeout bump exists for.

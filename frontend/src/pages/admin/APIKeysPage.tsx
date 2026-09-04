@@ -568,7 +568,7 @@ const APIKeysPage: React.FC = () => {
           </Box>
         }
       />
-      <StatusAlerts status={status} mb={3} />
+      <StatusAlerts status={status} mb={3} order="error-first" dismissible />
       {/*
         No loading condition any more: memberships arrive with the session, so
         by the time this page renders they are already known. The previous
