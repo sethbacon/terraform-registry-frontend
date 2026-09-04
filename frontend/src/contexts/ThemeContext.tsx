@@ -1,5 +1,5 @@
 import type React from 'react'
-import { SuiteThemeProvider, useThemeMode } from '@4cloudguru/cloud-suite-ui'
+import { SuiteThemeProvider, useThemeMode } from '../suite'
 import apiClient from '../services/api'
 import { isSafeExternalUrl } from '../utils/externalUrl'
 

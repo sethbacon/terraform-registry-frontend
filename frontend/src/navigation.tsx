@@ -21,7 +21,7 @@ import Storage from '@mui/icons-material/Storage'
 import Security from '@mui/icons-material/Security'
 import History from '@mui/icons-material/History'
 import Notifications from '@mui/icons-material/Notifications'
-import type { NavItem, NavGroup } from '@4cloudguru/cloud-suite-ui'
+import type { NavItem, NavGroup } from './suite'
 import { adminRouteScopeForPath } from './routeScopes'
 import type { ScopeValue } from './types/rbac'
 

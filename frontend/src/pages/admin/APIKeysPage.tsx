@@ -38,10 +38,7 @@ import {
 import DeleteIcon from '@mui/icons-material/Delete'
 import AddIcon from '@mui/icons-material/Add'
 import KeyIcon from '@mui/icons-material/Key'
-import {
-  ApiKeyExpirySettingsCard,
-  type ApiKeyExpirySettingsInput,
-} from '@4cloudguru/cloud-suite-ui'
+import { ApiKeyExpirySettingsCard, type ApiKeyExpirySettingsInput } from '../../suite'
 import EmptyState from '../../components/EmptyState'
 import Page from '../../components/Page'
 import PageHeader from '../../components/PageHeader'

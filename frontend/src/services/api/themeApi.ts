@@ -1,7 +1,7 @@
 import type { AxiosError } from 'axios'
 import { captureError } from '../errorReporting'
 import { http, setupRequest } from './http'
-import type { UIThemeConfig } from '@4cloudguru/cloud-suite-ui'
+import type { UIThemeConfig } from '../../suite'
 
 // ============================================================================
 // UI Theme (whitelabel)

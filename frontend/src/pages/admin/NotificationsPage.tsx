@@ -14,10 +14,7 @@ import {
   FormControlLabel,
   Button,
 } from '@mui/material'
-import {
-  NotificationChannelsSection,
-  type NotificationChannelTypeOption,
-} from '@4cloudguru/cloud-suite-ui'
+import { NotificationChannelsSection, type NotificationChannelTypeOption } from '../../suite'
 import Page from '../../components/Page'
 import PageHeader from '../../components/PageHeader'
 import PageTitleIcon from '@mui/icons-material/Notifications'

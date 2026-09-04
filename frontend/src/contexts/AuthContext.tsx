@@ -22,7 +22,7 @@ import {
   type MeResponse,
   type Membership,
   type SelectableOrganization,
-} from '@4cloudguru/cloud-suite-ui'
+} from '../suite'
 import api from '../services/api'
 import { setActingOrganization } from '../services/api/http'
 import { ORGANIZATION_PAGE_MAX } from '../services/api/organizationsApi'

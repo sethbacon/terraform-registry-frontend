@@ -392,14 +392,43 @@ version in `package.json` (see the "Shared package" section of
 `SECURITY.md` for the audit/provenance/update policy — the package carries the
 auth/session provider and is treated as load-bearing security code).
 
-The following local files are thin wrappers or re-exports around it:
+### The facade: `suite/index.ts`
 
-| Local file                     | Wraps / re-exports from the package                                 |
+`src/suite/index.ts` is the app's **single import site** for the package and the
+one place its full contract surface is written down (#603). Every symbol the app
+uses is re-exported there explicitly (never `export *`) and under its upstream
+name (never renamed), grouped by concern with a note on what depends on it. No
+other non-test module imports the package.
+
+Two guards hold this up, and each is one-directional on purpose:
+
+- `suite/__tests__/suiteFacade.test.ts` — the facade is the only direct importer
+  of the package, and it still re-exports every value the app takes from it.
+- `src/__tests__/suitePackageDocumented.test.ts` — every local importer of the
+  facade appears in the tables below.
+
+Tests are exempt from the single-importer rule. `utils/__tests__/externalUrl.test.ts`
+replaces the package with `vi.mock('@4cloudguru/cloud-suite-ui', …)`, which has
+to name the module id being mocked; the double still reaches code that imports
+through the facade, because the facade's own import resolves to the mock.
+`components/__tests__/Layout.test.tsx`, `services/__tests__/api.test.ts` and
+`services/__tests__/actingOrganization.guard.test.ts` import from the package
+directly for the same class of reason — they are asserting about the shared
+contract itself, not consuming it as app code.
+
+The facade is not an abstraction layer. Everything in it is a live re-export, so
+a breaking upstream change still breaks the build; what changed is that it
+breaks in one file instead of fourteen.
+
+### Wrappers and re-exports around the facade
+
+| Local file                     | Wraps / re-exports                                                  |
 | ------------------------------ | ------------------------------------------------------------------- |
+| `suite/index.ts`               | the facade itself — the only module that names the package          |
 | `contexts/AuthContext.tsx`     | `AuthProvider`, `useAuth` (session lifecycle, expiry, scopes)       |
 | `contexts/ConsentContext.tsx`  | `ConsentProvider`, `useConsent` (GDPR consent preferences)          |
 | `contexts/ThemeContext.tsx`    | `SuiteThemeProvider`, `useThemeMode` (light/dark, RTL, whitelabel)  |
-| `components/Layout.tsx`        | `SuiteLayout` (sidebar/topbar app shell)                            |
+| `components/Layout.tsx`        | `SuiteLayout`, `OrganizationPicker` (sidebar/topbar app shell)      |
 | `components/Page.tsx`          | `Page` + `PageProps`                                                |
 | `components/PageHeader.tsx`    | `PageHeader` + `PageHeaderProps`                                    |
 | `components/DashboardCard.tsx` | `DashboardCard` + `DashboardCardProps`                              |
@@ -407,15 +436,25 @@ The following local files are thin wrappers or re-exports around it:
 | `components/SuiteSwitcher.tsx` | `SuiteSwitcher` (cross-app switcher)                                |
 | `navigation.tsx`               | `NavItem` / `NavGroup` types for the sidebar config                 |
 
-These files are not wrappers — they **consume** the package's components and
-types directly, adding this app's own data fetching and policy around them:
+`Page.tsx`, `PageHeader.tsx`, `DashboardCard.tsx` and `ConsentBanner.tsx` are
+pure one-line pass-throughs and were already a seam of their own before the
+facade existed; routing them through it buys **those files** nothing. They were
+converted anyway so that "the facade is the only importer" is a rule with no
+exceptions — an absolute rule is enforceable and a rule with four exceptions
+invites a fifth.
 
-| Local file                           | Consumes from the package                                                                           |
+### Direct consumers
+
+These files are not wrappers — they **consume** the facade's components and
+types, adding this app's own data fetching and policy around them:
+
+| Local file                           | Consumes via the facade                                                                             |
 | ------------------------------------ | --------------------------------------------------------------------------------------------------- |
 | `pages/admin/APIKeysPage.tsx`        | `ApiKeyExpirySettingsCard`, `ApiKeyExpirySettingsInput`                                             |
 | `pages/admin/NotificationsPage.tsx`  | `NotificationChannelsSection`, `NotificationChannelTypeOption`                                      |
 | `pages/admin/BrandingPage.tsx`       | `BrandingSettingsCard`, `UIThemeConfig`                                                             |
 | `pages/setup/steps/BrandingStep.tsx` | `BrandingSettingsCard`, `UIThemeConfig` — the setup-wizard counterpart of the admin page above      |
+| `services/api/http.ts`               | `ORGANIZATION_HEADER` — the acting-organization header name, stamped in one interceptor             |
 | `services/api/themeApi.ts`           | `UIThemeConfig` (type only)                                                                         |
 | `utils/externalUrl.ts`               | `isSafeUrl`, composed with this app's scheme narrowing and origin allowlist rather than re-exported |
 
