@@ -18,8 +18,9 @@ export interface StatusMessage {
  * Extracted from the `useState<string | null>(null)` pair that was repeated
  * verbatim across the admin pages, each with its own copy of the
  * clear-the-error-when-an-action-succeeds wiring. Render the messages with
- * `<StatusAlerts status={status} mb={n} />`, which takes this whole object so
- * that a dismiss handler cannot be wired to the wrong message.
+ * `<StatusAlerts status={status} mb={n} order={...} dismissible={...} />`,
+ * which takes this whole object so that a dismiss handler cannot be wired to
+ * the wrong message.
  *
  * `setError` and `setSuccess` are deliberately independent: setting an error
  * does not clear a previous success, because none of the pages did that.

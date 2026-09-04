@@ -421,7 +421,7 @@ const VersionApprovalsPage: React.FC = () => {
         description={t('admin.versionApprovals.pageSubtitle')}
       />
 
-      <StatusAlerts status={status} mb={2} />
+      <StatusAlerts status={status} mb={2} order="error-first" dismissible />
 
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
         <Tabs

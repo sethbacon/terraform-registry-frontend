@@ -235,7 +235,7 @@ const PlatformAdminsPage: React.FC = () => {
             }
           />
 
-          <StatusAlerts status={status} mb={2} />
+          <StatusAlerts status={status} mb={2} order="error-first" dismissible />
 
           {orphanCount > 0 && (
             <Alert severity="warning" sx={{ mb: 2 }}>

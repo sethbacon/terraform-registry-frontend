@@ -1,4 +1,4 @@
-import { render, screen, waitFor, fireEvent } from '@testing-library/react'
+import { render, screen, waitFor, fireEvent, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router-dom'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
@@ -52,6 +52,22 @@ vi.mock('../../../contexts/AuthContext', () => ({
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import ModuleUploadPage from '../../admin/ModuleUploadPage'
+import StatusAlerts from '../../../components/StatusAlerts'
+import type { StatusMessage } from '../../../hooks/useStatusMessage'
+
+// A frozen StatusMessage carrying just an error, for rendering a reference
+// StatusAlerts whose emotion class can be compared against the page's banner.
+function idleStatusWith(error: string): StatusMessage {
+  return {
+    error,
+    success: null,
+    setError: () => {},
+    setSuccess: () => {},
+    showSuccess: () => {},
+    clear: () => {},
+  }
+}
+
 import apiDefault from '../../../services/api'
 const api = apiDefault as unknown as {
   uploadModule: ReturnType<typeof vi.fn>
@@ -347,6 +363,44 @@ describe('ModuleUploadPage — upload form (roadmap 2.5)', () => {
     expect(byLabel(/^Provider/).value).toBe('aws')
     expect(byLabel(/Version/).value).toBe('1.0.0')
     expect(inputs.length).toBeGreaterThan(0)
+  })
+
+  // The banner shape that kept this page off StatusAlerts until #765: a bare
+  // alert with no close button and no bottom margin of its own, sitting in the
+  // Stack-spaced form column.
+  it('renders the upload error as a bare alert: no dismiss button, no bottom margin', async () => {
+    const user = userEvent.setup()
+    api.uploadModule.mockRejectedValueOnce(new Error('boom'))
+
+    await openUploadForm(user)
+    const byLabel = (text: RegExp) => screen.getByLabelText(text) as HTMLInputElement
+    await user.type(byLabel(/Namespace/), 'myns')
+    await user.type(byLabel(/Module Name/), 'vpc')
+    await user.type(byLabel(/^Provider/), 'aws')
+    await user.type(byLabel(/Version/), '1.0.0')
+
+    const dropInput = screen.getByTestId('module-upload-dropzone-input') as HTMLInputElement
+    await user.upload(dropInput, new File(['x'], 'm.tar.gz'))
+    await user.click(screen.getByRole('button', { name: /Upload Module/i }))
+
+    // Located via its own text: the org-membership warning renders its own
+    // role="alert" on this page.
+    const banner = (await screen.findByText(/boom/)).closest('[role="alert"]') as HTMLElement
+    expect(banner).not.toBeNull()
+    expect(within(banner).queryByRole('button')).not.toBeInTheDocument()
+
+    // Spacing: emotion hashes the sx object into the class name, so an alert
+    // rendered with mb={0} carries a different class from one rendered with
+    // mb={2}. Computed styles are not usable here — happy-dom does not resolve
+    // emotion's injected rules inside this page's tree.
+    const { container: zero } = render(
+      <StatusAlerts status={idleStatusWith('x')} mb={0} order="error-first" dismissible={false} />,
+    )
+    const { container: two } = render(
+      <StatusAlerts status={idleStatusWith('x')} mb={2} order="error-first" dismissible={false} />,
+    )
+    expect(zero.firstElementChild!.className).not.toBe(two.firstElementChild!.className)
+    expect(banner.className).toBe(zero.firstElementChild!.className)
   })
 })
 

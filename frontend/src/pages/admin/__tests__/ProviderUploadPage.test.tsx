@@ -1,4 +1,4 @@
-import { render, screen, waitFor, fireEvent } from '@testing-library/react'
+import { render, screen, waitFor, fireEvent, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router-dom'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
@@ -21,6 +21,21 @@ vi.mock('../../../services/api', () => ({
 }))
 
 import ProviderUploadPage from '../../admin/ProviderUploadPage'
+import StatusAlerts from '../../../components/StatusAlerts'
+import type { StatusMessage } from '../../../hooks/useStatusMessage'
+
+// A frozen StatusMessage carrying just an error, for rendering a reference
+// StatusAlerts whose emotion class can be compared against the page's banner.
+function idleStatusWith(error: string): StatusMessage {
+  return {
+    error,
+    success: null,
+    setError: () => {},
+    setSuccess: () => {},
+    showSuccess: () => {},
+    clear: () => {},
+  }
+}
 
 function renderPage() {
   return render(
@@ -151,8 +166,7 @@ describe('ProviderUploadPage', () => {
     expect(screen.queryByTestId('provider-upload-dropzone-error')).not.toBeInTheDocument()
   })
 
-  it('shows error alert when upload fails', async () => {
-    const user = userEvent.setup()
+  async function submitAFailingProviderUpload(user: ReturnType<typeof userEvent.setup>) {
     uploadProviderMock.mockRejectedValue(new Error('upload blew up'))
     renderPage()
     await user.click(screen.getByText('Manual Upload'))
@@ -177,7 +191,41 @@ describe('ProviderUploadPage', () => {
       expect(screen.getByRole('button', { name: /^upload provider$/i })).not.toBeDisabled(),
     )
     await user.click(screen.getByRole('button', { name: /^upload provider$/i }))
+  }
+
+  it('shows error alert when upload fails', async () => {
+    const user = userEvent.setup()
+    await submitAFailingProviderUpload(user)
     await waitFor(() => expect(screen.getByText(/upload blew up/)).toBeInTheDocument())
+  })
+
+  // The banner shape that kept this page off StatusAlerts until #765: a bare
+  // alert with no close button and no bottom margin of its own, sitting in the
+  // Stack-spaced form column.
+  it('renders the upload error as a bare alert: no dismiss button, no bottom margin', async () => {
+    const user = userEvent.setup()
+    await submitAFailingProviderUpload(user)
+
+    // Located via its own text: the org-membership warning renders its own
+    // role="alert" on this page.
+    const banner = (await screen.findByText(/upload blew up/)).closest(
+      '[role="alert"]',
+    ) as HTMLElement
+    expect(banner).not.toBeNull()
+    expect(within(banner).queryByRole('button')).not.toBeInTheDocument()
+
+    // Spacing: emotion hashes the sx object into the class name, so an alert
+    // rendered with mb={0} carries a different class from one rendered with
+    // mb={2}. Computed styles are not usable here — happy-dom does not resolve
+    // emotion's injected rules inside this page's tree.
+    const { container: zero } = render(
+      <StatusAlerts status={idleStatusWith('x')} mb={0} order="error-first" dismissible={false} />,
+    )
+    const { container: two } = render(
+      <StatusAlerts status={idleStatusWith('x')} mb={2} order="error-first" dismissible={false} />,
+    )
+    expect(zero.firstElementChild!.className).not.toBe(two.firstElementChild!.className)
+    expect(banner.className).toBe(zero.firstElementChild!.className)
   })
 
   it('shows a Cancel button during upload that aborts without surfacing an error (#602)', async () => {

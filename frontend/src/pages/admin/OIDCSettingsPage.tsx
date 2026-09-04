@@ -205,7 +205,7 @@ const OIDCSettingsPage: React.FC = () => {
             description={t('admin.oidcSettings.pageSubtitle')}
           />
 
-          <StatusAlerts status={status} mb={3} />
+          <StatusAlerts status={status} mb={3} order="error-first" dismissible />
 
           {/* Active config summary */}
           {config && (
