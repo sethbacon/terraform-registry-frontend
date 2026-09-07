@@ -108,8 +108,20 @@ jobs:
       - name: Run OSV Scanner
         # v2.3.8
         id: osv
-        uses: google/osv-scanner-action/osv-scanner-action@6e4298ebc4db23e847df9b2e2de2939d6f066c67 # v2.5.1
-        continue-on-error: true
+        # THE SHARED ACTION, NOT THE OFFICIAL ONE, AND NO continue-on-error (#894).
+        #
+        # `continue-on-error` was the defect: it collapsed exit 1 ("ran, found
+        # something") and the error exits (127 general error, 128 no packages) into
+        # one `outcome == 'failure'`, and it rewrote a failed step's `conclusion` to
+        # `success`. A scanner that had stopped working produced exactly the same
+        # green as one that ran and found nothing, in the run history and in the API
+        # alike.
+        #
+        # The shared action reports the exit code it ACTUALLY got and exposes it as
+        # `outputs.exit-code`, `outputs.findings` and `outputs.errored`, so the steps
+        # below no longer have to infer the verdict from the artifact -- and a
+        # scanner error fails the job immediately rather than passing for clean.
+        uses: 4cloudguru/shared-workflows/.github/actions/osv-scan@3aae0966a70daa50bcfe741ef07e20e86c814af4 # v1.20.2
         with:
           # JSON so the triage step below can classify findings; it prints a
           # readable summary in place of the table.
@@ -135,6 +147,15 @@ jobs:
           # Passed through env, not `${{ }}` inside `script:`, which would be a
           # template-injection sink. A non-zero scanner exit with no findings at
           # all is a scan that did not happen; the filer refuses to report clean.
+          #
+          # Still `outcome`, and it is now SHARPER than it was. Under
+          # `continue-on-error` a non-success outcome meant "found something OR
+          # broke", so the filer had to disambiguate on the package count. With
+          # the shared action findings no longer fail the step, so the only way
+          # this is not `success` is a genuine scanner error -- exactly the case
+          # the guard exists for. osv-report.mjs and its unit tests are
+          # unchanged, deliberately: the contract they were written against
+          # still holds, and narrowing it is a separate change (#894).
           OSV_SCAN_OUTCOME: ${{ steps.osv.outcome }}
         with:
           script: |
