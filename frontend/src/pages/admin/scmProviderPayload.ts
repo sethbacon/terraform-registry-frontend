@@ -11,6 +11,7 @@ import type { CreateSCMProviderRequest, UpdateSCMProviderRequest } from '../../t
 export interface SCMSecretClearFlags {
   clientSecret?: boolean
   appPrivateKey?: boolean
+  entraCertificate?: boolean
 }
 
 /**
@@ -57,6 +58,12 @@ export function buildUpdateSCMProviderPayload(
     payload.app_private_key = ''
   } else if (form.app_private_key) {
     payload.app_private_key = form.app_private_key
+  }
+
+  if (clear.entraCertificate) {
+    payload.entra_certificate = ''
+  } else if (form.entra_certificate) {
+    payload.entra_certificate = form.entra_certificate
   }
 
   return payload
