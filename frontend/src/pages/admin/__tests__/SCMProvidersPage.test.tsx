@@ -357,11 +357,31 @@ describe('SCMProvidersPage', () => {
     )
     await userEvent.click(screen.getByRole('button', { name: /add provider/i }))
     await waitFor(() => expect(screen.getByText('Add SCM Provider')).toBeInTheDocument())
-    await userEvent.type(screen.getByLabelText(/^Name/i), 'My GitHub')
-    await userEvent.type(screen.getByLabelText(/Client ID/i), 'client-123')
+    await userEvent.type(screen.getByLabelText(/^Name/i), 'My ADO')
+    await userEvent.type(screen.getByLabelText(/Tenant ID/i), 'tenant-123')
+    await userEvent.type(screen.getByLabelText(/^App ID/i), 'client-123')
     await userEvent.type(screen.getByLabelText(/Client Secret/i), 'secret-456')
+    await userEvent.type(screen.getByLabelText(/Base URL/i), 'https://dev.azure.com/acme')
     await userEvent.click(screen.getByRole('button', { name: /^create$/i }))
     await waitFor(() => expect(createSCMProviderMock).toHaveBeenCalled())
+    expect(createSCMProviderMock.mock.calls[0][0].provider_type).toBe('azuredevops')
+  })
+
+  it('opens the Add dialog on Azure DevOps rather than GitHub', async () => {
+    // Azure DevOps is the provider operators add here; defaulting to GitHub
+    // made the Tenant ID and organization-bearing Base URL fields absent until
+    // the type was changed, which is easy to miss.
+    listSCMProvidersMock.mockResolvedValue([])
+    mockMemberships = fakeMemberships
+    renderPage()
+    await waitFor(() =>
+      expect(screen.getByRole('button', { name: /add provider/i })).toBeInTheDocument(),
+    )
+    await userEvent.click(screen.getByRole('button', { name: /add provider/i }))
+    await waitFor(() => expect(screen.getByText('Add SCM Provider')).toBeInTheDocument())
+
+    expect(screen.getByLabelText(/provider type/i)).toHaveTextContent(/azure devops/i)
+    expect(screen.getByLabelText(/tenant id/i)).toBeInTheDocument()
   })
 
   it('creates a GitHub App provider with app fields and no client secret', async () => {
@@ -375,7 +395,10 @@ describe('SCMProvidersPage', () => {
     await userEvent.click(screen.getByRole('button', { name: /add provider/i }))
     await waitFor(() => expect(screen.getByText('Add SCM Provider')).toBeInTheDocument())
     await userEvent.type(screen.getByLabelText(/^Name/i), 'GH App')
-    // provider_type defaults to github; switch to the shared app credential mode.
+    // provider_type defaults to azuredevops; switch to GitHub, then to the
+    // shared app credential mode.
+    await userEvent.click(screen.getByRole('combobox', { name: /Provider Type/i }))
+    await userEvent.click(await screen.findByRole('option', { name: /^GitHub$/ }))
     await userEvent.click(screen.getByRole('combobox', { name: /Authentication/i }))
     await userEvent.click(await screen.findByRole('option', { name: /Shared app credential/i }))
     await userEvent.type(screen.getByLabelText(/GitHub App ID/i), '12345')
