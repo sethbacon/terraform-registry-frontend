@@ -575,6 +575,102 @@ describe('SCMProvidersPage', () => {
     expect('client_secret' in updateSCMProviderMock.mock.calls[0][1]).toBe(false)
   })
 
+  // #908 — workload identity federation. The credential type is Azure DevOps
+  // only, and a federated provider carries neither a tenant id nor a secret:
+  // the platform projects a token and the row records only which identity to
+  // assume. The backend rejects both if sent.
+  const adoProvider = {
+    ...fakeProviders[0],
+    id: 'scm-ado',
+    name: 'Azure DevOps',
+    provider_type: 'azuredevops' as const,
+    base_url: 'https://dev.azure.com/acme',
+    tenant_id: 'tenant-1',
+    auth_mode: 'entra_app' as const,
+    has_client_secret: true,
+  }
+
+  it('offers no credential type for a non-Azure-DevOps provider', () => {
+    // The column is meaningless outside entra_app, and offering it on a GitHub
+    // provider would invite a value the backend refuses.
+    listSCMProvidersMock.mockResolvedValue(fakeProviders)
+    renderPage()
+    return waitFor(() => expect(screen.getByText('GitHub Enterprise')).toBeInTheDocument()).then(
+      async () => {
+        await userEvent.click(screen.getByRole('button', { name: /edit scm provider/i }))
+        await waitFor(() => expect(screen.getByText('Edit Provider')).toBeInTheDocument())
+        expect(screen.queryByLabelText(/credential type/i)).not.toBeInTheDocument()
+      },
+    )
+  })
+
+  it('offers no credential type for an Azure DevOps provider on per-user OAuth', async () => {
+    // The column is only read when auth_mode is entra_app -- the backend's shape
+    // CHECK is scoped to it. Offering the control on an oauth_user provider lets
+    // an operator set a value that is stored and then never consulted, which
+    // reads as "I chose federation" while the provider still uses OAuth.
+    listSCMProvidersMock.mockResolvedValue([{ ...adoProvider, auth_mode: 'oauth_user' as const }])
+    renderPage()
+    await userEvent.click(await screen.findByRole('button', { name: /edit scm provider/i }))
+    await waitFor(() => expect(screen.getByText('Edit Provider')).toBeInTheDocument())
+
+    expect(screen.queryByLabelText(/credential type/i)).not.toBeInTheDocument()
+  })
+
+  it('renders an existing provider with no credential type as Client secret', async () => {
+    // The whole installed base has no value in this column; reading absent as
+    // anything but client_secret would reclassify every existing provider.
+    listSCMProvidersMock.mockResolvedValue([adoProvider])
+    renderPage()
+    // The card shows "Azure DevOps" as both the name and the provider-type
+    // label, so wait on the control being clicked rather than the text.
+    await userEvent.click(await screen.findByRole('button', { name: /edit scm provider/i }))
+    await waitFor(() => expect(screen.getByText('Edit Provider')).toBeInTheDocument())
+
+    expect(screen.getByLabelText(/credential type/i)).toHaveTextContent(/client secret/i)
+    expect(screen.getByLabelText(/tenant id/i)).toBeInTheDocument()
+  })
+
+  it('hides the tenant id and client secret once federation is selected', async () => {
+    listSCMProvidersMock.mockResolvedValue([adoProvider])
+    renderPage()
+    // The card shows "Azure DevOps" as both the name and the provider-type
+    // label, so wait on the control being clicked rather than the text.
+    await userEvent.click(await screen.findByRole('button', { name: /edit scm provider/i }))
+    await waitFor(() => expect(screen.getByText('Edit Provider')).toBeInTheDocument())
+
+    await userEvent.click(screen.getByLabelText(/credential type/i))
+    await userEvent.click(await screen.findByRole('option', { name: /workload identity/i }))
+
+    expect(screen.queryByLabelText(/tenant id/i)).not.toBeInTheDocument()
+    expect(screen.queryByLabelText(/client secret/i)).not.toBeInTheDocument()
+  })
+
+  it('switches to federation and retires the stored secret in ONE request', async () => {
+    // Neither intermediate state satisfies the backend's shape constraint, so
+    // the type change and the secret removal must travel together. Sending the
+    // type alone is a 400; sending it without clearing leaves a retired secret
+    // in the database.
+    listSCMProvidersMock.mockResolvedValue([adoProvider])
+    updateSCMProviderMock.mockResolvedValue({})
+    renderPage()
+    // The card shows "Azure DevOps" as both the name and the provider-type
+    // label, so wait on the control being clicked rather than the text.
+    await userEvent.click(await screen.findByRole('button', { name: /edit scm provider/i }))
+    await waitFor(() => expect(screen.getByText('Edit Provider')).toBeInTheDocument())
+
+    await userEvent.click(screen.getByLabelText(/credential type/i))
+    await userEvent.click(await screen.findByRole('option', { name: /workload identity/i }))
+    await userEvent.click(screen.getByRole('button', { name: /^update$/i }))
+
+    await waitFor(() => expect(updateSCMProviderMock).toHaveBeenCalled())
+    const body = updateSCMProviderMock.mock.calls[0][1]
+    expect(body.entra_credential_type).toBe('federated')
+    expect('client_secret' in body).toBe(true)
+    expect(body.client_secret).toBe('')
+    expect(body.tenant_id).toBeNull()
+  })
+
   it('cancels the Edit dialog', async () => {
     listSCMProvidersMock.mockResolvedValue(fakeProviders)
     renderPage()

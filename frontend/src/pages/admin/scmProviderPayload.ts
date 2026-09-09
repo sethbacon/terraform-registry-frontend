@@ -42,6 +42,7 @@ export function buildUpdateSCMProviderPayload(
     client_id: form.client_id,
     webhook_secret: form.webhook_secret,
     auth_mode: form.auth_mode,
+    entra_credential_type: form.entra_credential_type,
     github_app_id: form.github_app_id,
     github_installation_id: form.github_installation_id,
   }

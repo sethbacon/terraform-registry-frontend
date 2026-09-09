@@ -51,6 +51,7 @@ import type {
   SCMProviderType,
   SCMAuthMode,
   CreateSCMProviderRequest,
+  SCMEntraCredentialType,
 } from '../../types/scm'
 import { queryKeys } from '../../services/queryKeys'
 import OrganizationFilter from '../../components/OrganizationFilter'
@@ -950,18 +951,61 @@ const SCMProvidersPage: React.FC = () => {
                   </FormControl>
                 )}
 
-                {(editingProvider?.provider_type || formData.provider_type) === 'azuredevops' && (
-                  <TextField
-                    label={t('admin.scmProviders.labelTenantId')}
-                    fullWidth
-                    value={formData.tenant_id || ''}
-                    onChange={(e) =>
-                      setFormData({ ...formData, tenant_id: e.target.value || null })
-                    }
-                    required
-                    helperText={t('admin.scmProviders.helpTenantId')}
-                  />
-                )}
+                {(editingProvider?.provider_type || formData.provider_type) === 'azuredevops' &&
+                  (formData.auth_mode || 'oauth_user') === 'entra_app' && (
+                    <FormControl fullWidth>
+                      <InputLabel id="entra-credential-type-label">
+                        {t('admin.scmProviders.labelCredentialType')}
+                      </InputLabel>
+                      <Select
+                        labelId="entra-credential-type-label"
+                        value={entraCredentialTypeOf(formData)}
+                        label={t('admin.scmProviders.labelCredentialType')}
+                        onChange={(e) => {
+                          const next = e.target.value as SCMEntraCredentialType
+                          // Clear what no longer applies as the type changes. The
+                          // backend refuses a federated provider that carries a
+                          // tenant id or a secret, so a value typed under the
+                          // other type must never reach the request.
+                          setFormData({
+                            ...formData,
+                            entra_credential_type: next,
+                            ...(next === 'federated' ? { tenant_id: null, client_secret: '' } : {}),
+                          })
+                          // Blanking the field is not enough on an existing
+                          // provider: an untouched blank is OMITTED from the
+                          // request, so the stored secret would survive and the
+                          // backend would refuse a federated row that still
+                          // carries one. Switching the type IS the instruction
+                          // to retire it, and both must travel in one request
+                          // because neither intermediate state is a legal row.
+                          setClearClientSecret(next === 'federated')
+                        }}
+                      >
+                        <MenuItem value="client_secret">
+                          {t('admin.scmProviders.credTypeClientSecret')}
+                        </MenuItem>
+                        <MenuItem value="federated">
+                          {t('admin.scmProviders.credTypeFederated')}
+                        </MenuItem>
+                      </Select>
+                      <FormHelperText>{t('admin.scmProviders.helpCredentialType')}</FormHelperText>
+                    </FormControl>
+                  )}
+
+                {(editingProvider?.provider_type || formData.provider_type) === 'azuredevops' &&
+                  federatedFieldsApply(formData) && (
+                    <TextField
+                      label={t('admin.scmProviders.labelTenantId')}
+                      fullWidth
+                      value={formData.tenant_id || ''}
+                      onChange={(e) =>
+                        setFormData({ ...formData, tenant_id: e.target.value || null })
+                      }
+                      required
+                      helperText={t('admin.scmProviders.helpTenantId')}
+                    />
+                  )}
 
                 {!isPATProvider(editingProvider?.provider_type || formData.provider_type) &&
                   !(
@@ -980,33 +1024,37 @@ const SCMProvidersPage: React.FC = () => {
                         helperText={t('admin.scmProviders.helpClientId')}
                       />
 
-                      <TextField
-                        label={getClientSecretLabel(
-                          editingProvider?.provider_type || formData.provider_type || 'github',
-                        )}
-                        type="password"
-                        fullWidth
-                        value={clearClientSecret ? '' : formData.client_secret}
-                        onChange={(e) =>
-                          setFormData({ ...formData, client_secret: e.target.value })
-                        }
-                        disabled={clearClientSecret}
-                        required={!editingProvider}
-                        helperText={
-                          editingProvider ? t('admin.scmProviders.helpClientSecretKeep') : ''
-                        }
-                      />
+                      {federatedFieldsApply(formData) && (
+                        <>
+                          <TextField
+                            label={getClientSecretLabel(
+                              editingProvider?.provider_type || formData.provider_type || 'github',
+                            )}
+                            type="password"
+                            fullWidth
+                            value={clearClientSecret ? '' : formData.client_secret}
+                            onChange={(e) =>
+                              setFormData({ ...formData, client_secret: e.target.value })
+                            }
+                            disabled={clearClientSecret}
+                            required={!editingProvider}
+                            helperText={
+                              editingProvider ? t('admin.scmProviders.helpClientSecretKeep') : ''
+                            }
+                          />
 
-                      {editingProvider?.has_client_secret && (
-                        <FormControlLabel
-                          control={
-                            <Checkbox
-                              checked={clearClientSecret}
-                              onChange={(e) => setClearClientSecret(e.target.checked)}
+                          {editingProvider?.has_client_secret && (
+                            <FormControlLabel
+                              control={
+                                <Checkbox
+                                  checked={clearClientSecret}
+                                  onChange={(e) => setClearClientSecret(e.target.checked)}
+                                />
+                              }
+                              label={t('admin.scmProviders.labelRemoveClientSecret')}
                             />
-                          }
-                          label={t('admin.scmProviders.labelRemoveClientSecret')}
-                        />
+                          )}
+                        </>
                       )}
                     </>
                   )}
@@ -1101,20 +1149,10 @@ const SCMProvidersPage: React.FC = () => {
               <Button
                 variant="contained"
                 onClick={editingProvider ? handleUpdate : handleCreate}
-                disabled={(() => {
-                  if (!formData.name) return true
-                  const ptype = editingProvider?.provider_type || formData.provider_type
-                  const authMode = formData.auth_mode || 'oauth_user'
-                  if (isPATProvider(ptype)) return !formData.base_url
-                  if (ptype === 'github' && authMode === 'github_app') {
-                    return (
-                      !formData.github_app_id ||
-                      !formData.github_installation_id ||
-                      (!editingProvider && !formData.app_private_key)
-                    )
-                  }
-                  return !formData.client_id || (!editingProvider && !formData.client_secret)
-                })()}
+                disabled={isSCMProviderSubmitBlocked(formData, {
+                  providerType: editingProvider?.provider_type,
+                  isEditing: !!editingProvider,
+                })}
               >
                 {editingProvider ? t('admin.scmProviders.update') : t('admin.scmProviders.create')}
               </Button>
@@ -1190,5 +1228,10 @@ const SCMProvidersPage: React.FC = () => {
   )
 }
 import { buildUpdateSCMProviderPayload } from './scmProviderPayload'
+import {
+  entraCredentialTypeOf,
+  federatedFieldsApply,
+  isSCMProviderSubmitBlocked,
+} from './scmProviderForm'
 
 export default SCMProvidersPage
