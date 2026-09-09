@@ -109,6 +109,7 @@ const SCMProvidersPage: React.FC = () => {
   // looks like and cannot also mean "delete this" (#909).
   const [clearClientSecret, setClearClientSecret] = useState(false)
   const [clearAppPrivateKey, setClearAppPrivateKey] = useState(false)
+  const [clearEntraCertificate, setClearEntraCertificate] = useState(false)
 
   // Per-provider "Test connection" (verify) outcomes for app-mode providers.
   const [verifyingId, setVerifyingId] = useState<string | null>(null)
@@ -207,6 +208,7 @@ const SCMProvidersPage: React.FC = () => {
         buildUpdateSCMProviderPayload(formData, {
           clientSecret: clearClientSecret,
           appPrivateKey: clearAppPrivateKey,
+          entraCertificate: clearEntraCertificate,
         }),
       )
     },
@@ -342,6 +344,7 @@ const SCMProvidersPage: React.FC = () => {
     })
     setClearClientSecret(false)
     setClearAppPrivateKey(false)
+    setClearEntraCertificate(false)
   }
 
   const openEditDialog = (provider: SCMProvider) => {
@@ -355,6 +358,7 @@ const SCMProvidersPage: React.FC = () => {
       client_secret: '', // Don't show existing secret
       webhook_secret: provider.webhook_secret || '',
       auth_mode: provider.auth_mode || 'oauth_user',
+      entra_credential_type: provider.entra_credential_type,
       github_app_id: provider.github_app_id || '',
       github_installation_id: provider.github_installation_id || '',
       app_private_key: '', // Don't show existing private key
@@ -367,6 +371,9 @@ const SCMProvidersPage: React.FC = () => {
     // kept because the cost of a future close path that forgets resetForm is a
     // silently destroyed credential on the NEXT provider edited, which is the
     // failure this whole change exists to prevent.
+    setClearClientSecret(false)
+    setClearAppPrivateKey(false)
+    setClearEntraCertificate(false)
   }
 
   const getProviderIcon = (type: SCMProviderType) => {
@@ -970,16 +977,22 @@ const SCMProvidersPage: React.FC = () => {
                           setFormData({
                             ...formData,
                             entra_credential_type: next,
-                            ...(next === 'federated' ? { tenant_id: null, client_secret: '' } : {}),
+                            ...(next === 'federated'
+                              ? { tenant_id: null, client_secret: '', entra_certificate: '' }
+                              : {}),
+                            ...(next === 'certificate' ? { client_secret: '' } : {}),
+                            ...(next === 'client_secret' ? { entra_certificate: '' } : {}),
                           })
-                          // Blanking the field is not enough on an existing
+                          // Blanking a field is not enough on an existing
                           // provider: an untouched blank is OMITTED from the
-                          // request, so the stored secret would survive and the
-                          // backend would refuse a federated row that still
-                          // carries one. Switching the type IS the instruction
-                          // to retire it, and both must travel in one request
+                          // request, so the stored credential would survive and
+                          // the backend would refuse a row that still carries
+                          // material of another type. Switching the type IS the
+                          // instruction to retire what no longer applies, and
+                          // the retirement must travel in the same request
                           // because neither intermediate state is a legal row.
-                          setClearClientSecret(next === 'federated')
+                          setClearClientSecret(next !== 'client_secret')
+                          setClearEntraCertificate(next !== 'certificate')
                         }}
                       >
                         <MenuItem value="client_secret">
@@ -987,6 +1000,9 @@ const SCMProvidersPage: React.FC = () => {
                         </MenuItem>
                         <MenuItem value="federated">
                           {t('admin.scmProviders.credTypeFederated')}
+                        </MenuItem>
+                        <MenuItem value="certificate">
+                          {t('admin.scmProviders.credTypeCertificate')}
                         </MenuItem>
                       </Select>
                       <FormHelperText>{t('admin.scmProviders.helpCredentialType')}</FormHelperText>
@@ -1024,7 +1040,7 @@ const SCMProvidersPage: React.FC = () => {
                         helperText={t('admin.scmProviders.helpClientId')}
                       />
 
-                      {federatedFieldsApply(formData) && (
+                      {secretFieldsApply(formData) && (
                         <>
                           <TextField
                             label={getClientSecretLabel(
@@ -1056,6 +1072,42 @@ const SCMProvidersPage: React.FC = () => {
                           )}
                         </>
                       )}
+
+                      {(editingProvider?.provider_type || formData.provider_type) ===
+                        'azuredevops' &&
+                        (formData.auth_mode || 'oauth_user') === 'entra_app' &&
+                        certificateFieldsApply(formData) && (
+                          <>
+                            <TextField
+                              label={t('admin.scmProviders.labelEntraCertificate')}
+                              fullWidth
+                              multiline
+                              minRows={6}
+                              value={clearEntraCertificate ? '' : formData.entra_certificate || ''}
+                              onChange={(e) =>
+                                setFormData({ ...formData, entra_certificate: e.target.value })
+                              }
+                              disabled={clearEntraCertificate}
+                              required={!editingProvider}
+                              helperText={
+                                editingProvider
+                                  ? t('admin.scmProviders.helpEntraCertificateKeep')
+                                  : t('admin.scmProviders.helpEntraCertificate')
+                              }
+                            />
+                            {editingProvider?.has_entra_certificate && (
+                              <FormControlLabel
+                                control={
+                                  <Checkbox
+                                    checked={clearEntraCertificate}
+                                    onChange={(e) => setClearEntraCertificate(e.target.checked)}
+                                  />
+                                }
+                                label={t('admin.scmProviders.labelRemoveEntraCertificate')}
+                              />
+                            )}
+                          </>
+                        )}
                     </>
                   )}
 
@@ -1229,9 +1281,11 @@ const SCMProvidersPage: React.FC = () => {
 }
 import { buildUpdateSCMProviderPayload } from './scmProviderPayload'
 import {
+  certificateFieldsApply,
   entraCredentialTypeOf,
   federatedFieldsApply,
   isSCMProviderSubmitBlocked,
+  secretFieldsApply,
 } from './scmProviderForm'
 
 export default SCMProvidersPage

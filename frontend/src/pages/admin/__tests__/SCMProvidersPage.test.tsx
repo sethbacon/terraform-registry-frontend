@@ -671,6 +671,91 @@ describe('SCMProvidersPage', () => {
     expect(body.tenant_id).toBeNull()
   })
 
+  // #1041 — certificate credential in the UI.
+  const PEM =
+    '-----BEGIN CERTIFICATE-----\nMIIB\n-----END CERTIFICATE-----\n-----BEGIN PRIVATE KEY-----\nMIIE\n-----END PRIVATE KEY-----'
+
+  it('renders an existing federated provider as federated, not as the default', async () => {
+    // Regression for #914, which never loaded entra_credential_type into the
+    // form: a federated provider opened as "Client secret" with the tenant and
+    // secret fields showing.
+    listSCMProvidersMock.mockResolvedValue([
+      {
+        ...adoProvider,
+        tenant_id: null,
+        has_client_secret: false,
+        entra_credential_type: 'federated' as const,
+      },
+    ])
+    renderPage()
+    await userEvent.click(await screen.findByRole('button', { name: /edit scm provider/i }))
+    await waitFor(() => expect(screen.getByText('Edit Provider')).toBeInTheDocument())
+
+    expect(screen.getByLabelText(/credential type/i)).toHaveTextContent(/workload identity/i)
+    expect(screen.queryByLabelText(/tenant id/i)).not.toBeInTheDocument()
+    expect(screen.queryByLabelText(/^client secret/i)).not.toBeInTheDocument()
+  })
+
+  it('selecting certificate hides the secret and shows the bundle field', async () => {
+    listSCMProvidersMock.mockResolvedValue([adoProvider])
+    renderPage()
+    await userEvent.click(await screen.findByRole('button', { name: /edit scm provider/i }))
+    await waitFor(() => expect(screen.getByText('Edit Provider')).toBeInTheDocument())
+
+    await userEvent.click(screen.getByLabelText(/credential type/i))
+    await userEvent.click(await screen.findByRole('option', { name: /^certificate$/i }))
+
+    expect(screen.queryByLabelText(/^client secret/i)).not.toBeInTheDocument()
+    expect(screen.getByLabelText(/certificate and private key/i)).toBeInTheDocument()
+    // The tenant stays: the signed assertion names it.
+    expect(screen.getByLabelText(/tenant id/i)).toBeInTheDocument()
+  })
+
+  it('switches to certificate: type, bundle and secret retirement in ONE request', async () => {
+    listSCMProvidersMock.mockResolvedValue([adoProvider])
+    updateSCMProviderMock.mockResolvedValue({})
+    renderPage()
+    await userEvent.click(await screen.findByRole('button', { name: /edit scm provider/i }))
+    await waitFor(() => expect(screen.getByText('Edit Provider')).toBeInTheDocument())
+
+    await userEvent.click(screen.getByLabelText(/credential type/i))
+    await userEvent.click(await screen.findByRole('option', { name: /^certificate$/i }))
+    await userEvent.type(screen.getByLabelText(/certificate and private key/i), PEM)
+    await userEvent.click(screen.getByRole('button', { name: /^update$/i }))
+
+    await waitFor(() => expect(updateSCMProviderMock).toHaveBeenCalled())
+    const body = updateSCMProviderMock.mock.calls[0][1]
+    expect(body.entra_credential_type).toBe('certificate')
+    expect(body.entra_certificate).toBe(PEM)
+    expect(body.client_secret).toBe('')
+  })
+
+  it('switching a certificate provider back to a secret retires the bundle in the same request', async () => {
+    listSCMProvidersMock.mockResolvedValue([
+      {
+        ...adoProvider,
+        has_client_secret: false,
+        has_entra_certificate: true,
+        entra_credential_type: 'certificate' as const,
+      },
+    ])
+    updateSCMProviderMock.mockResolvedValue({})
+    renderPage()
+    await userEvent.click(await screen.findByRole('button', { name: /edit scm provider/i }))
+    await waitFor(() => expect(screen.getByText('Edit Provider')).toBeInTheDocument())
+
+    await userEvent.click(screen.getByLabelText(/credential type/i))
+    await userEvent.click(await screen.findByRole('option', { name: /^client secret$/i }))
+    await userEvent.type(screen.getByLabelText(/^client secret/i), 'new-secret')
+    await userEvent.click(screen.getByRole('button', { name: /^update$/i }))
+
+    await waitFor(() => expect(updateSCMProviderMock).toHaveBeenCalled())
+    const body = updateSCMProviderMock.mock.calls[0][1]
+    expect(body.entra_credential_type).toBe('client_secret')
+    expect(body.client_secret).toBe('new-secret')
+    expect(body.entra_certificate).toBe('')
+  })
+
   it('cancels the Edit dialog', async () => {
     listSCMProvidersMock.mockResolvedValue(fakeProviders)
     renderPage()

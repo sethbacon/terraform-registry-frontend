@@ -1,9 +1,11 @@
 import { describe, it, expect } from 'vitest'
 
 import {
+  certificateFieldsApply,
   entraCredentialTypeOf,
   federatedFieldsApply,
   isSCMProviderSubmitBlocked,
+  secretFieldsApply,
 } from '../scmProviderForm'
 import type { CreateSCMProviderRequest } from '../../../types/scm'
 
@@ -111,6 +113,60 @@ describe('isSCMProviderSubmitBlocked — Azure DevOps with workload identity', (
 
   it('still requires the base URL', () => {
     expect(create({ ...adoFederated, base_url: null })).toBe(true)
+  })
+})
+
+// #1041 — a certificate provider signs an assertion with a held key. It needs
+// a tenant (the assertion names it) and the bundle, and must not carry a
+// secret; the backend refuses one sent alongside.
+const adoCertificate: Partial<CreateSCMProviderRequest> = {
+  name: 'ado-cert',
+  provider_type: 'azuredevops',
+  auth_mode: 'entra_app',
+  entra_credential_type: 'certificate',
+  base_url: 'https://dev.azure.com/acme',
+  tenant_id: 'tenant-1',
+  client_id: 'client-1',
+  entra_certificate: '-----BEGIN CERTIFICATE-----',
+}
+
+describe('field applicability per credential type', () => {
+  it('only client_secret collects a secret; only certificate collects a bundle', () => {
+    expect(secretFieldsApply({})).toBe(true)
+    expect(secretFieldsApply({ entra_credential_type: 'client_secret' })).toBe(true)
+    expect(secretFieldsApply({ entra_credential_type: 'federated' })).toBe(false)
+    expect(secretFieldsApply({ entra_credential_type: 'certificate' })).toBe(false)
+
+    expect(certificateFieldsApply({})).toBe(false)
+    expect(certificateFieldsApply({ entra_credential_type: 'certificate' })).toBe(true)
+    expect(certificateFieldsApply({ entra_credential_type: 'federated' })).toBe(false)
+  })
+
+  it('a certificate provider still has a tenant id', () => {
+    // Unlike federated: the signed assertion names the tenant.
+    expect(federatedFieldsApply({ entra_credential_type: 'certificate' })).toBe(true)
+  })
+})
+
+describe('isSCMProviderSubmitBlocked — Azure DevOps with a certificate', () => {
+  it('allows a complete form', () => {
+    expect(create(adoCertificate)).toBe(false)
+  })
+
+  it('requires the bundle on create but not on edit', () => {
+    expect(create({ ...adoCertificate, entra_certificate: '' })).toBe(true)
+    // On edit the stored bundle is never returned, so blank means unchanged.
+    expect(edit({ ...adoCertificate, entra_certificate: '' }, 'azuredevops')).toBe(false)
+  })
+
+  it('does not require a client secret', () => {
+    expect(create({ ...adoCertificate, client_secret: '' })).toBe(false)
+  })
+
+  it('still requires a tenant id, a client id and a base URL', () => {
+    expect(create({ ...adoCertificate, tenant_id: null })).toBe(true)
+    expect(create({ ...adoCertificate, client_id: '' })).toBe(true)
+    expect(create({ ...adoCertificate, base_url: null })).toBe(true)
   })
 })
 

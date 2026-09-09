@@ -7,16 +7,15 @@ export type SCMAuthMode = 'oauth_user' | 'entra_app' | 'github_app'
 /**
  * How an `entra_app` provider proves itself to Microsoft Entra.
  *
- * Only these two exist. The backend's CHECK constraint accepts nothing else, so
- * `managed_identity` and `certificate` -- which an earlier design listed -- are
- * refused by the database and rejected by the create handler. They are tracked
- * separately (registry-backend #1042 and #1041) and must not be offered here
- * until they land.
+ * Only these three exist. The backend's CHECK constraint accepts nothing else,
+ * so `managed_identity` -- which an earlier design listed -- is refused by the
+ * database and rejected by the create handler. It is tracked separately
+ * (registry-backend #1042) and must not be offered here until it lands.
  *
  * Absent means `client_secret`: every provider written before the column
  * existed carries the column default.
  */
-export type SCMEntraCredentialType = 'client_secret' | 'federated'
+export type SCMEntraCredentialType = 'client_secret' | 'federated' | 'certificate'
 
 export interface SCMProvider {
   id: string
@@ -36,6 +35,7 @@ export interface SCMProvider {
   github_installation_id?: string | null
   has_client_secret?: boolean
   has_app_private_key?: boolean
+  has_entra_certificate?: boolean
 }
 
 export interface CreateSCMProviderRequest {
@@ -52,6 +52,7 @@ export interface CreateSCMProviderRequest {
   github_app_id?: string
   github_installation_id?: string
   app_private_key?: string
+  entra_certificate?: string
 }
 
 export interface UpdateSCMProviderRequest {
@@ -67,6 +68,7 @@ export interface UpdateSCMProviderRequest {
   github_app_id?: string
   github_installation_id?: string
   app_private_key?: string
+  entra_certificate?: string
 }
 
 export interface SCMProviderVerifyResult {

@@ -41,6 +41,20 @@ export function federatedFieldsApply(form: Partial<CreateSCMProviderRequest>): b
 }
 
 /**
+ * Whether the client-secret field applies. Only the client_secret type carries
+ * one; federated and certificate providers must not, and the backend refuses a
+ * secret sent alongside either (#1041).
+ */
+export function secretFieldsApply(form: Partial<CreateSCMProviderRequest>): boolean {
+  return entraCredentialTypeOf(form) === 'client_secret'
+}
+
+/** Whether the certificate bundle field applies -- the certificate type only. */
+export function certificateFieldsApply(form: Partial<CreateSCMProviderRequest>): boolean {
+  return entraCredentialTypeOf(form) === 'certificate'
+}
+
+/**
  * isSCMProviderSubmitBlocked decides whether the Create/Update button is
  * disabled, and is the single place the per-provider field rules live.
  *
@@ -81,8 +95,13 @@ export function isSCMProviderSubmitBlocked(
       // Federated: the client id above is the whole credential.
       return false
     }
-    // Everything else on Azure DevOps needs a tenant, and a secret on create.
+    // Everything else on Azure DevOps needs a tenant.
     if (!form.tenant_id) return true
+    if (authMode === 'entra_app' && certificateFieldsApply(form)) {
+      // Certificate: the bundle is the credential. Required on create; on
+      // edit a blank means "keep the stored one", exactly as for the secret.
+      return !isEditing && !form.entra_certificate
+    }
     return !isEditing && !form.client_secret
   }
 

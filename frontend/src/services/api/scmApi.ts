@@ -50,6 +50,7 @@ export async function updateSCMProvider(
     is_active?: boolean
     auth_mode?: string
     entra_credential_type?: string
+    entra_certificate?: string
     github_app_id?: string
     github_installation_id?: string
     app_private_key?: string

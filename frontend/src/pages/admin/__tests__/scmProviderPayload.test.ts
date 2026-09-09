@@ -112,6 +112,30 @@ describe('buildUpdateSCMProviderPayload', () => {
     expect(payload.github_app_id).toBe('12345')
   })
 
+  // #1041 — the certificate bundle follows the same rule as the other two
+  // write-only credentials: typed → sent, removal → "", untouched → omitted.
+  it('omits an untouched certificate bundle', () => {
+    const payload = buildUpdateSCMProviderPayload({ ...untouchedEditForm, entra_certificate: '' })
+    expect('entra_certificate' in payload).toBe(false)
+  })
+
+  it('sends a bundle the operator pasted', () => {
+    const payload = buildUpdateSCMProviderPayload({
+      ...untouchedEditForm,
+      entra_certificate: '-----BEGIN CERTIFICATE-----',
+    })
+    expect(payload.entra_certificate).toBe('-----BEGIN CERTIFICATE-----')
+  })
+
+  it('sends an empty bundle only on explicit removal, which beats a typed value', () => {
+    const payload = buildUpdateSCMProviderPayload(
+      { ...untouchedEditForm, entra_certificate: 'left-over' },
+      { entraCertificate: true },
+    )
+    expect('entra_certificate' in payload).toBe(true)
+    expect(payload.entra_certificate).toBe('')
+  })
+
   it('defaults to no removal when no flags are given', () => {
     const payload = buildUpdateSCMProviderPayload({ name: 'n' })
 
