@@ -90,7 +90,7 @@ const SCMProvidersPage: React.FC = () => {
 
   const [formData, setFormData] = useState<Partial<CreateSCMProviderRequest>>({
     organization_id: undefined,
-    provider_type: 'github',
+    provider_type: 'azuredevops',
     name: '',
     base_url: null,
     tenant_id: null,
@@ -330,7 +330,7 @@ const SCMProvidersPage: React.FC = () => {
   const resetForm = () => {
     setFormData({
       organization_id: undefined,
-      provider_type: 'github',
+      provider_type: 'azuredevops',
       name: '',
       base_url: null,
       tenant_id: null,
