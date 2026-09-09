@@ -1,6 +1,13 @@
 <!-- markdownlint-disable MD013 MD024 MD041 -->
 # Changelog
 
+## [2.28.1](https://github.com/sethbacon/terraform-registry-frontend/compare/v2.28.0...v2.28.1) (2026-09-09)
+
+
+### Bug Fixes
+
+* **scm:** stop sending an empty client_secret on every provider edit ([#911](https://github.com/sethbacon/terraform-registry-frontend/issues/911)) ([ffd67e1](https://github.com/sethbacon/terraform-registry-frontend/commit/ffd67e1191a1742c0c293b3df2955bd69501d80c)), closes [#909](https://github.com/sethbacon/terraform-registry-frontend/issues/909)
+
 ## [2.28.0](https://github.com/sethbacon/terraform-registry-frontend/compare/v2.27.3...v2.28.0) (2026-09-04)
 
 
