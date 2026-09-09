@@ -4,6 +4,20 @@ export type SCMProviderType = 'github' | 'azuredevops' | 'gitlab' | 'bitbucket_d
 
 export type SCMAuthMode = 'oauth_user' | 'entra_app' | 'github_app'
 
+/**
+ * How an `entra_app` provider proves itself to Microsoft Entra.
+ *
+ * Only these two exist. The backend's CHECK constraint accepts nothing else, so
+ * `managed_identity` and `certificate` -- which an earlier design listed -- are
+ * refused by the database and rejected by the create handler. They are tracked
+ * separately (registry-backend #1042 and #1041) and must not be offered here
+ * until they land.
+ *
+ * Absent means `client_secret`: every provider written before the column
+ * existed carries the column default.
+ */
+export type SCMEntraCredentialType = 'client_secret' | 'federated'
+
 export interface SCMProvider {
   id: string
   organization_id: string
@@ -17,6 +31,7 @@ export interface SCMProvider {
   created_at: string
   updated_at: string
   auth_mode?: SCMAuthMode
+  entra_credential_type?: SCMEntraCredentialType
   github_app_id?: string | null
   github_installation_id?: string | null
   has_client_secret?: boolean
@@ -33,6 +48,7 @@ export interface CreateSCMProviderRequest {
   client_secret?: string
   webhook_secret?: string
   auth_mode?: SCMAuthMode
+  entra_credential_type?: SCMEntraCredentialType
   github_app_id?: string
   github_installation_id?: string
   app_private_key?: string
@@ -47,6 +63,7 @@ export interface UpdateSCMProviderRequest {
   webhook_secret?: string
   is_active?: boolean
   auth_mode?: SCMAuthMode
+  entra_credential_type?: SCMEntraCredentialType
   github_app_id?: string
   github_installation_id?: string
   app_private_key?: string

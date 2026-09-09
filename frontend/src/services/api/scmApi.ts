@@ -49,6 +49,7 @@ export async function updateSCMProvider(
     webhook_secret?: string
     is_active?: boolean
     auth_mode?: string
+    entra_credential_type?: string
     github_app_id?: string
     github_installation_id?: string
     app_private_key?: string
