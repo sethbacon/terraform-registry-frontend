@@ -1,6 +1,14 @@
 <!-- markdownlint-disable MD013 MD024 MD041 -->
 # Changelog
 
+## [2.29.0](https://github.com/sethbacon/terraform-registry-frontend/compare/v2.28.1...v2.29.0) (2026-09-09)
+
+
+### Features
+
+* **scm:** certificate credential for Azure DevOps providers ([#916](https://github.com/sethbacon/terraform-registry-frontend/issues/916)) ([82d39d5](https://github.com/sethbacon/terraform-registry-frontend/commit/82d39d5012163f927823afb8b79647eba68295e9))
+* **scm:** support workload identity federation for Azure DevOps providers ([#914](https://github.com/sethbacon/terraform-registry-frontend/issues/914)) ([195acf8](https://github.com/sethbacon/terraform-registry-frontend/commit/195acf8eb84bd91ff7d2b9d0c6242c04d2fe24b5))
+
 ## [2.28.1](https://github.com/sethbacon/terraform-registry-frontend/compare/v2.28.0...v2.28.1) (2026-09-09)
 
 
