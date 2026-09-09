@@ -483,6 +483,98 @@ describe('SCMProvidersPage', () => {
     )
   })
 
+  // #909 — the dialog says "Leave blank to keep existing secret". These pin that
+  // it is now true. They assert on the REQUEST BODY rather than on the call
+  // happening at all: the broken version also called updateSCMProvider, also
+  // resolved, and for an oauth_user provider destroyed the stored secret while
+  // reporting success.
+  it('omits client_secret entirely when the operator leaves it blank', async () => {
+    listSCMProvidersMock.mockResolvedValue(fakeProviders)
+    updateSCMProviderMock.mockResolvedValue({})
+    renderPage()
+    await waitFor(() => expect(screen.getByText('GitHub Enterprise')).toBeInTheDocument())
+    await userEvent.click(screen.getByRole('button', { name: /edit scm provider/i }))
+    await waitFor(() => expect(screen.getByText('Edit Provider')).toBeInTheDocument())
+
+    // Change something else, and never touch the secret.
+    await userEvent.click(screen.getByRole('button', { name: /^update$/i }))
+
+    await waitFor(() => expect(updateSCMProviderMock).toHaveBeenCalled())
+    const body = updateSCMProviderMock.mock.calls[0][1]
+    expect('client_secret' in body).toBe(false)
+    expect('app_private_key' in body).toBe(false)
+  })
+
+  it('sends a client secret the operator typed', async () => {
+    listSCMProvidersMock.mockResolvedValue(fakeProviders)
+    updateSCMProviderMock.mockResolvedValue({})
+    renderPage()
+    await waitFor(() => expect(screen.getByText('GitHub Enterprise')).toBeInTheDocument())
+    await userEvent.click(screen.getByRole('button', { name: /edit scm provider/i }))
+    await waitFor(() => expect(screen.getByText('Edit Provider')).toBeInTheDocument())
+    await userEvent.type(screen.getByLabelText(/Client Secret/i), 'rotated-secret')
+    await userEvent.click(screen.getByRole('button', { name: /^update$/i }))
+
+    await waitFor(() => expect(updateSCMProviderMock).toHaveBeenCalled())
+    expect(updateSCMProviderMock.mock.calls[0][1].client_secret).toBe('rotated-secret')
+  })
+
+  it('offers no removal control for a provider that has no stored secret', async () => {
+    // fakeProviders[0] carries no has_client_secret, so there is nothing to
+    // remove and the control must not be offered -- otherwise it would send ""
+    // for a provider whose secret was never set.
+    listSCMProvidersMock.mockResolvedValue(fakeProviders)
+    renderPage()
+    await waitFor(() => expect(screen.getByText('GitHub Enterprise')).toBeInTheDocument())
+    await userEvent.click(screen.getByRole('button', { name: /edit scm provider/i }))
+    await waitFor(() => expect(screen.getByText('Edit Provider')).toBeInTheDocument())
+
+    expect(screen.queryByLabelText(/remove the stored client secret/i)).not.toBeInTheDocument()
+  })
+
+  it('sends an empty client_secret when removal is explicitly requested', async () => {
+    listSCMProvidersMock.mockResolvedValue([{ ...fakeProviders[0], has_client_secret: true }])
+    updateSCMProviderMock.mockResolvedValue({})
+    renderPage()
+    await waitFor(() => expect(screen.getByText('GitHub Enterprise')).toBeInTheDocument())
+    await userEvent.click(screen.getByRole('button', { name: /edit scm provider/i }))
+    await waitFor(() => expect(screen.getByText('Edit Provider')).toBeInTheDocument())
+
+    await userEvent.click(screen.getByLabelText(/remove the stored client secret/i))
+    await userEvent.click(screen.getByRole('button', { name: /^update$/i }))
+
+    await waitFor(() => expect(updateSCMProviderMock).toHaveBeenCalled())
+    const body = updateSCMProviderMock.mock.calls[0][1]
+    expect('client_secret' in body).toBe(true)
+    expect(body.client_secret).toBe('')
+  })
+
+  it('does not carry a removal intent into the next provider edited', async () => {
+    listSCMProvidersMock.mockResolvedValue([{ ...fakeProviders[0], has_client_secret: true }])
+    updateSCMProviderMock.mockResolvedValue({})
+    renderPage()
+    await waitFor(() => expect(screen.getByText('GitHub Enterprise')).toBeInTheDocument())
+    await userEvent.click(screen.getByRole('button', { name: /edit scm provider/i }))
+    await waitFor(() => expect(screen.getByText('Edit Provider')).toBeInTheDocument())
+    await userEvent.click(screen.getByLabelText(/remove the stored client secret/i))
+    await userEvent.click(screen.getByRole('button', { name: /^cancel$/i }))
+    await waitFor(() => expect(screen.queryByText('Edit Provider')).not.toBeInTheDocument())
+
+    // Reopen. A checkbox left ticked from the abandoned edit would silently
+    // destroy the credential on the next save.
+    //
+    // findByRole rather than getByRole: MUI keeps the page behind a closing
+    // dialog aria-hidden for the duration of the transition, so the button is
+    // briefly unreachable even after the dialog's title has gone.
+    await userEvent.click(await screen.findByRole('button', { name: /edit scm provider/i }))
+    await waitFor(() => expect(screen.getByText('Edit Provider')).toBeInTheDocument())
+    expect(screen.getByLabelText(/remove the stored client secret/i)).not.toBeChecked()
+
+    await userEvent.click(screen.getByRole('button', { name: /^update$/i }))
+    await waitFor(() => expect(updateSCMProviderMock).toHaveBeenCalled())
+    expect('client_secret' in updateSCMProviderMock.mock.calls[0][1]).toBe(false)
+  })
+
   it('cancels the Edit dialog', async () => {
     listSCMProvidersMock.mockResolvedValue(fakeProviders)
     renderPage()

@@ -24,6 +24,8 @@ import {
   CircularProgress,
   Tooltip,
   Divider,
+  Checkbox,
+  FormControlLabel,
 } from '@mui/material'
 import AddIcon from '@mui/icons-material/Add'
 import EditIcon from '@mui/icons-material/Edit'
@@ -99,6 +101,13 @@ const SCMProvidersPage: React.FC = () => {
     github_installation_id: '',
     app_private_key: '',
   })
+
+  // Explicit intent to REMOVE a stored credential, as opposed to leaving it
+  // alone. The form fields cannot carry this: they are blanked on open because
+  // the stored values are never returned, so a blank field is what "untouched"
+  // looks like and cannot also mean "delete this" (#909).
+  const [clearClientSecret, setClearClientSecret] = useState(false)
+  const [clearAppPrivateKey, setClearAppPrivateKey] = useState(false)
 
   // Per-provider "Test connection" (verify) outcomes for app-mode providers.
   const [verifyingId, setVerifyingId] = useState<string | null>(null)
@@ -192,18 +201,13 @@ const SCMProvidersPage: React.FC = () => {
   const updateMutation = useMutation({
     mutationFn: () => {
       if (!editingProvider) throw new Error('No provider to update')
-      return api.updateSCMProvider(editingProvider.id, {
-        name: formData.name,
-        base_url: formData.base_url,
-        tenant_id: formData.tenant_id,
-        client_id: formData.client_id,
-        client_secret: formData.client_secret,
-        webhook_secret: formData.webhook_secret,
-        auth_mode: formData.auth_mode,
-        github_app_id: formData.github_app_id,
-        github_installation_id: formData.github_installation_id,
-        app_private_key: formData.app_private_key,
-      })
+      return api.updateSCMProvider(
+        editingProvider.id,
+        buildUpdateSCMProviderPayload(formData, {
+          clientSecret: clearClientSecret,
+          appPrivateKey: clearAppPrivateKey,
+        }),
+      )
     },
     onSuccess: () => {
       setEditingProvider(null)
@@ -335,6 +339,8 @@ const SCMProvidersPage: React.FC = () => {
       github_installation_id: '',
       app_private_key: '',
     })
+    setClearClientSecret(false)
+    setClearAppPrivateKey(false)
   }
 
   const openEditDialog = (provider: SCMProvider) => {
@@ -352,6 +358,14 @@ const SCMProvidersPage: React.FC = () => {
       github_installation_id: provider.github_installation_id || '',
       app_private_key: '', // Don't show existing private key
     })
+    // Opening an editor never carries a removal intent over from the last one.
+    //
+    // Redundant today -- every path that closes this dialog (Cancel, the
+    // backdrop, and both mutation successes) calls resetForm, which already
+    // clears these, so removing these two lines survives mutation. They are
+    // kept because the cost of a future close path that forgets resetForm is a
+    // silently destroyed credential on the NEXT provider edited, which is the
+    // failure this whole change exists to prevent.
   }
 
   const getProviderIcon = (type: SCMProviderType) => {
@@ -972,15 +986,28 @@ const SCMProvidersPage: React.FC = () => {
                         )}
                         type="password"
                         fullWidth
-                        value={formData.client_secret}
+                        value={clearClientSecret ? '' : formData.client_secret}
                         onChange={(e) =>
                           setFormData({ ...formData, client_secret: e.target.value })
                         }
+                        disabled={clearClientSecret}
                         required={!editingProvider}
                         helperText={
                           editingProvider ? t('admin.scmProviders.helpClientSecretKeep') : ''
                         }
                       />
+
+                      {editingProvider?.has_client_secret && (
+                        <FormControlLabel
+                          control={
+                            <Checkbox
+                              checked={clearClientSecret}
+                              onChange={(e) => setClearClientSecret(e.target.checked)}
+                            />
+                          }
+                          label={t('admin.scmProviders.labelRemoveClientSecret')}
+                        />
+                      )}
                     </>
                   )}
 
@@ -1010,10 +1037,11 @@ const SCMProvidersPage: React.FC = () => {
                         fullWidth
                         multiline
                         minRows={4}
-                        value={formData.app_private_key}
+                        value={clearAppPrivateKey ? '' : formData.app_private_key}
                         onChange={(e) =>
                           setFormData({ ...formData, app_private_key: e.target.value })
                         }
+                        disabled={clearAppPrivateKey}
                         required={!editingProvider}
                         helperText={
                           editingProvider
@@ -1021,6 +1049,18 @@ const SCMProvidersPage: React.FC = () => {
                             : t('admin.scmProviders.helpGithubApp')
                         }
                       />
+
+                      {editingProvider?.has_app_private_key && (
+                        <FormControlLabel
+                          control={
+                            <Checkbox
+                              checked={clearAppPrivateKey}
+                              onChange={(e) => setClearAppPrivateKey(e.target.checked)}
+                            />
+                          }
+                          label={t('admin.scmProviders.labelRemoveAppPrivateKey')}
+                        />
+                      )}
                     </>
                   )}
 
@@ -1149,5 +1189,6 @@ const SCMProvidersPage: React.FC = () => {
     </Page>
   )
 }
+import { buildUpdateSCMProviderPayload } from './scmProviderPayload'
 
 export default SCMProvidersPage
