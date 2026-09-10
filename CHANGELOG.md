@@ -1,6 +1,14 @@
 <!-- markdownlint-disable MD013 MD024 MD041 -->
 # Changelog
 
+## [2.30.0](https://github.com/sethbacon/terraform-registry-frontend/compare/v2.29.0...v2.30.0) (2026-09-10)
+
+
+### Features
+
+* **scm:** default the Add provider dialog to Azure DevOps ([#919](https://github.com/sethbacon/terraform-registry-frontend/issues/919)) ([ab700d4](https://github.com/sethbacon/terraform-registry-frontend/commit/ab700d461919e920801860e7001eb8aabe81056c))
+* **scm:** managed identity credential type, disabled when unavailable ([#922](https://github.com/sethbacon/terraform-registry-frontend/issues/922)) ([0232805](https://github.com/sethbacon/terraform-registry-frontend/commit/0232805e215ba00b7fe5e51b5e029769f6e6a426))
+
 ## [2.29.0](https://github.com/sethbacon/terraform-registry-frontend/compare/v2.28.1...v2.29.0) (2026-09-09)
 
 
