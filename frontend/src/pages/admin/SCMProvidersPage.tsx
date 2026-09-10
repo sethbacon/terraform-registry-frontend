@@ -52,6 +52,7 @@ import type {
   SCMAuthMode,
   CreateSCMProviderRequest,
   SCMEntraCredentialType,
+  SCMCapabilities,
 } from '../../types/scm'
 import { queryKeys } from '../../services/queryKeys'
 import OrganizationFilter from '../../components/OrganizationFilter'
@@ -67,6 +68,19 @@ interface TokenStatus {
 const SCMProvidersPage: React.FC = () => {
   const { t } = useTranslation()
   const queryClient = useQueryClient()
+
+  // credentialTypeOffered reports whether this deployment offers a type.
+  //
+  // Fails OPEN while the capabilities query is in flight or unavailable: the
+  // backend enforces the allow-list on create and update, so the worst case of
+  // leniency here is a 400 naming the config key, while the worst case of
+  // strictness is an option greyed out for everyone the moment the endpoint
+  // hiccups. An older backend that does not serve capabilities keeps working
+  // for the same reason.
+  const credentialTypeOffered = (type: SCMEntraCredentialType): boolean => {
+    const entry = capabilities?.entra_credential_types?.[type]
+    return entry === undefined ? true : entry.available
+  }
   // Memberships come from the session (`/auth/me`) rather than a second fetch
   // of `/users/me/memberships` (#779): both endpoints run the same membership
   // query for the same user, and two clients for one fact is how they diverged.
@@ -147,6 +161,15 @@ const SCMProvidersPage: React.FC = () => {
       const data = await api.listSCMProviders(organizationId || undefined)
       return Array.isArray(data) ? data : []
     },
+  })
+
+  // Which Entra credential types this deployment offers (#1042). Deployment
+  // level, so it is not keyed by organization and does not refetch as the
+  // organization picker moves.
+  const { data: capabilities } = useQuery<SCMCapabilities>({
+    queryKey: queryKeys.scmProviders.capabilities(),
+    queryFn: () => api.getSCMCapabilities(),
+    staleTime: 5 * 60 * 1000,
   })
 
   // Token statuses — separate query so React Query manages its own lifecycle
@@ -981,6 +1004,9 @@ const SCMProvidersPage: React.FC = () => {
                               ? { tenant_id: null, client_secret: '', entra_certificate: '' }
                               : {}),
                             ...(next === 'certificate' ? { client_secret: '' } : {}),
+                            ...(next === 'managed_identity'
+                              ? { tenant_id: null, client_secret: '', entra_certificate: '' }
+                              : {}),
                             ...(next === 'client_secret' ? { entra_certificate: '' } : {}),
                           })
                           // Blanking a field is not enough on an existing
@@ -1001,8 +1027,35 @@ const SCMProvidersPage: React.FC = () => {
                         <MenuItem value="federated">
                           {t('admin.scmProviders.credTypeFederated')}
                         </MenuItem>
-                        <MenuItem value="certificate">
+                        <MenuItem
+                          value="certificate"
+                          disabled={!credentialTypeOffered('certificate')}
+                        >
                           {t('admin.scmProviders.credTypeCertificate')}
+                          {!credentialTypeOffered('certificate') && (
+                            <Typography
+                              component="span"
+                              variant="caption"
+                              sx={{ color: 'text.secondary', ml: 1 }}
+                            >
+                              {t('admin.scmProviders.credTypeNotOffered')}
+                            </Typography>
+                          )}
+                        </MenuItem>
+                        <MenuItem
+                          value="managed_identity"
+                          disabled={!credentialTypeOffered('managed_identity')}
+                        >
+                          {t('admin.scmProviders.credTypeManagedIdentity')}
+                          {!credentialTypeOffered('managed_identity') && (
+                            <Typography
+                              component="span"
+                              variant="caption"
+                              sx={{ color: 'text.secondary', ml: 1 }}
+                            >
+                              {t('admin.scmProviders.credTypeNotOffered')}
+                            </Typography>
+                          )}
                         </MenuItem>
                       </Select>
                       <FormHelperText>{t('admin.scmProviders.helpCredentialType')}</FormHelperText>
@@ -1010,7 +1063,7 @@ const SCMProvidersPage: React.FC = () => {
                   )}
 
                 {(editingProvider?.provider_type || formData.provider_type) === 'azuredevops' &&
-                  federatedFieldsApply(formData) && (
+                  tenantFieldApplies(formData) && (
                     <TextField
                       label={t('admin.scmProviders.labelTenantId')}
                       fullWidth
@@ -1283,9 +1336,9 @@ import { buildUpdateSCMProviderPayload } from './scmProviderPayload'
 import {
   certificateFieldsApply,
   entraCredentialTypeOf,
-  federatedFieldsApply,
   isSCMProviderSubmitBlocked,
   secretFieldsApply,
+  tenantFieldApplies,
 } from './scmProviderForm'
 
 export default SCMProvidersPage

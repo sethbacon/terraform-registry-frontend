@@ -14,6 +14,7 @@ const initiateSCMOAuthMock = vi.fn()
 const saveSCMTokenMock = vi.fn()
 const revokeSCMTokenMock = vi.fn()
 const verifySCMProviderMock = vi.fn()
+const getSCMCapabilitiesMock = vi.fn()
 
 vi.mock('../../../services/api', () => ({
   default: {
@@ -26,6 +27,7 @@ vi.mock('../../../services/api', () => ({
     saveSCMToken: (...args: unknown[]) => saveSCMTokenMock(...args),
     revokeSCMToken: (...args: unknown[]) => revokeSCMTokenMock(...args),
     verifySCMProvider: (...args: unknown[]) => verifySCMProviderMock(...args),
+    getSCMCapabilities: (...args: unknown[]) => getSCMCapabilitiesMock(...args),
   },
 }))
 
@@ -777,6 +779,98 @@ describe('SCMProvidersPage', () => {
     expect(body.entra_credential_type).toBe('client_secret')
     expect(body.client_secret).toBe('new-secret')
     expect(body.entra_certificate).toBe('')
+  })
+
+  // #1042 — managed identity, and the deployment capability flag.
+  const CAPS = (available: Record<string, boolean>) => ({
+    entra_credential_types: Object.fromEntries(
+      ['client_secret', 'federated', 'certificate', 'managed_identity'].map((t) => [
+        t,
+        {
+          available: available[t] ?? false,
+          reason: available[t] ? undefined : 'not_offered_by_deployment',
+        },
+      ]),
+    ),
+  })
+
+  it('disables a credential type this deployment does not offer, rather than hiding it', async () => {
+    // Disable-with-reason, never hide. A hidden option is indistinguishable
+    // from a mis-wired flag — which is exactly how capabilities.oci stayed
+    // dead and unnoticed for its whole life (#921).
+    getSCMCapabilitiesMock.mockResolvedValue(
+      CAPS({ client_secret: true, certificate: true, federated: false, managed_identity: false }),
+    )
+    listSCMProvidersMock.mockResolvedValue([adoProvider])
+    renderPage()
+    await userEvent.click(await screen.findByRole('button', { name: /edit scm provider/i }))
+    await waitFor(() => expect(screen.getByText('Edit Provider')).toBeInTheDocument())
+    await userEvent.click(screen.getByLabelText(/credential type/i))
+
+    const mi = await screen.findByRole('option', { name: /managed identity/i })
+    expect(mi).toBeInTheDocument()
+    expect(mi).toHaveAttribute('aria-disabled', 'true')
+    expect(mi).toHaveTextContent(/not enabled on this deployment/i)
+
+    // And an offered one is selectable.
+    expect(await screen.findByRole('option', { name: /^certificate/i })).not.toHaveAttribute(
+      'aria-disabled',
+      'true',
+    )
+  })
+
+  it('offers managed identity when the deployment reports it available', async () => {
+    getSCMCapabilitiesMock.mockResolvedValue(CAPS({ client_secret: true, managed_identity: true }))
+    listSCMProvidersMock.mockResolvedValue([adoProvider])
+    renderPage()
+    await userEvent.click(await screen.findByRole('button', { name: /edit scm provider/i }))
+    await waitFor(() => expect(screen.getByText('Edit Provider')).toBeInTheDocument())
+    await userEvent.click(screen.getByLabelText(/credential type/i))
+
+    const mi = await screen.findByRole('option', { name: /managed identity/i })
+    expect(mi).not.toHaveAttribute('aria-disabled', 'true')
+  })
+
+  it('fails OPEN when capabilities cannot be read', async () => {
+    // The backend enforces the allow-list on create and update, so leniency
+    // here costs a 400 naming the config key. Strictness would grey out every
+    // option the moment the endpoint hiccups — or against an older backend
+    // that does not serve it at all.
+    getSCMCapabilitiesMock.mockRejectedValue(new Error('404'))
+    listSCMProvidersMock.mockResolvedValue([adoProvider])
+    renderPage()
+    await userEvent.click(await screen.findByRole('button', { name: /edit scm provider/i }))
+    await waitFor(() => expect(screen.getByText('Edit Provider')).toBeInTheDocument())
+    await userEvent.click(screen.getByLabelText(/credential type/i))
+
+    expect(await screen.findByRole('option', { name: /managed identity/i })).not.toHaveAttribute(
+      'aria-disabled',
+      'true',
+    )
+  })
+
+  it('switching to managed identity clears the tenant, secret and certificate in ONE request', async () => {
+    getSCMCapabilitiesMock.mockResolvedValue(CAPS({ client_secret: true, managed_identity: true }))
+    listSCMProvidersMock.mockResolvedValue([adoProvider])
+    updateSCMProviderMock.mockResolvedValue({})
+    renderPage()
+    await userEvent.click(await screen.findByRole('button', { name: /edit scm provider/i }))
+    await waitFor(() => expect(screen.getByText('Edit Provider')).toBeInTheDocument())
+
+    await userEvent.click(screen.getByLabelText(/credential type/i))
+    await userEvent.click(await screen.findByRole('option', { name: /managed identity/i }))
+
+    // The platform holds the credential: no tenant, no secret, no bundle.
+    expect(screen.queryByLabelText(/tenant id/i)).not.toBeInTheDocument()
+    expect(screen.queryByLabelText(/^client secret/i)).not.toBeInTheDocument()
+    expect(screen.queryByLabelText(/certificate and private key/i)).not.toBeInTheDocument()
+
+    await userEvent.click(screen.getByRole('button', { name: /^update$/i }))
+    await waitFor(() => expect(updateSCMProviderMock).toHaveBeenCalled())
+    const body = updateSCMProviderMock.mock.calls[0][1]
+    expect(body.entra_credential_type).toBe('managed_identity')
+    expect(body.tenant_id).toBeNull()
+    expect(body.client_secret).toBe('')
   })
 
   it('cancels the Edit dialog', async () => {

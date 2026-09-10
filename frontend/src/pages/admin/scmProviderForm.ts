@@ -55,6 +55,18 @@ export function certificateFieldsApply(form: Partial<CreateSCMProviderRequest>):
 }
 
 /**
+ * Whether the tenant-id field applies.
+ *
+ * False for the two types where the hosting platform supplies the tenant
+ * alongside the token. A certificate provider signs its own assertion and must
+ * name the tenant it is signing for, so it keeps the field.
+ */
+export function tenantFieldApplies(form: Partial<CreateSCMProviderRequest>): boolean {
+  const t = entraCredentialTypeOf(form)
+  return t !== 'federated' && t !== 'managed_identity'
+}
+
+/**
  * isSCMProviderSubmitBlocked decides whether the Create/Update button is
  * disabled, and is the single place the per-provider field rules live.
  *
@@ -91,8 +103,9 @@ export function isSCMProviderSubmitBlocked(
 
     if (!form.client_id) return true
 
-    if (authMode === 'entra_app' && !federatedFieldsApply(form)) {
-      // Federated: the client id above is the whole credential.
+    if (authMode === 'entra_app' && !tenantFieldApplies(form)) {
+      // Federated and managed identity: the client id above is the whole
+      // credential; the platform supplies everything else.
       return false
     }
     // Everything else on Azure DevOps needs a tenant.
