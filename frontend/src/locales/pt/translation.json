@@ -1602,6 +1602,8 @@
       "credTypeClientSecret": "Segredo do cliente",
       "credTypeFederated": "Federação de identidades de cargas de trabalho",
       "credTypeCertificate": "Certificado",
+      "credTypeManagedIdentity": "Identidade gerida",
+      "credTypeNotOffered": "— não está ativado nesta implementação",
       "labelEntraCertificate": "Certificado e chave privada (PEM)",
       "helpEntraCertificate": "Cole o certificado registado na aplicação, seguido da sua chave privada não encriptada, ambos no formato PEM. A chave nunca sai do registo — serve apenas para assinar.",
       "helpEntraCertificateKeep": "Deixe em branco para manter o certificado existente",

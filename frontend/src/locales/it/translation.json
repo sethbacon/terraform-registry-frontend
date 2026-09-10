@@ -1602,6 +1602,8 @@
       "credTypeClientSecret": "Codice segreto del cliente",
       "credTypeFederated": "Federazione delle identità relative al carico di lavoro",
       "credTypeCertificate": "Certificato",
+      "credTypeManagedIdentity": "Identità gestita",
+      "credTypeNotOffered": "— non abilitato in questa distribuzione",
       "labelEntraCertificate": "Certificato e chiave privata (PEM)",
       "helpEntraCertificate": "Incolla il certificato registrato nell'app seguito dalla relativa chiave privata non crittografata, entrambi in formato PEM. La chiave non esce mai dal registro: serve solo per la firma.",
       "helpEntraCertificateKeep": "Lasciare vuoto per mantenere il certificato esistente",
