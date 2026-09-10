@@ -6,6 +6,7 @@ import type {
   SCMRepository,
   SCMTag,
   SCMWebhookEvent,
+  SCMCapabilities,
 } from '../../types/scm'
 
 // SCM Provider Management
@@ -35,6 +36,12 @@ export async function createSCMProvider(data: {
 
 export async function getSCMProvider(id: string): Promise<SCMProvider> {
   const response = await http.get(`/api/v1/scm-providers/${encodeSegment(id)}`)
+  return response.data
+}
+
+// Which Entra credential types this deployment offers (registry-backend #1042).
+export async function getSCMCapabilities(): Promise<SCMCapabilities> {
+  const response = await http.get('/api/v1/scm-providers/capabilities')
   return response.data
 }
 

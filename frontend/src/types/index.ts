@@ -574,12 +574,29 @@ export interface VersionInfo {
   version: string
   build_date: string
   api_version: string
+  crypto_mode?: string
+  default_language?: string
   protocols: {
     modules: string
     providers: string
     mirror: string
   }
-  oci?: boolean
+  /**
+   * Deployment capabilities, as the backend actually sends them.
+   *
+   * This was typed as a top-level `oci?: boolean` and read as
+   * `versionInfo?.oci`, while the backend has always nested it under
+   * `capabilities`. The value was therefore always `undefined`, `ociEnabled`
+   * was always `false`, and the OCI usage example never rendered -- for the
+   * whole life of the flag, with nothing to notice it (#921).
+   *
+   * The backend shape is the one that changed here, because `/version` is
+   * public and consumed by clients other than this SPA; moving the field
+   * server-side would break them.
+   */
+  capabilities?: {
+    oci?: boolean
+  }
 }
 
 // ---- Policy Engine ----

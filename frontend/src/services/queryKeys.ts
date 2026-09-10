@@ -80,6 +80,9 @@ export const queryKeys = {
       [...queryKeys.scmProviders._def, 'list', organizationId] as const,
     tokenStatus: (providerId: string) =>
       [...queryKeys.scmProviders._def, 'tokenStatus', providerId] as const,
+    // Deployment-level, so NOT derived from the list key: which credential
+    // types this host offers is the same answer for every organization.
+    capabilities: () => [...queryKeys.scmProviders._def, 'capabilities'] as const,
   },
   auditLogs: {
     _def: ['auditLogs'] as const,

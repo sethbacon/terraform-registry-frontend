@@ -1602,6 +1602,8 @@
       "credTypeClientSecret": "Client secret",
       "credTypeFederated": "Workload identity federation",
       "credTypeCertificate": "Certificate",
+      "credTypeManagedIdentity": "Managed identity",
+      "credTypeNotOffered": "— not enabled on this deployment",
       "labelEntraCertificate": "Certificate and private key (PEM)",
       "helpEntraCertificate": "Paste the certificate registered on the app followed by its unencrypted private key, both in PEM. The key never leaves the registry — it only signs.",
       "helpEntraCertificateKeep": "Leave blank to keep the existing certificate",

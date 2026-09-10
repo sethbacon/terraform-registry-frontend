@@ -7,15 +7,18 @@ export type SCMAuthMode = 'oauth_user' | 'entra_app' | 'github_app'
 /**
  * How an `entra_app` provider proves itself to Microsoft Entra.
  *
- * Only these three exist. The backend's CHECK constraint accepts nothing else,
- * so `managed_identity` -- which an earlier design listed -- is refused by the
- * database and rejected by the create handler. It is tracked separately
- * (registry-backend #1042) and must not be offered here until it lands.
+ * All four are implemented. Which ones a DEPLOYMENT offers is a separate
+ * question from which ones exist: `federated` needs the platform to project a
+ * token and `managed_identity` needs Azure compute, so an operator declares the
+ * set with TFR_SCM_ENTRA_CREDENTIAL_TYPES and the backend reports it at
+ * GET /scm-providers/capabilities (registry-backend #1042). Types this
+ * deployment does not offer are shown disabled with a reason, never hidden.
  *
  * Absent means `client_secret`: every provider written before the column
  * existed carries the column default.
  */
-export type SCMEntraCredentialType = 'client_secret' | 'federated' | 'certificate'
+export type SCMEntraCredentialType =
+  'client_secret' | 'federated' | 'certificate' | 'managed_identity'
 
 export interface SCMProvider {
   id: string
@@ -36,6 +39,24 @@ export interface SCMProvider {
   has_client_secret?: boolean
   has_app_private_key?: boolean
   has_entra_certificate?: boolean
+}
+
+/** One credential type's availability on this deployment. */
+export interface SCMCredentialTypeAvailability {
+  available: boolean
+  reason?: string
+}
+
+/**
+ * Which Entra credential types this deployment offers.
+ *
+ * Every KNOWN type appears, including unavailable ones -- a type missing from
+ * the map would be indistinguishable from an older backend that never heard of
+ * it, which is exactly the ambiguity that left `capabilities.oci` dead and
+ * unnoticed for its whole life (#921).
+ */
+export interface SCMCapabilities {
+  entra_credential_types: Partial<Record<SCMEntraCredentialType, SCMCredentialTypeAvailability>>
 }
 
 export interface CreateSCMProviderRequest {

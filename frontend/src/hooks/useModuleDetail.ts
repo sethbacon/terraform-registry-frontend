@@ -25,6 +25,18 @@ interface ModuleRouteParams {
   system: string
 }
 
+/**
+ * ociEnabledFrom reads the OCI capability from /version.
+ *
+ * Exported so a test can exercise THIS expression rather than a copy of it.
+ * The bug it replaces (#921) was a nesting mismatch -- the backend sends
+ * `capabilities.oci`, the frontend read a top-level `oci` -- so a test that
+ * restates the expression would restate the assumption and pass either way.
+ */
+export function ociEnabledFrom(versionInfo?: { capabilities?: { oci?: boolean } }): boolean {
+  return versionInfo?.capabilities?.oci === true
+}
+
 export function useModuleDetail() {
   const { namespace, name, system } = useParams<{
     namespace: string
@@ -201,7 +213,7 @@ export function useModuleDetail() {
     staleTime: 5 * 60 * 1000,
   })
 
-  const ociEnabled = versionInfo?.oci === true
+  const ociEnabled = ociEnabledFrom(versionInfo)
 
   // =========================================================================
   // 6. Webhook events (on-demand via loadWebhookEvents)
