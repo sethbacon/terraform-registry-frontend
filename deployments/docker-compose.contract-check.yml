@@ -20,9 +20,21 @@ services:
     # Pinned backend image. Bump this tag in lockstep with backend releases
     # whose API surface the frontend wants to depend on. The contract check
     # validates that every route api.ts calls exists on this exact backend.
-    # 3.5.2 is the first release with POST /api/v1/auth/logout, which the UI
-    # now calls instead of the removed, CSRF-forgeable GET form.
-    image: ${BACKEND_IMAGE:-ghcr.io/sethbacon/terraform-registry-backend:3.5.2}
+    #
+    # 4.20.0 carries the Entra credential-type work (backend #1037/#1041) and
+    # the platform-admin carrier API (backend #766), which had been allowlisted
+    # ever since it merged.
+    #
+    # KEEP THIS CURRENT. A stale pin fails nothing by itself -- it quietly
+    # weakens the check, because every route added since the pin must be
+    # allowlisted for a PR to go green, and each allowlist entry is a route
+    # nothing verifies. This sat at 3.5.2 while the backend reached 4.20.0 (one
+    # major and fifteen minors), and three platform-admin entries were dead
+    # weight for that whole time. contract-check.ts fails on a STALE ENTRY once
+    # the pin moves, which is the cleanup lever; the pin itself has no such
+    # lever, so bumping it is a deliberate maintenance task -- see the
+    # contract-check-pin-currency test for the floor that now enforces it.
+    image: ${BACKEND_IMAGE:-ghcr.io/sethbacon/terraform-registry-backend:4.20.0}
     environment:
       - TFR_DATABASE_HOST=postgres
       - TFR_DATABASE_PORT=5432
