@@ -1602,6 +1602,8 @@
       "credTypeClientSecret": "Klienthemmelighet",
       "credTypeFederated": "Identitetsfederasjon for arbeidsbelastning",
       "credTypeCertificate": "Sertifikat",
+      "credTypeManagedIdentity": "Administrert identitet",
+      "credTypeNotOffered": "— ikke aktivert i denne distribusjonen",
       "labelEntraCertificate": "Sertifikat og privat nøkkel (PEM)",
       "helpEntraCertificate": "Lim inn sertifikatet som er registrert i appen, etterfulgt av den ukrypterte private nøkkelen, begge i PEM-format. Nøkkelen forlater aldri registeret – den brukes kun til signering.",
       "helpEntraCertificateKeep": "La feltet stå tomt for å beholde det eksisterende sertifikatet",

@@ -1602,6 +1602,8 @@
       "credTypeClientSecret": "Geheim van de klant",
       "credTypeFederated": "Federatie van werkbelastingidentiteiten",
       "credTypeCertificate": "Certificaat",
+      "credTypeManagedIdentity": "Beheerde identiteit",
+      "credTypeNotOffered": "— niet ingeschakeld in deze implementatie",
       "labelEntraCertificate": "Certificaat en privésleutel (PEM)",
       "helpEntraCertificate": "Plak het in de app geregistreerde certificaat, gevolgd door de onversleutelde privésleutel, beide in PEM-formaat. De sleutel verlaat het register nooit — hij wordt alleen gebruikt om te ondertekenen.",
       "helpEntraCertificateKeep": "Laat dit veld leeg om het bestaande certificaat te behouden",

@@ -1236,6 +1236,8 @@
   "admin.scmProviders.credTypeClientSecret": "4aded5faf15623c5c91eb87d39dbe4366fc73e1affb46dfbfcc1865e7704f157",
   "admin.scmProviders.credTypeFederated": "9f65dc4c17e6d21e1dd368464afaa1a0a0adb0468df40288bfd6419f984ee69d",
   "admin.scmProviders.credTypeCertificate": "2a93a8a442e305e84da02d6620f77f97ec9ebbca18abef6f64daf110c3992937",
+  "admin.scmProviders.credTypeManagedIdentity": "3cbc04d4694a1813a86318b701c611a0ca235376f828755679235993b1a85739",
+  "admin.scmProviders.credTypeNotOffered": "e984811beeafe80dda0fd99257bb7dbe1aacad385dfe64dada35a4ed0b5301b7",
   "admin.scmProviders.labelEntraCertificate": "0eba2c27c92c4c1739cbae31a845f2d6c7e8a563a1a6d901a32ebab18a52986e",
   "admin.scmProviders.helpEntraCertificate": "8fc2ac2b9aa239cdbaa64f944c4cccb01d588c5efb807e5e3b2428fe7cc653d6",
   "admin.scmProviders.helpEntraCertificateKeep": "6b7e5f645b7ae934e8e1d81fd1dd7f806d22e477253ff15fc4e12942a11e0e30",

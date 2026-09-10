@@ -1602,6 +1602,8 @@
       "credTypeClientSecret": "Client-Geheimnis",
       "credTypeFederated": "Identitätsverbund für Workloads",
       "credTypeCertificate": "Zertifikat",
+      "credTypeManagedIdentity": "Verwaltete Identität",
+      "credTypeNotOffered": "— bei dieser Bereitstellung nicht aktiviert",
       "labelEntraCertificate": "Zertifikat und privater Schlüssel (PEM)",
       "helpEntraCertificate": "Fügen Sie das in der App registrierte Zertifikat ein, gefolgt von dessen unverschlüsseltem privaten Schlüssel, beides im PEM-Format. Der Schlüssel verlässt die Registrierung zu keinem Zeitpunkt – er dient ausschließlich zum Signieren.",
       "helpEntraCertificateKeep": "Lassen Sie das Feld leer, um das bestehende Zertifikat beizubehalten.",
