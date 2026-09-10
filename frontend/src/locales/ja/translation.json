@@ -1602,6 +1602,8 @@
       "credTypeClientSecret": "クライアントシークレット",
       "credTypeFederated": "ワークロードIDフェデレーション",
       "credTypeCertificate": "証明書",
+      "credTypeManagedIdentity": "マネージド ID",
+      "credTypeNotOffered": "— このデプロイメントでは有効になっていません",
       "labelEntraCertificate": "証明書と秘密鍵（PEM）",
       "helpEntraCertificate": "アプリに登録されている証明書と、その暗号化されていない秘密鍵を、いずれもPEM形式で貼り付けてください。この鍵はレジストリから外部に持ち出されることはなく、署名にのみ使用されます。",
       "helpEntraCertificateKeep": "既存の証明書を維持する場合は、空欄のままにしてください",

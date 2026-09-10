@@ -1602,6 +1602,8 @@
       "credTypeClientSecret": "客户端密钥",
       "credTypeFederated": "工作负载身份联合",
       "credTypeCertificate": "证书",
+      "credTypeManagedIdentity": "托管身份",
+      "credTypeNotOffered": "— 此部署中未启用",
       "labelEntraCertificate": "证书和私钥（PEM）",
       "helpEntraCertificate": "粘贴在应用程序中注册的证书，随后粘贴其未加密的私钥，两者均采用PEM格式。该密钥绝不会离开注册表——它仅用于签名。",
       "helpEntraCertificateKeep": "若要保留现有证书，请留空",
