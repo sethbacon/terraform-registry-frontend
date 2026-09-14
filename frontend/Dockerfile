@@ -4,7 +4,7 @@
 # Must stay on the major declared in package.json `engines` (and in
 # @4cloudguru/cloud-suite-ui). .npmrc sets engine-strict=true, so a mismatch
 # fails this build instead of printing an EBADENGINE warning nobody reads.
-FROM node:24-alpine@sha256:e67514e5d0f6c46656005e1b693b2ec9d52e80b641307de684d4a015ba7a4eaf AS builder
+FROM node:24-alpine@sha256:50c8e8ca1d27439048670df5883f32d57cf81cff6233222c893fd0d9884cbd81 AS builder
 
 # VITE_MODE controls the Vite build mode.
 # Use "development" to enable the Dev Login button for E2E/staging environments.
