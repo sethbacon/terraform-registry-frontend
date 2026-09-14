@@ -1,4 +1,4 @@
-import '@testing-library/jest-dom'
+import '@testing-library/jest-dom/vitest'
 
 // Initialise i18next so that useTranslation() returns English translations in
 // every unit test — prevents react-i18next from suspending the render.
