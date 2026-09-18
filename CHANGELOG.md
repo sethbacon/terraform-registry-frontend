@@ -1,6 +1,14 @@
 <!-- markdownlint-disable MD013 MD024 MD041 -->
 # Changelog
 
+## [2.30.1](https://github.com/sethbacon/terraform-registry-frontend/compare/v2.30.0...v2.30.1) (2026-09-18)
+
+
+### Bug Fixes
+
+* **apikeys:** stop offering the admin scope when minting a key ([#933](https://github.com/sethbacon/terraform-registry-frontend/issues/933)) ([6abaccb](https://github.com/sethbacon/terraform-registry-frontend/commit/6abaccb58d28cdb205b8e685b06f23e97f5d7211))
+* **deps:** take the non-breaking upgrades for the js-yaml and swagger-ui advisories ([#934](https://github.com/sethbacon/terraform-registry-frontend/issues/934)) ([7280a5c](https://github.com/sethbacon/terraform-registry-frontend/commit/7280a5cdf61c9acbf2cb9e313105867ea2dc309a))
+
 ## [2.30.0](https://github.com/sethbacon/terraform-registry-frontend/compare/v2.29.0...v2.30.0) (2026-09-10)
 
 
