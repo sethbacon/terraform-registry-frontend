@@ -243,6 +243,27 @@ describe('APIKeysPage', () => {
     expect(within(dialog).getByText('Scopes')).toBeInTheDocument()
   })
 
+  // A platform admin does hold `admin` in allowedScopes -- it reaches /auth/me
+  // from the platform_admins carrier -- but a KEY may never carry it: the auth
+  // middleware strips the wildcard from every key on every request, so the
+  // credential would be inert, and POST /api/v1/apikeys refuses it outright
+  // (backend #766, migration 000054). Offering the checkbox produced a 403 on
+  // submit that read as a role problem an administrator could fix.
+  it('does not offer the admin scope to a platform admin', async () => {
+    listAPIKeysMock.mockResolvedValue([])
+    const user = userEvent.setup()
+    renderPage()
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: /Create API Key/i })).toBeInTheDocument()
+    })
+    await user.click(screen.getByRole('button', { name: /Create API Key/i }))
+    const dialog = screen.getByRole('dialog')
+
+    expect(within(dialog).queryByText('admin', { exact: true })).not.toBeInTheDocument()
+    // ...and the list has not collapsed to nothing, which would refuse everyone.
+    expect(within(dialog).getByText('modules:read', { exact: true })).toBeInTheDocument()
+  })
+
   // 9. Create button disabled when form is empty
   it('disables the Create button when no name or scopes are provided', async () => {
     listAPIKeysMock.mockResolvedValue([])

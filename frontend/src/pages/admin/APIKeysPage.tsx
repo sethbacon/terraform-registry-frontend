@@ -236,8 +236,17 @@ const APIKeysPage: React.FC = () => {
   // Check if user has admin scope (which grants all permissions)
   const hasAdminScope = allowedScopes.includes('admin')
 
-  // Get available scopes for this user
-  const availableScopes = hasAdminScope ? AVAILABLE_SCOPES.map((s) => s.value) : allowedScopes
+  // Get available scopes for this user.
+  //
+  // `admin` is filtered from BOTH branches, so it is never offered here. A
+  // platform administrator holds it -- it reaches allowedScopes from the
+  // carrier, not from a role template -- but a key may not: the auth middleware
+  // strips the wildcard from every key on every request (backend #766,
+  // migration 000054), and POST /api/v1/apikeys refuses it outright. Offering
+  // the checkbox produced a 403 on submit that read as a role problem.
+  const availableScopes = (
+    hasAdminScope ? AVAILABLE_SCOPES.map((s) => s.value) : allowedScopes
+  ).filter((s) => s !== 'admin')
 
   // --- Create Dialog ---
 
