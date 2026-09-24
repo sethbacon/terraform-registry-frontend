@@ -1,6 +1,13 @@
 <!-- markdownlint-disable MD013 MD024 MD041 -->
 # Changelog
 
+## [2.30.2](https://github.com/sethbacon/terraform-registry-frontend/compare/v2.30.1...v2.30.2) (2026-09-24)
+
+
+### Bug Fixes
+
+* **zizmor:** drop the dead github-app ignore for release-please.yml ([#939](https://github.com/sethbacon/terraform-registry-frontend/issues/939)) ([f9cedd0](https://github.com/sethbacon/terraform-registry-frontend/commit/f9cedd07f563684eea8b9c3ff6e2eaa0a6985391))
+
 ## [2.30.1](https://github.com/sethbacon/terraform-registry-frontend/compare/v2.30.0...v2.30.1) (2026-09-18)
 
 
